@@ -33,10 +33,11 @@ government photo ID matching the registration, a clear workspace with no notes, 
 materials or recording devices, no communication with anyone, and no copying of exam content;
 exam content is confidential. Fees, eligibility and policy change, so module 8 teaches the format and tells the reader to check the official pages.
 
-## Associate, Foundations (reported domains)
+## Associate, Foundations (confirmed domains)
 
-The Associate guide's seven domains, with the course's own codes. These weights are reported by
-prep material and are to be confirmed against the official guide at the next exam-facts check.
+The Associate guide's seven domains, with the course's own codes. All domains and weights are
+confirmed from the official Claude Certified Associate – Foundations Exam Guide (v1.0, effective
+July 2026).
 
 | Domain | Weight | Topics (own words) | Modules |
 |---|---|---|---|
