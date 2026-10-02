@@ -55,8 +55,9 @@ Read `docs/GOAL.md`, `docs/IDEA.md`, `docs/SETUP.md` and `docs/EXAM-MAP.md` firs
     topic. A source whose licence permits copying may be adapted and is credited on the page where
     it is used. The official exam guides are the topic maps, and their sample questions may be
     used in quizzes and mock exams, credited on the page (board D10). Any other source with a
-    restricted, unclear or no licence, and every official course, is never copied: the course
-    writes its own wording, examples and questions.
+    restricted, unclear or no licence, and every official course, is studied in full to learn
+    what and how to teach, then never copied: the course writes its own understanding in its own
+    wording, examples and questions.
 11. **Sources are not named in this repository.** The register of sources, their licences and
     any audit are kept outside the repository and never committed. Nothing in a commit, a branch
     or a merge names a source, except the credit line on a page for a source whose licence permits

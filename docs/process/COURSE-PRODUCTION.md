@@ -41,7 +41,7 @@ Code is shown exactly as typed (no font ligatures).
 | **P2 Objectives** | For each module, what the reader can do afterwards, as a testable sentence | A line per module in the outline | A module with no testable objective is rewritten or cut |
 | **P3 Survey** | Prove what runs: a Python practice end to end offline, the SDKs in a profile, the harness, an MCP server over stdio, a hook script on sample input | A feasibility table | The register runs each claim |
 | **P4 Harness** | Build `harness/`: replay, script, optional live, the capture tool and its id-stripping check | `harness/` with tests | A planted key or id in a capture fails the check |
-| **P5 Prose** | Draft the units, one level at a time | `course/*.md` | Technical review against the pinned versions; plain-language read |
+| **P5 Prose** | Study every source for the module first (official docs and courses, the exam guides, the third-party guides and question sets in the register), then draft the units in the course's own words, one level at a time | `course/*.md` | Technical review against the pinned versions; plain-language read |
 | **P6 Examples** | Write the examples as projects with tests; capture their exchanges | `examples/` | Every example's tests pass offline; a planted wrong expected output fails |
 | **P7 Practices and quizzes** | Practices by coverage of every aspect; exam-style quizzes; a mock exam per level | `exercises/` | Reference passes, planted wrong solutions fail on assertions, starter fails; an independent quiz reader |
 | **P8 Build** | `corpus.json`, `validate`, build the site, serve it, crawl it | A running site | Zero console errors; practices run end to end; the editor opens |
