@@ -33,6 +33,21 @@ government photo ID matching the registration, a clear workspace with no notes, 
 materials or recording devices, no communication with anyone, and no copying of exam content;
 exam content is confidential. Fees, eligibility and policy change, so module 8 teaches the format and tells the reader to check the official pages.
 
+## Associate, Foundations (reported domains)
+
+The Associate guide's seven domains, with the course's own codes. These weights are reported by
+prep material and are to be confirmed against the official guide at the next exam-facts check.
+
+| Domain | Weight | Topics (own words) | Modules |
+|---|---|---|---|
+| AS1 Prompting and task execution | 14% | clear objectives; stages for a complex request; iterating; a strategy per task type | 5 |
+| AS2 Output evaluation and validation | 21% | accuracy and completeness; hallucination; bias; fact-checking; audience fit | 1, 3, 4 |
+| AS3 Product and model selection | 12% | chat, Projects, research and artifacts; the three tiers; cost, speed and quality; context limits | 2, 6, 8 |
+| AS4 Workflow integration and solution design | 16% | analysing a use case; judgment steps versus automatable steps; explaining value and limits | 4 |
+| AS5 Configuration and knowledge management | 12% | Projects, instructions, uploads, connectors; keeping sources current | 6 |
+| AS6 Governance, risk and responsible use | 15% | usage policy; sensitive and regulated data; privacy; escalation of policy conflicts | 4, 7 |
+| AS7 Troubleshooting and optimisation | 10% | diagnosing a failure type; controlled fixes; cheaper and faster at equal quality | 5 |
+
 ## Developer, Foundations (confirmed domains)
 
 | Domain | Weight | Modules |
