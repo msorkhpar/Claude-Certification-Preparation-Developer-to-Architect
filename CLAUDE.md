@@ -12,7 +12,8 @@ Read `docs/GOAL.md`, `docs/IDEA.md`, `docs/SETUP.md` and `docs/EXAM-MAP.md` firs
   design, security and evaluation, to the depth the Developer and Architect exams ask. The apps
   appear at Level 1 only.
 - **Not a copy of an exam or an official course.** Exam blueprints are a map of topics, written
-  in the course's own words. Every quiz question is written fresh.
+  in the course's own words. Quiz questions are written fresh, except the official exam guides'
+  sample questions, which may be used with credit (board D10).
 - **Not official.** No page claims endorsement or a guaranteed pass, and no page uses Anthropic's
   logos or exam branding as its own.
 - **Everything graded runs offline** in the container, against recorded or scripted exchanges.
@@ -52,9 +53,10 @@ Read `docs/GOAL.md`, `docs/IDEA.md`, `docs/SETUP.md` and `docs/EXAM-MAP.md` firs
    to check: read the commit, plant a bug of your own, run the gate.
 10. **The licence decides how a source is used.** Any public source may be read to understand a
     topic. A source whose licence permits copying may be adapted and is credited on the page where
-    it is used. A source with a restricted, unclear or no licence, every official course and every
-    exam guide is never copied: the course writes its own wording, examples and questions. A
-    document marked confidential is not used.
+    it is used. The official exam guides are the topic maps, and their sample questions may be
+    used in quizzes and mock exams, credited on the page (board D10). Any other source with a
+    restricted, unclear or no licence, and every official course, is never copied: the course
+    writes its own wording, examples and questions.
 11. **Sources are not named in this repository.** The register of sources, their licences and
     any audit are kept outside the repository and never committed. Nothing in a commit, a branch
     or a merge names a source, except the credit line on a page for a source whose licence permits

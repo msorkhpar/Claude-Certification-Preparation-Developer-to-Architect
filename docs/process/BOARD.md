@@ -32,6 +32,7 @@ M9.**
 | D7 | Associate exam | **decided:** covered by Level 1 only; no separate Associate track |
 | D8 | API key | **decided:** the reader enters their own key in the site's UI, which passes it to the code at run time and never stores it in a file; grading stays offline and deterministic against the scripted model for everyone; with a key, the reader can also run examples and their own solution live, never graded. Examples ship with exchanges captured by the course's authors, labelled with model and date |
 | D9 | Key storage and captures | **decided:** the reader's key is typed in the site and kept in the browser tab's session storage by default (gone when the tab closes); "remember on this device" is an opt-in to the browser's local storage. The site sends it with a live-run request; the local service passes it as an environment variable to that run's container only, never writes it to disk and never gives it to the graded runner. A reader may instead set `ANTHROPIC_API_KEY` in their own ignored `course.env`. Authoring uses hand-scripted exchanges labelled illustrative; real exchanges are captured in one pass before release, with the owner's key set in the environment for that run only |
+| D10 | Official exam guides | **decided:** all four official exam guides (Associate, Developer, Architect Foundations, Architect Professional) are used as the topic maps of their levels, and their sample questions may be used in the course's quizzes and mock exams, credited on the page where used. Questions from any other source are never copied |
 
 ## M1 rows (opened now)
 
@@ -60,6 +61,7 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 | Date | Entry |
 |---|---|
 | 2026-10-02 | Survey C-01, C-02 and C-08 done: exam map confirmed, versions pinned, Level 4 redrafted from the Professional blueprint (83 modules). |
+| 2026-10-02 | D10: the official exam guides are the topic maps, and their sample questions may be used with credit. Exam facts confirmed from the official guides; versions pinned; Level 4 drafted from the Professional blueprint. |
 | 2026-10-02 | Decisions D2, D4, D6 and D7: four incremental levels, offline grading, Professional level after a fresh search, Associate covered by Level 1. |
 | 2026-10-02 | Decisions D1, D3, D5, D8 and D9: name, four languages, the exam guide as topic map, the reader's key in the site and captures before release. |
 | 2026-10-02 | Outline draft 2: 80 modules in four levels, widened to the Developer exam's reported topics and the official course topics. |
