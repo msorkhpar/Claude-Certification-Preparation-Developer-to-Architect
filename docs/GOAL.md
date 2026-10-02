@@ -39,10 +39,10 @@ nothing about Claude.
 - Not a copy of any exam, exam guide or official course. Exam blueprints are used only as a map
   of topics, written in the course's own words; questions are written fresh.
 - No claim that the course is official, endorsed or sufficient for a pass.
-- Not a machine-learning course: training, fine-tuning, tokenizer internals and model
-  architecture appear only as far as a developer needs them.
-- Not a cloud-provider course: Bedrock and Vertex appear as deployment options, explained, not
-  configured.
+- Not a machine-learning research course: how models are made (pre-training, fine-tuning,
+  tokenizers, architecture) is taught as concepts, with no training practice.
+- Not a cloud administration course: Bedrock and Vertex access, identity, quotas and regions are
+  taught as configuration to read and check, in graded config practices, not as console tours.
 - No live API call in a graded practice. Practices run offline; live runs are optional and use
   the reader's own key from the environment.
 
