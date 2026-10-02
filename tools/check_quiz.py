@@ -55,6 +55,7 @@ def stem_of(stem):
     return words(re.sub(r"`[^`]*`", " ", stem))
 
 
+QID = {"Quiz": "q", "Module quiz": "m", "Mock exam": "x"}
 MIN_QUOTE_WORDS = 4
 MAX_STEM_OVERLAP = 0.5
 QUOTE = re.compile(r'"([^"]+)"')
@@ -78,7 +79,7 @@ def norm(text):
 
 def prose_of(md):
     """The page text before its quiz sections."""
-    return re.split(r"^## (?:Quiz|Module quiz)\n", md, maxsplit=1, flags=re.M)[0]
+    return re.split(r"^## (?:Quiz|Module quiz|Mock exam)\n", md, maxsplit=1, flags=re.M)[0]
 
 
 def check_quotes(qid, explanation, key, prose):
@@ -179,7 +180,7 @@ def check_key_paragraph(qid, para, key):
 
 def key_paragraphs(md):
     result = []
-    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+    for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         _, _, keyblock = m.group(2).partition("<details>")
         result.append(re.findall(r"^\d+\. (\*\*[a-d]\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M))
     return result
@@ -188,7 +189,7 @@ def key_paragraphs(md):
 def parse_page_quizzes(md):
     """Return a list of (heading, [(stem, {letter: text})], [key letters]) per quiz section."""
     out = []
-    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+    for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         body = m.group(2)
         qblock, _, keyblock = body.partition("<details>")
         questions = []
@@ -227,13 +228,24 @@ def check_module(folder):
             if kind == "Quiz":
                 for n, (stem, _) in enumerate(questions, start=1):
                     page_stems[f"{page.stem}#q{n}"] = stem
+    level_prose, level_stems = None, {}
+    if any(k == "Mock exam" for pg in pages for k, _, _ in parse_page_quizzes(pg.read_text())):
+        level_prose = "\n".join(prose_of(pg.read_text()) for f in sorted(ROOT.joinpath("course").iterdir())
+                                if f.is_dir() and re.match(r"(0[1-9]|1[01])-", f.name) for pg in sorted(f.glob("*.md")))
+        for f in sorted(ROOT.joinpath("course").iterdir()):
+            if f.is_dir() and re.match(r"(0[1-9]|1[01])-", f.name):
+                for pg in sorted(f.glob("*.md")):
+                    for kind, questions, _ in parse_page_quizzes(pg.read_text()):
+                        if kind != "Mock exam":
+                            for n, (stem, _) in enumerate(questions, start=1):
+                                level_stems[f"{pg.stem}#{kind[0].lower()}{n}"] = stem
     for page in pages:
         md = page.read_text()
         for kind, questions, keys in parse_page_quizzes(md):
             if len(keys) != len(questions):
                 problems.append(f"{page.name}: {kind} has {len(questions)} questions but {len(keys)} keys")
             for n, (stem, opts) in enumerate(questions, start=1):
-                qid = f"{page.stem}#{'m' if kind == 'Module quiz' else 'q'}{n}"
+                qid = f"{page.stem}#{QID[kind]}{n}"
                 q = by_id.get(qid)
                 if q is None:
                     problems.append(f"{qid}: not in quiz.json")
@@ -249,10 +261,12 @@ def check_module(folder):
                 if sorted(q.get("explanation", {})) != list("abcd"):
                     problems.append(f"{qid}: quiz.json must explain every option a-d")
                 problems += check_question(qid, stem, opts, q["key"])
-                problems += check_quotes(qid, q.get("explanation", {}), q["key"],
-                                         module_prose if kind == "Module quiz" else prose_of(md))
+                scope_prose = {"Quiz": prose_of(md), "Module quiz": module_prose, "Mock exam": level_prose}[kind]
+                problems += check_quotes(qid, q.get("explanation", {}), q["key"], scope_prose)
                 if kind == "Module quiz":
                     problems += check_duplicate(qid, stem, page_stems)
+                if kind == "Mock exam":
+                    problems += check_duplicate(qid, stem, level_stems)
                 paras = key_paragraphs(md)
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
                 if n - 1 < len(paras[idx]):
@@ -272,7 +286,7 @@ def check_module(folder):
 
 
 def main(argv):
-    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"0[1-6]-", p.name))
+    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name))
     if argv:
         folders = [f for f in folders if any(f.name.startswith(a) for a in argv)]
     total = 0
