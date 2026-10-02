@@ -89,8 +89,8 @@ do it; and use the model for the part that is language and judgment while the re
 
 ## Quiz
 
-1. A support tool runs its deepest reasoning setting on every request, including one-word intent labels.
-   Spend is rising with no gain in quality. What does the documentation support as the first remedy?
+1. A support tool runs its deepest reasoning setting on every request, including one-word intent labels. Spend
+   is rising with no gain in quality. What does the documentation support as the first remedy?
    - **a**: Raise `max_tokens` so the reasoning always has room to finish
    - **b**: Use low effort on trivial inputs and keep high effort for demanding ones
    - **c**: Move the labels to the model with the largest context window
@@ -106,8 +106,8 @@ do it; and use the model for the part that is language and judgment while the re
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap). *a* is ruled out because reasoning tokens count toward `max_tokens`, so a larger cap only allows more spend. *c* is ruled out because the window is capacity and a bigger one saves nothing on a request that reasons too much. *d* is ruled out because the page says adaptive thinking is steered by effort, so it can be tuned without a manual budget.
-2. **c**. A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap). *a* is ruled out because the table says the model approximates where code is exact. *b* is ruled out because a self-reported rating does not make a judgment exact, and the table asks for a repeatable result from code. *d* is ruled out because a tool call adds a model round trip to a rule that fits on one line.
+1. **b**. Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap). *a* is ruled out because reasoning tokens "count toward max_tokens alongside the response text", so a larger cap only allows more spend. *c* is ruled out because the waste is in the reasoning: "Paying for reasoning on a one-word classification is waste", and a bigger window does not change that. *d* is ruled out because with adaptive thinking "the model decides how much to think, steered by effort", so it can be tuned without manual budgets.
+2. **c**. A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap). *a* is ruled out because "The model approximates; code is exact". *b* is ruled out because a self-reported rating is not a guarantee: "A prompt is a request, not a guarantee". *d* is ruled out because "A model call is a network round trip plus generation", added to a rule that fits on one line.
 
 </details>
 
@@ -127,27 +127,27 @@ This quiz covers both pages of the module.
    - **a**: Upscale each photo before sending, since more visual tokens fix legibility
    - **b**: Ask the model to double-check each reading in a second pass
    - **c**: Trust high-confidence readings and re-check only the ones it flags
-   - **d**: Such inputs invite mistakes, so improve capture quality and verify the output
+   - **d**: Improve the capture quality, then verify every output yourself
 
 3. A product owner wants an assistant that books flights by operating an airline's website through screenshots
    and clicks. Which design point matters most for safety?
-   - **a**: Give it the customer's saved card so it never has to stop and ask
-   - **b**: Run it on an isolated machine with no secrets and a person approving each purchase
+   - **a**: Let it keep the customer's saved card on file so it never stops to ask
+   - **b**: Isolate the machine, keep secrets off it, and have a person approve each purchase
    - **c**: Add a prompt line telling it to ignore instructions found on web pages
-   - **d**: Run it with the lowest effort setting so it reasons less about each step
+   - **d**: Run it at the lowest effort setting so it reasons less about each step
 
 4. Which request is the best fit for Claude without extra machinery?
-   - **a**: Drafting a polite reply to a complaint, for an agent to review
-   - **b**: Calculating payroll to the cent for 800 staff
+   - **a**: Drafting a polite, well-organised reply to a customer's complaint
+   - **b**: Calculating the payroll for 800 staff exactly, to the cent
    - **c**: Reporting today's closing price of a listed stock
    - **d**: Checking whether a claim photo is AI-generated, to block fraud
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Exact tallies belong in code (page 1, maths and counting). *a* is ruled out because fitting in the window says nothing about counting accuracy, and the third trap calls the window capacity, not quality. *b* is ruled out because the first trap says "count carefully" does not change that the model sees pieces. *d* is ruled out because quotes ground claims in the text, but the total is still tallied by a model that sees pieces, so it stays approximate.
-2. **d**. The vision page says Claude might hallucinate or make mistakes on low-quality, rotated or very small images, and advises verifying. *a* is ruled out because the visual-token cost grows with size while a poor photo gains no information, and the page names quality as the cause. *b* is ruled out because page 1 says decisive reasoning needs a check that does not come from the same reasoning, and a second pass by the same model is not one. *c* is ruled out because the second trap says detail is not accuracy, so a confident reading proves nothing.
-3. **b**. Computer use needs an isolated machine, no exposed secrets and a person confirming consequential steps (the computer use section). *a* is ruled out because a stored card is the exposed secret and the removed confirmation that the section warns against. *c* is ruled out because the page says a prompt is a request and not a guarantee, so a line of text cannot replace isolation and confirmation. *d* is ruled out because effort sets reasoning depth and does neither of the two safeguards the section lists.
-4. **a**. Drafting language with review is the strong-fit row. *b* is ruled out because exact payroll is code's job in the when-not-to table. *c* is ruled out because a live price is after the cut-off and needs a tool or data feed. *d* is ruled out because the vision page says Claude cannot determine whether an image is AI-generated and that no one should rely on it for that.
+1. **c**. Exact tallies belong in code (page 1, maths and counting). *a* is ruled out because "A bigger window is capacity, not a reason to send everything", and it says nothing about counting accuracy. *b* is ruled out because a re-read request "does not change that the model sees pieces", however carefully it is told to read. *d* is ruled out because quotes ground claims in the text, but "exact counts of letters, words or items" stay approximate unless the model does the work in a tool.
+2. **d**. Such inputs are on the page's list of conditions where Claude can be wrong, and its closing advice is to review and verify interpretations. *a* is ruled out because "each 28 by 28 pixel patch is one visual token", so a bigger image costs more tokens without adding information the photo lacks. *b* is ruled out because reasoning "needs a check that does not come from the same reasoning", and a second pass by the same model is not one. *c* is ruled out because "Detail is not accuracy", so a confident reading proves nothing.
+3. **b**. Computer use runs in an isolated machine, without secrets, with a person confirming consequential steps (the computer use section). *a* is ruled out because computer use "runs in an isolated machine, without secrets", and a stored card is the exposed secret. *c* is ruled out because "A prompt is a request, not a guarantee", so a line of text cannot replace isolation and confirmation. *d* is ruled out because "thinking and effort are cost, latency and quality levers", and neither is a safeguard.
+4. **a**. Drafting language is the strong-fit row of the summary table, with the usual review for accuracy and fit. *b* is ruled out because the table sends "An exact, repeatable result (totals, dates, ids, string edits)" to code. *c* is ruled out because "Anything recent, private or fast-changing has to come in through the prompt" or a tool, and a live price is after the cut-off. *d* is ruled out because the vision page says Claude "cannot determine whether an image is AI-generated".
 
 </details>

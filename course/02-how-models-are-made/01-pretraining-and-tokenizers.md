@@ -50,9 +50,11 @@ is the context window doing its job. Apps with memory features or Projects can l
 across chats, but they work the same way: saved notes are put back into the context, and the weights
 stay as they were. The glossary adds a scoped fact about changing the weights: "The Claude API does not
 currently offer fine-tuning, but ask your Anthropic contact if you are interested in exploring this
-option." The statement is about the Claude API only. Amazon Bedrock, a cloud platform, announced
-fine-tuning of one older model, Claude 3 Haiku, in November 2024 (an AWS announcement, not an Anthropic page); the current Bedrock
-page for Claude lists no fine-tuning among its supported features, and none of the models in the table of
+option." The statement is about the Claude API only. Amazon Bedrock, a cloud platform, offered
+fine-tuning of one older model, Claude 3 Haiku, as a preview in the US West (Oregon) region (the AWS
+Machine Learning Blog post "Fine-tune Anthropic's Claude 3 Haiku in Amazon Bedrock to boost model accuracy
+and quality", dated 2024-07-10, which now carries a notice that Claude 3 Haiku reached end of life on
+2026-09-10); the Anthropic page "Claude in Amazon Bedrock" lists no fine-tuning among its supported features, and none of the models in the table of
 module 3 is offered for fine-tuning on the Claude API. Changing the weights is a separate act from calling
 the model, not something an API call does.
 
@@ -238,21 +240,21 @@ larger scale.
 1. An assistant is asked to tally the letter r in a long part number and gives a wrong, confident figure. The
    team wants a fix that holds for every part number. Which approach is best?
    - **a**: Ask it to spell the part number out letter by letter before answering
-   - **b**: Compute the total with a short program, not by asking the model
+   - **b**: Hand the counting to a small script and use its output
    - **c**: Move to a model with a larger context window available
-   - **d**: Lower the temperature so the tally stops changing between runs
+   - **d**: Run the same question five times and take the most common figure
 
 2. A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do
    better next week. They call the API directly and store no history. Which expectation is accurate?
    - **a**: The weights absorb the fix and apply it to every later session by default
    - **b**: The API stores the fix under the account's key for reuse
-   - **c**: Only requests that resend the fix in their input can benefit
-   - **d**: Lowering the temperature makes the model hold on to the fix
+   - **c**: Only a request that carries the amended guidance in its own input can benefit
+   - **d**: Memory features retrain the weights whenever a user saves a note
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The tokenizer section explains that the model works on pieces, not letters, so character-level tallies are approximate, and the first trap says a one-line program answers it exactly. *a* is ruled out because the model would still read the spelling as pieces, and the section says such questions are harder than they look and belong in code. *c* is ruled out because the second trap separates the window, how much text fits, from the pieces the tokenizer knows. *d* is ruled out because the weights section ties the error to how text is cut, which a sampling setting does not change.
-2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it. *a* is ruled out because the weights section says a conversation teaches the model nothing that carries over. *b* is ruled out because the stateless API in the same section stores nothing for later calls. *d* is ruled out because temperature has no storage role.
+1. **b**. The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap). *a* is ruled out because "The model never sees the letters of lowest as six separate things", so a spelled-out version is itself produced from pieces. *c* is ruled out because "The window is how much text fits per request", a capacity that does not change how a part number is cut into pieces. *d* is ruled out because "a model answers it by approximation", so repeating the question repeats the approximation.
+2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it. *a* is ruled out because "A conversation with Claude does not teach it anything that carries to the next conversation". *b* is ruled out because "Changing the weights is a separate act from calling the model", so an API call stores nothing for later. *d* is ruled out because memory features work by putting notes back: "saved notes are put back into the context", and the weights stay as they were.
 
 </details>

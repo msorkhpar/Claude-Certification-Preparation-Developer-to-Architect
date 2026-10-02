@@ -7,8 +7,9 @@
 and does not, and choose a mitigation for a confident wrong answer.
 
 Checked against the Anthropic documentation on 2026-10-02 (glossary, models overview, reduce
-hallucinations) and by running the example below in the course container (Python 3 and Node 24 on the
-runner image, offline). The example is a toy model, not Claude.
+hallucinations, the Messages API reference, the Claude Opus 5.5 migration guide and What's new in Claude
+Fable 5.1) and by running the example below in the course container (Python 3 and Node 24 on the runner
+image, offline). The example is a toy model, not Claude.
 
 ## Why it matters
 
@@ -179,6 +180,25 @@ T=2.0 `blue` falls to 0.563, the three weaker tokens together hold the rest, and
 That is the whole trade: low temperature for extraction, classification and anything with one right answer;
 higher for brainstorming and varied drafting.
 
+### What the current models let you set
+
+The toy sampler has a temperature knob, and older Claude models exposed `temperature`, `top_p` and `top_k`
+on the Messages API. The models this course uses do not accept them. The Messages API reference
+(page title "Messages") marks `temperature` as deprecated: "Models released after Claude Opus 4.6 do not
+support setting temperature. A value of 1.0 will be accepted for backwards compatibility, all other values
+will be rejected". That covers Claude Fable 5.1, Opus 5.5 and Sonnet 5.5. The migration guide for Opus 5.5
+(page title "Migrating to Claude Opus 5.5") names all three parameters: "Omit `temperature`, `top_p`, and
+`top_k`, or leave them at their defaults: any other value is rejected. Use prompting to guide the model's
+behavior." It adds that on Opus 4.7 and later a non-default value "returns a 400 error". The page "What's new
+in Claude Fable 5.1" lists "Non-default `temperature`, `top_p`, or `top_k` values return a 400 error" among the
+behaviours unchanged from Claude Fable 5. Claude Haiku 4.5 is older than that cut and is not covered by these
+sentences; this course does not rely on a sampling setting for it either. Read on 2026-10-02.
+
+So the lever a Claude engineer pulls for steadiness is not a number in the request. It is a narrower output
+(a fixed list of labels, a schema), a check in code, and a prompt that leaves less to chance. The same
+migration guide notes that a zero "never guaranteed identical outputs on prior models". The toy above still
+shows the mechanism that makes output vary; it is not a setting you can reach on these models.
+
 ### Why the same prompt gives different answers
 
 Two sources:
@@ -192,7 +212,7 @@ Two sources:
 Consequences an engineer must accept: never judge a prompt from one run; compare prompts on a set of
 inputs (module 42); never write a test that expects byte-identical model output; and never rely on
 temperature zero as a guarantee. Which sampling parameters a given model accepts changes between
-generations, so read the model's own page before relying on one (module 18).
+generations (see the section above), so read the model's own page before relying on one (module 18).
 
 ### What the model knows, and when it stopped knowing
 
@@ -235,7 +255,8 @@ them entirely":
 - **Ground in quotes.** For long documents, ask for word-for-word quotes first, then the analysis based only
   on those quotes.
 - **Cite and retract.** Ask for a supporting quote for each claim, and to drop any claim it cannot support.
-- **Compare runs.** Run the same prompt several times; disagreement is a warning sign.
+- **Compare runs.** Run the same prompt several times; disagreement is a warning sign. Comparing detects the
+  variation; it does not remove it, and every extra run is another paid request.
 - **Restrict knowledge.** Tell the model to use only the provided documents, not its general knowledge.
 
 Source: Reduce hallucinations, Claude API documentation.
@@ -247,24 +268,24 @@ source document, a database, a test. Module 5 builds the habit of checking; modu
 ## Traps
 
 1. **Fixing variation with "be consistent".** A prompt sentence does not remove sampling. If you need the
-   same label for the same input, lower the randomness where the model allows it, constrain the output
-   format, and validate in code.
+   same label for the same input, constrain the output to a fixed set, and validate in code; lower the
+   randomness only where the model allows it, which the current models do not.
 2. **Trusting temperature zero as determinism.** The glossary says it is not fully deterministic.
 3. **Asking the model about the present.** Questions about today's date, prices, versions or events after
    the cutoff are answered from stale or absent knowledge unless the context supplies the facts.
 
 ## Quiz
 
-1. A ticket router asks Claude to put each support ticket into one category. In testing, the same ticket
-   lands in "billing" on one run and "account" on the next, though the prompt never changes. Which change
-   best addresses the cause?
-   - **a**: Restrict the output to a fixed list and check the result in code
+1. A ticket router asks Claude to put each support ticket into one category. In testing, the same ticket lands
+   in "billing" on one run and "account" on the next, though the prompt never changes. Which change best
+   addresses the cause?
+   - **a**: Constrain replies to an allowed set of labels and validate each one in code
    - **b**: Append a line asking for the same category every time, however the ticket reads
    - **c**: Set the temperature to zero and treat the output as fixed
    - **d**: Compare three runs and keep whichever category wins the vote
 
-2. A refund bot is not given the company's policy file. It states firmly that refunds are allowed for
-   45 days, while the real policy says 30. What best explains the firm wrong answer?
+2. A refund bot is not given the company's policy file. It states firmly that refunds are allowed for 45 days,
+   while the real policy says 30. What best explains the firm wrong answer?
    - **a**: Its reliable knowledge cutoff predates the policy, so the answer is stale
    - **b**: It produced a typical-sounding number because nothing supplied the true one
    - **c**: Its sampling randomness was too low, which locks in mistaken answers
@@ -273,8 +294,8 @@ source document, a database, a test. Module 5 builds the habit of checking; modu
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can. *b* is ruled out because a prompt line is only a request, as the steerability section says. *c* is ruled out because the glossary says that even at temperature zero results are not fully deterministic. *d* is ruled out because comparing runs, as the hallucination list describes it, exposes disagreement as a warning sign and does not remove it, and it multiplies the cost.
-2. **b**. The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section). *a* is ruled out because the knowledge section says anything private is unknown whatever the cutoff, so a cutoff date does not decide this. *c* is ruled out because temperature changes how varied answers are, not whether a fact is known. *d* is ruled out because the scenario never supplied the file, and the limit section says an overflow ends in an error or a stop reason, not a confident figure.
+1. **a**. Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can. *b* is ruled out because a prompt line "can make a behaviour much more likely; it cannot make it certain" (the steerability section). *c* is ruled out because the glossary warns that "even with temperature set to 0, the results will not be fully deterministic", and the current models reject any non-default value anyway (the sampling section). *d* is ruled out because comparing runs only reveals the variation: "Comparing detects the variation; it does not remove it" (the hallucination list).
+2. **b**. The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section). *a* is ruled out because the knowledge section says "anything private (your tickets, your policies), is unknown to it" whatever the cutoff, so a cutoff date does not decide this. *c* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true", so the wrong figure needs no particular level of randomness. *d* is ruled out because the scenario never supplied the file, and private material is unknown to the model "unless you supply it in the context", so nothing was pushed out of view.
 
 </details>
 
@@ -282,41 +303,42 @@ source document, a database, a test. Module 5 builds the habit of checking; modu
 
 This quiz covers both pages of the module.
 
-1. A product team plans one fixed sampling setting for two assistants: one invents campaign slogans and
-   one reads amounts off bills. Which adjustment is sound?
-   - **a**: Split the settings: conservative for the exact job, adventurous for the creative one
-   - **b**: Keep one middle setting and strengthen the prompt wording for both jobs
-   - **c**: Use zero for both, since zero makes every output fully deterministic
-   - **d**: Use the highest setting for both and filter the extra variety out in code afterwards
+1. A team runs two assistants on Claude Sonnet 5.5: one drafts campaign slogans and the other reads amounts
+   off bills. The lead wants the slogans varied and the amounts exact, and plans to tune each assistant's
+   randomness separately through request settings. What actually happens?
+   - **a**: Anything but the defaults comes back as a 400 error, so accuracy has to come from validation in code
+   - **b**: Each assistant takes its own value, so slogan variety and amount accuracy can be tuned independently
+   - **c**: Zero is accepted for the amounts assistant and then makes every output come out identical
+   - **d**: Variation is already absent on current models, so neither assistant needs extra checks
 
 2. A developer sizes a prompt by counting its words, then ships. After the team migrates to a newer Claude
-   generation, the bill is about a third higher than predicted. Which earlier step would have prevented
-   the surprise?
+   generation, the bill is about a third higher than predicted. Which earlier step would have prevented the
+   surprise?
    - **a**: Applying a stricter definition of a word before estimating the size
    - **b**: Requesting an estimate from the token endpoint for the production model
-   - **c**: Setting `max_tokens` low enough that the estimate matched the bill
-   - **d**: Deleting the few-shot examples from every prompt before estimating
+   - **c**: Setting `max_tokens` low enough that the earlier estimate matched the final bill
+   - **d**: Deleting the few-shot examples from every single prompt before estimating the cost
 
-3. A scheduling assistant is asked what day it is mid-conversation and names a day from its training
-   period. Which fix sits at the right layer?
+3. A scheduling assistant is asked what day it is mid-conversation and names a day from its training period.
+   Which fix sits at the right layer?
    - **a**: Switch to the newest model, whose cutoff is closest to today
    - **b**: Add a prompt line telling it never to guess the current day
-   - **c**: Inject today's date into the instructions on every call
-   - **d**: Ask users to restate the date at the start of each chat
+   - **c**: Have the application stamp the current date onto every call it makes
+   - **d**: Resend older conversations with each call so they hint at today's date
 
-4. A long contract is pasted into a request. The summary Claude returns cites a clause number that does
-   not appear in the contract. Which prompt change most directly targets this failure?
+4. A long contract is pasted into a request. The overview Claude returns cites a clause number that does not
+   appear in the contract. Which prompt change most directly targets this failure?
    - **a**: Ask for a longer, more detailed summary so every clause is covered
    - **b**: Ask Claude to state its confidence level beside each citation
-   - **c**: Lower the temperature to zero so clause numbers cannot vary
-   - **d**: Have it pull exact quotes first and summarize only from those
+   - **c**: Tell it to be an honest assistant that cites only clauses that really exist in the text
+   - **d**: Have it first copy the relevant passages out exactly, then write only from them
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Low randomness suits one-right-answer tasks and higher randomness suits varied drafting (the example and its reading). *b* is ruled out because added wording is only a request and does not set the distribution (the steerability section). *c* is ruled out because the glossary says temperature zero is not fully deterministic, and it removes the variety the slogans want. *d* is ruled out because the example's T=2.0 line shows the likely token losing probability, so the amounts would vary.
-2. **b**. The token counting endpoint returns an estimate against the model you name, and the same text yields about 30 percent more tokens from Opus 4.7 on. *a* is ruled out because words are not the unit that is counted or billed. *c* is ruled out because `max_tokens` caps output, not input. *d* is ruled out because the miscount comes from the same text producing more tokens, so trimming the prompt hides the error and does not correct it.
-3. **c**. The model has no clock, so the date must be supplied in the context (the knowledge section). *a* is ruled out because every model has a cutoff, so a later one still lacks today's date. *b* is ruled out because a prompt line cannot supply a fact the model lacks, and the steerability section calls such a line a request. *d* is ruled out because it moves a code-level fix onto users.
-4. **d**. Grounding in word-for-word quotes is the documented technique for long documents. *a* is ruled out because a longer output adds more room for unsupported claims and no grounding. *b* is ruled out because the page says confidence is not evidence. *c* is ruled out because a fixed invented number is still invented, and temperature zero is not fully deterministic.
+1. **a**. Claude Sonnet 5.5, like Fable 5.1 and Opus 5.5, rejects any non-default temperature, top_p or top_k with an error, so exactness for the bills comes from restricting and validating the output, and the slogans need no extra setting (the sampling section). *b* is ruled out because the page says "Which sampling parameters a given model accepts changes between generations", and these models accept nothing beyond the defaults. *c* is ruled out because even where a zero is accepted, "the results will not be fully deterministic", and these models reject it. *d* is ruled out because outputs still vary, which is why the page says to "never write a test that expects byte-identical model output".
+2. **b**. The token counting endpoint returns an estimate against the model you name, and the same text yields about 30 percent more tokens from Opus 4.7 on. *a* is ruled out because "A 10,000-word document is not 10,000 tokens", so a stricter word definition still counts the wrong unit. *c* is ruled out because "max_tokens is a cap on output, not on context", so it cannot make an input estimate match a bill. *d* is ruled out because the page says "Count with the endpoint for the model you will call"; trimming the prompt would hide the miscount and not correct it.
+3. **c**. The model has no clock, so the date has to be supplied in the context on every call (the knowledge section). *a* is ruled out because "Knowledge comes from training data with a cut-off", so even the newest model stops before today. *b* is ruled out because a prompt shapes the distribution and that is "why it is only a request", so a line cannot supply a fact the model lacks. *d* is ruled out because "The model has no clock", so replaying older conversations gives it nothing to read the present from.
+4. **d**. Grounding the work in exact passages first means every claim can be traced to text that exists, which is the documented technique for long documents (the hallucination list). *a* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true", so more output only gives an invented clause more chances to appear. *b* is ruled out because the page says "confidence is not evidence". *c* is ruled out because honesty is "a goal of training and not a guarantee of any single answer", so asking for it does not ground the citations.
 
 </details>

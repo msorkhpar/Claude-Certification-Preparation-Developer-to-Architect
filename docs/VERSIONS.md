@@ -21,6 +21,19 @@ Haiku only where a cheap tier is the point. Older models still available are lis
 official model pages; the course does not use them. Prices, cache-read ratios and the batch
 discount are read from the pricing page at release, not copied here.
 
+## Sampling parameters (`temperature`, `top_p`, `top_k`)
+
+Read on 2026-10-02 from the Anthropic documentation: the Messages API reference (page title "Messages"),
+"Migrating to Claude Opus 5.5" and "What's new in Claude Fable 5.1". **Claude Fable 5.1, Opus 5.5 and
+Sonnet 5.5 reject any non-default value** of all three with a 400 error; omit them. For `temperature` the
+reference says models released after Claude Opus 4.6 do not support setting it, that 1.0 is accepted for
+backwards compatibility and that every other value is rejected. The Opus 5.5 migration guide states the same
+for `temperature`, `top_p` and `top_k` ("Omit ... or leave them at their defaults: any other value is
+rejected") and the Fable 5.1 page lists non-default values of all three as returning a 400 error. The Sonnet 5.5
+"What's new" page does not repeat the rule; it follows from the Messages reference, which covers every model
+released after Opus 4.6. Claude Haiku 4.5 predates that cut and is not covered by these sentences; the course
+does not use a sampling setting on it. Re-check at release.
+
 ## SDKs by language
 
 | Component | Package | Pinned | Needs |

@@ -92,8 +92,8 @@ The Associate guide lists four task types by name. Their prompts differ:
 | **Drafting** | Audience, tone, length, an example of the target style | Generic text in the wrong voice |
 | **Brainstorming** | Breadth first, many options, no early judgment; then a second pass to evaluate | Few, similar ideas; or premature narrowing |
 
-Brainstorming also shows why the same prompt is not right for every task: the settings that suit
-extraction (precision, low variety) work against ideation (module 1, temperature).
+Brainstorming also shows why the same prompt is not right for every task: the approach that suits
+extraction (precision, low variety) works against ideation (module 1, sampling).
 
 ## Traps
 
@@ -123,7 +123,7 @@ extraction (precision, low variety) work against ideation (module 1, temperature
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Success criteria and test inputs are the preconditions the overview names, and without them no edit can be compared (the success criteria section). *b* is ruled out because a larger model changes a second variable at once and still gives no comparison against criteria. *c* is ruled out because it gives up improvement instead of measuring it, and the first trap asks for a fixed set so edits can continue safely. *d* is ruled out because a model's preference is not a measurement against written criteria.
-2. **c**. Staging with an evidence step first is the pattern the page models on the documentation's quote-first technique, with a code check possible between stages. *a* is ruled out because repetition does not separate evidence from writing, and the page's stages are what let a failure show up where it happened. *b* is ruled out because writing before assessing lets the email lead the analysis, against the order gather, reason, write. *d* is ruled out because a closing line is a request and not a stage whose output can be checked.
+1. **a**. Success criteria and test inputs are the preconditions the overview names, and without them no edit can be compared (the success criteria section). *b* is ruled out because "Changing a prompt and re-reading one answer is anecdote", and a larger model changes a second variable at once. *c* is ruled out because the first trap says to "Keep a handful of fixed inputs, including hard ones", so edits can continue safely. *d* is ruled out because the preconditions include "some ways to empirically test against those criteria", and a model's preference is not one.
+2. **c**. Staging with an evidence step first is the pattern the page models on the documentation's quote-first technique, with a code check possible between stages. *a* is ruled out because the benefit of stages is that "a failure shows up at the stage where it happened", which repetition does not give. *b* is ruled out because the stages start with "extract the relevant facts or quotes from the material", so the email cannot come first. *d* is ruled out because "A giant do-everything prompt makes failures hard to locate", and a closing line is a request, not a stage.
 
 </details>

@@ -119,14 +119,14 @@ be trusted".
    asks you to drop that row so the table looks finished. Which response is best?
    - **a**: Ask Claude to try again until every cell holds a value
    - **b**: Fill it with a typical industry figure and label it an estimate
-   - **c**: Keep the entry and note what could not be found
-   - **d**: Merge it into a footnote, where the table still looks complete
+   - **c**: Retain the entry as it stands and state what could not be located
+   - **d**: Show a dash in that cell and drop any mention of the missing data
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Specific citations are the kind of detail a model can invent, so the claim that would hurt if wrong is checked against the source of record (the checking routine). *b* is ruled out because the routine and the first trap say self-reported confidence verifies nothing. *c* is ruled out because the routine says to check against the source and not against the model, and a second reply from the same model is not the source. *d* is ruled out because disclosure is a separate duty, and the recipient would still be relying on an unchecked claim.
-2. **c**. A declared gap is information, and the careful move is to keep it and decide what to do (the spotting a gap section). *a* is ruled out because the iterate section says re-rolling the same request is a reflex, and pressing for a figure invites invention. *b* is ruled out because the page names filling the gap with an estimate as the careless move. *d* is ruled out because a footnote hides the gap from the table, which the third trap warns makes it look complete.
+1. **a**. Specific citations are the kind of detail a model can invent, so the claim that would hurt if wrong is checked against the source of record (the checking routine). *b* is ruled out because the routine says that asking the model how sure it is, or "for its confidence does not verify anything". *c* is ruled out because the routine says to check "against the source of record, not against the model", and a second reply from the same model is not the source. *d* is ruled out because "Check in proportion to the cost of being wrong", and a note about an AI draft leaves the unchecked claim in place.
+2. **c**. A declared gap is information, and the careful move is to keep it and decide what to do (the spotting a gap section). *a* is ruled out because "Regenerating the same request and hoping is the reflex", and pressing for a value invites invention. *b* is ruled out because "the careless move is to fill the gap with an estimate". *d* is ruled out because the page says "Keep the gap and decide what to do about it", not hide it behind a dash.
 
 </details>
 
@@ -146,7 +146,7 @@ This quiz covers both pages of the module.
    - **a**: Ask again with the same wording and pick the best of the replies
    - **b**: Move to the highest tier, which follows loose instructions better
    - **c**: Accept the rewrite and edit it by hand to the voice wanted
-   - **d**: Say who will read it, the tone wanted and what to keep, then compare
+   - **d**: Name the audience, the register to aim for and what to keep, then compare
 
 3. A manager must explain Claude's role in a new reporting process to colleagues. Which message is most
    accurate?
@@ -165,9 +165,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Sorting steps into judgment and automatable work is the delegating skill (page 1). *a* is ruled out because the first trap says one good result does not show the figures were right. *c* is ruled out because nothing checks the output, and the table keeps checking every figure with a person or a script. *d* is ruled out because Claude can state a figure that was never supplied, and a flag raised by the same model is not an independent check.
-2. **d**. Describing the audience, tone and what to keep, then comparing, is the iterate-not-re-roll method. *a* is ruled out because an identical request is a second guess. *b* is ruled out because the page says the description is where quality is decided, not the tier. *c* is ruled out because accepting the result and editing by hand skips learning why the brief was missed.
-3. **c**. The fair message has three parts, what it speeds up, what still needs a person and how you will know it works. *a* is ruled out because it hands the verification away, which is the first extreme the page names. *b* is ruled out because it is the opposite extreme, "it cannot be trusted". *d* is ruled out because deciding which findings matter is a judgment step for a person.
-4. **a**. Check in proportion to the cost of being wrong (the checking routine). *b* is ruled out because tone and polish are visible and easy to check, and the second trap says the damage is in figures and citations. *c* is ruled out because the page names no tier that makes verification unnecessary. *d* is ruled out because supporting quotes make checking faster and do not replace it.
+1. **b**. Sorting steps into judgment and automatable work is the delegating skill (page 1). *a* is ruled out because "A good draft does not show the figures were right". *c* is ruled out because the table keeps "Check every figure in the draft against the source" with a person or a script, and review is skipped here. *d* is ruled out because "Claude can state a figure that was never supplied", and a flag raised by the same model is not an independent check.
+2. **d**. Describing the audience, the style and what to keep, then comparing, is the iterate-not-re-roll method. *a* is ruled out because "Regenerating the same request and hoping is the reflex", and an identical request is a second guess. *b* is ruled out because "the description is where most of the quality is decided", not the tier. *c* is ruled out because the page says "When an output is wrong, ask why before asking again", and hand-editing accepts the rewrite without finding the gap in the request.
+3. **c**. The fair message has three parts: what it speeds up, what still needs a person, and how you will know it works. *a* is ruled out because it hands the verification away, the first extreme the page names: "it will do the job". *b* is ruled out because it is the opposite extreme: "it cannot be trusted". *d* is ruled out because deciding which findings matter is "Decide which variances matter to the board", a step the table gives to a person.
+4. **a**. Check in proportion to the cost of being wrong (the checking routine). *b* is ruled out because "Readers check tone and grammar, which are visible", and the damage is in figures and citations. *c* is ruled out because the routine says "Do not check everything equally", and names no tier that makes verification unnecessary. *d* is ruled out because supporting quotes make checking faster: "These make checking faster; they do not replace it".
 
 </details>

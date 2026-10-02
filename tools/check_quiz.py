@@ -3,12 +3,16 @@
 
 Rules (CLAUDE.md quiz rules that a script can check):
   - every question has four options a-d and a key among them;
-  - the key option shares no content word (after simple stemming) with the stem;
+  - the key option shares no content word (after simple stemming, hyphens split) with the stem, and no stem is
+    contained in a longer word on the other side ("send" in "resend", "want" in "unwanted");
   - the key is at most 1.3 times the mean length of the distractors, in characters (warning when the key is the
     longest option in more than 40 percent of a module's questions);
   - the folded key gives every option its own explanation sentence (no merged "a, b, c are ..." sentence);
   - the folded key on the page names the same letter as quiz.json, in the same order;
-  - quiz.json explains every option.
+  - quiz.json explains every option;
+  - every non-key option's explanation quotes, in double quotes, a phrase of at least 4 words that appears verbatim
+    on the page the quiz closes (for a module quiz: on any page of the module, quiz sections excluded);
+  - a module question's stem shares at most half of its content stems with any page question of the same module.
 usage: tools/check_quiz.py [module-folder-prefix ...]   exit 1 on any finding
 """
 import json
@@ -24,7 +28,7 @@ their there they them he she his her you your we our i me my us has have had get
 
 
 def words(text):
-    return {w for w in re.findall(r"[a-z][a-z'-]+", text.lower().replace("’", "'")) if w not in STOP and len(w) > 2}
+    return {w for w in re.findall(r"[a-z]+(?:'[a-z]+)?", text.lower().replace("’", "'")) if w not in STOP and len(w) > 2}
 
 
 SUFFIXES = ("ers", "ions", "ments", "ing", "ion", "ment", "ed", "er", "es", "ly", "s")
@@ -47,6 +51,57 @@ def stems(text):
 
 def stem_of(stem):
     return words(re.sub(r"`[^`]*`", " ", stem))
+
+
+MIN_QUOTE_WORDS = 4
+MAX_STEM_OVERLAP = 0.5
+QUOTE = re.compile(r'"([^"]+)"')
+
+
+def contained_echo(key_text, stem_text):
+    """Pairs (stem, longer word) where a stem of one side sits inside a longer word of the other side."""
+    hits = set()
+    for s in stems(stem_text):
+        hits |= {(s, w) for w in words(key_text) if s in w and len(w) > len(s)}
+    for s in stems(key_text):
+        hits |= {(s, w) for w in words(stem_text) if s in w and len(w) > len(s)}
+    return hits
+
+
+def norm(text):
+    """Page and quotation text for verbatim matching: no markup, curly quotes straightened, one space, lower case."""
+    text = text.replace("’", "'").replace("“", '"').replace("”", '"')
+    return re.sub(r"\s+", " ", re.sub(r"[*`]", "", text)).strip().lower()
+
+
+def prose_of(md):
+    """The page text before its quiz sections."""
+    return re.split(r"^## (?:Quiz|Module quiz)\n", md, maxsplit=1, flags=re.M)[0]
+
+
+def check_quotes(qid, explanation, key, prose):
+    """Every non-key option is ruled out by a quotation of 4 or more words that appears verbatim in the prose."""
+    problems = []
+    page = norm(prose)
+    for letter in sorted(explanation):
+        if letter == key:
+            continue
+        quotes = [q for q in QUOTE.findall(explanation[letter]) if len(q.split()) >= MIN_QUOTE_WORDS]
+        if not quotes:
+            problems.append(f"{qid}: option {letter} has no quoted phrase of {MIN_QUOTE_WORDS} words or more in its explanation")
+        elif not any(norm(q) in page for q in quotes):
+            problems.append(f"{qid}: option {letter} quotes {quotes[0]!r}, which is not verbatim on the page")
+    return problems
+
+
+def check_duplicate(qid, stem, page_stems):
+    """A module question must not restate a page question of the same module."""
+    mine = stems(re.sub(r"`[^`]*`", " ", stem))
+    for other_id, other in page_stems.items():
+        theirs = stems(re.sub(r"`[^`]*`", " ", other))
+        if mine and len(mine & theirs) / len(mine) > MAX_STEM_OVERLAP:
+            return [f"{qid}: stem shares {len(mine & theirs)} of {len(mine)} content stems with {other_id}"]
+    return []
 
 
 LENGTH_RATIO = 1.3
@@ -74,6 +129,9 @@ def check_question(qid, stem, opts, key):
     echoed = stems(opts[key]) & stems(plain)
     if echoed and not shared:
         problems.append(f"{qid}: key echoes the stem by stem {sorted(echoed)}")
+    inside = contained_echo(opts[key], plain)
+    if inside and not shared and not echoed:
+        problems.append(f"{qid}: key echoes the stem inside a longer word {sorted(inside)}")
     ratio = key_length_ratio(opts, key)
     if ratio > LENGTH_RATIO:
         problems.append(f"{qid}: key is {ratio:.2f} times the mean distractor length (limit {LENGTH_RATIO})")
@@ -135,7 +193,15 @@ def check_module(folder):
     by_id = {q["id"]: q for q in data["quizzes"]}
     seen = set()
     longest_total = longest_hits = 0
-    for page in sorted(folder.glob("*.md")):
+    pages = sorted(folder.glob("*.md"))
+    module_prose = "\n".join(prose_of(p.read_text()) for p in pages)
+    page_stems = {}
+    for page in pages:
+        for kind, questions, _ in parse_page_quizzes(page.read_text()):
+            if kind == "Quiz":
+                for n, (stem, _) in enumerate(questions, start=1):
+                    page_stems[f"{page.stem}#q{n}"] = stem
+    for page in pages:
         md = page.read_text()
         for kind, questions, keys in parse_page_quizzes(md):
             if len(keys) != len(questions):
@@ -157,6 +223,10 @@ def check_module(folder):
                 if sorted(q.get("explanation", {})) != list("abcd"):
                     problems.append(f"{qid}: quiz.json must explain every option a-d")
                 problems += check_question(qid, stem, opts, q["key"])
+                problems += check_quotes(qid, q.get("explanation", {}), q["key"],
+                                         module_prose if kind == "Module quiz" else prose_of(md))
+                if kind == "Module quiz":
+                    problems += check_duplicate(qid, stem, page_stems)
                 paras = key_paragraphs(md)
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
                 if n - 1 < len(paras[idx]):

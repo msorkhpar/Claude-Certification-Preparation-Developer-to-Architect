@@ -9,15 +9,15 @@
       "options": {
         "a": "Ask for the sum again with an instruction to double-check each step",
         "b": "Add a closing line asking Claude to flag how sure it is of the total",
-        "c": "Lower the temperature to zero so the arithmetic stops varying",
+        "c": "Reformat the amounts into one column so the sum is easier to follow",
         "d": "Let it call a code tool and pass on the tool's result"
       },
       "key": "d",
       "explanation": {
         "d": "Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code.",
-        "a": "Ruled out because the section says the fix is not a better prompt, and a request to re-check is only a prompt.",
-        "b": "Ruled out because the table gives an independent check for decisive steps, and the model's own report of certainty is not one.",
-        "c": "Ruled out because the error comes from producing text token by token and not from randomness, so a sampling setting leaves it in place."
+        "a": "Ruled out because a re-check request \"does not change that the model sees pieces\", and the section says the fix is not a better prompt.",
+        "b": "Ruled out because reasoning \"needs a check that does not come from the same reasoning\", and the model's own report of certainty is not one.",
+        "c": "Ruled out because exact arithmetic on long numbers is \"approximate unless the model does the work in a tool\", however the amounts are laid out."
       }
     },
     {
@@ -26,17 +26,17 @@
       "scope": "page",
       "stem": "An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes wrong on crowded shelves. Which design response fits what the documentation says?",
       "options": {
-        "a": "Treat the figures as estimates and have a person verify the high-stakes ones",
-        "b": "Crop each photo to a single row so the tallies become exact",
-        "c": "Compress each photo heavily so the scene is simpler to read",
-        "d": "Switch to a larger model, since the limit is a matter of tier"
+        "a": "Label each count as approximate, and have a person confirm the ones that matter",
+        "b": "Crop each shelf photo to one row, then trust the resulting counts as exact",
+        "c": "Shrink each photo heavily to simplify the scene, then rely on the counts",
+        "d": "Switch to a larger model, then treat the counts as dependable"
       },
       "key": "a",
       "explanation": {
-        "a": "The vision page says counts can be approximate, especially with large numbers of small objects, and its closing advice is to verify interpretations in high-stakes cases.",
-        "b": "Ruled out because the page names approximate counts as a limit and promises no exactness for any crop.",
-        "c": "Ruled out because the accuracy limit names low-quality images as a cause of mistakes, so heavy compression makes it worse.",
-        "d": "Ruled out because the limits are listed for Claude's vision in general, and the counting fix the page gives is verification or code."
+        "a": "The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the counts are labelled as estimates and a person checks the ones that matter.",
+        "b": "Ruled out because the page says Claude \"can give approximate counts of objects in an image but might not always be precisely accurate\", whatever the crop.",
+        "c": "Ruled out because Claude \"might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels\", so heavy compression makes it worse.",
+        "d": "Ruled out because the page says \"Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight\", for any tier."
       }
     },
     {
@@ -53,9 +53,9 @@
       "key": "b",
       "explanation": {
         "b": "Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap).",
-        "a": "Ruled out because reasoning tokens count toward `max_tokens`, so a larger cap only allows more spend.",
-        "c": "Ruled out because the window is capacity and a bigger one saves nothing on a request that reasons too much.",
-        "d": "Ruled out because the page says adaptive thinking is steered by effort, so it can be tuned without a manual budget."
+        "a": "Ruled out because reasoning tokens \"count toward max_tokens alongside the response text\", so a larger cap only allows more spend.",
+        "c": "Ruled out because the waste is in the reasoning: \"Paying for reasoning on a one-word classification is waste\", and a bigger window does not change that.",
+        "d": "Ruled out because with adaptive thinking \"the model decides how much to think, steered by effort\", so it can be tuned without manual budgets."
       }
     },
     {
@@ -72,9 +72,9 @@
       "key": "c",
       "explanation": {
         "c": "A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap).",
-        "a": "Ruled out because the table says the model approximates where code is exact.",
-        "b": "Ruled out because a self-reported rating does not make a judgment exact, and the table asks for a repeatable result from code.",
-        "d": "Ruled out because a tool call adds a model round trip to a rule that fits on one line."
+        "a": "Ruled out because \"The model approximates; code is exact\".",
+        "b": "Ruled out because a self-reported rating is not a guarantee: \"A prompt is a request, not a guarantee\".",
+        "d": "Ruled out because \"A model call is a network round trip plus generation\", added to a rule that fits on one line."
       }
     },
     {
@@ -91,9 +91,9 @@
       "key": "c",
       "explanation": {
         "c": "Exact tallies belong in code (page 1, maths and counting).",
-        "a": "Ruled out because fitting in the window says nothing about counting accuracy, and the third trap calls the window capacity, not quality.",
-        "b": "Ruled out because the first trap says \"count carefully\" does not change that the model sees pieces.",
-        "d": "Ruled out because quotes ground claims in the text, but the total is still tallied by a model that sees pieces, so it stays approximate."
+        "a": "Ruled out because \"A bigger window is capacity, not a reason to send everything\", and it says nothing about counting accuracy.",
+        "b": "Ruled out because a re-read request \"does not change that the model sees pieces\", however carefully it is told to read.",
+        "d": "Ruled out because quotes ground claims in the text, but \"exact counts of letters, words or items\" stay approximate unless the model does the work in a tool."
       }
     },
     {
@@ -105,14 +105,14 @@
         "a": "Upscale each photo before sending, since more visual tokens fix legibility",
         "b": "Ask the model to double-check each reading in a second pass",
         "c": "Trust high-confidence readings and re-check only the ones it flags",
-        "d": "Such inputs invite mistakes, so improve capture quality and verify the output"
+        "d": "Improve the capture quality, then verify every output yourself"
       },
       "key": "d",
       "explanation": {
-        "d": "The vision page says Claude might hallucinate or make mistakes on low-quality, rotated or very small images, and advises verifying.",
-        "a": "Ruled out because the visual-token cost grows with size while a poor photo gains no information, and the page names quality as the cause.",
-        "b": "Ruled out because page 1 says decisive reasoning needs a check that does not come from the same reasoning, and a second pass by the same model is not one.",
-        "c": "Ruled out because the second trap says detail is not accuracy, so a confident reading proves nothing."
+        "d": "Such inputs are on the page's list of conditions where Claude can be wrong, and its closing advice is to review and verify interpretations.",
+        "a": "Ruled out because \"each 28 by 28 pixel patch is one visual token\", so a bigger image costs more tokens without adding information the photo lacks.",
+        "b": "Ruled out because reasoning \"needs a check that does not come from the same reasoning\", and a second pass by the same model is not one.",
+        "c": "Ruled out because \"Detail is not accuracy\", so a confident reading proves nothing."
       }
     },
     {
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "A product owner wants an assistant that books flights by operating an airline's website through screenshots and clicks. Which design point matters most for safety?",
       "options": {
-        "a": "Give it the customer's saved card so it never has to stop and ask",
-        "b": "Run it on an isolated machine with no secrets and a person approving each purchase",
+        "a": "Let it keep the customer's saved card on file so it never stops to ask",
+        "b": "Isolate the machine, keep secrets off it, and have a person approve each purchase",
         "c": "Add a prompt line telling it to ignore instructions found on web pages",
-        "d": "Run it with the lowest effort setting so it reasons less about each step"
+        "d": "Run it at the lowest effort setting so it reasons less about each step"
       },
       "key": "b",
       "explanation": {
-        "b": "Computer use needs an isolated machine, no exposed secrets and a person confirming consequential steps (the computer use section).",
-        "a": "Ruled out because a stored card is the exposed secret and the removed confirmation that the section warns against.",
-        "c": "Ruled out because the page says a prompt is a request and not a guarantee, so a line of text cannot replace isolation and confirmation.",
-        "d": "Ruled out because effort sets reasoning depth and does neither of the two safeguards the section lists."
+        "b": "Computer use runs in an isolated machine, without secrets, with a person confirming consequential steps (the computer use section).",
+        "a": "Ruled out because computer use \"runs in an isolated machine, without secrets\", and a stored card is the exposed secret.",
+        "c": "Ruled out because \"A prompt is a request, not a guarantee\", so a line of text cannot replace isolation and confirmation.",
+        "d": "Ruled out because \"thinking and effort are cost, latency and quality levers\", and neither is a safeguard."
       }
     },
     {
@@ -140,17 +140,17 @@
       "scope": "module",
       "stem": "Which request is the best fit for Claude without extra machinery?",
       "options": {
-        "a": "Drafting a polite reply to a complaint, for an agent to review",
-        "b": "Calculating payroll to the cent for 800 staff",
+        "a": "Drafting a polite, well-organised reply to a customer's complaint",
+        "b": "Calculating the payroll for 800 staff exactly, to the cent",
         "c": "Reporting today's closing price of a listed stock",
         "d": "Checking whether a claim photo is AI-generated, to block fraud"
       },
       "key": "a",
       "explanation": {
-        "a": "Drafting language with review is the strong-fit row.",
-        "b": "Ruled out because exact payroll is code's job in the when-not-to table.",
-        "c": "Ruled out because a live price is after the cut-off and needs a tool or data feed.",
-        "d": "Ruled out because the vision page says Claude cannot determine whether an image is AI-generated and that no one should rely on it for that."
+        "a": "Drafting language is the strong-fit row of the summary table, with the usual review for accuracy and fit.",
+        "b": "Ruled out because the table sends \"An exact, repeatable result (totals, dates, ids, string edits)\" to code.",
+        "c": "Ruled out because \"Anything recent, private or fast-changing has to come in through the prompt\" or a tool, and a live price is after the cut-off.",
+        "d": "Ruled out because the vision page says Claude \"cannot determine whether an image is AI-generated\"."
       }
     }
   ]

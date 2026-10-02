@@ -121,20 +121,20 @@ produced with a confident voice.
    fluently and is off by a few cents. What is the most dependable correction?
    - **a**: Ask for the sum again with an instruction to double-check each step
    - **b**: Add a closing line asking Claude to flag how sure it is of the total
-   - **c**: Lower the temperature to zero so the arithmetic stops varying
+   - **c**: Reformat the amounts into one column so the sum is easier to follow
    - **d**: Let it call a code tool and pass on the tool's result
 
 2. An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are
    sometimes wrong on crowded shelves. Which design response fits what the documentation says?
-   - **a**: Treat the figures as estimates and have a person verify the high-stakes ones
-   - **b**: Crop each photo to a single row so the tallies become exact
-   - **c**: Compress each photo heavily so the scene is simpler to read
-   - **d**: Switch to a larger model, since the limit is a matter of tier
+   - **a**: Label each count as approximate, and have a person confirm the ones that matter
+   - **b**: Crop each shelf photo to one row, then trust the resulting counts as exact
+   - **c**: Shrink each photo heavily to simplify the scene, then rely on the counts
+   - **d**: Switch to a larger model, then treat the counts as dependable
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *a* is ruled out because the section says the fix is not a better prompt, and a request to re-check is only a prompt. *b* is ruled out because the table gives an independent check for decisive steps, and the model's own report of certainty is not one. *c* is ruled out because the error comes from producing text token by token and not from randomness, so a sampling setting leaves it in place.
-2. **a**. The vision page says counts can be approximate, especially with large numbers of small objects, and its closing advice is to verify interpretations in high-stakes cases. *b* is ruled out because the page names approximate counts as a limit and promises no exactness for any crop. *c* is ruled out because the accuracy limit names low-quality images as a cause of mistakes, so heavy compression makes it worse. *d* is ruled out because the limits are listed for Claude's vision in general, and the counting fix the page gives is verification or code.
+1. **d**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *a* is ruled out because a re-check request "does not change that the model sees pieces", and the section says the fix is not a better prompt. *b* is ruled out because reasoning "needs a check that does not come from the same reasoning", and the model's own report of certainty is not one. *c* is ruled out because exact arithmetic on long numbers is "approximate unless the model does the work in a tool", however the amounts are laid out.
+2. **a**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the counts are labelled as estimates and a person checks the ones that matter. *b* is ruled out because the page says Claude "can give approximate counts of objects in an image but might not always be precisely accurate", whatever the crop. *c* is ruled out because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels", so heavy compression makes it worse. *d* is ruled out because the page says "Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
 
 </details>

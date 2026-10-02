@@ -101,8 +101,8 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 
 ## Quiz
 
-1. A marketing manager with no engineering support needs weekly newsletters drafted in the house voice,
-   using last quarter's issues as reference. Which approach fits best?
+1. A marketing manager with no engineering support needs weekly newsletters drafted in the house voice, using
+   last quarter's issues as reference. Which approach fits best?
    - **a**: A Project in the app holding the tone guide and earlier editions
    - **b**: A scheduled script that calls the Messages API weekly with the issues attached
    - **c**: A bespoke agent on the Agent SDK that reads the archive before each draft
@@ -125,9 +125,9 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A Project holds instructions and reference files for recurring non-developer work (the apps bullet and the first trap). *b* is ruled out because the first trap says building an endpoint adds cost and maintenance for nothing. *c* is ruled out because the Agent SDK is for developers building custom agents, and a Project already holds the knowledge base without code. *d* is ruled out because the cloud platforms row answers account and traffic control, which the scenario never mentions.
-2. **d**. The cloud platforms row is the one that carries the customer's cloud identity and permission model while serving the same models. *a* is ruled out because a managed agent is a harness in managed infrastructure for long-running work, and the page says nothing of it adopting the bank's tenancy. *b* is ruled out because a system prompt instructs the model and is not an identity or permission model, which the who-is-in-the-loop bullet attributes to the platform. *c* is ruled out because the shared engine carries a repository's files and settings across surfaces, not where traffic and identity rules are enforced.
-3. **b**. Where instructions live decides where they are read, and a Project's instructions do not reach the API (the carry-across section and the third trap). *a* is ruled out because the same model family sits behind every surface, so its capabilities carry across. *c* is ruled out because the API follows instructions placed in the request and the system prompt, as the where-instructions-live bullet says. *d* is ruled out because the system prompt your code sends is enough, and no other surface is a precondition.
+1. **a**. A Project holds instructions and reference files for recurring non-developer work (the apps bullet and the first trap). *b* is ruled out because "A recurring chat workflow for a non-developer does not need code". *c* is ruled out because the Agent SDK row is for "Developers building custom agents", and a Project already holds the archive without code. *d* is ruled out because the cloud platforms row is for "Organisations that buy Claude through a cloud account", which the scenario never mentions.
+2. **d**. The cloud platforms row carries the customer's cloud identity and permission model while serving the same models. *a* is ruled out because a managed agent suits "Teams with long-running, asynchronous work", and the page says nothing of it adopting the bank's tenancy. *b* is ruled out because "a cloud platform adds its own identity and permission model", while a system prompt only instructs the model. *c* is ruled out because the shared engine only means "your repo's CLAUDE.md files, settings, and MCP servers work across all of them", not that identity rules are enforced.
+3. **b**. Where instructions live decides where they are read, and a Project's instructions do not reach the API (the carry-across section and the third trap). *a* is ruled out because "The model is the same family behind every door, so its capabilities and its quirks are the same". *c* is ruled out because the instruction lives "In the API, in the system prompt your code sends", and no model parameter is involved. *d* is ruled out because "Instructions written for one place do not appear in another unless you put them there", and no other surface is a precondition.
 
 </details>
 
@@ -135,12 +135,12 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 
 This quiz covers both pages of the module.
 
-1. A support team writes thousands of short customer answers an hour, and about one in fifty is a delicate
-   complaint. Real past examples are available for measurement. Which plan balances spend and quality best?
-   - **a**: Use the strongest tier for everything and lower the effort later to save money
-   - **b**: Use the fastest tier for everything and add a human check on each hard one
-   - **c**: Handle the routine volume on a fast tier and route the rare hard ones to a stronger tier
-   - **d**: Split the volume evenly across the tiers and compare the average rating
+1. A team's research job runs for hours with nobody watching: mostly routine page fetching and note-taking,
+   with a few hard judgment calls. Which design fits?
+   - **a**: Host it in managed infrastructure, with cheap workers for bulk and a stronger model to decide
+   - **b**: Chat through an app Project, with a person starting each step by hand
+   - **c**: Run the strongest tier through the Messages API from the team's own servers
+   - **d**: Use the fastest tier for every step, and add a stronger one only if the job fails
 
 2. A feature must call one specific Claude model for two years. In review, someone flags the id hard-coded in
    the source. What is the most likely concern?
@@ -167,9 +167,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Matching the model to the task in both directions, measured on real data, is the worked decision. *a* is ruled out because the worked decision says the top tier for everything wastes the budget. *b* is ruled out because the cheapest model for everything under-serves the cases that need depth, and a human check on each hard one does not give them depth. *d* is ruled out because an even split matches no task to any tier.
-2. **d**. The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap). *a* is ruled out because the page says every id is a pinned snapshot, so replies do not drift under a fixed id. *b* is ruled out because the table gives a dated id for Haiku 4.5, and the dated id is its snapshot. *c* is ruled out because the page says dateless ids from the 4.6 generation on are themselves pinned snapshots, so an alias is no more of a tracker.
-3. **a**. Claude Code is the agentic coding tool that reads a codebase and runs commands. *b* is ruled out because the Agent SDK is for building a custom agent, which is the tool the developer already has. *c* is ruled out because a Project's knowledge base holds uploaded files and cannot run the tests. *d* is ruled out because managed agents suit long-running asynchronous work in managed infrastructure, not an interactive refactor.
-4. **b**. The cloud platforms bullet lists a separate id for each platform, for example `anthropic.claude-opus-5-5` on Amazon Bedrock. *a* is ruled out because the same model family sits behind every door, and the page says ids and access differ, not the generation. *c* is ruled out because the scenario says access is granted and the error concerns the name. *d* is ruled out because the scenario says both platforms list the model as current.
+1. **a**. A job that runs for hours belongs in managed agents, and an orchestrator that hands bulk work to cheaper workers puts most tokens on the cheaper model while a stronger one takes the hard calls. *b* is ruled out because the apps give "Chat, Projects, artifacts, research, connectors; a person in the loop", and nobody is watching here. *c* is ruled out because the situation table points "A job runs for hours and should not tie up your servers" to managed agents. *d* is ruled out because "the cheapest model for everything under-serves exactly the cases that need depth".
+2. **d**. The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap). *a* is ruled out because "every Claude model id is a pinned snapshot", so replies do not drift under a fixed id. *b* is ruled out because "For Haiku 4.5 the dated id is the snapshot and the shorter name is an alias", so dated ids are accepted. *c* is ruled out because the page counts "including the dateless IDs used from the 4.6 generation on" among the pinned snapshots, so an alias is no more of a tracker.
+3. **a**. Claude Code is the agentic coding tool that reads a codebase and runs commands. *b* is ruled out because the Agent SDK row is for "Developers building custom agents", and this developer wants help with a repository, not a new agent to build. *c* is ruled out because the Project row says "Instructions and uploads, not code", and a knowledge base cannot run the tests. *d* is ruled out because managed agents suit "Teams with long-running, asynchronous work", not an interactive refactor.
+4. **b**. The cloud platforms bullet lists a separate id for each platform, for example anthropic.claude-opus-5-5 on Amazon Bedrock. *a* is ruled out because the page says "Same model family; different ids, access and sometimes features", so the generation is the same and only the id differs. *c* is ruled out because the scenario grants access and the error concerns the name: "The ids differ, and the platform sets its own dates". *d* is ruled out because the scenario says both platforms list the model as current, as the page's example "anthropic.claude-opus-5-5 on Amazon Bedrock" shows for a current model.
 
 </details>

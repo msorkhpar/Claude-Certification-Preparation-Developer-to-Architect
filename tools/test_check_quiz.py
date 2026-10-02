@@ -6,10 +6,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import check_key_paragraph, check_question, key_is_longest  # noqa: E402
+from check_quiz import (check_duplicate, check_key_paragraph, check_question, check_quotes,  # noqa: E402
+                        key_is_longest)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
-CLEAN = {"a": "Count the tokens again for the target model", "b": "Split every document into chapters by hand",
+CLEAN = {"a": "Measure the input again for the target model", "b": "Split every document into chapters by hand",
          "c": "Raise the output cap on the request body", "d": "Switch the job to a cheaper model tier"}
 failures = []
 
@@ -24,7 +25,7 @@ def expect(name, problems, want):
 expect("clean question", check_question("t#q1", STEM, CLEAN, "a"), False)
 
 # (a) key far longer than the distractors
-long_key = dict(CLEAN, a="Count the tokens again for the target model before every deployment and compare the result to the window")
+long_key = dict(CLEAN, a="Measure the input again for the target model before every deployment and compare the result to the window")
 expect("plant: key 1.3x longer", check_question("t#q1", STEM, long_key, "a"), True)
 expect("plant: key longest is detected", [1] if key_is_longest(long_key, "a") else [], True)
 
@@ -41,5 +42,36 @@ missing = "**a**. Because the tokenizer changed. *b* is ruled out because x. *c*
 expect("clean folded key", check_key_paragraph("t#q1", good, "a"), False)
 expect("plant: merged folded key", check_key_paragraph("t#q1", bad, "a"), True)
 expect("plant: option without a sentence", check_key_paragraph("t#q1", missing, "a"), True)
+
+# (d) stem echo across hyphens and inside longer words
+S1 = "A job sends every report to a model with a 1M-token window and the largest reports fail. What is the cause?"
+O1 = {"a": "The output cap is counted first now, before the prompt", "b": "Earlier requests are kept and fill the space over time", "c": "More tokens per page after the change", "d": "The vendor quietly lowered the limit for everyone"}
+expect("plant: hyphenated stem word (1M-token / tokens)", check_question("t#q1", S1, O1, "c"), True)
+expect("clean: same stem, key reworded", check_question("t#q1", S1, dict(O1, c="The newer tokenizer cuts prose into finer pieces"), "c"), True)
+expect("clean: key shares nothing", check_question("t#q1", S1, dict(O1, c="Newer text splitting yields finer pieces from identical prose"), "c"), False)
+S2 = "A support chat sends only the latest question to the model. The assistant asks for the order number again."
+O2 = {"a": "Add a system line about each customer who writes in", "b": "Use the largest window available on the market now", "c": "Raise the output cap on every reply the assistant gives", "d": "Store the dialogue and resend it each time"}
+expect("plant: stem inside longer word (sends / resend)", check_question("t#q1", S2, O2, "d"), True)
+expect("clean: key reworded (replay)", check_question("t#q1", S2, dict(O2, d="Keep the dialogue in the application and replay it with every call"), "d"), False)
+S3 = "A marketing assistant tells Claude to make it better and gets a rewrite in an unwanted voice. What is the next step?"
+O3 = {"a": "Ask again with the same wording and pick the best reply", "b": "Move to the highest tier that exists on the platform", "c": "Edit the whole rewrite by hand until it suits the brand", "d": "Describe the reader and the tone wanted, then compare"}
+expect("plant: key word inside stem word (wanted / unwanted)", check_question("t#q1", S3, O3, "d"), True)
+expect("clean: key reworded (register)", check_question("t#q1", S3, dict(O3, d="Describe the reader and the register to aim for, then compare"), "d"), False)
+
+# (e) every non-key option is ruled out by a verbatim quotation of 4 or more words from the page
+PAGE = "The API remembers nothing. Your code resends the whole history on every request. A cap on output is not a cap on context."
+EXP = {"a": "The answer.", "b": 'Ruled out because "your code resends the whole history on every request".',
+       "c": 'Ruled out because "a cap on output is not a cap on context".', "d": 'Ruled out because "the API remembers nothing".'}
+expect("clean quotations", check_quotes("t#q1", EXP, "a", PAGE), False)
+expect("plant: option without a quotation", check_quotes("t#q1", dict(EXP, b="Ruled out because it adds nothing."), "a", PAGE), True)
+expect("plant: quotation not on the page", check_quotes("t#q1", dict(EXP, c='Ruled out because "a cap on output is a cap on window".'), "a", PAGE), True)
+expect("plant: quotation under 4 words", check_quotes("t#q1", dict(EXP, d='Ruled out because "remembers nothing".'), "a", PAGE), True)
+
+# (f) a module question must not restate a page question of the same module
+PAGES = {"p1#q1": "A support chat sends only the latest question and the assistant asks for the order number again."}
+expect("plant: module stem restates a page stem",
+       check_duplicate("p1#m1", "A support chat sends only the latest question, so the order number is asked for again.", PAGES), True)
+expect("clean: module stem on another scenario",
+       check_duplicate("p1#m2", "A localisation lead sees one paragraph cost more in one script than in another.", PAGES), False)
 
 sys.exit(1 if failures else 0)
