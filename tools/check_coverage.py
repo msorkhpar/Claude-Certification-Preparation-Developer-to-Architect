@@ -2,14 +2,15 @@
 """Coverage check: every exam-map topic has a module; every module names only defined codes.
 
 Reads docs/EXAM-MAP.md (definitions) and docs/COURSE-OUTLINE.md (module tables).
-Exit 0 when both directions hold, 1 otherwise. Standard library only.
+Code X (beyond the exam blueprints) is valid when the map defines it; no module is required
+per X. Exit 0 when both directions hold, 1 otherwise. Standard library only.
 """
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CODE = r"(?:DV[1-9]|A[1-9]\.[1-9]|A[1-9]|S[1-9]|P[1-9]|AS)"
+CODE = r"(?:DV[1-9]|A[1-9]\.[1-9]|A[1-9]|S[1-9]|P[1-9]|AS|X)"
 CODE_RE = re.compile(r"\b" + CODE + r"\b")
 RANGE_RE = re.compile(r"\b(" + CODE + r")\s+to\s+(" + CODE + r")\b")
 LEAF_RE = re.compile(r"^(?:DV\d|A\d\.\d|S\d|P\d)$")
@@ -21,6 +22,8 @@ def defined_codes(map_text: str) -> set:
         m = re.match(r"\|\s*((?:DV|A|P)\d)\s", line)  # domain rows
         if m:
             codes.add(m.group(1))
+        if re.match(r"\|\s*X\s+Beyond", line):  # the "beyond the exam blueprints" row
+            codes.add("X")
         if line.startswith("|") and re.match(r"\|\s*A\d\s", line):
             codes.update(re.findall(r"\b(A\d\.\d)\b", line))
     codes.update(re.findall(r"\b(S\d)\s+(?!to\b)[A-Za-z]", map_text))  # scenario list "S1 customer ..."

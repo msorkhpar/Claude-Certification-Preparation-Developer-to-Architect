@@ -49,7 +49,7 @@ tests.
 Each level builds on the one before and **does not repeat it**: a topic is taught once, at the
 level that first needs it, and a later level deepens it in its own module that links back. A
 reader may start at a higher level; a placement quiz at the top of each level says whether they
-should. Each level ends with a mock exam in the exam's own question style.
+should. Each level ends with a mock exam in the exam's own question style, with a flashcard set and a spaced-review question bank for revision. The course aims to be as comprehensive as possible: modules that no blueprint tests are kept and marked `X` in the exam map.
 
 ## Exam-style questions
 
