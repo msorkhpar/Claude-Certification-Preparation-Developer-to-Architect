@@ -44,7 +44,7 @@ tests.
 | **1 Foundations** | Knows how Claude works, what it is good and bad at, how to prompt it and use it safely | The shared base of all exams; most of the Associate exam |
 | **2 Developer** | Builds applications with the API, tools, MCP, agents and Claude Code, secures and evaluates them | Claude Certified Developer, Foundations |
 | **3 Architect** | Designs agentic systems: orchestration, tool and MCP design, Claude Code configuration, structured output, context and reliability, in the exam's six scenarios | Claude Certified Architect, Foundations |
-| **4 Architect Professional** | Runs Claude at enterprise scale: deployment, governance, cost, observability, platform engineering | Claude Certified Architect, Professional (provisional: no public blueprint yet) |
+| **4 Architect Professional** | Designs, evaluates and governs production Claude solutions end to end: architecture patterns, integration and retrieval, evaluation, observability, risk and compliance, stakeholder communication | Claude Certified Architect, Professional |
 
 Each level builds on the one before and **does not repeat it**: a topic is taught once, at the
 level that first needs it, and a later level deepens it in its own module that links back. A
