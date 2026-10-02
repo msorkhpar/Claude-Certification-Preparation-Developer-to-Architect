@@ -98,24 +98,24 @@ under-serves exactly the cases that need depth.
 
 ## Quiz
 
-1. A team runs a nightly job that tags 50,000 short support tickets with one of eight labels. Latency does
-   not matter, cost does, and the tags are simple. Which first step is best?
-   - **a**: Start with the fastest, lowest-cost tier and evaluate on real samples
-   - **b**: Start with the top tier for the best accuracy on every ticket
-   - **c**: Split the tickets across all four tiers at random
-   - **d**: Fine-tune a model on past tickets before any testing
+1. A team tags 50,000 short support tickets overnight, each with one of eight categories. Speed per ticket is
+   irrelevant, spend matters, and the categories are easy to tell apart. What is the best first step?
+   - **a**: Begin with the top tier, then step down if the budget complains
+   - **b**: Begin with Claude Opus 5.5, because the overview names it the usual starting point
+   - **c**: Begin with the lowest-priced tier and score it on genuine samples
+   - **d**: Send the first thousand to each tier and keep whichever answers quickest
 
-2. A coding agent on the mid-priced tier fails a handful of hard tasks per day. The team plans to move the
-   whole system to the top tier. What should they try first?
-   - **a**: Remove the system prompt to save tokens
-   - **b**: Lower `max_tokens` on every request
-   - **c**: Raise the effort setting for just those cases
-   - **d**: Switch to the model with the newest retirement date
+2. A coding agent running on the mid tier fails a handful of hard tasks each day. The team plans to move the
+   entire system to the top tier. Which alternative should they try first?
+   - **a**: Move all traffic to Claude Fable 5.1, then work the effort down later
+   - **b**: Run the difficult cases at higher effort and measure the change
+   - **c**: Drop to the fastest tier and retry each failure several times
+   - **d**: Pin the id to a dated snapshot so results stop varying
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies). *b* is ruled out because the page lists accuracy-over-cost scenarios for the capability-first path, and this one is the opposite. *c* is ruled out because a random split matches no task to any tier, which the worked decision rules out. *d* is ruled out because the glossary says the Claude API does not offer fine-tuning at present, and anything chosen before testing skips the evaluation step.
-2. **c**. The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only. *b* is ruled out because a lower output cap would truncate answers without adding capability. *a* is ruled out because removing instructions cuts guidance, not cost-effectively improves hard tasks. *d* is ruled out because a retirement date is a lifecycle fact and says nothing about capability.
+1. **c**. Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies). *a* is ruled out because the capability-first path is listed for complex reasoning and accuracy that outweighs cost, and this task is the opposite. *b* is ruled out because the overview's default is a starting point for most workloads, while the efficiency-first path names high-volume, straightforward tasks and the decision rule is to measure on your own data. *d* is ruled out because the decision rule compares accuracy, quality and edge-case handling, and speed per ticket is irrelevant here.
+2. **b**. The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only. *a* is ruled out because the first and second traps warn against reaching for the largest model when effort would do. *c* is ruled out because the efficiency-first path suits straightforward work, and retrying hard tasks on a weaker tier multiplies cost without closing the gap. *d* is ruled out because pinning is about the lifecycle of an id (the third trap) and says nothing about capability.
 
 </details>

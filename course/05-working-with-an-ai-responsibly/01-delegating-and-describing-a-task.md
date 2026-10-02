@@ -119,24 +119,24 @@ code; the habit starts here.
 
 ## Quiz
 
-1. A team lead wants an AI assistant to prepare a weekly status email from a spreadsheet of task
-   progress notes. Which split of work is best?
-   - **a**: The tool drafts from the rows; a person checks facts and sends
-   - **b**: The tool collects, writes and sends without any review
-   - **c**: A person writes it all; the tool only fixes spelling
-   - **d**: The tool decides which risks to escalate to executives
+1. A team lead wants an assistant to prepare a weekly status email from a spreadsheet of task progress notes.
+   The email goes to executives. Which division of work is soundest?
+   - **a**: Claude collects the notes, writes the email and sends it, with spot checks later
+   - **b**: A person writes the email; Claude only corrects spelling and grammar
+   - **c**: Claude drafts and also decides which blockers to escalate to executives
+   - **d**: Claude writes the first version; a person verifies facts and approves sending
 
-2. A request reads: "Summarise this report." The summary is accurate but useless to the sales team who
-   asked. Which missing piece of the description most likely caused it?
-   - **a**: A temperature setting
-   - **b**: A longer system prompt
-   - **c**: The intended audience and purpose
-   - **d**: A faster model tier
+2. Someone asks Claude: "Summarise this report." The result is accurate, but the sales team who asked cannot
+   use it. Which gap in the request most likely caused this?
+   - **a**: It lacked a role line naming Claude an expert summariser
+   - **b**: It never said who would read it or what they must decide with it
+   - **c**: It omitted a word limit, which is why the summary missed the sales angle
+   - **d**: It ran on a tier too small to judge what matters to sales
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Drafting is language-shaped and reviewable, while facts and sending remain with the owner (the worked example's table). *b* is ruled out because nothing in the process checks the output before it reaches readers. *c* is ruled out because it keeps all the hand-over value on the table. *d* is ruled out because deciding what to escalate is a judgment step that stays with a person.
-2. **c**. The description covers the audience and goal as well as the deliverable, and a generic request gets a generic reply. *a* is ruled out because randomness does not supply a purpose. *b* is ruled out because length of instruction is not the missing element. *d* is ruled out because a faster tier does not know the readers either.
+1. **d**. Drafting is language-shaped and reviewable, while checking facts and approving the send stay with a person (the worked example's table). *a* is ruled out because nothing in that process checks the output before it reaches readers, and the table keeps approving and sending with a person. *b* is ruled out because drafting is the language-shaped step the page hands to Claude, so keeping all the prose with a person forgoes the main saving. *c* is ruled out because deciding what matters is judgment with accountability, which the table keeps with a person.
+2. **b**. The description should cover the goal and the context, who reads it and why, and a generic request gets a generic reply. *a* is ruled out because a role line names no reader and no purpose, which the page lists as the missing ingredients. *c* is ruled out because a limit is a constraint on form and cannot tell Claude what sales needs from the report. *d* is ruled out because the page says the description is where most of the quality is decided, and a larger tier does not know the readers either.
 
 </details>

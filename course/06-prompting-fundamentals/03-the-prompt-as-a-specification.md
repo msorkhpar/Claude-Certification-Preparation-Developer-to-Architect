@@ -77,8 +77,9 @@ A complex request asks for several different things at once: read this, decide t
 You can run the stages as separate requests (chaining, covered in module 24), or as numbered steps within
 one prompt for modest tasks. The benefits are the same: each stage is smaller and clearer, a failure shows
 up at the stage where it happened, and you can run a code check between stages. The documentation's
-hallucination technique ("extract word-for-word quotes first, then analyse based only on the quotes") is a
-two-stage prompt, and a good model of the pattern.
+hallucination technique is a two-stage prompt, and a good model of the pattern: for long documents, "ask
+Claude to extract word-for-word quotes first before performing its task", and in the page's own example
+the second step says "Only base your analysis on the extracted quotes."
 
 ### A strategy per task type
 
@@ -105,24 +106,24 @@ extraction (precision, low variety) work against ideation (module 1, temperature
 
 ## Quiz
 
-1. A team keeps editing a prompt and judging results by reading one reply each time. Over a month, quality
-   seems to drift and nobody can say which edit caused it. What is the best remedy?
-   - **a**: Switch to a larger model whenever replies disappoint
-   - **b**: Fix written criteria and a small set of inputs to run each version against
-   - **c**: Stop editing the prompt after the first draft
-   - **d**: Ask the model which edit it prefers
+1. A team keeps editing a prompt and judging each edit by reading one reply. Over a month quality seems to
+   drift and nobody can say which edit caused it. What is the best remedy?
+   - **a**: Write the criteria down and score every version on a fixed set of inputs
+   - **b**: Move to a larger model, since drift usually comes from the weaker tier in use
+   - **c**: Freeze the prompt after the first draft and accept the current level
+   - **d**: Have the model rank the edits and keep the one it prefers
 
-2. A request asks Claude to read a fifty-page report, decide whether the supplier is at risk, and draft an
-   email to the board. The email's claims are sometimes unsupported. Which restructuring helps most?
-   - **a**: One longer prompt that repeats the request
-   - **b**: Ask for the email first and the assessment afterwards
-   - **c**: Remove the report and ask from memory
-   - **d**: Separate stages: extract quotes, assess using only those, then write
+2. A request asks Claude to read a fifty-page report, judge whether a supplier is at risk and draft a board
+   email. The email's claims are sometimes unsupported. Which restructuring helps most?
+   - **a**: Resend the same request three times and merge the three emails
+   - **b**: Request the email first and the assessment afterwards, to compare them
+   - **c**: Run stages: pull exact quotes, assess from only those, then write
+   - **d**: Add a closing line: "Be careful; do not include unsupported claims"
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Success criteria and test inputs are the preconditions the overview names, and without them no edit can be compared. *a* is ruled out because it changes a second variable at once and still gives no comparison. *c* is ruled out because it gives up improvement rather than measuring it. *d* is ruled out because a model's preference is not a measurement against criteria.
-2. **d**. Staging with an evidence step first is the pattern the page models on the documentation's own technique. *a* is ruled out because repetition does not separate evidence from writing. *c* is ruled out because remembered facts are exactly what the model may invent. *b* is ruled out because writing before assessing lets the email lead the analysis.
+1. **a**. Success criteria and test inputs are the preconditions the overview names, and without them no edit can be compared (the success criteria section). *b* is ruled out because a larger model changes a second variable at once and still gives no comparison against criteria. *c* is ruled out because it gives up improvement instead of measuring it, and the first trap asks for a fixed set so edits can continue safely. *d* is ruled out because a model's preference is not a measurement against written criteria.
+2. **c**. Staging with an evidence step first is the pattern the page models on the documentation's quote-first technique, with a code check possible between stages. *a* is ruled out because repetition does not separate evidence from writing, and the page's stages are what let a failure show up where it happened. *b* is ruled out because writing before assessing lets the email lead the analysis, against the order gather, reason, write. *d* is ruled out because a closing line is a request and not a stage whose output can be checked.
 
 </details>

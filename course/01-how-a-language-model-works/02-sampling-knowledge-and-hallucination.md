@@ -255,25 +255,26 @@ source document, a database, a test. Module 5 builds the habit of checking; modu
 
 ## Quiz
 
-1. A classifier labels support tickets. In testing, the same ticket gets "billing" on one run and "account"
-   on the next, even though the prompt never changes. Which action best addresses the root cause?
-   - **a**: Add a final line asking the model to stay consistent
-   - **b**: Constrain the label to a fixed list and validate it in code
-   - **c**: Ask the model to explain its reasoning at length
-   - **d**: Run once per ticket and trust whichever label returns
+1. A ticket router asks Claude to put each support ticket into one category. In testing, the same ticket
+   lands in "billing" on one run and "account" on the next, though the prompt never changes. Which change
+   best addresses the cause?
+   - **a**: Restrict the output to a fixed list and check the result in code
+   - **b**: Append a line asking for the same category every time, however the ticket reads
+   - **c**: Set the temperature to zero and treat the output as fixed
+   - **d**: Compare three runs and keep whichever category wins the vote
 
-2. A model confidently states that an internal refund policy allows 45 days. The policy file, which the
-   model never saw, says 30. Why did it answer so firmly?
-   - **a**: Its reliable knowledge cutoff was set to a past year
-   - **b**: Its temperature was set below the recommended level
-   - **c**: The context window had overflowed with earlier text
-   - **d**: It filled the gap with a likely-sounding number
+2. A refund bot is not given the company's policy file. It states firmly that refunds are allowed for
+   45 days, while the real policy says 30. What best explains the firm wrong answer?
+   - **a**: Its reliable knowledge cutoff predates the policy, so the answer is stale
+   - **b**: It produced a typical-sounding number because nothing supplied the true one
+   - **c**: Its sampling randomness was too low, which locks in mistaken answers
+   - **d**: Earlier text overflowed the window and pushed the policy out of view
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can. *a* is ruled out because a prompt line is only a request, as the steerability section says. *c* is ruled out because a longer explanation adds more sampled text and does not fix the label. *d* is ruled out because trusting one run is the trap the page names: a single run says nothing about the spread.
-2. **d**. The model has no access to private material unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section). *b* is ruled out because temperature changes how varied answers are, not whether unknown facts are known. *c* is ruled out because nothing in the scenario fills the window, and an overflow would produce an error or a stop reason, not a confident figure. *a* is ruled out because a cutoff is fixed by training and says nothing about a private file.
+1. **a**. Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can. *b* is ruled out because a prompt line is only a request, as the steerability section says. *c* is ruled out because the glossary says that even at temperature zero results are not fully deterministic. *d* is ruled out because comparing runs, as the hallucination list describes it, exposes disagreement as a warning sign and does not remove it, and it multiplies the cost.
+2. **b**. The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section). *a* is ruled out because the knowledge section says anything private is unknown whatever the cutoff, so a cutoff date does not decide this. *c* is ruled out because temperature changes how varied answers are, not whether a fact is known. *d* is ruled out because the scenario never supplied the file, and the limit section says an overflow ends in an error or a stop reason, not a confident figure.
 
 </details>
 
@@ -281,40 +282,41 @@ source document, a database, a test. Module 5 builds the habit of checking; modu
 
 This quiz covers both pages of the module.
 
-1. A product team wants an assistant that drafts varied marketing taglines and, separately, one that
-   extracts invoice totals. They plan one fixed sampling setting for both. What is the sound adjustment?
-   - **a**: Use lower randomness for extraction and higher for drafting
-   - **b**: Keep a single moderate setting and add more prompt wording
-   - **c**: Use the highest randomness for both, to avoid repetition
-   - **d**: Use the lowest randomness for both, to avoid mistakes
+1. A product team plans one fixed sampling setting for two assistants: one invents campaign slogans and
+   one reads amounts off bills. Which adjustment is sound?
+   - **a**: Split the settings: conservative for the exact job, adventurous for the creative one
+   - **b**: Keep one middle setting and strengthen the prompt wording for both jobs
+   - **c**: Use zero for both, since zero makes every output fully deterministic
+   - **d**: Use the highest setting for both and filter the extra variety out in code afterwards
 
-2. A developer measures a prompt's cost with a word count, then ships. The bill is about a third higher
-   than predicted after migrating to a newer Claude generation. Which step would have prevented the surprise?
-   - **a**: Counting words with a stricter definition of a word
-   - **b**: Lowering `max_tokens` until the estimate matched
-   - **c**: Recounting tokens against the model that will serve production
-   - **d**: Shortening each prompt by deleting its examples
+2. A developer sizes a prompt by counting its words, then ships. After the team migrates to a newer Claude
+   generation, the bill is about a third higher than predicted. Which earlier step would have prevented
+   the surprise?
+   - **a**: Applying a stricter definition of a word before estimating the size
+   - **b**: Requesting an estimate from the token endpoint for the production model
+   - **c**: Setting `max_tokens` low enough that the estimate matched the bill
+   - **d**: Deleting the few-shot examples from every prompt before estimating
 
-3. An assistant is asked, mid-conversation, what day it is, and answers with a day from its training period.
-   What should the application do?
-   - **a**: Raise the temperature so the answer varies
-   - **b**: Pass the current date in the system prompt
-   - **c**: Wait for the next model release to fix it
-   - **d**: Ask users to correct the model each time
+3. A scheduling assistant is asked what day it is mid-conversation and names a day from its training
+   period. Which fix sits at the right layer?
+   - **a**: Switch to the newest model, whose cutoff is closest to today
+   - **b**: Add a prompt line telling it never to guess the current day
+   - **c**: Inject today's date into the instructions on every call
+   - **d**: Ask users to restate the date at the start of each chat
 
-4. A long contract is pasted into a request, and the model's summary cites a clause number that is not in
-   the contract. Which prompt change most directly reduces this failure?
-   - **a**: Ask the model to repeat the contract first
-   - **b**: Ask the model to rate its own confidence at the end
-   - **c**: Ask for a longer and more formal summary
-   - **d**: Ask for word-for-word supporting quotes first
+4. A long contract is pasted into a request. The summary Claude returns cites a clause number that does
+   not appear in the contract. Which prompt change most directly targets this failure?
+   - **a**: Ask for a longer, more detailed summary so every clause is covered
+   - **b**: Ask Claude to state its confidence level beside each citation
+   - **c**: Lower the temperature to zero so clause numbers cannot vary
+   - **d**: Have it pull exact quotes first and summarize only from those
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Low randomness suits one-right-answer tasks and higher randomness suits varied drafting (the example and its reading). *b* is ruled out because added wording does not set the distribution. *c* is ruled out because the highest setting makes totals vary most. *d* is ruled out because the lowest setting removes the variety the tagline task wants, and the page says it still does not guarantee determinism.
-2. **c**. Newer generations from Claude Opus 4.7 on use a tokenizer that yields roughly 30 percent more tokens for the same text, and the documentation says to recount against the model you plan to use. *a* is ruled out because words are not the billing unit. *b* is ruled out because `max_tokens` caps output, not input. *d* is ruled out because trimming examples changes the prompt, which hides the miscount instead of correcting it.
-3. **b**. The model has no clock and the date must be supplied in the context (the knowledge section). *a* is ruled out because temperature does not add knowledge. *c* is ruled out because every release has a cutoff, so a later model still lacks today's date. *d* is ruled out because it moves a code-level fix onto users.
-4. **d**. Grounding in word-for-word quotes is the documented technique for long documents. *b* is ruled out because the page says confidence is not evidence. *c* is ruled out because a more formal summary does not add grounding. *a* is ruled out because repeating the text proves nothing about the claims made later.
+1. **a**. Low randomness suits one-right-answer tasks and higher randomness suits varied drafting (the example and its reading). *b* is ruled out because added wording is only a request and does not set the distribution (the steerability section). *c* is ruled out because the glossary says temperature zero is not fully deterministic, and it removes the variety the slogans want. *d* is ruled out because the example's T=2.0 line shows the likely token losing probability, so the amounts would vary.
+2. **b**. The token counting endpoint returns an estimate against the model you name, and the same text yields about 30 percent more tokens from Opus 4.7 on. *a* is ruled out because words are not the unit that is counted or billed. *c* is ruled out because `max_tokens` caps output, not input. *d* is ruled out because the miscount comes from the same text producing more tokens, so trimming the prompt hides the error and does not correct it.
+3. **c**. The model has no clock, so the date must be supplied in the context (the knowledge section). *a* is ruled out because every model has a cutoff, so a later one still lacks today's date. *b* is ruled out because a prompt line cannot supply a fact the model lacks, and the steerability section calls such a line a request. *d* is ruled out because it moves a code-level fix onto users.
+4. **d**. Grounding in word-for-word quotes is the documented technique for long documents. *a* is ruled out because a longer output adds more room for unsupported claims and no grounding. *b* is ruled out because the page says confidence is not evidence. *c* is ruled out because a fixed invented number is still invented, and temperature zero is not fully deterministic.
 
 </details>

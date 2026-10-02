@@ -101,33 +101,33 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 
 ## Quiz
 
-1. A marketing manager with no engineering support wants Claude to draft weekly newsletters in the house
-   style, using last quarter's issues as reference. Which approach fits best?
-   - **a**: Build a service that calls the Messages API weekly
-   - **b**: Request a dedicated cloud-platform deployment
-   - **c**: Run an Agent SDK program on a scheduled server
-   - **d**: Create an app Project holding the guidelines and earlier editions
+1. A marketing manager with no engineering support needs weekly newsletters drafted in the house voice,
+   using last quarter's issues as reference. Which approach fits best?
+   - **a**: A Project in the app holding the tone guide and earlier editions
+   - **b**: A scheduled script that calls the Messages API weekly with the issues attached
+   - **c**: A bespoke agent on the Agent SDK that reads the archive before each draft
+   - **d**: A cloud-platform deployment so the drafts stay inside the company account
 
-2. A bank requires that all model traffic stay inside its existing infrastructure account, under its own
-   identity rules, while developers keep using the same models. Which surface fits?
-   - **a**: The consumer apps on personal accounts
-   - **b**: Calling them through the company's cloud provider
-   - **c**: A managed agent in Anthropic's sandbox
-   - **d**: The terminal tool on each laptop
+2. A bank requires every call to a Claude model to run under the identity and permission rules of the
+   hyperscaler it already buys infrastructure from. Developers still want the same models. Which option fits?
+   - **a**: Give each developer a managed-agent environment under the bank's own tenancy
+   - **b**: Keep calling the Messages API directly and add the bank's rules to the system prompt
+   - **c**: Run Claude Code on every laptop, since it connects to the same engine everywhere
+   - **d**: Take them through the matching cloud platform listing
 
-3. A developer says: "I told Claude in our shared workspace to answer in French, so my API integration will too."
-   What is wrong with this expectation?
-   - **a**: French is unsupported on the API
-   - **b**: Instructions stay hidden until a tier upgrade
-   - **c**: The API ignores any language requests
-   - **d**: Those instructions are read only inside the chat product
+3. A developer wrote "answer in French" into a Project's instructions. Her own integration, calling the
+   Messages API, still replies in English. What is the best explanation?
+   - **a**: The Messages API supports fewer languages than the apps do
+   - **b**: Settings kept in the chat product are not sent with requests from code
+   - **c**: French must be requested through a model parameter that the API leaves unset
+   - **d**: The integration needs the Agent SDK before it can follow language rules
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A Project holds instructions and reference files for recurring non-developer work (the apps bullet). *a* is ruled out because the map says building application code buys nothing here. *c* is ruled out because an agent on a server is infrastructure for a task a Project does without code. *b* is ruled out because cloud platforms address account and traffic control, which the scenario does not mention.
-2. **b**. The cloud platforms row is the one that keeps traffic in the customer's cloud account and identity model. *a* is ruled out because personal consumer accounts are outside the bank's control. *c* is ruled out because managed agents run in Anthropic-managed or self-hosted sandboxes, and the page says they are not eligible for zero data retention. *d* is ruled out because a developer tool on each laptop answers how developers work, not where the traffic and identity rules sit.
-3. **d**. Where instructions live decides where they are read (the carry-across section). *a* is ruled out because nothing on the pages restricts languages on the API. *c* is ruled out because the API follows instructions in the request and system prompt. *b* is ruled out because tiers do not gate where an instruction is read.
+1. **a**. A Project holds instructions and reference files for recurring non-developer work (the apps bullet and the first trap). *b* is ruled out because the first trap says building an endpoint adds cost and maintenance for nothing. *c* is ruled out because the Agent SDK is for developers building custom agents, and a Project already holds the knowledge base without code. *d* is ruled out because the cloud platforms row answers account and traffic control, which the scenario never mentions.
+2. **d**. The cloud platforms row is the one that carries the customer's cloud identity and permission model while serving the same models. *a* is ruled out because a managed agent is a harness in managed infrastructure for long-running work, and the page says nothing of it adopting the bank's tenancy. *b* is ruled out because a system prompt instructs the model and is not an identity or permission model, which the who-is-in-the-loop bullet attributes to the platform. *c* is ruled out because the shared engine carries a repository's files and settings across surfaces, not where traffic and identity rules are enforced.
+3. **b**. Where instructions live decides where they are read, and a Project's instructions do not reach the API (the carry-across section and the third trap). *a* is ruled out because the same model family sits behind every surface, so its capabilities carry across. *c* is ruled out because the API follows instructions placed in the request and the system prompt, as the where-instructions-live bullet says. *d* is ruled out because the system prompt your code sends is enough, and no other surface is a precondition.
 
 </details>
 
@@ -135,39 +135,41 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 
 This quiz covers both pages of the module.
 
-1. A support team writes thousands of short, similar replies each hour and occasionally meets a delicate
-   complaint. Which plan balances cost and quality?
-   - **a**: Route routine drafts to a fast tier and rare complaints to a stronger one
-   - **b**: Send every draft to the strongest tier for uniform quality
-   - **c**: Send every draft to the fastest tier to protect the budget
-   - **d**: Alternate tiers by time of day to even out the load
+1. A support team writes thousands of short customer answers an hour, and about one in fifty is a delicate
+   complaint. Real past examples are available for measurement. Which plan balances spend and quality best?
+   - **a**: Use the strongest tier for everything and lower the effort later to save money
+   - **b**: Use the fastest tier for everything and add a human check on each hard one
+   - **c**: Handle the routine volume on a fast tier and route the rare hard ones to a stronger tier
+   - **d**: Split the volume evenly across the tiers and compare the average rating
 
-2. A new feature must call a specific Claude model for the next two years. A reviewer flags the model id in
-   the code. What is the most likely concern?
-   - **a**: The model's retirement date may arrive before the product's end
-   - **b**: Dated ids cannot be used with the API
-   - **c**: Ids must be changed with every request
-   - **d**: Alias names raise the price per token
+2. A feature must call one specific Claude model for two years. In review, someone flags the id hard-coded in
+   the source. What is the most likely concern?
+   - **a**: Hard-coded ids bypass the pinned snapshot, so replies drift between calls
+   - **b**: Dated ids are rejected by the Messages API in favour of aliases
+   - **c**: A shorter alias would always follow new releases and should replace it
+   - **d**: That snapshot has a retirement date, and nothing plans the move
 
-3. A solo developer wants help refactoring a repository from the terminal. Which surface fits?
-   - **a**: A Project in the chat app
-   - **b**: A bespoke integration on the Messages API
-   - **c**: Claude Code
-   - **d**: A managed agent session
+3. A solo developer wants help restructuring a repository from the terminal, reading files and running the
+   tests. Which surface fits best?
+   - **a**: Claude Code, the agentic tool built for codebase work
+   - **b**: The Agent SDK, to assemble a custom agent first
+   - **c**: A Project in the app, with the files uploaded to its knowledge base
+   - **d**: A Managed Agents session, since restructuring takes a while
 
-4. A team pins `claude-haiku-4-5-20251001` in production and plans nothing else. Which statement is true,
-   from the model table?
-   - **a**: The id will track new releases automatically
-   - **b**: The id is a pinned snapshot with a published retirement window
-   - **c**: The id is valid only on cloud platforms
-   - **d**: The id has a larger window than the top tier
+4. A team calls the same Claude model through the Claude API and through Amazon Bedrock, reusing one config
+   file with a single name string for both. Both platforms list the model as current and access is granted,
+   but Bedrock answers that the name is unknown. What is the most likely cause?
+   - **a**: Bedrock runs a different generation of the family, so the name never matched
+   - **b**: Each vendor gives the family its own id, so the value must differ
+   - **c**: The account lacks the identity and permission setup that Bedrock requires
+   - **d**: Bedrock already retired that model, so its name is unknown there
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Matching the model to the task in both directions, with an evaluation set, is the worked decision. *b* is ruled out because it wastes cost and latency on routine work. *c* is ruled out because it under-serves the complaints that need depth. *d* is ruled out because time of day matches no task to a tier.
-2. **a**. The table shows retirement dates, and a model with a near date needs a migration plan. *b* is ruled out because the table gives a dated id for Haiku 4.5. *c* is ruled out because a pinned id is meant to stay fixed. *d* is ruled out because the pages say nothing about alias pricing.
-3. **c**. Claude Code is the agentic coding tool for a repository. *a* is ruled out because a chat Project has no repository access. *b* is ruled out because it means building the tool the product already provides. *d* is ruled out because a managed agent suits long-running asynchronous work in managed infrastructure, not a developer's interactive refactor.
-4. **b**. The page states every id is a pinned snapshot and lists a retirement date for it. *a* is ruled out because a snapshot does not move. *c* is ruled out because the same id works on the Claude API, as the table shows. *d* is ruled out because the 200K window is the smallest in the table.
+1. **c**. Matching the model to the task in both directions, measured on real data, is the worked decision. *a* is ruled out because the worked decision says the top tier for everything wastes the budget. *b* is ruled out because the cheapest model for everything under-serves the cases that need depth, and a human check on each hard one does not give them depth. *d* is ruled out because an even split matches no task to any tier.
+2. **d**. The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap). *a* is ruled out because the page says every id is a pinned snapshot, so replies do not drift under a fixed id. *b* is ruled out because the table gives a dated id for Haiku 4.5, and the dated id is its snapshot. *c* is ruled out because the page says dateless ids from the 4.6 generation on are themselves pinned snapshots, so an alias is no more of a tracker.
+3. **a**. Claude Code is the agentic coding tool that reads a codebase and runs commands. *b* is ruled out because the Agent SDK is for building a custom agent, which is the tool the developer already has. *c* is ruled out because a Project's knowledge base holds uploaded files and cannot run the tests. *d* is ruled out because managed agents suit long-running asynchronous work in managed infrastructure, not an interactive refactor.
+4. **b**. The cloud platforms bullet lists a separate id for each platform, for example `anthropic.claude-opus-5-5` on Amazon Bedrock. *a* is ruled out because the same model family sits behind every door, and the page says ids and access differ, not the generation. *c* is ruled out because the scenario says access is granted and the error concerns the name. *d* is ruled out because the scenario says both platforms list the model as current.
 
 </details>

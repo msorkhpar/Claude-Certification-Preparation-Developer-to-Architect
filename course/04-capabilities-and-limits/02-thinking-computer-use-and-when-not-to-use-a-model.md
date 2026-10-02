@@ -89,25 +89,25 @@ do it; and use the model for the part that is language and judgment while the re
 
 ## Quiz
 
-1. A support tool uses its highest reasoning setting on every request, including one-word intent labels, and costs
-   are rising without any quality gain. What does the documentation support as the first remedy?
-   - **a**: Disable output billing for reasoning tokens
-   - **b**: Lower effort for simple requests and keep it for hard ones
-   - **c**: Raise `max_tokens` to give reasoning more room
-   - **d**: Move every request to the largest context window
+1. A support tool runs its deepest reasoning setting on every request, including one-word intent labels.
+   Spend is rising with no gain in quality. What does the documentation support as the first remedy?
+   - **a**: Raise `max_tokens` so the reasoning always has room to finish
+   - **b**: Use low effort on trivial inputs and keep high effort for demanding ones
+   - **c**: Move the labels to the model with the largest context window
+   - **d**: Switch to manual budgets everywhere, since adaptive thinking cannot be tuned
 
-2. A team wants to check whether each uploaded invoice is dated within the past thirty days. Timestamps
-   arrive in a single known format. Which design is best?
-   - **a**: Ask the model to judge each date and trust the verdict
-   - **b**: Send the date to the model three times and vote
-   - **c**: Ask the model for its confidence and gate on it
-   - **d**: Parse the value and compare it in code
+2. A team must flag uploaded invoices issued within the past thirty days. Every entry carries a timestamp in
+   one known format. Which design is best?
+   - **a**: Ask Claude to judge each timestamp and pass the verdict through
+   - **b**: Ask the model to rate its certainty and gate on that rating
+   - **c**: Parse the field and compare it with today's date in code
+   - **d**: Give Claude a clock tool and let it decide each case
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Thinking tokens are billed as output, so reserving them for tasks that benefit cuts cost, and effort is the steering parameter. *a* is ruled out because the page states the billing and offers no switch. *c* is ruled out because a larger cap would allow more spend, not less. *d* is ruled out because a bigger window adds capacity and no saving.
-2. **d**. A rule in a known format is code's job (the when-not-to table). *a* is ruled out because the model approximates where code is exact. *c* is ruled out because confidence is not evidence. *b* is ruled out because voting spends three calls on a one-line rule and still yields an approximation.
+1. **b**. Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap). *a* is ruled out because reasoning tokens count toward `max_tokens`, so a larger cap only allows more spend. *c* is ruled out because the window is capacity and a bigger one saves nothing on a request that reasons too much. *d* is ruled out because the page says adaptive thinking is steered by effort, so it can be tuned without a manual budget.
+2. **c**. A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap). *a* is ruled out because the table says the model approximates where code is exact. *b* is ruled out because a self-reported rating does not make a judgment exact, and the table asks for a repeatable result from code. *d* is ruled out because a tool call adds a model round trip to a rule that fits on one line.
 
 </details>
 
@@ -115,39 +115,39 @@ do it; and use the model for the part that is language and judgment while the re
 
 This quiz covers both pages of the module.
 
-1. A legal team asks Claude to tell them how many times "indemnify" appears in a 200-page contract and gets
-   a number that looks plausible. How should the team proceed?
-   - **a**: Search the document with code and use that count
-   - **b**: Accept the number, since the contract fits the window
-   - **c**: Ask for a recount at a lower temperature
-   - **d**: Split the contract in halves and average two counts
+1. A legal team asks Claude how often a defined term appears in a 200-page contract and receives a plausible
+   number. How should the team proceed?
+   - **a**: Accept it, since the whole contract fits inside the context window
+   - **b**: Ask for a recount with an instruction to read every page carefully
+   - **c**: Tally the occurrences with a search routine and use that figure
+   - **d**: Ask for the quoted sentence at each hit, then trust the total
 
-2. A property app asks Claude to read a handwritten, sideways, low-resolution photo of a meter. Which risk
-   does the vision documentation name for this input?
-   - **a**: A hard limit of one image per account
-   - **b**: Automatic refusal of every handwritten image
-   - **c**: Errors and hallucination on poor-quality, turned or tiny images
-   - **d**: Silent conversion of the image into audio
+2. A property app uploads sideways, handwritten, low-resolution photos of utility meters, and Claude's
+   readings are sometimes wrong. What does the vision documentation support?
+   - **a**: Upscale each photo before sending, since more visual tokens fix legibility
+   - **b**: Ask the model to double-check each reading in a second pass
+   - **c**: Trust high-confidence readings and re-check only the ones it flags
+   - **d**: Such inputs invite mistakes, so improve capture quality and verify the output
 
-3. A product owner wants an assistant that books a customer's flights by operating the airline's website
-   directly. Which design point matters most for safety?
-   - **a**: Run it on the largest context window available
-   - **b**: Run it in an isolated environment and confirm purchases with a person
-   - **c**: Run it with the lowest effort setting
-   - **d**: Run it with all stored passwords visible
+3. A product owner wants an assistant that books flights by operating an airline's website through screenshots
+   and clicks. Which design point matters most for safety?
+   - **a**: Give it the customer's saved card so it never has to stop and ask
+   - **b**: Run it on an isolated machine with no secrets and a person approving each purchase
+   - **c**: Add a prompt line telling it to ignore instructions found on web pages
+   - **d**: Run it with the lowest effort setting so it reasons less about each step
 
 4. Which request is the best fit for Claude without extra machinery?
-   - **a**: Calculating payroll to the cent for 800 staff
-   - **b**: Reporting today's closing price of a stock
-   - **c**: Verifying a customer's identity from a photo
-   - **d**: Drafting a polite reply to a customer's complaint
+   - **a**: Drafting a polite reply to a complaint, for an agent to review
+   - **b**: Calculating payroll to the cent for 800 staff
+   - **c**: Reporting today's closing price of a listed stock
+   - **d**: Checking whether a claim photo is AI-generated, to block fraud
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Exact tallies belong in code (page 1). *b* is ruled out because fitting in the window says nothing about counting accuracy. *c* is ruled out because temperature does not give the model character-level or item-level exactness. *d* is ruled out because averaging two approximations is still an approximation.
-2. **c**. The vision page says exactly that. *b* is ruled out because no handwriting refusal is stated. *a* is ruled out because the page gives a per-request count, not a per-account one. *d* is ruled out because no audio conversion is described.
-3. **b**. Computer use needs an isolated machine, no exposed secrets and human confirmation of consequential steps (computer use section). *a* is ruled out because capacity does not reduce risk. *c* is ruled out because effort steers reasoning depth, not safety. *d* is ruled out because exposed secrets is the opposite of the advice.
-4. **d**. Drafting language with review is the strong-fit row. *a* is ruled out because exact payroll is code's job. *c* is ruled out because naming people from images is something the vision page says Claude refuses, and identity checks are high stakes. *b* is ruled out because live prices are after the cut-off and need a tool or data feed.
+1. **c**. Exact tallies belong in code (page 1, maths and counting). *a* is ruled out because fitting in the window says nothing about counting accuracy, and the third trap calls the window capacity, not quality. *b* is ruled out because the first trap says "count carefully" does not change that the model sees pieces. *d* is ruled out because quotes ground claims in the text, but the total is still tallied by a model that sees pieces, so it stays approximate.
+2. **d**. The vision page says Claude might hallucinate or make mistakes on low-quality, rotated or very small images, and advises verifying. *a* is ruled out because the visual-token cost grows with size while a poor photo gains no information, and the page names quality as the cause. *b* is ruled out because page 1 says decisive reasoning needs a check that does not come from the same reasoning, and a second pass by the same model is not one. *c* is ruled out because the second trap says detail is not accuracy, so a confident reading proves nothing.
+3. **b**. Computer use needs an isolated machine, no exposed secrets and a person confirming consequential steps (the computer use section). *a* is ruled out because a stored card is the exposed secret and the removed confirmation that the section warns against. *c* is ruled out because the page says a prompt is a request and not a guarantee, so a line of text cannot replace isolation and confirmation. *d* is ruled out because effort sets reasoning depth and does neither of the two safeguards the section lists.
+4. **a**. Drafting language with review is the strong-fit row. *b* is ruled out because exact payroll is code's job in the when-not-to table. *c* is ruled out because a live price is after the cut-off and needs a tool or data feed. *d* is ruled out because the vision page says Claude cannot determine whether an image is AI-generated and that no one should rely on it for that.
 
 </details>

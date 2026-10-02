@@ -70,7 +70,8 @@ material:
 - **Generation.** Claude "is an image understanding model only"; it cannot create or edit images.
 
 Source: Vision, Claude API documentation. The page's own closing advice: "Always carefully review and
-verify Claude's image interpretations, especially for high-stakes use cases."
+verify Claude's image interpretations, especially for high-stakes use cases. The page adds: "Do not use Claude for tasks
+requiring perfect precision or sensitive image analysis without human oversight."
 
 Images also cost tokens: each 28 by 28 pixel patch is one visual token, so an image costs about
 `ceil(width/28) x ceil(height/28)` tokens up to a per-model cap. A 1000 by 1000 image is 1,296 tokens on the
@@ -116,24 +117,24 @@ produced with a confident voice.
 
 ## Quiz
 
-1. A finance team asks Claude to total a column of forty invoice amounts pasted into the prompt. The reply
-   is fluent and off by a small amount. What is the most reliable correction?
-   - **a**: Move the addition to a code tool and return its result
-   - **b**: Ask for a recount with a firmer instruction
-   - **c**: Re-send the column in a different order
-   - **d**: Ask the model to rate its own certainty
+1. A finance team pastes forty invoice amounts into a prompt and asks Claude for the sum. The reply reads
+   fluently and is off by a few cents. What is the most dependable correction?
+   - **a**: Ask for the sum again with an instruction to double-check each step
+   - **b**: Add a closing line asking Claude to flag how sure it is of the total
+   - **c**: Lower the temperature to zero so the arithmetic stops varying
+   - **d**: Let it call a code tool and pass on the tool's result
 
-2. An inspection app sends photographs of shelves and asks Claude how many bottles are visible. Counts are
-   sometimes wrong when shelves are crowded. Which statement is supported by the documentation?
-   - **a**: Tallies are exact when the prompt is short
-   - **b**: Tallies fail only when the image is in colour
-   - **c**: Tallies of objects are approximate, mainly with crowds of small items
-   - **d**: Tallies improve once the image is re-encoded as text
+2. An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are
+   sometimes wrong on crowded shelves. Which design response fits what the documentation says?
+   - **a**: Treat the figures as estimates and have a person verify the high-stakes ones
+   - **b**: Crop each photo to a single row so the tallies become exact
+   - **c**: Compress each photo heavily so the scene is simpler to read
+   - **d**: Switch to a larger model, since the limit is a matter of tier
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section). *b* is ruled out because firmness does not change how the model sees numbers. *c* is ruled out because reordering moves the same limitation around. *d* is ruled out because the hallucination section says confidence is not evidence.
-2. **c**. The vision page says counts can be approximate, especially with large numbers of small objects. *b* is ruled out because the page does not tie counting errors to colour. *a* is ruled out because prompt length is not named as a factor. *d* is ruled out because no page offers re-encoding images as text as a remedy.
+1. **d**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *a* is ruled out because the section says the fix is not a better prompt, and a request to re-check is only a prompt. *b* is ruled out because the table gives an independent check for decisive steps, and the model's own report of certainty is not one. *c* is ruled out because the error comes from producing text token by token and not from randomness, so a sampling setting leaves it in place.
+2. **a**. The vision page says counts can be approximate, especially with large numbers of small objects, and its closing advice is to verify interpretations in high-stakes cases. *b* is ruled out because the page names approximate counts as a limit and promises no exactness for any crop. *c* is ruled out because the accuracy limit names low-quality images as a cause of mistakes, so heavy compression makes it worse. *d* is ruled out because the limits are listed for Claude's vision in general, and the counting fix the page gives is verification or code.
 
 </details>

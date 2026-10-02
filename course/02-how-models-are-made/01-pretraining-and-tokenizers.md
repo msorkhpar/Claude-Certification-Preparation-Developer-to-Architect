@@ -46,9 +46,15 @@ Two things follow that the glossary states and the exams use:
 
 Training adjusts weights. Using the model (called inference) does not. A conversation with Claude does not
 teach it anything that carries to the next conversation; what looks like learning inside one conversation
-is the context window doing its job. This is also why the glossary notes that the Claude API "does not
-currently offer fine-tuning" and tells readers to ask their Anthropic contact: changing the weights is a
-separate act from calling the model, not something an API call does.
+is the context window doing its job. Apps with memory features or Projects can look as if they learn
+across chats, but they work the same way: saved notes are put back into the context, and the weights
+stay as they were. The glossary adds a scoped fact about changing the weights: "The Claude API does not
+currently offer fine-tuning, but ask your Anthropic contact if you are interested in exploring this
+option." The statement is about the Claude API only. Amazon Bedrock, a cloud platform, announced
+fine-tuning of one older model, Claude 3 Haiku, in November 2024 (an AWS announcement, not an Anthropic page); the current Bedrock
+page for Claude lists no fine-tuning among its supported features, and none of the models in the table of
+module 3 is offered for fine-tuning on the Claude API. Changing the weights is a separate act from calling
+the model, not something an API call does.
 
 ### Tokenizers: how text becomes numbers
 
@@ -229,24 +235,24 @@ larger scale.
 
 ## Quiz
 
-1. A user asks an assistant to count how many times a particular letter appears in a long product
-   identifier and gets a wrong, confident number. What explains the failure, and what is the sound remedy?
-   - **a**: The model sees sub-word pieces, so exact tallies belong in code
-   - **b**: The window ran out, so the code should be shortened
-   - **c**: The sampler was too cold, so it should be raised
-   - **d**: The weights were stale, so the model should be retrained
+1. An assistant is asked to tally the letter r in a long part number and gives a wrong, confident figure. The
+   team wants a fix that holds for every part number. Which approach is best?
+   - **a**: Ask it to spell the part number out letter by letter before answering
+   - **b**: Compute the total with a short program, not by asking the model
+   - **c**: Move to a model with a larger context window available
+   - **d**: Lower the temperature so the tally stops changing between runs
 
-2. A team says: "Our assistant made the same mistake in forty chats last week, so after we corrected it in
-   chat it should now know better." Which statement is accurate?
-   - **a**: Corrections in a conversation update its weights for later sessions
-   - **b**: Corrections persist only if the API temperature is lowered
-   - **c**: Corrections apply within that conversation's context only
-   - **d**: Corrections are saved once the model is fine-tuned by default
+2. A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do
+   better next week. They call the API directly and store no history. Which expectation is accurate?
+   - **a**: The weights absorb the fix and apply it to every later session by default
+   - **b**: The API stores the fix under the account's key for reuse
+   - **c**: Only requests that resend the fix in their input can benefit
+   - **d**: Lowering the temperature makes the model hold on to the fix
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The tokenizer section explains that the model works on pieces, not letters, so character-level tallies are approximate; code counts exactly (the first trap). *b* is ruled out because a short code fits any window and the error is not a cut-off. *c* is ruled out because sampling temperature changes variety, not letter-level access. *d* is ruled out because retraining does not change how text is cut into pieces for a given model.
-2. **c**. What looks like learning is the context window; weights are fixed at inference (the weights section). *a* is ruled out for the same reason. *b* is ruled out because temperature has no storage role. *d* is ruled out because the glossary says the API does not currently offer fine-tuning and, in any case, fine-tuning is a deliberate separate process.
+1. **b**. The tokenizer section explains that the model works on pieces, not letters, so character-level tallies are approximate, and the first trap says a one-line program answers it exactly. *a* is ruled out because the model would still read the spelling as pieces, and the section says such questions are harder than they look and belong in code. *c* is ruled out because the second trap separates the window, how much text fits, from the pieces the tokenizer knows. *d* is ruled out because the weights section ties the error to how text is cut, which a sampling setting does not change.
+2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it. *a* is ruled out because the weights section says a conversation teaches the model nothing that carries over. *b* is ruled out because the stateless API in the same section stores nothing for later calls. *d* is ruled out because temperature has no storage role.
 
 </details>

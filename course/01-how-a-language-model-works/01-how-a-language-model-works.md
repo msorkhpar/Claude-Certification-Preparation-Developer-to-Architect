@@ -138,25 +138,27 @@ for, and the reason the window sizes in the model table of module 3 matter.
 
 ## Quiz
 
-1. A team's nightly job sends 120 reports, one request each, to Claude Sonnet 5.5. Each report is 30,000
-   words. After the vendor moves the job to a later model generation, a few of the largest reports are
-   rejected as too long, though the reports themselves did not change. What is the most likely cause?
-   - **a**: The tokenizer now splits identical input into more pieces
-   - **b**: The newer model forgets earlier requests in the batch
-   - **c**: Output limits are applied to input on newer generations
-   - **d**: Stricter safety filters trim long documents silently
+1. A nightly job sends one request per report to a model with a 1M-token window. The reports average about
+   650,000 words and are accepted. After the vendor moves the job to Claude Opus 5.5, which also has a 1M
+   window, the largest reports fail with "prompt is too long". The reports have not changed. What is the
+   most likely cause?
+   - **a**: The output cap is now added to the size check before a request is accepted
+   - **b**: Earlier requests in the batch are kept and fill the window over time
+   - **c**: The newer tokenizer turns the same prose into more tokens
+   - **d**: The newer model's window is smaller than the earlier model's window
 
-2. A chat client built on the Messages API sends only the newest user message each turn. Users complain that
-   the assistant has no memory of what they wrote moments before. What is the fix?
-   - **a**: Raise `max_tokens` so the reply can hold more detail
-   - **b**: Switch to the model with the largest window
-   - **c**: Include the prior exchange in every new call
-   - **d**: Lower the sampling randomness to stabilise recall
+2. A support chat built on the Messages API sends only the customer's latest question to the model. The
+   customer gave an order number two exchanges ago, and the assistant now asks for it again. Which change
+   fixes this at the right layer?
+   - **a**: Add a system line telling the model to remember each customer
+   - **b**: Move to the model with the largest context window available
+   - **c**: Raise `max_tokens` so the assistant can hold earlier details
+   - **d**: Store the dialogue in the application and resend it each time
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The token counting page says models from Claude Opus 4.7 on use a newer tokenizer that produces about 30 percent more tokens for the same text, so a report that fit before can exceed the window now. *b* is ruled out because the API keeps no state between requests (the stateless section). *c* is ruled out because `max_tokens` caps output only; input is checked against the window (the limit section). *d* is ruled out because the page names no trimming of documents: an oversized input is rejected with a 400 error, not silently cut.
-2. **c**. The API is stateless, so memory is the history your code resends (the scripted pair of requests). *a* is ruled out because `max_tokens` caps the reply and holds no history. *b* is ruled out because a larger window only helps if the earlier turns are actually sent. *d* is ruled out because randomness changes which token is picked, not what the request contains.
+1. **c**. The token counting page says models from Claude Opus 4.7 on use a newer tokenizer that produces about 30 percent more tokens for the same text, and the models overview puts 1M tokens at roughly 555k words on the current tokenizer against about 750k earlier, so a 650,000-word report fit before and does not now. *a* is ruled out because on Claude 4.5 models and newer, input plus `max_tokens` beyond the window is still accepted (the limit section). *b* is ruled out because the API keeps no state between requests (the stateless section). *d* is ruled out because the size table lists 1M tokens for Opus 5.5, the same as before.
+2. **d**. The API is stateless, so memory is the history your code resends (the scripted pair of requests). *a* is ruled out because a model remembers only what the request contains, and a system line adds no history. *b* is ruled out because a larger window only helps when the earlier turns are actually sent, and it costs more. *c* is ruled out because `max_tokens` caps the reply and holds no history.
 
 </details>

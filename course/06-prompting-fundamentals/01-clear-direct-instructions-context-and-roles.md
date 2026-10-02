@@ -6,9 +6,9 @@
 **After this page you can** rewrite a vague request into a clear and direct one, add the context that
 explains the purpose, and use a role without mistaking it for a guarantee.
 
-Checked against the Claude API documentation on 2026-10-02: the prompt engineering overview and the
-prompting best practices index (which names the techniques below), the reduce-hallucinations page and the
-vision page. Where this page gives a working rule of its own, it says so. All model replies on this page
+Checked against the Claude API documentation on 2026-10-02: the prompt engineering overview, the
+Prompting best practices page (which covers the techniques below for Claude Fable 5.1, Opus 5.5, Sonnet 5.5
+and Haiku 4.5, among others), the reduce-hallucinations page and the vision page. Where this page gives a working rule of its own, it says so. All model replies on this page
 are hand-scripted and labelled illustrative; no live call was made.
 
 ## Why it matters
@@ -87,10 +87,14 @@ Keep three limits in mind:
 
 ### Order matters a little
 
-Two ordering habits from the documentation are worth adopting. For long inputs, put the **document first
-and the question last**: the vision page says "just as placing long documents before your query improves
-results in text prompts, Claude works best when images come before text." And restate the task after a
-long block of material so it is the last thing read.
+Two ordering habits are worth adopting. For long inputs (the best-practices page says 20k tokens and more),
+put the **document first and the question last**. The page's wording: "Place your long documents and inputs
+near the top of your prompt, above your query, instructions, and examples", and "Queries at the end can
+improve response quality by up to 30 percent in tests, especially with complex, multidocument inputs." The
+vision page makes the same point for pictures: "just as placing long documents before your query improves
+results in text prompts, Claude works best when images come before text." The second habit is a working rule
+of this course, not a documented one: restate the task after a long block of material so that it is the
+last thing read.
 
 ## Examples
 
@@ -126,28 +130,28 @@ model how to treat the uncertain case), and the ticket placed last. The reason i
    conflicting, unverifiable demands. Give measurable ones: "at most 120 words, one recommendation first."
 2. **Over-trusting the role line.** A role changes the voice, not the facts. Verify output as before.
 3. **Hiding the task in the middle.** A key instruction buried in a long paragraph is easy to underweight.
-   Put it on its own line, and say it again after long material.
+   Put it on its own line, and, as the course's working rule, say it again after long material.
 
 ## Quiz
 
-1. A prompt says: "Condense the contract, but don't be too long." Results range from one line to two
-   pages. What revision is most likely to fix the inconsistency?
-   - **a**: "Limit it to five bullets, each under twenty words"
-   - **b**: "Condense the contract, and make sure to be brief"
-   - **c**: "As an expert lawyer, condense the contract"
-   - **d**: "Condense the contract very carefully and concisely"
+1. A prompt says "Condense the contract, but don't be too long." Outputs range from one line to two pages.
+   Which revision best fixes the inconsistency?
+   - **a**: Open with "You are a senior contracts lawyer" to set the right length
+   - **b**: Add "be concise, thorough and precise" so every summary stays focused
+   - **c**: Cap it at five bullets, each under twenty words
+   - **d**: Restate "keep it reasonably short" as the last line after the contract
 
-2. An application's prompt says "Never mention competitors." The model sometimes names a competitor when
-   comparing features asked for by users. Which change best follows the page's guidance?
-   - **a**: Capitalise the rule so it stands out
-   - **b**: Repeat the rule at the top and bottom
-   - **c**: Explain the reason: legal advice forbids naming brands in replies
-   - **d**: Remove the rule and trust the model's judgment
+2. An application prompt says "Never mention competitors." Users who ask for feature comparisons still
+   sometimes get a rival brand in the reply. Which change best follows the page's guidance?
+   - **a**: Add the reason, for example that legal advice bars naming other firms
+   - **b**: Move the rule into a role line: "You are a loyal brand ambassador"
+   - **c**: Put the rule in capitals and add "this is critical, never break it" to stress it
+   - **d**: Soften it to "try to avoid competitors where practical"
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A measurable constraint is clear and direct and can be checked afterwards (clear and direct section). *b* is ruled out because "brief" is an unmeasured adjective, the first trap. *c* is ruled out because a role changes voice and focus, not the length. *d* is ruled out because stacking adjectives gives the same unmeasurable demand.
-2. **c**. A rule with its reason lets the model apply it to cases the rule did not list (purpose and context section). *a* is ruled out because emphasis adds no information. *b* is ruled out because repetition without a reason leaves the model guessing the boundary. *d* is ruled out because dropping the rule gives up a requirement the application has.
+1. **c**. A measurable constraint is clear and direct and can be checked afterwards (the clear and direct section). *a* is ruled out because the role section says a role changes vocabulary, depth and tone, not a length that was never stated. *b* is ruled out because the first trap calls stacked adjectives conflicting and unverifiable. *d* is ruled out because restating helps the model find the task, but "reasonably short" is still an unmeasured demand.
+2. **a**. A rule with its reason lets the model apply it to cases the rule did not list (the purpose and context section, with the text-to-speech example). *b* is ruled out because the role section says a role is a request, not a credential or a safeguard, and it changes the voice and not the obligation. *c* is ruled out because emphasis adds no reason, and the section's example gains its effect from the explanation. *d* is ruled out because the application has a firm requirement, and a softer rule gives the model less to generalise from.
 
 </details>
