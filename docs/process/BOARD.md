@@ -9,7 +9,7 @@ M9.**
 | ID | Milestone | Status | Exit test |
 |---|---|---|---|
 | M0 | Project start: goal, idea, setup, exam map, outline draft, board | **done** | The files exist and the owner has read them |
-| M1 | Survey: exam facts confirmed, what runs in the container, the harness proved | todo | A feasibility table, every cell run; the exam map marked confirmed where an official page says so; sources and licences recorded outside the repository |
+| M1 | Survey: exam facts confirmed, what runs in the container, the harness proved | **done** | A feasibility table, every cell run; the exam map marked confirmed where an official page says so; sources and licences recorded outside the repository |
 | M2 | Framework readiness: Python wheels in a profile, mock-exam quiz units, Python and TypeScript tabs, optional live key for the editor; planned and tracked on the framework's own boards | todo | A fixture unit goes from markdown to a graded Python practice and a mock exam on the site |
 | M3 | Outline frozen, layout settled | todo | The owner's yes; `corpus.json` layout settled |
 | M4 | Course prose, level by level | todo | Each level reviewed by the register and a plain-language read |
@@ -66,6 +66,7 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 |---|---|
 | 2026-10-02 | Survey C-09 done: topic-coverage audit closed; outline draft 4 widens 28 Covers cells, adds no module, and the exam map gains the Associate domains. |
 | 2026-10-02 | Survey C-01, C-02 and C-08 done: exam map confirmed, versions pinned, Level 4 redrafted from the Professional blueprint (83 modules). |
+| 2026-10-02 | M1 closed: all four exams confirmed from the official guides; practices graded offline in Python, TypeScript, Java and Kotlin; the SDKs install offline; the API stand-in and the coverage check proved. |
 | 2026-10-02 | D10: the official exam guides are the topic maps, and their sample questions may be used with credit. Exam facts confirmed from the official guides; versions pinned; Level 4 drafted from the Professional blueprint. |
 | 2026-10-02 | Decisions D2, D4, D6 and D7: four incremental levels, offline grading, Professional level after a fresh search, Associate covered by Level 1. |
 | 2026-10-02 | Decisions D1, D3, D5, D8 and D9: name, four languages, the exam guide as topic map, the reader's key in the site and captures before release. |
