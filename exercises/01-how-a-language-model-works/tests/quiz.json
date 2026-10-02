@@ -1,0 +1,157 @@
+{
+  "module": "01-how-a-language-model-works",
+  "quizzes": [
+    {
+      "id": "01-how-a-language-model-works#q1",
+      "page": "01-how-a-language-model-works.md",
+      "scope": "page",
+      "stem": "A team's nightly job sends 120 reports, one request each, to Claude Sonnet 5.5. Each report is 30,000 words. After the vendor moves the job to a later model generation, a few of the largest reports are rejected as too long, though the reports themselves did not change. What is the most likely cause?",
+      "options": {
+        "a": "The tokenizer now splits identical input into more pieces",
+        "b": "The newer model forgets earlier requests in the batch",
+        "c": "Output limits are applied to input on newer generations",
+        "d": "Stricter safety filters trim long documents silently"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The token counting page says models from Claude Opus 4.7 on use a newer tokenizer that produces about 30 percent more tokens for the same text, so a report that fit before can exceed the window now.",
+        "b": "Ruled out because the API keeps no state between requests (the stateless section).",
+        "c": "Ruled out because `max_tokens` caps output only; input is checked against the window (the limit section).",
+        "d": "Ruled out because the page names no trimming of documents: an oversized input is rejected with a 400 error, not silently cut."
+      }
+    },
+    {
+      "id": "01-how-a-language-model-works#q2",
+      "page": "01-how-a-language-model-works.md",
+      "scope": "page",
+      "stem": "A chat client built on the Messages API sends only the newest user message each turn. Users complain that the assistant has no memory of what they wrote moments before. What is the fix?",
+      "options": {
+        "a": "Raise `max_tokens` so the reply can hold more detail",
+        "b": "Switch to the model with the largest window",
+        "c": "Include the prior exchange in every new call",
+        "d": "Lower the sampling randomness to stabilise recall"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The API is stateless, so memory is the history your code resends (the scripted pair of requests).",
+        "a": "Ruled out because `max_tokens` caps the reply and holds no history.",
+        "b": "Ruled out because a larger window only helps if the earlier turns are actually sent.",
+        "d": "Ruled out because randomness changes which token is picked, not what the request contains."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#q1",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "page",
+      "stem": "A classifier labels support tickets. In testing, the same ticket gets \"billing\" on one run and \"account\" on the next, even though the prompt never changes. Which action best addresses the root cause?",
+      "options": {
+        "a": "Add a final line asking the model to stay consistent",
+        "b": "Constrain the label to a fixed list and validate it in code",
+        "c": "Ask the model to explain its reasoning at length",
+        "d": "Run once per ticket and trust whichever label returns"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can.",
+        "a": "Ruled out because a prompt line is only a request, as the steerability section says.",
+        "c": "Ruled out because a longer explanation adds more sampled text and does not fix the label.",
+        "d": "Ruled out because trusting one run is the trap the page names: a single run says nothing about the spread."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#q2",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "page",
+      "stem": "A model confidently states that an internal refund policy allows 45 days. The policy file, which the model never saw, says 30. Why did it answer so firmly?",
+      "options": {
+        "a": "Its reliable knowledge cutoff was set to a past year",
+        "b": "Its temperature was set below the recommended level",
+        "c": "The context window had overflowed with earlier text",
+        "d": "It filled the gap with a likely-sounding number"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The model has no access to private material unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section).",
+        "b": "Ruled out because temperature changes how varied answers are, not whether unknown facts are known.",
+        "c": "Ruled out because nothing in the scenario fills the window, and an overflow would produce an error or a stop reason, not a confident figure.",
+        "a": "Ruled out because a cutoff is fixed by training and says nothing about a private file."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m1",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A product team wants an assistant that drafts varied marketing taglines and, separately, one that extracts invoice totals. They plan one fixed sampling setting for both. What is the sound adjustment?",
+      "options": {
+        "a": "Use lower randomness for extraction and higher for drafting",
+        "b": "Keep a single moderate setting and add more prompt wording",
+        "c": "Use the highest randomness for both, to avoid repetition",
+        "d": "Use the lowest randomness for both, to avoid mistakes"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Low randomness suits one-right-answer tasks and higher randomness suits varied drafting (the example and its reading).",
+        "b": "Ruled out because added wording does not set the distribution.",
+        "c": "Ruled out because the highest setting makes totals vary most.",
+        "d": "Ruled out because the lowest setting removes the variety the tagline task wants, and the page says it still does not guarantee determinism."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m2",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A developer measures a prompt's cost with a word count, then ships. The bill is about a third higher than predicted after migrating to a newer Claude generation. Which step would have prevented the surprise?",
+      "options": {
+        "a": "Counting words with a stricter definition of a word",
+        "b": "Lowering `max_tokens` until the estimate matched",
+        "c": "Recounting tokens against the model that will serve production",
+        "d": "Shortening each prompt by deleting its examples"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Newer generations from Claude Opus 4.7 on use a tokenizer that yields roughly 30 percent more tokens for the same text, and the documentation says to recount against the model you plan to use.",
+        "a": "Ruled out because words are not the billing unit.",
+        "b": "Ruled out because `max_tokens` caps output, not input.",
+        "d": "Ruled out because trimming examples changes the prompt, which hides the miscount instead of correcting it."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m3",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "An assistant is asked, mid-conversation, what day it is, and answers with a day from its training period. What should the application do?",
+      "options": {
+        "a": "Raise the temperature so the answer varies",
+        "b": "Pass the current date in the system prompt",
+        "c": "Wait for the next model release to fix it",
+        "d": "Ask users to correct the model each time"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The model has no clock and the date must be supplied in the context (the knowledge section).",
+        "a": "Ruled out because temperature does not add knowledge.",
+        "c": "Ruled out because every release has a cutoff, so a later model still lacks today's date.",
+        "d": "Ruled out because it moves a code-level fix onto users."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m4",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A long contract is pasted into a request, and the model's summary cites a clause number that is not in the contract. Which prompt change most directly reduces this failure?",
+      "options": {
+        "a": "Ask the model to repeat the contract first",
+        "b": "Ask the model to rate its own confidence at the end",
+        "c": "Ask for a longer and more formal summary",
+        "d": "Ask for word-for-word supporting quotes first"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Grounding in word-for-word quotes is the documented technique for long documents.",
+        "b": "Ruled out because the page says confidence is not evidence.",
+        "c": "Ruled out because a more formal summary does not add grounding.",
+        "a": "Ruled out because repeating the text proves nothing about the claims made later."
+      }
+    }
+  ]
+}

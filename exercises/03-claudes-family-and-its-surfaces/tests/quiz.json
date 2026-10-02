@@ -1,0 +1,176 @@
+{
+  "module": "03-claudes-family-and-its-surfaces",
+  "quizzes": [
+    {
+      "id": "01-the-model-family-and-choosing-a-tier#q1",
+      "page": "01-the-model-family-and-choosing-a-tier.md",
+      "scope": "page",
+      "stem": "A team runs a nightly job that tags 50,000 short support tickets with one of eight labels. Latency does not matter, cost does, and the tags are simple. Which first step is best?",
+      "options": {
+        "a": "Start with the fastest, lowest-cost tier and evaluate on real samples",
+        "b": "Start with the top tier for the best accuracy on every ticket",
+        "c": "Split the tickets across all four tiers at random",
+        "d": "Fine-tune a model on past tickets before any testing"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies).",
+        "b": "Ruled out because the page lists accuracy-over-cost scenarios for the capability-first path, and this one is the opposite.",
+        "c": "Ruled out because a random split matches no task to any tier, which the worked decision rules out.",
+        "d": "Ruled out because the glossary says the Claude API does not offer fine-tuning at present, and anything chosen before testing skips the evaluation step."
+      }
+    },
+    {
+      "id": "01-the-model-family-and-choosing-a-tier#q2",
+      "page": "01-the-model-family-and-choosing-a-tier.md",
+      "scope": "page",
+      "stem": "A coding agent on the mid-priced tier fails a handful of hard tasks per day. The team plans to move the whole system to the top tier. What should they try first?",
+      "options": {
+        "a": "Remove the system prompt to save tokens",
+        "b": "Lower `max_tokens` on every request",
+        "c": "Raise the effort setting for just those cases",
+        "d": "Switch to the model with the newest retirement date"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only.",
+        "b": "Ruled out because a lower output cap would truncate answers without adding capability.",
+        "a": "Ruled out because removing instructions cuts guidance, not cost-effectively improves hard tasks.",
+        "d": "Ruled out because a retirement date is a lifecycle fact and says nothing about capability."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#q1",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "page",
+      "stem": "A marketing manager with no engineering support wants Claude to draft weekly newsletters in the house style, using last quarter's issues as reference. Which approach fits best?",
+      "options": {
+        "a": "Build a service that calls the Messages API weekly",
+        "b": "Request a dedicated cloud-platform deployment",
+        "c": "Run an Agent SDK program on a scheduled server",
+        "d": "Create an app Project holding the guidelines and earlier editions"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A Project holds instructions and reference files for recurring non-developer work (the apps bullet).",
+        "a": "Ruled out because the map says building application code buys nothing here.",
+        "c": "Ruled out because an agent on a server is infrastructure for a task a Project does without code.",
+        "b": "Ruled out because cloud platforms address account and traffic control, which the scenario does not mention."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#q2",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "page",
+      "stem": "A bank requires that all model traffic stay inside its existing infrastructure account, under its own identity rules, while developers keep using the same models. Which surface fits?",
+      "options": {
+        "a": "The consumer apps on personal accounts",
+        "b": "Calling them through the company's cloud provider",
+        "c": "A managed agent in Anthropic's sandbox",
+        "d": "The terminal tool on each laptop"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The cloud platforms row is the one that keeps traffic in the customer's cloud account and identity model.",
+        "a": "Ruled out because personal consumer accounts are outside the bank's control.",
+        "c": "Ruled out because managed agents run in Anthropic-managed or self-hosted sandboxes, and the page says they are not eligible for zero data retention.",
+        "d": "Ruled out because a developer tool on each laptop answers how developers work, not where the traffic and identity rules sit."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#q3",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "page",
+      "stem": "A developer says: \"I told Claude in our shared workspace to answer in French, so my API integration will too.\" What is wrong with this expectation?",
+      "options": {
+        "a": "French is unsupported on the API",
+        "b": "Instructions stay hidden until a tier upgrade",
+        "c": "The API ignores any language requests",
+        "d": "Those instructions are read only inside the chat product"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Where instructions live decides where they are read (the carry-across section).",
+        "a": "Ruled out because nothing on the pages restricts languages on the API.",
+        "c": "Ruled out because the API follows instructions in the request and system prompt.",
+        "b": "Ruled out because tiers do not gate where an instruction is read."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#m1",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "module",
+      "stem": "A support team writes thousands of short, similar replies each hour and occasionally meets a delicate complaint. Which plan balances cost and quality?",
+      "options": {
+        "a": "Route routine drafts to a fast tier and rare complaints to a stronger one",
+        "b": "Send every draft to the strongest tier for uniform quality",
+        "c": "Send every draft to the fastest tier to protect the budget",
+        "d": "Alternate tiers by time of day to even out the load"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Matching the model to the task in both directions, with an evaluation set, is the worked decision.",
+        "b": "Ruled out because it wastes cost and latency on routine work.",
+        "c": "Ruled out because it under-serves the complaints that need depth.",
+        "d": "Ruled out because time of day matches no task to a tier."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#m2",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "module",
+      "stem": "A new feature must call a specific Claude model for the next two years. A reviewer flags the model id in the code. What is the most likely concern?",
+      "options": {
+        "a": "The model's retirement date may arrive before the product's end",
+        "b": "Dated ids cannot be used with the API",
+        "c": "Ids must be changed with every request",
+        "d": "Alias names raise the price per token"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The table shows retirement dates, and a model with a near date needs a migration plan.",
+        "b": "Ruled out because the table gives a dated id for Haiku 4.5.",
+        "c": "Ruled out because a pinned id is meant to stay fixed.",
+        "d": "Ruled out because the pages say nothing about alias pricing."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#m3",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "module",
+      "stem": "A solo developer wants help refactoring a repository from the terminal. Which surface fits?",
+      "options": {
+        "a": "A Project in the chat app",
+        "b": "A bespoke integration on the Messages API",
+        "c": "Claude Code",
+        "d": "A managed agent session"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Claude Code is the agentic coding tool for a repository.",
+        "a": "Ruled out because a chat Project has no repository access.",
+        "b": "Ruled out because it means building the tool the product already provides.",
+        "d": "Ruled out because a managed agent suits long-running asynchronous work in managed infrastructure, not a developer's interactive refactor."
+      }
+    },
+    {
+      "id": "02-the-surfaces-one-model-behind-many#m4",
+      "page": "02-the-surfaces-one-model-behind-many.md",
+      "scope": "module",
+      "stem": "A team pins `claude-haiku-4-5-20251001` in production and plans nothing else. Which statement is true, from the model table?",
+      "options": {
+        "a": "The id will track new releases automatically",
+        "b": "The id is a pinned snapshot with a published retirement window",
+        "c": "The id is valid only on cloud platforms",
+        "d": "The id has a larger window than the top tier"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page states every id is a pinned snapshot and lists a retirement date for it.",
+        "a": "Ruled out because a snapshot does not move.",
+        "c": "Ruled out because the same id works on the Claude API, as the table shows.",
+        "d": "Ruled out because the 200K window is the smallest in the table."
+      }
+    }
+  ]
+}

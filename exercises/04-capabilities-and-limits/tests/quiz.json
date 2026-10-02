@@ -1,0 +1,157 @@
+{
+  "module": "04-capabilities-and-limits",
+  "quizzes": [
+    {
+      "id": "01-what-claude-does-well-and-where-it-slips#q1",
+      "page": "01-what-claude-does-well-and-where-it-slips.md",
+      "scope": "page",
+      "stem": "A finance team asks Claude to total a column of forty invoice amounts pasted into the prompt. The reply is fluent and off by a small amount. What is the most reliable correction?",
+      "options": {
+        "a": "Move the addition to a code tool and return its result",
+        "b": "Ask for a recount with a firmer instruction",
+        "c": "Re-send the column in a different order",
+        "d": "Ask the model to rate its own certainty"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section).",
+        "b": "Ruled out because firmness does not change how the model sees numbers.",
+        "c": "Ruled out because reordering moves the same limitation around.",
+        "d": "Ruled out because the hallucination section says confidence is not evidence."
+      }
+    },
+    {
+      "id": "01-what-claude-does-well-and-where-it-slips#q2",
+      "page": "01-what-claude-does-well-and-where-it-slips.md",
+      "scope": "page",
+      "stem": "An inspection app sends photographs of shelves and asks Claude how many bottles are visible. Counts are sometimes wrong when shelves are crowded. Which statement is supported by the documentation?",
+      "options": {
+        "a": "Tallies are exact when the prompt is short",
+        "b": "Tallies fail only when the image is in colour",
+        "c": "Tallies of objects are approximate, mainly with crowds of small items",
+        "d": "Tallies improve once the image is re-encoded as text"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The vision page says counts can be approximate, especially with large numbers of small objects.",
+        "b": "Ruled out because the page does not tie counting errors to colour.",
+        "a": "Ruled out because prompt length is not named as a factor.",
+        "d": "Ruled out because no page offers re-encoding images as text as a remedy."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#q1",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "page",
+      "stem": "A support tool uses its highest reasoning setting on every request, including one-word intent labels, and costs are rising without any quality gain. What does the documentation support as the first remedy?",
+      "options": {
+        "a": "Disable output billing for reasoning tokens",
+        "b": "Lower effort for simple requests and keep it for hard ones",
+        "c": "Raise `max_tokens` to give reasoning more room",
+        "d": "Move every request to the largest context window"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Thinking tokens are billed as output, so reserving them for tasks that benefit cuts cost, and effort is the steering parameter.",
+        "a": "Ruled out because the page states the billing and offers no switch.",
+        "c": "Ruled out because a larger cap would allow more spend, not less.",
+        "d": "Ruled out because a bigger window adds capacity and no saving."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#q2",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "page",
+      "stem": "A team wants to check whether each uploaded invoice is dated within the past thirty days. Timestamps arrive in a single known format. Which design is best?",
+      "options": {
+        "a": "Ask the model to judge each date and trust the verdict",
+        "b": "Send the date to the model three times and vote",
+        "c": "Ask the model for its confidence and gate on it",
+        "d": "Parse the value and compare it in code"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A rule in a known format is code's job (the when-not-to table).",
+        "a": "Ruled out because the model approximates where code is exact.",
+        "c": "Ruled out because confidence is not evidence.",
+        "b": "Ruled out because voting spends three calls on a one-line rule and still yields an approximation."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m1",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "A legal team asks Claude to tell them how many times \"indemnify\" appears in a 200-page contract and gets a number that looks plausible. How should the team proceed?",
+      "options": {
+        "a": "Search the document with code and use that count",
+        "b": "Accept the number, since the contract fits the window",
+        "c": "Ask for a recount at a lower temperature",
+        "d": "Split the contract in halves and average two counts"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Exact tallies belong in code (page 1).",
+        "b": "Ruled out because fitting in the window says nothing about counting accuracy.",
+        "c": "Ruled out because temperature does not give the model character-level or item-level exactness.",
+        "d": "Ruled out because averaging two approximations is still an approximation."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m2",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "A property app asks Claude to read a handwritten, sideways, low-resolution photo of a meter. Which risk does the vision documentation name for this input?",
+      "options": {
+        "a": "A hard limit of one image per account",
+        "b": "Automatic refusal of every handwritten image",
+        "c": "Errors and hallucination on poor-quality, turned or tiny images",
+        "d": "Silent conversion of the image into audio"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The vision page says exactly that.",
+        "b": "Ruled out because no handwriting refusal is stated.",
+        "a": "Ruled out because the page gives a per-request count, not a per-account one.",
+        "d": "Ruled out because no audio conversion is described."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m3",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "A product owner wants an assistant that books a customer's flights by operating the airline's website directly. Which design point matters most for safety?",
+      "options": {
+        "a": "Run it on the largest context window available",
+        "b": "Run it in an isolated environment and confirm purchases with a person",
+        "c": "Run it with the lowest effort setting",
+        "d": "Run it with all stored passwords visible"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Computer use needs an isolated machine, no exposed secrets and human confirmation of consequential steps (computer use section).",
+        "a": "Ruled out because capacity does not reduce risk.",
+        "c": "Ruled out because effort steers reasoning depth, not safety.",
+        "d": "Ruled out because exposed secrets is the opposite of the advice."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m4",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "Which request is the best fit for Claude without extra machinery?",
+      "options": {
+        "a": "Calculating payroll to the cent for 800 staff",
+        "b": "Reporting today's closing price of a stock",
+        "c": "Verifying a customer's identity from a photo",
+        "d": "Drafting a polite reply to a customer's complaint"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Drafting language with review is the strong-fit row.",
+        "a": "Ruled out because exact payroll is code's job.",
+        "c": "Ruled out because naming people from images is something the vision page says Claude refuses, and identity checks are high stakes.",
+        "b": "Ruled out because live prices are after the cut-off and need a tool or data feed."
+      }
+    }
+  ]
+}
