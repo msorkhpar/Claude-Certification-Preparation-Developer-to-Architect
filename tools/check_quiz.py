@@ -12,6 +12,8 @@ Rules (CLAUDE.md quiz rules that a script can check):
   - quiz.json explains every option;
   - every non-key option's explanation quotes, in double quotes, a phrase of at least 4 words that appears verbatim
     on the page the quiz closes (for a module quiz: on any page of the module, quiz sections excluded);
+  - no doubled adjacent word in a stem, option or explanation; no stem or option ends on a preposition, article or
+    conjunction (cut-off text);
   - a module question's stem shares at most half of its content stems with any page question of the same module.
 usage: tools/check_quiz.py [module-folder-prefix ...]   exit 1 on any finding
 """
@@ -84,6 +86,8 @@ def check_quotes(qid, explanation, key, prose):
     problems = []
     page = norm(prose)
     for letter in sorted(explanation):
+        problems += [p for p in check_text_shape(f"{qid} option {letter} explanation", explanation[letter])
+                     if "doubled" in p]
         if letter == key:
             continue
         quotes = [q for q in QUOTE.findall(explanation[letter]) if len(q.split()) >= MIN_QUOTE_WORDS]
@@ -117,9 +121,28 @@ def key_is_longest(opts, key):
     return all(len(opts[key]) > len(v) for k, v in opts.items() if k != key)
 
 
+TRUNCATION_ENDINGS = set("in on at to of for with from by the a an and or but".split())
+WORD = re.compile(r"[A-Za-z']+")
+
+
+def check_text_shape(label, text):
+    """A doubled adjacent word, or an ending on a preposition, article or conjunction (cut-off text)."""
+    problems = []
+    plain = re.sub(r"`[^`]*`", " ", text)
+    dup = re.search(r"\b([A-Za-z']+)[ \t]+\1\b", plain, re.I)
+    if dup:
+        problems.append(f"{label}: doubled word {dup.group(1).lower()!r}")
+    tail = WORD.findall(re.sub(r"[^A-Za-z']+$", "", text))
+    if label.split()[-1] != "explanation" and tail and tail[-1].lower() in TRUNCATION_ENDINGS:
+        problems.append(f"{label}: ends with {tail[-1]!r}, looks truncated")
+    return problems
+
+
 def check_question(qid, stem, opts, key):
     """Wording findings for one question (stem, {letter: text}, key letter)."""
-    problems = []
+    problems = check_text_shape(f"{qid} stem", stem)
+    for letter, text in sorted(opts.items()):
+        problems += check_text_shape(f"{qid} option {letter}", text)
     if key not in opts:
         return problems
     plain = re.sub(r"`[^`]*`", " ", stem)
@@ -171,13 +194,16 @@ def parse_page_quizzes(md):
         questions = []
         for q in re.finditer(r"^\d+\. (.*?)(?=^\d+\. |\Z)", qblock, re.S | re.M):
             lines = q.group(1).strip().split("\n")
-            stem_lines, opts = [], {}
+            stem_lines, opts, last = [], {}, None
             for line in lines:
                 om = re.match(r"\s*- \*\*([a-d])\*\*: (.*)", line)
                 if om:
                     opts[om.group(1)] = om.group(2).strip()
+                    last = om.group(1)
                 elif not opts:
                     stem_lines.append(line.strip())
+                elif last and line.strip():
+                    opts[last] += " " + line.strip()
             questions.append((" ".join(stem_lines), opts))
         keys = re.findall(r"^\d+\. \*\*([a-d])\*\*", keyblock, re.M)
         out.append((m.group(1), questions, keys))

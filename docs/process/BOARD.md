@@ -15,6 +15,7 @@ M9.**
 | M4 | Course prose, level by level | doing: Level 1 modules 1-6 | Each level reviewed by the register and a plain-language read |
 | M5 | Examples with recorded exchanges, verified offline in the container | doing: Level 1 modules 1-6 | Every example's tests pass offline; planted wrong output fails |
 | M6 | Practices, quizzes and mock exams | doing: Level 1 modules 1-6 | Reference passes, planted wrong solutions fail on assertions, starter fails; quizzes passed the reader |
+| Q-L1 | A quiz polish pass over all of Level 1 once modules 7-11 are written: one independent reader judges the whole level; known WEAK items in modules 1-6: 02 p1q1, 02 p1q2, 02 p2q2, 02 m1, 02 m2, 02 m3, 03 p2q2, 03 m3, 04 p1q2, 05 m4, 06 p2q2, 06 m1, 06 m3 (near-synonym echoes, strawman distractors, key longest) | todo | One reader's verdict on every Level 1 quiz |
 | M7 | Build with studyforge: ingest, validate, site, crawl | todo | Zero console errors; practices run end to end; editor opens |
 | M8 | Narration of the lesson prose | todo | A listened sample from every level |
 | M9 | Release-ready: exam facts and model ids re-checked, images, learner `main`, README | todo | A cold pull on a clean machine runs the course |

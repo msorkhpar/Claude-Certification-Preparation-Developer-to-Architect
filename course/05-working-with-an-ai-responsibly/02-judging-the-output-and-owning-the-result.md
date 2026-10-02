@@ -111,7 +111,7 @@ be trusted".
 1. An analyst asks Claude to summarise a regulation for compliance colleagues. The summary cites "subsection
    14(b)(ii)" for a retention rule, and the analyst is about to forward it. What is the most appropriate step?
    - **a**: Ask Claude whether it is confident, and forward the summary if it says yes
-   - **b**: Look the passage up in the source of record before sending it on
+   - **b**: Look the passage up in the source of record before the text goes out
    - **c**: Ask Claude to cite the subsection again in a fresh reply and compare the two
    - **d**: Forward it with a note that an AI drafted it, so readers can judge
 
@@ -142,7 +142,7 @@ This quiz covers both pages of the module.
      numbers
    - **c**: Drop the verification, since clean drafts show the numbers are right, and keep the judgment call
      human
-   - **d**: Let Claude take both, and ask it to flag any figure it is unsure of
+   - **d**: Let Claude take both, and ask it to flag any figure it doubts
 
 2. A support lead gets a drafted reply to an angry customer that is accurate but reads like a legal notice.
    The lead needs the next attempt to come out right. Which change to the request follows the pages?
@@ -168,9 +168,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Judgment that carries accountability stays with a person, and figures are checked against the source of record however clean past drafts were (page 1 delegation table; page 2 checking routine). *b* is ruled out because because the table gives "Decide which variances matter to the board" to a person, as judgment with accountability, and a clean run does not move it. *c* is ruled out because because "A good draft does not show the figures were right", so a run of clean drafts is no reason to stop verifying. *d* is ruled out because because "Self-reported confidence is not a measure of accuracy", and a flag from the model replaces neither the person nor the check.
-2. **c**. The description should say who reads it and show the target style, and the iterate-not-re-roll method compares the new result with the last (page 1, describe; page 2, iterate). *b* is ruled out because because "Regenerating the same request and hoping is the reflex", and an identical request is a second guess. *a* is ruled out because because a role line names no reader or purpose, and the page says to "Add what a colleague new to the job would need". *d* is ruled out because because "the description is where most of the quality is decided", and a higher tier does not know the readers either.
-3. **b**. The sender owns what was sent, and figures are checked against the source of record before release (page 2, take responsibility and the checking routine; page 1, where checking every figure sits with a person or a script). *a* is ruled out because because "You own what you send, whoever drafted it". *c* is ruled out because because "the person who relied on it will not distinguish between you and the tool", so blame does not move to the reader. *d* is ruled out because because "An error in AI-assisted work is your error to correct", with or without a disclosure note; disclosure is a separate duty.
-4. **d**. Page 1 puts the rule in the description ("say so rather than estimating"), and page 2 says a declared gap is information to keep. *b* is ruled out because because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because because "the careless move is to fill the gap with an estimate", and a label on an invented value still puts it in the table. *a* is ruled out because because "Readers check tone and grammar, which are visible, and skip figures and citations", which is where the damage is.
+1. **a**. Judgment that carries accountability stays with a person, and figures are checked against the source of record however clean past drafts were (page 1 delegation table; page 2 checking routine). *b* is ruled out because the table gives "Decide which variances matter to the board" to a person, as judgment with accountability, and a clean run does not move it. *c* is ruled out because "A good draft does not show the figures were right", so a run of clean drafts is no reason to stop verifying. *d* is ruled out because "Self-reported confidence is not a measure of accuracy", and a flag from the model replaces neither the person nor the check.
+2. **c**. The description should say who reads it and show the target style, and the iterate-not-re-roll method compares the new result with the last (page 1, describe; page 2, iterate). *b* is ruled out because "Regenerating the same request and hoping is the reflex", and an identical request is a second guess. *a* is ruled out because a role line names no reader or purpose, and the page says to "Add what a colleague new to the job would need". *d* is ruled out because "the description is where most of the quality is decided", and a higher tier does not know the readers either.
+3. **b**. The sender owns what was sent, and figures are checked against the source of record before release (page 2, take responsibility and the checking routine; page 1, where checking every figure sits with a person or a script). *a* is ruled out because "You own what you send, whoever drafted it". *c* is ruled out because "the person who relied on it will not distinguish between you and the tool", so blame does not move to the reader. *d* is ruled out because "An error in AI-assisted work is your error to correct", with or without a disclosure note; disclosure is a separate duty.
+4. **d**. Page 1 puts the rule in the description ("say so rather than estimating"), and page 2 says a declared gap is information to keep. *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because "the careless move is to fill the gap with an estimate", and a label on an invented value still puts it in the table. *a* is ruled out because "Readers check tone and grammar, which are visible, and skip figures and citations", which is where the damage is.
 
 </details>

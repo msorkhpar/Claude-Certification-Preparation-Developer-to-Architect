@@ -50,7 +50,7 @@ expect("plant: hyphenated stem word (1M-token / tokens)", check_question("t#q1",
 expect("clean: same stem, key reworded", check_question("t#q1", S1, dict(O1, c="The newer tokenizer cuts prose into finer pieces"), "c"), True)
 expect("clean: key shares nothing", check_question("t#q1", S1, dict(O1, c="Newer text splitting yields finer pieces from identical prose"), "c"), False)
 S2 = "A support chat sends only the latest question to the model. The assistant asks for the order number again."
-O2 = {"a": "Add a system line about each customer who writes in", "b": "Use the largest window available on the market now", "c": "Raise the output cap on every reply the assistant gives", "d": "Store the dialogue and resend it each time"}
+O2 = {"a": "Add a system line about each customer who writes to us", "b": "Use the largest window available on the market now", "c": "Raise the output cap on every reply the assistant gives", "d": "Store the dialogue and resend it each time"}
 expect("plant: stem inside longer word (sends / resend)", check_question("t#q1", S2, O2, "d"), True)
 expect("clean: key reworded (replay)", check_question("t#q1", S2, dict(O2, d="Keep the dialogue in the application and replay it with every call"), "d"), False)
 S3 = "A marketing assistant tells Claude to make it better and gets a rewrite in an unwanted voice. What is the next step?"
@@ -73,5 +73,14 @@ expect("plant: module stem restates a page stem",
        check_duplicate("p1#m1", "A support chat sends only the latest question, so the order number is asked for again.", PAGES), True)
 expect("clean: module stem on another scenario",
        check_duplicate("p1#m2", "A localisation lead sees one paragraph cost more in one script than in another.", PAGES), False)
+
+# (g) doubled word and truncation
+expect("plant: doubled word in an option", check_question("t#q1", STEM, dict(CLEAN, b="Split every every document into chapters by hand"), "a"), True)
+expect("plant: doubled word in the stem", check_question("t#q1", STEM + " Which step is is right?", CLEAN, "a"), True)
+expect("plant: doubled word in an explanation", check_quotes("t#q1", dict(EXP, b='Ruled out because because "your code resends the whole history on every request".'), "a", PAGE), True)
+expect("plant: option ends with a preposition", check_question("t#q1", STEM, dict(CLEAN, b="Split every document into chapters by"), "a"), True)
+expect("plant: option ends with an article", check_question("t#q1", STEM, dict(CLEAN, c="Raise the output cap on the"), "a"), True)
+expect("plant: stem ends with a conjunction", check_question("t#q1", STEM[:-1] + " and", CLEAN, "a"), True)
+expect("clean: well-formed option ending", check_question("t#q1", STEM, dict(CLEAN, b="Split every document into chapters, by hand."), "a"), False)
 
 sys.exit(1 if failures else 0)

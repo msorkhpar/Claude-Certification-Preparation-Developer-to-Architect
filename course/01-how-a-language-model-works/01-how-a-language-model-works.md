@@ -150,7 +150,7 @@ for, and the reason the window sizes in the model table of module 3 matter.
 2. A support chat built on the Messages API passes only the customer's latest question to the model. The
    customer gave an order number two exchanges ago, and the assistant now asks for it again. Which change
    fixes this at the right layer?
-   - **a**: Add a system line telling the model to remember each customer who writes in
+   - **a**: Add a system line telling the model to remember each customer who sends a message
    - **b**: Move to the model with the largest context window that is available
    - **c**: Keep the dialogue in the application and replay it with every call
    - **d**: Raise `max_tokens` so the assistant can hold earlier details of the chat

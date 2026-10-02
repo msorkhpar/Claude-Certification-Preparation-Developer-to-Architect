@@ -15,9 +15,9 @@
       "key": "a",
       "explanation": {
         "a": "The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap).",
-        "b": "Ruled out because because \"a model answers it by approximation\", so a demand for exactness does not change how the part number is cut into pieces.",
-        "c": "Ruled out because because \"The window is how much text fits per request\", a capacity that does not change how a part number is cut into pieces.",
-        "d": "Ruled out because because \"Questions about individual characters (how many letters, which letter is third, reverse this string) are harder for it than they look\", so repeating the question repeats the weakness."
+        "b": "Ruled out because \"a model answers it by approximation\", so a demand for exactness does not change how the part number is cut into pieces.",
+        "c": "Ruled out because \"The window is how much text fits per request\", a capacity that does not change how a part number is cut into pieces.",
+        "d": "Ruled out because \"Questions about individual characters (how many letters, which letter is third, reverse this string) are harder for it than they look\", so repeating the question repeats the weakness."
       }
     },
     {
@@ -34,9 +34,9 @@
       "key": "c",
       "explanation": {
         "c": "Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it.",
-        "a": "Ruled out because because \"A conversation with Claude does not teach it anything that carries to the next conversation\".",
-        "b": "Ruled out because because \"The Claude API does not currently offer fine-tuning\", so no tuned copy is made by calling it.",
-        "d": "Ruled out because because \"Weights are fixed at inference time; a later session starts from the same model\", so chats do not change it next week."
+        "a": "Ruled out because \"A conversation with Claude does not teach it anything that carries to the next conversation\".",
+        "b": "Ruled out because \"The Claude API does not currently offer fine-tuning\", so no tuned copy is made by calling it.",
+        "d": "Ruled out because \"Weights are fixed at inference time; a later session starts from the same model\", so chats do not change it next week."
       }
     },
     {
@@ -72,9 +72,9 @@
       "key": "d",
       "explanation": {
         "d": "Knowledge that changes monthly belongs in the context, and the glossary says the Claude API does not currently offer fine-tuning (the second trap and the table).",
-        "b": "Ruled out because because \"the Claude API does not currently offer fine-tuning\", so the monthly request cannot be made through this route.",
-        "c": "Ruled out because because the table lists \"Memory of your previous conversations\" among the things training does not give, so pasted corrections are not recalled.",
-        "a": "Ruled out because because the table lists \"Access to your files, systems or today's date\" among the things training does not give, and a manual revised monthly outruns any cut-off."
+        "b": "Ruled out because \"the Claude API does not currently offer fine-tuning\", so the monthly request cannot be made through this route.",
+        "c": "Ruled out because the table lists \"Memory of your previous conversations\" among the things training does not give, so pasted corrections are not recalled.",
+        "a": "Ruled out because the table lists \"Access to your files, systems or today's date\" among the things training does not give, and a manual revised monthly outruns any cut-off."
       }
     },
     {
@@ -91,9 +91,9 @@
       "key": "a",
       "explanation": {
         "a": "Pretraining teaches continuation, and fine-tuning and feedback training turn the continuer into an assistant (page 2, the stages section).",
-        "b": "Ruled out because because pretraining is where the model starts to \"learn to continue text on a very large corpus\", so the order is reversed.",
-        "c": "Ruled out because because the tokenizer only exists so that \"text must be cut into pieces and each piece mapped to an integer\", and attention weighs context; neither is a training stage that shapes manner.",
-        "d": "Ruled out because because a pretrained model \"is not inherently good at answering questions or following instructions\", whatever the corpus size."
+        "b": "Ruled out because pretraining is where the model starts to \"learn to continue text on a very large corpus\", so the order is reversed.",
+        "c": "Ruled out because the tokenizer only exists so that \"text must be cut into pieces and each piece mapped to an integer\", and attention weighs context; neither is a training stage that shapes manner.",
+        "d": "Ruled out because a pretrained model \"is not inherently good at answering questions or following instructions\", whatever the corpus size."
       }
     },
     {
@@ -110,9 +110,9 @@
       "key": "c",
       "explanation": {
         "c": "The vocabulary was learned from a corpus, so a script that was common gets longer pieces and a rarer one splits into more (page 1, what the tokenizer does to your work).",
-        "a": "Ruled out because because the tokenizer is \"built before pretraining and fixed afterwards\", so later fine-tuning cannot re-cut any text.",
-        "b": "Ruled out because because \"The window is how much text fits per request\", and the vocabulary is a separate thing, so the window does not set the piece size.",
-        "d": "Ruled out because because a token is not a word: \"a Claude token is about 3.5 English characters\", and \"the exact number can vary depending on the language used\"."
+        "a": "Ruled out because the tokenizer is \"built before pretraining and fixed afterwards\", so later fine-tuning cannot re-cut any text.",
+        "b": "Ruled out because \"The window is how much text fits per request\", and the vocabulary is a separate thing, so the window does not set the piece size.",
+        "d": "Ruled out because a token is not a word: \"a Claude token is about 3.5 English characters\", and \"the exact number can vary depending on the language used\"."
       }
     },
     {
@@ -129,9 +129,9 @@
       "key": "b",
       "explanation": {
         "b": "The glossary frames HHH as how Claude is trained, a goal and a direction, and the first trap says verification is still the user's job.",
-        "a": "Ruled out because because the table lists \"A guarantee that any statement is true\" among the things training does not give.",
-        "d": "Ruled out because because \"an instruction that fights the training may not win\", so a prompt cannot make a trained behaviour certain.",
-        "c": "Ruled out because because \"Verification is still the user's job\", and a model's own report of high confidence is not a check."
+        "a": "Ruled out because the table lists \"A guarantee that any statement is true\" among the things training does not give.",
+        "d": "Ruled out because \"an instruction that fights the training may not win\", so a prompt cannot make a trained behaviour certain.",
+        "c": "Ruled out because \"Verification is still the user's job\", and a model's own report of high confidence is not a check."
       }
     },
     {
