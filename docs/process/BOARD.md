@@ -48,7 +48,7 @@ M9.**
 | C-06 | Coverage check: every exam-map topic has a module, every module names valid codes; a script the gate runs | office | todo |
 | C-07 | The other three languages: TypeScript on the base image's Node (type stripping, its test runner) or a pinned compiler; the Java API SDK and the JVM MCP SDK in a Gradle project for Java and Kotlin, offline; which SDK features each language lacks | office (heavy, slot) | todo |
 | C-08 | Look again for a public blueprint, exam description or prep material for the Architect Professional exam; if found, redraft Level 4 from it | office (reading) | **done:** A public official Professional blueprint exists (CCAR-P, seven weighted domains); Level 4 is redrafted from it as modules 72 to 83 and no longer provisional. |
-| C-09 | Topic-coverage audit against third-party references: list every topic the public study guides, practice-question sets and prep-course tables of contents cover, and name any the outline lacks; findings kept in the register outside the repository, outline gaps fixed in the outline | office (reading) | todo |
+| C-09 | Topic-coverage audit against third-party references: list every topic the public study guides, practice-question sets and prep-course tables of contents cover, and name any the outline lacks; findings kept in the register outside the repository, outline gaps fixed in the outline | office (reading) | **done:** Public prep material for all four exams was read for topics; 19 gaps found, all closed by widening 28 Covers cells (no module added) and adding the Associate domain table to the exam map; outline is draft 4. |
 
 C-01, C-02, C-06, C-08 and C-09 are reading and may run beside each other and beside one heavy row. C-03 to
 C-05 build or run containers and go through the heavy-job slot one at a time.
@@ -63,6 +63,7 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 
 | Date | Entry |
 |---|---|
+| 2026-10-02 | Survey C-09 done: topic-coverage audit closed; outline draft 4 widens 28 Covers cells, adds no module, and the exam map gains the Associate domains. |
 | 2026-10-02 | Survey C-01, C-02 and C-08 done: exam map confirmed, versions pinned, Level 4 redrafted from the Professional blueprint (83 modules). |
 | 2026-10-02 | D10: the official exam guides are the topic maps, and their sample questions may be used with credit. Exam facts confirmed from the official guides; versions pinned; Level 4 drafted from the Professional blueprint. |
 | 2026-10-02 | Decisions D2, D4, D6 and D7: four incremental levels, offline grading, Professional level after a fresh search, Associate covered by Level 1. |
