@@ -119,22 +119,22 @@ guarantees you need all come from what you build around the model.
    started from tends to continue the question with more questions. Which part of how models are made does
    most to explain the gap?
    - **a**: Pretraining on a far larger corpus than the raw model saw
-   - **b**: A larger attention mechanism that lets the model reread the question
+   - **b**: A later round of tuning on curated examples and replies ranked by people
    - **c**: A separate look-up store of answers that the assistant consults
-   - **d**: A later round of tuning on curated examples and replies ranked by people
+   - **d**: A larger attention mechanism that lets the model reread the question
 
-2. A company wants Claude to answer from its product manual, which is revised every month, through the Claude
-   API. An engineer proposes fine-tuning on each new version. What is the best response?
-   - **a**: Include the current edition in every call, since the context is the standard route
-   - **b**: Go ahead with monthly tuning, then patch the gaps through corrections made in chat
-   - **c**: Tune the model once on the manual so its weights keep the facts for good
-   - **d**: Place the edition in the prompt and also tune the model, to be safe
+2. A company wants Claude to answer from its product manual, which is revised every month, through the
+   Claude API. An engineer proposes fine-tuning on each new version. What is the best response?
+   - **a**: Rely on what the model absorbed in training from earlier editions
+   - **b**: Retrain the weights each month through a fine-tuning request to the API
+   - **c**: Paste corrections into the chat and rely on the model to recall them later
+   - **d**: Send the current edition with each call, as the standard route
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. Fine-tuning and feedback training are the stages that turn a text continuer into an assistant (the stages section). *a* is ruled out because the stage list says of pretraining that "The result is capable and unruly", and a bigger corpus does not change that. *b* is ruled out because in attention "every position in the context can look at every earlier position", in the raw model as much as in the assistant. *c* is ruled out because "There is no third place such as a notebook it consults": everything the model uses is in the window or in the weights.
-2. **a**. Knowledge that changes monthly belongs in the context, and the glossary says the Claude API does not currently offer fine-tuning (the second trap and the table). *b* is ruled out because the table lists "Memory of your previous conversations" among the things training does not give, so chat corrections patch nothing. *c* is ruled out because the table credits training with "Broad general knowledge to a cut-off date" and nothing newer, so weights cannot track a monthly revision. *d* is ruled out because "the Claude API does not currently offer fine-tuning", so the added step is not available through this route.
+1. **b**. Fine-tuning and feedback training are the stages that turn a text continuer into an assistant (the stages section). *a* is ruled out because the stage list says of pretraining that "The result is capable and unruly", and a bigger corpus does not change that. *d* is ruled out because in attention "every position in the context can look at every earlier position", in the raw model as much as in the assistant. *c* is ruled out because "There is no third place such as a notebook it consults": everything the model uses is in the window or in the weights.
+2. **d**. Knowledge that changes monthly belongs in the context, and the glossary says the Claude API does not currently offer fine-tuning (the second trap and the table). *b* is ruled out because because "the Claude API does not currently offer fine-tuning", so the monthly request cannot be made through this route. *c* is ruled out because because the table lists "Memory of your previous conversations" among the things training does not give, so pasted corrections are not recalled. *a* is ruled out because because the table lists "Access to your files, systems or today's date" among the things training does not give, and a manual revised monthly outruns any cut-off.
 
 </details>
 
@@ -142,40 +142,40 @@ guarantees you need all come from what you build around the model.
 
 This quiz covers both pages of the module.
 
-1. An analyst taught Claude a set of internal abbreviations in a chat last week. In a new chat today it
-   ignores them, and the analyst concludes something broke. Which explanation fits?
-   - **a**: Unfamiliar abbreviations were split into odd pieces, so the model could not match them again
-   - **b**: Weights stay fixed in use, so the earlier session left nothing behind to reuse
-   - **c**: The context window filled up last week, so the oldest abbreviations were pushed out
-   - **d**: Chats feed a nightly fine-tuning round, and this week's round skipped the abbreviations
+1. A new engineer asks which stage of making a Claude model is behind its skill at carrying on any text, and
+   which is behind its polite replies to questions. Which pairing is right?
+   - **a**: Pretraining gave next-word prediction; later tuning and human rankings gave the helpful manner
+   - **b**: Feedback training gave next-word prediction; pretraining gave the helpful manner
+   - **c**: The tokenizer gave next-word prediction; attention gave the helpful manner
+   - **d**: Pretraining gave both, since a larger corpus makes a raw model follow instructions
 
 2. A localisation lead notices that one paragraph needs noticeably more tokens in one language than in
    another. Which explanation fits best?
-   - **a**: The model silently translates the harder language before reading it, which adds pieces
-   - **b**: Preference training from human rankings sets how many pieces each language costs
+   - **a**: That language was added by later fine-tuning, which re-cut its text into extra pieces
+   - **b**: The larger window used for that language forces the text into finer pieces
    - **c**: Its learned vocabulary stores longer chunks for the script that dominated the corpus
    - **d**: The translated text simply contains more words, and tokens track words one to one
 
-3. A reviewer waves through a number in a report because the assistant is built to be honest. Which reply is
-   the soundest?
-   - **a**: Honesty goals cover harmful topics only, so numbers are exempt
-   - **b**: A system prompt can switch the honesty framework on for a task
-   - **c**: Honesty work verifies each figure against its sources before release
-   - **d**: That describes a goal, not a guarantee, so key claims still need checking
+3. A reviewer waves through a number in a report because the assistant is described as built to tell the
+   truth. Which reply is the soundest?
+   - **a**: Training on written principles removed unsupported claims, so the figure stands
+   - **b**: That is a training goal, not a guarantee, so the figure needs checking
+   - **c**: The model reports high confidence, so the figure stands
+   - **d**: A prompt can demand truthfulness, so asking for it makes the figure safe
 
 4. A team is automating four chores. Which one should be done by a deterministic program instead of the model
    alone?
-   - **a**: Verifying every product code is exactly eight characters long
+   - **a**: Sorting incoming emails by urgency from the message text
    - **b**: Rewriting release notes for a non-technical audience of customers
    - **c**: Proposing likely causes for an intermittent failing test
-   - **d**: Sorting incoming emails by urgency from the message text
+   - **d**: Verifying every product code is exactly eight characters long
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Weights do not change while you chat, so a new conversation has no trace of the old one (page 1, weights section). *a* is ruled out because the tokenizer copes with unseen text, since "a word the corpus never contained, still encodes, from smaller pieces", and the model only needs the abbreviations in its input (page 1). *c* is ruled out because "what looks like learning inside one conversation is the context window doing its job", and a new chat starts with an empty window (page 1). *d* is ruled out because "A conversation with Claude does not teach it anything that carries to the next conversation", so no nightly round learns from chats (page 1).
-2. **c**. The vocabulary was learned from a corpus, so a script that was common gets longer pieces and a rarer one splits into more (page 1, what the tokenizer does to your work). *a* is ruled out because "text must be cut into pieces and each piece mapped to an integer" before the model reads anything, so the count is set by the cutting and not by a hidden translation step (page 1). *b* is ruled out because the tokenizer is "built before pretraining and fixed afterwards", so later feedback training cannot change what a language costs (page 1). *d* is ruled out because a token is not a word: "a Claude token is about 3.5 English characters", and "the exact number can vary depending on the language used" (page 1).
-3. **d**. The glossary frames HHH as how Claude is trained, and the first trap says verification is still the user's job. *a* is ruled out because the honest part of HHH means "an honest one gives accurate information and acknowledges" its limits, so it reaches beyond harmful topics. *b* is ruled out because "an instruction that fights the training may not win", so a system prompt cannot switch a training framework on. *c* is ruled out because the table lists "A guarantee that any statement is true" among the things training does not give.
-4. **a**. Exact character work is a tokenizer-level weakness, so code should do it (page 1, first trap). *b* is ruled out because the table credits training with "Fluent language, many languages, code", which covers rewording for customers. *c* is ruled out because the table credits training with "Reasoning patterns it can apply to new problems", which covers proposing causes. *d* is ruled out because the table lists "Following instructions and a helpful manner", and a model reads message text well.
+1. **a**. Pretraining teaches continuation, and fine-tuning and feedback training turn the continuer into an assistant (page 2, the stages section). *b* is ruled out because because pretraining is where the model starts to "learn to continue text on a very large corpus", so the order is reversed. *c* is ruled out because because the tokenizer only exists so that "text must be cut into pieces and each piece mapped to an integer", and attention weighs context; neither is a training stage that shapes manner. *d* is ruled out because because a pretrained model "is not inherently good at answering questions or following instructions", whatever the corpus size.
+2. **c**. The vocabulary was learned from a corpus, so a script that was common gets longer pieces and a rarer one splits into more (page 1, what the tokenizer does to your work). *a* is ruled out because because the tokenizer is "built before pretraining and fixed afterwards", so later fine-tuning cannot re-cut any text. *b* is ruled out because because "The window is how much text fits per request", and the vocabulary is a separate thing, so the window does not set the piece size. *d* is ruled out because because a token is not a word: "a Claude token is about 3.5 English characters", and "the exact number can vary depending on the language used".
+3. **b**. The glossary frames HHH as how Claude is trained, a goal and a direction, and the first trap says verification is still the user's job. *a* is ruled out because because the table lists "A guarantee that any statement is true" among the things training does not give. *d* is ruled out because because "an instruction that fights the training may not win", so a prompt cannot make a trained behaviour certain. *c* is ruled out because because "Verification is still the user's job", and a model's own report of high confidence is not a check.
+4. **d**. Exact character work is a tokenizer-level weakness, so code should do it (page 1, first trap). *b* is ruled out because the table credits training with "Fluent language, many languages, code", which covers rewording for customers. *c* is ruled out because the table credits training with "Reasoning patterns it can apply to new problems", which covers proposing causes. *a* is ruled out because the table lists "Following instructions and a helpful manner", and a model reads message text well.
 
 </details>

@@ -100,22 +100,22 @@ under-serves exactly the cases that need depth.
 
 1. A team tags 50,000 short support tickets overnight, each with one of eight categories. Speed per ticket is
    irrelevant, spend matters, and the categories are easy to tell apart. What is the best first step?
-   - **a**: Begin with the top tier, then step down if the budget complains
+   - **a**: Begin with the lowest-priced tier and score it on genuine samples
    - **b**: Begin with Claude Opus 5.5, because the overview names it the usual starting point
-   - **c**: Begin with the lowest-priced tier and score it on genuine samples
+   - **c**: Begin with the top tier, then step down if the budget complains
    - **d**: Send the first thousand to each tier and keep whichever answers quickest
 
 2. A coding agent running on the mid tier fails a handful of hard tasks each day. The team plans to move the
    entire system to the top tier. Which alternative should they try first?
    - **a**: Move all traffic to Claude Fable 5.1, then work the effort down later
-   - **b**: Run the difficult cases at higher effort and measure the change
-   - **c**: Drop to the fastest tier and retry each failure several times
+   - **b**: Drop to the fastest tier and retry each failure several times
+   - **c**: Run the difficult cases at higher effort and measure the change
    - **d**: Pin the id to a dated snapshot so results stop varying
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies). *a* is ruled out because the capability-first path is "Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work", and this task is the opposite. *b* is ruled out because the efficiency-first path says to "Begin with the fast, low-cost tier, test thoroughly, and move up only for a gap you can name", and the overview's default is only a starting point for most workloads. *d* is ruled out because the decision rule is to "compare accuracy, quality and edge-case handling", and speed per ticket is irrelevant here.
-2. **b**. The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only. *a* is ruled out because the largest model "raises cost and latency on work that does not need it", and effort would do. *c* is ruled out because the efficiency-first path says to "move up only for a gap you can name", and retrying hard tasks on a weaker tier moves the wrong way. *d* is ruled out because "an id with a retirement date needs a migration plan before the date, not after" is about the life of an id and says nothing about capability.
+1. **a**. Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies). *c* is ruled out because the capability-first path is "Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work", and this task is the opposite. *b* is ruled out because the efficiency-first path says to "Begin with the fast, low-cost tier, test thoroughly, and move up only for a gap you can name", and the overview's default is only a starting point for most workloads. *d* is ruled out because the decision rule is to "compare accuracy, quality and edge-case handling", and speed per ticket is irrelevant here.
+2. **c**. The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only. *a* is ruled out because the largest model "raises cost and latency on work that does not need it", and effort would do. *b* is ruled out because the efficiency-first path says to "move up only for a gap you can name", and retrying hard tasks on a weaker tier moves the wrong way. *d* is ruled out because "an id with a retirement date needs a migration plan before the date, not after" is about the life of an id and says nothing about capability.
 
 </details>

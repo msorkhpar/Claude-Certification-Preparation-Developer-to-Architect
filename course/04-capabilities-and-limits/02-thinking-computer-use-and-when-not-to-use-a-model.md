@@ -99,15 +99,15 @@ do it; and use the model for the part that is language and judgment while the re
 2. A team must flag uploaded invoices issued within the past thirty days. Every entry carries a timestamp in
    one known format. Which design is best?
    - **a**: Ask Claude to judge each timestamp and pass the verdict through
-   - **b**: Ask the model to rate its certainty and gate on that rating
-   - **c**: Parse the field and compare it with today's date in code
-   - **d**: Give Claude a clock tool and let it decide each case
+   - **b**: Ask Claude for each verdict at high effort so the date arithmetic is dependable
+   - **c**: Give Claude a clock tool and have it compare each timestamp
+   - **d**: Parse the field and compare it with today's date in code
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap). *a* is ruled out because reasoning tokens "count toward max_tokens alongside the response text", so a larger cap only allows more spend. *c* is ruled out because the waste is in the reasoning: "Paying for reasoning on a one-word classification is waste", and a bigger window does not change that. *d* is ruled out because with adaptive thinking "the model decides how much to think, steered by effort", so it can be tuned without manual budgets.
-2. **c**. A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap). *a* is ruled out because "The model approximates; code is exact". *b* is ruled out because a self-reported rating is not a guarantee: "A prompt is a request, not a guarantee". *d* is ruled out because "A model call is a network round trip plus generation", added to a rule that fits on one line.
+2. **d**. A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap). *a* is ruled out because because "The model approximates; code is exact". *b* is ruled out because because the table gives code as the answer for a one-line rule for the reason "Cheaper, faster, deterministic, testable", and a higher effort setting is none of those. *c* is ruled out because because the table sends "Anything that must happen every time" to a check in code, and a model comparing dates through a tool is still the model deciding.
 
 </details>
 
@@ -115,39 +115,40 @@ do it; and use the model for the part that is language and judgment while the re
 
 This quiz covers both pages of the module.
 
-1. A legal team asks Claude how often a defined term appears in a 200-page contract and receives a plausible
-   number. How should the team proceed?
-   - **a**: Accept it, since the whole contract fits inside the context window
-   - **b**: Ask for a recount with an instruction to read every page carefully
-   - **c**: Tally the occurrences with a search routine and use that figure
-   - **d**: Ask for the quoted sentence at each hit, then trust the total
+1. A firm wants a model to help review a 200-page contract: a plain-language summary, the sum of the charges
+   it lists, and the decision to proceed. Which split of the work follows the module?
+   - **a**: Claude summarises, code adds the amounts, a lawyer approves the deal
+   - **b**: Claude summarises, Claude adds the amounts, a lawyer approves the deal
+   - **c**: Claude summarises, code adds the amounts, Claude approves the deal
+   - **d**: Claude summarises and adds the amounts at the highest effort, a lawyer approves the deal
 
-2. A property app uploads sideways, handwritten, low-resolution photos of utility meters, and Claude's
-   readings are sometimes wrong. What does the vision documentation support?
-   - **a**: Upscale each photo before sending, since more visual tokens fix legibility
-   - **b**: Ask the model to double-check each reading in a second pass
-   - **c**: Trust high-confidence readings and re-check only the ones it flags
-   - **d**: Improve the capture quality, then verify every output yourself
+2. A computer-use loop sends full-resolution monitor captures as tool results, and the API refuses some of
+   them. The agent's pointer actions also sometimes land beside their target. What does the documentation
+   support?
+   - **a**: Resend oversized screenshots unchanged, and ask in the prompt for exact click positions
+   - **b**: Let the API downscale oversized screenshots, and resend each click that missed
+   - **c**: Resize each screenshot in your own program first, and treat click positions as approximate
+   - **d**: Move to a model with a larger window, which takes bigger screenshots and exact positions
 
-3. A product owner wants an assistant that books flights by operating an airline's website through screenshots
-   and clicks. Which design point matters most for safety?
-   - **a**: Let it keep the customer's saved card on file so it never stops to ask
-   - **b**: Isolate the machine, keep secrets off it, and have a person approve each purchase
+3. A product owner wants an assistant that books flights by operating an airline's website through
+   screenshots and clicks. Which design point matters most for safety?
+   - **a**: Run it in the customer's own browser profile, so saved logins already work
+   - **b**: Sandbox it with no credentials, and have a person approve each payment
    - **c**: Add a prompt line telling it to ignore instructions found on web pages
-   - **d**: Run it at the lowest effort setting so it reasons less about each step
+   - **d**: Restrict it to the airline's own site, so its pages can be treated as trusted
 
 4. Which request is the best fit for Claude without extra machinery?
-   - **a**: Drafting a polite, well-organised reply to a customer's complaint
+   - **a**: Checking whether a claim photo is AI-generated, to block fraud
    - **b**: Calculating the payroll for 800 staff exactly, to the cent
    - **c**: Reporting today's closing price of a listed stock
-   - **d**: Checking whether a claim photo is AI-generated, to block fraud
+   - **d**: Drafting a polite, well-organised reply to a customer's complaint
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Exact tallies belong in code (page 1, maths and counting). *a* is ruled out because "A bigger window is capacity, not a reason to send everything", and it says nothing about counting accuracy. *b* is ruled out because a re-read request "does not change that the model sees pieces", however carefully it is told to read. *d* is ruled out because quotes ground claims in the text, but "exact counts of letters, words or items" stay approximate unless the model does the work in a tool.
-2. **d**. Such inputs are on the page's list of conditions where Claude can be wrong, and its closing advice is to review and verify interpretations. *a* is ruled out because "each 28 by 28 pixel patch is one visual token", so a bigger image costs more tokens without adding information the photo lacks. *b* is ruled out because reasoning "needs a check that does not come from the same reasoning", and a second pass by the same model is not one. *c* is ruled out because "Detail is not accuracy", so a confident reading proves nothing.
-3. **b**. Computer use runs in an isolated machine, without secrets, with a person confirming consequential steps (the computer use section). *a* is ruled out because computer use "runs in an isolated machine, without secrets", and a stored card is the exposed secret. *c* is ruled out because "A prompt is a request, not a guarantee", so a line of text cannot replace isolation and confirmation. *d* is ruled out because "thinking and effort are cost, latency and quality levers", and neither is a safeguard.
-4. **a**. Drafting language is the strong-fit row of the summary table, with the usual review for accuracy and fit. *b* is ruled out because the table sends "An exact, repeatable result (totals, dates, ids, string edits)" to code. *c* is ruled out because "Anything recent, private or fast-changing has to come in through the prompt" or a tool, and a live price is after the cut-off. *d* is ruled out because the vision page says Claude "cannot determine whether an image is AI-generated".
+1. **a**. Summarising is language-shaped work, exact addition belongs to code, and a decision with legal consequences stays with a person (page 1, maths and counting; page 2, the when-not-to table). *b* is ruled out because because exact arithmetic is "approximate unless the model does the work in a tool". *c* is ruled out because because the table sends "A decision with legal, medical, financial or safety consequences" to a qualified person. *d* is ruled out because because "The fix is not a better prompt; it is code", and an effort setting is a prompting lever, not a calculator.
+2. **c**. The API rejects an oversized tool-result screenshot instead of downscaling it, so the program resizes first, and spatial output is approximate (page 2, computer use at a glance). *b* is ruled out because because the API "rejects a tool-result screenshot that exceeds the model's limits instead of downscaling it". *a* is ruled out because because "Spatial output is approximate", so a prompt line cannot make positions exact, and an unchanged screenshot is refused again. *d* is ruled out because because "Coordinates and localisation outputs are approximate", whatever the model.
+3. **b**. Computer use runs in an isolated machine, without secrets, with a person confirming consequential steps (the computer use section). *a* is ruled out because because computer use "runs in an isolated machine, without secrets", and a saved login is exactly such a secret. *c* is ruled out because because "A prompt is a request, not a guarantee", so a line of text cannot replace isolation and confirmation. *d* is ruled out because because "A screen is untrusted input", and text on any web page can try to give the model instructions.
+4. **d**. Drafting language is the strong-fit row of the summary table, with the usual review for accuracy and fit. *b* is ruled out because the table sends "An exact, repeatable result (totals, dates, ids, string edits)" to code. *c* is ruled out because "Anything recent, private or fast-changing has to come in through the prompt" or a tool, and a live price is after the cut-off. *a* is ruled out because the vision page says Claude "cannot determine whether an image is AI-generated".
 
 </details>

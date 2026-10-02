@@ -136,22 +136,22 @@ model how to treat the uncertain case), and the ticket placed last. The reason i
 
 1. A prompt says "Condense the contract, but don't be too long." Outputs range from one line to two pages.
    Which revision best fixes the inconsistency?
-   - **a**: Open with "You are a senior contracts lawyer" to set the right length
+   - **a**: Cap it at five bullets, each under twenty words
    - **b**: Add "be concise, thorough and precise" so every summary stays focused
-   - **c**: Cap it at five bullets, each under twenty words
+   - **c**: Open with "You are a senior contracts lawyer" to set the right length
    - **d**: Restate "keep it reasonably short" as the last line after the contract
 
 2. An application prompt says "Never mention competitors." Users who ask for feature comparisons still
    sometimes get a rival brand in the reply. Which change best follows the page's guidance?
-   - **a**: Add the reason, for example that legal advice bars naming other firms
+   - **a**: Put the rule in capitals and add "this is critical, never break it" to stress it
    - **b**: Move the rule into a role line: "You are a loyal brand ambassador"
-   - **c**: Put the rule in capitals and add "this is critical, never break it" to stress it
+   - **c**: Add the reason, for example that legal advice bars naming other firms
    - **d**: Soften it to "try to avoid competitors where practical"
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A measurable constraint is clear and direct and can be checked afterwards (the clear and direct section). *a* is ruled out because "A role sets vocabulary, depth, tone and what to pay attention to", not a length that was never stated. *b* is ruled out because stacking adjectives "gives conflicting, unverifiable demands" (the first trap). *d* is ruled out because restating only helps the model find the task: the page's rule is to "restate the task after a long block of material", and "reasonably short" is still an unmeasured demand.
-2. **a**. A rule with its reason lets the model apply it to cases the rule did not list (the purpose and context section, with the text-to-speech example). *b* is ruled out because "A role is a request, not a credential", and a role changes the voice, not the obligation. *c* is ruled out because emphasis adds no reason, and "The second explains itself and generalises", which a shouted rule does not. *d* is ruled out because the page contrasts "It would be great if the answer were short" with a firm instruction, so a softer rule gives the model less to generalise from.
+1. **a**. A measurable constraint is clear and direct and can be checked afterwards (the clear and direct section). *c* is ruled out because "A role sets vocabulary, depth, tone and what to pay attention to", not a length that was never stated. *b* is ruled out because stacking adjectives "gives conflicting, unverifiable demands" (the first trap). *d* is ruled out because restating only helps the model find the task: the page's rule is to "restate the task after a long block of material", and "reasonably short" is still an unmeasured demand.
+2. **c**. A rule with its reason lets the model apply it to cases the rule did not list (the purpose and context section, with the text-to-speech example). *b* is ruled out because "A role is a request, not a credential", and a role changes the voice, not the obligation. *a* is ruled out because emphasis adds no reason, and "The second explains itself and generalises", which a shouted rule does not. *d* is ruled out because the page contrasts "It would be great if the answer were short" with a firm instruction, so a softer rule gives the model less to generalise from.
 
 </details>

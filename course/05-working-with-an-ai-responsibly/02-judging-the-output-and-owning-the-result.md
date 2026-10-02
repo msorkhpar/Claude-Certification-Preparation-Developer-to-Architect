@@ -110,8 +110,8 @@ be trusted".
 
 1. An analyst asks Claude to summarise a regulation for compliance colleagues. The summary cites "subsection
    14(b)(ii)" for a retention rule, and the analyst is about to forward it. What is the most appropriate step?
-   - **a**: Look the passage up in the source of record before sending it on
-   - **b**: Ask Claude whether it is confident, and forward the summary if it says yes
+   - **a**: Ask Claude whether it is confident, and forward the summary if it says yes
+   - **b**: Look the passage up in the source of record before sending it on
    - **c**: Ask Claude to cite the subsection again in a fresh reply and compare the two
    - **d**: Forward it with a note that an AI drafted it, so readers can judge
 
@@ -119,14 +119,14 @@ be trusted".
    asks you to drop that row so the table looks finished. Which response is best?
    - **a**: Ask Claude to try again until every cell holds a value
    - **b**: Fill it with a typical industry figure and label it an estimate
-   - **c**: Retain the entry as it stands and state what could not be located
-   - **d**: Show a dash in that cell and drop any mention of the missing data
+   - **c**: Show a dash in that cell and drop any mention of the missing data
+   - **d**: Retain the entry as it stands and state what could not be located
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Specific citations are the kind of detail a model can invent, so the claim that would hurt if wrong is checked against the source of record (the checking routine). *b* is ruled out because the routine says that asking the model how sure it is, or "for its confidence does not verify anything". *c* is ruled out because the routine says to check "against the source of record, not against the model", and a second reply from the same model is not the source. *d* is ruled out because "Check in proportion to the cost of being wrong", and a note about an AI draft leaves the unchecked claim in place.
-2. **c**. A declared gap is information, and the careful move is to keep it and decide what to do (the spotting a gap section). *a* is ruled out because "Regenerating the same request and hoping is the reflex", and pressing for a value invites invention. *b* is ruled out because "the careless move is to fill the gap with an estimate". *d* is ruled out because the page says "Keep the gap and decide what to do about it", not hide it behind a dash.
+1. **b**. Specific citations are the kind of detail a model can invent, so the claim that would hurt if wrong is checked against the source of record (the checking routine). *a* is ruled out because the routine says that asking the model how sure it is, or "for its confidence does not verify anything". *c* is ruled out because the routine says to check "against the source of record, not against the model", and a second reply from the same model is not the source. *d* is ruled out because "Check in proportion to the cost of being wrong", and a note about an AI draft leaves the unchecked claim in place.
+2. **d**. A declared gap is information, and the careful move is to keep it and decide what to do (the spotting a gap section). *a* is ruled out because "Regenerating the same request and hoping is the reflex", and pressing for a value invites invention. *b* is ruled out because "the careless move is to fill the gap with an estimate". *c* is ruled out because the page says "Keep the gap and decide what to do about it", not hide it behind a dash.
 
 </details>
 
@@ -134,40 +134,43 @@ be trusted".
 
 This quiz covers both pages of the module.
 
-1. A team lead wants to hand a monthly board pack entirely to Claude. Which first move reflects sound
-   delegation?
-   - **a**: Give Claude the whole pack once it passes a single test run
-   - **b**: List the steps and keep judgment and figure-checking with people
-   - **c**: Give it only the narrative sections and send them without review
-   - **d**: Hand over everything but ask it to flag anything it is unsure of
+1. A team uses Claude to draft a monthly variance narrative from a finance export. After a few clean months
+   the lead proposes two changes: Claude will also decide which variances reach the directors, and the
+   figure-by-figure review stops. Which response applies both pages?
+   - **a**: Keep the judgment call with a person and keep verifying every number against its source
+   - **b**: Let Claude take the judgment call, since clean drafts show sound judgment, and keep verifying
+     numbers
+   - **c**: Drop the verification, since clean drafts show the numbers are right, and keep the judgment call
+     human
+   - **d**: Let Claude take both, and ask it to flag any figure it is unsure of
 
-2. A marketing assistant tells Claude to "make it better" and gets a full rewrite in an unwanted voice. What
-   is the most useful next step?
-   - **a**: Ask again with the same wording and pick the best of the replies
-   - **b**: Move to the highest tier, which follows loose instructions better
-   - **c**: Accept the rewrite and edit it by hand to the voice wanted
-   - **d**: Name the audience, the register to aim for and what to keep, then compare
+2. A support lead gets a drafted reply to an angry customer that is accurate but reads like a legal notice.
+   The lead needs the next attempt to come out right. Which change to the request follows the pages?
+   - **a**: Open with a role line: "You are a world-class customer-care writer"
+   - **b**: Send the identical request again and keep the first answer that sounds friendly
+   - **c**: Describe the audience, add one sample in the voice wanted, then compare
+   - **d**: Move to a higher tier, which follows loose instructions better
 
-3. A manager must explain Claude's role in a new reporting process to colleagues. Which message is most
-   accurate?
-   - **a**: It produces the report end to end, with a spot check each quarter
-   - **b**: It is too unreliable for reports, so it should only reformat finished text
-   - **c**: It speeds up drafting and summaries, while people verify figures and decide
-   - **d**: It drafts, and it also ranks which findings matter to the board
+3. A consultant forwards a client a report that Claude drafted. The client later finds a wrong number in it.
+   Who answers for the mistake, and what should have happened first?
+   - **a**: The tool's provider answers, since its software produced the number
+   - **b**: The sender owns the work and should have verified the figures at their source
+   - **c**: The recipient answers, since the number was accepted without question
+   - **d**: The sender answers, but only if the work lacked a note about the AI's part
 
-4. A compliance officer must decide how much review an AI-assisted email to a regulator needs. What should
-   that depend on mainly?
-   - **a**: What a wrong claim in it would cost if acted on
-   - **b**: How polished the draft reads after one editing pass
-   - **c**: Which model tier drafted it, since larger tiers need less review
-   - **d**: Whether the draft came with supporting quotes attached
+4. A team asks Claude to fill a supplier price table from a PDF. The result has every row filled, including
+   a cost the PDF never states. Which pair of actions fits both pages?
+   - **a**: Check only the layout and tone of the result, and accept the data as given
+   - **b**: Ask it to give a confidence beside each entry, and keep the ones it marks high
+   - **c**: Tell it to leave no cell empty, and label the invented entries as estimates
+   - **d**: Tell it to say so when a value is absent instead of estimating, and keep any gap it reports
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Sorting steps into judgment and automatable work is the delegating skill (page 1). *a* is ruled out because "A good draft does not show the figures were right". *c* is ruled out because the table keeps "Check every figure in the draft against the source" with a person or a script, and review is skipped here. *d* is ruled out because "Claude can state a figure that was never supplied", and a flag raised by the same model is not an independent check.
-2. **d**. Describing the audience, the style and what to keep, then comparing, is the iterate-not-re-roll method. *a* is ruled out because "Regenerating the same request and hoping is the reflex", and an identical request is a second guess. *b* is ruled out because "the description is where most of the quality is decided", not the tier. *c* is ruled out because the page says "When an output is wrong, ask why before asking again", and hand-editing accepts the rewrite without finding the gap in the request.
-3. **c**. The fair message has three parts: what it speeds up, what still needs a person, and how you will know it works. *a* is ruled out because it hands the verification away, the first extreme the page names: "it will do the job". *b* is ruled out because it is the opposite extreme: "it cannot be trusted". *d* is ruled out because deciding which findings matter is "Decide which variances matter to the board", a step the table gives to a person.
-4. **a**. Check in proportion to the cost of being wrong (the checking routine). *b* is ruled out because "Readers check tone and grammar, which are visible", and the damage is in figures and citations. *c* is ruled out because the routine says "Do not check everything equally", and names no tier that makes verification unnecessary. *d* is ruled out because supporting quotes make checking faster: "These make checking faster; they do not replace it".
+1. **a**. Judgment that carries accountability stays with a person, and figures are checked against the source of record however clean past drafts were (page 1 delegation table; page 2 checking routine). *b* is ruled out because because the table gives "Decide which variances matter to the board" to a person, as judgment with accountability, and a clean run does not move it. *c* is ruled out because because "A good draft does not show the figures were right", so a run of clean drafts is no reason to stop verifying. *d* is ruled out because because "Self-reported confidence is not a measure of accuracy", and a flag from the model replaces neither the person nor the check.
+2. **c**. The description should say who reads it and show the target style, and the iterate-not-re-roll method compares the new result with the last (page 1, describe; page 2, iterate). *b* is ruled out because because "Regenerating the same request and hoping is the reflex", and an identical request is a second guess. *a* is ruled out because because a role line names no reader or purpose, and the page says to "Add what a colleague new to the job would need". *d* is ruled out because because "the description is where most of the quality is decided", and a higher tier does not know the readers either.
+3. **b**. The sender owns what was sent, and figures are checked against the source of record before release (page 2, take responsibility and the checking routine; page 1, where checking every figure sits with a person or a script). *a* is ruled out because because "You own what you send, whoever drafted it". *c* is ruled out because because "the person who relied on it will not distinguish between you and the tool", so blame does not move to the reader. *d* is ruled out because because "An error in AI-assisted work is your error to correct", with or without a disclosure note; disclosure is a separate duty.
+4. **d**. Page 1 puts the rule in the description ("say so rather than estimating"), and page 2 says a declared gap is information to keep. *b* is ruled out because because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because because "the careless move is to fill the gap with an estimate", and a label on an invented value still puts it in the table. *a* is ruled out because because "Readers check tone and grammar, which are visible, and skip figures and citations", which is where the damage is.
 
 </details>

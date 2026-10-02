@@ -119,22 +119,22 @@ produced with a confident voice.
 
 1. A finance team pastes forty invoice amounts into a prompt and asks Claude for the sum. The reply reads
    fluently and is off by a few cents. What is the most dependable correction?
-   - **a**: Ask for the sum again with an instruction to double-check each step
+   - **a**: Let it call a code tool and pass on the tool's result
    - **b**: Add a closing line asking Claude to flag how sure it is of the total
    - **c**: Reformat the amounts into one column so the sum is easier to follow
-   - **d**: Let it call a code tool and pass on the tool's result
+   - **d**: Ask for the sum again with an instruction to double-check each step
 
 2. An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are
    sometimes wrong on crowded shelves. Which design response fits what the documentation says?
-   - **a**: Label each count as approximate, and have a person confirm the ones that matter
-   - **b**: Crop each shelf photo to one row, then trust the resulting counts as exact
-   - **c**: Shrink each photo heavily to simplify the scene, then rely on the counts
-   - **d**: Switch to a larger model, then treat the counts as dependable
+   - **a**: Shrink each photo heavily to simplify the scene, which makes the counts dependable
+   - **b**: Crop each photo to a single row, which makes the counts exact
+   - **c**: Label the figures approximate and verify the important ones against real stock
+   - **d**: Switch to a larger model, which makes the counts dependable
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *a* is ruled out because a re-check request "does not change that the model sees pieces", and the section says the fix is not a better prompt. *b* is ruled out because reasoning "needs a check that does not come from the same reasoning", and the model's own report of certainty is not one. *c* is ruled out because exact arithmetic on long numbers is "approximate unless the model does the work in a tool", however the amounts are laid out.
-2. **a**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the counts are labelled as estimates and a person checks the ones that matter. *b* is ruled out because the page says Claude "can give approximate counts of objects in an image but might not always be precisely accurate", whatever the crop. *c* is ruled out because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels", so heavy compression makes it worse. *d* is ruled out because the page says "Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
+1. **a**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *d* is ruled out because a re-check request "does not change that the model sees pieces", and the section says the fix is not a better prompt. *b* is ruled out because reasoning "needs a check that does not come from the same reasoning", and the model's own report of certainty is not one. *c* is ruled out because exact arithmetic on long numbers is "approximate unless the model does the work in a tool", however the amounts are laid out.
+2. **c**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked. *b* is ruled out because because Claude "can give approximate counts of objects in an image but might not always be precisely accurate", whatever the crop. *a* is ruled out because because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels", so heavy shrinking makes it worse. *d* is ruled out because because the page says "Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
 
 </details>

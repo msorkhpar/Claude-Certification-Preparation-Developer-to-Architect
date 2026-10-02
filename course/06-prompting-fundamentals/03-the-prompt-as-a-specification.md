@@ -108,22 +108,22 @@ extraction (precision, low variety) works against ideation (module 1, sampling).
 
 1. A team keeps editing a prompt and judging each edit by reading one reply. Over a month quality seems to
    drift and nobody can say which edit caused it. What is the best remedy?
-   - **a**: Write the criteria down and score every version on a fixed set of inputs
-   - **b**: Move to a larger model, since drift usually comes from the weaker tier in use
-   - **c**: Freeze the prompt after the first draft and accept the current level
-   - **d**: Have the model rank the edits and keep the one it prefers
+   - **a**: Revert to the version in place when quality last seemed good, and stop editing
+   - **b**: Write the criteria down and score every version on a fixed set of inputs
+   - **c**: Have the model rank the edits and keep the one it prefers
+   - **d**: Write the criteria down, then judge each edit by reading one fresh reply
 
 2. A request asks Claude to read a fifty-page report, judge whether a supplier is at risk and draft a board
    email. The email's claims are sometimes unsupported. Which restructuring helps most?
    - **a**: Resend the same request three times and merge the three emails
    - **b**: Request the email first and the assessment afterwards, to compare them
-   - **c**: Run stages: pull exact quotes, assess from only those, then write
-   - **d**: Add a closing line: "Be careful; do not include unsupported claims"
+   - **c**: Add a closing line: "Be careful; do not include unsupported claims"
+   - **d**: Run stages: pull exact quotes, assess from only those, then write
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Success criteria and test inputs are the preconditions the overview names, and without them no edit can be compared (the success criteria section). *b* is ruled out because "Changing a prompt and re-reading one answer is anecdote", and a larger model changes a second variable at once. *c* is ruled out because the first trap says to "Keep a handful of fixed inputs, including hard ones", so edits can continue safely. *d* is ruled out because the preconditions include "some ways to empirically test against those criteria", and a model's preference is not one.
-2. **c**. Staging with an evidence step first is the pattern the page models on the documentation's quote-first technique, with a code check possible between stages. *a* is ruled out because the benefit of stages is that "a failure shows up at the stage where it happened", which repetition does not give. *b* is ruled out because the stages start with "extract the relevant facts or quotes from the material", so the email cannot come first. *d* is ruled out because "A giant do-everything prompt makes failures hard to locate", and a closing line is a request, not a stage.
+1. **b**. Success criteria and test inputs are the preconditions the overview names, and without them no edit can be compared (the success criteria section). *a* is ruled out because because "Without the first two, you cannot tell whether an edit helped", so nobody can know which version was the good one. *c* is ruled out because because the preconditions include "some ways to empirically test against those criteria", and a model's preference is not one. *d* is ruled out because because "Changing a prompt and re-reading one answer is anecdote", so the criteria need a fixed set of inputs to be scored on.
+2. **d**. Staging with an evidence step first is the pattern the page models on the documentation's quote-first technique, with a code check possible between stages. *a* is ruled out because the benefit of stages is that "a failure shows up at the stage where it happened", which repetition does not give. *b* is ruled out because the stages start with "extract the relevant facts or quotes from the material", so the email cannot come first. *c* is ruled out because "A giant do-everything prompt makes failures hard to locate", and a closing line is a request, not a stage.
 
 </details>

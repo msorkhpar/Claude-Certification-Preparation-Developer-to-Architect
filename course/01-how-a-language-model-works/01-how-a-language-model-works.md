@@ -142,9 +142,9 @@ for, and the reason the window sizes in the model table of module 3 matter.
    average about 650,000 words and are accepted. After the vendor moves the job to Claude Opus 5.5, which has
    the same window, the largest reports fail with "prompt is too long". The reports have not changed. What is
    the most likely cause?
-   - **a**: The output cap is now added into the size check before any request can be accepted
+   - **a**: The newer tokenizer turns identical prose into noticeably more tokens than before
    - **b**: Earlier requests in the same batch are kept and slowly fill the window over time
-   - **c**: The newer tokenizer turns identical prose into noticeably more tokens than before
+   - **c**: The output cap is now added into the size check before any request can be accepted
    - **d**: Always-on thinking now fills part of the window before the input is even counted
 
 2. A support chat built on the Messages API passes only the customer's latest question to the model. The
@@ -152,13 +152,13 @@ for, and the reason the window sizes in the model table of module 3 matter.
    fixes this at the right layer?
    - **a**: Add a system line telling the model to remember each customer who writes in
    - **b**: Move to the model with the largest context window that is available
-   - **c**: Raise `max_tokens` so the assistant can hold earlier details of the chat
-   - **d**: Keep the dialogue in the application and replay it with every call
+   - **c**: Keep the dialogue in the application and replay it with every call
+   - **d**: Raise `max_tokens` so the assistant can hold earlier details of the chat
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Claude Opus 4.7 and later cut text with a newer tokenizer that yields about 30 percent more tokens for the same text, and 1M tokens is roughly 555k words on it against about 750k earlier, so a 650,000-word report fit before and does not now (the tokenizers section). *a* is ruled out because on Claude 4.5 models and newer an input plus an output cap beyond the window is not refused: "the request is still accepted" (the limit section). *b* is ruled out because the API keeps no state between requests, and "your code resends the whole history on every request" (the stateless section). *d* is ruled out because the "prompt is too long" error is the input-only check: "If the input alone exceeds the window" the API refuses it, so output and thinking cannot be the cause (the limit section).
-2. **d**. The API remembers nothing, so memory is the history your code sends again with each request (the scripted pair of requests). *a* is ruled out because a model sees only what the request carries, and without the earlier messages "the model has no order number to talk about"; a system line adds no history. *b* is ruled out because each turn's input is "all previous conversation history plus the current user message", so a larger window holds nothing that was never sent. *c* is ruled out because "max_tokens is a cap on output, not on context", so raising it holds no earlier details.
+1. **a**. Claude Opus 4.7 and later cut text with a newer tokenizer that yields about 30 percent more tokens for the same text, and 1M tokens is roughly 555k words on it against about 750k earlier, so a 650,000-word report fit before and does not now (the tokenizers section). *c* is ruled out because on Claude 4.5 models and newer an input plus an output cap beyond the window is not refused: "the request is still accepted" (the limit section). *b* is ruled out because the API keeps no state between requests, and "your code resends the whole history on every request" (the stateless section). *d* is ruled out because the "prompt is too long" error is the input-only check: "If the input alone exceeds the window" the API refuses it, so output and thinking cannot be the cause (the limit section).
+2. **c**. The API remembers nothing, so memory is the history your code sends again with each request (the scripted pair of requests). *a* is ruled out because a model sees only what the request carries, and without the earlier messages "the model has no order number to talk about"; a system line adds no history. *b* is ruled out because each turn's input is "all previous conversation history plus the current user message", so a larger window holds nothing that was never sent. *d* is ruled out because "max_tokens is a cap on output, not on context", so raising it holds no earlier details.
 
 </details>

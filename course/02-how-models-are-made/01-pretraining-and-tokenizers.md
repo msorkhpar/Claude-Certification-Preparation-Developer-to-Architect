@@ -51,7 +51,7 @@ across chats, but they work the same way: saved notes are put back into the cont
 stay as they were. The glossary adds a scoped fact about changing the weights: "The Claude API does not
 currently offer fine-tuning, but ask your Anthropic contact if you are interested in exploring this
 option." The statement is about the Claude API only. Amazon Bedrock, a cloud platform, offered
-fine-tuning of one older model, Claude 3 Haiku, as a preview in the US West (Oregon) region (the AWS
+fine-tuning of one older model, Claude 3 Haiku, first as a preview (2024-07) and then, from 2024-11-01, as a generally available feature in the US West (Oregon) region (the AWS "What's New" post "Fine-tuning for Anthropic's Claude 3 Haiku in Amazon Bedrock is now generally available"; the AWS
 Machine Learning Blog post "Fine-tune Anthropic's Claude 3 Haiku in Amazon Bedrock to boost model accuracy
 and quality", dated 2024-07-10, which now carries a notice that Claude 3 Haiku reached end of life on
 2026-09-10); the Anthropic page "Claude in Amazon Bedrock" lists no fine-tuning among its supported features, and none of the models in the table of
@@ -237,24 +237,24 @@ larger scale.
 
 ## Quiz
 
-1. An assistant is asked to tally the letter r in a long part number and gives a wrong, confident figure. The
-   team wants a fix that holds for every part number. Which approach is best?
-   - **a**: Ask it to spell the part number out letter by letter before answering
-   - **b**: Hand the counting to a small script and use its output
+1. An assistant is asked to tally the letter r in a long part number and gives a wrong, confident figure.
+   The team wants a fix that holds for every part number. Which approach is best?
+   - **a**: Hand the counting to a small script and use its output
+   - **b**: Add a system line demanding an exact character count every time
    - **c**: Move to a model with a larger context window available
    - **d**: Run the same question five times and take the most common figure
 
 2. A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do
    better next week. They call the API directly and store no history. Which expectation is accurate?
    - **a**: The weights absorb the fix and apply it to every later session by default
-   - **b**: The API stores the fix under the account's key for reuse
+   - **b**: A tuned copy of the model is created under the account for later calls
    - **c**: Only a request that carries the amended guidance in its own input can benefit
-   - **d**: Memory features retrain the weights whenever a user saves a note
+   - **d**: The provider's overnight training folds the chats into the model
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap). *a* is ruled out because "The model never sees the letters of lowest as six separate things", so a spelled-out version is itself produced from pieces. *c* is ruled out because "The window is how much text fits per request", a capacity that does not change how a part number is cut into pieces. *d* is ruled out because "a model answers it by approximation", so repeating the question repeats the approximation.
-2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it. *a* is ruled out because "A conversation with Claude does not teach it anything that carries to the next conversation". *b* is ruled out because "Changing the weights is a separate act from calling the model", so an API call stores nothing for later. *d* is ruled out because memory features work by putting notes back: "saved notes are put back into the context", and the weights stay as they were.
+1. **a**. The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap). *b* is ruled out because because "a model answers it by approximation", so a demand for exactness does not change how the part number is cut into pieces. *c* is ruled out because because "The window is how much text fits per request", a capacity that does not change how a part number is cut into pieces. *d* is ruled out because because "Questions about individual characters (how many letters, which letter is third, reverse this string) are harder for it than they look", so repeating the question repeats the weakness.
+2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it. *a* is ruled out because because "A conversation with Claude does not teach it anything that carries to the next conversation". *b* is ruled out because because "The Claude API does not currently offer fine-tuning", so no tuned copy is made by calling it. *d* is ruled out because because "Weights are fixed at inference time; a later session starts from the same model", so chats do not change it next week.
 
 </details>

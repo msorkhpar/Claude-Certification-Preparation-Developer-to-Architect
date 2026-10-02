@@ -279,23 +279,23 @@ source document, a database, a test. Module 5 builds the habit of checking; modu
 1. A ticket router asks Claude to put each support ticket into one category. In testing, the same ticket lands
    in "billing" on one run and "account" on the next, though the prompt never changes. Which change best
    addresses the cause?
-   - **a**: Constrain replies to an allowed set of labels and validate each one in code
-   - **b**: Append a line asking for the same category every time, however the ticket reads
+   - **a**: Append a line asking for the same category every time, however the ticket reads
+   - **b**: Constrain replies to an allowed set of labels and validate each one in code
    - **c**: Set the temperature to zero and treat the output as fixed
    - **d**: Compare three runs and keep whichever category wins the vote
 
-2. A refund bot is not given the company's policy file. It states firmly that refunds are allowed for 45 days,
-   while the real policy says 30. What best explains the firm wrong answer?
+2. A refund bot is not given the company's policy file. It states firmly that refunds are allowed for 45
+   days, while the real policy says 30. What best explains the firm wrong answer?
    - **a**: Its reliable knowledge cutoff predates the policy, so the answer is stale
-   - **b**: It produced a typical-sounding number because nothing supplied the true one
-   - **c**: Its sampling randomness was too low, which locks in mistaken answers
-   - **d**: Earlier text overflowed the window and pushed the policy out of view
+   - **b**: Earlier text overflowed the window and pushed the policy out of view
+   - **c**: It ignored a policy instruction because the system prompt was worded too weakly
+   - **d**: It produced a typical-sounding number because nothing supplied the true one
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can. *b* is ruled out because a prompt line "can make a behaviour much more likely; it cannot make it certain" (the steerability section). *c* is ruled out because the glossary warns that "even with temperature set to 0, the results will not be fully deterministic", and the current models reject any non-default value anyway (the sampling section). *d* is ruled out because comparing runs only reveals the variation: "Comparing detects the variation; it does not remove it" (the hallucination list).
-2. **b**. The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section). *a* is ruled out because the knowledge section says "anything private (your tickets, your policies), is unknown to it" whatever the cutoff, so a cutoff date does not decide this. *c* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true", so the wrong figure needs no particular level of randomness. *d* is ruled out because the scenario never supplied the file, and private material is unknown to the model "unless you supply it in the context", so nothing was pushed out of view.
+1. **b**. Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can. *a* is ruled out because a prompt line "can make a behaviour much more likely; it cannot make it certain" (the steerability section). *c* is ruled out because the glossary warns that "even with temperature set to 0, the results will not be fully deterministic", and the current models reject any non-default value anyway (the sampling section). *d* is ruled out because comparing runs only reveals the variation: "Comparing detects the variation; it does not remove it" (the hallucination list).
+2. **d**. The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section). *a* is ruled out because because the knowledge section says "anything private (your tickets, your policies), is unknown to it" whatever the cutoff, so a cutoff date does not decide this. *c* is ruled out because because the scenario never supplied a policy file, and private material is unknown to the model "unless you supply it in the context", so there was no instruction to ignore. *b* is ruled out because because the scenario never supplied the file, and private material is unknown to the model "unless you supply it in the context", so nothing was pushed out of view.
 
 </details>
 
@@ -306,24 +306,27 @@ This quiz covers both pages of the module.
 1. A team runs two assistants on Claude Sonnet 5.5: one drafts campaign slogans and the other reads amounts
    off bills. The lead wants the slogans varied and the amounts exact, and plans to tune each assistant's
    randomness separately through request settings. What actually happens?
-   - **a**: Anything but the defaults comes back as a 400 error, so accuracy has to come from validation in code
-   - **b**: Each assistant takes its own value, so slogan variety and amount accuracy can be tuned independently
+   - **a**: Anything but the defaults comes back as a 400 error, so accuracy has to come from validation in
+     code
+   - **b**: Each assistant takes its own value, so slogan variety and amount accuracy can be tuned
+     independently
    - **c**: Zero is accepted for the amounts assistant and then makes every output come out identical
-   - **d**: Variation is already absent on current models, so neither assistant needs extra checks
+   - **d**: Only top_p stays adjustable, so slogans can still be varied through that one setting
 
-2. A developer sizes a prompt by counting its words, then ships. After the team migrates to a newer Claude
-   generation, the bill is about a third higher than predicted. Which earlier step would have prevented the
-   surprise?
-   - **a**: Applying a stricter definition of a word before estimating the size
-   - **b**: Requesting an estimate from the token endpoint for the production model
-   - **c**: Setting `max_tokens` low enough that the earlier estimate matched the final bill
-   - **d**: Deleting the few-shot examples from every single prompt before estimating the cost
+2. A team plans to cut wrong answers by running every prompt three times and comparing the replies. It
+   budgets the cost from what a token-counting tool reported for Claude Haiku 4.5. After the job moves to
+   Claude Opus 5.5 the bill is about a third above budget, although the run count is as planned. Which
+   earlier step would have given a sound budget?
+   - **a**: Reusing the Haiku numbers, since Claude generations share one tokenizer
+   - **b**: Dropping the comparison runs, since every extra run is another paid request
+   - **c**: Querying the endpoint again with the destination model named, before the change
+   - **d**: Setting max_tokens low, so output cost cannot exceed the plan
 
-3. A scheduling assistant is asked what day it is mid-conversation and names a day from its training period.
-   Which fix sits at the right layer?
+3. A scheduling assistant is asked to book "next Friday" mid-conversation and proposes a day from its
+   training period. Which fix sits at the right layer?
    - **a**: Switch to the newest model, whose cutoff is closest to today
-   - **b**: Add a prompt line telling it never to guess the current day
-   - **c**: Have the application stamp the current date onto every call it makes
+   - **b**: Have the application put the current calendar date in every request
+   - **c**: Add a prompt line telling it never to guess the current day
    - **d**: Resend older conversations with each call so they hint at today's date
 
 4. A long contract is pasted into a request. The overview Claude returns cites a clause number that does not
@@ -336,9 +339,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Claude Sonnet 5.5, like Fable 5.1 and Opus 5.5, rejects any non-default temperature, top_p or top_k with an error, so exactness for the bills comes from restricting and validating the output, and the slogans need no extra setting (the sampling section). *b* is ruled out because the page says "Which sampling parameters a given model accepts changes between generations", and these models accept nothing beyond the defaults. *c* is ruled out because even where a zero is accepted, "the results will not be fully deterministic", and these models reject it. *d* is ruled out because outputs still vary, which is why the page says to "never write a test that expects byte-identical model output".
-2. **b**. The token counting endpoint returns an estimate against the model you name, and the same text yields about 30 percent more tokens from Opus 4.7 on. *a* is ruled out because "A 10,000-word document is not 10,000 tokens", so a stricter word definition still counts the wrong unit. *c* is ruled out because "max_tokens is a cap on output, not on context", so it cannot make an input estimate match a bill. *d* is ruled out because the page says "Count with the endpoint for the model you will call"; trimming the prompt would hide the miscount and not correct it.
-3. **c**. The model has no clock, so the date has to be supplied in the context on every call (the knowledge section). *a* is ruled out because "Knowledge comes from training data with a cut-off", so even the newest model stops before today. *b* is ruled out because a prompt shapes the distribution and that is "why it is only a request", so a line cannot supply a fact the model lacks. *d* is ruled out because "The model has no clock", so replaying older conversations gives it nothing to read the present from.
+1. **a**. Claude Sonnet 5.5, like Fable 5.1 and Opus 5.5, rejects any non-default temperature, top_p or top_k with an error, so exactness for the bills comes from restricting and validating the output, and the slogans need no extra setting (the sampling section). *b* is ruled out because because the Messages reference says "all other values will be rejected", so no assistant can take a value of its own. *c* is ruled out because because even where a zero is accepted, "even with temperature set to 0, the results will not be fully deterministic", and these models reject it. *d* is ruled out because because the migration guide names all three parameters: "Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected".
+2. **c**. The token counting endpoint returns an estimate against the model you name, and the same text yields about 30 percent more tokens from Opus 4.7 on, so a count made for the model the job moves to would have shown the rise (page 1, tokens are not words). *b* is ruled out because because the run count was already budgeted and the bill still rose: "the same text produces about 30 percent more tokens than on earlier models", so the cost moved with the model and not with the runs. *a* is ruled out because because "Tokenizers change between model generations", so the old numbers do not carry over. *d* is ruled out because because "max_tokens is a cap on output, not on context", and the input side is where the new tokenizer adds tokens.
+3. **b**. The model has no clock, so the date has to be supplied in the context on every call (the knowledge section). *a* is ruled out because because "Knowledge comes from training data with a cut-off", so even the newest model stops before today. *c* is ruled out because because a prompt shapes the distribution and that is "why it is only a request", so a line cannot supply a fact the model lacks. *d* is ruled out because because "The model has no clock", so replaying older conversations gives it nothing to read the present from.
 4. **d**. Grounding the work in exact passages first means every claim can be traced to text that exists, which is the documented technique for long documents (the hallucination list). *a* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true", so more output only gives an invented clause more chances to appear. *b* is ruled out because the page says "confidence is not evidence". *c* is ruled out because honesty is "a goal of training and not a guarantee of any single answer", so asking for it does not ground the citations.
 
 </details>
