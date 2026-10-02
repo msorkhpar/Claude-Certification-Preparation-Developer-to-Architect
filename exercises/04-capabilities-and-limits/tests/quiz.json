@@ -1,0 +1,157 @@
+{
+  "module": "04-capabilities-and-limits",
+  "quizzes": [
+    {
+      "id": "01-what-claude-does-well-and-where-it-slips#q1",
+      "page": "01-what-claude-does-well-and-where-it-slips.md",
+      "scope": "page",
+      "stem": "A finance team pastes forty invoice amounts into a prompt and asks Claude for the sum. The reply reads fluently and is off by a few cents. What is the most dependable correction?",
+      "options": {
+        "a": "Let it call a code tool and pass on the tool's result",
+        "b": "Add a closing line asking Claude to flag how sure it is of the total",
+        "c": "Reformat the amounts into one column so the sum is easier to follow",
+        "d": "Ask for the sum again with an instruction to double-check each step"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code.",
+        "d": "Ruled out because a re-check request \"does not change that the model sees pieces\", and the section says the fix is not a better prompt.",
+        "b": "Ruled out because reasoning \"needs a check that does not come from the same reasoning\", and the model's own report of certainty is not one.",
+        "c": "Ruled out because exact arithmetic on long numbers is \"approximate unless the model does the work in a tool\", however the amounts are laid out."
+      }
+    },
+    {
+      "id": "01-what-claude-does-well-and-where-it-slips#q2",
+      "page": "01-what-claude-does-well-and-where-it-slips.md",
+      "scope": "page",
+      "stem": "An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes wrong on crowded shelves. Which design response fits what the documentation says?",
+      "options": {
+        "a": "Shrink each photo heavily to simplify the scene, which makes the counts dependable",
+        "b": "Crop each photo to a single row, which makes the counts exact",
+        "c": "Label the figures approximate and verify the important ones against real stock",
+        "d": "Switch to a larger model, which makes the counts dependable"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked.",
+        "b": "Ruled out because Claude \"can give approximate counts of objects in an image but might not always be precisely accurate\", whatever the crop.",
+        "a": "Ruled out because Claude \"might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels\", so heavy shrinking makes it worse.",
+        "d": "Ruled out because the page says \"Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight\", for any tier."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#q1",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "page",
+      "stem": "A support tool runs its deepest reasoning setting on every request, including one-word intent labels. Spend is rising with no gain in quality. What does the documentation support as the first remedy?",
+      "options": {
+        "a": "Raise `max_tokens` so the reasoning always has room to finish",
+        "b": "Use low effort on trivial inputs and keep high effort for demanding ones",
+        "c": "Move the labels to the model with the largest context window",
+        "d": "Switch to manual budgets everywhere, since adaptive thinking cannot be tuned"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap).",
+        "a": "Ruled out because reasoning tokens \"count toward max_tokens alongside the response text\", so a larger cap only allows more spend.",
+        "c": "Ruled out because the waste is in the reasoning: \"Paying for reasoning on a one-word classification is waste\", and a bigger window does not change that.",
+        "d": "Ruled out because with adaptive thinking \"the model decides how much to think, steered by effort\", so it can be tuned without manual budgets."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#q2",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "page",
+      "stem": "A team must flag uploaded invoices issued within the past thirty days. Every entry carries a timestamp in one known format. Which design is best?",
+      "options": {
+        "a": "Ask Claude to judge each timestamp and pass the verdict through",
+        "b": "Ask Claude for each verdict at high effort so the date arithmetic is dependable",
+        "c": "Give Claude a clock tool and have it compare each timestamp",
+        "d": "Parse the field and compare it with today's date in code"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap).",
+        "a": "Ruled out because \"The model approximates; code is exact\".",
+        "b": "Ruled out because the table gives code as the answer for a one-line rule for the reason \"Cheaper, faster, deterministic, testable\", and a higher effort setting is none of those.",
+        "c": "Ruled out because the table sends \"Anything that must happen every time\" to a check in code, and a model comparing dates through a tool is still the model deciding."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m1",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "A firm wants a model to help review a 200-page contract: a plain-language summary, the sum of the charges it lists, and the decision to proceed. Which split of the work follows the module?",
+      "options": {
+        "a": "Claude summarises, code adds the amounts, a lawyer approves the deal",
+        "b": "Claude summarises, Claude adds the amounts, a lawyer approves the deal",
+        "c": "Claude summarises, code adds the amounts, Claude approves the deal",
+        "d": "Claude summarises and adds the amounts at the highest effort, a lawyer approves the deal"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Summarising is language-shaped work, exact addition belongs to code, and a decision with legal consequences stays with a person (page 1, maths and counting; page 2, the when-not-to table).",
+        "b": "Ruled out because exact arithmetic is \"approximate unless the model does the work in a tool\".",
+        "c": "Ruled out because the table sends \"A decision with legal, medical, financial or safety consequences\" to a qualified person.",
+        "d": "Ruled out because \"The fix is not a better prompt; it is code\", and an effort setting is a prompting lever, not a calculator."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m2",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "A computer-use loop sends full-resolution monitor captures as tool results, and the API refuses some of them. The agent's pointer actions also sometimes land beside their target. What does the documentation support?",
+      "options": {
+        "a": "Resend oversized screenshots unchanged, and ask in the prompt for exact click positions",
+        "b": "Let the API downscale oversized screenshots, and resend each click that missed",
+        "c": "Resize each screenshot in your own program first, and treat click positions as approximate",
+        "d": "Move to a model with a larger window, which takes bigger screenshots and exact positions"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The API rejects an oversized tool-result screenshot instead of downscaling it, so the program resizes first, and spatial output is approximate (page 2, computer use at a glance).",
+        "b": "Ruled out because the API \"rejects a tool-result screenshot that exceeds the model's limits instead of downscaling it\".",
+        "a": "Ruled out because \"Spatial output is approximate\", so a prompt line cannot make positions exact, and an unchanged screenshot is refused again.",
+        "d": "Ruled out because \"Coordinates and localisation outputs are approximate\", whatever the model."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m3",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "A product owner wants an assistant that books flights by operating an airline's website through screenshots and clicks. Which design point matters most for safety?",
+      "options": {
+        "a": "Run it in the customer's own browser profile, so saved logins already work",
+        "b": "Sandbox it with no credentials, and have a person approve each payment",
+        "c": "Add a prompt line telling it to ignore instructions found on web pages",
+        "d": "Restrict it to the airline's own site, so its pages can be treated as trusted"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Computer use runs in an isolated machine, without secrets, with a person confirming consequential steps (the computer use section).",
+        "a": "Ruled out because computer use \"runs in an isolated machine, without secrets\", and a saved login is exactly such a secret.",
+        "c": "Ruled out because \"A prompt is a request, not a guarantee\", so a line of text cannot replace isolation and confirmation.",
+        "d": "Ruled out because \"A screen is untrusted input\", and text on any web page can try to give the model instructions."
+      }
+    },
+    {
+      "id": "02-thinking-computer-use-and-when-not-to-use-a-model#m4",
+      "page": "02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "scope": "module",
+      "stem": "Which request is the best fit for Claude without extra machinery?",
+      "options": {
+        "a": "Checking whether a claim photo is AI-generated, to block fraud",
+        "b": "Calculating the payroll for 800 staff exactly, to the cent",
+        "c": "Reporting today's closing price of a listed stock",
+        "d": "Drafting a polite, well-organised reply to a customer's complaint"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Drafting language is the strong-fit row of the summary table, with the usual review for accuracy and fit.",
+        "b": "Ruled out because the table sends \"An exact, repeatable result (totals, dates, ids, string edits)\" to code.",
+        "c": "Ruled out because \"Anything recent, private or fast-changing has to come in through the prompt\" or a tool, and a live price is after the cut-off.",
+        "a": "Ruled out because the vision page says Claude \"cannot determine whether an image is AI-generated\"."
+      }
+    }
+  ]
+}

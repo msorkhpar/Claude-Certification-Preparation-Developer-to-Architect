@@ -1,0 +1,157 @@
+{
+  "module": "01-how-a-language-model-works",
+  "quizzes": [
+    {
+      "id": "01-how-a-language-model-works#q1",
+      "page": "01-how-a-language-model-works.md",
+      "scope": "page",
+      "stem": "A nightly job sends one request per report to a model with a one-million context window. The reports average about 650,000 words and are accepted. After the vendor moves the job to Claude Opus 5.5, which has the same window, the largest reports fail with \"prompt is too long\". The reports have not changed. What is the most likely cause?",
+      "options": {
+        "a": "The newer tokenizer turns identical prose into noticeably more tokens than before",
+        "b": "Earlier requests in the same batch are kept and slowly fill the window over time",
+        "c": "The output cap is now added into the size check before any request can be accepted",
+        "d": "Always-on thinking now fills part of the window before the input is even counted"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Claude Opus 4.7 and later cut text with a newer tokenizer that yields about 30 percent more tokens for the same text, and 1M tokens is roughly 555k words on it against about 750k earlier, so a 650,000-word report fit before and does not now (the tokenizers section).",
+        "c": "Ruled out because on Claude 4.5 models and newer an input plus an output cap beyond the window is not refused: \"the request is still accepted\" (the limit section).",
+        "b": "Ruled out because the API keeps no state between requests, and \"your code resends the whole history on every request\" (the stateless section).",
+        "d": "Ruled out because the \"prompt is too long\" error is the input-only check: \"If the input alone exceeds the window\" the API refuses it, so output and thinking cannot be the cause (the limit section)."
+      }
+    },
+    {
+      "id": "01-how-a-language-model-works#q2",
+      "page": "01-how-a-language-model-works.md",
+      "scope": "page",
+      "stem": "A support chat built on the Messages API passes only the customer's latest question to the model. The customer gave an order number two exchanges ago, and the assistant now asks for it again. Which change fixes this at the right layer?",
+      "options": {
+        "a": "Add a system line telling the model to remember each customer who sends a message",
+        "b": "Move to the model with the largest context window that is available",
+        "c": "Keep the dialogue in the application and replay it with every call",
+        "d": "Raise `max_tokens` so the assistant can hold earlier details of the chat"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The API remembers nothing, so memory is the history your code sends again with each request (the scripted pair of requests).",
+        "a": "Ruled out because a model sees only what the request carries, and without the earlier messages \"the model has no order number to talk about\"; a system line adds no history.",
+        "b": "Ruled out because each turn's input is \"all previous conversation history plus the current user message\", so a larger window holds nothing that was never sent.",
+        "d": "Ruled out because \"max_tokens is a cap on output, not on context\", so raising it holds no earlier details."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#q1",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "page",
+      "stem": "A ticket router asks Claude to put each support ticket into one category. In testing, the same ticket lands in \"billing\" on one run and \"account\" on the next, though the prompt never changes. Which change best addresses the cause?",
+      "options": {
+        "a": "Append a line asking for the same category every time, however the ticket reads",
+        "b": "Constrain replies to an allowed set of labels and validate each one in code",
+        "c": "Set the temperature to zero and treat the output as fixed",
+        "d": "Compare three runs and keep whichever category wins the vote"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can.",
+        "a": "Ruled out because a prompt line \"can make a behaviour much more likely; it cannot make it certain\" (the steerability section).",
+        "c": "Ruled out because the glossary warns that \"even with temperature set to 0, the results will not be fully deterministic\", and the current models reject any non-default value anyway (the sampling section).",
+        "d": "Ruled out because comparing runs only reveals the variation: \"Comparing detects the variation; it does not remove it\" (the hallucination list)."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#q2",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "page",
+      "stem": "A refund bot is not given the company's policy file. It states firmly that refunds are allowed for 45 days, while the real policy says 30. What best explains the firm wrong answer?",
+      "options": {
+        "a": "Its reliable knowledge cutoff predates the policy, so the answer is stale",
+        "b": "Earlier text overflowed the window and pushed the policy out of view",
+        "c": "It ignored a policy instruction because the system prompt was worded too weakly",
+        "d": "It produced a typical-sounding number because nothing supplied the true one"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section).",
+        "a": "Ruled out because the knowledge section says \"anything private (your tickets, your policies), is unknown to it\" whatever the cutoff, so a cutoff date does not decide this.",
+        "c": "Ruled out because the scenario never supplied a policy file, and private material is unknown to the model \"unless you supply it in the context\", so there was no instruction to ignore.",
+        "b": "Ruled out because the scenario never supplied the file, and private material is unknown to the model \"unless you supply it in the context\", so nothing was pushed out of view."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m1",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A team runs two assistants on Claude Sonnet 5.5: one drafts campaign slogans and the other reads amounts off bills. The lead wants the slogans varied and the amounts exact, and plans to tune each assistant's randomness separately through request settings. What actually happens?",
+      "options": {
+        "a": "Anything but the defaults comes back as a 400 error, so correctness has to be enforced by checks in code",
+        "b": "Each assistant takes its own value, so slogan variety and amount accuracy can be tuned independently",
+        "c": "Zero is accepted for the amounts assistant and then makes every output come out identical",
+        "d": "Only top_p stays adjustable, so slogans can still be varied through that one setting"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Claude Sonnet 5.5, like Fable 5.1 and Opus 5.5, rejects any non-default temperature, top_p or top_k with an error, so exactness for the bills comes from restricting and validating the output, and the slogans need no extra setting (the sampling section).",
+        "b": "Ruled out because the Messages reference says \"all other values will be rejected\", so no assistant can take a value of its own.",
+        "c": "Ruled out because even where a zero is accepted, \"even with temperature set to 0, the results will not be fully deterministic\", and these models reject it.",
+        "d": "Ruled out because the migration guide names all three parameters: \"Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected\"."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m2",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A team plans to cut wrong answers by running every prompt three times and comparing the replies. It budgets the cost from what a token-counting tool reported for Claude Haiku 4.5. After the job moves to Claude Opus 5.5 the bill is about a third above budget, although the run count is as planned. Which earlier step would have given a sound budget?",
+      "options": {
+        "a": "Reusing the Haiku numbers, since Claude generations share one tokenizer",
+        "b": "Dropping the comparison runs, since every extra run is another paid request",
+        "c": "Querying the endpoint again with the destination model named, before the change",
+        "d": "Setting max_tokens low, so output cost cannot exceed the plan"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The token counting endpoint returns an estimate against the model you name, and the same text yields about 30 percent more tokens from Opus 4.7 on, so a count made for the model the job moves to would have shown the rise (page 1, tokens are not words).",
+        "b": "Ruled out because the run count was already budgeted and the bill still rose: \"the same text produces about 30 percent more tokens than on earlier models\", so the cost moved with the model and not with the runs.",
+        "a": "Ruled out because \"Tokenizers change between model generations\", so the old numbers do not carry over.",
+        "d": "Ruled out because \"max_tokens is a cap on output, not on context\", and the input side is where the new tokenizer adds tokens."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m3",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A scheduling assistant is asked to book \"next Friday\" mid-conversation and proposes a day from its training period. Which fix sits at the right layer?",
+      "options": {
+        "a": "Switch to the newest model, whose cutoff is closest to today",
+        "b": "Have the application put the current calendar date in every request",
+        "c": "Add a prompt line telling it never to guess the current day",
+        "d": "Resend older conversations with each call so they hint at today's date"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The model has no clock, so the date has to be supplied in the context on every call (the knowledge section).",
+        "a": "Ruled out because \"Knowledge comes from training data with a cut-off\", so even the newest model stops before today.",
+        "c": "Ruled out because a prompt shapes the distribution and that is \"why it is only a request\", so a line cannot supply a fact the model lacks.",
+        "d": "Ruled out because \"The model has no clock\", so replaying older conversations gives it nothing to read the present from."
+      }
+    },
+    {
+      "id": "02-sampling-knowledge-and-hallucination#m4",
+      "page": "02-sampling-knowledge-and-hallucination.md",
+      "scope": "module",
+      "stem": "A long contract is pasted into a request. The overview Claude returns cites a clause number that does not appear in the contract. Which prompt change most directly targets this failure?",
+      "options": {
+        "a": "Ask for a longer, more detailed summary so every clause is covered",
+        "b": "Ask Claude to state its confidence level beside each citation",
+        "c": "Tell it to be an honest assistant that cites only clauses that really exist in the text",
+        "d": "Have it first copy the relevant passages out exactly, then write only from them"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Grounding the work in exact passages first means every claim can be traced to text that exists, which is the documented technique for long documents (the hallucination list).",
+        "a": "Ruled out because \"a plausible-looking fact is a likely continuation whether or not it is true\", so more output only gives an invented clause more chances to appear.",
+        "b": "Ruled out because the page says \"confidence is not evidence\".",
+        "c": "Ruled out because honesty is \"a goal of training and not a guarantee of any single answer\", so asking for it does not ground the citations."
+      }
+    }
+  ]
+}

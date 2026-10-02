@@ -1,0 +1,157 @@
+{
+  "module": "02-how-models-are-made",
+  "quizzes": [
+    {
+      "id": "01-pretraining-and-tokenizers#q1",
+      "page": "01-pretraining-and-tokenizers.md",
+      "scope": "page",
+      "stem": "An assistant is asked to tally the letter r in a long part number and gives a wrong, confident figure. The team wants a fix that holds for every part number. Which approach is best?",
+      "options": {
+        "a": "Hand the counting to a small script and use its output",
+        "b": "Add a system line demanding an exact character count every time",
+        "c": "Move to a model with a larger context window available",
+        "d": "Run the same question five times and take the most common figure"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap).",
+        "b": "Ruled out because \"a model answers it by approximation\", so a demand for exactness does not change how the part number is cut into pieces.",
+        "c": "Ruled out because \"The window is how much text fits per request\", a capacity that does not change how a part number is cut into pieces.",
+        "d": "Ruled out because \"Questions about individual characters (how many letters, which letter is third, reverse this string) are harder for it than they look\", so repeating the question repeats the weakness."
+      }
+    },
+    {
+      "id": "01-pretraining-and-tokenizers#q2",
+      "page": "01-pretraining-and-tokenizers.md",
+      "scope": "page",
+      "stem": "A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do better next week. They call the API directly and store no history. Which expectation is accurate?",
+      "options": {
+        "a": "The weights absorb the fix and apply it to every later session by default",
+        "b": "A tuned copy of the model is created under the account for later calls",
+        "c": "Only a request that carries the amended guidance in its own input can benefit",
+        "d": "The provider's overnight training folds the chats into the model"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it.",
+        "a": "Ruled out because \"A conversation with Claude does not teach it anything that carries to the next conversation\".",
+        "b": "Ruled out because \"The Claude API does not currently offer fine-tuning\", so no tuned copy is made by calling it.",
+        "d": "Ruled out because \"Weights are fixed at inference time; a later session starts from the same model\", so chats do not change it next week."
+      }
+    },
+    {
+      "id": "02-fine-tuning-feedback-and-what-training-gives#q1",
+      "page": "02-fine-tuning-feedback-and-what-training-gives.md",
+      "scope": "page",
+      "stem": "A stakeholder asks why a deployed assistant answers a question with an answer, when the raw model it started from tends to continue the question with more questions. Which part of how models are made does most to explain the gap?",
+      "options": {
+        "a": "Pretraining on a far larger corpus than the raw model saw",
+        "b": "A later round of tuning on curated examples and replies ranked by people",
+        "c": "A separate look-up store of answers that the assistant consults",
+        "d": "A larger attention mechanism that lets the model reread the question"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Fine-tuning and feedback training are the stages that turn a text continuer into an assistant (the stages section).",
+        "a": "Ruled out because the stage list says of pretraining that \"The result is capable and unruly\", and a bigger corpus does not change that.",
+        "d": "Ruled out because in attention \"every position in the context can look at every earlier position\", in the raw model as much as in the assistant.",
+        "c": "Ruled out because \"There is no third place such as a notebook it consults\": everything the model uses is in the window or in the weights."
+      }
+    },
+    {
+      "id": "02-fine-tuning-feedback-and-what-training-gives#q2",
+      "page": "02-fine-tuning-feedback-and-what-training-gives.md",
+      "scope": "page",
+      "stem": "A company wants Claude to answer from its product manual, which is revised every month, through the Claude API. An engineer proposes fine-tuning on each new version. What is the best response?",
+      "options": {
+        "a": "Rely on what the model absorbed in training from earlier editions",
+        "b": "Retrain the weights each month through a fine-tuning request to the API",
+        "c": "Paste corrections into the chat and rely on the model to recall them later",
+        "d": "Send the current edition with each call, as the standard route"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Knowledge that changes monthly belongs in the context, and the glossary says the Claude API does not currently offer fine-tuning (the second trap and the table).",
+        "b": "Ruled out because \"the Claude API does not currently offer fine-tuning\", so the monthly request cannot be made through this route.",
+        "c": "Ruled out because the table lists \"Memory of your previous conversations\" among the things training does not give, so pasted corrections are not recalled.",
+        "a": "Ruled out because the table lists \"Access to your files, systems or today's date\" among the things training does not give, and a manual revised monthly outruns any cut-off."
+      }
+    },
+    {
+      "id": "02-fine-tuning-feedback-and-what-training-gives#m1",
+      "page": "02-fine-tuning-feedback-and-what-training-gives.md",
+      "scope": "module",
+      "stem": "A new engineer asks which stage of making a Claude model is behind its skill at carrying on any text, and which is behind its polite replies to questions. Which pairing is right?",
+      "options": {
+        "a": "Pretraining gave next-word prediction; later tuning and human rankings gave the helpful manner",
+        "b": "Feedback training gave next-word prediction; pretraining gave the helpful manner",
+        "c": "The tokenizer gave next-word prediction; attention gave the helpful manner",
+        "d": "Pretraining gave both, since a larger corpus makes a raw model follow instructions"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Pretraining teaches continuation, and fine-tuning and feedback training turn the continuer into an assistant (page 2, the stages section).",
+        "b": "Ruled out because pretraining is where the model starts to \"learn to continue text on a very large corpus\", so the order is reversed.",
+        "c": "Ruled out because the tokenizer only exists so that \"text must be cut into pieces and each piece mapped to an integer\", and attention weighs context; neither is a training stage that shapes manner.",
+        "d": "Ruled out because a pretrained model \"is not inherently good at answering questions or following instructions\", whatever the corpus size."
+      }
+    },
+    {
+      "id": "02-fine-tuning-feedback-and-what-training-gives#m2",
+      "page": "02-fine-tuning-feedback-and-what-training-gives.md",
+      "scope": "module",
+      "stem": "A localisation lead notices that one paragraph needs noticeably more tokens in one language than in another. Which explanation fits best?",
+      "options": {
+        "a": "That language was added by later fine-tuning, which re-cut its text into extra pieces",
+        "b": "The larger window used for that language forces the text into finer pieces",
+        "c": "Its learned vocabulary stores longer chunks for the script that dominated the corpus",
+        "d": "The translated text simply contains more words, and tokens track words one to one"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The vocabulary was learned from a corpus, so a script that was common gets longer pieces and a rarer one splits into more (page 1, what the tokenizer does to your work).",
+        "a": "Ruled out because the tokenizer is \"built before pretraining and fixed afterwards\", so later fine-tuning cannot re-cut any text.",
+        "b": "Ruled out because \"The window is how much text fits per request\", and the vocabulary is a separate thing, so the window does not set the piece size.",
+        "d": "Ruled out because a token is not a word: \"a Claude token is about 3.5 English characters\", and \"the exact number can vary depending on the language used\"."
+      }
+    },
+    {
+      "id": "02-fine-tuning-feedback-and-what-training-gives#m3",
+      "page": "02-fine-tuning-feedback-and-what-training-gives.md",
+      "scope": "module",
+      "stem": "A reviewer waves through a number in a report because the assistant is described as built to tell the truth. Which reply is the soundest?",
+      "options": {
+        "a": "Training on written principles removed unsupported claims, so the figure stands",
+        "b": "That is a training goal, not a guarantee, so the figure needs checking",
+        "c": "The model reports high confidence, so the figure stands",
+        "d": "A prompt can demand truthfulness, so asking for it makes the figure safe"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The glossary frames HHH as how Claude is trained, a goal and a direction, and the first trap says verification is still the user's job.",
+        "a": "Ruled out because the table lists \"A guarantee that any statement is true\" among the things training does not give.",
+        "d": "Ruled out because \"an instruction that fights the training may not win\", so a prompt cannot make a trained behaviour certain.",
+        "c": "Ruled out because \"Verification is still the user's job\", and a model's own report of high confidence is not a check."
+      }
+    },
+    {
+      "id": "02-fine-tuning-feedback-and-what-training-gives#m4",
+      "page": "02-fine-tuning-feedback-and-what-training-gives.md",
+      "scope": "module",
+      "stem": "A team is automating four chores. Which one should be done by a deterministic program instead of the model alone?",
+      "options": {
+        "a": "Sorting incoming emails by urgency from the message text",
+        "b": "Rewriting release notes for a non-technical audience of customers",
+        "c": "Proposing likely causes for an intermittent failing test",
+        "d": "Verifying every product code is exactly eight characters long"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Exact character work is a tokenizer-level weakness, so code should do it (page 1, first trap).",
+        "b": "Ruled out because the table credits training with \"Fluent language, many languages, code\", which covers rewording for customers.",
+        "c": "Ruled out because the table credits training with \"Reasoning patterns it can apply to new problems\", which covers proposing causes.",
+        "a": "Ruled out because the table lists \"Following instructions and a helpful manner\", and a model reads message text well."
+      }
+    }
+  ]
+}
