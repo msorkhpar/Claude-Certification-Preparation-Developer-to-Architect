@@ -28,7 +28,7 @@ M9.**
 | D3 | Languages | **decided:** four languages. Python and TypeScript for every example and practice; Java and Kotlin too wherever the topic does not need the Agent SDK (which exists only for Python and TypeScript). One example block with a tab per language; the reader picks a language on the first visit and a remembered switch changes it; a language a topic or practice does not exist in is greyed out and says which languages carry it. Claude Code and MCP configuration files are language-neutral and shown once |
 | D4 | The API in practices | **decided:** graded runs are offline against recorded exchanges (captured once, replayed) and scripted exchanges; live runs optional with the reader's own key, never graded |
 | D5 | Exam guide | **decided:** the Architect Foundations exam guide is public and is used as the topic map: its domains, topics and scenarios shape Level 3. Its wording and sample questions are not copied; the course writes its own |
-| D6 | Architect Professional | **decided:** a survey looks again for a public blueprint or public prep material for the Professional exam (row C-08); if none exists, Level 4 is authored after Level 3 as drafted, marked provisional, and rebuilt when a blueprint is published |
+| D6 | Architect Professional | **decided:** a survey looks again for a public blueprint or public prep material for the Professional exam (row C-08); if none exists, Level 4 is authored after Level 3 as drafted, marked provisional, and rebuilt when a blueprint is published. **Outcome:** the official blueprint is public; Level 4 is drafted from it and is no longer provisional |
 | D7 | Associate exam | **decided:** covered by Level 1 only; no separate Associate track |
 | D8 | API key | **decided:** the reader enters their own key in the site's UI, which passes it to the code at run time and never stores it in a file; grading stays offline and deterministic against the scripted model for everyone; with a key, the reader can also run examples and their own solution live, never graded. Examples ship with exchanges captured by the course's authors, labelled with model and date |
 | D9 | Key storage and captures | **decided:** the reader's key is typed in the site and kept in the browser tab's session storage by default (gone when the tab closes); "remember on this device" is an opt-in to the browser's local storage. The site sends it with a live-run request; the local service passes it as an environment variable to that run's container only, never writes it to disk and never gives it to the graded runner. A reader may instead set `ANTHROPIC_API_KEY` in their own ignored `course.env`. Authoring uses hand-scripted exchanges labelled illustrative; real exchanges are captured in one pass before release, with the owner's key set in the environment for that run only |
@@ -37,14 +37,14 @@ M9.**
 
 | Row | Task | Owner | Status |
 |---|---|---|---|
-| C-01 | Confirm the exam facts on official pages (names, format, eligibility, domains, weights, scenarios); mark each in `EXAM-MAP.md` confirmed or reported | office (reading) | todo |
-| C-02 | Pin versions from the official documentation: current model ids and tiers, Python, the Anthropic SDK, the MCP SDK, the Agent SDK; record which features each version has | office (reading) | todo |
+| C-01 | Confirm the exam facts on official pages (names, format, eligibility, domains, weights, scenarios); mark each in `EXAM-MAP.md` confirmed or reported | office (reading) | **done:** All four exams have a public official guide (v1.0, July 2026); `EXAM-MAP.md` is marked confirmed (codes, items, fees, format, scoring, eligibility, renewal, retakes, domains, weights, six scenarios); the Architect Foundations task statements match the A-topics one to one, two small topics added to modules 59 and 62. |
+| C-02 | Pin versions from the official documentation: current model ids and tiers, Python, the Anthropic SDK, the MCP SDK, the Agent SDK; record which features each version has | office (reading) | **done:** `VERSIONS.md` pins model ids, the client, MCP and Agent SDKs per language and the Agent SDK run-time needs (binary bundled); to be re-checked at release. |
 | C-03 | A Python practice end to end in the existing runner, offline, with pytest and the standard library only (an agent loop against a scripted model); sizes and times | office (heavy, slot) | todo |
 | C-04 | The SDK wheels offline: what the Anthropic SDK, MCP SDK, Agent SDK, Pydantic and httpx need as pinned wheels; whether the Agent SDK needs the Claude Code binary and Node; what a profile image would hold | office (heavy, slot) | todo |
 | C-05 | Harness design: replay through the SDK's transport hook, the scripted model, the capture tool and its id-stripping check; one proof example | office (heavy, slot) | todo |
 | C-06 | Coverage check: every exam-map topic has a module, every module names valid codes; a script the gate runs | office | todo |
 | C-07 | The other three languages: TypeScript on the base image's Node (type stripping, its test runner) or a pinned compiler; the Java API SDK and the JVM MCP SDK in a Gradle project for Java and Kotlin, offline; which SDK features each language lacks | office (heavy, slot) | todo |
-| C-08 | Look again for a public blueprint, exam description or prep material for the Architect Professional exam; if found, redraft Level 4 from it | office (reading) | todo |
+| C-08 | Look again for a public blueprint, exam description or prep material for the Architect Professional exam; if found, redraft Level 4 from it | office (reading) | **done:** A public official Professional blueprint exists (CCAR-P, seven weighted domains); Level 4 is redrafted from it as modules 72 to 83 and no longer provisional. |
 
 C-01, C-02, C-06 and C-08 are reading and may run beside each other and beside one heavy row. C-03 to
 C-05 build or run containers and go through the heavy-job slot one at a time.
@@ -59,6 +59,7 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 
 | Date | Entry |
 |---|---|
+| 2026-10-02 | Survey C-01, C-02 and C-08 done: exam map confirmed, versions pinned, Level 4 redrafted from the Professional blueprint (83 modules). |
 | 2026-10-02 | Decisions D2, D4, D6 and D7: four incremental levels, offline grading, Professional level after a fresh search, Associate covered by Level 1. |
 | 2026-10-02 | Decisions D1, D3, D5, D8 and D9: name, four languages, the exam guide as topic map, the reader's key in the site and captures before release. |
 | 2026-10-02 | Outline draft 2: 80 modules in four levels, widened to the Developer exam's reported topics and the official course topics. |

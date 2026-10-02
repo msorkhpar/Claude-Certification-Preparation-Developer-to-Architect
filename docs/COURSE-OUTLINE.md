@@ -1,8 +1,9 @@
-# Course outline (draft 2)
+# Course outline (draft 3)
 
 **Status: a draft for the owner to cut, add to and reorder.** Nothing here is a promise until
 milestone M3 freezes it. Each module will hold one to four pages; the page count is set in M3.
-Draft 2 widens Level 2 to every topic the Developer exam is reported to cover, and adds the
+Draft 3 follows the four exams' published blueprints: Level 2 covers every Developer topic,
+Level 3 every Architect Foundations task statement, Level 4 the seven Professional domains; it keeps the
 official Academy's topics (skills, subagents, managed agents, retrieval, enterprise rollout).
 
 **Exam codes used below** (defined in [`EXAM-MAP.md`](EXAM-MAP.md)):
@@ -18,7 +19,7 @@ official Academy's topics (skills, subagents, managed agents, retrieval, enterpr
 - **S1 to S6**: the Architect exam's six scenario settings (customer support agent; code
   generation with Claude Code; multi-agent research; developer productivity; Claude Code in CI;
   structured data extraction).
-- **AS**: the Associate exam. **P**: Architect Professional, provisional.
+- **AS**: the Associate exam. **P1 to P7**: the Architect Professional exam's seven domains (P1 solution design and architecture; P2 models, prompting and context engineering; P3 integration; P4 evaluation, testing and optimisation; P5 governance, safety and risk; P6 stakeholder communication and lifecycle; P7 developer productivity and operational enablement).
 
 **Practice kinds:** **code** (Python and TypeScript everywhere, Java and Kotlin wherever the
 module does not need the Agent SDK; graded by each language's test runner against the scripted
@@ -31,8 +32,8 @@ modules that use its subagent, hook and session features: 42, 44 and 46) are Pyt
 only; every other code module is in all four. Each such module says what a Java or Kotlin team
 uses instead.
 
-**Versions:** pinned in M1 (model ids; Python, Node, the JDK and Kotlin; the Anthropic, MCP and
-Agent SDKs per language).
+**Versions:** pinned in [`VERSIONS.md`](VERSIONS.md) (model ids; the Anthropic, MCP and Agent SDKs
+per language); Python, Node, JDK and Kotlin follow from the heavy rows.
 A claim on a page names the versions it was checked on.
 
 ## Level 1: Foundations (shared by every exam)
@@ -58,11 +59,11 @@ A claim on a page names the versions it was checked on.
 | 12 | Errors, retries and timeouts | Error classes by type and origin, which to retry, back-off, timeouts, idempotency, logging without secrets | DV1, DV8 | code: a retry policy graded on scripted failures |
 | 13 | Async, concurrency and backpressure | `async` and `await` for API calls, bounded concurrency, rate limits as a client concern, backpressure when streaming | DV1 | code |
 | 14 | Streaming | The event types, assembling a message, streaming tool use, when streaming matters | DV1 | code |
-| 15 | Model choice, cost and migration | Matching a tier to a workload; quality, latency and cost; reading usage and modelling cost; parameters a newer model rejects; pinning model ids; migrating safely | DV2; P | code: a router and a cost model |
+| 15 | Model choice, cost and migration | Matching a tier to a workload; quality, latency and cost; reading usage and modelling cost; parameters a newer model rejects; pinning model ids; migrating safely | DV2; P2, P4 | code: a router and a cost model |
 | 16 | Thinking, effort and speed | Extended and adaptive thinking, effort levels, fast mode, thinking with tools, cost | DV2 | code |
 | 17 | Prompt caching | The prefix rule, breakpoints, time to live, measuring hits, when caching pays | DV2 | code: order a request for cache hits |
 | 18 | Message Batches | Real time versus batch, `custom_id`, results, cost, limits | DV1, DV2; A4.5 | code |
-| 19 | Claude on the cloud platforms | Calling Claude through Amazon Bedrock and Google Vertex AI: what differs from the direct API (model ids, auth, features), choosing a platform | DV1; P | code against replay |
+| 19 | Claude on the cloud platforms | Calling Claude through Amazon Bedrock and Google Vertex AI: what differs from the direct API (model ids, auth, features), choosing a platform | DV1; P3 | code against replay |
 | 20 | Prompt engineering for applications | Templates and variables, system versus user placement, constraints, few-shot design, chain of thought, prefilling, long-document placement, prompt chaining, versioning prompts | DV4; A4.1, A4.2 | code |
 | 21 | Structured output and defensive parsing | JSON Schema, structured outputs, tool-forced output, validate and re-prompt, parsing defensively, distrusting confident but wrong output | DV1, DV4; A4.3, A4.4 | code: an extractor with validation |
 | 22 | Tool use | Tool definitions and schemas, descriptions as the routing contract, the tool loop, `tool_choice`, parallel calls, results and errors, client versus server tools (web search, code execution, text editor), approval gates | DV5; A1.1, A2.1 | code: a tool loop against a scripted model |
@@ -74,7 +75,7 @@ A claim on a page names the versions it was checked on.
 | 28 | MCP advanced | Message types, sampling, roots, log and progress notifications, Streamable HTTP and its state, remote servers and authorisation | DV5 | code |
 | 29 | Workflows and agents | Agent or workflow: the criteria; cost, latency and reliability; chaining, routing, parallelisation, orchestrator and workers, evaluator and optimiser | DV3; A1.6 | code: two workflow patterns |
 | 30 | The Claude Agent SDK | `query()` and the loop under it, streaming versus single-message input, built-in tools, permissions, custom tools, a custom loop and harness (turns, state, control) | DV3; A1 | code against a scripted model |
-| 31 | Managed and self-hosted agents | Anthropic-hosted managed agents versus running your own, configuring a managed agent, what each costs and controls | DV3; P | quiz |
+| 31 | Managed and self-hosted agents | Anthropic-hosted managed agents versus running your own, configuring a managed agent, what each costs and controls | DV3; P1 | quiz |
 | 32 | Agent frameworks compared | What graph-based, model-driven and typed frameworks are, and when one beats the SDK | DV3 | quiz |
 | 33 | Claude Code for developers | Installing, explore, plan, code and commit, the memory file and its precedence, settings and their layers (user, project, local), permission modes, sessions, built-in and custom slash commands, headless and auto modes, initialising a repository | DV7; A3 | config: a project set-up graded by tests |
 | 34 | Extending Claude Code | Skills, subagents and their memory, hooks, plugins and their dependencies, sharing them across a team | DV1, DV7; A3.2 | config |
@@ -110,10 +111,10 @@ introduced a topic, the Level 3 module deepens it and links back; it does not re
 | 56 | Criteria and examples | Explicit criteria that cut false positives, two to four targeted examples, when examples beat instructions | A4.1, A4.2 | code |
 | 57 | Structured output at the architect level | Tool-forced output, `tool_choice` modes, nullable and "unclear" values, validation, retry with feedback | A4.3, A4.4; S6 | code: an extraction pipeline |
 | 58 | Batch and multi-pass review | Batches in a pipeline, several independent passes, combining verdicts | A4.5, A4.6 | code |
-| 59 | Keeping what matters in long conversations | What to pin, summarise or drop, case facts kept outside the transcript | A5.1 | code |
+| 59 | Keeping what matters in long conversations | What to pin, summarise or drop, case facts kept outside the transcript, trimming tool output, placing key facts where the model attends to them (the lost-in-the-middle effect) | A5.1 | code |
 | 60 | Escalation and ambiguity | When the agent must ask, hand off or stop; designing the hand-off | A5.2; S1 | code |
 | 61 | Errors across agents | How a subagent's failure travels to the coordinator and the user, partial results | A5.3 | code |
-| 62 | Exploring a large codebase | Scratchpad files, delegating exploration to subagents, keeping the main context lean | A5.4; S4 | config |
+| 62 | Exploring a large codebase | Scratchpad files, delegating exploration to subagents (the Explore subagent), `/compact`, keeping the main context lean, state manifests that let a coordinator recover after a crash | A5.4; S4 | config |
 | 63 | Human review and calibrated confidence | Sampling for review, stratified sampling, making a confidence score honest | A5.5 | code |
 | 64 | Provenance and uncertainty | Linking claims to sources, recording conflicts and gaps | A5.6; S3 | code |
 | 65 | Scenario: customer support agent | A capstone that brings A1, A2 and A5 together | S1 | code (capstone) and quiz |
@@ -124,23 +125,28 @@ introduced a topic, the Level 3 module deepens it and links back; it does not re
 | 70 | Scenario: structured data extraction | Capstone | S6 | code (capstone) and quiz |
 | 71 | Exam readiness 3 | Architect exam strategy and two Architect mock exams | A1 to A5 | quiz (mock) |
 
-## Level 4: Architect Professional (provisional)
+## Level 4: Architect Professional (Claude Certified Architect, Professional)
 
-No public blueprint exists for this exam at the time of writing. This level is drafted from the
-Foundations blueprint's next steps and from enterprise practice, and it is rebuilt when a
-blueprint is published (board D6).
+Drafted from the exam's seven published domains (board C-08). The exam tests design judgment and
+communication at the level of a solution architect: choosing patterns, protocols and models,
+evaluating and governing a system, and explaining the trade-offs to the people who fund it. Where
+a Level 2 or 3 module introduced a topic, the Level 4 module deepens it from the architect's seat
+and links back.
 
 | # | Module | Covers | Exams | Practice |
 |---|---|---|---|---|
-| 72 | Deployment architecture | The API directly or through a cloud platform, data handling and retention options, regions, choosing for a regulated customer | P | quiz |
-| 73 | Rolling Claude out to an organisation | Organisations and groups, which surfaces each group gets, connectors, spend caps, measuring adoption | P | quiz |
-| 74 | Governance at scale | Organisation-wide Claude Code policy (managed settings, permissions), approved MCP servers, governing skills and plugins, audit | P | config |
-| 75 | Cost and capacity engineering | Rate limits and tiers, caching and batching strategy, routing at scale, budgets and alerts | P | code |
-| 76 | Observability and evaluation in production | Tracing agent runs, online evaluation, drift after a model upgrade, incident review | P | code |
-| 77 | Reliability of multi-agent systems | Failure isolation, idempotent tools, retries across agents, degradation paths | P | code |
-| 78 | Migration and model upgrades at scale | Moving prompts and agents to a new model, regression suites, staged roll-out | P | code |
-| 79 | Professional capstone | An enterprise scenario designed end to end, with a written design review | P | code and quiz |
-| 80 | Exam readiness 4 | The Professional mock exam (provisional) | P | quiz (mock) |
+| 72 | From business problem to solution | Translating a business need into a Claude solution; choosing workflow, agentic or augmented-model design; tying the design to value (efficiency, transformation, productivity, cost, performance targets) | P1 | quiz |
+| 73 | End-to-end and multi-agent architecture | Input, processing, output and feedback loops; decomposing a complex problem; when several agents earn their cost; orchestration choices and their failure modes | P1 | code: an architecture review against a rubric |
+| 74 | Models, prompts and context as design choices | Model trade-offs for a workload; system prompts, templates and guardrails; zero-shot, few-shot and chain of thought as design options; token and context budgets; reuse through caching, modular prompts and skills | P2 | code |
+| 75 | Retrieval pipelines at design level | Chunking and indexing strategies; matching retrieval to data shape and query pattern; freshness after re-indexing; evaluating retrieval separately from generation | P3 | code: a pipeline graded on recall and staleness |
+| 76 | Integration choices, access and capability bloat | MCP versus direct API or CLI versus agent-to-agent; progressive discovery versus one large context; spotting capability bloat; authentication and authorisation gaps; the accuracy and latency trade | P3 | quiz and config |
+| 77 | Observability at scale | What to log and trace across agents and tools, sampling, dashboards and alerts, tracing a bad answer back to its cause | P3, P4 | code |
+| 78 | Evaluation and optimisation | Metrics for accuracy, latency, cost, safety and security; building evaluation sets and mixed test methods; A/B tests; diagnosing prompt failure, hallucination and model mismatch; cost and latency trade-offs | P4 | code |
+| 79 | Governance, safety and risk | Guardrails and safety controls; failure modes and limits of language-model systems; human-in-the-loop design; compliance regimes at design level (GDPR, HIPAA, FedRAMP); fairness and transparency | P5 | quiz and config |
+| 80 | Stakeholders and the project lifecycle | Structured discovery; explaining decisions and trade-offs to technical and executive audiences; expectations and SLAs; architecture documents and hand-off; discovery, design, hand-off, monitoring and iteration | P6 | written design record graded on a rubric, and quiz |
+| 81 | Enabling teams and operations | Claude Code and tool environments for a team; AI-assisted developer workflows; supporting debugging and operational incidents | P7 | config |
+| 82 | Professional capstone | An enterprise scenario designed end to end, with retrieval, evaluation, observability and a written design review | P1 to P7 | code and quiz |
+| 83 | Exam readiness 4 | Professional exam strategy and the Professional mock exam | P1 to P7 | quiz (mock) |
 
 ## Excluded on purpose
 
@@ -153,6 +159,6 @@ blueprint is published (board D6).
 
 ## Size
 
-80 modules: Level 1 has 8, Level 2 has 31, Level 3 has 32, Level 4 has 9. Level 2 is the widest
-because the Developer exam is reported to span the whole platform; Level 3 is the deepest because
-the Architect Foundations exam has the most detailed public blueprint and the scenario capstones.
+83 modules: Level 1 has 8, Level 2 has 31, Level 3 has 32, Level 4 has 12. Level 2 is the widest
+because the Developer exam spans the whole platform; Level 3 is the deepest because
+the Architect Foundations exam has the most detailed blueprint and the scenario capstones.
