@@ -24,6 +24,8 @@ can also be run live.
   reliability, in the exam's scenarios), and Architect Professional (enterprise scale).
 - **Practices graded by a real runner:** you write the agent loop, the tool schema, the MCP
   server, the hook, the `CLAUDE.md` and the validation-and-retry loop, and tests grade them.
+- **Four languages:** every example and practice in Python and TypeScript, and in Java and
+  Kotlin wherever the topic does not need the Agent SDK; pick your language on the first visit.
 - **Exam-style quizzes:** scenario questions with one best answer and three plausible ones,
   explained, and a mock exam at the end of each level.
 

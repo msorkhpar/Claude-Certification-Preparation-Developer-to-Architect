@@ -30,7 +30,8 @@ The questions the course must let a reader answer:
    certificates.
 3. **Teams** adopting Claude Code and the API who want a shared, tested standard of practice.
 
-The course assumes the reader can program (it uses Python) and knows HTTP and JSON. It assumes
+The course assumes the reader can program in one of its four languages (Python, TypeScript,
+Java or Kotlin) and knows HTTP and JSON. It assumes
 nothing about Claude.
 
 ## Non-goals (the scope guard)

@@ -23,14 +23,15 @@ M9.**
 
 | # | Decision | Status |
 |---|---|---|
-| D1 | Name | **proposed:** "Claude Certification Preparation: Developer to Architect", repository `claude-certification-preparation` |
+| D1 | Name | **decided:** "Claude Certification Preparation: Developer to Architect", repository `claude-certification-preparation` |
 | D2 | Levels | **proposed:** four incremental levels in one site: Foundations, Developer, Architect, Architect Professional; a topic is taught once, at the first level that needs it, and deepened later by link, never repeated |
-| D3 | Language | **proposed:** Python for every practice and example; a TypeScript tab where the TypeScript form differs in a way an exam can ask about |
+| D3 | Languages | **decided:** four languages. Python and TypeScript for every example and practice; Java and Kotlin too wherever the topic does not need the Agent SDK (which exists only for Python and TypeScript). One example block with a tab per language; the reader picks a language on the first visit and a remembered switch changes it; a language a topic or practice does not exist in is greyed out and says which languages carry it. Claude Code and MCP configuration files are language-neutral and shown once |
 | D4 | The API in practices | **proposed:** graded runs are offline against recorded exchanges (captured once, replayed) and scripted exchanges; live runs optional with the reader's own key, never graded |
-| D5 | Exam guide copies | **open:** a circulating copy of an exam guide is marked confidential; proposed: not used at all; the exam map uses only the domain names, weights and scenarios reported publicly, and confirms them on official pages |
+| D5 | Exam guide | **decided:** the Architect Foundations exam guide is public and is used as the topic map: its domains, topics and scenarios shape Level 3. Its wording and sample questions are not copied; the course writes its own |
 | D6 | Architect Professional | **proposed:** Level 4 is provisional and rebuilt when a public blueprint exists |
 | D7 | Associate exam | **proposed:** covered by Level 1 only; no separate Associate track |
-| D8 | Capture key | **open:** recorded exchanges need one approved capture run per batch with a key from the environment; who supplies it, and a spend cap per run |
+| D8 | API key | **decided:** the reader enters their own key in the site's UI, which passes it to the code at run time and never stores it in a file; grading stays offline and deterministic against the scripted model for everyone; with a key, the reader can also run examples and their own solution live, never graded. Examples ship with exchanges captured by the course's authors, labelled with model and date |
+| D9 | Key storage and captures | **decided:** the reader's key is typed in the site and kept in the browser tab's session storage by default (gone when the tab closes); "remember on this device" is an opt-in to the browser's local storage. The site sends it with a live-run request; the local service passes it as an environment variable to that run's container only, never writes it to disk and never gives it to the graded runner. A reader may instead set `ANTHROPIC_API_KEY` in their own ignored `course.env`. Authoring uses hand-scripted exchanges labelled illustrative; real exchanges are captured in one pass before release, with the owner's key set in the environment for that run only |
 
 ## M1 rows (opened now)
 
@@ -42,6 +43,7 @@ M9.**
 | C-04 | The SDK wheels offline: what the Anthropic SDK, MCP SDK, Agent SDK, Pydantic and httpx need as pinned wheels; whether the Agent SDK needs the Claude Code binary and Node; what a profile image would hold | office (heavy, slot) | todo |
 | C-05 | Harness design: replay through the SDK's transport hook, the scripted model, the capture tool and its id-stripping check; one proof example | office (heavy, slot) | todo |
 | C-06 | Coverage check: every exam-map topic has a module, every module names valid codes; a script the gate runs | office | todo |
+| C-07 | The other three languages: TypeScript on the base image's Node (type stripping, its test runner) or a pinned compiler; the Java API SDK and the JVM MCP SDK in a Gradle project for Java and Kotlin, offline; which SDK features each language lacks | office (heavy, slot) | todo |
 
 C-01, C-02 and C-06 are reading and may run beside each other and beside one heavy row. C-03 to
 C-05 build or run containers and go through the heavy-job slot one at a time.
@@ -56,5 +58,6 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 
 | Date | Entry |
 |---|---|
+| 2026-10-02 | Decisions D1, D3, D5, D8 and D9: name, four languages, the exam guide as topic map, the reader's key in the site and captures before release. |
 | 2026-10-02 | Outline draft 2: 80 modules in four levels, widened to the Developer exam's reported topics and the official course topics. |
 | 2026-10-02 | Project created: goal, idea, setup, exam map, outline draft, production steps and the board. Nothing has been built or run. |

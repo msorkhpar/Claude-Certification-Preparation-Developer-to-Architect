@@ -20,11 +20,19 @@ official Academy's topics (skills, subagents, managed agents, retrieval, enterpr
   structured data extraction).
 - **AS**: the Associate exam. **P**: Architect Professional, provisional.
 
-**Practice kinds:** **code** (Python, graded by pytest against the scripted or replayed model),
+**Practice kinds:** **code** (Python and TypeScript everywhere, Java and Kotlin wherever the
+module does not need the Agent SDK; graded by each language's test runner against the scripted
+or replayed model),
 **config** (Claude Code or MCP files, graded by tests that validate them and run their hooks),
 **quiz** (exam-style scenario questions), **reading** (no practice).
 
-**Versions:** pinned in M1 (model ids, Python, the Anthropic SDK, the MCP SDK and the Agent SDK).
+**Languages (board D3):** modules whose practice needs the Agent SDK (30, and the Level 3
+modules that use its subagent, hook and session features: 42, 44 and 46) are Python and TypeScript
+only; every other code module is in all four. Each such module says what a Java or Kotlin team
+uses instead.
+
+**Versions:** pinned in M1 (model ids; Python, Node, the JDK and Kotlin; the Anthropic, MCP and
+Agent SDKs per language).
 A claim on a page names the versions it was checked on.
 
 ## Level 1: Foundations (shared by every exam)

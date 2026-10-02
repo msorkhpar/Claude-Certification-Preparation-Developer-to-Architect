@@ -60,13 +60,17 @@ The recurring lessons (a guarantee belongs in code, not in a prompt; the simples
 cause beats extra machinery) are taught in the lessons first, so a quiz never tests something the
 page did not teach.
 
-## One language, with a second tab where it helps
+## Four languages, one tab block
 
-Practices and examples are in **Python** (the SDKs, the MCP SDK and the Agent SDK all have
-first-class Python, and the toolchain already runs Python with pytest). Where the TypeScript
-form differs in a way an exam can ask about, an example carries a **TypeScript tab** beside the
-Python one, in the same one-click tab block the Kotlin course uses. Claude Code configuration
-(settings, hooks, skills, `CLAUDE.md`, `.mcp.json`) is shown as the files themselves.
+Every example and practice exists in **Python and TypeScript**, the two languages that have every
+SDK the course uses (the API SDK, the MCP SDK and the Agent SDK). Wherever a topic does not need
+the Agent SDK, it also exists in **Java and Kotlin**, through the Java API SDK and the MCP SDK for
+the JVM. An example is one block with a tab per language, the same tab feature the Kotlin course
+uses; the reader picks a language on the first visit, a remembered switch on every page changes it,
+and a language a topic or practice does not exist in is greyed out with a line naming the languages
+that carry it. Claude Code and MCP configuration files (settings, hooks, skills, the memory file,
+the project MCP file) are language-neutral and shown once; a hook script is shown in each language
+that has the topic.
 
 ## What runs, and where
 
@@ -84,15 +88,18 @@ Python one, in the same one-click tab block the Kotlin course uses. Claude Code 
 Planned and tracked on the framework repositories' own boards, backward compatible with every
 existing course. This repository only states the need:
 
-1. **Python dependencies in a profile:** the toolchain's profile mechanism gains a pinned
-   Python-wheel entry kind, so a profile image can carry the Anthropic SDK, the MCP SDK, the Agent
-   SDK, Pydantic and httpx, offline, without moving any shared base tag.
+1. **SDKs in a profile, for four languages:** the toolchain's profile mechanism gains pinned
+   Python-wheel and npm-package entry kinds (its Maven and Gradle kinds already exist), so a
+   profile image carries the Anthropic, MCP and Agent SDKs for Python and TypeScript and the
+   Anthropic and MCP SDKs for Java and Kotlin, offline, without moving any shared base tag.
+   TypeScript runs on the base image's Node if its built-in type stripping suffices (survey C-07).
 2. **A quiz-heavy unit:** a mock-exam page of many scenario questions that covers a whole level,
    graded in the page, within the quiz gates.
-3. **Optional live runs:** a way for a reader to pass their own API key to the editor at run time,
-   off by default, never to the graded runner.
-4. **Python and TypeScript tabs** in the example block (the tab feature generalised from Kotlin and
-   Java).
+3. **Optional live runs:** the reader types their own key in the site; it is kept in the browser,
+   passed to a live run as an environment variable, never stored on disk and never given to the
+   graded runner (board D9).
+4. **Four-language tabs and reading languages:** the example tab block and the reading-mode choice
+   generalised from the Kotlin course to any list of languages, with greyed-out languages.
 
 ## How the repository is laid out (draft)
 
