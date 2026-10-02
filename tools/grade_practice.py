@@ -27,30 +27,31 @@ def analyse(lang, text):
     names = {lang_name: cid for cid, c in CASES["cases"].items() for lang_name in [c[lang]]}
     failed, problems = set(), []
     if lang == "python":
-        for m in re.finditer(r"^FAILED \S+::(\w+)(?: - (.*))?$", text, re.M):
+        for m in re.finditer(r"^FAILED \S+::(\w+)", text, re.M):
             failed.add(names.get(m.group(1), m.group(1)))
-            if not (m.group(2) or "").startswith("AssertionError"):
-                problems.append(f"{m.group(1)}: not an assertion ({m.group(2)})")
-        if "ERROR" in text and "error" in re.sub(r"(?i)0 errors", "", text.lower()) and "FAILED" not in text:
-            problems.append("collection or import error")
+        kinds = re.findall(r"^tests/\S+:\d+: (\w+)\s*$", text, re.M)
+        if len(kinds) != len(failed) or any(k != "AssertionError" for k in kinds):
+            problems.append(f"failure types {kinds} are not all AssertionError")
+        if re.search(r"^E\s+(ImportError|ModuleNotFoundError|SyntaxError)", text, re.M):
+            problems.append("import or syntax error")
     elif lang == "typescript":
-        for m in re.finditer(r"^\s*✖ (.*?) \(\d", text, re.M):
+        section = text.split("✖ failing tests:", 1)[1] if "✖ failing tests:" in text else ""
+        for m in re.finditer(r"^\s*✖ (.*?) \(\d[\d.]*ms\)", text, re.M):
             if m.group(1) in names:
                 failed.add(names[m.group(1)])
-        n_fail = len(re.findall(r"^\s*✖ (?!.*\(\d.*\)\n.*subtests)", text, re.M))
-        if "name: 'AssertionError'" not in text and failed:
-            problems.append("failure is not an AssertionError")
-        if re.search(r"name: '(?!AssertionError)\w+'", text):
-            problems.append("a non-assertion error type appears")
+        kinds = re.findall(r"^\s+(\w+Error)\b.*", section, re.M)
+        top = [k for k in kinds if k != "AssertionError"]
+        if len([k for k in kinds if k == "AssertionError"]) < len(failed) or top:
+            problems.append(f"failure types {sorted(set(kinds))} are not all AssertionError")
     elif lang == "java":
         if "COMPILATION ERROR" in text:
             problems.append("compilation error")
-        for m in re.finditer(r"PromptBuilderTest\.(\w+):\d+", text):
+        for m in re.finditer(r"PromptBuilderTest\.(?!java)(\w+):\d+", text):
             failed.add(names.get(m.group(1), m.group(1)))
         if re.search(r"Errors: [1-9]", text):
             problems.append("a test errored instead of failing an assertion")
-        if re.search(r"\[ERROR\]\s+PromptBuilderTest\.\w+(?::\d+)?\s+(?!expected|Expected|Unexpected|Should|\S*Assertion)", text) and "AssertionFailedError" not in text:
-            pass
+        if failed and "AssertionFailedError" not in text:
+            problems.append("failure is not an AssertionFailedError")
     else:
         if re.search(r"^e: ", text, re.M):
             problems.append("compilation error")
@@ -97,7 +98,7 @@ def main():
         for lang in ["python", "typescript"]:
             t = (OUT / f"ex-{ex}-{lang}-test.txt")
             txt = t.read_text() if t.exists() else ""
-            ok = bool(re.search(r"\d+ passed", txt) and "failed" not in txt) if lang == "python" else bool(re.search(r"^# fail 0", txt, re.M) and re.search(r"^# pass [1-9]", txt, re.M))
+            ok = bool(re.search(r"\d+ passed", txt) and "failed" not in txt) if lang == "python" else bool(re.search(r"^ℹ fail 0", txt, re.M) and re.search(r"^ℹ pass [1-9]", txt, re.M))
             print(f"example {ex} {lang} tests: {'ok' if ok else 'FINDING'}")
             findings += 0 if ok else 1
     print("findings:", findings)

@@ -38,24 +38,144 @@ exists so you can see the effect, with a seeded generator so every run prints th
 
 <!-- example: m1-sampler tabs: python,typescript -->
 ```python
-EXAMPLE_PYTHON
+"""A toy next-token sampler. It is not Claude: it only shows what temperature does."""
+import math
+
+TOKENS = ["blue", " clear", " falling", "green"]
+LOGITS = [4.0, 2.5, 1.0, -1.0]
+
+
+def softmax(logits, temperature):
+    """Turn scores into probabilities. Lower temperature sharpens, higher flattens."""
+    scaled = [x / temperature for x in logits]
+    top = max(scaled)
+    exps = [math.exp(x - top) for x in scaled]
+    total = sum(exps)
+    return [e / total for e in exps]
+
+
+class Lcg:
+    """A tiny seeded random generator, the same in every language of this course."""
+
+    def __init__(self, seed):
+        self.state = seed % 2**32
+
+    def next(self):
+        self.state = (self.state * 1664525 + 1013904223) % 2**32
+        return self.state / 2**32
+
+
+def sample(probs, rng):
+    u = rng.next()
+    acc = 0.0
+    for i, p in enumerate(probs):
+        acc += p
+        if u < acc:
+            return i
+    return len(probs) - 1
+
+
+def greedy(probs):
+    return max(range(len(probs)), key=lambda i: probs[i])
+
+
+def main():
+    for t in (0.5, 1.0, 2.0):
+        probs = softmax(LOGITS, t)
+        print(f"T={t}: " + "  ".join(f"{tok.strip()}={p:.3f}" for tok, p in zip(TOKENS, probs)))
+    print("greedy:", TOKENS[greedy(softmax(LOGITS, 1.0))])
+    for t in (0.2, 1.0, 2.0):
+        probs = softmax(LOGITS, t)
+        rng = Lcg(7)
+        picks = [TOKENS[sample(probs, rng)].strip() for _ in range(10)]
+        print(f"T={t} ten draws:", " ".join(picks))
+
+
+if __name__ == "__main__":
+    main()
 ```
 ```text
-EXAMPLE_OUT_PY
+T=0.5: blue=0.950  clear=0.047  falling=0.002  green=0.000
+T=1.0: blue=0.781  clear=0.174  falling=0.039  green=0.005
+T=2.0: blue=0.563  clear=0.266  falling=0.126  green=0.046
+greedy: blue
+T=0.2 ten draws: blue blue blue blue blue blue blue blue blue blue
+T=1.0 ten draws: blue clear blue clear blue clear blue blue blue falling
+T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
 ```
 ```typescript
-EXAMPLE_TS
+// A toy next-token sampler. It is not Claude: it only shows what temperature does.
+export const TOKENS = ["blue", " clear", " falling", "green"];
+export const LOGITS = [4.0, 2.5, 1.0, -1.0];
+
+export function softmax(logits: number[], temperature: number): number[] {
+  const scaled = logits.map((x) => x / temperature);
+  const top = Math.max(...scaled);
+  const exps = scaled.map((x) => Math.exp(x - top));
+  const total = exps.reduce((a, b) => a + b, 0);
+  return exps.map((e) => e / total);
+}
+
+// A tiny seeded random generator, the same in every language of this course.
+export class Lcg {
+  state: number;
+  constructor(seed: number) {
+    this.state = seed >>> 0;
+  }
+  next(): number {
+    this.state = (Math.imul(this.state, 1664525) + 1013904223) >>> 0;
+    return this.state / 2 ** 32;
+  }
+}
+
+export function sample(probs: number[], rng: Lcg): number {
+  const u = rng.next();
+  let acc = 0;
+  for (let i = 0; i < probs.length; i++) {
+    acc += probs[i];
+    if (u < acc) return i;
+  }
+  return probs.length - 1;
+}
+
+export function greedy(probs: number[]): number {
+  return probs.indexOf(Math.max(...probs));
+}
+
+export function main(): void {
+  for (const t of [0.5, 1.0, 2.0]) {
+    const probs = softmax(LOGITS, t);
+    const cells = TOKENS.map((tok, i) => `${tok.trim()}=${probs[i].toFixed(3)}`);
+    console.log(`T=${t.toFixed(1)}: ` + cells.join("  "));
+  }
+  console.log("greedy:", TOKENS[greedy(softmax(LOGITS, 1.0))]);
+  for (const t of [0.2, 1.0, 2.0]) {
+    const probs = softmax(LOGITS, t);
+    const rng = new Lcg(7);
+    const picks = Array.from({ length: 10 }, () => TOKENS[sample(probs, rng)].trim());
+    console.log(`T=${t.toFixed(1)} ten draws:`, picks.join(" "));
+  }
+}
+
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop()!)) main();
 ```
 ```text
-EXAMPLE_OUT_TS
+T=0.5: blue=0.950  clear=0.047  falling=0.002  green=0.000
+T=1.0: blue=0.781  clear=0.174  falling=0.039  green=0.005
+T=2.0: blue=0.563  clear=0.266  falling=0.126  green=0.046
+greedy: blue
+T=0.2 ten draws: blue blue blue blue blue blue blue blue blue blue
+T=1.0 ten draws: blue clear blue clear blue clear blue blue blue falling
+T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
 ```
 <!-- /example -->
 
-(Java and Kotlin readers: the example needs only the standard library of any language; the numbers above
-are the same in every language, because the generator is a four-line recurrence.)
+(Java and Kotlin readers: the example needs only the standard library of any language; the generator is a
+four-line recurrence, so a port prints the same numbers.)
 
-Read the output. At the lowest temperature almost all the probability sits on `blue`, and the ten draws are
-nearly identical. At the highest, the three weaker tokens together gain a large share and the draws mix.
+Read the output. At T=0.5 the probability of `blue` is 0.950, and at T=0.2 all ten draws are `blue`. At
+T=2.0 `blue` falls to 0.563, the three weaker tokens together hold the rest, and the draws mix `falling`,
+`clear` and `green` in. The program prints the same lines in Python and in TypeScript.
 That is the whole trade: low temperature for extraction, classification and anything with one right answer;
 higher for brainstorming and varied drafting.
 

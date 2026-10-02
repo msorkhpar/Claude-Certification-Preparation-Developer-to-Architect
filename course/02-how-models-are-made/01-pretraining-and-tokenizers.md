@@ -63,21 +63,141 @@ Frequent words end up as one piece; rare words are built from several smaller pi
 still be spelled out from the smallest pieces. The result is a vocabulary of sub-word units, which is why
 tokens are "not words".
 
-The example trains a toy version on eleven words and shows the effect. It is a teaching sketch with six
+The example trains a toy version on ten words and shows the effect. It is a teaching sketch with six
 merges, not Claude's tokenizer.
 
 <!-- example: m2-toy-bpe tabs: python,typescript -->
 ```python
-EXAMPLE_PYTHON
+"""A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words."""
+from collections import Counter
+
+
+def train(corpus, merges):
+    """Learn merge rules: repeatedly join the most frequent adjacent pair (ties: first seen)."""
+    words = [list(w) for w in corpus.split()]
+    rules = []
+    for _ in range(merges):
+        pairs = Counter()
+        for w in words:
+            for a, b in zip(w, w[1:]):
+                pairs[(a, b)] += 1
+        if not pairs:
+            break
+        best = max(pairs, key=lambda p: (pairs[p], -list(pairs).index(p)))
+        rules.append(best)
+        words = [_merge(w, best) for w in words]
+    return rules
+
+
+def _merge(word, pair):
+    out, i = [], 0
+    while i < len(word):
+        if i + 1 < len(word) and (word[i], word[i + 1]) == pair:
+            out.append(word[i] + word[i + 1])
+            i += 2
+        else:
+            out.append(word[i])
+            i += 1
+    return out
+
+
+def encode(word, rules):
+    pieces = list(word)
+    for rule in rules:
+        pieces = _merge(pieces, rule)
+    return pieces
+
+
+def main():
+    corpus = "low low low lower lower lowest newest newest widest widest"
+    rules = train(corpus, 6)
+    print("merges:", " ".join("+".join(r) for r in rules))
+    for word in ["low", "lowest", "newer", "widest", "lowish"]:
+        print(f"{word:7} -> {' | '.join(encode(word, rules))}")
+
+
+if __name__ == "__main__":
+    main()
 ```
 ```text
-EXAMPLE_OUT_PY
+merges: l+o lo+w e+s es+t low+e lowe+r
+low     -> low
+lowest  -> low | est
+newer   -> n | e | w | e | r
+widest  -> w | i | d | est
+lowish  -> low | i | s | h
 ```
 ```typescript
-EXAMPLE_TS
+// A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words.
+export type Pair = [string, string];
+
+function merge(word: string[], pair: Pair): string[] {
+  const out: string[] = [];
+  let i = 0;
+  while (i < word.length) {
+    if (i + 1 < word.length && word[i] === pair[0] && word[i + 1] === pair[1]) {
+      out.push(word[i] + word[i + 1]);
+      i += 2;
+    } else {
+      out.push(word[i]);
+      i += 1;
+    }
+  }
+  return out;
+}
+
+// Learn merge rules: repeatedly join the most frequent adjacent pair (ties: first seen).
+export function train(corpus: string, merges: number): Pair[] {
+  let words = corpus.split(/\s+/).filter(Boolean).map((w) => [...w]);
+  const rules: Pair[] = [];
+  for (let n = 0; n < merges; n++) {
+    const counts = new Map<string, number>();
+    for (const w of words) {
+      for (let i = 0; i + 1 < w.length; i++) {
+        const key = w[i] + "\u0000" + w[i + 1];
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+    }
+    if (counts.size === 0) break;
+    let best = "";
+    let bestCount = -1;
+    for (const [key, count] of counts) {
+      if (count > bestCount) {
+        best = key;
+        bestCount = count;
+      }
+    }
+    const pair = best.split("\u0000") as Pair;
+    rules.push(pair);
+    words = words.map((w) => merge(w, pair));
+  }
+  return rules;
+}
+
+export function encode(word: string, rules: Pair[]): string[] {
+  let pieces = [...word];
+  for (const rule of rules) pieces = merge(pieces, rule);
+  return pieces;
+}
+
+export function main(): void {
+  const corpus = "low low low lower lower lowest newest newest widest widest";
+  const rules = train(corpus, 6);
+  console.log("merges:", rules.map((r) => r.join("+")).join(" "));
+  for (const word of ["low", "lowest", "newer", "widest", "lowish"]) {
+    console.log(`${word.padEnd(7)} -> ${encode(word, rules).join(" | ")}`);
+  }
+}
+
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop()!)) main();
 ```
 ```text
-EXAMPLE_OUT_TS
+merges: l+o lo+w e+s es+t low+e lowe+r
+low     -> low
+lowest  -> low | est
+newer   -> n | e | w | e | r
+widest  -> w | i | d | est
+lowish  -> low | i | s | h
 ```
 <!-- /example -->
 

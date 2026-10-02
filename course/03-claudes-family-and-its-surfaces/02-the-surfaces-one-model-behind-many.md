@@ -26,7 +26,7 @@ the most common wrong option in scenario questions, and the commonest cause of a
 | Surface | Who it is for | What you get | You write |
 |---|---|---|---|
 | **The Claude apps** (web, desktop, mobile) | People doing knowledge work | Chat, Projects, artifacts, research, connectors; a person in the loop | Instructions and uploads, not code |
-| **Cowork** | People delegating work in an app | Taught in module 8 | Instructions |
+| **Cowork** | Placed here by name; see module 8 | Taught in module 8 from the official pages | See module 8 |
 | **Claude Code** | Developers working in a repository | An agentic coding tool in the terminal, IDE extensions, the desktop app and the web | Memory files, settings, skills, hooks |
 | **The Messages API** | Developers building products | Direct access to the model; your own loop, tools and state | Application code |
 | **The Agent SDK** | Developers building custom agents | The Claude Code engine and tools as a library | Agent code |

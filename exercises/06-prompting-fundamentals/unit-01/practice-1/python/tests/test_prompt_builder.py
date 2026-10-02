@@ -108,6 +108,8 @@ def test_e6_documents_and_examples_keep_their_order_and_index():
         "examples": [{"input": "i1", "output": "o1"}, {"input": "i2", "output": "o2"}],
     }
     out = build_prompt(spec)
-    assert out.index('index="1" name="b"') < out.index('index="2" name="a"')
-    assert out.index("<example index=\"1\">") < out.index("<example index=\"2\">")
-    assert out.index("i2") < out.index("o2")
+    d1, d2 = out.find('index="1" name="b"'), out.find('index="2" name="a"')
+    e1, e2 = out.find('<example index="1">'), out.find('<example index="2">')
+    assert 0 <= d1 < d2
+    assert 0 <= e1 < e2
+    assert 0 <= out.find("i2") < out.find("o2")
