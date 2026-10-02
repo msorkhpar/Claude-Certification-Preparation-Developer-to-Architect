@@ -33,6 +33,7 @@ M9.**
 | D8 | API key | **decided:** the reader enters their own key in the site's UI, which passes it to the code at run time and never stores it in a file; grading stays offline and deterministic against the scripted model for everyone; with a key, the reader can also run examples and their own solution live, never graded. Examples ship with exchanges captured by the course's authors, labelled with model and date |
 | D9 | Key storage and captures | **decided:** the reader's key is typed in the site and kept in the browser tab's session storage by default (gone when the tab closes); "remember on this device" is an opt-in to the browser's local storage. The site sends it with a live-run request; the local service passes it as an environment variable to that run's container only, never writes it to disk and never gives it to the graded runner. A reader may instead set `ANTHROPIC_API_KEY` in their own ignored `course.env`. Authoring uses hand-scripted exchanges labelled illustrative; real exchanges are captured in one pass before release, with the owner's key set in the environment for that run only |
 | D10 | Official exam guides | **decided:** all four official exam guides (Associate, Developer, Architect Foundations, Architect Professional) are used as the topic maps of their levels, and their sample questions may be used in the course's quizzes and mock exams, credited on the page where used. Questions from any other source are never copied |
+| D11 | Third-party material | **decided:** third-party prep material (study guides, practice-question sets, course tables of contents) may be read as a reference to check that the course covers every topic it lists; the course's wording, examples and questions stay its own, and the third-party sources are kept in the register outside the repository |
 
 ## M1 rows (opened now)
 
@@ -46,8 +47,9 @@ M9.**
 | C-06 | Coverage check: every exam-map topic has a module, every module names valid codes; a script the gate runs | office | todo |
 | C-07 | The other three languages: TypeScript on the base image's Node (type stripping, its test runner) or a pinned compiler; the Java API SDK and the JVM MCP SDK in a Gradle project for Java and Kotlin, offline; which SDK features each language lacks | office (heavy, slot) | todo |
 | C-08 | Look again for a public blueprint, exam description or prep material for the Architect Professional exam; if found, redraft Level 4 from it | office (reading) | **done:** A public official Professional blueprint exists (CCAR-P, seven weighted domains); Level 4 is redrafted from it as modules 72 to 83 and no longer provisional. |
+| C-09 | Topic-coverage audit against third-party references: list every topic the public study guides, practice-question sets and prep-course tables of contents cover, and name any the outline lacks; findings kept in the register outside the repository, outline gaps fixed in the outline | office (reading) | todo |
 
-C-01, C-02, C-06 and C-08 are reading and may run beside each other and beside one heavy row. C-03 to
+C-01, C-02, C-06, C-08 and C-09 are reading and may run beside each other and beside one heavy row. C-03 to
 C-05 build or run containers and go through the heavy-job slot one at a time.
 
 ## Framework work

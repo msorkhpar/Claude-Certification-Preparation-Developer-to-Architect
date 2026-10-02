@@ -56,6 +56,9 @@ For every module, once drafted:
   scenario question needs?
 - **Against the official material:** is anything the official courses and documentation teach for
   this topic missing? Findings are kept with the source register, outside the repository.
+- **Against third-party references:** do the public study guides, practice-question sets and
+  prep-course tables of contents name a topic this module or level lacks? They are a coverage
+  check only; findings stay in the register outside the repository.
 - **Against fresh-writing:** no sentence, example or question is a copy or close paraphrase of a
   source that does not permit it.
 
