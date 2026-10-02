@@ -3,7 +3,10 @@
 
 Rules (CLAUDE.md quiz rules that a script can check):
   - every question has four options a-d and a key among them;
-  - the key option shares no content word with the stem;
+  - the key option shares no content word (after simple stemming) with the stem;
+  - the key is at most 1.3 times the mean length of the distractors, in characters (warning when the key is the
+    longest option in more than 40 percent of a module's questions);
+  - the folded key gives every option its own explanation sentence (no merged "a, b, c are ..." sentence);
   - the folded key on the page names the same letter as quiz.json, in the same order;
   - quiz.json explains every option.
 usage: tools/check_quiz.py [module-folder-prefix ...]   exit 1 on any finding
@@ -24,8 +27,81 @@ def words(text):
     return {w for w in re.findall(r"[a-z][a-z'-]+", text.lower().replace("’", "'")) if w not in STOP and len(w) > 2}
 
 
+SUFFIXES = ("ers", "ions", "ments", "ing", "ion", "ment", "ed", "er", "es", "ly", "s")
+
+
+def stemmed(word):
+    """Lowercase stem: strip one common suffix and a doubled final consonant; kept when it has 4 letters or more."""
+    for suf in SUFFIXES:
+        if word.endswith(suf) and len(word) - len(suf) >= 3:
+            word = word[: -len(suf)]
+            break
+    if len(word) > 3 and word[-1] == word[-2] and word[-1] not in "aeiou":
+        word = word[:-1]
+    return word if len(word) >= 4 else None
+
+
+def stems(text):
+    return {x for x in (stemmed(w) for w in words(text)) if x}
+
+
 def stem_of(stem):
     return words(re.sub(r"`[^`]*`", " ", stem))
+
+
+LENGTH_RATIO = 1.3
+LONGEST_SHARE = 0.4
+
+
+def key_length_ratio(opts, key):
+    others = [len(v) for k, v in opts.items() if k != key]
+    return len(opts[key]) / (sum(others) / len(others)) if others else 0.0
+
+
+def key_is_longest(opts, key):
+    return all(len(opts[key]) > len(v) for k, v in opts.items() if k != key)
+
+
+def check_question(qid, stem, opts, key):
+    """Wording findings for one question (stem, {letter: text}, key letter)."""
+    problems = []
+    if key not in opts:
+        return problems
+    plain = re.sub(r"`[^`]*`", " ", stem)
+    shared = words(opts[key]) & stem_of(stem)
+    if shared:
+        problems.append(f"{qid}: key repeats stem words {sorted(shared)}")
+    echoed = stems(opts[key]) & stems(plain)
+    if echoed and not shared:
+        problems.append(f"{qid}: key echoes the stem by stem {sorted(echoed)}")
+    ratio = key_length_ratio(opts, key)
+    if ratio > LENGTH_RATIO:
+        problems.append(f"{qid}: key is {ratio:.2f} times the mean distractor length (limit {LENGTH_RATIO})")
+    return problems
+
+
+def check_key_paragraph(qid, para, key):
+    """The folded key: key letter first, then one sentence per other option, none merged."""
+    problems = []
+    text = re.sub(r"^\*\*[a-d]\*\*\.\s*", "", para.strip())
+    groups = re.findall(r"(?:\*[a-d]\*(?:, and |, | and )?)+", text)
+    singles = [g for g in groups if len(re.findall(r"\*([a-d])\*", g)) == 1]
+    merged = [g for g in groups if len(re.findall(r"\*([a-d])\*", g)) > 1]
+    if merged:
+        problems.append(f"{qid}: folded key merges options ({merged[0].strip()}); give each its own sentence")
+    letters = sorted(re.findall(r"\*([a-d])\*", " ".join(singles)))
+    want = sorted(set("abcd") - {key})
+    if letters != want and not merged:
+        problems.append(f"{qid}: folded key explains {letters}, want one sentence each for {want}")
+    return problems
+
+
+def key_paragraphs(md):
+    result = []
+    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+        _, _, keyblock = m.group(2).partition("<details>")
+        result.append(re.findall(r"^\d+\. (\*\*[a-d]\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M))
+    return result
 
 
 def parse_page_quizzes(md):
@@ -58,6 +134,7 @@ def check_module(folder):
     data = json.loads(qj.read_text())
     by_id = {q["id"]: q for q in data["quizzes"]}
     seen = set()
+    longest_total = longest_hits = 0
     for page in sorted(folder.glob("*.md")):
         md = page.read_text()
         for kind, questions, keys in parse_page_quizzes(md):
@@ -79,12 +156,18 @@ def check_module(folder):
                     problems.append(f"{qid}: page key {key} differs from quiz.json key {q['key']}")
                 if sorted(q.get("explanation", {})) != list("abcd"):
                     problems.append(f"{qid}: quiz.json must explain every option a-d")
-                shared = words(opts.get(q["key"], "")) & stem_of(stem)
-                if shared:
-                    problems.append(f"{qid}: key repeats stem words {sorted(shared)}")
+                problems += check_question(qid, stem, opts, q["key"])
+                paras = key_paragraphs(md)
+                idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
+                if n - 1 < len(paras[idx]):
+                    problems += check_key_paragraph(qid, paras[idx][n - 1], q["key"])
+                longest_total += 1
+                longest_hits += key_is_longest(opts, q["key"])
     for qid in by_id:
         if qid not in seen:
             problems.append(f"{qid}: in quiz.json but not on any page")
+    if longest_total and longest_hits / longest_total > LONGEST_SHARE:
+        print(f"warning: {folder.name}: key is the longest option in {longest_hits} of {longest_total} questions")
     keys_used = [q["key"] for q in data["quizzes"]]
     for letter in "abcd":
         if keys_used and keys_used.count(letter) > (len(keys_used) + 1) // 2:
