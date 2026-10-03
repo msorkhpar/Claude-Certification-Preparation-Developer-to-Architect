@@ -24,15 +24,18 @@ Steps:
     {"exit": 2}                                               the process dies at once with that exit code (a crash)
 
 Rules applied to a tool step (a simplified copy of the documented behaviour, not the real binary): a tool that is
-not in --tools (when that flag is given) does not exist; PreToolUse hooks registered at the handshake are called
-and may deny; a tool in --disallowedTools is denied; a tool in --allowedTools runs without asking; permission mode
+not in --tools (when that flag is given) does not exist (MCP tools are not affected by --tools); PreToolUse hooks registered at the handshake are called
+and may deny; a tool in --disallowedTools is denied; a tool in --allowedTools (a pattern such as mcp__calc__* matches too) runs without asking; permission mode
 bypassPermissions runs it; mode dontAsk denies it; any other tool is sent to the SDK as a `can_use_tool` control
 request and the answer decides. The command line, the working directory, every message received and every
 control request sent are appended to the file named by FAKE_CLAUDE_RECORD.
+A tool named mcp__<server>__<tool> is run by the SDK's own in-process MCP server: the stand-in sends it JSON-RPC as `mcp_message`
+control requests (initialize, then tools/call) and reports what the SDK answered.
 Like the real binary in single-shot mode, the process exits with code 1 after it sent an error result (a subtype other than
 "success", or the turn limit), which makes the SDK raise after it has yielded that result.
 Standard library only.
 """
+import fnmatch
 import json
 import os
 import sys
@@ -111,15 +114,29 @@ def main():
                     return out.get("reason", "blocked by a hook")
         return None
 
+    def mcp_call(tool):
+        """A tool of an in-process SDK MCP server (mcp__<server>__<tool>): the SDK answers JSON-RPC sent as `mcp_message` control requests."""
+        _, server, name = tool["name"].split("__", 2)
+        ids = iter(range(1, 100))
+
+        def rpc(method, params=None, notify=False):
+            message = {"jsonrpc": "2.0", "method": method, **({"params": params} if params else {}), **({} if notify else {"id": next(ids)})}
+            return ((ask("mcp_message", server_name=server, message=message).get("response") or {}).get("mcp_response")) or {}
+
+        rpc("initialize", {"protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": {"name": "course-stand-in", "version": "1"}})
+        rpc("notifications/initialized", notify=True)
+        result = rpc("tools/call", {"name": name, "arguments": tool["input"]}).get("result") or {}
+        return "".join(c.get("text", "") for c in result.get("content", [])), bool(result.get("isError"))
+
     def run_tool(tool):
         assistant([{"type": "tool_use", "id": tool["id"], "name": tool["name"], "input": tool["input"]}], "tool_use")
-        denied = None if available is None or tool["name"] in available else f"No such tool available: {tool['name']}"
+        denied = None if available is None or tool["name"] in available or tool["name"].startswith("mcp__") else f"No such tool available: {tool['name']}"
         denied = denied or run_hooks("PreToolUse", tool)
         if denied is None:
             name = tool["name"]
             if name in disallowed or mode == "dontAsk" and name not in allowed:
                 denied = f"{name} is not permitted"
-            elif name in allowed or mode == "bypassPermissions":
+            elif any(fnmatch.fnmatchcase(name, pattern) for pattern in allowed) or mode == "bypassPermissions":
                 pass
             else:
                 answer = ask("can_use_tool", tool_name=name, input=tool["input"], tool_use_id=tool["id"])
@@ -131,7 +148,7 @@ def main():
         if denied is not None:
             content, is_error = (denied if denied.startswith("No such tool") else f"Permission denied: {denied}"), True
         else:
-            content, is_error = tool.get("output", ""), bool(tool.get("is_error"))
+            content, is_error = mcp_call(tool) if tool["name"].startswith("mcp__") else (tool.get("output", ""), bool(tool.get("is_error")))
             run_hooks("PostToolUse", tool)
         send({"type": "user", "session_id": session, "parent_tool_use_id": None,
               "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": tool["id"],
@@ -150,7 +167,7 @@ def main():
             send({"type": "control_response", "response": {"subtype": "success", "request_id": msg["request_id"], "response": {"commands": [], "models": []}}})
         elif kind == "user" and turns:
             send({"type": "system", "subtype": "init", "session_id": session, "model": model, "cwd": "/work",
-                  "tools": allowed, "permissionMode": mode, "apiKeySource": "none"})
+                  "tools": available if available is not None else allowed, "permissionMode": mode, "apiKeySource": "none"})
             tool_calls = 0
             exit_code = 0
             for step in turns.pop(0):
