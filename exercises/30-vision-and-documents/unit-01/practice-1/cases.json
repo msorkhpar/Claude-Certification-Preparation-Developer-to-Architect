@@ -1,0 +1,110 @@
+{
+  "practice": "30-vision-and-documents/unit-01/practice-1",
+  "name": "vision",
+  "tests": {
+    "java": "VisionTest",
+    "kotlin": "VisionTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_images_come_first_with_labels_and_the_question_last",
+      "typescript": "m1 images come first with labels and the question last",
+      "java": "m1_imagesComeFirstWithLabelsAndTheQuestionLast",
+      "kotlin": "m1_imagesComeFirstWithLabelsAndTheQuestionLast"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_token_cost_follows_the_models_resolution_tier",
+      "typescript": "e1 the token cost follows the models resolution tier",
+      "java": "e1_theTokenCostFollowsTheModelsResolutionTier",
+      "kotlin": "e1_theTokenCostFollowsTheModelsResolutionTier"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_formats_dimensions_sizes_and_counts_are_checked_before_any_call",
+      "typescript": "e2 formats dimensions sizes and counts are checked before any call",
+      "java": "e2_formatsDimensionsSizesAndCountsAreCheckedBeforeAnyCall",
+      "kotlin": "e2_formatsDimensionsSizesAndCountsAreCheckedBeforeAnyCall"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_more_than_twenty_images_lower_the_side_limit_to_2000_pixels",
+      "typescript": "e3 more than twenty images lower the side limit to 2000 pixels",
+      "java": "e3_moreThanTwentyImagesLowerTheSideLimitTo2000Pixels",
+      "kotlin": "e3_moreThanTwentyImagesLowerTheSideLimitTo2000Pixels"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_an_image_whose_size_matters_is_rejected_instead_of_resized",
+      "typescript": "e4 an image whose size matters is rejected instead of resized",
+      "java": "e4_anImageWhoseSizeMattersIsRejectedInsteadOfResized",
+      "kotlin": "e4_anImageWhoseSizeMattersIsRejectedInsteadOfResized"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_pdfs_become_document_blocks_in_order_and_are_limited_by_pages",
+      "typescript": "e5 pdfs become document blocks in order and are limited by pages",
+      "java": "e5_pdfsBecomeDocumentBlocksInOrderAndAreLimitedByPages",
+      "kotlin": "e5_pdfsBecomeDocumentBlocksInOrderAndAreLimitedByPages"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_bedrock_and_vertex_take_only_base64_sources_and_smaller_images",
+      "typescript": "e6 bedrock and vertex take only base64 sources and smaller images",
+      "java": "e6_bedrockAndVertexTakeOnlyBase64SourcesAndSmallerImages",
+      "kotlin": "e6_bedrockAndVertexTakeOnlyBase64SourcesAndSmallerImages"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_coordinates_map_back_to_the_original_and_cost_follows_the_price",
+      "typescript": "e7 coordinates map back to the original and cost follows the price",
+      "java": "e7_coordinatesMapBackToTheOriginalAndCostFollowsThePrice",
+      "kotlin": "e7_coordinatesMapBackToTheOriginalAndCostFollowsThePrice"
+    }
+  },
+  "plants": {
+    "wrong-edge-only-resize": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "sizes an image by the edge limit alone and ignores the visual token budget"
+    },
+    "wrong-text-first": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "puts the question before the images"
+    },
+    "wrong-no-labels": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "does not label the images when there are several"
+    },
+    "wrong-padded-coordinates": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "divides a returned coordinate by the padded height instead of the resized height"
+    },
+    "wrong-same-limit-all-models": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "allows 600 images for every model, including the 200k-context one"
+    },
+    "wrong-many-image-rule": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "ignores the 2000 pixel limit that applies above 20 images"
+    },
+    "wrong-exact-silent": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "lets an oversized image through even when its exact size matters"
+    }
+  }
+}
