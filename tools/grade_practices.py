@@ -7,6 +7,7 @@ Also checks the Level 2 examples' test runs. Prints one line per variant and a s
 usage: tools/grade_practices.py
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -102,6 +103,8 @@ def main():
               f"plants failing on assertions {sum(1 for r in plants if r[3])}/{len(plants)}")
     for spec in sorted(ROOT.glob("examples/*/example.json")):
         d = spec.parent.name
+        if os.environ.get("L2_EXAMPLES") and not re.match(os.environ["L2_EXAMPLES"], d):
+            continue
         for lang in ("python", "typescript"):
             t = OUT / f"ex-{d}-{lang}-test.txt"
             txt = t.read_text() if t.exists() else ""

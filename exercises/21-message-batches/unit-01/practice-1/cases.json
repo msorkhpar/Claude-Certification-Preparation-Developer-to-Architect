@@ -1,0 +1,97 @@
+{
+  "practice": "21-message-batches/unit-01/practice-1",
+  "name": "batches",
+  "tests": {
+    "java": "BatchesTest",
+    "kotlin": "BatchesTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_results_are_matched_to_requests_by_custom_id_not_by_position",
+      "typescript": "m1 results are matched to requests by custom id not by position",
+      "java": "m1_resultsAreMatchedToRequestsByCustomIdNotByPosition",
+      "kotlin": "m1_resultsAreMatchedToRequestsByCustomIdNotByPosition"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_custom_id_is_1_to_64_safe_characters_and_unique",
+      "typescript": "e1 a custom id is 1 to 64 safe characters and unique",
+      "java": "e1_aCustomIdIs1To64SafeCharactersAndUnique",
+      "kotlin": "e1_aCustomIdIs1To64SafeCharactersAndUnique"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_parameters_a_batch_cannot_take_are_refused",
+      "typescript": "e2 parameters a batch cannot take are refused",
+      "java": "e2_parametersABatchCannotTakeAreRefused",
+      "kotlin": "e2_parametersABatchCannotTakeAreRefused"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_big_job_is_cut_in_order_by_request_count_and_by_size",
+      "typescript": "e3 a big job is cut in order by request count and by size",
+      "java": "e3_aBigJobIsCutInOrderByRequestCountAndBySize",
+      "kotlin": "e3_aBigJobIsCutInOrderByRequestCountAndBySize"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_invalid_requests_are_fixed_and_the_rest_are_retried",
+      "typescript": "e4 invalid requests are fixed and the rest are retried",
+      "java": "e4_invalidRequestsAreFixedAndTheRestAreRetried",
+      "kotlin": "e4_invalidRequestsAreFixedAndTheRestAreRetried"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_request_with_no_result_is_missing_and_a_stranger_is_reported",
+      "typescript": "e5 a request with no result is missing and a stranger is reported",
+      "java": "e5_aRequestWithNoResultIsMissingAndAStrangerIsReported",
+      "kotlin": "e5_aRequestWithNoResultIsMissingAndAStrangerIsReported"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_only_requests_that_succeeded_count_toward_usage",
+      "typescript": "e6 only requests that succeeded count toward usage",
+      "java": "e6_onlyRequestsThatSucceededCountTowardUsage",
+      "kotlin": "e6_onlyRequestsThatSucceededCountTowardUsage"
+    }
+  },
+  "plants": {
+    "wrong-by-position": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "pairs results with requests by their position in the file"
+    },
+    "wrong-duplicate-ids": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts a custom id that is used twice"
+    },
+    "wrong-allow-stream": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets stream and speed into a batch"
+    },
+    "wrong-count-only": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "cuts by request count and ignores the size limit"
+    },
+    "wrong-retry-invalid": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "retries an invalid request unchanged instead of fixing it"
+    },
+    "wrong-missing-ignored": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "drops a request that has no result instead of retrying it"
+    }
+  }
+}

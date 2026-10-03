@@ -1,0 +1,98 @@
+{
+  "practice": "22-claude-on-the-cloud-platforms/unit-01/practice-1",
+  "name": "platforms",
+  "tests": {
+    "java": "PlatformsTest",
+    "kotlin": "PlatformsTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_same_message_takes_three_shapes",
+      "typescript": "m1 the same message takes three shapes",
+      "java": "m1_theSameMessageTakesThreeShapes",
+      "kotlin": "m1_theSameMessageTakesThreeShapes"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_model_ids_change_with_the_platform",
+      "typescript": "e1 model ids change with the platform",
+      "java": "e1_modelIdsChangeWithThePlatform",
+      "kotlin": "e1_modelIdsChangeWithThePlatform"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_vertex_moves_the_model_into_the_url_and_the_version_into_the_body",
+      "typescript": "e2 vertex moves the model into the url and the version into the body",
+      "java": "e2_vertexMovesTheModelIntoTheUrlAndTheVersionIntoTheBody",
+      "kotlin": "e2_vertexMovesTheModelIntoTheUrlAndTheVersionIntoTheBody"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_vertex_endpoints_global_multi_region_and_regional",
+      "typescript": "e3 vertex endpoints global multi region and regional",
+      "java": "e3_vertexEndpointsGlobalMultiRegionAndRegional",
+      "kotlin": "e3_vertexEndpointsGlobalMultiRegionAndRegional"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_platform_serves_only_its_own_models",
+      "typescript": "e4 a platform serves only its own models",
+      "java": "e4_aPlatformServesOnlyItsOwnModels",
+      "kotlin": "e4_aPlatformServesOnlyItsOwnModels"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_each_platform_lacks_its_own_features",
+      "typescript": "e5 each platform lacks its own features",
+      "java": "e5_eachPlatformLacksItsOwnFeatures",
+      "kotlin": "e5_eachPlatformLacksItsOwnFeatures"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_request_needs_the_place_it_is_sent_to",
+      "typescript": "e6 a request needs the place it is sent to",
+      "java": "e6_aRequestNeedsThePlaceItIsSentTo",
+      "kotlin": "e6_aRequestNeedsThePlaceItIsSentTo"
+    }
+  },
+  "plants": {
+    "wrong-vertex-model-in-body": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "leaves the model in the Vertex body"
+    },
+    "wrong-vertex-version-header": {
+      "caught_by": [
+        "m1",
+        "e2"
+      ],
+      "defect": "sends the Vertex version as the anthropic-version header instead of a body field"
+    },
+    "wrong-bedrock-direct-id": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "sends the direct API model id to Bedrock"
+    },
+    "wrong-regional-any": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "allows any model on a specific Vertex region"
+    },
+    "wrong-batches-everywhere": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "treats the Message Batches API as available on both clouds"
+    },
+    "wrong-body-mutated": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "removes the model from the caller's own body"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "practice": "19-thinking-effort-and-speed/unit-01/practice-1",
+  "name": "params",
+  "tests": {
+    "java": "ParamsTest",
+    "kotlin": "ParamsTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_each_course_model_gets_the_request_it_accepts",
+      "typescript": "m1 each course model gets the request it accepts",
+      "java": "m1_eachCourseModelGetsTheRequestItAccepts",
+      "kotlin": "m1_eachCourseModelGetsTheRequestItAccepts"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_thinking_modes_a_model_does_not_have_are_refused",
+      "typescript": "e1 thinking modes a model does not have are refused",
+      "java": "e1_thinkingModesAModelDoesNotHaveAreRefused",
+      "kotlin": "e1_thinkingModesAModelDoesNotHaveAreRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_mode_that_skips_thinking_up_front_is_sonnet_only_and_needs_high_effort_or_below",
+      "typescript": "e2 the mode that skips thinking up front is Sonnet only and needs high effort or below",
+      "java": "e2_theModeThatSkipsThinkingUpFrontIsSonnetOnlyAndNeedsHighEffortOrBelow",
+      "kotlin": "e2_theModeThatSkipsThinkingUpFrontIsSonnetOnlyAndNeedsHighEffortOrBelow"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_effort_needs_a_supporting_model_and_a_real_level",
+      "typescript": "e3 effort needs a supporting model and a real level",
+      "java": "e3_effortNeedsASupportingModelAndARealLevel",
+      "kotlin": "e3_effortNeedsASupportingModelAndARealLevel"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_newer_models_reject_sampling_parameters_and_haiku_keeps_them",
+      "typescript": "e4 newer models reject sampling parameters and Haiku keeps them",
+      "java": "e4_newerModelsRejectSamplingParametersAndHaikuKeepsThem",
+      "kotlin": "e4_newerModelsRejectSamplingParametersAndHaikuKeepsThem"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_fast_mode_is_opus_only_with_its_beta_header_and_never_in_a_batch",
+      "typescript": "e5 fast mode is Opus only with its beta header and never in a batch",
+      "java": "e5_fastModeIsOpusOnlyWithItsBetaHeaderAndNeverInABatch",
+      "kotlin": "e5_fastModeIsOpusOnlyWithItsBetaHeaderAndNeverInABatch"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_manual_budget_is_at_least_1024_and_below_max_tokens",
+      "typescript": "e6 a manual budget is at least 1024 and below max tokens",
+      "java": "e6_aManualBudgetIsAtLeast1024AndBelowMaxTokens",
+      "kotlin": "e6_aManualBudgetIsAtLeast1024AndBelowMaxTokens"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_effort_lives_in_output_config_and_never_inside_thinking",
+      "typescript": "e7 effort lives in output config and never inside thinking",
+      "java": "e7_effortLivesInOutputConfigAndNeverInsideThinking",
+      "kotlin": "e7_effortLivesInOutputConfigAndNeverInsideThinking"
+    }
+  },
+  "plants": {
+    "wrong-allow-disabled": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "lets thinking be disabled on models that reject it"
+    },
+    "wrong-between-any-effort": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts between_tools at xhigh and max effort"
+    },
+    "wrong-effort-on-haiku": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "sends effort to Haiku 4.5, which does not support it"
+    },
+    "wrong-sampling-pass-through": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "passes temperature, top_p and top_k through to every model"
+    },
+    "wrong-fast-in-batch": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "allows fast mode inside a batch"
+    },
+    "wrong-budget-floor": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "accepts a budget below the 1,024 minimum"
+    },
+    "wrong-effort-in-thinking": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "puts the effort level inside the thinking object"
+    }
+  }
+}
