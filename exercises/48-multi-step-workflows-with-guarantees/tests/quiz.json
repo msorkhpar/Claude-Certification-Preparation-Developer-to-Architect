@@ -1,0 +1,138 @@
+{
+  "module": "48-multi-step-workflows-with-guarantees",
+  "quizzes": [
+    {
+      "id": "01-prompt-or-code-where-a-guarantee-lives#q1",
+      "page": "01-prompt-or-code-where-a-guarantee-lives.md",
+      "scope": "page",
+      "stem": "A gate in a support agent's dispatcher refuses a refund because no identity has been verified. What should the dispatcher send back to the model?",
+      "options": {
+        "a": "A flagged failure result that names the missing step",
+        "b": "Nothing, because an unanswered call simply ends the turn",
+        "c": "A generic error that says only that the call failed",
+        "d": "The refund's result after running the verification itself"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Every call needs an answer, and an error that names the missing step lets the model do it and try again.",
+        "b": "Ruled out because the API requires a result: \"Tool result blocks must immediately follow their corresponding tool use blocks in the message history.\"",
+        "c": "Ruled out because the documentation's advice is to \"include what went wrong and what Claude should try next\".",
+        "d": "Ruled out because the model must obtain the code from the customer: \"the gate refuses and says what is missing\"."
+      }
+    },
+    {
+      "id": "01-prompt-or-code-where-a-guarantee-lives#q2",
+      "page": "01-prompt-or-code-where-a-guarantee-lives.md",
+      "scope": "page",
+      "stem": "A team forces the verification tool through tool_choice on the first request, believing the order of steps is now guaranteed. Which gap remains?",
+      "options": {
+        "a": "Every later tool stays blocked until verification returns a result",
+        "b": "The first request is left unconstrained, since a forced choice is only advisory",
+        "c": "Later turns are unconstrained, so a refund can still follow a failed check",
+        "d": "The forced call skips the schema, so its input may be malformed"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A forced choice applies to the request that sets it, and nothing carries it to later calls.",
+        "b": "Ruled out because the first call is forced: \"the API prefills the assistant message to force a tool to be used\".",
+        "a": "Ruled out because nothing links the later tools to it: \"An order between steps is a property of the program that runs them.\"",
+        "d": "Ruled out because the shape of an input is a separate matter, which strict tool use handles: \"which guarantees the shape of the call and not its place in a sequence\"."
+      }
+    },
+    {
+      "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#q1",
+      "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "scope": "page",
+      "stem": "A refund gate becomes stricter after three failed identity checks: it now refuses every tool, escalation included. A locked-out customer's chat loops until the turn limit. What went wrong?",
+      "options": {
+        "a": "The lock should have waited for ten failures instead of three",
+        "b": "The route to a person depended on the same safeguard that had tripped",
+        "c": "The turn limit should have been set a lot lower, so that the loop ended sooner",
+        "d": "The model should have been asked to hand the case over on its own"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "An escape route must not sit behind a prerequisite that may be what failed.",
+        "a": "Ruled out because the lock is not the fault: \"a successful check resets the count, so ordinary typing mistakes do not lock anyone out\".",
+        "c": "Ruled out because a lower limit only shortens a dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\".",
+        "d": "Ruled out because the hand-off should come from the gate, not from the model's own account: \"A summary written by the model can leave out what went wrong.\""
+      }
+    },
+    {
+      "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#q2",
+      "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "scope": "page",
+      "stem": "A refund over the limit is escalated with the full chat transcript attached, and reviewers spend minutes finding what was verified and what was blocked. Which change helps most?",
+      "options": {
+        "a": "Keep the transcript, but have the model highlight its key lines",
+        "b": "Ask the model to write a much longer and fuller summary of the whole conversation",
+        "c": "Add the customer's complete order history to the escalation",
+        "d": "Provide a record from the gate's own state, with the agent's reason as a field"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The gate holds the facts, and a record answers the reviewer's questions in a fixed place.",
+        "b": "Ruled out because \"A summary written by the model can leave out what went wrong.\"",
+        "c": "Ruled out because a record carries only what is needed: \"identifiers and amounts, not the whole order contents\".",
+        "a": "Ruled out because the model is again choosing what the reviewer sees: \"The gate's state is the source for what was verified, looked up and refunded; the model's account of them is not.\""
+      }
+    },
+    {
+      "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#m1",
+      "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "scope": "module",
+      "stem": "A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. What should the gate's state say next?",
+      "options": {
+        "a": "Customers A and B are both verified, because the new check adds evidence",
+        "b": "Customer A is still verified, since an earlier check succeeded",
+        "c": "No one is cleared, so every protected step is refused again",
+        "d": "Customer A stays verified until the model confirms which one is meant"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A failed check clears the verified customer.",
+        "b": "Ruled out because \"a failed verification clears the state, so that an earlier success cannot be reused.\"",
+        "a": "Ruled out because the state holds one verified customer, and a failure does not add one: \"set only by a successful verification call\".",
+        "d": "Ruled out because the gate does not consult the model about its own state: \"does not ask the model whether it did\"."
+      }
+    },
+    {
+      "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#m2",
+      "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "scope": "module",
+      "stem": "A policy allows refunds only for items that arrived damaged. The team encodes \"damaged\" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?",
+      "options": {
+        "a": "Keep extending the keyword list until the valid claims finally pass through it",
+        "b": "Let the model judge condition, and keep steps, amounts and limits as rules",
+        "c": "Move the refund limit into the prompt as well, so that the gate has fewer rules",
+        "d": "Drop the ownership check altogether, so that more claims reach the model"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Judgement is the model's work, and rules with a right answer are the gate's.",
+        "a": "Ruled out because \"A design that puts judgement in code ends up with a brittle rule engine\".",
+        "c": "Ruled out because \"the thresholds and the order of steps go in the gate\".",
+        "d": "Ruled out because ownership is a rule with a right answer: \"Everything above it is a rule with a right answer, which code checks the same way every time.\""
+      }
+    },
+    {
+      "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#m3",
+      "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?",
+      "options": {
+        "a": "A judge model that grades every single conversation for the order of its steps in it",
+        "b": "A larger live sample, since zero in five hundred proves the rate is zero",
+        "c": "The same live run with the verification rule written in capitals",
+        "d": "Direct checks that make the forbidden call and assert it never hits the backend"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The gate is code, so it is tested with the forbidden call and an assertion on the backend log.",
+        "b": "Ruled out because a sample measures a rate, which is the way the model is tested: \"where a failure is a rate and not a bug\".",
+        "c": "Ruled out because capitals only change the text the model weighs: \"text that the model reads and weighs with everything else in its context\".",
+        "a": "Ruled out because the gate is tested the way all code is: \"the same inputs, the same outputs\"."
+      }
+    }
+  ]
+}

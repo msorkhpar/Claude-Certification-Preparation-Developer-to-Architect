@@ -5,10 +5,11 @@ import { message, text } from "../../../harness/ts/scriptedFetch.ts";
 
 const usage = { input_tokens: 1, output_tokens: 1 };
 
-test("the plan is read from the forced tool call", async () => {
+test("the plan is read from the tool call and no choice is forced", async () => {
   const { fake, client } = clientFor([{ body: message([{ type: "tool_use", id: "t", name: "plan", input: { subtasks: SUBTASKS } }], "tool_use", usage, MODEL) }]);
   assert.deepEqual(await plan(client, "q"), SUBTASKS);
-  assert.deepEqual(fake.seen[0].body.tool_choice, { type: "tool", name: "plan" });
+  assert.equal(fake.seen[0].body.tool_choice, undefined);
+  assert.ok(fake.seen[0].body.messages[0].content.includes("plan tool"));
 });
 
 test("a subagent request holds its brief and the role prompt only", async () => {

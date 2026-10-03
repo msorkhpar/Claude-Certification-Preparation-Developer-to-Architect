@@ -1,4 +1,4 @@
-// Hub and spoke on the Messages API: a coordinator plans with a forced tool call, each subagent is its own conversation, the coordinator synthesizes.
+// Hub and spoke on the Messages API: a coordinator plans by calling a plan tool, each subagent is its own conversation, the coordinator synthesizes.
 //
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The point is what each
 // request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
@@ -24,7 +24,8 @@ export const REPORTS = ["CHIPS-REPORT: output of foundries rose, lead times fell
 const textOf = (reply: Anthropic.Message) => reply.content.map((b) => (b.type === "text" ? b.text : "")).join("");
 
 export async function plan(client: Anthropic, question: string) {
-  const reply = await client.messages.create({ model: MODEL, max_tokens: 800, tools: [PLAN_TOOL], tool_choice: { type: "tool", name: "plan" }, messages: [{ role: "user", content: question }] });
+  // tool_choice stays auto: Claude Sonnet 5.5 returns a 400 error for a forced choice, so the request asks for the tool in words
+  const reply = await client.messages.create({ model: MODEL, max_tokens: 800, tools: [PLAN_TOOL], messages: [{ role: "user", content: `${question}\nRecord your plan by calling the plan tool.` }] });
   const block = reply.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use")!;
   return (block.input as { subtasks: Array<{ scope: string; brief: string }> }).subtasks;
 }

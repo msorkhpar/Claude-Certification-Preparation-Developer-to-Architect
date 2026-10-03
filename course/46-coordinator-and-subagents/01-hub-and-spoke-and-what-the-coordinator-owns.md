@@ -51,11 +51,11 @@ The positive list is as short: use subagents when "the task produces verbose out
 
 ### The example: one request per subagent
 
-The example is hub and spoke on the Messages API, so that you can see the isolation as data. A coordinator makes one planning call with a forced tool call named `plan` (the same technique as module 26's forced tool choice) and reads the subtasks from the tool input. Each subtask becomes a separate conversation: the role's system prompt and the brief, nothing else. The coordinator then makes one synthesis call with every report. The replies are scripted, so what the output shows is what each request contains.
+The example is hub and spoke on the Messages API, so that you can see the isolation as data. A coordinator makes one planning call that offers a tool named `plan` and asks for it in words (Claude Sonnet 5.5 rejects a forced `tool_choice` with a 400 error, as module 26 explained), and reads the subtasks from the tool input. Each subtask becomes a separate conversation: the role's system prompt and the brief, nothing else. The coordinator then makes one synthesis call with every report. The replies are scripted, so what the output shows is what each request contains.
 
 <!-- example: m46-hub-and-spoke tabs: python,typescript -->
 ```python
-"""Hub and spoke on the Messages API: a coordinator plans with a forced tool call, each subagent is its own conversation, the coordinator synthesizes.
+"""Hub and spoke on the Messages API: a coordinator plans by calling a plan tool, each subagent is its own conversation, the coordinator synthesizes.
 
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The point is what each
 request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
@@ -81,7 +81,8 @@ REPORTS = ["CHIPS-REPORT: output of foundries rose, lead times fell. Source: ind
 
 
 def plan(client, question):
-    reply = client.messages.create(model=MODEL, max_tokens=800, tools=[PLAN_TOOL], tool_choice={"type": "tool", "name": "plan"}, messages=[{"role": "user", "content": question}])
+    # tool_choice stays auto: Claude Sonnet 5.5 returns a 400 error for a forced choice, so the request asks for the tool in words
+    reply = client.messages.create(model=MODEL, max_tokens=800, tools=[PLAN_TOOL], messages=[{"role": "user", "content": f"{question}\nRecord your plan by calling the plan tool."}])
     return next(b.input["subtasks"] for b in reply.content if b.type == "tool_use")
 
 
@@ -134,7 +135,7 @@ model calls: 5 | one plan, three subagents, one synthesis
 answer: Chip supply recovered first, car output followed, and rates stayed high.
 ```
 ```typescript
-// Hub and spoke on the Messages API: a coordinator plans with a forced tool call, each subagent is its own conversation, the coordinator synthesizes.
+// Hub and spoke on the Messages API: a coordinator plans by calling a plan tool, each subagent is its own conversation, the coordinator synthesizes.
 //
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The point is what each
 // request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
@@ -160,7 +161,8 @@ export const REPORTS = ["CHIPS-REPORT: output of foundries rose, lead times fell
 const textOf = (reply: Anthropic.Message) => reply.content.map((b) => (b.type === "text" ? b.text : "")).join("");
 
 export async function plan(client: Anthropic, question: string) {
-  const reply = await client.messages.create({ model: MODEL, max_tokens: 800, tools: [PLAN_TOOL], tool_choice: { type: "tool", name: "plan" }, messages: [{ role: "user", content: question }] });
+  // tool_choice stays auto: Claude Sonnet 5.5 returns a 400 error for a forced choice, so the request asks for the tool in words
+  const reply = await client.messages.create({ model: MODEL, max_tokens: 800, tools: [PLAN_TOOL], messages: [{ role: "user", content: `${question}\nRecord your plan by calling the plan tool.` }] });
   const block = reply.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use")!;
   return (block.input as { subtasks: Array<{ scope: string; brief: string }> }).subtasks;
 }

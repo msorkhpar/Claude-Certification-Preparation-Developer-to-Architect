@@ -5,10 +5,10 @@ from harness.scripted import message, text, tool_use
 from hub import MODEL, REPORTS, SUBAGENT_SYSTEM, SUBTASKS, plan, run_subagent, synthesize
 
 
-def test_the_plan_is_read_from_the_forced_tool_call():
+def test_the_plan_is_read_from_the_tool_call_and_no_choice_is_forced():
     client, transport = scripted_client(message([tool_use("t", "plan", subtasks=SUBTASKS)], stop_reason="tool_use", model=MODEL))
     assert plan(client, "q") == SUBTASKS
-    assert transport.requests[0]["tool_choice"] == {"type": "tool", "name": "plan"}
+    assert "tool_choice" not in transport.requests[0] and "plan tool" in transport.requests[0]["messages"][0]["content"]
 
 
 def test_a_subagent_request_holds_its_brief_and_the_role_prompt_only():
