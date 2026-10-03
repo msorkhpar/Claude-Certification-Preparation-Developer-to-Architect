@@ -63,6 +63,12 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 |---|---|---|
 | J-1 | Java practices and examples build with Gradle (Kotlin DSL), like the Kotlin ones, so the course image grades them; convert modules 6 and 13 to 17 | **done:** the seven Java practices (modules 6 and 13 to 17, and the agent-loop exercise) build with `build.gradle.kts` and `settings.gradle.kts`, no `pom.xml` remains; the run scripts and graders read Gradle output; the examples of those modules have no Java side. Proved offline: every reference passes, every starter fails, every plant fails on its named case on an assertion. |
 | R-1 | Before Level 3: Level 2 complete, the framework milestone closed, then the Java course built and run on the new framework and base images with no change in behaviour; any difference is fixed in the framework, backward compatibly | **done:** no change in behaviour: validate, site and export match (only image tags and recorded commits move), all 743 references and 248 starter and plant runs give the same results, live site and Run identical; the editor base has no changed input |
+| L3-A | Level 3 batch: modules 45 to 50, agent architecture (A1.1 to A1.6) | todo, after Level 2 merges |
+| L3-B | Level 3 batch: modules 51 to 56, session state, tool design and tools in Claude Code (A1.7, A2) | todo, after L3-A |
+| L3-C | Level 3 batch: modules 57 to 62, Claude Code configuration, CI, criteria and structured output (A3, A4.1 to A4.4) | todo, after L3-B |
+| L3-D | Level 3 batch: modules 63 to 69, review passes and reliability (A4.5, A4.6, A5) | todo, after L3-C |
+| L3-E | Level 3 batch: modules 70 to 74, scenarios S1 to S5 with capstones | todo, after L3-D |
+| L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | todo, after L3-E |
 
 ## Framework work
 
