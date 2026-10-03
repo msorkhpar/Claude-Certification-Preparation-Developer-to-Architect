@@ -158,6 +158,62 @@ The "tool runner" and "MCP helpers" rows for Java and Kotlin say "not documented
 official pages checked do not describe them, not because they were proved absent: C-07 settles
 them by running the build.
 
+## Vision, documents, computer use, MCP and the Agent SDK in practice (modules 30 to 35)
+
+Read on **2026-10-03** from the Claude API documentation (Vision, Coordinates and bounding boxes, PDF support, Files API, Computer use
+tool, Token counting), the Model Context Protocol specification and documentation of revision 2026-07-28 (architecture, server and client
+concepts, versioning, server tools, stdio and Streamable HTTP transports, multi round-trip requests, elicitation, sampling, subscriptions,
+progress, cancellation, authorization, security best practices, the Inspector, debugging, the SDK list and the deprecated-features
+registry), the Agent SDK pages of the Claude Code documentation (overview, agent loop, permissions, hooks, custom tools, streaming
+versus single input, the Python and TypeScript references) and Anthropic's engineering article "Building effective agents" (published
+2024-12-19; it carries a note that much of its tooling landscape has changed). Re-check at release.
+
+- Vision: JPEG, PNG, GIF (first frame only) and WebP; image blocks from base64, a URL or a `file_id` (Bedrock and Google Cloud take base64
+  only). Limits: 600 images per request (100 on 200k-window models), 8000 by 8000 pixels per image, 10 MB per image on the API and 5 MB on
+  Bedrock and Google Cloud, 32 MB per request. More than 20 images in one request puts every image under a stricter per-side limit of
+  2000 px. Resizing: standard tier (all other models) 1568 px on the long edge and 1568 visual tokens, high-resolution tier (Claude Opus
+  4.7 and later, including the models of the computer use toolset) 2576 px and 4784 tokens; tokens are `ceil(width / 28) * ceil(height / 28)`;
+  the model sees the resized picture padded on the bottom and right to a multiple of 28, and its coordinates are in the resized, not the
+  padded, picture. Worked: 1920x1080 resizes to 1456x819, an A4 scan of 1075x1520 costs 2145 tokens and is resized to 924x1307 on the
+  standard tier. `"transformations": {"oversized_image": "error"}` makes the API reject an image that would be resized.
+- PDFs: converted page by page to an image plus extracted text; 32 MB and 600 pages (100 when the window is under 1M tokens); text
+  typically 1,500 to 3,000 tokens a page; no PDF surcharge. Files API: 500 MB a file, 1 TB an organisation, no beta header, visible to the
+  whole workspace (one workspace per tenant), expiry 3,600 to 7,776,000 seconds set at upload, `.txt`, `.csv` and `.md` upload as
+  `text/plain`, `.xlsx` and `.docx` are not accepted in document blocks.
+- Computer use: one entry `{"type": "computer_toolset_20260801"}` gives 17 member tools, no beta header; results echo
+  `"toolset_name": "computer"`; a batch runs in order and stops at the first failure, later blocks answered with the fixed halt text
+  `Not executed: an earlier computer action in this turn failed.`; the entry rejects `name`, `display_width_px`, `display_height_px`,
+  `display_number` and `enable_zoom`; screenshots must already fit the image limits (the API does not downscale); the toolset definition
+  costs about 4,500 input tokens (about 410 for `zoom`); a screenshot costs roughly 1,000 to 1,800 tokens. On the Claude API and Google
+  Cloud, Claude 5.5 and later models accept only this toolset; the earlier `computer_20251124` tool needs a beta header and is for older
+  models and other platforms. For Claude Fable 5.1, Opus 5.5 and Sonnet 5.5 the documentation advises against pruning screenshots on the
+  client (it invalidates later thinking blocks) and prefers resizing to 2000 px or less and server-side tool result clearing.
+- MCP revision 2026-07-28: no handshake, version and capabilities on every request, `server/discover` mandatory, Streamable HTTP without
+  protocol sessions or a GET stream, server-to-client requests replaced by multi round-trip requests (an input-required result with
+  `inputRequests` and an opaque `requestState` that the server must treat as attacker-controlled), sampling, roots and logging over the
+  protocol deprecated (earliest removal: the first revision released on or after 2027-07-28), Dynamic Client Registration deprecated in
+  favour of Client ID Metadata Documents, resource-not-found as -32602, errors -32020 to -32022 (-32021 missing client capability, -32022
+  unsupported protocol version), `subscriptions/listen` for change notifications, `Origin` validation required on Streamable HTTP, token
+  passthrough forbidden, `resource` parameter and PKCE `S256` required of clients. Authorization is optional, applies to HTTP transports, and
+  stdio servers take credentials from the environment.
+- MCP SDK support, found by running each pinned SDK in the course container: Python `mcp` 2.2.0 serves the handshake versions up to
+  2025-11-25 and the modern 2026-07-28 (stateless, `server/discover`, multi round-trip requests through `Resolve`, `Elicit` and `Sample`);
+  TypeScript 1.31.0, Java 2.0.1 and Kotlin 0.15.0 contain no support for 2026-07-28 and their latest revision is 2025-11-25. SDK tiers on
+  the documentation's list: TypeScript and Python Tier 1, Java Tier 2, Kotlin Tier 3. A Python tool that raises an exception other than
+  `ToolError` is reported to the client without the exception's message.
+- Agent SDK: a single-shot `query()` that ends on an error result (`error_max_turns`, `error_max_budget_usd`, `error_during_execution`)
+  yields that result and then raises, because the binary exits with a nonzero code; `allowed_tools` pre-approves and does not restrict,
+  and an `allowed_tools` entry shadows `can_use_tool`; the order is hooks, deny rules, ask rules, mode, allow rules, callback; `allowed_tools`
+  does not constrain `bypassPermissions`; a hook deny applies in every mode; omitting the permission mode in the TypeScript SDK can start the
+  session in auto mode (read in the 0.3.287 reference), so the course sets it explicitly; a custom tool's uncaught exception reaches Claude
+  as an error result carrying the raw message; tool search is on by default and defers in-process MCP tools.
+- The stand-in `harness/fake_claude.py` is the course's own scripted replacement for the Claude Code binary, reached through `cli_path`
+  (Python) or `pathToClaudeCodeExecutable` (TypeScript). It applies a simplified copy of the documented rules, exits with code 1 after an
+  error result and runs in-process MCP tools through `mcp_message` control requests. Its message wording (for example the prefix
+  `Permission denied:`) and its message counts are its own, not the real binary's.
+- Not verified by a run: the headless CLI route for Java and Kotlin (`-p` and `--output-format json`), the Inspector, the OAuth flow of the
+  authorization specification, and the real binary's wording and scheduling; the practices and examples prove the course's code, not those.
+
 ## Not yet pinned
 
 Python, Node, JDK and Kotlin versions for the container, Gradle, and the test runners are chosen
