@@ -22,11 +22,12 @@ Steps:
     {"result": {"subtype": "success", "result": "text", "cost": 0.01, "turns": 2}}
                                                               the final result message (always last)
 
-Permission rules applied to a tool step (a simplified copy of the documented behaviour, not the real binary):
-a tool in --disallowedTools is denied; a tool in --allowedTools runs without asking; permission mode
-bypassPermissions runs it; mode dontAsk denies it; any other tool is sent to the SDK as a `can_use_tool`
-control request and the answer decides. PreToolUse hooks registered at the handshake are called first and may
-deny. Every message received and the command line are appended to the file named by FAKE_CLAUDE_RECORD.
+Rules applied to a tool step (a simplified copy of the documented behaviour, not the real binary): a tool that is
+not in --tools (when that flag is given) does not exist; PreToolUse hooks registered at the handshake are called
+and may deny; a tool in --disallowedTools is denied; a tool in --allowedTools runs without asking; permission mode
+bypassPermissions runs it; mode dontAsk denies it; any other tool is sent to the SDK as a `can_use_tool` control
+request and the answer decides. The command line, the working directory, every message received and every
+control request sent are appended to the file named by FAKE_CLAUDE_RECORD.
 Standard library only.
 """
 import json
@@ -47,10 +48,12 @@ def main():
                 f.write(json.dumps({kind: value}) + "\n")
 
     rec("argv", argv)
+    rec("cwd", os.getcwd())
 
     def flag(name):
         return argv[argv.index(name) + 1] if name in argv else None
 
+    available = None if "--tools" not in argv else [t for t in flag("--tools").split(",") if t]
     allowed = [t for t in (flag("--allowedTools") or "").split(",") if t]
     disallowed = [t for t in (flag("--disallowedTools") or "").split(",") if t]
     mode = flag("--permission-mode") or "default"
@@ -70,6 +73,7 @@ def main():
         """A control request to the SDK; returns the response payload."""
         counter[0] += 1
         rid = f"cli_{counter[0]}"
+        rec("ask", {"subtype": subtype, "tool_name": fields.get("tool_name"), "tool_use_id": fields.get("tool_use_id")})
         send({"type": "control_request", "request_id": rid, "request": {"subtype": subtype, **fields}})
         while rid not in pending:
             line = sys.stdin.readline()
@@ -106,7 +110,8 @@ def main():
 
     def run_tool(tool):
         assistant([{"type": "tool_use", "id": tool["id"], "name": tool["name"], "input": tool["input"]}], "tool_use")
-        denied = run_hooks("PreToolUse", tool)
+        denied = None if available is None or tool["name"] in available else f"No such tool available: {tool['name']}"
+        denied = denied or run_hooks("PreToolUse", tool)
         if denied is None:
             name = tool["name"]
             if name in disallowed or mode == "dontAsk" and name not in allowed:
@@ -121,7 +126,7 @@ def main():
                 else:
                     tool = {**tool, "input": decision.get("updatedInput", tool["input"])}
         if denied is not None:
-            content, is_error = f"Permission denied: {denied}", True
+            content, is_error = (denied if denied.startswith("No such tool") else f"Permission denied: {denied}"), True
         else:
             content, is_error = tool.get("output", ""), bool(tool.get("is_error"))
             run_hooks("PostToolUse", tool)
@@ -151,14 +156,14 @@ def main():
                     tool_calls += 1
                     if max_turns is not None and tool_calls >= max_turns:
                         send({"type": "result", "subtype": "error_max_turns", "is_error": True, "duration_ms": 1, "duration_api_ms": 1,
-                              "num_turns": tool_calls, "session_id": session, "total_cost_usd": 0.0, "usage": {}})
+                              "num_turns": tool_calls, "session_id": session, "total_cost_usd": 0.0, "usage": {}, "modelUsage": {}, "permission_denials": [], "errors": []})
                         break
                     run_tool(step["tool"])
                 elif "result" in step:
                     r = step["result"]
                     send({"type": "result", "subtype": r.get("subtype", "success"), "is_error": r.get("subtype", "success") != "success",
                           "duration_ms": 1, "duration_api_ms": 1, "num_turns": r.get("turns", 1), "session_id": session,
-                          "result": r.get("result"), "total_cost_usd": r.get("cost", 0.0), "usage": {}})
+                          "result": r.get("result"), "total_cost_usd": r.get("cost", 0.0), "usage": {}, "modelUsage": {}, "permission_denials": [], "errors": []})
     return 0
 
 

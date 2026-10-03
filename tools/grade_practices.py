@@ -72,7 +72,7 @@ def main():
     summary = {}
     for practice, cases in practices():
         allids = list(cases["cases"])
-        for lang in LANGS:
+        for lang in [l for l in LANGS if l in next(iter(cases["cases"].values()))]:
             for variant in variants(cases):
                 p = out_path(practice, lang, variant)
                 if not p.exists():

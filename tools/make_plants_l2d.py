@@ -174,6 +174,29 @@ PLANTS[f"{X}/33-mcp-advanced/unit-01/practice-1"] = {
     }),
 }
 
+PLANTS[f"{X}/35-the-claude-agent-sdk/unit-01/practice-1"] = {
+    "python": ("agent.py", {
+        "wrong-auto-approve": [("allowed_tools=[],", "allowed_tools=READ_TOOLS,")],
+        "wrong-edit-in-readonly": [('if tool_name in EDIT_TOOLS and mode != "edit":', "if False:")],
+        "wrong-env-variants": [('if base.startswith(".env") and base != ".env.example":', 'if base == ".env":')],
+        "wrong-chaining-allowed": [('r"[;&|<>`]|\\$\\("', 'r"[<>`]|\\$\\("')],
+        "wrong-danger-no-interrupt": [('return deny("Dangerous command", True)', 'return deny("Dangerous command", False)')],
+        "wrong-push-substring": [('r"\\bgit\\s+push\\b"', 'r"\\bgit\\s+push"')],
+        "wrong-no-turn-limit": [("max_turns=6, ", "")],
+        "wrong-status-unmapped": [('"error_max_turns": "max_turns", ', "")],
+    }),
+    "typescript": ("agent.ts", {
+        "wrong-auto-approve": [("allowedTools: [] as string[],", "allowedTools: READ_TOOLS,")],
+        "wrong-edit-in-readonly": [('if (EDIT_TOOLS.includes(toolName) && mode !== "edit")', "if (false)")],
+        "wrong-env-variants": [('if (base.startsWith(".env") && base !== ".env.example")', 'if (base === ".env")')],
+        "wrong-chaining-allowed": [("/[;&|<>`]|\\$\\(/", "/[<>`]|\\$\\(/")],
+        "wrong-danger-no-interrupt": [('return deny("Dangerous command", true)', 'return deny("Dangerous command", false)')],
+        "wrong-push-substring": [("/\\bgit\\s+push\\b/", "/\\bgit\\s+push/")],
+        "wrong-no-turn-limit": [("maxTurns: 6, ", "")],
+        "wrong-status-unmapped": [('error_max_turns: "max_turns", ', "")],
+    }),
+}
+
 # --- PLANTS ABOVE ---
 
 
