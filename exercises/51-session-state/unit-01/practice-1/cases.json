@@ -1,0 +1,150 @@
+{
+  "practice": "51-session-state/unit-01/practice-1",
+  "name": "sessions",
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_plan_resumes_an_unchanged_session_and_tells_a_changed_one_what_differs_and_starts_fresh_when_most_of_it_changed",
+      "typescript": "m1 the plan resumes an unchanged session and tells a changed one what differs and starts fresh when most of it changed"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_changed_deleted_and_added_files_are_listed_in_order_and_any_difference_asks_for_a_notice",
+      "typescript": "e1 changed deleted and added files are listed in order and any difference asks for a notice"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_more_than_half_of_the_files_changed_or_gone_starts_fresh_and_exactly_half_does_not",
+      "typescript": "e2 more than half of the files changed or gone starts fresh and exactly half does not"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_session_idle_for_more_than_a_week_starts_fresh_and_exactly_a_week_is_resumed",
+      "typescript": "e3 a session idle for more than a week starts fresh and exactly a week is resumed"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_no_saved_session_starts_fresh_and_a_fork_is_only_planned_from_a_session_that_is_resumed",
+      "typescript": "e4 no saved session starts fresh and a fork is only planned from a session that is resumed"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_change_notice_names_only_what_differs_and_the_prompt_puts_the_notice_or_the_summary_before_the_task",
+      "typescript": "e5 the change notice names only what differs and the prompt puts the notice or the summary before the task"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_summary_has_a_fixed_layout_with_blank_and_repeated_items_dropped_and_files_listed_by_path",
+      "typescript": "e6 the summary has a fixed layout with blank and repeated items dropped and files listed by path"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_options_resume_by_id_and_fork_together_and_continue_is_refused_unless_one_session_exists_and_a_name_must_be_unique",
+      "typescript": "e7 options resume by id and fork together and continue is refused unless one session exists and a name must be unique"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_a_run_through_the_sdk_passes_resume_and_fork_to_the_binary_and_returns_the_session_id_even_after_an_error",
+      "typescript": "e8 a run through the sdk passes resume and fork to the binary and returns the session id even after an error"
+    }
+  },
+  "plants": {
+    "wrong-ignores-changes": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "resumes a session without a notice even when files changed"
+    },
+    "wrong-added-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "does not count a new file as a difference"
+    },
+    "wrong-half-is-fresh": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "starts fresh when exactly half of the files changed"
+    },
+    "wrong-added-counted": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "counts new files toward the share of changed files"
+    },
+    "wrong-age-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "resumes a session however long it has been idle"
+    },
+    "wrong-age-inclusive": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "starts fresh when the session was idle for exactly a week"
+    },
+    "wrong-fork-without-session": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "plans a fork even when the session is not resumed"
+    },
+    "wrong-notice-when-nothing": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes a notice even when no file differs"
+    },
+    "wrong-summary-after-task": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "puts the summary after the task"
+    },
+    "wrong-summary-keeps-repeats": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps repeated items in the summary"
+    },
+    "wrong-files-unsorted": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "lists the files in the order they came"
+    },
+    "wrong-fork-alone": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "sets the fork option even when there is no session to resume"
+    },
+    "wrong-continue-many": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "continues the latest session when several exist"
+    },
+    "wrong-name-first-match": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "resumes the first of several sessions that share a name"
+    },
+    "wrong-id-only-on-success": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "reads the session id only from a successful result"
+    },
+    "wrong-no-fork-flag": {
+      "caught_by": [
+        "e7",
+        "e8"
+      ],
+      "defect": "writes the fork option as false"
+    }
+  }
+}

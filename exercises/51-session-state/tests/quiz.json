@@ -1,0 +1,138 @@
+{
+  "module": "51-session-state",
+  "quizzes": [
+    {
+      "id": "01-continue-resume-and-fork-what-a-session-keeps#q1",
+      "page": "01-continue-resume-and-fork-what-a-session-keeps.md",
+      "scope": "page",
+      "stem": "A review agent finished mapping a payments module on Monday. On Tuesday the team wants to compare a rewrite with a refactor from that same baseline, and the Monday thread must stay usable. What should the SDK call carry?",
+      "options": {
+        "a": "`resume` with the saved id and `fork_session` enabled",
+        "b": "`continue_conversation` alone, which branches the latest run",
+        "c": "`resume` with the saved id, once for each approach",
+        "d": "A new run whose first prompt only names the Monday thread"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Fork is an option set together with a resume id, so it branches a copy and leaves the original usable.",
+        "b": "Ruled out because \"**Continue** finds the most recent session in the current directory\", so it adds to that session and branches nothing.",
+        "c": "Ruled out because \"Continue and resume both pick up an existing session and add to it\", which puts both approaches into one history.",
+        "d": "Ruled out because a name carries none of the analysis, and the guide says to \"Capture the results you need (analysis output, decisions, file diffs) as application state and pass them into a fresh session's prompt.\""
+      }
+    },
+    {
+      "id": "01-continue-resume-and-fork-what-a-session-keeps#q2",
+      "page": "01-continue-resume-and-fork-what-a-session-keeps.md",
+      "scope": "page",
+      "stem": "A multi-user app keeps one conversation per customer. After a restart it must return each customer to the right earlier conversation, not just the latest one. What does the code store for each customer?",
+      "options": {
+        "a": "`continue` enabled for the customer's directory",
+        "b": "A display name passed to `resume` in the SDK",
+        "c": "The session id from the last result message",
+        "d": "A fork of the first session per customer"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Resume needs a specific id, and the result carries it on every result.",
+        "b": "Ruled out because \"Resume takes a specific session ID\", not a display name; the guide's `--resume <session-name>` is a command-line form, and the SDK guide passes an id.",
+        "a": "Ruled out because continue \"Works well when your app runs one conversation at a time\", and this app runs one per customer.",
+        "d": "Ruled out because \"Fork is different: it creates a new session that starts with a copy of the original's history\", which is a second conversation and not a return to the first."
+      }
+    },
+    {
+      "id": "02-stale-results-the-notice-the-summary-and-the-practice#q1",
+      "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "scope": "page",
+      "stem": "An agent mapped a service of twelve modules on Friday. Over the weekend a developer rewrote two of them. On Monday the team resumes the session. What should the first prompt add?",
+      "options": {
+        "a": "A request to survey the whole service from scratch",
+        "b": "The two changed paths and a request to re-read them",
+        "c": "Nothing at all, since the earlier read still holds",
+        "d": "The full text of both changed modules, pasted inline"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Naming the differing files gives targeted re-analysis and keeps everything still true.",
+        "a": "Ruled out because naming the files is \"targeted re-analysis rather than requiring full re-exploration\", and a survey discards what the resume kept.",
+        "c": "Ruled out because \"Sessions persist the conversation, not the filesystem\", so the weekend's edits are not in it.",
+        "d": "Ruled out because the notice \"does not paste the new contents: the session reads them with its own tools\"."
+      }
+    },
+    {
+      "id": "02-stale-results-the-notice-the-summary-and-the-practice#q2",
+      "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "scope": "page",
+      "stem": "Most of the files an agent analysed last month have since been rewritten, and its transcript is long. Which start is most reliable?",
+      "options": {
+        "a": "A new run that begins by pasting the earlier tool output",
+        "b": "The full old transcript, with a line saying that things have changed",
+        "c": "A fork of the transcript, so the original stays untouched",
+        "d": "A new run that opens with a structured summary of the conclusions"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "When most results are stale, a summary of conclusions and their state is the reliable start.",
+        "b": "Ruled out because a notice can correct a few files but cannot correct most of them: \"More than half of the analysed files changed or are gone, or the session was idle for more than 7 days\" is the course's rule for starting fresh.",
+        "c": "Ruled out because a fork \"creates a new session that starts with a copy of the original's history\", stale results included.",
+        "a": "Ruled out because a summary carries conclusions \"never the raw tool output that went stale\"."
+      }
+    },
+    {
+      "id": "02-stale-results-the-notice-the-summary-and-the-practice#m1",
+      "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. An engineer resumes a very large session on a Pro plan in Claude Code after a two-hour break. What should they expect from the first request?",
+      "options": {
+        "a": "A replay of the tools the session called, to refresh their results",
+        "b": "A warm cache, because a resumed session keeps its earlier requests",
+        "c": "A cache miss, so all of the history is read again one time",
+        "d": "An automatic fork, so that the earlier thread is left unchanged"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The prompt cache expires after a long pause, so the next request reads the history once more.",
+        "b": "Ruled out because \"The session's prompt cache has expired by then, so the next request processes the full history once no matter which of the dialog's options you pick.\"",
+        "a": "Ruled out because a resume restores the conversation and does not run tools again: a call that was cut off \"doesn't finish or run again when you resume\".",
+        "d": "Ruled out because forking is an option you set, and a fork \"creates a new session that starts with a copy of the original's history\", not an automatic step of resuming."
+      }
+    },
+    {
+      "id": "02-stale-results-the-notice-the-summary-and-the-practice#m2",
+      "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A forked agent rewrote several modules in the shared working copy. The team wants that copy exactly as it stood before the run, and wants to keep the fork's conversation. What provides this?",
+      "options": {
+        "a": "Resuming the original session, which brings its files back",
+        "b": "Deleting the fork's session so its edits are discarded",
+        "c": "Forking again from the original, so the copy starts clean",
+        "d": "Checkpointing, which snapshots the edits and reverts them"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Only a snapshot of the files can return them to an earlier state.",
+        "a": "Ruled out because \"Sessions persist the conversation, not the filesystem\", so a resume restores no files.",
+        "b": "Ruled out because \"If a forked agent edits files, those changes are real and visible to any session working in the same directory\", and removing the session does not undo them.",
+        "c": "Ruled out because forking \"branches the conversation history, not the filesystem\", so the second copy meets the same edited files."
+      }
+    },
+    {
+      "id": "02-stale-results-the-notice-the-summary-and-the-practice#m3",
+      "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?",
+      "options": {
+        "a": "Fork the session, so that the stale results stay in the original",
+        "b": "Start a new session that carries the earlier transcript as context",
+        "c": "Continue the most recent session in the directory without a note",
+        "d": "Resume the session, with a first prompt that lists the five paths"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Five of twelve is under half, so a resume with a notice naming the paths keeps what is still true.",
+        "b": "Ruled out because a transcript carries the stale results with it; a summary carries conclusions \"never the raw tool output that went stale\".",
+        "c": "Ruled out because continue takes the most recent session, and with no note the session believes the old files: \"Sessions persist the conversation, not the filesystem\".",
+        "a": "Ruled out because a fork \"creates a new session that starts with a copy of the original's history\", stale results included."
+      }
+    }
+  ]
+}
