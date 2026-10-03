@@ -57,6 +57,12 @@ M9.**
 C-01, C-02, C-06, C-08 and C-09 are reading and may run beside each other and beside one heavy row. C-03 to
 C-05 build or run containers and go through the heavy-job slot one at a time.
 
+## Open course rows
+
+| Row | Task | Status |
+|---|---|---|
+| J-1 | Java practices and examples build with Gradle (Kotlin DSL), like the Kotlin ones, so the course image grades them; convert modules 6 and 13 to 17 | todo |
+
 ## Framework work
 
 Not tracked here. The framework repositories plan it on their own boards, on release branches,
