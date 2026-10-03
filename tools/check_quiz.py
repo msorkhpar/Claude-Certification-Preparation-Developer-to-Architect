@@ -285,9 +285,9 @@ def check_module(folder):
     level_prose, level_stems = None, {}
     if any(k == "Mock exam" for pg in pages for k, _, _ in parse_page_quizzes(pg.read_text())):
         level_prose = "\n".join(prose_of(pg.read_text()) for f in sorted(ROOT.joinpath("course").iterdir())
-                                if f.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-3])-", f.name) for pg in sorted(f.glob("*.md")))
+                                if f.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-9])-", f.name) for pg in sorted(f.glob("*.md")))
         for f in sorted(ROOT.joinpath("course").iterdir()):
-            if f.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-3])-", f.name):
+            if f.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-9])-", f.name):
                 for pg in sorted(f.glob("*.md")):
                     for kind, questions, _ in parse_page_quizzes(pg.read_text()):
                         if kind != "Mock exam":
@@ -345,12 +345,12 @@ def check_module(folder):
 
 
 def main(argv):
-    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-3])-", p.name))
+    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-9])-", p.name))
     if argv:
         folders = [f for f in folders if any(f.name.startswith(a) for a in argv)]
     total = 0
     items = {}
-    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-3])-", p.name)):
+    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-9]|2[0-9])-", p.name)):
         for pg in sorted(f.glob("*.md")):
             for kind, questions, keys in parse_page_quizzes(pg.read_text()):
                 for n, ((stem, opts), key) in enumerate(zip(questions, keys), start=1):
