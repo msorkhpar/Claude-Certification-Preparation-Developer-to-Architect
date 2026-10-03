@@ -1,0 +1,252 @@
+{
+  "module": "42-evaluation",
+  "quizzes": [
+    {
+      "id": "01-success-criteria-and-test-sets#q1",
+      "page": "01-success-criteria-and-test-sets.md",
+      "scope": "page",
+      "stem": "A team's goal reads \"the extraction model should work well\". Which rewrite meets the documentation's four traits of a good criterion?",
+      "options": {
+        "a": "Reach full accuracy on all fields so that no invoice ever needs a manual check",
+        "b": "Make the model as accurate as an expert human reviewer on every invoice",
+        "c": "Improve extraction until reviewers feel the output is clearly better",
+        "d": "Raise the field-level F1 above 0.9 on 500 held-out invoices, beating today's 0.86"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "It names a metric (F1), a threshold above the current baseline, and a data set the model was not tuned on, which are the parts of the page's good example: \"a held-out test set* of 10,000 diverse Twitter posts (Relevant), which is a 5% improvement over the current baseline (Achievable)\".",
+        "b": "Ruled out because a target fails the Achievable trait when \"The target is beyond what current frontier models can do\", and this one names no metric.",
+        "c": "Ruled out because a feeling has no number, while a criterion must \"Use quantitative metrics or well-defined qualitative scales\".",
+        "a": "Ruled out because full accuracy on every field ignores \"Base your targets on industry benchmarks, prior experiments, AI research, or expert knowledge\"."
+      }
+    },
+    {
+      "id": "01-success-criteria-and-test-sets#q2",
+      "page": "01-success-criteria-and-test-sets.md",
+      "scope": "page",
+      "stem": "A support bot's eval set contains 40 polite, well-formed questions. Production shows empty messages, pasted logs and abusive input. What is the best change to the set?",
+      "options": {
+        "a": "Add tagged cases for those awkward situations, sampled from live traffic",
+        "b": "Replace the questions with a smaller group graded by hand",
+        "c": "Keep the set unchanged and raise the passing threshold",
+        "d": "Ask the model to write more polite questions of the same kind"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The first principle is to \"Design evals that mirror your real-world task distribution\", and its list of edge cases includes irrelevant or nonexistent input data and \"irrelevant or nonexistent input data\".",
+        "b": "Ruled out because the page says \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals\".",
+        "c": "Ruled out because a stricter threshold on the same easy cases still measures a different task and, in the page's words, \"Don't forget to factor in edge cases!\".",
+        "d": "Ruled out because the course's advice is to \"Write the awkward inputs by hand\", and more polite questions add none."
+      }
+    },
+    {
+      "id": "01-success-criteria-and-test-sets#q3",
+      "page": "01-success-criteria-and-test-sets.md",
+      "scope": "page",
+      "stem": "A prompt is refined for a week against a fixed set of 200 examples, and the pass rate climbs from 71 to 96 percent. The launch review wants to know whether 96 percent will hold on new traffic. Which evidence answers that?",
+      "options": {
+        "a": "The same fixed set rerun with a stricter grader",
+        "b": "A longer list of the prompt changes made during the week",
+        "c": "A fresh slice of cases that played no part in any tuning",
+        "d": "The pass rate on the same set averaged over five runs"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page's example speaks of a \"held-out test set\", which is \"data you did not tune on\", and only that can say how the prompt will do on new input.",
+        "a": "Ruled out because a stricter grader on the same set still scores the cases the prompt was shaped by, and the trap says \"Keep cases the prompt has never been shaped by\".",
+        "b": "Ruled out because a list of changes records effort and carries no score, while the page asks for \"Some ways to empirically test against those criteria\".",
+        "d": "Ruled out because repeating the tuned set only averages out noise, and the trap says \"The score is then a memory test\"."
+      }
+    },
+    {
+      "id": "02-code-graded-and-model-graded-evals#q1",
+      "page": "02-code-graded-and-model-graded-evals.md",
+      "scope": "page",
+      "stem": "A team's classifier must return one of three labels, and a script has to compare it with the expected label on 2,000 cases overnight. Which grader fits?",
+      "options": {
+        "a": "A model grader that rates each answer on a scale",
+        "b": "Normalised exact match with the reference answer",
+        "c": "A human reviewer who reads a sample of the output",
+        "d": "Cosine similarity between embeddings of both texts"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The table lists exact match for \"A categorical answer: a label, a choice\", and the course's rule is to \"use the first one that can decide the case\".",
+        "a": "Ruled out because a model grader belongs to \"A judgement no code can make\", and a label comparison is not that.",
+        "c": "Ruled out because a human grader decides \"Anything, slowly\", and 2,000 overnight cases need an automated grader, since the page says to \"Structure questions to allow for automated grading\".",
+        "d": "Ruled out because similarity scores answer \"Whether two texts say the same thing\", which is a different question from whether two labels are equal."
+      }
+    },
+    {
+      "id": "02-code-graded-and-model-graded-evals#q2",
+      "page": "02-code-graded-and-model-graded-evals.md",
+      "scope": "page",
+      "stem": "A model that scores output replies \"Score: 4, because the tone is polite\" for one case, and the harness cannot parse it. How should the harness record that case?",
+      "options": {
+        "a": "As a score of 4 read from the first digit of the text",
+        "b": "As a pass, since the reply mentions a score above the threshold",
+        "c": "As a skipped case that is left out of the pass rate",
+        "d": "As a failure with the reason that the reply was ungradable"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"a reply that is not a bare score counts as ungradable, and an ungradable case fails\".",
+        "b": "Ruled out because the contract is \"Output only the number\", and the page says \"an ungradable case fails\" whatever the prose mentions.",
+        "c": "Ruled out because a skipped case would hide the grader's drift, while the course says to \"Count the ungradable cases in the report\".",
+        "a": "Ruled out because \"a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade\"."
+      }
+    },
+    {
+      "id": "02-code-graded-and-model-graded-evals#q3",
+      "page": "02-code-graded-and-model-graded-evals.md",
+      "scope": "page",
+      "stem": "A check expects the field `count` to equal the number 3, and the application's output holds the string \"3\". The grader compares both sides as text and passes it. What is wrong?",
+      "options": {
+        "a": "Nothing is wrong, because the digits are the same in both forms of it",
+        "b": "The type differs, and a program reading the value would reject it",
+        "c": "The check should have used a model grader to judge the number",
+        "d": "The expected value should have been written as a string instead"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says that a grader comparing both sides as text \"passes values that a program reading the field would reject\".",
+        "a": "Ruled out because \"A structure check also compares types\", and matching digits do not make matching types.",
+        "c": "Ruled out because a structure check decides this by parsing, and a model grader belongs to \"A judgement no code can make\".",
+        "d": "Ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: \"Comparing JSON fields as text\"."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#q1",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "page",
+      "stem": "A new prompt raises the overall pass rate from 0.78 to 0.84. The per-item comparison shows that one input which passed before now fails. What should the team do?",
+      "options": {
+        "a": "Review that regression, then accept or repair it",
+        "b": "Ship it, because the pass rate rose",
+        "c": "Delete the failing item from the set, since it is noisy",
+        "d": "Rerun the set until that input passes"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says that \"An average never excuses a regression\": \"If a case passed before and fails now, a person looks at it\", and then the decision is made.",
+        "b": "Ruled out because the example's v2 also raised the average, and the page says \"An average never excuses a regression\".",
+        "c": "Ruled out because \"A case that disappears is not a pass\", and dropping the case that fails \"is the easiest way to improve a score\".",
+        "d": "Ruled out because a rerun until the input passes treats a signal as noise, while the page says \"a flaky case is a finding\"."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#q2",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "page",
+      "stem": "A regression run is scheduled for the day a team changes the model id in its configuration. Which failure does that run catch that a prompt-only check would not?",
+      "options": {
+        "a": "A prefilled assistant turn that the new release rejects at the request",
+        "b": "A typo that has crept into one of the example sentences",
+        "c": "A grader scale written from one to five instead of zero to five",
+        "d": "A label that was copied wrongly from a spreadsheet into the set"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says a prefilled assistant message \"returns a 400 on Claude 4.6 and later models\", and that a regression run on the new id \"turns each of those into a failed case the same afternoon\".",
+        "b": "Ruled out because an example sentence typo is a prompt edit, which the table already puts \"Before the merge, as a check on the pull request\".",
+        "c": "Ruled out because the grader's scale belongs to the grader, and the new id changes the application's behaviour: \"Models differ, and a migration changes behaviour\".",
+        "d": "Ruled out because a wrongly copied label is a data error, and \"The set lives in the repository beside the prompt\", so a review of the diff finds it."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#q3",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "page",
+      "stem": "A team re-grades 800 items with a model every night, and nobody waits for the result. Which option lowers the cost of that work the most?",
+      "options": {
+        "a": "Remove the edge items because they are rare",
+        "b": "Run the work again on every commit instead of once a day",
+        "c": "Submit it through the Message Batches API",
+        "d": "Grade every item twice and keep the higher score"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says the Message Batches API \"charges half the standard price for work that can wait up to a day\", and calls a nightly regression run \"the typical batch job\".",
+        "b": "Ruled out because a run on every commit multiplies the requests, and the page says \"A quick check on a pull request stays synchronous and small\".",
+        "a": "Ruled out because \"The edge tag has its own threshold\", since the edge cases are where regressions hide.",
+        "d": "Ruled out because grading twice doubles the requests, and keeping the higher score contradicts the rule to \"pass it only if every run passes\"."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#m1",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "module",
+      "stem": "A team writes one criterion, \"replies should be accurate\". Which addition turns it into something an eval can enforce?",
+      "options": {
+        "a": "A promise to review the replies at the end of each month",
+        "b": "A threshold on a named metric, over a fixed set of cases",
+        "c": "A longer list of the qualities that a good reply has",
+        "d": "A statement that accuracy matters more than speed or cost"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A good criterion names \"a metric, a threshold, a data set, and a baseline to beat\", and the four traits ask for \"quantitative metrics or well-defined qualitative scales\".",
+        "a": "Ruled out because a promise to review is a process and does not make the criterion measurable: \"Nobody can say what number or scale a result would have\".",
+        "c": "Ruled out because a longer list of qualities repeats the problem, since good, accurate and natural are \"wishes until they carry a number or a scale and a data set\".",
+        "d": "Ruled out because the page says \"Most use cases need multidimensional evaluation along several success criteria\", which means a number for each, not one ranking in a sentence."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#m2",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "module",
+      "stem": "A ticket-routing prompt is edited, and the team reruns a set in which every case is graded by a script. Which grader fits a case whose output must parse as a JSON object holding a `queue` key?",
+      "options": {
+        "a": "A model grader that rates the whole output from one to five",
+        "b": "A similarity score against a reference output of the same kind",
+        "c": "A structure check that decodes and compares the value",
+        "d": "A human who reads every single item that the set holds"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page lists a \"Structure check\" for \"A reply that must parse and carry the right fields\", and says it \"parses the whole output as JSON\".",
+        "a": "Ruled out because a model grader belongs to \"A judgement no code can make\", and a field comparison is code.",
+        "b": "Ruled out because similarity answers \"Whether two texts say the same thing\", and a queue name has an exact right value.",
+        "d": "Ruled out because the case is graded by a script, and a human belongs in \"A sample, to check the model grader\"."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#m3",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "module",
+      "stem": "A prompt change scores better overall, and the team wants to be sure the improvement is real before launch. Which pair of checks gives the most trustworthy answer?",
+      "options": {
+        "a": "A larger set of the same easy cases, and a stricter threshold",
+        "b": "A second run of the same cases, and a review of the average",
+        "c": "A review of the edits, and the same cases graded by a person",
+        "d": "A comparison per case, and a run on held-out cases"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Compare per case\" and to \"Keep a held-out slice that the loop never touches and run it at the end\".",
+        "b": "Ruled out because rerunning the same cases repeats the tuned set, and \"The score is then a memory test\".",
+        "c": "Ruled out because a list of edits records effort and a person grading the same cases still scores the cases the prompt was shaped by, and the page says \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals\".",
+        "a": "Ruled out because \"Grading only what is easy to grade\" measures a different task, and a threshold on easy cases does not change that."
+      }
+    },
+    {
+      "id": "03-refining-against-a-set-and-regression-runs#m4",
+      "page": "03-refining-against-a-set-and-regression-runs.md",
+      "scope": "module",
+      "stem": "A case passes in two of three repeated runs. How should the harness treat it?",
+      "options": {
+        "a": "As a pass, since most runs passed",
+        "b": "As a fail, and as flaky in the report",
+        "c": "As a pass, after the failing run is thrown away",
+        "d": "As a fail, kept out of the flaky count"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says a case \"passes only if every run passes\", and that \"A case that passes in some runs and fails in others is flaky\".",
+        "a": "Ruled out because a case that fails sometimes will fail for some customers, which is why \"a flaky case is a finding\".",
+        "c": "Ruled out because discarding the failing run removes the evidence, and the page says to \"pass it only if every run passes\".",
+        "d": "Ruled out because the criteria \"can say how many flaky cases are tolerated\", which needs the count to include it."
+      }
+    }
+  ]
+}

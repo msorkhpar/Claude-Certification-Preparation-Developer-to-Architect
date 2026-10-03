@@ -1,0 +1,152 @@
+{
+  "practice": "42-evaluation/unit-01/practice-1",
+  "name": "harness",
+  "tests": {
+    "java": "HarnessTest",
+    "kotlin": "HarnessTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_run_grades_every_case_with_its_own_check_and_reports_the_pass_rate",
+      "typescript": "m1 a run grades every case with its own check and reports the pass rate",
+      "java": "m1_aRunGradesEveryCaseWithItsOwnCheckAndReportsThePassRate",
+      "kotlin": "m1_aRunGradesEveryCaseWithItsOwnCheckAndReportsThePassRate"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_an_exact_check_ignores_case_and_spacing_but_nothing_else",
+      "typescript": "e1 an exact check ignores case and spacing but nothing else",
+      "java": "e1_anExactCheckIgnoresCaseAndSpacingButNothingElse",
+      "kotlin": "e1_anExactCheckIgnoresCaseAndSpacingButNothingElse"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_json_field_check_needs_a_json_object_with_the_field_and_the_same_typed_value",
+      "typescript": "e2 a json field check needs a json object with the field and the same typed value",
+      "java": "e2_aJsonFieldCheckNeedsAJsonObjectWithTheFieldAndTheSameTypedValue",
+      "kotlin": "e2_aJsonFieldCheckNeedsAJsonObjectWithTheFieldAndTheSameTypedValue"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_judge_check_sends_the_rubric_prompt_and_accepts_only_a_bare_score_at_the_threshold",
+      "typescript": "e3 a judge check sends the rubric prompt and accepts only a bare score at the threshold",
+      "java": "e3_aJudgeCheckSendsTheRubricPromptAndAcceptsOnlyABareScoreAtTheThreshold",
+      "kotlin": "e3_aJudgeCheckSendsTheRubricPromptAndAcceptsOnlyABareScoreAtTheThreshold"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_model_that_fails_on_one_case_does_not_stop_the_run",
+      "typescript": "e4 a model that fails on one case does not stop the run",
+      "java": "e4_aModelThatFailsOnOneCaseDoesNotStopTheRun",
+      "kotlin": "e4_aModelThatFailsOnOneCaseDoesNotStopTheRun"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_tags_report_their_own_rates_and_success_criteria_judge_each_dimension",
+      "typescript": "e5 tags report their own rates and success criteria judge each dimension",
+      "java": "e5_tagsReportTheirOwnRatesAndSuccessCriteriaJudgeEachDimension",
+      "kotlin": "e5_tagsReportTheirOwnRatesAndSuccessCriteriaJudgeEachDimension"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_regression_run_names_what_broke_what_was_fixed_and_what_went_missing",
+      "typescript": "e6 a regression run names what broke what was fixed and what went missing",
+      "java": "e6_aRegressionRunNamesWhatBrokeWhatWasFixedAndWhatWentMissing",
+      "kotlin": "e6_aRegressionRunNamesWhatBrokeWhatWasFixedAndWhatWentMissing"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_repeated_runs_expose_flaky_cases_and_a_case_passes_only_if_every_run_does",
+      "typescript": "e7 repeated runs expose flaky cases and a case passes only if every run does",
+      "java": "e7_repeatedRunsExposeFlakyCasesAndACasePassesOnlyIfEveryRunDoes",
+      "kotlin": "e7_repeatedRunsExposeFlakyCasesAndACasePassesOnlyIfEveryRunDoes"
+    }
+  },
+  "plants": {
+    "wrong-regex-full-match": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "requires the whole output to match the regular expression instead of searching it"
+    },
+    "wrong-exact-case-sensitive": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "compares exact answers without lower-casing them"
+    },
+    "wrong-exact-contains": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts an output that merely contains the expected answer"
+    },
+    "wrong-json-loose-type": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "compares the field and the expected value as text, so the string 3 equals the number 3"
+    },
+    "wrong-json-fence-ok": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "strips a code fence before parsing, so fenced output passes"
+    },
+    "wrong-judge-first-digit": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "takes the first digit it finds in the judge's reply instead of requiring a bare score"
+    },
+    "wrong-judge-strict-threshold": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "requires a score above the threshold instead of at it"
+    },
+    "wrong-model-error-passes": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "counts a run in which the model raised an error as a pass"
+    },
+    "wrong-tag-total": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "counts a case in its tag total only when it passed"
+    },
+    "wrong-meets-at-or-below": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "fails the overall criterion when the pass rate equals the minimum"
+    },
+    "wrong-meets-missing-tag-ok": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets a criterion pass when no case carries its tag"
+    },
+    "wrong-compare-rate-only": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "calls a run fine whenever the pass rate did not fall, even with a regression"
+    },
+    "wrong-compare-removed-ignored": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "ignores cases that disappeared from the set"
+    },
+    "wrong-flaky-any-run": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "passes a case when any of its repeated runs passes"
+    }
+  }
+}
