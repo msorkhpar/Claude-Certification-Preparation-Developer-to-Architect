@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import (check_duplicate, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
+from check_quiz import (check_duplicate, check_named_page, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
                         key_is_longest)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
@@ -103,5 +103,13 @@ expect("plant: key longest above 40 percent fails", [f for f in [longest_verdict
 expect("plant: key longest 35 percent warns only", [f for f in [longest_verdict("m", 7, 20)[0]] if f], False)
 expect("plant: key longest 35 percent gives a warning", [w for w in [longest_verdict("m", 7, 20)[1]] if w], True)
 expect("clean: key longest 30 percent", [w for w in longest_verdict("m", 3, 10)] and [w for w in longest_verdict("m", 3, 10) if w], False)
+
+# (d) a Developer mock question names the page that answers it and quotes it
+GOOD = 'Because the page says "Not every success criteria or failing eval is best solved by prompt engineering" (module 42, page 1).'
+expect("clean: key explanation names its page and quotes it", check_named_page("x#x1", GOOD), False)
+expect("plant: no page named", check_named_page("x#x1", 'The page says "Not every success criteria or failing eval is best solved by prompt engineering".'), True)
+expect("plant: page does not exist", check_named_page("x#x1", GOOD.replace("module 42, page 1", "module 42, page 9")), True)
+expect("plant: quotation is not on the named page", check_named_page("x#x1", GOOD.replace("module 42, page 1", "module 42, page 2")), True)
+expect("plant: the named page is quoted by a phrase of fewer than four words", check_named_page("x#x1", 'Because "failing eval" (module 42, page 1).'), True)
 
 sys.exit(1 if failures else 0)

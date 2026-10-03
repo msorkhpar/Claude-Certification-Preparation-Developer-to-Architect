@@ -49,6 +49,18 @@ expect("plant: bank item repeats a quiz stem",
 expect("plant: every key is a", cr.check_bank(mutate(bank, lambda d: [it.update(key="a", options=dict(it["options"], a=it["options"]["a"])) for it in d["items"]]), taken), True, "overused")
 expect("plant: doubled word in an option",
        cr.check_bank(mutate(bank, lambda d: d["items"][5]["options"].update({"a" if d["items"][5]["key"] != "a" else "b": "Ask it it to try again"})), taken), True, "doubled")
+# Level 2 rules: the module range, the domains and the near-duplicate rule, on a small synthetic bank
+l2 = cr.LEVELS[2]
+page = "course/42-evaluation/01-success-criteria-and-test-sets.md"
+quiz = {"x#q1": cr.stems("A team asks which grader fits a classifier that returns one of three labels " + "Normalised exact match with the reference answer")}
+item = {"id": "rb-001", "module": 42, "page": page, "domains": ["DV8"],
+        "stem": "A team asks which grader fits a classifier that returns one of three labels. What should it pick?",
+        "options": {"a": "A model grader that scores every answer on a scale", "b": "Normalised exact match with the reference answer",
+                    "c": "A human reviewer who reads a sample of the output", "d": "Cosine similarity between embeddings of both texts"},
+        "key": "b", "explanation": "Exact match decides a categorical answer."}
+expect("plant: Level 2 item that restates a quiz question", cr.check_bank({"intervals_days": [1, 3], "items": [item]}, set(), l2, quiz), True, "near-duplicate")
+expect("plant: Level 2 card in a Level 1 module", cr.check_cards({"cards": [{"id": "fc-001", "module": 5, "page": page, "domains": ["DV8"], "front": "q", "back": "a"}]}, l2), True, "module must be 12 to 43")
+expect("plant: Level 2 card with an Associate domain", cr.check_cards({"cards": [{"id": "fc-001", "module": 42, "page": page, "domains": ["AS1"], "front": "q", "back": "a"}]}, l2), True, "domains")
 if failures:
     print(f"{len(failures)} plant(s) not caught: {failures}")
     sys.exit(1)
