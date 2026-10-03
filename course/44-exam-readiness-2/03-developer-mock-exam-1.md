@@ -103,7 +103,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Their results are discarded and nothing can be downloaded afterwards
    - **d**: The whole batch is deleted at once, so its results address stops working for everyone
 
-10. A developer ports a working direct-API request to Claude in Amazon Bedrock and removes the version header, assuming the platform now handles versioning. What does the page say?
+10. A developer ports a working direct-API request to the Messages API of Claude in Amazon Bedrock and removes the version header, assuming the platform now handles versioning. What does the page say?
    - **a**: The date moves into the body and is renamed to a platform-specific field name
    - **b**: The platform infers it from the model identifier, so no value is sent
    - **c**: It stays, with the value 2023-06-01, exactly as on Anthropic's own endpoint
@@ -149,7 +149,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: Nothing carries over, because each surface keeps its own separate memory
    - **b**: The conventions apply, but the settings and servers must be recreated
    - **c**: Only the terminal reads that file, and extensions need the Agent SDK
-   - **d**: Identical rules and settings apply, as every surface runs one engine
+   - **d**: Matching rules and configuration apply, as each surface runs one engine
 
 18. Nightly bulk jobs share a 30,000-token instruction block, yet cache hit rates stay low because each entry lapses before many requests have arrived. Which adjustment does the page suggest?
    - **a**: Submit that block as a separate batch beforehand to warm the entry

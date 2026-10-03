@@ -27,7 +27,7 @@ The prompt engineering overview supplies the guard on step 1: the techniques ass
 
 ### A run, a gate and a comparison
 
-The example below does the five steps on six sentiment cases. It uses two scripted "versions" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label, the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of both languages is shown, and under each is what it printed in the container.
+The example below does the five steps on six sentiment cases. It uses two scripted "versions" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label (the example's grader trims and lower-cases only, a simpler rule than the practice's `exact` check, which also collapses runs of white space), the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of both languages is shown, and under each is what it printed in the container.
 
 <!-- example: m42-eval-run tabs: python,typescript -->
 ```python

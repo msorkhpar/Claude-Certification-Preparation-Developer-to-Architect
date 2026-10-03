@@ -82,7 +82,7 @@ A recovery is a decision about what can change before the next attempt. The rule
 | If what failed was | Then | Because |
 |---|---|---|
 | Your request (400, 404, 413, a migration error) | Fix it and resend | The same request fails the same way |
-| Your credential or account (401, 402, 403, a spend cap) | Send it to a person | No retry can supply a key or a payment |
+| Your credential or account (401, 402, 403, a spend cap) | Send it to a person | No retry can supply a key or a payment, and a spend cap lifts only at the monthly reset or with a higher limit |
 | Capacity (429 with `retry-after`, 529) | Wait for the header, or back off with jitter, then retry | The service will accept the same request later |
 | The provider (500) | Retry with back-off; give support the request id if it persists | The fault is theirs and often brief |
 | A timeout (504) | Change the call: stream, or use a batch | The same long request will time out again |

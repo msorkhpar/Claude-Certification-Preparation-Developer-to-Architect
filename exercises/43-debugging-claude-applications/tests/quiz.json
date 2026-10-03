@@ -121,14 +121,14 @@
       "scope": "module",
       "stem": "A call returns a 429 that carries no `retry-after` header, and its error code says the organisation reached its monthly spend ceiling. What does the module advise?",
       "options": {
-        "a": "Back off with jitter, since waiting restores access within seconds",
-        "b": "Hand it to a person, since waiting restores nothing",
+        "a": "Back off with jitter, since capacity frees up within seconds",
+        "b": "Hand it to a person, since only a higher limit or the reset restores access",
         "c": "Split the work into smaller calls so that each one fits beneath the ceiling",
         "d": "Move the call to a fallback model, since this one is overloaded"
       },
       "key": "b",
       "explanation": {
-        "b": "The table sends \"Your credential or account (401, 402, 403, a spend cap)\" to a person, because \"No retry can supply a key or a payment\".",
+        "b": "The table sends \"Your credential or account (401, 402, 403, a spend cap)\" to a person, because \"a spend cap lifts only at the monthly reset or with a higher limit\", and \"No retry can supply a key or a payment\".",
         "a": "Ruled out because capacity failures are the ones where you \"Wait for the header, or back off with jitter, then retry\", and this response has no such header.",
         "c": "Ruled out because the module's rule is to \"retry only what can change by itself\", and smaller calls do not change an organisation's ceiling.",
         "d": "Ruled out because a fallback model is the recovery for a refusal, where the table says \"Use a fallback model, or reset the context\", and this is not an overload."

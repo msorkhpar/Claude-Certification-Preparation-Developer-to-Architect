@@ -68,7 +68,7 @@ Scenario items are written around a small number of decisions. The table is the 
 
 ### The guide's own samples
 
-The guide publishes three sample questions that, in its words, "show the style and cognitive level of the exam" and "are not drawn from the live item bank". Work each one before you read the answer, and name the cue in the scenario first.
+The guide publishes three sample questions that, in its words, "show the style and cognitive level of the exam" and "are not drawn from the live item bank". Work each one before you read the answer, and name the cue in the scenario first. The samples carry the guide's own domain numbers, which differ from the course's codes: the guide's Domain 2 is Applications and Integration (DV1), Domain 7 is Security and Safety (DV6) and Domain 8 is Tools and MCPs (DV5).
 
 > **Sample 1, Domain 2, Applications and Integration.** A developer must process 10,000 documents overnight to produce a non-urgent analytics report. Cost is the primary concern, and results are not needed until the following morning. Which approach best fits the requirement?
 >

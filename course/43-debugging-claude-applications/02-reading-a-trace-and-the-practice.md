@@ -224,7 +224,7 @@ C: JSON in a code fence
 ```
 <!-- /example -->
 
-The three outputs show the three cases of the table. Trace A's empty reply is the integration's: the page on stop reasons says text after a tool result teaches the model to end its turn, so the fix is to send the tool result alone, and a prompt change would not help. Trace B's 529 is the service's, the next action is a retry with back-off, and the example reports that a later response recovered. Trace C's JSON was in the text, inside a fence, so the integration's parser was too strict and the fix is to extract the object. The same text with no object in it would have been the model's, with a different recovery: validate the output and ask again. Both languages print the same text.
+The three outputs show the three cases of the table. The example's table of origins is simpler than the practice's: it files every `rate_limit_error` under the service, and the spend-cap 429 that page 1 sends to the account is a case it leaves out. The practice tells the two apart by the `retry-after` header and the error code. Trace A's empty reply is the integration's: the page on stop reasons says text after a tool result teaches the model to end its turn, so the fix is to send the tool result alone, and a prompt change would not help. Trace B's 529 is the service's, the next action is a retry with back-off, and the example reports that a later response recovered. Trace C's JSON was in the text, inside a fence, so the integration's parser was too strict and the fix is to extract the object. The same text with no object in it would have been the model's, with a different recovery: validate the output and ask again. Both languages print the same text.
 
 ### Fix at the right layer, then keep the case
 
@@ -289,8 +289,8 @@ The practice is the diagnosis function. You write, in the language of your choic
 This quiz covers both pages of the module.
 
 1. A call returns a 429 that carries no `retry-after` header, and its error code says the organisation reached its monthly spend ceiling. What does the module advise?
-   - **a**: Back off with jitter, since waiting restores access within seconds
-   - **b**: Hand it to a person, since waiting restores nothing
+   - **a**: Back off with jitter, since capacity frees up within seconds
+   - **b**: Hand it to a person, since only a higher limit or the reset restores access
    - **c**: Split the work into smaller calls so that each one fits beneath the ceiling
    - **d**: Move the call to a fallback model, since this one is overloaded
 
@@ -315,7 +315,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The table sends "Your credential or account (401, 402, 403, a spend cap)" to a person, because "No retry can supply a key or a payment". *a* is ruled out because capacity failures are the ones where you "Wait for the header, or back off with jitter, then retry", and this response has no such header. *c* is ruled out because the module's rule is to "retry only what can change by itself", and smaller calls do not change an organisation's ceiling. *d* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and this is not an overload.
+1. **b**. The table sends "Your credential or account (401, 402, 403, a spend cap)" to a person, because "a spend cap lifts only at the monthly reset or with a higher limit", and "No retry can supply a key or a payment". *a* is ruled out because capacity failures are the ones where you "Wait for the header, or back off with jitter, then retry", and this response has no such header. *c* is ruled out because the module's rule is to "retry only what can change by itself", and smaller calls do not change an organisation's ceiling. *d* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and this is not an overload.
 2. **a**. The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5 and Sonnet 5.5, with the recovery "change the request". *b* is ruled out because a 400 is a request status and capacity failures are "429 with `retry-after`, 529". *c* is ruled out because "None is cured by a retry, a longer timeout or a different prompt". *d* is ruled out because permissions are the 403 row, "Your credential or account (401, 402, 403, a spend cap)", and a 400 names a rejected request.
 3. **a**. The table says an object between the first `{` and the last `}` makes it "The integration: the parser was too strict, so extract the object first", and the page says to prove a fix "with a test that scripts the trace". *d* is ruled out because the trap warns "Assuming the model when the output is odd", and the output does hold the JSON. *b* is ruled out because the module's rule is to "retry only what can change by itself", and a repeat gives the same shape. *c* is ruled out because the account row is "Your credential or account (401, 402, 403, a spend cap)", which arrives as an error status, and this call returned text.
 4. **c**. The page says "A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite." *a* is ruled out because "A bug that is fixed without a test or an eval case will return", as the last trap puts it. *b* is ruled out because a runbook note records the bug and does not test for it, and the page says "The bug cannot return unseen" once it is a case. *d* is ruled out because a smaller budget hides failures, while the routine says to "note whether the application recovered".
