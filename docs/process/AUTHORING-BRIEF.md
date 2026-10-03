@@ -61,6 +61,9 @@ outside the worktree. Web requests carry no personal data; nothing is signed int
 
 ## Rules of the house
 
+A batch is written by one agent: no drafting or fixing forks or sub-agents, except the read-only
+independent quiz readers. No test, example or program runs on the host outside the heavy-job slot, even a
+small one, and no process is killed except one the batch itself started and can name.
 Every container or test run goes through the heavy-job slot, one at a time, never in the background,
 with its real exit status read; a refusal is waited out, never bypassed. Docker runs on the
 `desktop-linux` context with no host `/tmp` mounts, and scratch images and containers are removed. Commit
