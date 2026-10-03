@@ -1,0 +1,195 @@
+{
+  "module": "15-errors-retries-and-timeouts",
+  "quizzes": [
+    {
+      "id": "01-error-classes-by-type-and-origin#q1",
+      "page": "01-error-classes-by-type-and-origin.md",
+      "scope": "page",
+      "stem": "After a model upgrade a nightly job gets a 400 `invalid_request_error` on every call, with a message saying the conversation must end with a user message. What is the origin, and what is the first action?",
+      "options": {
+        "a": "Your request is at fault, so fix the request and do not retry",
+        "b": "The provider is at fault, so retry with back-off until it clears",
+        "c": "Capacity is at fault, so wait for the retry-after interval",
+        "d": "The account is at fault, so ask billing to restore access"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The table puts 400 under \"your request\" and says the same request fails again, so \"retrying is waste\".",
+        "b": "Ruled out because the provider's statuses are 500 and 504, and the 400 origin is \"your request (or a limit you set)\".",
+        "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\", and the 400 names a request defect.",
+        "d": "Ruled out because the account origin is \"401, 402, 403, and the spend limits\", and a message about the list order is not one of them."
+      }
+    },
+    {
+      "id": "01-error-classes-by-type-and-origin#q2",
+      "page": "01-error-classes-by-type-and-origin.md",
+      "scope": "page",
+      "stem": "A batch job receives a 429 `rate_limit_error` on every call from the first day of a month, with no `retry-after` header and an error code that says the monthly limit is enforced. What should the job do?",
+      "options": {
+        "a": "Add jitter to the delays so that the calls spread out",
+        "b": "Retry with longer back-off, since every 429 is a rate limit",
+        "c": "Stop retrying and raise the ceiling or wait for access to resume",
+        "d": "Switch the residency setting so that another pool is used"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says a spend-cap 429 has no `retry-after`, and that \"retrying fails until access resumes\".",
+        "b": "Ruled out because \"the SDK's automatic retries do not know that\", and a longer back-off still fails until the next month.",
+        "a": "Ruled out because jitter spreads load, and the page says to read the error code \"before you decide to wait\".",
+        "d": "Ruled out because both kinds are \"set for the whole organisation\", so no setting on one request gives another pool."
+      }
+    },
+    {
+      "id": "02-retry-back-off-and-idempotency#q1",
+      "page": "02-retry-back-off-and-idempotency.md",
+      "scope": "page",
+      "stem": "A service retries every 5xx and 429 immediately, three times, with no delay. During a provider overload the service's own traffic triples and the errors last longer. What is the best change?",
+      "options": {
+        "a": "Retry five times so that one of the attempts succeeds after the overload",
+        "b": "Wait with a doubling, capped pause plus jitter, and honour any retry-after value",
+        "c": "Retry only the 429 responses, since the 5xx responses cannot be retried",
+        "d": "Add a fixed one-second pause so that every client waits the same time"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page's three ideas are exponential growth, a cap and jitter, and \"wait the larger of your back-off and the header\".",
+        "a": "Ruled out because more immediate attempts add traffic to an overloaded service: \"a long outage is met with fewer and fewer requests\" is the point of the doubling.",
+        "c": "Ruled out because the table lists \"500, 504 and 529\" under \"Retry\".",
+        "d": "Ruled out because \"after an outage, every client retries on the same schedule, and the recovering service meets all of them at once\"."
+      }
+    },
+    {
+      "id": "02-retry-back-off-and-idempotency#q2",
+      "page": "02-retry-back-off-and-idempotency.md",
+      "scope": "page",
+      "stem": "A tool in an agent files a support ticket. A timeout makes the surrounding call retry, and customers receive two tickets. Which design fixes it?",
+      "options": {
+        "a": "Wait longer between the attempts so that the first one can finish",
+        "b": "Lower the retry count of the call to zero for all tools",
+        "c": "Ask the model in the prompt not to call the tool a second time",
+        "d": "Give each filing its own key and check it before the action runs"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"make such tools idempotent: pass your own unique key, check it before acting, and store the result under it\".",
+        "b": "Ruled out because without retries a transient failure fails a customer, and \"retry the call, never the side effect\" separates the two.",
+        "c": "Ruled out because \"a prompt is a request to the model, not a guarantee\", and the retry happens in code.",
+        "a": "Ruled out because the problem is that the first attempt may already have succeeded, and \"if the first attempt actually succeeded on the server and only the answer was lost\", waiting does not undo it."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#q1",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "page",
+      "stem": "A screen that a user watches calls the API with the SDK defaults, and a stuck connection now leaves users waiting for about half an hour. Which change does the page recommend first?",
+      "options": {
+        "a": "Raise the number of retries so that a stuck call is more likely to succeed in the end",
+        "b": "Set a total deadline from the latency budget and fit the timeout and attempts under it",
+        "c": "Turn on debug logging so that the stuck call is recorded in full for later reading",
+        "d": "Lower only the connect timeout, since the stall happens while the connection opens"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says to \"set the total deadline from the latency budget of module 12, then choose a per-attempt timeout and an attempt count that fit under it\".",
+        "a": "Ruled out because \"three attempts of ten minutes each\" is the cause of the half hour, and more retries lengthen it.",
+        "c": "Ruled out because logging records the wait and does not shorten it, and \"debug logging is a development tool\".",
+        "d": "Ruled out because a stall on an open connection is the read clock: \"Read: how long to wait between bytes of the reply\"."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#q2",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "page",
+      "stem": "A support engineer asks for one item from a failing call so that the provider can find it. Which item should the log have kept?",
+      "options": {
+        "a": "The reply text, so that the provider can see what the model wrote in answer",
+        "b": "The complete request body, so that the call can be replayed from the log later",
+        "c": "The key used for the call, so that the provider can match the account at once",
+        "d": "The request id from the response header or the error body"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page calls the request id \"the one handle the provider's support can use\".",
+        "b": "Ruled out because \"prompts and replies unless the spec says they may be stored\" stay out of the log.",
+        "c": "Ruled out because the log must not hold \"the API key and the authorization or x-api-key header\".",
+        "a": "Ruled out because \"neither job needs a secret or a customer's text\", and the reply is customer-facing text."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m1",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "A service reports a 400 `invalid_request_error` on all calls after switching to Claude Opus 5.5, and its wrapper has been sending each call four times. What is the best change?",
+      "options": {
+        "a": "Add jitter to the delays so that the four attempts are spaced out over time",
+        "b": "Correct the rejected setting, and treat every 400 as final",
+        "c": "Raise the timeout so that the fourth attempt has time to succeed after all",
+        "d": "Move the calls to a batch so that the wrapper runs its attempts less often"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A 400 is the \"your request\" origin, and \"the same request will fail again\", so no retry helps.",
+        "a": "Ruled out because \"retrying them costs time and hides the real fault\", and spacing out useless attempts keeps them useless.",
+        "c": "Ruled out because \"the same request will fail again\", whatever the timeout.",
+        "d": "Ruled out because \"a 400, 401, 404 or 413 returns the same answer each time\", and a batch carries the same requests."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m2",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "A user-facing summary call has a budget of 2,000 ms. Its client allows three attempts with a 1,000 ms timeout and waits 500 ms, then 1,000 ms, between them. What is the worst case for the caller?",
+      "options": {
+        "a": "About four and a half seconds, which is more than twice the target",
+        "b": "One second, because the timeout bounds the whole call from start to finish",
+        "c": "About two seconds, because the waits between the attempts are not counted",
+        "d": "Thirty seconds, because the default timeout still applies to every attempt"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page's formula is \"attempts x timeout + sum of the waits between attempts\": three seconds of attempts and one and a half seconds of waits make four and a half.",
+        "b": "Ruled out because \"the time a caller may wait is not the timeout\".",
+        "c": "Ruled out because the formula adds \"the waits between attempts\".",
+        "d": "Ruled out because the page has you \"choose a per-attempt timeout and an attempt count that fit under it\", and a one-second timeout replaces the ten-minute default."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m3",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "Users behind a corporate proxy report that streamed answers arrive in one lump and, now and then, as an HTML page. Which origin does the page point to first?",
+      "options": {
+        "a": "The network path, where a device rewrites or buffers the traffic",
+        "b": "Their credential, which the proxy has stripped from the calls",
+        "c": "Capacity, because the provider could not take every request",
+        "d": "The output limit, because the replies are cut before the end"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page's table lists \"works locally, fails behind the proxy\" under the path, with the checks \"Is the body still JSON? Is the stream buffered?\".",
+        "b": "Ruled out because a credential fault is a \"401 or 403 from one environment only\", and a stripped key would not give an HTML page with partial streaming.",
+        "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\", with a 429 or 529 status.",
+        "d": "Ruled out because a cut reply is \"replies cut mid-sentence, status 200\" and does not come as HTML."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m4",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "An incident review finds a customer's message in the log of a failed call, and the SDK's most detailed log level was on. Which statement is right?",
+      "options": {
+        "a": "The leak is expected, since a failed call must always be logged in full for the on-call team",
+        "b": "The SDK redacts every body, so the leak must have come from some other library in use",
+        "c": "Verbose logging records bodies, so keep it off in production and record ids instead",
+        "d": "The leak proves that the retries were turned off for that call and that nobody noticed"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says that at debug \"all HTTP requests and responses are logged, including headers and bodies\", so ids are logged instead.",
+        "b": "Ruled out because \"sensitive data in request and response bodies may still be visible\".",
+        "a": "Ruled out because the page says to \"log ids, statuses and counts\" and keep prompts out.",
+        "d": "Ruled out because \"the log level comes from the ANTHROPIC_LOG environment variable or a client option\", which is separate from retries."
+      }
+    }
+  ]
+}
