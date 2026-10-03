@@ -214,6 +214,49 @@ versus single input, the Python and TypeScript references) and Anthropic's engin
 - Not verified by a run: the headless CLI route for Java and Kotlin (`-p` and `--output-format json`), the Inspector, the OAuth flow of the
   authorization specification, and the real binary's wording and scheduling; the practices and examples prove the course's code, not those.
 
+## Managed Agents, frameworks, Claude Code, plugins, CI and security (modules 36 to 41)
+
+Read on **2026-10-03** from the Managed Agents pages of the Claude API documentation (overview, agent setup, tools, environments,
+sessions, permission policies, vaults, budgets, self-hosted sandboxes and their security model, migration), the vendors' own pages for
+three agent frameworks (the LangGraph overview and persistence pages, the Strands Agents blog post of 2025-09-12 and the Pydantic AI
+home page), "Building effective agents" (2024-12-19), the Claude Code documentation (setup, how it works, common workflows, permission
+modes, permissions, settings, memory, skills, subagents, hooks and the hooks guide, plugins, commands, headless, GitHub Actions, Code
+Review, routines, security, sandboxing, monitoring) and the Claude API pages "Mitigate jailbreaks and prompt injections" and "Reduce
+prompt leak". Re-check at release.
+
+- Claude Code behaviour that the pages state with a version: the built-in starting permission mode is `auto` from v2.1.283 (terminal and
+  VS Code; earlier versions depend on plan and feature flags), the `manual` alias and the Manual label need v2.1.200, `--bare` is the
+  recommended mode for scripted calls and its limits hold fully from v2.1.286, plugin validation (`claude plugin validate`) needs
+  v2.1.233. The highest version any of these pages mentions is v2.1.286. No Claude Code binary was run for this batch.
+- Managed Agents: beta header `managed-agents-2026-04-01` (the SDKs set it); agents are versioned, environments are not; a session
+  override of `tools` replaces the agent's list and never merges; permission policies `always_allow`, `always_ask`, `auto`; the agent
+  toolset defaults to `always_allow` and MCP toolsets to `always_ask`; custom tools are not governed by a policy; an environment
+  created without `networking` gets `unrestricted`; `limited` networking with packages needs `allow_package_managers` or the request is
+  rejected with a 400; `allowed_hosts` takes bare hostnames or wildcards; a session budget is whole US cents written as a string, is
+  checked between requests (the request in flight finishes) and a session at its cap goes idle with `budget_reached`; list cost is model
+  tokens at list price, web searches at $10 per 1,000 and running time at $0.08 per hour; the product is not eligible for Zero Data
+  Retention or a HIPAA BAA. Self-hosted sandboxes keep orchestration with Anthropic, run tools on your infrastructure through an
+  environment worker, accept `memory_store` resources only and do not yet support environment-variable credentials.
+- The frameworks are quoted only for their own definitions and are not pinned to versions: the course teaches families (graph-based,
+  model-driven, typed) and not APIs, and the pages carry a dated note that these products change quickly.
+- Claude Code configuration facts used by the practices: settings precedence is managed, command line, project local, shared project,
+  user; rules are evaluated deny, then ask, then allow, and the first match decides; `auto` and `bypassPermissions` set in the shared
+  or local project file do not take effect; CLAUDE.md should stay under 200 lines and imports go four hops deep; a skill's `description`
+  and `when_to_use` are cut at 1,536 characters in the listing; a plugin's agents ignore `permissionMode`, `hooks` and `mcpServers`;
+  plugin dependencies take a semantic-version range resolved against git tags; a repository's `extraKnownMarketplaces` apply only after
+  the folder is trusted; for a `PreToolUse` hook exit 2 blocks and the most restrictive answer of several hooks applies.
+- CI: `anthropics/claude-code-action@v1`; the key is passed as `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}`; the cost section
+  advises `--max-turns`, workflow timeouts and concurrency controls; commits made with the default `GITHUB_TOKEN` do not start other
+  workflows; Code Review is a separate product whose check run always completes neutral, and `REVIEW.md` is review-only guidance.
+- Security: the injection page splits the threats into jailbreaks and direct injection (the user is the adversary) and indirect
+  injection (third-party content), and prescribes untrusted content only in tool results, JSON-encoded, with its source named and the
+  policy in the system prompt; it names Claude Haiku 4.5 as the screening model. The sandbox covers shell commands only and runs on
+  macOS, Linux and WSL2.
+- The taint gate, the card-number redaction and the alert threshold of three denials in the module 41 practice are the course's own
+  design, built from this advice. They are not product features.
+- Not verified by a run: Claude Code itself, Managed Agents, the GitHub Action, Code Review, routines, any plugin install, and any
+  model's response to an injection. The examples and practices prove the course's own models of the documented rules, offline.
+
 ## Not yet pinned
 
 Python, Node, JDK and Kotlin versions for the container, Gradle, and the test runners are chosen

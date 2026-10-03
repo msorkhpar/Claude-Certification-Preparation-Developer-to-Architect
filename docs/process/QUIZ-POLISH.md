@@ -35,3 +35,12 @@ distractors, repeated themes: anonymise-first, cheap-tier escalation, faster tie
   - 33: 02#q2, 02#q3, 02#m1, 02#m3
   - 34: 01#q1, 01#q2, 02#q2, 02#m1, 02#m2, 02#m3
   - 35: 02#q1, 02#q2, 03#q3, 03#m2; the 02#q3 answer (raw exception message) differs from the Python MCP SDK behaviour on the module 32 page: different products, say so on the page at the next pass
+
+- Level 2 modules 36 to 41 (independent reader: 27 pass, 38 weak, 2 fail of 67; the two fails and the reader's fact findings were fixed in the batch, the weak items were not re-read). Remaining WEAK items, with the recurring reasons (a key that is the only composite or contrast phrase; strawman distractors; a key near-verbatim from the page; a stem that names the answer's wording):
+  - 36: 01#q3, 02#q2, 02#q3, 02#m1, 02#m4
+  - 37: 01#q2, 01#q3, 02#q1, 02#q2, 02#m1, 02#m2
+  - 38: 01#q1, 01#q3, 02#q1, 03#q2, 03#q3, 03#m1, 03#m4
+  - 39: 01#q2 (a deny rule also misses other spellings; say hook), 02#q3, 03#q2, 03#m2
+  - 40: 01#q2, 01#q3 (near-duplicate of 38 02#q3), 02#q2, 02#q3, 02#m4
+  - 41: 01#q1, 01#q3, 02#q2, 02#q3 (say the WebFetch tool), 03#q1, 03#q2, 03#q3, 03#m1, 03#m2, 03#m3, 03#m4
+  - Answer-letter sequences repeat across modules 38, 39 and 41; rebalance at the next pass.
