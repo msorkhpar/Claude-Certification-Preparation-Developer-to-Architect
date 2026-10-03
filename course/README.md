@@ -1,7 +1,8 @@
 # course/
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
-(Foundations), modules 1 to 11, which is the whole of Level 1:
+(Foundations), modules 1 to 11, which is the whole of Level 1, and the first modules of Level 2 (Developer),
+modules 12 to 17:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -16,6 +17,12 @@ The lessons of the course, one markdown file per page, grouped by module. These 
 | `09-claude-for-every-role/` | Claude for every role | 2 |
 | `10-safety-privacy-and-policy/` | Safety, privacy and policy | 2 |
 | `11-exam-readiness-1/` | Exam readiness 1 (three pages and the Level 1 mock exam) | 4 |
+| `12-from-business-need-to-a-testable-spec/` | From business need to a testable spec | 3 |
+| `13-one-rest-api-under-every-sdk/` | One REST API under every SDK | 3 |
+| `14-the-messages-api/` | The Messages API | 3 |
+| `15-errors-retries-and-timeouts/` | Errors, retries and timeouts | 3 |
+| `16-async-concurrency-and-backpressure/` | Async, concurrency and backpressure | 2 |
+| `17-streaming/` | Streaming | 2 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
