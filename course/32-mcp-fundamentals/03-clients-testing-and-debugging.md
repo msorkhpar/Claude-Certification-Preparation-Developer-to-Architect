@@ -60,29 +60,29 @@ The practice is in `exercises/32-mcp-fundamentals/unit-01/practice-1/statement.m
 ## Quiz
 
 1. A server's tools are not showing up in a host, and the team cannot tell why. Which first step does the documentation recommend?
-   - **a**: Reinstall the host application, since a corrupt cache hides tools
+   - **a**: Try it standalone in the Inspector, with no other application involved
    - **b**: Write the server again in another language to rule out an SDK defect there
    - **c**: Add output to stdout so that the host can see the server's progress
-   - **d**: Try it standalone in the Inspector, with no other application involved
+   - **d**: Reinstall the host application, since a corrupt cache hides tools
 
 2. A stdio server started by a host cannot find credentials that work in the developer's shell. Which documented behavior explains it?
-   - **a**: The host wipes the whole environment on purpose, to keep secrets away from servers
+   - **a**: Only a limited subset is inherited, so extra variables go in the config
    - **b**: Credentials are read from the shell only when the transport used is HTTP
    - **c**: The server receives its variables only after the first tool call has arrived
-   - **d**: Only a limited subset is inherited, so extra variables go in the config
+   - **d**: The host wipes the whole environment on purpose, to keep secrets away from servers
 
 3. A CI job must exercise a server without a browser and print machine-readable results. Which Inspector client fits?
    - **a**: The web one, run headless with the default settings
    - **b**: The terminal-UI one, since it prints results as JSON
-   - **c**: None, because the Inspector can only run interactively
-   - **d**: The scriptable command-line mode, built for pipelines
+   - **c**: The scriptable command-line mode, built for pipelines
+   - **d**: None, because the Inspector can only run interactively
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "Test it standalone with the Inspector" is one of the documented steps and that the guide calls it "This should be your first stop." *a* is ruled out because the documented steps check the server rather than the host: "Verify server process is running". *b* is ruled out because the steps go through logs, the process and "Test standalone with Inspector" before anything is rewritten. *c* is ruled out because "Local MCP servers should not log messages to stdout (standard out), as this will interfere with protocol operation."
-2. **d**. The page quotes the guide: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically (the exact set is platform-dependent)." *a* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them, not none. *b* is ruled out because the fix is to "set an env key in the host's configuration", whatever the transport. *c* is ruled out because the variables are fixed when the process is launched: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically".
-3. **d**. The page's table says the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents." *a* is ruled out because the web one is "A full graphical inspector in the browser. The default, and the richest surface." *b* is ruled out because the terminal one is "An interactive terminal UI, for when a browser isn't available or wanted." *c* is ruled out because the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents."
+1. **a**. The page says "Test it standalone with the Inspector" is one of the documented steps and that the guide calls it "This should be your first stop." *d* is ruled out because the documented steps check the server rather than the host: "Verify server process is running". *b* is ruled out because the steps go through logs, the process and "Test standalone with Inspector" before anything is rewritten. *c* is ruled out because "Local MCP servers should not log messages to stdout (standard out), as this will interfere with protocol operation."
+2. **a**. The page quotes the guide: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically (the exact set is platform-dependent)." *d* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them, not none. *b* is ruled out because the fix is to "set an env key in the host's configuration", whatever the transport. *c* is ruled out because the variables are fixed when the process is launched: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically".
+3. **c**. The page's table says the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents." *a* is ruled out because the web one is "A full graphical inspector in the browser. The default, and the richest surface." *b* is ruled out because the terminal one is "An interactive terminal UI, for when a browser isn't available or wanted." *d* is ruled out because the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents."
 
 </details>
 
@@ -92,15 +92,15 @@ This quiz covers all three pages of the module.
 
 1. A server works in the Inspector, but the host cannot start it from its configuration file, which gives a relative path to the data folder. What does the documentation blame?
    - **a**: A host can launch only servers that were first registered with the Inspector
-   - **b**: Relative paths can resolve only when the server runs over Streamable HTTP
+   - **b**: The directory can be undefined, so locations should be written in full
    - **c**: A host can pass along no environment variables, so the data path is lost
-   - **d**: The directory can be undefined, so locations should be written in full
+   - **d**: Relative paths can resolve only when the server runs over Streamable HTTP
 
 2. Under the 2026-07-28 revision, a server needs to ask the user a question in the middle of a call, but the incoming call declared no matching feature. What does the server return?
    - **a**: An unsupported-version error that lists the versions it accepts
    - **b**: An invalid-params error, since the metadata fields are absent
-   - **c**: A tool result flagged as an error, saying the user cannot be reached
-   - **d**: A missing-capability error, naming whatever the metadata omitted
+   - **c**: A missing-capability error, naming whatever the metadata omitted
+   - **d**: A tool result flagged as an error, saying the user cannot be reached
 
 3. A team must build an MCP server that speaks the newest protocol version. Which of the four SDKs used in the course reached that version when it was checked?
    - **a**: All four, since they share one specification and release together
@@ -110,16 +110,16 @@ This quiz covers all three pages of the module.
 
 4. A query matches no stored entries. How does the course's notes server answer?
    - **a**: With a tool error that tells the model to ask the user for a new query
-   - **b**: With a protocol error, as for an unknown tool, so that the client logs it
+   - **b**: With ordinary text saying that nothing fits, and the error flag stays off
    - **c**: With a resource error for the missing note, as for a bad id
-   - **d**: With ordinary text saying that nothing fits, and the error flag stays off
+   - **d**: With a protocol error, as for an unknown tool, so that the client logs it
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The third page quotes the guide: the directory of a launched server "may be undefined (like / on macOS) since the client could be started from anywhere", so use absolute paths. *a* is ruled out because the guide says "the same principles apply to any stdio-based MCP client", and no registration with the Inspector exists. *b* is ruled out because "testing from the command line uses the directory where you run the command", which is the contrast, and the transport is not part of it. *c* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them and not none.
-2. **d**. The third page says that if the server needs a capability that the request's client capabilities did not declare, "it returns a MissingRequiredClientCapabilityError (code -32021) naming the missing capabilities". *a* is ruled out because an unsupported-version error is one that "lists the server's supported versions in its data field", and the version was fine here. *b* is ruled out because "A request missing either required field is rejected with error -32602", and the required fields were sent. *c* is ruled out because the error is "returned as an error with its own code", so a client can tell it from a failed tool.
+1. **b**. The third page quotes the guide: the directory of a launched server "may be undefined (like / on macOS) since the client could be started from anywhere", so use absolute paths. *a* is ruled out because the guide says "the same principles apply to any stdio-based MCP client", and no registration with the Inspector exists. *d* is ruled out because "testing from the command line uses the directory where you run the command", which is the contrast, and the transport is not part of it. *c* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them and not none.
+2. **c**. The third page says that if the server needs a capability that the request's client capabilities did not declare, "it returns a MissingRequiredClientCapabilityError (code -32021) naming the missing capabilities". *a* is ruled out because an unsupported-version error is one that "lists the server's supported versions in its data field", and the version was fine here. *b* is ruled out because "A request missing either required field is rejected with error -32602", and the required fields were sent. *d* is ruled out because the error is "returned as an error with its own code", so a client can tell it from a failed tool.
 3. **d**. The first page says the Python SDK speaks both eras, and that the other three "contain no support for 2026-07-28, and their latest revision is 2025-11-25". *a* is ruled out because three of them "contain no support for 2026-07-28". *b* is ruled out because the Kotlin SDK is one of the three whose "latest revision is 2025-11-25". *c* is ruled out because "Java is Tier 2 and Kotlin is Tier 3", and the Java SDK stops at the earlier revision as well.
-4. **d**. The third page says that with no match the search answers `No notes match "{query}"`, "which is not an error". *a* is ruled out because the answer is "which is not an error", so there is no tool error to read. *b* is ruled out because protocol errors "indicate issues with the request structure itself that models are less likely to be able to fix", and the request here is valid. *c* is ruled out because the protocol error that says `No note {id}` is "for reading a note that does not exist", and "a search that finds nothing is a normal answer".
+4. **b**. The third page says that with no match the search answers `No notes match "{query}"`, "which is not an error". *a* is ruled out because the answer is "which is not an error", so there is no tool error to read. *d* is ruled out because protocol errors "indicate issues with the request structure itself that models are less likely to be able to fix", and the request here is valid. *c* is ruled out because the protocol error that says `No note {id}` is "for reading a note that does not exist", and "a search that finds nothing is a normal answer".
 
 </details>

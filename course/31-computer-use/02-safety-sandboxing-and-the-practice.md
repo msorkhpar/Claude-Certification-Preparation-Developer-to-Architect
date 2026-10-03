@@ -61,9 +61,9 @@ The practice is in `exercises/31-computer-use/unit-01/practice-1/statement.md`, 
 
 1. An agent browses supplier websites in a container that holds the team's admin password, so that it can log in to portals. A hidden line on one page tells the agent to send the password to an outside address. Which precaution from the documentation addresses this exposure?
    - **a**: Rely on the classifiers alone, since they replace the other precautions
-   - **b**: Add a line to the prompt that tells Claude to ignore text on web pages
+   - **b**: Keep secrets away from the machine and allow only listed destinations
    - **c**: Use a larger screen so that hidden text is displayed more clearly
-   - **d**: Keep secrets away from the machine and allow only listed destinations
+   - **d**: Add a line to the prompt that tells Claude to ignore text on web pages
 
 2. After many turns, a loop that keeps every screenshot starts to fail, even though each image is small. What does the documentation give as the reason?
    - **a**: The API rejects any conversation that holds more than ten screenshots in total
@@ -73,16 +73,16 @@ The practice is in `exercises/31-computer-use/unit-01/practice-1/statement.md`, 
 
 3. A loop on Claude Sonnet 5.5 keeps growing its context with screenshots, and an engineer proposes dropping the oldest one each turn on the client. What does the documentation advise?
    - **a**: Drop one every turn, which keeps the cached prefix byte-identical
-   - **b**: Remove them in groups of three on the client, with no other side effects
+   - **b**: Resize to 2000 px or less per side and let the server clear earlier results
    - **c**: Keep the whole history, because only the first screenshot counts
-   - **d**: Resize to 2000 px or less per side and let the server clear earlier results
+   - **d**: Remove them in groups of three on the client, with no other side effects
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page lists two precautions for this: "Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft", and "Limiting internet access to an allowlist of domains to reduce exposure to malicious content." *a* is ruled out because "The precautions above remain important even with these classifiers in place." *b* is ruled out because "Claude will follow commands found in content even when they conflict with your instructions", so a line in the prompt is not a control. *c* is ruled out because the commands may be "instructions embedded in webpages or images", and a larger screen only shows them better.
+1. **b**. The page lists two precautions for this: "Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft", and "Limiting internet access to an allowlist of domains to reduce exposure to malicious content." *a* is ruled out because "The precautions above remain important even with these classifiers in place." *d* is ruled out because "Claude will follow commands found in content even when they conflict with your instructions", so a line in the prompt is not a control. *c* is ruled out because the commands may be "instructions embedded in webpages or images", and a larger screen only shows them better.
 2. **d**. The page quotes the documentation: "Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit." *a* is ruled out because the limit is "more than 20 images" in a single request, not ten in a conversation. *b* is ruled out because "Pricing follows the standard tool use pricing", with no quota unit per screenshot. *c* is ruled out because "All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment", so the application holds and prunes them, not Claude.
-3. **d**. The page says the documentation prefers resizing screenshots to "2000 px or less" per side and server-side tool result clearing, which drops old results from the context. *a* is ruled out because "Dropping a screenshot every turn changes the prefix every turn and invalidates the cache." *b* is ruled out because removing an earlier screenshot "invalidates every later thinking block in every request that still carries those turns". *c* is ruled out because every image in a request over 20 images "is held to a stricter per-side limit", not only the later ones.
+3. **b**. The page says the documentation prefers resizing screenshots to "2000 px or less" per side and server-side tool result clearing, which drops old results from the context. *a* is ruled out because "Dropping a screenshot every turn changes the prefix every turn and invalidates the cache." *d* is ruled out because removing an earlier screenshot "invalidates every later thinking block in every request that still carries those turns". *c* is ruled out because every image in a request over 20 images "is held to a stricter per-side limit", not only the later ones.
 
 </details>
 
@@ -92,34 +92,34 @@ This quiz covers both pages of the module.
 
 1. A migration moves a working integration from Claude Opus 4.6 to Claude Sonnet 5.5 on the Claude API. What changes in the tools array?
    - **a**: The old entry stays, and the new model accepts it unchanged
-   - **b**: The entry gains width and height fields that match the screen
+   - **b**: A single entry replaces the earlier definition, with no beta header
    - **c**: A beta header is added so that the new toolset can be enabled
-   - **d**: A single entry replaces the earlier definition, with no beta header
+   - **d**: The entry gains width and height fields that match the screen
 
 2. A payment form appears in the middle of a batch that the app has already started. Where must the check by a person sit?
-   - **a**: Once, after every block has run and the screen has been captured
+   - **a**: Ahead of every single block, since one turn finishes several steps
    - **b**: Only at the start of the task, when the user's request arrives
    - **c**: Never, because classifiers steer the model away from unsafe clicks
-   - **d**: Ahead of every single block, since one turn finishes several steps
+   - **d**: Once, after every block has run and the screen has been captured
 
 3. An application sizes screenshots with the rule of the practice, on a model of the high-resolution tier. What is the effect?
-   - **a**: The API rejects the screenshots, since they fall below a minimum size
+   - **a**: It works everywhere, but finer detail that the larger budget allows is lost
    - **b**: Coordinates from Claude must now be multiplied instead of divided
    - **c**: The tier needs a beta header, so requests without it fail
-   - **d**: It works everywhere, but finer detail that the larger budget allows is lost
+   - **d**: The API rejects the screenshots, since they fall below a minimum size
 
 4. A compliance team asks where the screenshots from a computer use session are kept. What is the documented answer?
    - **a**: In a vault that Anthropic holds for every session by default
    - **b**: In the Files API, where the workspace can read them later
-   - **c**: Nowhere, since screenshots are deleted as soon as Claude answers
-   - **d**: In the customer's own environment, and not at Anthropic
+   - **c**: In the customer's own environment, and not at Anthropic
+   - **d**: Nowhere, since screenshots are deleted as soon as Claude answers
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The first page says "Claude 5.5 and later models support computer use only through this toolset" and that "The request needs no beta header." *a* is ruled out because "Claude 5.5 and later models support computer use only through this toolset", so the old entry does not carry over. *b* is ruled out because the entry rejects the display fields, and "coordinates are always in the pixel space of the screenshots you return". *c* is ruled out because "The request needs no beta header."
-2. **d**. The first page says that "a batch can finish a multistep action inside one turn", so the check goes before each block runs. *a* is ruled out because the page says to "make that check before each block runs", and a check after the batch comes too late. *b* is ruled out because the documentation asks for "Asking a human to confirm decisions that might result in meaningful real-world consequences", and a payment appears at a point the first request never named. *c* is ruled out because the classifier layer is a second one: "That layer is not a replacement".
-3. **d**. The first page says the rule of the practice is "safe on every model", and "it costs detail on a high-resolution model". *a* is ruled out because the rule "is safe on every model", and the page names no minimum size. *b* is ruled out because "scale Claude's coordinates back up before applying them to the real display" holds for any scale. *c* is ruled out because "The request needs no beta header."
-4. **d**. The second page quotes the documentation: "All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment, not by Anthropic." *a* is ruled out because "Anthropic processes the images and action requests in real time as part of the API call". *b* is ruled out because "Computer use is a client-side tool." *c* is ruled out because the documentation says "Always carefully review and verify Claude's computer use actions and logs", which needs logs to exist.
+1. **b**. The first page says "Claude 5.5 and later models support computer use only through this toolset" and that "The request needs no beta header." *a* is ruled out because "Claude 5.5 and later models support computer use only through this toolset", so the old entry does not carry over. *d* is ruled out because the entry rejects the display fields, and "coordinates are always in the pixel space of the screenshots you return". *c* is ruled out because "The request needs no beta header."
+2. **a**. The first page says that "a batch can finish a multistep action inside one turn", so the check goes before each block runs. *d* is ruled out because the page says to "make that check before each block runs", and a check after the batch comes too late. *b* is ruled out because the documentation asks for "Asking a human to confirm decisions that might result in meaningful real-world consequences", and a payment appears at a point the first request never named. *c* is ruled out because the classifier layer is a second one: "That layer is not a replacement".
+3. **a**. The first page says the rule of the practice is "safe on every model", and "it costs detail on a high-resolution model". *d* is ruled out because the rule "is safe on every model", and the page names no minimum size. *b* is ruled out because "scale Claude's coordinates back up before applying them to the real display" holds for any scale. *c* is ruled out because "The request needs no beta header."
+4. **c**. The second page quotes the documentation: "All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment, not by Anthropic." *a* is ruled out because "Anthropic processes the images and action requests in real time as part of the API call". *b* is ruled out because "Computer use is a client-side tool." *d* is ruled out because the documentation says "Always carefully review and verify Claude's computer use actions and logs", which needs logs to exist.
 
 </details>

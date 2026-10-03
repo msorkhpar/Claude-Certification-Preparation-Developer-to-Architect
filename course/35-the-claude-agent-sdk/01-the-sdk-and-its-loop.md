@@ -1,0 +1,103 @@
+# The Claude Agent SDK: what it is and how its loop runs
+
+**Level:** Developer · **Module 35:** The Claude Agent SDK · **Page 1 of 3**
+**Exams:** DV3; A1
+
+**After this page you can** say what the Agent SDK is and how it differs from the CLI, the Client SDK and Managed Agents, follow one run through the agent loop and its messages, set the limits that keep a run bounded, read the result of a run correctly (including the error that a single-shot query raises), and name the route for a language that has no SDK.
+
+Checked against the Agent SDK pages of the Claude Code documentation on 2026-10-03: Python `claude-agent-sdk` 0.2.163 and TypeScript `@anthropic-ai/claude-agent-sdk` 0.3.287, the versions the course ran. Everything in the module ran offline through a scripted stand-in for the Claude Code binary, described on page 3. No model was called, no network was used and no API key was involved.
+
+## Why it matters
+
+Claude Code is an agent: it plans, calls tools and repeats until the task is done. The Agent SDK lets you embed that agent in your own program instead of writing the tool loop of module 26 yourself. That is a trade. You gain the built-in tools, permissions, hooks and context management, and you take on a child process and a stream of messages to read correctly. The exam asks where the SDK sits among Anthropic's products, what the loop yields, and how a run ends.
+
+## The idea
+
+### Four ways to build an agent
+
+The documentation separates four options by who runs the agent and what comes built in.
+
+| You want to | Use | What you get |
+|---|---|---|
+| Embed Claude Code's agent in your own Python or TypeScript application, in a process you operate | Agent SDK | "A library that runs the Claude Code binary", with built-in tools, permissions, sessions and hooks |
+| Do interactive development or one-off tasks from a terminal | Claude Code CLI | The terminal interface |
+| Call the Claude API directly from your own code | Client SDK | "You write the tool loop yourself, or let the client SDK's beta tool runner drive it." |
+| Have Anthropic host the agent | Managed Agents | "A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox" |
+
+The SDK gives you what powers Claude Code, "programmable in Python and TypeScript". There is no Java or Kotlin edition. For those languages, and any other, the documentation says to run the CLI as a subprocess: use the `-p` flag and `--output-format json` to drive the same agent loop. The course practice for this module is therefore in two languages only, and it did not run the headless CLI, which needs the real binary and a model.
+
+How it works matters for everything after this page. "Both the TypeScript and Python SDKs bundle a native Claude Code binary." Your program calls `query()`, the SDK starts that binary as a child process and exchanges messages with it, and the model and the built-in tools live in the binary. The SDK is the part around it: it turns your options into command-line flags, answers the binary's questions (may this tool run, what does your hook say, what does your own tool return) and parses what comes back.
+
+### The loop
+
+Every session follows one cycle.
+
+1. **Receive prompt.** Claude gets the prompt, the system prompt, the tool definitions and the history. The SDK yields a `SystemMessage` with subtype `init`.
+2. **Evaluate and respond.** Claude answers with text, tool calls or both. The SDK yields an `AssistantMessage` for each content block.
+3. **Execute tools.** The SDK runs each requested tool and feeds the results back. Hooks can intercept, change or block a call before it runs.
+4. **Repeat.** One full cycle is one turn, and it repeats until Claude answers without a tool call.
+5. **Return result.** The SDK yields the final assistant message and then a `ResultMessage` with the final text, token usage, cost and session ID.
+
+A turn happens without giving control back to your code. Five message types come out of the loop: the system message, the assistant message, the user message (the tool results, and any input you stream mid-loop), the stream event (only when partial messages are enabled) and the result message. A small number of trailing events can arrive after the result, so iterate the stream to the end instead of breaking at the result.
+
+### Limits and results
+
+Without limits, "the loop runs until Claude finishes on its own", which is fine for a narrow task and risky for an open-ended prompt. Two options bound it.
+
+| Option | What it controls | Default |
+|---|---|---|
+| `max_turns` / `maxTurns` | Maximum tool-use round trips | No limit |
+| `max_budget_usd` / `maxBudgetUsd` | Maximum cost before stopping | No limit |
+
+`max_turns` counts tool-use turns only, so the final text-only answer is not counted, and the budget covers subagents too. When a limit is reached the run ends with a result whose subtype names it. The subtype "is the primary way to check termination state", and the instruction is short: "Check the subtype field to determine whether the task succeeded or hit a limit."
+
+| Subtype | What happened |
+|---|---|
+| `success` | Claude finished the task normally |
+| `error_max_turns` | Hit the maxTurns limit before finishing |
+| `error_max_budget_usd` | Hit the maxBudgetUsd limit before finishing |
+| `error_during_execution` | An error interrupted the loop, for example a cancelled request |
+
+"The result field holds the final text output and is only present on the success variant, so always check the subtype before reading it." Every subtype carries cost, usage, turn count and session ID, so you can track spend and resume even after an error. In Python the cost and usage are optional, so test them for `None`.
+
+One behaviour surprises people, and the documentation says it outright: a single-shot query() call yields the final result message, then raises an error that includes the failure text, such as `Reached maximum number of turns`. "The raise is intentional." The binary also exits with a nonzero code. The consequence for code is that an error result is something you have already received by the time the exception arrives, so catch the exception and keep what you have. The practice builds this, and it is careful about the opposite case: a crash with no result message before it is not hidden, because there is nothing to summarize.
+
+### Sessions and context
+
+The session ID in the result lets you resume a conversation later with the earlier context restored, or fork it into another approach. The context window grows with every turn, because the system prompt, the tool definitions, the history and every tool output accumulate. When it nears the limit the SDK compacts older history automatically and emits a `compact_boundary` system message. Persistent rules belong in a `CLAUDE.md` file loaded through the setting sources, because compaction can drop an instruction that was given only in the first prompt. Subagents help: each starts with a fresh conversation, and only its final answer returns to the parent.
+
+## Traps
+
+1. **Looking for a Java edition.** There is none. Drive the CLI as a subprocess with `-p` and `--output-format json` from other languages.
+2. **Reading `result` without checking the subtype.** The text exists only on `success`. Check the subtype first.
+3. **Letting the raise after an error result throw away the run.** A single-shot query yields the error result and then raises. Catch it when you have already seen a result.
+4. **Running without limits.** Set `max_turns` and a budget in production, and treat `error_max_turns` and `error_max_budget_usd` as expected outcomes.
+
+## Quiz
+
+1. A service calls the SDK's query function. Where do the built-in tools actually run?
+   - **a**: Inside the Python interpreter, which re-implements each tool itself
+   - **b**: On Anthropic's servers, which receive the tool calls over the API
+   - **c**: In a hosted sandbox that the SDK creates for each query it makes
+   - **d**: In a bundled native program that the library launches on the side
+
+2. A single-shot query hits its turn limit. What does the program observe?
+   - **a**: A final result message with an error subtype, then a raised exception
+   - **b**: An exception only, with no result message arriving before it
+   - **c**: Silence, since the loop simply stops and the stream closes cleanly
+   - **d**: A normal success result whose text says that the limit was reached
+
+3. A developer wants to know whether a run succeeded or stopped on a limit. Which field is the primary way to check?
+   - **a**: The stop reason of the last assistant message in the stream
+   - **b**: The presence of a text answer in the result message
+   - **c**: The subtype of the final result
+   - **d**: The exit code of the underlying child program
+
+<details>
+<summary>Answer key</summary>
+
+1. **d**. The page says "Both the TypeScript and Python SDKs bundle a native Claude Code binary", and the SDK starts it as a child process. *a* is ruled out because the Agent SDK is "A library that runs the Claude Code binary", so the tools are not re-implemented in Python. *b* is ruled out because the SDK is an embedded library "in a process you operate", and the tools run in the binary. *c* is ruled out because the hosted option is another product: "A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox".
+2. **a**. The page says a single-shot query() call yields the final result message, then raises an error that includes the failure text. *d* is ruled out because the result is the error variant: `error_max_turns` means "Hit the maxTurns limit before finishing". *b* is ruled out because "A single-shot query() call yields the final result message, then raises an error that includes the failure text", so a result arrives first. *c* is ruled out because the raise is not silence: "The raise is intentional."
+3. **c**. The page says the subtype "is the primary way to check termination state". *a* is ruled out because the subtype "is the primary way to check termination state", and the stop reason of one message is not the end of the run. *b* is ruled out because "The result field holds the final text output and is only present on the success variant, so always check the subtype before reading it." *d* is ruled out because the instruction is "Check the subtype field to determine whether the task succeeded or hit a limit.", and the exit code and the raise only follow the error result.
+
+</details>

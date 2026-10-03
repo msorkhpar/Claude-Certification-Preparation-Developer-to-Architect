@@ -1,0 +1,252 @@
+{
+  "module": "35-the-claude-agent-sdk",
+  "quizzes": [
+    {
+      "id": "01-the-sdk-and-its-loop#q1",
+      "page": "01-the-sdk-and-its-loop.md",
+      "scope": "page",
+      "stem": "A service calls the SDK's query function. Where do the built-in tools actually run?",
+      "options": {
+        "a": "Inside the Python interpreter, which re-implements each tool itself",
+        "b": "On Anthropic's servers, which receive the tool calls over the API",
+        "c": "In a hosted sandbox that the SDK creates for each query it makes",
+        "d": "In a bundled native program that the library launches on the side"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Both the TypeScript and Python SDKs bundle a native Claude Code binary\", and the SDK starts it as a child process.",
+        "a": "Ruled out because the Agent SDK is \"A library that runs the Claude Code binary\", so the tools are not re-implemented in Python.",
+        "b": "Ruled out because the SDK is an embedded library \"in a process you operate\", and the tools run in the binary.",
+        "c": "Ruled out because the hosted option is another product: \"A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox\"."
+      }
+    },
+    {
+      "id": "01-the-sdk-and-its-loop#q2",
+      "page": "01-the-sdk-and-its-loop.md",
+      "scope": "page",
+      "stem": "A single-shot query hits its turn limit. What does the program observe?",
+      "options": {
+        "a": "A final result message with an error subtype, then a raised exception",
+        "b": "An exception only, with no result message arriving before it",
+        "c": "Silence, since the loop simply stops and the stream closes cleanly",
+        "d": "A normal success result whose text says that the limit was reached"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says a single-shot query() call yields the final result message, then raises an error that includes the failure text.",
+        "d": "Ruled out because the result is the error variant: `error_max_turns` means \"Hit the maxTurns limit before finishing\".",
+        "b": "Ruled out because \"A single-shot query() call yields the final result message, then raises an error that includes the failure text\", so a result arrives first.",
+        "c": "Ruled out because the raise is not silence: \"The raise is intentional.\""
+      }
+    },
+    {
+      "id": "01-the-sdk-and-its-loop#q3",
+      "page": "01-the-sdk-and-its-loop.md",
+      "scope": "page",
+      "stem": "A developer wants to know whether a run succeeded or stopped on a limit. Which field is the primary way to check?",
+      "options": {
+        "a": "The stop reason of the last assistant message in the stream",
+        "b": "The presence of a text answer in the result message",
+        "c": "The subtype of the final result",
+        "d": "The exit code of the underlying child program"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says the subtype \"is the primary way to check termination state\".",
+        "a": "Ruled out because the subtype \"is the primary way to check termination state\", and the stop reason of one message is not the end of the run.",
+        "b": "Ruled out because \"The result field holds the final text output and is only present on the success variant, so always check the subtype before reading it.\"",
+        "d": "Ruled out because the instruction is \"Check the subtype field to determine whether the task succeeded or hit a limit.\", and the exit code and the raise only follow the error result."
+      }
+    },
+    {
+      "id": "02-tools-permissions-hooks-and-custom-tools#q1",
+      "page": "02-tools-permissions-hooks-and-custom-tools.md",
+      "scope": "page",
+      "stem": "A developer puts Read and Grep in allowed_tools, expecting the agent to be unable to run shell commands. What happens?",
+      "options": {
+        "a": "Every other tool is removed, because a list means an exact allowance",
+        "b": "The remaining ones stay available; the listed ones are merely pre-approved",
+        "c": "The run fails at startup, because the list is incomplete",
+        "d": "The shell tool asks nothing, since unlisted tools default to approval"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says allowed_tools \"does not restrict Claude to only these tools\", and that unlisted tools \"fall through to permission_mode and can_use_tool\".",
+        "a": "Ruled out because \"This does not restrict Claude to only these tools.\"",
+        "d": "Ruled out because unlisted tools do not default to approval: they \"fall through to permission_mode and can_use_tool\".",
+        "c": "Ruled out because \"Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool.\""
+      }
+    },
+    {
+      "id": "02-tools-permissions-hooks-and-custom-tools#q2",
+      "page": "02-tools-permissions-hooks-and-custom-tools.md",
+      "scope": "page",
+      "stem": "A hook returns a denial for a tool call that a matching allow rule would approve. Which result follows?",
+      "options": {
+        "a": "It runs, because an allow rule outranks a hook's denial",
+        "b": "It runs only if the permission mode is bypassPermissions",
+        "c": "It goes to the permission callback, which makes the final decision",
+        "d": "It is refused: that check is the first thing evaluated"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page gives the order as hooks, deny rules, ask rules, the mode, allow rules and the callback, and says a hook can deny a call outright.",
+        "a": "Ruled out because the order puts hooks first and \"If any hook returns deny, the operation is blocked regardless of other hooks.\"",
+        "b": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\".",
+        "c": "Ruled out because \"hooks run before every other step\", while the callback is the last step and sees only what nothing earlier decided."
+      }
+    },
+    {
+      "id": "02-tools-permissions-hooks-and-custom-tools#q3",
+      "page": "02-tools-permissions-hooks-and-custom-tools.md",
+      "scope": "page",
+      "stem": "A custom in-process tool divides by zero and the handler throws without catching. What does Claude see?",
+      "options": {
+        "a": "Nothing, because the query aborts before any result is produced",
+        "b": "The raw exception message as an error result, and the loop continues",
+        "c": "A message that you compose, since uncaught errors are reported as written",
+        "d": "A generic failure notice with the message stripped for safety"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says the in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on.",
+        "a": "Ruled out because \"A handler error doesn't stop the agent loop.\"",
+        "d": "Ruled out because the result is an error result \"that carries the raw exception message\", not a stripped one.",
+        "c": "Ruled out because \"Claude sees the message you compose\" only when the handler catches the error and returns is_error, and an uncaught exception does not do that."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#q1",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "page",
+      "stem": "A team wants to test its permission policy without a model. Which part of the run can it replace, according to the page?",
+      "options": {
+        "a": "The executable that the SDK starts, through its path option",
+        "b": "The control messages, since the policy never sees them",
+        "c": "The prompt text, because the policy ignores what is asked",
+        "d": "The SDK library, since its code holds the policy"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says both SDKs let you choose the executable that they start, `cli_path` in Python and `pathToClaudeCodeExecutable` in TypeScript, so the SDK code runs for real.",
+        "d": "Ruled out because \"the SDK code in your program runs for real\", which is the point of the method.",
+        "b": "Ruled out because \"the binary sends control requests back when it needs your process\", and the SDK answers them, so they belong to the code under test.",
+        "c": "Ruled out because \"A script, a JSON file named in an environment variable, lists the steps of a run\", so what is replaced is the binary behind the script and not the prompt."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#q2",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "page",
+      "stem": "In the example, the git push never reaches the permission callback. Why?",
+      "options": {
+        "a": "The hook runs first and denies it, so no later step is consulted",
+        "b": "The stand-in hides every Bash call that mentions a remote",
+        "c": "The turn limit stops the run before the push can be asked",
+        "d": "The callback allows only the list command, so the push is skipped"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"The push never reaches the callback. The hook runs first and denies it\", which follows the order of page 2.",
+        "d": "Ruled out because the callback is asked about three calls (the two custom tools and the list command), \"but not the push, which the hook had already decided\".",
+        "b": "Ruled out because the stand-in applies \"a simplified copy of the documented behaviour\", and its hook step is the SDK's registered hook, not a filter on remotes.",
+        "c": "Ruled out because the options allow six turns and \"the run ends in success after five\"."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#q3",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "page",
+      "stem": "The example's output shows six MCP messages for two custom tool calls. How should a reader treat that number?",
+      "options": {
+        "a": "As what the real binary sends for any pair of custom tools",
+        "b": "As a count that the SDK promises in its documentation",
+        "c": "As the stand-in's own sequence, not a figure for the real binary",
+        "d": "As a protocol limit of three messages for each tool call"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"The MCP count is the stand-in's own sequence of an initialize, a notification and a tool call for each custom tool, so it is not a number to expect from the real binary.\"",
+        "a": "Ruled out because it \"is not a number to expect from the real binary\".",
+        "b": "Ruled out because \"The MCP count is the stand-in's own sequence\", and no documentation promises it.",
+        "d": "Ruled out because the three messages are \"the stand-in's own sequence\", and not a limit of the protocol."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#m1",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team writes its services in Java and wants the same agent loop. What does the documentation offer?",
+      "options": {
+        "a": "A Java edition of the SDK, installed from Maven",
+        "b": "Run the CLI as a subprocess in headless mode with JSON output",
+        "c": "Managed Agents, which expose the loop as a Java library",
+        "d": "The Client SDK's tool runner, which is the same loop as the Agent SDK"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The first page says the documentation's route for other languages is to run the CLI as a subprocess, with the `-p` flag and `--output-format json`.",
+        "a": "Ruled out because the SDK is \"programmable in Python and TypeScript\", and there is no Java edition.",
+        "d": "Ruled out because for the Client SDK \"You write the tool loop yourself, or let the client SDK's beta tool runner drive it\", which is not the Agent SDK's loop.",
+        "c": "Ruled out because Managed Agents are \"A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox\", and not a library."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#m2",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "module",
+      "stem": "In the course example, a denied push appears as \"Permission denied: Nothing is pushed from an agent\". Which part of that text is the stand-in's own wording?",
+      "options": {
+        "a": "The reason after the colon, which the hook returned",
+        "b": "The whole line, since the real binary words denials in the same way",
+        "c": "The prefix before the colon",
+        "d": "Nothing, because the stand-in copies the real binary's messages exactly"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The third page says \"The prefix Permission denied: in front of it is the stand-in's wording and not the real binary's.\"",
+        "a": "Ruled out because the reason is the hook's own text: \"which is the text of your hook\".",
+        "b": "Ruled out because the prefix \"is the stand-in's wording and not the real binary's\".",
+        "d": "Ruled out because the stand-in applies \"a simplified copy of the documented behaviour, not the real binary\"."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#m3",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "module",
+      "stem": "An agent in production must not run unbounded. Which two limits does the SDK offer?",
+      "options": {
+        "a": "A cap on tokens for each message and a cap on wall-clock time",
+        "b": "A cap on files read and a cap on files written",
+        "c": "A cap on hooks and a cap on tools for each turn",
+        "d": "A cap on tool-use turns and a cap on spend in dollars"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The first page lists `max_turns` (\"Maximum tool-use round trips\") and `max_budget_usd` (\"Maximum cost before stopping\").",
+        "a": "Ruled out because the two options are \"Maximum tool-use round trips\" and \"Maximum cost before stopping\", with no per-message token cap.",
+        "b": "Ruled out because `max_turns` \"counts tool-use turns only\", and no file cap exists.",
+        "c": "Ruled out because without limits \"the loop runs until Claude finishes on its own\", and hooks and tools are not what the two options count."
+      }
+    },
+    {
+      "id": "03-driving-the-sdk-offline-and-the-practice#m4",
+      "page": "03-driving-the-sdk-offline-and-the-practice.md",
+      "scope": "module",
+      "stem": "A CI job uses bypassPermissions and also lists Read in allowed_tools, hoping to keep the agent read-only. Which fix does the documentation give?",
+      "options": {
+        "a": "Nothing is needed, since the allowed list already limits the agent",
+        "b": "Block the unwanted ones with deny rules",
+        "c": "Move the list into the callback, which is consulted first",
+        "d": "Switch to the default mode, which makes the list exclusive"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The second page says \"allowed_tools does not constrain bypassPermissions\", and that the way to block specific tools in that mode is deny rules.",
+        "a": "Ruled out because \"allowed_tools does not constrain bypassPermissions.\"",
+        "d": "Ruled out because \"This does not restrict Claude to only these tools\", in any mode.",
+        "c": "Ruled out because \"Auto-approved tools never reach canUseTool\", so the callback does not see them."
+      }
+    }
+  ]
+}

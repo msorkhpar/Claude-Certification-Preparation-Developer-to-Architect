@@ -319,22 +319,22 @@ The toy screen is 2560 by 1440. The area limit binds first (a scale of 0.5585, a
    - **d**: Your own program, inside an environment that you set up
 
 2. A single reply from Claude contains a click, a text entry and a screenshot request, and the click fails. What should the application send back for the last two calls?
-   - **a**: Normal results for both, because the earlier failure does not matter
+   - **a**: Error results with the fixed halt wording, and neither action run
    - **b**: The screenshot for the last call and an error for the text entry
    - **c**: Nothing for them, since the batch is abandoned after a failure
-   - **d**: Error results with the fixed halt wording, and neither action run
+   - **d**: Normal results for both, because the earlier failure does not matter
 
 3. The application shrinks every screenshot to half its size before returning it. Claude replies with a click at a spot in the shrunken image. What must the application do before clicking?
    - **a**: Click exactly where Claude said, since the toolset converts coordinates
    - **b**: Treat the numbers as relative to the last zoomed region
-   - **c**: Give the toolset the true display size so that the API scales for you
-   - **d**: Scale the position back up by the factor it used, onto the real display
+   - **c**: Scale the position back up by the factor it used, onto the real display
+   - **d**: Give the toolset the true display size so that the API scales for you
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The page says the toolset "gives Claude 17 member tools such as screenshot, left_click, type, and zoom, and your application runs every call in an environment you control." *a* is ruled out because the documentation describes the loop as one where the application translates the calls, and Claude "never touches the machine" in this design. *b* is ruled out because "Your application receives the tool use requests, translates them into actions in your computing environment", and no Anthropic server replays them. *c* is ruled out because "The request needs no beta header."
-2. **d**. The page says "if one fails, don't run the rest", and that every later action gets `is_error: true` with exactly the text `Not executed: an earlier computer action in this turn failed.` *a* is ruled out because "Later actions depend on earlier ones, because the type enters text into whatever the click focused." *b* is ruled out because a screenshot after a failed click would run against a screen that no longer looks as expected, and "if one fails, don't run the rest". *c* is ruled out because leaving a block unanswered is an invalid request, "so an agent loop that reads only the first block fails on its next call".
-3. **d**. The page quotes the documentation: "If you scale screenshots down before returning them, scale Claude's coordinates back up before applying them to the real display." *a* is ruled out because "coordinates are always in the pixel space of the screenshots you return", which is the shrunken picture here. *b* is ruled out because after a zoom Claude "still expresses coordinates in the full screenshot's space, never relative to the zoomed image". *c* is ruled out because "the toolset takes no display dimensions and the API doesn't downscale for you".
+2. **a**. The page says "if one fails, don't run the rest", and that every later action gets `is_error: true` with exactly the text `Not executed: an earlier computer action in this turn failed.` *d* is ruled out because "Later actions depend on earlier ones, because the type enters text into whatever the click focused." *b* is ruled out because a screenshot after a failed click would run against a screen that no longer looks as expected, and "if one fails, don't run the rest". *c* is ruled out because leaving a block unanswered is an invalid request, "so an agent loop that reads only the first block fails on its next call".
+3. **c**. The page quotes the documentation: "If you scale screenshots down before returning them, scale Claude's coordinates back up before applying them to the real display." *a* is ruled out because "coordinates are always in the pixel space of the screenshots you return", which is the shrunken picture here. *b* is ruled out because after a zoom Claude "still expresses coordinates in the full screenshot's space, never relative to the zoomed image". *d* is ruled out because "the toolset takes no display dimensions and the API doesn't downscale for you".
 
 </details>

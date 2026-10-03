@@ -315,28 +315,28 @@ The limitations list is short and testable. Claude "cannot be used to name peopl
 ## Quiz
 
 1. A review service sends thirty scanned pages, each 3000 pixels wide, in a single call, and the API refuses it with an invalid_request_error that cites a stricter limit for crowded requests. Which repair does the page document?
-   - **a**: Downscale each file to 2000 px or less per side, or cap the batch at twenty
+   - **a**: Send the pages from Amazon Bedrock, which accepts them without any per-image limit
    - **b**: Raise the output limit so that the reply has room to describe all thirty of them
    - **c**: Convert each page to GIF so that the stricter size limit stops counting it
-   - **d**: Send the pages from Amazon Bedrock, which accepts them without any per-image limit
+   - **d**: Downscale each file to 2000 px or less per side, or cap the batch at twenty
 
 2. A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands too low on the original. What explains the miss?
-   - **a**: The reply was normalized to a 0 to 1000 grid and was then used as plain pixels
-   - **b**: The picture it viewed was 924 by 1307, so every returned value needs rescaling by that size
+   - **a**: The picture it viewed was 924 by 1307, so every returned value needs rescaling by that size
+   - **b**: The reply was normalized to a 0 to 1000 grid and was then used as plain pixels
    - **c**: Claude pads every image on the top and left, which moved the origin downward
    - **d**: Pictures under the edge limit are returned untouched, so the model misjudged the line
 
 3. A support agent keeps ten screenshots in a long chat and attaches all of them as base64 on every turn. Latency climbs with each turn. What does the page recommend?
    - **a**: Re-encode them as heavily compressed JPEG until the payload shrinks to a few hundred kilobytes
    - **b**: Move to a model with a larger window, which makes the repeated bytes cost nothing
-   - **c**: Place the screenshots after the text, because that order shortens the transfer
-   - **d**: Upload each one once and refer to it by id, so the payload stays small
+   - **c**: Upload each one once and refer to it by id, so the payload stays small
+   - **d**: Place the screenshots after the text, because that order shortens the transfer
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says to resize each image "so that neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks." *b* is ruled out because the stricter limit is "a stricter per-image dimension limit", which concerns the size of each file and not the reply. *c* is ruled out because "Animations are unsupported, and only the first frame is used", which changes nothing about the dimension limit. *d* is ruled out because on Amazon Bedrock "only base64-encoded sources are currently available", and the limit still applies to every image.
-2. **b**. The page works the example: 1075 by 1520 costs 2145 tokens, so Claude "resizes it to 924 by 1307" and the point is in that picture. *a* is ruled out because "Claude does not work well when you ask for normalized coordinates", and it returns pixel positions. *c* is ruled out because the padding sits "on the bottom and right", so the origin does not move. *d* is ruled out because "The token limit can resize an image whose sides are both under the edge limit."
-3. **d**. The page says that an uploaded file keeps the payload small "regardless of how many images accumulate in the conversation history." *a* is ruled out because "Lossy compression can add artifacts that hurt text". *b* is ruled out because the problem is that "each request resends the full conversation history", whatever the window size. *c* is ruled out because the placement advice is only that Claude "works best when images come before text".
+1. **d**. The page says to resize each image "so that neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks." *b* is ruled out because the stricter limit is "a stricter per-image dimension limit", which concerns the size of each file and not the reply. *c* is ruled out because "Animations are unsupported, and only the first frame is used", which changes nothing about the dimension limit. *a* is ruled out because on Amazon Bedrock "only base64-encoded sources are currently available", and the limit still applies to every image.
+2. **a**. The page works the example: 1075 by 1520 costs 2145 tokens, so Claude "resizes it to 924 by 1307" and the point is in that picture. *b* is ruled out because "Claude does not work well when you ask for normalized coordinates", and it returns pixel positions. *c* is ruled out because the padding sits "on the bottom and right", so the origin does not move. *d* is ruled out because "The token limit can resize an image whose sides are both under the edge limit."
+3. **c**. The page says that an uploaded file keeps the payload small "regardless of how many images accumulate in the conversation history." *a* is ruled out because "Lossy compression can add artifacts that hurt text". *b* is ruled out because the problem is that "each request resends the full conversation history", whatever the window size. *d* is ruled out because the placement advice is only that Claude "works best when images come before text".
 
 </details>

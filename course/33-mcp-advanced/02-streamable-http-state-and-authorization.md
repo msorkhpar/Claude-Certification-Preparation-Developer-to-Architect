@@ -61,9 +61,9 @@ The practice is in `exercises/33-mcp-advanced/unit-01/practice-1/statement.md`, 
 
 1. An MCP server on Streamable HTTP receives a request whose Origin header shows an unrelated site. What does the specification require?
    - **a**: Accept it, since the Origin header is advisory and only logged
-   - **b**: Redirect it to the authorization server so that the sender can authenticate
+   - **b**: Answer 403 Forbidden, which blocks DNS rebinding attacks
    - **c**: Close the stream of the next response so that the sender retries
-   - **d**: Answer 403 Forbidden, which blocks DNS rebinding attacks
+   - **d**: Redirect it to the authorization server so that the sender can authenticate
 
 2. An MCP server accepts a credential that was meant for another service and passes it unchanged to a downstream API. What does the specification say?
    - **a**: Allowed, since the downstream API validates the token on its own
@@ -73,16 +73,16 @@ The practice is in `exercises/33-mcp-advanced/unit-01/practice-1/statement.md`, 
 
 3. A server issues a workflow identifier in a tool result and later acts on whoever presents it. Which attack does this invite?
    - **a**: None, because MCP sessions already bind every handle to its caller
-   - **b**: Cross-site scripting, since the identifier appears in a result
+   - **b**: Hijacking, since holding the handle is taken as proof of who is asking
    - **c**: Scope inflation, since the handle carries more permissions than needed
-   - **d**: Hijacking, since holding the handle is taken as proof of who is asking
+   - **d**: Cross-site scripting, since the identifier appears in a result
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks", and that an invalid one gets 403 Forbidden. *a* is ruled out because "Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks." *b* is ruled out because "If the header is present and invalid, the server must answer 403 Forbidden", not a redirect. *c* is ruled out because "Closing the response stream is cancellation", which is how a client cancels a request, and it is not an answer to a bad Origin.
+1. **b**. The page says "Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks", and that an invalid one gets 403 Forbidden. *a* is ruled out because "Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks." *d* is ruled out because "If the header is present and invalid, the server must answer 403 Forbidden", not a redirect. *c* is ruled out because "Closing the response stream is cancellation", which is how a client cancels a request, and it is not an answer to a bad Origin.
 2. **d**. The page says "MCP servers MUST NOT accept or transit any other tokens." *a* is ruled out because "MCP servers MUST NOT accept or transit any other tokens." *b* is ruled out because "Token passthrough is explicitly forbidden", with no consent exception. *c* is ruled out because "MCP servers MUST validate that access tokens were issued specifically for them as the intended audience".
-3. **d**. The page says "MCP servers MUST NOT treat possession of a state handle as authentication." *a* is ruled out because MCP in this revision "is stateless and has no protocol-level sessions". *b* is ruled out because state handle hijacking is "an unauthorized party obtains or guesses a handle and uses it to read or change another user's state". *c* is ruled out because the remedy is that "MCP servers SHOULD bind handles server-side to the authenticated user", which is about ownership and not about permissions.
+3. **b**. The page says "MCP servers MUST NOT treat possession of a state handle as authentication." *a* is ruled out because MCP in this revision "is stateless and has no protocol-level sessions". *d* is ruled out because state handle hijacking is "an unauthorized party obtains or guesses a handle and uses it to read or change another user's state". *c* is ruled out because the remedy is that "MCP servers SHOULD bind handles server-side to the authenticated user", which is about ownership and not about permissions.
 
 </details>
 
@@ -92,34 +92,34 @@ This quiz covers both pages of the module.
 
 1. A tool wants a person's confirmation, but the calling client declared only roots. What must the server avoid?
    - **a**: Returning a normal result that reports the confirmation could not be requested
-   - **b**: Signing the state of the call, since the client may tamper with it
+   - **b**: Including any elicitation request, since the caller never announced support for it
    - **c**: Ending the call with an error code, since failing is always forbidden
-   - **d**: Including any elicitation request, since the caller never announced support for it
+   - **d**: Signing the state of the call, since the client may tamper with it
 
 2. Two requests carry the same requestState and arrive within its lifetime, one from the user it was issued to and one from a different user. How should the server treat them?
-   - **a**: Accept both, because a valid signature proves the state is genuine
+   - **a**: Reject the second, because the signed payload names its intended principal
    - **b**: Reject both, since a state may be presented only once
    - **c**: Accept both, because the expiry is the only check the specification requires
-   - **d**: Reject the second, because the signed payload names its intended principal
+   - **d**: Accept both, because a valid signature proves the state is genuine
 
 3. A load balancer sends consecutive calls of one client to different instances of an MCP server on the 2026-07-28 revision. What does the protocol need so that this works?
-   - **a**: A session identifier that each instance looks up in a common table
+   - **a**: No shared storage, since each call is self-contained
    - **b**: A sticky connection that keeps one client on the same instance
    - **c**: A resumable stream that another instance can pick up by its event id
-   - **d**: No shared storage, since each call is self-contained
+   - **d**: A session identifier that each instance looks up in a common table
 
 4. A team plans HTTP-style login for an MCP server that runs as a local child process. What does the specification advise?
    - **a**: Follow the same flow, since authorization is mandatory for every transport
    - **b**: Use a query-string token, which stdio clients may append to the command
-   - **c**: Ask the user for a password through form-mode elicitation on each start
-   - **d**: Skip that flow and read credentials from the environment instead
+   - **c**: Skip that flow and read credentials from the environment instead
+   - **d**: Ask the user for a password through form-mode elicitation on each start
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The first page says "Servers MUST NOT send an inputRequests that the client has not declared support for in its capabilities." *a* is ruled out because the practice's server "completes with an error result that says the client cannot be asked", so a normal result of that kind is allowed. *b* is ruled out because "servers MUST treat requestState as an attacker-controlled input", so signing it is required, not avoided. *c* is ruled out because a server that needs a capability the call did not declare "returns a MissingRequiredClientCapabilityError with code -32021", which is an error code.
-2. **d**. The first page says the state should carry "the authenticated principal, rejecting state presented by a different principal". *a* is ruled out because the server must reject "rejecting state presented by a different principal" even when the signature is valid. *b* is ruled out because these measures "do not by themselves guarantee single-use", so the same user can present it again within the lifetime. *c* is ruled out because the server also checks "an identifier of the originating request", and the principal.
-3. **d**. The first page says the pattern works "without requiring a shared storage layer across server instances or requiring stateful load balancing", and the second page that every POST stands alone. *a* is ruled out because MCP in this revision "is stateless and has no protocol-level sessions". *b* is ruled out because the pattern works "without requiring a shared storage layer across server instances or requiring stateful load balancing". *c* is ruled out because "Resumable streams through `Last-Event-ID` are not supported."
-4. **d**. The second page quotes the specification: "Implementations using an STDIO transport SHOULD NOT follow this specification, and instead retrieve credentials from the environment." *a* is ruled out because "Authorization is OPTIONAL for MCP implementations." *b* is ruled out because "Access tokens MUST NOT be included in the URI query string". *c* is ruled out because "Servers MUST NOT use form mode elicitation to request sensitive information".
+1. **b**. The first page says "Servers MUST NOT send an inputRequests that the client has not declared support for in its capabilities." *a* is ruled out because the practice's server "completes with an error result that says the client cannot be asked", so a normal result of that kind is allowed. *d* is ruled out because "servers MUST treat requestState as an attacker-controlled input", so signing it is required, not avoided. *c* is ruled out because a server that needs a capability the call did not declare "returns a MissingRequiredClientCapabilityError with code -32021", which is an error code.
+2. **a**. The first page says the state should carry "the authenticated principal, rejecting state presented by a different principal". *d* is ruled out because the server must reject "rejecting state presented by a different principal" even when the signature is valid. *b* is ruled out because these measures "do not by themselves guarantee single-use", so the same user can present it again within the lifetime. *c* is ruled out because the server also checks "an identifier of the originating request", and the principal.
+3. **a**. The first page says the pattern works "without requiring a shared storage layer across server instances or requiring stateful load balancing", and the second page that every POST stands alone. *d* is ruled out because MCP in this revision "is stateless and has no protocol-level sessions". *b* is ruled out because the pattern works "without requiring a shared storage layer across server instances or requiring stateful load balancing". *c* is ruled out because "Resumable streams through `Last-Event-ID` are not supported."
+4. **c**. The second page quotes the specification: "Implementations using an STDIO transport SHOULD NOT follow this specification, and instead retrieve credentials from the environment." *a* is ruled out because "Authorization is OPTIONAL for MCP implementations." *b* is ruled out because "Access tokens MUST NOT be included in the URI query string". *d* is ruled out because "Servers MUST NOT use form mode elicitation to request sensitive information".
 
 </details>

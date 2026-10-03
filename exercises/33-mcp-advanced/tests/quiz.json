@@ -26,15 +26,15 @@
       "scope": "page",
       "stem": "A client receives an opaque string called requestState together with an input-required result. What must it do with that string?",
       "options": {
-        "a": "Decode it to learn what the server wants, then adjust it before the retry",
+        "a": "Send back the exact same value on the retry, without reading it",
         "b": "Discard it, since only the answers to the questions matter on the retry",
         "c": "Keep it in a cookie so that other calls running in parallel can reuse it",
-        "d": "Send back the exact same value on the retry, without reading it"
+        "d": "Decode it to learn what the server wants, then adjust it before the retry"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The page says \"Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents\", and that the client must echo the exact value on the retry.",
-        "a": "Ruled out because \"Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents.\"",
+        "a": "The page says \"Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents\", and that the client must echo the exact value on the retry.",
+        "d": "Ruled out because \"Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents.\"",
         "b": "Ruled out because \"the client MUST echo back the exact value of that field when retrying the original request\", and the retry needs it, since the server keeps nothing else.",
         "c": "Ruled out because both fields \"MUST NOT be used for any other request that the client may be sending in parallel\"."
       }
@@ -47,15 +47,15 @@
       "options": {
         "a": "The form one, since the client validates every field against a schema",
         "b": "Either one, as long as the client shows the form to the person first",
-        "c": "Neither one, since a server may never request data from a person",
-        "d": "The out-of-band one, where the person visits a separate web page"
+        "c": "The out-of-band one, where the person visits a separate web page",
+        "d": "Neither one, since a server may never request data from a person"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The page says \"Servers MUST NOT use form mode elicitation to request sensitive information\", and that such interactions belong in URL mode.",
+        "c": "The page says \"Servers MUST NOT use form mode elicitation to request sensitive information\", and that such interactions belong in URL mode.",
         "a": "Ruled out because \"Servers MUST NOT use form mode elicitation to request sensitive information\", whatever the schema checks.",
         "b": "Ruled out because URL mode \"keeps the data out of band so it never passes through the client or the LLM context\", and a form always passes through the client.",
-        "c": "Ruled out because \"Elicitation lets a server ask a person for more information\", with URL mode for sensitive data."
+        "d": "Ruled out because \"Elicitation lets a server ask a person for more information\", with URL mode for sensitive data."
       }
     },
     {
@@ -65,15 +65,15 @@
       "stem": "An MCP server on Streamable HTTP receives a request whose Origin header shows an unrelated site. What does the specification require?",
       "options": {
         "a": "Accept it, since the Origin header is advisory and only logged",
-        "b": "Redirect it to the authorization server so that the sender can authenticate",
+        "b": "Answer 403 Forbidden, which blocks DNS rebinding attacks",
         "c": "Close the stream of the next response so that the sender retries",
-        "d": "Answer 403 Forbidden, which blocks DNS rebinding attacks"
+        "d": "Redirect it to the authorization server so that the sender can authenticate"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The page says \"Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks\", and that an invalid one gets 403 Forbidden.",
+        "b": "The page says \"Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks\", and that an invalid one gets 403 Forbidden.",
         "a": "Ruled out because \"Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks.\"",
-        "b": "Ruled out because \"If the header is present and invalid, the server must answer 403 Forbidden\", not a redirect.",
+        "d": "Ruled out because \"If the header is present and invalid, the server must answer 403 Forbidden\", not a redirect.",
         "c": "Ruled out because \"Closing the response stream is cancellation\", which is how a client cancels a request, and it is not an answer to a bad Origin."
       }
     },
@@ -103,15 +103,15 @@
       "stem": "A server issues a workflow identifier in a tool result and later acts on whoever presents it. Which attack does this invite?",
       "options": {
         "a": "None, because MCP sessions already bind every handle to its caller",
-        "b": "Cross-site scripting, since the identifier appears in a result",
+        "b": "Hijacking, since holding the handle is taken as proof of who is asking",
         "c": "Scope inflation, since the handle carries more permissions than needed",
-        "d": "Hijacking, since holding the handle is taken as proof of who is asking"
+        "d": "Cross-site scripting, since the identifier appears in a result"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The page says \"MCP servers MUST NOT treat possession of a state handle as authentication.\"",
+        "b": "The page says \"MCP servers MUST NOT treat possession of a state handle as authentication.\"",
         "a": "Ruled out because MCP in this revision \"is stateless and has no protocol-level sessions\".",
-        "b": "Ruled out because state handle hijacking is \"an unauthorized party obtains or guesses a handle and uses it to read or change another user's state\".",
+        "d": "Ruled out because state handle hijacking is \"an unauthorized party obtains or guesses a handle and uses it to read or change another user's state\".",
         "c": "Ruled out because the remedy is that \"MCP servers SHOULD bind handles server-side to the authenticated user\", which is about ownership and not about permissions."
       }
     },
@@ -122,15 +122,15 @@
       "stem": "A tool wants a person's confirmation, but the calling client declared only roots. What must the server avoid?",
       "options": {
         "a": "Returning a normal result that reports the confirmation could not be requested",
-        "b": "Signing the state of the call, since the client may tamper with it",
+        "b": "Including any elicitation request, since the caller never announced support for it",
         "c": "Ending the call with an error code, since failing is always forbidden",
-        "d": "Including any elicitation request, since the caller never announced support for it"
+        "d": "Signing the state of the call, since the client may tamper with it"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The first page says \"Servers MUST NOT send an inputRequests that the client has not declared support for in its capabilities.\"",
+        "b": "The first page says \"Servers MUST NOT send an inputRequests that the client has not declared support for in its capabilities.\"",
         "a": "Ruled out because the practice's server \"completes with an error result that says the client cannot be asked\", so a normal result of that kind is allowed.",
-        "b": "Ruled out because \"servers MUST treat requestState as an attacker-controlled input\", so signing it is required, not avoided.",
+        "d": "Ruled out because \"servers MUST treat requestState as an attacker-controlled input\", so signing it is required, not avoided.",
         "c": "Ruled out because a server that needs a capability the call did not declare \"returns a MissingRequiredClientCapabilityError with code -32021\", which is an error code."
       }
     },
@@ -140,15 +140,15 @@
       "scope": "module",
       "stem": "Two requests carry the same requestState and arrive within its lifetime, one from the user it was issued to and one from a different user. How should the server treat them?",
       "options": {
-        "a": "Accept both, because a valid signature proves the state is genuine",
+        "a": "Reject the second, because the signed payload names its intended principal",
         "b": "Reject both, since a state may be presented only once",
         "c": "Accept both, because the expiry is the only check the specification requires",
-        "d": "Reject the second, because the signed payload names its intended principal"
+        "d": "Accept both, because a valid signature proves the state is genuine"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The first page says the state should carry \"the authenticated principal, rejecting state presented by a different principal\".",
-        "a": "Ruled out because the server must reject \"rejecting state presented by a different principal\" even when the signature is valid.",
+        "a": "The first page says the state should carry \"the authenticated principal, rejecting state presented by a different principal\".",
+        "d": "Ruled out because the server must reject \"rejecting state presented by a different principal\" even when the signature is valid.",
         "b": "Ruled out because these measures \"do not by themselves guarantee single-use\", so the same user can present it again within the lifetime.",
         "c": "Ruled out because the server also checks \"an identifier of the originating request\", and the principal."
       }
@@ -159,15 +159,15 @@
       "scope": "module",
       "stem": "A load balancer sends consecutive calls of one client to different instances of an MCP server on the 2026-07-28 revision. What does the protocol need so that this works?",
       "options": {
-        "a": "A session identifier that each instance looks up in a common table",
+        "a": "No shared storage, since each call is self-contained",
         "b": "A sticky connection that keeps one client on the same instance",
         "c": "A resumable stream that another instance can pick up by its event id",
-        "d": "No shared storage, since each call is self-contained"
+        "d": "A session identifier that each instance looks up in a common table"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The first page says the pattern works \"without requiring a shared storage layer across server instances or requiring stateful load balancing\", and the second page that every POST stands alone.",
-        "a": "Ruled out because MCP in this revision \"is stateless and has no protocol-level sessions\".",
+        "a": "The first page says the pattern works \"without requiring a shared storage layer across server instances or requiring stateful load balancing\", and the second page that every POST stands alone.",
+        "d": "Ruled out because MCP in this revision \"is stateless and has no protocol-level sessions\".",
         "b": "Ruled out because the pattern works \"without requiring a shared storage layer across server instances or requiring stateful load balancing\".",
         "c": "Ruled out because \"Resumable streams through `Last-Event-ID` are not supported.\""
       }
@@ -180,15 +180,15 @@
       "options": {
         "a": "Follow the same flow, since authorization is mandatory for every transport",
         "b": "Use a query-string token, which stdio clients may append to the command",
-        "c": "Ask the user for a password through form-mode elicitation on each start",
-        "d": "Skip that flow and read credentials from the environment instead"
+        "c": "Skip that flow and read credentials from the environment instead",
+        "d": "Ask the user for a password through form-mode elicitation on each start"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The second page quotes the specification: \"Implementations using an STDIO transport SHOULD NOT follow this specification, and instead retrieve credentials from the environment.\"",
+        "c": "The second page quotes the specification: \"Implementations using an STDIO transport SHOULD NOT follow this specification, and instead retrieve credentials from the environment.\"",
         "a": "Ruled out because \"Authorization is OPTIONAL for MCP implementations.\"",
         "b": "Ruled out because \"Access tokens MUST NOT be included in the URI query string\".",
-        "c": "Ruled out because \"Servers MUST NOT use form mode elicitation to request sensitive information\"."
+        "d": "Ruled out because \"Servers MUST NOT use form mode elicitation to request sensitive information\"."
       }
     }
   ]

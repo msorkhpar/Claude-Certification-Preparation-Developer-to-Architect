@@ -366,22 +366,22 @@ Read the two outputs side by side. In the Python output, the first request ends 
    - **d**: It returns an input-required result, and the client repeats the request with the replies
 
 2. A client receives an opaque string called requestState together with an input-required result. What must it do with that string?
-   - **a**: Decode it to learn what the server wants, then adjust it before the retry
+   - **a**: Send back the exact same value on the retry, without reading it
    - **b**: Discard it, since only the answers to the questions matter on the retry
    - **c**: Keep it in a cookie so that other calls running in parallel can reuse it
-   - **d**: Send back the exact same value on the retry, without reading it
+   - **d**: Decode it to learn what the server wants, then adjust it before the retry
 
 3. A server must collect a payment card number from a user during a tool call. Which mode of elicitation may it use?
    - **a**: The form one, since the client validates every field against a schema
    - **b**: Either one, as long as the client shows the form to the person first
-   - **c**: Neither one, since a server may never request data from a person
-   - **d**: The out-of-band one, where the person visits a separate web page
+   - **c**: The out-of-band one, where the person visits a separate web page
+   - **d**: Neither one, since a server may never request data from a person
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The page says the server answers with an input-required result, and the client "then retries the original request including the additional requested information". *a* is ruled out because "The previous pattern of server-initiated requests is no longer supported." *b* is ruled out because the pattern works "without requiring a shared storage layer across server instances or requiring stateful load balancing", which a held connection would need. *c* is ruled out because the pattern allows "servers to request additional information without maintaining any server-side state", so there is no session to resume.
-2. **d**. The page says "Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents", and that the client must echo the exact value on the retry. *a* is ruled out because "Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents." *b* is ruled out because "the client MUST echo back the exact value of that field when retrying the original request", and the retry needs it, since the server keeps nothing else. *c* is ruled out because both fields "MUST NOT be used for any other request that the client may be sending in parallel".
-3. **d**. The page says "Servers MUST NOT use form mode elicitation to request sensitive information", and that such interactions belong in URL mode. *a* is ruled out because "Servers MUST NOT use form mode elicitation to request sensitive information", whatever the schema checks. *b* is ruled out because URL mode "keeps the data out of band so it never passes through the client or the LLM context", and a form always passes through the client. *c* is ruled out because "Elicitation lets a server ask a person for more information", with URL mode for sensitive data.
+2. **a**. The page says "Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents", and that the client must echo the exact value on the retry. *d* is ruled out because "Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents." *b* is ruled out because "the client MUST echo back the exact value of that field when retrying the original request", and the retry needs it, since the server keeps nothing else. *c* is ruled out because both fields "MUST NOT be used for any other request that the client may be sending in parallel".
+3. **c**. The page says "Servers MUST NOT use form mode elicitation to request sensitive information", and that such interactions belong in URL mode. *a* is ruled out because "Servers MUST NOT use form mode elicitation to request sensitive information", whatever the schema checks. *b* is ruled out because URL mode "keeps the data out of band so it never passes through the client or the LLM context", and a form always passes through the client. *d* is ruled out because "Elicitation lets a server ask a person for more information", with URL mode for sensitive data.
 
 </details>

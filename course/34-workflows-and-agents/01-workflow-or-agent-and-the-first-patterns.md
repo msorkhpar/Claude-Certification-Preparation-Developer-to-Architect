@@ -261,22 +261,22 @@ Read the output for the places where the program, not the model, made the decisi
    - **d**: A workflow, because the program fixes the route in advance
 
 2. A product team wants an assistant to answer questions from a small knowledge base and is considering a multi-agent design. What does the article recommend as a starting point?
-   - **a**: A network of cooperating agents, since complexity improves every task
+   - **a**: The plainest option that works, like one prompted call with retrieval
    - **b**: A framework with a graphical builder, to avoid writing prompts by hand
    - **c**: An autonomous agent, since a small base leaves no path to hard-code
-   - **d**: The plainest option that works, like one prompted call with retrieval
+   - **d**: A network of cooperating agents, since complexity improves every task
 
 3. A moderation service must check a user message and also draft a reply at the same time. The two jobs do not depend on each other. Which pattern fits?
    - **a**: Voting, where the same prompt is run several times for a majority
    - **b**: Prompt chaining, where each call processes the output of the previous one
-   - **c**: Routing, where a classifier picks one specialized path for the input
-   - **d**: Sectioning, where separate subtasks run side by side and are joined
+   - **c**: Sectioning, where separate subtasks run side by side and are joined
+   - **d**: Routing, where a classifier picks one specialized path for the input
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The page says "Workflows are systems where LLMs and tools are orchestrated through predefined code paths." *a* is ruled out because agents "are systems where LLMs dynamically direct their own processes and tool usage", and here the program does the directing. *b* is ruled out because the page says agents "are typically just LLMs using tools based on environmental feedback in a loop", which is a loop chosen by the model, not a fixed sequence. *c* is ruled out because "we categorize all these variations as agentic systems", so the term covers both.
-2. **d**. The page says "we recommend finding the simplest solution possible, and only increasing complexity when needed", and that "optimizing single LLM calls with retrieval and in-context examples is usually enough". *a* is ruled out because "Agentic systems often trade latency and cost for better task performance", so complexity is not free. *b* is ruled out because "We suggest that developers start by using LLM APIs directly". *c* is ruled out because agents suit "open-ended problems where it's difficult or impossible to predict the required number of steps", and a small knowledge base is not one.
-3. **d**. The page says sectioning is "Breaking a task into independent subtasks run in parallel", with a guardrail beside the answer as its example. *a* is ruled out because "Running the same task multiple times to get diverse outputs" is voting, and these are two different jobs. *b* is ruled out because chaining is for steps "where each LLM call processes the output of the previous one", and these jobs do not depend on each other. *c* is ruled out because "Routing classifies an input and directs it to a specialized followup task", and here both jobs run.
+2. **a**. The page says "we recommend finding the simplest solution possible, and only increasing complexity when needed", and that "optimizing single LLM calls with retrieval and in-context examples is usually enough". *d* is ruled out because "Agentic systems often trade latency and cost for better task performance", so complexity is not free. *b* is ruled out because "We suggest that developers start by using LLM APIs directly". *c* is ruled out because agents suit "open-ended problems where it's difficult or impossible to predict the required number of steps", and a small knowledge base is not one.
+3. **c**. The page says sectioning is "Breaking a task into independent subtasks run in parallel", with a guardrail beside the answer as its example. *a* is ruled out because "Running the same task multiple times to get diverse outputs" is voting, and these are two different jobs. *b* is ruled out because chaining is for steps "where each LLM call processes the output of the previous one", and these jobs do not depend on each other. *d* is ruled out because "Routing classifies an input and directs it to a specialized followup task", and here both jobs run.
 
 </details>

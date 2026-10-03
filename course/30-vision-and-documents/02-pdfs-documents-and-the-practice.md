@@ -59,29 +59,29 @@ Most of the failures above are knowable before the call, which is what the pract
 ## Quiz
 
 1. A team sends a 400-page annual report full of tables, and the call fails long before 600 pages. According to the documentation, what is the likely cause?
-   - **a**: Heavy graphics and small type use up the context window first
-   - **b**: Tables are rasterized at a resolution that the API charges for separately
+   - **a**: Tables are rasterized at a resolution that the API charges for separately
+   - **b**: Heavy graphics and small type use up the context window first
    - **c**: PDFs above 100 pages are refused unless a beta header is present
    - **d**: Extracted text is capped at 1,000 tokens per document on every platform
 
 2. A multi-tenant application stores every customer's uploaded contract with the Files API and keeps one file id per customer in its database. Which design choice protects the customers from one another?
    - **a**: Encrypt each id with a customer key before it is stored
-   - **b**: Give each client its own workspace in the organization
+   - **b**: Give every file the shortest expiry that the API allows
    - **c**: Delete the files after each request and upload them anew
-   - **d**: Give every file the shortest expiry that the API allows
+   - **d**: Give each client its own workspace in the organization
 
 3. A user asks for one summary that covers an Excel workbook and a CSV file. How should the application prepare them?
    - **a**: Attach both as document blocks exactly as they are, since the API opens every format
-   - **b**: Convert each of them to a PDF, which is the only type a document block takes
-   - **c**: Upload the delimited data as text/plain and convert the spreadsheet first
+   - **b**: Upload the delimited data as text/plain and convert the spreadsheet first
+   - **c**: Convert each of them to a PDF, which is the only type a document block takes
    - **d**: Paste the spreadsheet bytes into a text block and rely on the model to decode them
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says that dense PDFs with small-font pages or heavy graphics "can fill the context window before reaching the page limit". *b* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because the limit is "600, and 100 when the request's context window is under 1M tokens", and no header is involved. *d* is ruled out because the 1,000-token figure belongs to a mode that "uses roughly 1,000 tokens for a 3-page PDF" on Bedrock Converse and is not a cap on documents.
-2. **b**. The page says that "a multi-tenant application creates a workspace for each tenant" because files are visible to the whole workspace. *a* is ruled out because uploaded files are "accessible to the whole workspace, not scoped to an end user, a conversation or a session", whatever the id looks like. *c* is ruled out because "a file cannot be edited or renamed after upload" and a workspace boundary is not created by re-uploading. *d* is ruled out because an expiry is something you set "at upload and not changed afterwards", and it does not separate tenants.
-3. **c**. The page says to upload `.txt`, `.csv` or `.md` "to the Files API with the MIME type `text/plain`", and that binary formats such as `.xlsx` and `.docx` "are not supported in document blocks". *a* is ruled out because "Binary formats such as `.xlsx` and `.docx` are not supported in document blocks". *b* is ruled out because "A plain text file can go into a document block too", so a PDF is not the only type. *d* is ruled out because the page tells you to "convert them to text or PDF first" and offers no route that pastes raw bytes into a text block.
+1. **b**. The page says that dense PDFs with small-font pages or heavy graphics "can fill the context window before reaching the page limit". *a* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because the limit is "600, and 100 when the request's context window is under 1M tokens", and no header is involved. *d* is ruled out because the 1,000-token figure belongs to a mode that "uses roughly 1,000 tokens for a 3-page PDF" on Bedrock Converse and is not a cap on documents.
+2. **d**. The page says that "a multi-tenant application creates a workspace for each tenant" because files are visible to the whole workspace. *a* is ruled out because uploaded files are "accessible to the whole workspace, not scoped to an end user, a conversation or a session", whatever the id looks like. *c* is ruled out because "a file cannot be edited or renamed after upload" and a workspace boundary is not created by re-uploading. *b* is ruled out because an expiry is something you set "at upload and not changed afterwards", and it does not separate tenants.
+3. **b**. The page says to upload `.txt`, `.csv` or `.md` "to the Files API with the MIME type `text/plain`", and that binary formats such as `.xlsx` and `.docx` "are not supported in document blocks". *a* is ruled out because "Binary formats such as `.xlsx` and `.docx` are not supported in document blocks". *c* is ruled out because "A plain text file can go into a document block too", so a PDF is not the only type. *d* is ruled out because the page tells you to "convert them to text or PDF first" and offers no route that pastes raw bytes into a text block.
 
 </details>
 
@@ -90,15 +90,15 @@ Most of the failures above are knowable before the call, which is what the pract
 This quiz covers both pages of the module.
 
 1. A mobile app uploads photos of receipts and the cost per request is higher than expected on a model in the high-resolution tier. Which statement from the module explains it?
-   - **a**: A single image can use up to roughly three times more visual tokens there
-   - **b**: Receipts can be billed as documents, which carry a flat surcharge per page
+   - **a**: Receipts can be billed as documents, which carry a flat surcharge per page
+   - **b**: A single image can use up to roughly three times more visual tokens there
    - **c**: Every upload can be stored for a month and billed for the storage it occupies
    - **d**: The tier can charge for padding rows as separate tokens at a higher price
 
 2. An agent returns a bounding box for a table on a scanned page, and the box sits slightly off when drawn on the original. The team divided the coordinates by the extent of the padded picture. What is the correct divisor?
-   - **a**: The width and height of the original scan, taken before any resizing
+   - **a**: The dimensions of the image that the model actually received
    - **b**: The next multiple of 28 above the resized width and height
-   - **c**: The dimensions of the image that the model actually received
+   - **c**: The width and height of the original scan, taken before any resizing
    - **d**: The token limit of the tier, which is the same on both axes
 
 3. A pipeline must stay safe if a new image source quietly produces larger pictures that Claude would shrink. Which feature of the API turns that silent change into an error?
@@ -108,17 +108,17 @@ This quiz covers both pages of the module.
    - **d**: A smaller output limit, which makes resized images fail the call
 
 4. A contract workflow sends one PDF per request and wants the same document answered from many requests over a week, without re-sending its bytes. Which combination follows the module?
-   - **a**: Upload it to the Files API, refer to it by id, and keep tenants in separate workspaces
+   - **a**: Host it at a public URL and pass the URL, since Bedrock prefers links
    - **b**: Embed it as base64 in every request and enable the stricter image limit
-   - **c**: Host it at a public URL and pass the URL, since Bedrock prefers links
+   - **c**: Upload it to the Files API, refer to it by id, and keep tenants in separate workspaces
    - **d**: Convert it to GIF frames so each page counts as a single small image
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The first page says that "High-resolution images can use up to roughly three times more visual tokens than the same image on a standard-tier model". *b* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because Claude does not keep uploads: "uploaded images are not stored beyond the request." *d* is ruled out because "The padding holds no content", and the cost is the token count of the image.
-2. **c**. The first page says: "Always normalize or rescale by the resized dimensions, not the padded dimensions." *a* is ruled out because the point Claude returned lies in the resized picture, and "a 1920×1080 screenshot resizes to 1456×819" shows that the original size differs from it. *b* is ruled out because that is the padded size, and "The padding holds no content". *d* is ruled out because the budget is a token count, and the page says only that "the visual token limit is what determines the final size", which is not a length in pixels.
+1. **b**. The first page says that "High-resolution images can use up to roughly three times more visual tokens than the same image on a standard-tier model". *a* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because Claude does not keep uploads: "uploaded images are not stored beyond the request." *d* is ruled out because "The padding holds no content", and the cost is the token count of the image.
+2. **a**. The first page says: "Always normalize or rescale by the resized dimensions, not the padded dimensions." *c* is ruled out because the point Claude returned lies in the resized picture, and "a 1920×1080 screenshot resizes to 1456×819" shows that the original size differs from it. *b* is ruled out because that is the padded size, and "The padding holds no content". *d* is ruled out because the budget is a token count, and the page says only that "the visual token limit is what determines the final size", which is not a length in pixels.
 3. **a**. The first page says that setting `"transformations": {"oversized_image": "error"}` makes the API reject an image that would be resized, "with a `400`, instead of resizing it." *b* is ruled out because "High-resolution support is automatic on the listed models and requires no beta header or client-side opt-in." *c* is ruled out because "a successful count doesn't mean the image is within the Messages API's request limits". *d* is ruled out because the documented behaviour is rejection "instead of resizing it", and no output limit is involved.
-4. **a**. The pages combine the Files API, where "the payload stays small" and an id replaces the bytes, with "a workspace for each tenant". *b* is ruled out because base64 resends the bytes on every request, and "a stricter per-image dimension limit applies" is a limit to stay under and not a feature. *c* is ruled out because on Amazon Bedrock and Google Cloud "only base64 sources are available", so a link does not work there. *d* is ruled out because "Animations are unsupported, and only the first frame is used."
+4. **c**. The pages combine the Files API, where "the payload stays small" and an id replaces the bytes, with "a workspace for each tenant". *b* is ruled out because base64 resends the bytes on every request, and "a stricter per-image dimension limit applies" is a limit to stay under and not a feature. *a* is ruled out because on Amazon Bedrock and Google Cloud "only base64 sources are available", so a link does not work there. *d* is ruled out because "Animations are unsupported, and only the first frame is used."
 
 </details>
