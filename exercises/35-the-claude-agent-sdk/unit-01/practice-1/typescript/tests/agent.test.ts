@@ -19,15 +19,27 @@ const FAKE = (() => {
 const tool = (id: string, name: string, input: Record<string, unknown>) => ({ tool: { id, name, input, output: `${name} ok` } });
 const finish = (text = "All done.", subtype = "success", cost = 0.02, turns = 3) => [{ say: text }, { result: { subtype, result: text, cost, turns } }];
 
-async function run(steps: any[], mode = "readonly") {
+/** Run runAgent against the scripted CLI. The summary is what it returned, or the error it threw. */
+async function runRaw(steps: any[], mode = "readonly") {
   const d = mkdtempSync(join(tmpdir(), "agent-"));
   const script = join(d, "script.json"), record = join(d, "record.jsonl");
   writeFileSync(script, JSON.stringify({ session_id: "s1", turns: [steps] }));
   process.env.FAKE_CLAUDE_SCRIPT = script;
   process.env.FAKE_CLAUDE_RECORD = record;
-  const summary: any = (await runAgent("go", d, FAKE, mode)) ?? {};
+  let summary: any;
+  try {
+    summary = (await runAgent("go", d, FAKE, mode)) ?? {};
+  } catch (e) {
+    summary = e instanceof Error ? e : new Error(String(e));
+  }
   const records: any[] = existsSync(record) ? readFileSync(record, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)) : [];
   return { summary, records, d };
+}
+
+async function run(steps: any[], mode = "readonly") {
+  const out = await runRaw(steps, mode);
+  if (out.summary instanceof Error) throw new assert.AssertionError({ message: `runAgent threw ${out.summary.message}` });
+  return out;
 }
 
 const asks = (records: any[]) => records.filter((r) => r.ask).map((r) => [r.ask.subtype, r.ask.tool_name]);
@@ -121,11 +133,15 @@ test("e5 the messages of a run fold into a summary", () => {
   assert.deepEqual(summarize([said, errors]), { status: "incomplete", text: "last words", tools: ["Read"], turns: 0, cost: 0, denied: 1 });
 });
 
-test("e6 a run that hits the turn limit ends with that status", async () => {
-  const steps = [...Array.from({ length: 8 }, (_, i) => tool(`t${i}`, "Read", { file_path: "a.txt" })), ...finish()];
+test("e6 an error result still gives its summary and a crash is not hidden", async () => {
+  const steps = [...Array.from({ length: 8 }, (_, i) => tool(`t${i}`, "Read", { file_path: "a.txt" })), ...finish()]; // the CLI stops at the turn limit and exits with code 1
   const { summary, records } = await run(steps);
   assert.deepEqual([summary.status, summary.turns, summary.tools?.length], ["max_turns", 6, 5]);
   assert.equal(flag(records, "--max-turns"), "6");
+  const budget = (await run([tool("t1", "Read", { file_path: "a.txt" }), ...finish("Stopped early.", "error_max_budget_usd", 0.5, 2)])).summary;
+  assert.deepEqual([budget.status, budget.cost, budget.text, budget.tools], ["budget", 0.5, "Stopped early.", ["Read"]]);
+  const crashed = (await runRaw([tool("t1", "Read", { file_path: "a.txt" }), { exit: 2 }])).summary; // the process dies before it sends any result
+  assert.ok(crashed instanceof Error);
 });
 
 test("e7 denied calls are counted and the run still ends with a result", async () => {

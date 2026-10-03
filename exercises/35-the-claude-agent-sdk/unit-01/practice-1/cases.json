@@ -34,8 +34,8 @@
     },
     "e6": {
       "kind": "edge",
-      "python": "test_e6_a_run_that_hits_the_turn_limit_ends_with_that_status",
-      "typescript": "e6 a run that hits the turn limit ends with that status"
+      "python": "test_e6_an_error_result_still_gives_its_summary_and_a_crash_is_not_hidden",
+      "typescript": "e6 an error result still gives its summary and a crash is not hidden"
     },
     "e7": {
       "kind": "edge",
@@ -85,6 +85,18 @@
         "e6"
       ],
       "defect": "leaves max turns unset, so the run is not capped"
+    },
+    "wrong-raises-after-error-result": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "lets the error that follows an error result escape, so a run that hit its limit has no summary"
+    },
+    "wrong-hides-crash": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "swallows every error, so a process that died before any result looks like a run that ended"
     },
     "wrong-status-unmapped": {
       "caught_by": [

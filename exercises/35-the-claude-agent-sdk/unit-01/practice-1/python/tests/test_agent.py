@@ -24,14 +24,24 @@ def finish(text="All done.", subtype="success", cost=0.02, turns=3):
     return [{"say": text}, {"result": {"subtype": subtype, "result": text, "cost": cost, "turns": turns}}]
 
 
-def run(steps, mode="readonly"):
-    """Run run_agent against the scripted CLI. Returns (summary, records of the CLI, project directory)."""
+def run_raw(steps, mode="readonly"):
+    """Run run_agent against the scripted CLI. Returns (summary or the exception it raised, records of the CLI, project directory)."""
     d = tempfile.mkdtemp()
     script, record = Path(d, "script.json"), Path(d, "record.jsonl")
     script.write_text(json.dumps({"session_id": "s1", "turns": [steps]}))
     os.environ["FAKE_CLAUDE_SCRIPT"], os.environ["FAKE_CLAUDE_RECORD"] = str(script), str(record)
-    summary = asyncio.run(run_agent("go", d, FAKE, mode)) or {}
+    try:
+        summary = asyncio.run(run_agent("go", d, FAKE, mode)) or {}
+    except Exception as e:  # noqa: BLE001 - the tests look at what run_agent raised
+        summary = e
     records = [json.loads(line) for line in record.read_text().splitlines()] if record.exists() else []
+    return summary, records, d
+
+
+def run(steps, mode="readonly"):
+    summary, records, d = run_raw(steps, mode)
+    if isinstance(summary, Exception):
+        raise AssertionError(f"run_agent raised {summary!r}")
     return summary, records, d
 
 
@@ -138,10 +148,14 @@ def test_e5_the_messages_of_a_run_fold_into_a_summary():
     assert summarize([said, errors]) == {"status": "incomplete", "text": "last words", "tools": ["Read"], "turns": 0, "cost": 0.0, "denied": 1}
 
 
-def test_e6_a_run_that_hits_the_turn_limit_ends_with_that_status():
-    summary, records, _ = run([tool(f"t{i}", "Read", file_path="a.txt") for i in range(8)] + finish())
+def test_e6_an_error_result_still_gives_its_summary_and_a_crash_is_not_hidden():
+    summary, records, _ = run([tool(f"t{i}", "Read", file_path="a.txt") for i in range(8)] + finish())  # the CLI stops at the turn limit and exits with code 1
     assert (summary.get("status"), summary.get("turns"), len(summary.get("tools", []))) == ("max_turns", 6, 5)
     assert flag(records, "--max-turns") == "6"
+    budget, _, _ = run([tool("t1", "Read", file_path="a.txt"), *finish("Stopped early.", "error_max_budget_usd", 0.5, 2)])
+    assert (budget.get("status"), budget.get("cost"), budget.get("text"), budget.get("tools")) == ("budget", 0.5, "Stopped early.", ["Read"])
+    crashed, _, _ = run_raw([tool("t1", "Read", file_path="a.txt"), {"exit": 2}])  # the process dies before it sends any result
+    assert isinstance(crashed, Exception)
 
 
 def test_e7_denied_calls_are_counted_and_the_run_still_ends_with_a_result():

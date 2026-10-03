@@ -21,6 +21,7 @@ Steps:
                                                               the output (or the denial) as a tool_result
     {"result": {"subtype": "success", "result": "text", "cost": 0.01, "turns": 2}}
                                                               the final result message (always last)
+    {"exit": 2}                                               the process dies at once with that exit code (a crash)
 
 Rules applied to a tool step (a simplified copy of the documented behaviour, not the real binary): a tool that is
 not in --tools (when that flag is given) does not exist; PreToolUse hooks registered at the handshake are called
@@ -28,6 +29,8 @@ and may deny; a tool in --disallowedTools is denied; a tool in --allowedTools ru
 bypassPermissions runs it; mode dontAsk denies it; any other tool is sent to the SDK as a `can_use_tool` control
 request and the answer decides. The command line, the working directory, every message received and every
 control request sent are appended to the file named by FAKE_CLAUDE_RECORD.
+Like the real binary in single-shot mode, the process exits with code 1 after it sent an error result (a subtype other than
+"success", or the turn limit), which makes the SDK raise after it has yielded that result.
 Standard library only.
 """
 import json
@@ -149,7 +152,11 @@ def main():
             send({"type": "system", "subtype": "init", "session_id": session, "model": model, "cwd": "/work",
                   "tools": allowed, "permissionMode": mode, "apiKeySource": "none"})
             tool_calls = 0
+            exit_code = 0
             for step in turns.pop(0):
+                if "exit" in step:
+                    sys.stdout.flush()
+                    return step["exit"]
                 if "say" in step:
                     assistant([{"type": "text", "text": step["say"]}])
                 elif "tool" in step:
@@ -157,6 +164,7 @@ def main():
                     if max_turns is not None and tool_calls >= max_turns:
                         send({"type": "result", "subtype": "error_max_turns", "is_error": True, "duration_ms": 1, "duration_api_ms": 1,
                               "num_turns": tool_calls, "session_id": session, "total_cost_usd": 0.0, "usage": {}, "modelUsage": {}, "permission_denials": [], "errors": []})
+                        exit_code = 1
                         break
                     run_tool(step["tool"])
                 elif "result" in step:
@@ -164,6 +172,10 @@ def main():
                     send({"type": "result", "subtype": r.get("subtype", "success"), "is_error": r.get("subtype", "success") != "success",
                           "duration_ms": 1, "duration_api_ms": 1, "num_turns": r.get("turns", 1), "session_id": session,
                           "result": r.get("result"), "total_cost_usd": r.get("cost", 0.0), "usage": {}, "modelUsage": {}, "permission_denials": [], "errors": []})
+                    exit_code = 0 if r.get("subtype", "success") == "success" else 1
+            if exit_code:
+                sys.stdout.flush()
+                return exit_code
     return 0
 
 

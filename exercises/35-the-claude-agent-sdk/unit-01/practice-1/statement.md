@@ -46,7 +46,10 @@ so the SDK code you call is the real one.
   every tool call in order; `denied` counts the tool results marked as errors; `text` is the result text, or when that is empty or missing the
   last text the assistant wrote; `turns` and `cost` come from the result message (a missing cost is 0). The status is `STATUS[subtype]`, or the
   subtype itself when it is not in `STATUS`. A run with no result message is `{"status": "incomplete", ..., "turns": 0, "cost": 0}`.
-- `run_agent(prompt, project_dir, cli_path, mode)` runs `query()` with those options, collects every message and returns the summary.
+- `run_agent(prompt, project_dir, cli_path, mode)` runs `query()` with those options, collects every message and returns the summary. A
+  single-shot `query()` that ends on an error result (the turn limit, the budget) yields that result and then raises, because the process
+  exits with a nonzero code; that raise is not a failure of the run, so a summary is still returned once a result message has arrived. An
+  error with no result message before it (the process died) is not hidden: it propagates.
 
 ## The cases
 
@@ -58,7 +61,7 @@ so the SDK code you call is the real one.
 | `e3` | Bash is limited to a few commands, and dangerous ones stop the run |
 | `e4` | A hook blocks a push before the permission callback is asked |
 | `e5` | The messages of a run fold into a summary |
-| `e6` | A run that hits the turn limit ends with that status |
+| `e6` | An error result still gives its summary, and a crash is not hidden |
 | `e7` | Denied calls are counted, and the run still ends with a result |
 
 Run the tests with the command in the language folder's `run.sh`.

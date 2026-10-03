@@ -93,4 +93,13 @@ def summarize(messages):
 
 
 async def run_agent(prompt, project_dir, cli_path, mode="readonly"):
-    return summarize([m async for m in query(prompt=prompt, options=build_options(project_dir, cli_path, mode))])
+    messages = []
+    try:
+        async for message in query(prompt=prompt, options=build_options(project_dir, cli_path, mode)):
+            messages.append(message)
+    except Exception:
+        # After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a
+        # nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.
+        if not any(isinstance(m, ResultMessage) for m in messages):
+            raise
+    return summarize(messages)

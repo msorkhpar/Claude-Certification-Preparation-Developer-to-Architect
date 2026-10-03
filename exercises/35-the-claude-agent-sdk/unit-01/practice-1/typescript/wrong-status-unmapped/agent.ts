@@ -85,6 +85,12 @@ export function summarize(messages: any[]) {
 
 export async function runAgent(prompt: string, projectDir: string, cliPath: string, mode = "readonly") {
   const messages: any[] = [];
-  for await (const m of query({ prompt, options: buildOptions(projectDir, cliPath, mode) as any })) messages.push(m);
+  try {
+    for await (const m of query({ prompt, options: buildOptions(projectDir, cliPath, mode) as any })) messages.push(m);
+  } catch (error) {
+    // After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a
+    // nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.
+    if (!messages.some((m) => m.type === "result")) throw error;
+  }
   return summarize(messages);
 }

@@ -42,7 +42,7 @@ def decide(tool_name, tool_input, project_dir, mode="readonly"):
         command = tool_input.get("command", "")
         if re.search(r"\bsudo\b", command) or "rm -rf" in command:
             return deny("Dangerous command", True)
-        if re.search(r"[<>`]|\$\(", command):
+        if re.search(r"[;&|<>`]|\$\(", command):
             return deny("Command not allowed: no chaining or redirection")
         if command.split()[:1] and command.split()[0] in SAFE_COMMANDS:
             return {"behavior": "allow"}
@@ -100,6 +100,5 @@ async def run_agent(prompt, project_dir, cli_path, mode="readonly"):
     except Exception:
         # After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a
         # nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.
-        if not any(isinstance(m, ResultMessage) for m in messages):
-            raise
+        raise
     return summarize(messages)

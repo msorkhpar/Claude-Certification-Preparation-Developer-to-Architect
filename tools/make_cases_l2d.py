@@ -122,7 +122,7 @@ PRACTICES[f"{X}/35-the-claude-agent-sdk/unit-01/practice-1"] = {
         ("e3", "edge", "bash is limited to a few commands and dangerous ones stop the run"),
         ("e4", "edge", "a hook blocks a push before the permission callback is asked"),
         ("e5", "edge", "the messages of a run fold into a summary"),
-        ("e6", "edge", "a run that hits the turn limit ends with that status"),
+        ("e6", "edge", "an error result still gives its summary and a crash is not hidden"),
         ("e7", "edge", "denied calls are counted and the run still ends with a result"),
     ],
     "plants": {
@@ -133,6 +133,8 @@ PRACTICES[f"{X}/35-the-claude-agent-sdk/unit-01/practice-1"] = {
         "wrong-danger-no-interrupt": (["e3"], "denies sudo and rm -rf without interrupting the run"),
         "wrong-push-substring": (["e4"], "blocks any command that merely starts a word with git push, such as git pushd"),
         "wrong-no-turn-limit": (["e6"], "leaves max turns unset, so the run is not capped"),
+        "wrong-raises-after-error-result": (["e6"], "lets the error that follows an error result escape, so a run that hit its limit has no summary"),
+        "wrong-hides-crash": (["e6"], "swallows every error, so a process that died before any result looks like a run that ended"),
         "wrong-status-unmapped": (["e5"], "reports the raw result subtype instead of the course status for the turn limit"),
     },
 }
