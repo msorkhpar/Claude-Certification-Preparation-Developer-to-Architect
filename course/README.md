@@ -1,8 +1,8 @@
 # course/
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
-(Foundations), modules 1 to 11, which is the whole of Level 1, and the first modules of Level 2 (Developer),
-modules 12 to 41:
+(Foundations), modules 1 to 11, which is the whole of Level 1, and the modules of Level 2 (Developer),
+modules 12 to 44, which is the whole of Level 2:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -47,6 +47,9 @@ modules 12 to 41:
 | `39-extending-claude-code/` | Extending Claude Code | 3 |
 | `40-claude-in-the-software-life-cycle/` | Claude in the software life cycle | 2 |
 | `41-security-and-safety/` | Security and safety | 3 |
+| `42-evaluation/` | Evaluation | 3 |
+| `43-debugging-claude-applications/` | Debugging Claude applications | 2 |
+| `44-exam-readiness-2/` | Exam readiness 2 (two pages and two Developer mock exams) | 4 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names

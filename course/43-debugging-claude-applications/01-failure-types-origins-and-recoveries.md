@@ -1,0 +1,129 @@
+# Failure types, origins and recoveries
+
+**Level:** Developer · **Module 43:** Debugging Claude applications · **Page 1 of 2**
+**Exams:** DV8
+
+**After this page you can** sort any failure of a Claude application into a type and one of four origins (your integration, the model, the service, your account), tell a failed request from a successful response that still failed, and choose the recovery that fits instead of the one that is reflex.
+
+Checked on 2026-10-03 against the Claude API documentation pages "Claude API errors", "Stop reasons and fallback" and "Handle streaming refusals", and against the Developer exam guide (version 1.0). The error replies and traces in this module are hand-written and labelled illustrative. Nothing was run against a live service, and the model behaviour described is what the pages document.
+
+## Why it matters
+
+The Developer exam guide describes its debugging skill as "Debugging and error handling techniques for Claude applications, including error type identification, recovery strategy selection, trace analysis to identify failure modes, and problem origin isolation between the integration layer and model output." That is four skills: name the error, pick the recovery, read the trace, and say whose fault it is. The last matters most in practice, because the fix for a bad request is code, the fix for a refusal is a fallback, and the fix for an overload is patience. A team that cannot tell them apart rewrites prompts to cure bugs in its own message structure, and retries requests that can never succeed.
+
+## The idea
+
+### Two questions
+
+Every failure needs two answers, in this order.
+
+1. **Where did it fail?** One of four places, which the module calls origins.
+2. **What happens next?** A recovery chosen for that origin: fix and resend, retry with back-off, wait for a header, change the call, use a fallback model, continue the turn, or hand it to a person.
+
+| Origin | What it covers | Who acts |
+|---|---|---|
+| Integration | The request you built, the code that reads the reply, the tools you run, the state you keep | You, in code |
+| Model | What the model produced: a refusal, a reply with no JSON, a tool name it invented, an empty turn it chose | You, in the prompt, the validation or the fallback |
+| Service | Capacity, the provider's own faults, the network | Usually a retry with back-off |
+| Account | The key, billing, access and limits that belong to your organisation | A person, outside the code |
+
+Module 15 sorted HTTP errors into origins by status. This module widens the view to the whole path: a response that arrives with status 200 can still be a failure, and then the origin is not in the status at all.
+
+### Failures that carry a status
+
+The status table of module 15 holds: 400 `invalid_request_error`, 401 `authentication_error`, 402 `billing_error`, 403 `permission_error`, 404 `not_found_error`, 409 `conflict_error`, 413 `request_too_large`, 429 `rate_limit_error`, 500 `api_error`, 504 `timeout_error` and 529 `overloaded_error`. The errors page says the API "always returns errors as JSON, with a top-level `error` object that always includes a `type` and `message` value", and that the body carries a `request_id`. Three rules from the page sit above the table.
+
+- Read the **`type`** and the **`message`**, not the status alone, because a status can mean more than one thing (a 400 can be a spend limit you set, and a 429 can be a spend cap that no retry will lift).
+- **Catch the SDK's typed classes**, in the page's words, "rather than string-matching error messages, handling the most specific classes first".
+- **Keep the `request-id`.** "Every API response includes a unique `request-id` header", and it is what support asks for.
+
+Most of the table names an origin without ambiguity: 400, 404 and 413 are your request; 401, 402 and 403 are your account; 429 and 529 are capacity, with one exception that module 15 covers; 500 and 504 are the provider. A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure.
+
+### Migration errors: your request, after a model change
+
+A class of 400 errors deserves its own line, because it appears on the day a model id changes and then on every call. The errors page lists them under "Common validation errors", and each is an integration failure that the new model reveals.
+
+| Request that worked on an older model | What the new model returns |
+|---|---|
+| A prefilled last assistant message (Claude 4.6 and later) | 400 `invalid_request_error`: "This model does not support assistant message prefill. The conversation must end with a user message." |
+| Edited, reordered or dropped `thinking` blocks in the latest assistant message | 400: "`thinking` or `redacted_thinking` blocks in the latest assistant message cannot be modified. These blocks must remain as they were in the original response." |
+| `thinking: {"type": "enabled"}` (Claude 4.7 and later) | 400, with a message that points to adaptive thinking and `output_config.effort` |
+| `tool_choice` of `any` or a named tool (Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1) | 400: forced tool use is not supported for those models; `auto` and `none` are accepted |
+| A non-default `temperature`, `top_p` or `top_k` (Claude Fable 5.1, Opus 5.5 and Sonnet 5.5) | 400, as the course's version notes record |
+
+Every row has the same recovery: change the request. None is cured by a retry, a longer timeout or a different prompt, and each is caught by the regression run of module 42 the same afternoon the id changes.
+
+### Failures that carry a status of 200
+
+A successful HTTP response can hold a failure, and the documentation draws the line clearly. **Stop reasons** are "part of the response body" and describe a response that "contains valid content"; **errors** are "HTTP status codes 4xx or 5xx" and describe a request that failed. The stop reason says why generation stopped, and some values mean the reply is not what you wanted.
+
+| `stop_reason` | The page says | Origin, by the course's reading | Recovery |
+|---|---|---|---|
+| `end_turn` | Claude finished its response naturally | None, unless the content is empty (below) | Use the reply |
+| `max_tokens` | The response reached your `max_tokens` limit | Integration: the limit is yours | Raise `max_tokens` or continue the response |
+| `stop_sequence` | Claude emitted one of your `stop_sequences` | None | Read which sequence fired |
+| `tool_use` | Claude is calling a tool | None | Run the tool and return the result |
+| `pause_turn` | A server-tool loop reached its iteration limit | Integration: the loop must continue | Send the assistant content back to continue |
+| `refusal` | Claude declined to respond | Model | Read `stop_details` and retry on a fallback model |
+| `model_context_window_exceeded` | The response filled the model's context window | Integration: the context is yours | Treat the response as truncated, then trim or compact the context |
+
+The middle column is the course's reading, and the right column is the page's, joined with the module's own continuation of it. Three of these need more than a table.
+
+**A refusal is a response, not an error.** The page on refusals says so in plain words: "Refusals are responses, not errors." A refusal arrives with status 200, so "monitoring built only on error rates won't surface it", and the course's advice is to track refusals as their own signal. The recovery is not a retry on the same model: "Re-sending a refused request to the same model usually results in another refusal." Retry on a fallback model, or reset the context, since the page says that after a refusal "you must reset the conversation context before continuing". The `stop_details` object is always present on a refusal, but its `category` and `explanation` can be null, so branch on `stop_reason` and have your own message ready.
+
+**A cut-off reply is usually your setting.** `max_tokens` is the number you chose. A reply that stops mid-sentence with status 200 is the integration's configuration, and raising the limit or continuing the turn fixes it. The model did nothing wrong, and a prompt change would not help.
+
+**An empty reply has two causes.** The page on stop reasons describes an empty response, "exactly 2–3 tokens with no content", with `stop_reason: end_turn`. It occurs when Claude "interprets that the assistant turn is complete, particularly after tool results". The first cause is in the integration: text blocks added right after a tool result teach the model to expect text after every tool use, and the page says "Never add text blocks immediately after tool results". The second is the model's own judgement that it is done, for example when you send its finished reply back with nothing added. The page's advice for the second: "Don't retry empty responses without modification", and use a continuation prompt, in a new user message, "as a last resort". The origin decides the recovery: remove the text in the first case, add a user message in the second.
+
+### Choosing the recovery
+
+A recovery is a decision about what can change before the next attempt. The rule that sorts them is short: **retry only what can change by itself.**
+
+| If what failed was | Then | Because |
+|---|---|---|
+| Your request (400, 404, 413, a migration error) | Fix it and resend | The same request fails the same way |
+| Your credential or account (401, 402, 403, a spend cap) | Send it to a person | No retry can supply a key or a payment |
+| Capacity (429 with `retry-after`, 529) | Wait for the header, or back off with jitter, then retry | The service will accept the same request later |
+| The provider (500) | Retry with back-off; give support the request id if it persists | The fault is theirs and often brief |
+| A timeout (504) | Change the call: stream, or use a batch | The same long request will time out again |
+| A refusal | Use a fallback model, or reset the context | The same model will usually refuse again |
+| A cut-off (`max_tokens`) | Raise the limit, or continue | The setting was too small |
+| A parse failure | See page 2: extract and parse again, or validate and ask the model again | Depends on whether the JSON was there |
+
+Module 15 builds the retry machinery, with attempts and time budgets, `retry-after` and idempotency. The point here is the first column: the recovery is chosen after the origin is known.
+
+## Traps
+
+1. **Retrying a request that cannot succeed.** A 400, a 404 or a migration error repeats forever. Fix the request.
+2. **Counting only errors.** A refusal, a cut-off reply and an empty turn all arrive with status 200. Monitor stop reasons as well as statuses.
+3. **Blaming the model for an empty turn.** If text follows the tool result in your messages, the structure is the cause. Check the last user message before changing the prompt.
+4. **Rewriting the prompt to cure a limit.** A reply cut by `max_tokens` needs a larger limit or a continuation, and no wording will change it.
+
+## Quiz
+
+1. A service sends a request with a prefilled assistant message to a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?
+   - **a**: Retry each call with exponential back-off and jitter
+   - **b**: Drop the pre-written closing block so that the user speaks last
+   - **c**: Move the traffic to a fallback model and keep the same request
+   - **d**: Hand the problem to the billing owner of the organisation
+
+2. A reply to a long-document summary ends mid-sentence, with status 200 and a stop reason of `max_tokens`. What is the origin and the right fix?
+   - **a**: The service, so retry the same call after a short pause
+   - **b**: The model, so reword the prompt to ask for shorter output
+   - **c**: The integration's limit, so raise it or continue the turn
+   - **d**: The account, so ask for a higher quota on the organisation
+
+3. An assistant's reply arrives with status 200 and a stop reason of `refusal`. The team's dashboard shows nothing wrong. What does the documentation imply?
+   - **a**: Nothing is wrong, because the dashboard counts only failed calls
+   - **b**: A refusal is invisible to an error rate, so it needs its own signal
+   - **c**: The same request will usually succeed if it is sent again unchanged
+   - **d**: The model is overloaded and the call should wait for a retry header
+
+<details>
+<summary>Answer key</summary>
+
+1. **b**. The errors page lists the rejected prefill under "Common validation errors": "This model does not support assistant message prefill. The conversation must end with a user message." The module adds that a migration error has the recovery "change the request". *a* is ruled out because "A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure". *c* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and the 400 is a rejected request. *d* is ruled out because billing problems are the 402 row, "Your credential or account (401, 402, 403, a spend cap)", and this is a 400.
+2. **c**. The table reads `max_tokens` as "Integration: the limit is yours" with the recovery "Raise `max_tokens` or continue the response". *a* is ruled out because a retry repeats the same limit, and the page says "A cut-off reply is usually your setting". *b* is ruled out because the trap says "A reply cut by `max_tokens` needs a larger limit or a continuation, and no wording will change it". *d* is ruled out because the status is 200 and no quota was exceeded: stop reasons are "part of the response body" and not account errors.
+3. **b**. The page says "Refusals are responses, not errors", so "monitoring built only on error rates won't surface it". *a* is ruled out because the refusal is a real failure of the request, and the course's advice is to "track refusals as their own signal". *c* is ruled out because "Re-sending a refused request to the same model usually results in another refusal". *d* is ruled out because waiting for a retry header is the recovery for capacity failures: "Wait for the header, or back off with jitter, then retry", while this reply has status 200.
+
+</details>
