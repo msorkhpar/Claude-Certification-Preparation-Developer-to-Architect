@@ -16,7 +16,8 @@ a practice and a quiz; `harness/`; `tools/` and the latest `docs/process/batches
 Study every source for a module before writing it: the official Anthropic documentation, the official
 Academy course topics, the official exam guides, and the third-party guides and question sets in the
 source register outside the repository. A source whose licence permits copying may be adapted, with a
-credit line on the page; every other source is studied and never copied. Record what each page used in
+credit line on the page; every other source is studied and never copied. Every copyable source in the register is used, not only listed: the batch checks its
+modules against each one's questions and notes, and adapts what fits, with the credit line. Record what each page used in
 the batch's sources note in the register folder outside the repository, and create no other file
 outside the worktree. Web requests carry no personal data; nothing is signed into; no API key exists.
 
