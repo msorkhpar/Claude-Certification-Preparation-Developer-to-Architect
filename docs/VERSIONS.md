@@ -67,6 +67,44 @@ Claude models. Re-check at release.
 - Not verified on an official page: the resource ARN type to use with the `bedrock-mantle:CreateInference` action (the course checks the
   documented `foundation-model` shape only), and a Vertex `streamRawPredict` URL (not used).
 
+## Prompts, structured output, tools, extensions, retrieval and context
+
+Read on 2026-10-03 from the Anthropic documentation (Prompting best practices and the pages for Claude Opus 5.5, Claude Sonnet 5.5 and
+Claude Fable 5.1; Structured outputs; Tool use overview, How tool use works, Define tools, Handle tool calls, Parallel tool use, Strict
+tool use and Tool runner; Handling stop reasons; Embeddings; Search results; Citations; Files API; Context windows; Context editing;
+Compaction, Compaction on demand and Compaction at a token threshold; Memory tool), the Claude Code documentation (Extend Claude Code)
+and Anthropic's write-up on contextual retrieval. Re-check at release.
+
+- Structured outputs: schema in `output_config.format` with `type: "json_schema"`; `strict: true` on a tool for strict tool use. Not
+  supported in a schema: recursive schemas, numerical constraints (`minimum`, `maximum`, `multipleOf`), string constraints (`minLength`,
+  `maxLength`), array `minItems` above 1, `additionalProperties` other than `false`; an unsupported feature is a 400 error. Limits per
+  request: 20 strict tools, 24 optional parameters, 16 parameters with union types. Enum and const capitalisation is not guaranteed.
+  Grammars are cached for 24 hours from last use. `refusal` and `max_tokens` replies may not match the schema.
+- `tool_choice`: `auto`, `any`, `tool`, `none`; `any` and `tool` return a 400 error on Claude Opus 5.5, Claude Sonnet 5.5, Claude
+  Fable 5.1 and Claude Mythos 5.1, and are an error under manual extended thinking. `disable_parallel_tool_use` is a field of the
+  `tool_choice` object. The tool use system prompt is 286 tokens for `auto` and `none` on Opus 5.5 and Sonnet 5.5.
+- Tool results: all `tool_result` blocks of one assistant turn go in the next user message, before any text; `is_error: true` reports a
+  failure. Stop reasons: `end_turn`, `max_tokens`, `stop_sequence`, `tool_use`, `pause_turn`, `refusal`,
+  `model_context_window_exceeded`. The tool runner is a beta feature in the SDKs and takes `max_iterations`.
+- Prefilling a last assistant turn is a 400 error on Claude Opus 5.5, Claude Sonnet 5.5 and Claude Fable 5.1 (module 24).
+- Embeddings: "Anthropic does not offer its own embedding model"; the documentation names Voyage AI. Contextual retrieval, as reported by
+  Anthropic on its own data: top-20 failure rate 5.7% baseline, 3.7% with contextual embeddings (35% fewer), 2.9% with contextual BM25
+  added (49%), 1.9% with reranking (67%); under about 200,000 tokens, skip retrieval and use a cached prompt.
+- Citations: `citations.enabled` on every document or none; plain text `char_location` (0-indexed, exclusive end), PDF `page_location`
+  (1-indexed), custom content `content_block_location`; `cited_text` is not billed as output; incompatible with `output_config.format`
+  (400 error). Search result blocks need `source`, `title` and `content`, and carry the same all-or-nothing citation rule.
+- Files API: generally available, no beta header; 500 MB per file and 1 TB per organization; files are visible to the whole workspace;
+  file content in a request is billed as input tokens; only files created by skills or code execution can be downloaded.
+- Context: 1M-token window on the current Opus, Sonnet, Fable and Mythos models, 200k on Claude Sonnet 4.5; context editing uses the
+  beta header `context-management-2025-06-27` and `clear_tool_uses_20250919` (defaults: trigger 100,000 input tokens, keep 3 tool uses);
+  on-demand compaction uses `compact-2026-09-04` and `"compaction": {"type": "summarize"}`; threshold compaction uses
+  `compact-2026-01-12` and `compact_20260112` (trigger default 150,000, minimum 50,000); the memory tool is `memory_20250818`.
+- Claude Code: CLAUDE.md loads every session (keep it under 200 lines), skills load descriptions at start and full content when used,
+  MCP loads tool names with schemas on demand, hooks cost no context unless they return output, subagents run in isolated context;
+  CLAUDE.md files add up, skills and subagents override by name, MCP servers override local over project over user, hooks merge.
+- Not verified on an official page: the prompt improver tool in the Console (module 24 names it and marks it unverified), and the exact behaviour of the text
+  editor's `undo_edit` command (not used).
+
 ## SDKs by language
 
 | Component | Package | Pinned | Needs |
