@@ -135,7 +135,7 @@ trust and review before sharing.
 3. A colleague shares a ZIP file of a "free time-saving skill" from an unknown site and asks you to upload it. What is
    the best response?
    - **a**: Upload it straight away, since skills only run when the task matches them
-   - **b**: Inspect everything inside the archive first, and decline if nobody can vouch for it
+   - **b**: Inspect the archive first, and decline if nobody can vouch for it
    - **c**: Upload it for yourself only, so that no colleague is exposed to it
    - **d**: Upload it to a test chat and judge it by the first reply it gives back
 

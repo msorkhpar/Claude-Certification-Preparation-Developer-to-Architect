@@ -12,9 +12,9 @@ M9.**
 | M1 | Survey: exam facts confirmed, what runs in the container, the harness proved | **done** | A feasibility table, every cell run; the exam map marked confirmed where an official page says so; sources and licences recorded outside the repository |
 | M2 | Framework readiness: Python wheels in a profile, mock-exam quiz units, Python and TypeScript tabs, optional live key for the editor; planned and tracked on the framework's own boards | todo | A fixture unit goes from markdown to a graded Python practice and a mock exam on the site |
 | M3 | Outline frozen, layout settled | **done:** outline draft 5 frozen (94 modules, D13) | The owner's yes; `corpus.json` layout settled |
-| M4 | Course prose, level by level | doing: Level 1 modules 1-6 | Each level reviewed by the register and a plain-language read |
+| M4 | Course prose, level by level | doing: Level 1 modules 1-11 written (prose complete for Level 1; module 11 pages and mock exam included), awaiting review | Each level reviewed by the register and a plain-language read |
 | M5 | Examples with recorded exchanges, verified offline in the container | doing: Level 1 modules 1-6 | Every example's tests pass offline; planted wrong output fails |
-| M6 | Practices, quizzes and mock exams | doing: Level 1 modules 1-6 | Reference passes, planted wrong solutions fail on assertions, starter fails; quizzes passed the reader |
+| M6 | Practices, quizzes and mock exams | doing: Level 1 modules 1-11 (quizzes for every page and module, the Level 1 mock exam of 30 questions, a flashcard set and a spaced-review bank), awaiting the independent quiz reader | Reference passes, planted wrong solutions fail on assertions, starter fails; quizzes passed the reader |
 | Q-L1 | A quiz polish pass over all of Level 1 once modules 7-11 are written: one independent reader judges the whole level; known WEAK items in modules 1-6: 02 p1q1, 02 p1q2, 02 p2q2, 02 m1, 02 m2, 02 m3, 03 p2q2, 03 m3, 04 p1q2, 05 m4, 06 p2q2, 06 m1, 06 m3 (near-synonym echoes, strawman distractors, key longest) | todo | One reader's verdict on every Level 1 quiz |
 | M7 | Build with studyforge: ingest, validate, site, crawl | todo | Zero console errors; practices run end to end; editor opens |
 | M8 | Narration of the lesson prose | todo | A listened sample from every level |
@@ -66,6 +66,7 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 
 | Date | Entry |
 |---|---|
+| 2026-10-02 | Level 1 modules 7 to 11 authored on branch `feat/level1-7-11`: 13 pages (apps, apps in depth, roles, safety and policy, exam readiness), 39 page quiz questions and 20 module quiz questions, a 30-question Level 1 mock exam, 131 flashcards and a 67-item spaced-review bank with their checker and planted-defect tests; the quiz checker, key balancer and quiz.json builder now cover modules 1 to 11 and a mock-exam section; gate `docs/process/batches/level1-7-11-gates.sh`. App and exam-logistics facts were read from official pages on this date and are marked with it on the pages. Awaiting the register's verification and Q-L1's independent quiz reader. |
 | 2026-10-02 | Level 1 modules 1 to 6 authored on branch `feat/level1-1-6`: 13 pages, 54 quiz questions, two offline examples, and the module 6 prompt template builder in Python, TypeScript, Java and Kotlin with planted wrong solutions; gate `docs/process/batches/level1-1-6-gates.sh`. Awaiting the register's verification and an independent quiz reader. |
 | 2026-10-02 | M3 done: outline draft 5 frozen with 94 modules (Level 1: 11, Level 2: 33, Level 3: 34, Level 4: 16). D13 keeps every module and restores what earlier drafts cut; exam code `X` added to the exam map and the coverage check. |
 | 2026-10-02 | Survey C-09 done: topic-coverage audit closed; outline draft 4 widens 28 Covers cells, adds no module, and the exam map gains the Associate domains. |

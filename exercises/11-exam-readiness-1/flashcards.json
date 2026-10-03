@@ -1,0 +1,1350 @@
+{
+  "level": 1,
+  "format": 1,
+  "title": "Level 1 flashcards",
+  "cards": [
+    {
+      "id": "fc-001",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3",
+        "AS2"
+      ],
+      "front": "What does a language model do at each step of generating text?",
+      "back": "It scores every token it knows for how likely it is to come next, one token is chosen and appended, and the loop repeats until the model finishes, reaches max_tokens or fills the context window."
+    },
+    {
+      "id": "fc-002",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "About how many English characters is one token for Claude?",
+      "back": "About 3.5 characters. The figure varies with the language, and newer tokenizers can produce about 30 percent more tokens for the same text."
+    },
+    {
+      "id": "fc-003",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What counts toward the context window?",
+      "back": "The system prompt, every message (including tool results, images and documents), the tool definitions and the output Claude generates for the turn, including its thinking."
+    },
+    {
+      "id": "fc-004",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Does the Messages API remember earlier turns?",
+      "back": "No. It is stateless: the code resends the whole history on every request. Chat apps manage the history for you."
+    },
+    {
+      "id": "fc-005",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3",
+        "AS2"
+      ],
+      "front": "What is context rot?",
+      "back": "Accuracy and recall degrade as the token count grows, so a bigger window does not remove the need to curate what goes into it."
+    },
+    {
+      "id": "fc-006",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What happens if the input alone is larger than the context window?",
+      "back": "The API returns a 400 invalid_request_error (prompt is too long) on every model."
+    },
+    {
+      "id": "fc-007",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What does max_tokens limit?",
+      "back": "Only the output of a turn. Raising it does not enlarge the context window."
+    },
+    {
+      "id": "fc-008",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2",
+        "AS7"
+      ],
+      "front": "Does temperature zero make Claude's output identical every time?",
+      "back": "No. The glossary says the results are not fully deterministic even at temperature 0, and the current models reject non-default temperature, top_p and top_k values."
+    },
+    {
+      "id": "fc-009",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "Name two sources of variation between runs of the same prompt.",
+      "back": "Sampling (a draw from a distribution that compounds across steps) and infrastructure differences between calls."
+    },
+    {
+      "id": "fc-010",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "What does the model know about recent events or your private data?",
+      "back": "Only what was in its training data up to the cutoff (June 2026 for the three large models, February 2025 reliable for Haiku 4.5). It has no clock, so supply dates, facts and private material in the context or through a tool."
+    },
+    {
+      "id": "fc-011",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "Define hallucination and name two ways to reduce it.",
+      "back": "Fluent, confident output that is wrong or unsupported. Allow the model to say it does not know, ask for word-for-word quotes first, ask it to retract unsupported claims, or restrict it to the supplied documents. These reduce it but do not eliminate it."
+    },
+    {
+      "id": "fc-012",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS1",
+        "AS2"
+      ],
+      "front": "A prompt is a request. What does that imply?",
+      "back": "A sentence in a prompt makes a behaviour more likely but not certain, so anything that must hold every time belongs in code, such as a check, a validator or a hook."
+    },
+    {
+      "id": "fc-013",
+      "module": 2,
+      "page": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What is pretraining?",
+      "back": "Training a model on a very large unlabeled text corpus to predict the next token. The result continues text but is not yet good at following instructions."
+    },
+    {
+      "id": "fc-014",
+      "module": 2,
+      "page": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+      "domains": [
+        "AS3",
+        "AS2"
+      ],
+      "front": "Does using Claude change its weights?",
+      "back": "No. Training changes weights; inference does not. Apparent learning within a conversation is the context window, and memory features put saved notes back into the context."
+    },
+    {
+      "id": "fc-015",
+      "module": 2,
+      "page": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Why are tokens not words?",
+      "back": "A tokenizer, built before pretraining, cuts text into frequent sub-word pieces. Common words may be one token, rare words are built from several smaller pieces."
+    },
+    {
+      "id": "fc-016",
+      "module": 2,
+      "page": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "What does tokenization do to counting and spelling tasks?",
+      "back": "The model sees pieces rather than letters, so exact character counts and spelling work are approximate. Hand them to code."
+    },
+    {
+      "id": "fc-017",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What does the glossary say about fine-tuning Claude?",
+      "back": "Fine-tuning is further training on additional data. The Claude API does not currently offer fine-tuning, a statement about the Claude API only."
+    },
+    {
+      "id": "fc-018",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What is RLHF?",
+      "back": "Reinforcement learning from human feedback: humans rank example answers and reinforcement learning encourages the model to prefer outputs like the higher-ranked ones."
+    },
+    {
+      "id": "fc-019",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are the two phases of Constitutional AI?",
+      "back": "A supervised phase of self-critique and revision against written principles, then reinforcement learning from AI feedback using a preference model."
+    },
+    {
+      "id": "fc-020",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What does HHH stand for, and what is it?",
+      "back": "Helpful, honest, harmless. It is a research framework that informs how Claude is trained and a goal for behaviour, not a guarantee about any single answer."
+    },
+    {
+      "id": "fc-021",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Explain attention in one sentence.",
+      "back": "When choosing the next token, every position in the context can look at every earlier position and weigh how relevant it is; it is a limited resource spread across the context."
+    },
+    {
+      "id": "fc-022",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3",
+        "AS2"
+      ],
+      "front": "Name two things training does not give a model.",
+      "back": "A guarantee that statements are true, knowledge after the cutoff, access to your files or today's date, memory of earlier conversations, or perfect arithmetic and counting."
+    },
+    {
+      "id": "fc-023",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Where is everything a model uses stored?",
+      "back": "In the context window or in the weights. There is no third place, so put a fact you have into the window."
+    },
+    {
+      "id": "fc-024",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Which four current models does the course use, and what are their API ids?",
+      "back": "Claude Fable 5.1 (claude-fable-5-1), Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5) and Haiku 4.5 (claude-haiku-4-5-20251001, alias claude-haiku-4-5), as read on 2026-10-02."
+    },
+    {
+      "id": "fc-025",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are the context windows of the four models?",
+      "back": "1M tokens for Fable 5.1, Opus 5.5 and Sonnet 5.5, and 200K for Haiku 4.5."
+    },
+    {
+      "id": "fc-026",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are the list prices per million input and output tokens?",
+      "back": "Fable 5.1 $10 and $50, Opus 5.5 $4 and $20, Sonnet 5.5 $2 and $10, Haiku 4.5 $1 and $5, as read on 2026-10-02."
+    },
+    {
+      "id": "fc-027",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Describe the efficiency-first and capability-first strategies.",
+      "back": "Efficiency first starts on the fast, low-cost tier and moves up only for a gap you can name. Capability first starts from the strongest option and works down through lower effort or smaller models. Both end in measurement on your own data."
+    },
+    {
+      "id": "fc-028",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3",
+        "AS7"
+      ],
+      "front": "What is effort, and why does it matter?",
+      "back": "A setting that trades intelligence for latency and cost within one model. The documentation says tuning effort is often a better lever than switching models."
+    },
+    {
+      "id": "fc-029",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3",
+        "AS4"
+      ],
+      "front": "What are two multi-model designs for mostly easy work with occasional hard cases?",
+      "back": "An executor that escalates hard decisions to an advisor, and an orchestrator that hands bulk work to lower-cost workers."
+    },
+    {
+      "id": "fc-030",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3",
+        "AS7"
+      ],
+      "front": "What do batch requests and prompt cache reads change about price?",
+      "back": "Batch API requests are 50 percent cheaper, and cache reads cost a fraction of the base input price."
+    },
+    {
+      "id": "fc-031",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Which surface fits a non-developer with recurring work and reference files?",
+      "back": "The Claude apps with a Project. Building an API integration would add cost and upkeep for nothing."
+    },
+    {
+      "id": "fc-032",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+      "domains": [
+        "AS3",
+        "AS5"
+      ],
+      "front": "Do a Project's instructions reach your own API integration?",
+      "back": "No. Instructions live where they are read: Project instructions in the app, memory files and settings in Claude Code, the system prompt in the API."
+    },
+    {
+      "id": "fc-033",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Why must you pin model ids and watch retirement dates?",
+      "back": "Every Claude model id is a pinned snapshot, and ids retire (Haiku 4.5 not before 2026-10-15). A hard-coded id with a retirement date needs a migration plan."
+    },
+    {
+      "id": "fc-034",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Do model ids and features match across the cloud platforms?",
+      "back": "No. The same model family has a different id on each platform, and access and some features differ, so read the platform's own model page."
+    },
+    {
+      "id": "fc-035",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "Name three limits of Claude's vision.",
+      "back": "It cannot name people in images, counts of many small objects are approximate, it is not designed for complex diagnostic scans such as CTs or MRIs, it cannot tell whether an image is AI-generated, and it only understands images and cannot create them."
+    },
+    {
+      "id": "fc-036",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "How are image tokens counted?",
+      "back": "Each 28 by 28 pixel patch is one visual token, up to a per-model cap."
+    },
+    {
+      "id": "fc-037",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS2",
+        "AS4"
+      ],
+      "front": "What is the fix for exact arithmetic, exact counts and string edits?",
+      "back": "Code or a tool, such as a calculator or code execution. Prompting harder does not change that the model works on tokens."
+    },
+    {
+      "id": "fc-038",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS3",
+        "AS7"
+      ],
+      "front": "How is thinking billed, and what else does it use?",
+      "back": "Thinking tokens are billed as output tokens, count toward max_tokens and use space in the context window."
+    },
+    {
+      "id": "fc-039",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are the default effort levels?",
+      "back": "High for Fable 5.1 and Sonnet 5.5, medium for Opus 5.5, as read on 2026-10-02."
+    },
+    {
+      "id": "fc-040",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What is the main safety point about computer use?",
+      "back": "A screen is untrusted input that can carry injected instructions, so run it on an isolated machine without secrets and with a person confirming consequential steps."
+    },
+    {
+      "id": "fc-041",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS4"
+      ],
+      "front": "List three needs that should not go to a model alone.",
+      "back": "An exact repeatable result, a rule you can state in one line, a fact in your database, a high-stakes decision, data that must not leave your boundary, or anything that must happen every time."
+    },
+    {
+      "id": "fc-042",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Where should long documents sit in a prompt, and where the question?",
+      "back": "Near the top, with the query at the end, which the documentation says can improve results by up to 30 percent."
+    },
+    {
+      "id": "fc-043",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "What is the check for reasoning that decides something important?",
+      "back": "An independent check, such as a test, a calculation in code or a second reader, because a wrong step makes everything after it wrong."
+    },
+    {
+      "id": "fc-044",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md",
+      "domains": [
+        "AS4"
+      ],
+      "front": "Name the four working habits of module 5.",
+      "back": "Delegate, describe, discern and take responsibility. They run as a loop in which what you discern shapes the next description."
+    },
+    {
+      "id": "fc-045",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md",
+      "domains": [
+        "AS4"
+      ],
+      "front": "Which steps stay with a person or with code?",
+      "back": "Judgment that carries accountability, exact work (money, counts, identifiers), anything touching data that policy keeps away from the tool, and anything hard to reverse."
+    },
+    {
+      "id": "fc-046",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md",
+      "domains": [
+        "AS1",
+        "AS4"
+      ],
+      "front": "What three things does a good description cover?",
+      "back": "The product (what you want), the process (how to go about it) and the performance (how Claude should behave), plus the goal, context, constraints and an example when style matters."
+    },
+    {
+      "id": "fc-047",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "What four questions do you ask of any output?",
+      "back": "Is it accurate? Is it complete? Is it fair? Does it fit the audience?"
+    },
+    {
+      "id": "fc-048",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "Give the four-step checking routine.",
+      "back": "Mark the claims that would hurt if wrong, check them against the source of record, route high stakes to a human reviewer, then adapt for the audience."
+    },
+    {
+      "id": "fc-049",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "Is asking Claude how sure it is a verification?",
+      "back": "No. Self-reported confidence is not a measure of accuracy; check against the source of record."
+    },
+    {
+      "id": "fc-050",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS2"
+      ],
+      "front": "What should you do with a declared gap such as data unavailable?",
+      "back": "Keep it and decide what to do about it. Filling it with an estimate or deleting the row hides the gap."
+    },
+    {
+      "id": "fc-051",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS7"
+      ],
+      "front": "Why iterate rather than re-roll?",
+      "back": "Regenerating the same request is a second guess. Name what is wrong, change one thing in the description and compare."
+    },
+    {
+      "id": "fc-052",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Name the consequences of owning the result.",
+      "back": "Accountability for errors, disclosure of the AI's part when it matters, data care, and attention to fairness and impact."
+    },
+    {
+      "id": "fc-053",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS4"
+      ],
+      "front": "What are the three parts of a fair message about Claude's value and limits?",
+      "back": "What it speeds up, what still needs a person, and how you will know it works."
+    },
+    {
+      "id": "fc-054",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "What makes an instruction clear and direct?",
+      "back": "A verb for the task, a named deliverable (form, length, reader), constraints you could check afterwards, and the instruction stated as an instruction."
+    },
+    {
+      "id": "fc-055",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Why give the purpose behind an instruction?",
+      "back": "A reason lets the model handle cases the rule did not list, so the instruction generalises."
+    },
+    {
+      "id": "fc-056",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "What are the limits of role prompting?",
+      "back": "A role is a request and not a credential, it needs a task to be useful, and it is not a safeguard."
+    },
+    {
+      "id": "fc-057",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Why use tags, and is position a boundary?",
+      "back": "Tags mark kinds of content and keep data apart from instructions. Position is not a boundary: text placed above the instructions can still read as an instruction, so tag the data and say it is data."
+    },
+    {
+      "id": "fc-058",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Zero-, one- and multi-shot: when each, and how many examples?",
+      "back": "Zero-shot for common easy tasks, one-shot to show a format once, multi-shot for subtle boundaries or unusual formats. The documentation suggests 3 to 5 relevant, diverse examples in a consistent format."
+    },
+    {
+      "id": "fc-059",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Can you prefill the assistant's reply on current models?",
+      "back": "No. From the 4.6 models on, prefilled responses on the last assistant turn are no longer supported. Use structured outputs, a tool with enum values, direct instructions or code to strip stray text."
+    },
+    {
+      "id": "fc-060",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1",
+        "AS7"
+      ],
+      "front": "What is the rule for output formats a program reads?",
+      "back": "Specify the format in the prompt, and check it in code, because a prompt makes a format likely but not certain."
+    },
+    {
+      "id": "fc-061",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/03-the-prompt-as-a-specification.md",
+      "domains": [
+        "AS1",
+        "AS7"
+      ],
+      "front": "What three preconditions does the documentation set before prompt engineering?",
+      "back": "A clear definition of success criteria, a way to test against them and a first draft prompt."
+    },
+    {
+      "id": "fc-062",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/03-the-prompt-as-a-specification.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Give the stages for a complex request.",
+      "back": "Gather facts or quotes, reason from the gathered facts only, write the deliverable, then check it against the criteria."
+    },
+    {
+      "id": "fc-063",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/03-the-prompt-as-a-specification.md",
+      "domains": [
+        "AS1"
+      ],
+      "front": "Name an emphasis for each task type.",
+      "back": "Analysis: material, question and evidence. Research: sources named and gaps declared. Drafting: audience, tone and an example. Brainstorming: breadth first, then a second pass to judge."
+    },
+    {
+      "id": "fc-064",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+      "domains": [
+        "AS7"
+      ],
+      "front": "What are the four causes of a weak output?",
+      "back": "Missing context, ambiguity, the wrong feature, and the wrong model. Rule out hallucination and format failures too."
+    },
+    {
+      "id": "fc-065",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+      "domains": [
+        "AS7"
+      ],
+      "front": "What is the controlled-fix method?",
+      "back": "Fix an evaluation set, change one thing, re-run the whole set, keep the change only if it helped and nothing else got worse, and record it."
+    },
+    {
+      "id": "fc-066",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+      "domains": [
+        "AS7"
+      ],
+      "front": "What order does optimisation follow?",
+      "back": "First reach the quality bar, then find the cheaper way to hold it: a shorter prompt, reuse of context, a smaller tier or lower effort proved on the set, and exact steps moved into code."
+    },
+    {
+      "id": "fc-067",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "What is a Project?",
+      "back": "A self-contained workspace with its own chat histories and knowledge base. Free accounts can hold up to five."
+    },
+    {
+      "id": "fc-068",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "What is the difference between a Project's instructions and its knowledge?",
+      "back": "Instructions say how to work and apply to every chat in the Project. Knowledge is the reference material that says what is true."
+    },
+    {
+      "id": "fc-069",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5",
+        "AS3"
+      ],
+      "front": "What is RAG mode in a Project?",
+      "back": "On paid plans, when a Project nears the context limit, Claude retrieves the relevant parts and expands capacity by up to 10 times."
+    },
+    {
+      "id": "fc-070",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5",
+        "AS6"
+      ],
+      "front": "What do the Project permission levels allow?",
+      "back": "Can view is read-only access to contents, knowledge and instructions. Can edit also changes instructions, knowledge and access. Treat sharing as publishing."
+    },
+    {
+      "id": "fc-071",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "How does a synced Drive document differ from an uploaded file?",
+      "back": "A synced document follows its source and shows the latest version, while an uploaded file is a copy as of the upload. Sync reads text only."
+    },
+    {
+      "id": "fc-072",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "How does memory relate to Projects?",
+      "back": "Each Project has its own memory space and summary. Memory holds preferences and context and is not a substitute for a knowledge file. Incognito is only outside Projects."
+    },
+    {
+      "id": "fc-073",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "List practices that keep a Project current.",
+      "back": "Name an owner and review date, keep one source of record, remove superseded versions, version the files, judge the source before adding it, change one thing at a time and ask for a cited source."
+    },
+    {
+      "id": "fc-074",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS3",
+        "AS2"
+      ],
+      "front": "When does Claude create an artifact, and how are artifacts shared?",
+      "back": "When content is significant and self-contained, typically over 15 lines. Artifacts are private by default and can be shared or published."
+    },
+    {
+      "id": "fc-075",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What is the exam warning about artifact storage?",
+      "back": "Storage is text only, up to 20 MB, and personal or shared. Check whether the artifact uses shared storage before entering anything sensitive."
+    },
+    {
+      "id": "fc-076",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "What are skills and how does Claude load them?",
+      "back": "Folders of instructions, scripts and resources that Claude loads dynamically through progressive disclosure, so only relevant skills enter the context."
+    },
+    {
+      "id": "fc-077",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS5",
+        "AS6"
+      ],
+      "front": "What is the security rule for skills?",
+      "back": "Install skills only from trusted sources and review their code and resources. The named risks are prompt injection and data exfiltration."
+    },
+    {
+      "id": "fc-078",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "When do you use Research, and what does it need?",
+      "back": "For open, broad questions needing many linked searches with citations. It needs a paid plan and web search turned on, and it can use limits faster."
+    },
+    {
+      "id": "fc-079",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS3",
+        "AS2"
+      ],
+      "front": "How do you choose between inline, artifact and structured data?",
+      "back": "Short answers go inline, deliverables someone will open, edit or send are artifacts, and data another program reads is structured data."
+    },
+    {
+      "id": "fc-080",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/03-connectors-integrations-and-working-safely.md",
+      "domains": [
+        "AS5",
+        "AS6"
+      ],
+      "front": "State the connector permission rule.",
+      "back": "Claude inherits each person's permissions from the connected service, so a connector cannot give more access than the person already has."
+    },
+    {
+      "id": "fc-081",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/03-connectors-integrations-and-working-safely.md",
+      "domains": [
+        "AS5"
+      ],
+      "front": "What settings can control a connector's tools?",
+      "back": "Each tool can be always allowed, needs approval or blocked, and on Team and Enterprise plans an owner must enable connectors first."
+    },
+    {
+      "id": "fc-082",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/03-connectors-integrations-and-working-safely.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What is the connector governance checklist?",
+      "back": "Connect only what the work needs, prefer the directory, read scopes before approving, separate read from write, review the list on a schedule and keep the source of record clean."
+    },
+    {
+      "id": "fc-083",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS3",
+        "AS4"
+      ],
+      "front": "When is Cowork the right choice rather than chat?",
+      "back": "When there is a clear deliverable and the work touches your files or tools. Chat is for one-off questions and turn-by-turn steering."
+    },
+    {
+      "id": "fc-084",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Where do Cowork tasks run, and what does local file access need?",
+      "back": "Tasks run in the cloud and can continue when your computer is offline. Local files, browser and computer automation need the desktop app open and connected."
+    },
+    {
+      "id": "fc-085",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What are the Cowork approval modes?",
+      "back": "Manual asks before every action. Auto has Claude check each action for safety but still runs on its own."
+    },
+    {
+      "id": "fc-086",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Name safe-use habits for Cowork.",
+      "back": "Use a dedicated folder, avoid financial documents and credentials, use Manual for sensitive or hard-to-undo actions, watch for unexpected access, start scheduled tasks with low-risk work and trust only the sites you give it."
+    },
+    {
+      "id": "fc-087",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What does Cowork's isolated cloud environment not limit?",
+      "back": "It protects your network, but it does not limit what Claude reads or does through connected tools."
+    },
+    {
+      "id": "fc-088",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What is Claude in Chrome?",
+      "back": "A browser extension in the Chrome side panel on paid plans that reads and acts on pages with your logins. It is not supported on other browsers or on mobile."
+    },
+    {
+      "id": "fc-089",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "List Claude in Chrome's permission modes.",
+      "back": "Manually approve, Automatically approve, and Skip all approvals, where nothing checks the actions. Downloads, sensitive inputs and authorisations still need approval, and purchases and permanent deletions are off limits."
+    },
+    {
+      "id": "fc-090",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What does the Chrome safety page say about HIPAA and regulated data?",
+      "back": "It is not available to HIPAA organisations, and it is not recommended on pages with regulated data."
+    },
+    {
+      "id": "fc-091",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS3",
+        "AS5"
+      ],
+      "front": "What is Claude for Microsoft 365?",
+      "back": "Add-ins for Excel, PowerPoint, Word and Outlook from AppSource. Each has its own instructions and works on open files, and cross-app mode lets one conversation read one app and write in another."
+    },
+    {
+      "id": "fc-092",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What should you know about the add-ins' audit and retention?",
+      "back": "Inputs and outputs are deleted within 30 days, chat history is stored in the browser, they do not inherit custom retention settings and they are not in Enterprise audit logs, though the Compliance API can include them."
+    },
+    {
+      "id": "fc-093",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What are the Excel add-in's limits?",
+      "back": "Not recommended for final client deliverables without human review, audit-critical calculations without verification, or highly sensitive data without controls. Macros, VBA and data tables are unsupported, and only trusted spreadsheets should be used."
+    },
+    {
+      "id": "fc-094",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS3",
+        "AS5"
+      ],
+      "front": "What is Claude Tag?",
+      "back": "Claude working in Slack channels and DMs on Team and Enterprise plans, in public beta on 2026-10-02. Channel work is visible to all and billed to the organisation, while a DM uses your own account and connectors."
+    },
+    {
+      "id": "fc-095",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS5",
+        "AS6"
+      ],
+      "front": "How is Claude Tag administered?",
+      "back": "An Owner pairs the Slack workspace, sets a monthly spend limit and gives Claude its own accounts in other tools with narrow roles. It is not available under zero data retention or customer-managed encryption."
+    },
+    {
+      "id": "fc-096",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/03-choosing-the-surface-for-the-job.md",
+      "domains": [
+        "AS3",
+        "AS4"
+      ],
+      "front": "What is the pattern for choosing a surface?",
+      "back": "Least reach, least action, and most visibility to the right people. Ask about the work's shape, what it must reach, who must see it and how much can go wrong."
+    },
+    {
+      "id": "fc-097",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS4"
+      ],
+      "front": "Name the 4D framework and its loops.",
+      "back": "Delegation, Description, Discernment and Diligence. Description and Discernment form the inner loop, and Delegation and Diligence frame it from outside."
+    },
+    {
+      "id": "fc-098",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS4",
+        "AS2"
+      ],
+      "front": "For a builder, where does discernment bear down hardest?",
+      "back": "On code and user experience: run and test the output, since plausible code can do the wrong thing."
+    },
+    {
+      "id": "fc-099",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS6",
+        "AS4"
+      ],
+      "front": "What should a student not delegate?",
+      "back": "The thinking the course exists to build. Use Claude as a learning partner and follow the rules about help and disclosure."
+    },
+    {
+      "id": "fc-100",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS2",
+        "AS6"
+      ],
+      "front": "What does an educator own?",
+      "back": "What is taught, how it is assessed and the fairness of grades, plus student data. Check accuracy, bias and alignment to the outcome."
+    },
+    {
+      "id": "fc-101",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md",
+      "domains": [
+        "AS6",
+        "AS2"
+      ],
+      "front": "What is the key check for a non-profit using Claude?",
+      "back": "Impact claims, statistics and funder requirements against the source, and beneficiary and donor data classified and anonymised first."
+    },
+    {
+      "id": "fc-102",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md",
+      "domains": [
+        "AS4",
+        "AS2"
+      ],
+      "front": "What is the key check for a small business?",
+      "back": "Prices, dates and promises against policy, with a short list of facts verified before anything reaches a customer, since the owner has no second reviewer."
+    },
+    {
+      "id": "fc-103",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md",
+      "domains": [
+        "AS4",
+        "AS6"
+      ],
+      "front": "What starting point does the creative-work course recommend?",
+      "back": "A deliberate starting point of no AI, adding it only where analysis shows it earns a place. Delegate production, keep authorship and be open about it."
+    },
+    {
+      "id": "fc-104",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What are the three parts of the Usage Policy?",
+      "back": "Universal usage standards, high-risk use case requirements, and additional guidelines for chatbots, minors, agentic use and MCP servers. The version read had an effective date of 15 September 2025."
+    },
+    {
+      "id": "fc-105",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What two safeguards apply to high-risk uses?",
+      "back": "A qualified professional reviews the content or decision before it is finalised, and the individual is told AI helped produce it, at least at the start of each session."
+    },
+    {
+      "id": "fc-106",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Name high-risk fields in the Usage Policy.",
+      "back": "Legal, healthcare, insurance, finance, employment and housing, academic testing and admissions, and media or journalism."
+    },
+    {
+      "id": "fc-107",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Name the course's four data classes and a rule for each.",
+      "back": "Public (free use), internal (approved tools), confidential (approved tools, need to know, often de-identified) and regulated (not allowed unless policy and contract permit; anonymise first)."
+    },
+    {
+      "id": "fc-108",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Rank anonymising techniques.",
+      "back": "Aggregate, remove direct identifiers, replace with codes, generalise values, and remove unread free text. Check for re-identification."
+    },
+    {
+      "id": "fc-109",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Is pseudonymised data anonymous?",
+      "back": "No. Because the key can reverse it, it is still personal data under many rules."
+    },
+    {
+      "id": "fc-110",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Are consumer chats used to improve Claude?",
+      "back": "Only if you choose to allow it in your privacy settings, or if a conversation is flagged for review. Incognito chats are excluded. With improvement on, de-identified data may be kept up to five years."
+    },
+    {
+      "id": "fc-111",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What is the default for commercial plans and the API?",
+      "back": "Inputs and outputs are not used to train models by default, and they are deleted within 30 days unless a custom retention or zero retention agreement applies."
+    },
+    {
+      "id": "fc-112",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "How long are feedback and flagged conversations kept?",
+      "back": "Thumbs feedback conversations up to five years. Content flagged for a policy violation up to two years, with classification scores up to seven."
+    },
+    {
+      "id": "fc-113",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Define prompt injection and its condition for harm.",
+      "back": "Instructions planted in content Claude reads, such as a page, email or file. The risk exists when Claude can read untrusted content and take consequential actions."
+    },
+    {
+      "id": "fc-114",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "List user habits that limit prompt injection.",
+      "back": "Limit what Claude reads, limit what it can do, keep a person on consequential steps, watch for strange behaviour, install only trusted skills and connectors, and report incidents."
+    },
+    {
+      "id": "fc-115",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Name organisational controls on Team and Enterprise plans.",
+      "back": "Feature enablement, per-tool connector actions, sharing limits, skill scanning, web search and site lists, single sign-on, audit logs and Compliance API, retention settings and spend controls."
+    },
+    {
+      "id": "fc-116",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Give the escalation steps for a policy conflict.",
+      "back": "Stop at the edge, read the written policy, take it to the policy owner or the right contact, offer a compliant alternative and write down the decision."
+    },
+    {
+      "id": "fc-117",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Name the four exams with codes, item counts and fees.",
+      "back": "Associate CCAO-F (60 items, $99), Developer CCDV-F (53, $125), Architect Foundations CCAR-F (60, $125) and Architect Professional CCAR-P (63, $175), as read on 2026-10-02."
+    },
+    {
+      "id": "fc-118",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "Give the Associate domains and weights.",
+      "back": "Prompting 14, Output evaluation 21, Product and model selection 12, Workflow integration 16, Configuration 12, Governance 15, Troubleshooting 10 percent."
+    },
+    {
+      "id": "fc-119",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What is the format of every exam?",
+      "back": "Multiple-choice and multiple-response items, each stating how many to select, in 120 minutes, proctored by Pearson VUE online or at a test centre."
+    },
+    {
+      "id": "fc-120",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "How is the exam scored?",
+      "back": "A scaled score from 100 to 1,000 with 720 to pass, measured against a fixed standard. The score report adds percent correct by domain, which does not decide pass or fail."
+    },
+    {
+      "id": "fc-121",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "How is the Architect Foundations exam structured?",
+      "back": "Four scenarios drawn at random from a bank of six."
+    },
+    {
+      "id": "fc-122",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are the retake rules?",
+      "back": "Wait 14 days after the first failed attempt, 30 after the second and 90 after the third, with at most four attempts in a rolling 12 months per exam, each at the full fee."
+    },
+    {
+      "id": "fc-123",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are the cancellation rules?",
+      "back": "The exam guides say up to 24 hours before, with changes inside it forfeiting the fee. Pearson's page gives 48 hours for test centres, so use the longer notice and read your confirmation."
+    },
+    {
+      "id": "fc-124",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What order applies for accommodations?",
+      "back": "Request through Pearson VUE, wait for approval and only then schedule. They cannot be arranged on the day."
+    },
+    {
+      "id": "fc-125",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What are the ID rules?",
+      "back": "A valid, unexpired, government-issued photo ID whose name matches the registration exactly. Correct a name before scheduling through the support contact in the guide."
+    },
+    {
+      "id": "fc-126",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "Name prohibited behaviour during the exam.",
+      "back": "Using AI help, notes or electronic devices, more than one monitor, unscheduled breaks, talking to others and copying exam content."
+    },
+    {
+      "id": "fc-127",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS3"
+      ],
+      "front": "What are validity, renewal and lapse rules?",
+      "back": "Valid 12 months. Renew before expiry with a free, non-proctored assessment. After a lapse, the full exam is needed at the full fee."
+    },
+    {
+      "id": "fc-128",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS6"
+      ],
+      "front": "What is the appeal window?",
+      "back": "14 calendar days from notice of a final decision. The standard-setting outcome and individual items are not open to appeal."
+    },
+    {
+      "id": "fc-129",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/03-reading-a-scenario-question-and-revising.md",
+      "domains": [
+        "AS7"
+      ],
+      "front": "Give the working method for a scenario question.",
+      "back": "Read the ask first, note how many to select, mark the constraint, name the problem type, predict then compare, rule out with a reason each, pick the best and change only for a reason."
+    },
+    {
+      "id": "fc-130",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/03-reading-a-scenario-question-and-revising.md",
+      "domains": [
+        "AS2",
+        "AS7"
+      ],
+      "front": "Name the distractor families.",
+      "back": "Too much machinery, a different problem, self-verification, a request in place of a guarantee, going around the rule, right idea at the wrong moment, the absolute, and true but not best."
+    },
+    {
+      "id": "fc-131",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/03-reading-a-scenario-question-and-revising.md",
+      "domains": [
+        "AS7"
+      ],
+      "front": "What is a spaced-review schedule?",
+      "back": "Review on the day, then after 1, 3, 7, 14 and 30 days, advancing on a correct answer and returning to the first interval on a miss."
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # course/
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
-(Foundations), modules 1 to 6 so far:
+(Foundations), modules 1 to 11, which is the whole of Level 1:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -11,6 +11,11 @@ The lessons of the course, one markdown file per page, grouped by module. These 
 | `04-capabilities-and-limits/` | Capabilities and limits | 2 |
 | `05-working-with-an-ai-responsibly/` | Working with an AI, responsibly | 2 |
 | `06-prompting-fundamentals/` | Prompting fundamentals | 4 |
+| `07-claude-in-the-apps/` | Claude in the apps | 3 |
+| `08-claudes-apps-in-depth/` | Claude's apps in depth | 3 |
+| `09-claude-for-every-role/` | Claude for every role | 2 |
+| `10-safety-privacy-and-policy/` | Safety, privacy and policy | 2 |
+| `11-exam-readiness-1/` | Exam readiness 1 (three pages and the Level 1 mock exam) | 4 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
@@ -85,6 +90,50 @@ A quiz closes a page: a `## Quiz` heading, each question with its four options `
 `<details>` element that holds the answer key and the reason for every option. The last page of a module
 closes with a `## Module quiz`. The same questions, keys and explanations are in
 `exercises/<module>/tests/quiz.json`, and `tools/check_quiz.py` checks that the page and the file agree.
+
+### Mock exams
+
+A mock exam is a page whose last section is a `## Mock exam` heading, in the same form as a quiz: each question with its
+four options `a` to `d`, then a folded `<details>` key that explains every option. It covers a whole level, so its
+questions are checked against the prose of every page of the level (an explanation's quoted phrase may come from any page of
+Level 1) and against every page and module question, which it must not repeat. Its ids in `quiz.json` are `<page>#x<n>` and
+its scope is `level`. Everything else about a quiz holds: `tools/check_quiz.py` applies the same rules.
+
+### Flashcards and the review bank
+
+Two plain JSON files in `exercises/<module>/` carry a level's revision aids; Level 1 has them in
+`exercises/11-exam-readiness-1/`. `tools/check_revision.py` checks both, and `tools/test_check_revision.py` plants defects to
+prove the checker catches them.
+
+`flashcards.json`:
+
+```text
+{ "level": 1, "format": 1, "title": "...",
+  "cards": [ { "id": "fc-001",                      // fc-, then a running number, in order
+               "module": 1,                         // 1 to 11
+               "page": "course/<module>/<page>.md", // the page the card revises; the file must exist
+               "domains": ["AS3", "AS2"],           // Associate domains AS1 to AS7
+               "front": "question or term",         // at most 200 characters
+               "back": "answer" } ] }               // at most 420 characters
+```
+
+`review-bank.json`:
+
+```text
+{ "level": 1, "format": 1, "title": "...",
+  "intervals_days": [1, 3, 7, 14, 30],              // the spaced-review schedule, ascending
+  "items": [ { "id": "rb-001", "module": 1, "page": "...", "domains": ["AS3"],
+               "stem": "scenario and question",
+               "options": { "a": "...", "b": "...", "c": "...", "d": "..." },
+               "key": "c",
+               "explanation": "why the key is best" } ] }
+```
+
+A bank item obeys the quiz wording rules that a script can check (parallel options, a key that does not echo the stem, a key
+no more than 1.3 times the mean length of the others, no doubled or cut-off words), must not repeat a quiz stem, and the keys
+are spread over the four letters. Every module 1 to 11 and every Associate domain has a minimum number of cards and items. The
+learner's spaced review is the schedule in `intervals_days`: an item moves to the next interval when answered correctly and
+back to the first when it is not.
 
 ### Practices
 

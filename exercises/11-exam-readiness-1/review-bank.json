@@ -1,0 +1,1168 @@
+{
+  "level": 1,
+  "format": 1,
+  "title": "Level 1 spaced-review question bank",
+  "intervals_days": [
+    1,
+    3,
+    7,
+    14,
+    30
+  ],
+  "items": [
+    {
+      "id": "rb-001",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "A chat tool built on the Messages API forgets a customer's name after the server process restarts, though she introduced herself earlier. What is the likeliest cause?",
+      "options": {
+        "a": "The weights inside the model were reset by the restart itself",
+        "b": "The window shrinks each time a server process is restarted",
+        "c": "The history was not sent again along with the new call",
+        "d": "The name was longer than the output limit of the call"
+      },
+      "key": "c",
+      "explanation": "The Messages API is stateless: code must resend the history on every request."
+    },
+    {
+      "id": "rb-002",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "A team budgets an English document at one token per word and is surprised by the bill. What is the better rule of thumb?",
+      "options": {
+        "a": "About three and a half characters each, then count with the endpoint",
+        "b": "One piece for every sentence on average, in any language",
+        "c": "Exactly four characters for each piece in every language",
+        "d": "The same figure as any earlier model gives for identical text"
+      },
+      "key": "a",
+      "explanation": "A Claude token is about 3.5 English characters, it varies with language and tokenizer, and counts are estimates to recheck per model."
+    },
+    {
+      "id": "rb-003",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Input of 180,000 tokens goes to a model with a 200K window, with max_tokens set to 40,000. What does the course say happens on Claude 4.5 models and newer?",
+      "options": {
+        "a": "The API returns a 400 error telling you that the prompt is too long",
+        "b": "The API quietly trims the input until the total fits",
+        "c": "The output cap is raised automatically to match the space",
+        "d": "The call is accepted, and generation may stop early at the limit"
+      },
+      "key": "d",
+      "explanation": "Only input alone larger than the window is refused; input plus max_tokens beyond it is accepted and generation can stop at the limit."
+    },
+    {
+      "id": "rb-004",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2",
+        "AS7"
+      ],
+      "stem": "A team wants repeatable labels from Claude Sonnet 5.5. Which approach follows the course?",
+      "options": {
+        "a": "Set the temperature to 0.2 on every request that is sent",
+        "b": "Constrain the output to a fixed list and validate in code",
+        "c": "Add a line saying be consistent at the top of the prompt",
+        "d": "Run each ticket five times and keep the most common label"
+      },
+      "key": "b",
+      "explanation": "The current models reject non-default sampling values, a prompt sentence does not remove sampling, and extra runs only detect variation."
+    },
+    {
+      "id": "rb-005",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2"
+      ],
+      "stem": "A model asked about last month's release notes answers confidently from an older version. Which fix sits at the right layer?",
+      "options": {
+        "a": "Ask it to try harder to remember the newest version",
+        "b": "Raise max_tokens so that it has longer to think the answer through",
+        "c": "Switch to a model with a larger window and ask again",
+        "d": "Supply the text in the context, or give it a tool to fetch it"
+      },
+      "key": "d",
+      "explanation": "Knowledge stops at the cutoff and the model has no live access; recent or private facts must come through the context or a tool."
+    },
+    {
+      "id": "rb-006",
+      "module": 1,
+      "page": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+      "domains": [
+        "AS2"
+      ],
+      "stem": "Which statement about a model's knowledge is correct?",
+      "options": {
+        "a": "It updates itself each time any user corrects one of its answers",
+        "b": "It stops at the cutoff, so recent or private facts must be supplied",
+        "c": "It includes anything stored in the files on the user's own computer",
+        "d": "It always knows today's date from the clock of the server"
+      },
+      "key": "b",
+      "explanation": "The weights are fixed after training and the model has no clock, no access to your files and no knowledge after the cutoff."
+    },
+    {
+      "id": "rb-007",
+      "module": 2,
+      "page": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+      "domains": [
+        "AS2"
+      ],
+      "stem": "An engineer asks why Claude cannot reliably count the letters in a long identifier. Which explanation is best?",
+      "options": {
+        "a": "Its vocabulary is too small to hold any identifier",
+        "b": "Its context window is shorter than the identifier is",
+        "c": "It reads pieces of text rather than single characters",
+        "d": "Its training stopped before identifiers like that existed"
+      },
+      "key": "c",
+      "explanation": "The tokenizer cuts text into sub-word pieces, so exact character work is approximate and belongs in code."
+    },
+    {
+      "id": "rb-008",
+      "module": 2,
+      "page": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "A stakeholder expects the assistant to improve each week as colleagues correct it in chat. Why will that not happen by itself?",
+      "options": {
+        "a": "Using the model never changes the trained weights themselves",
+        "b": "Corrections are deleted automatically after thirty days",
+        "c": "Correction messages are too short for the model to register",
+        "d": "The app switches to a different model every single week"
+      },
+      "key": "a",
+      "explanation": "Training changes weights and inference does not; memory features only put saved notes back into the context."
+    },
+    {
+      "id": "rb-009",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Which stages turn a text-continuing pretrained model into a helpful assistant?",
+      "options": {
+        "a": "Fine-tuning plus preference learning applied afterwards",
+        "b": "A larger tokenizer vocabulary added once training is done",
+        "c": "A longer context window added once training is done",
+        "d": "A lower temperature applied at inference time by default"
+      },
+      "key": "a",
+      "explanation": "Fine-tuning, RLHF and Constitutional AI shape behaviour; window size and sampling do not."
+    },
+    {
+      "id": "rb-010",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Constitutional AI replaces much of the human preference labelling with what?",
+      "options": {
+        "a": "More paid raters who compare every pair of replies by hand, one at a time",
+        "b": "A written list of principles used to critique and compare answers",
+        "c": "A fixed list of banned words applied after generation ends",
+        "d": "A search engine that fetches approved answers to reuse"
+      },
+      "key": "b",
+      "explanation": "The model critiques and revises its answers against principles, then reinforcement learning uses AI feedback."
+    },
+    {
+      "id": "rb-011",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS2",
+        "AS6"
+      ],
+      "stem": "A manager says the model is trained to be honest, so its numbers need no check. What is the best reply?",
+      "options": {
+        "a": "That is true, because honesty training guarantees every single figure it gives",
+        "b": "That is true for numbers but not for names or other facts",
+        "c": "That is false only for the models older than the Opus tier",
+        "d": "That is a goal, not a guarantee, so claims that matter get verified"
+      },
+      "key": "d",
+      "explanation": "HHH is a research framework that informs training, not a guarantee about any single answer."
+    },
+    {
+      "id": "rb-012",
+      "module": 2,
+      "page": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "A company wants Claude to answer from a product manual that changes monthly. Which route does the module support?",
+      "options": {
+        "a": "Fine-tune the model again on each new edition that appears",
+        "b": "Wait for the next model release to pick up the changes",
+        "c": "Put the current edition into the context at request time",
+        "d": "Teach the model the changes through many repeated chats"
+      },
+      "key": "c",
+      "explanation": "The Claude API does not currently offer fine-tuning, and knowledge you have belongs in the window."
+    },
+    {
+      "id": "rb-013",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "A team must choose a tier for varied hard reasoning and is unsure. What approach does the documentation back?",
+      "options": {
+        "a": "Pick the highest-priced tier as the safe default choice for every task",
+        "b": "Run its own prompts and data across candidates, then compare",
+        "c": "Choose the model whose name is the shortest to type",
+        "d": "Use the cheapest tier and accept whatever it produces"
+      },
+      "key": "b",
+      "explanation": "The decision rule is to benchmark on your own use case; a good evaluation set is the most important step."
+    },
+    {
+      "id": "rb-014",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Which surface suits a developer who wants an agent to edit files and run commands in a repository?",
+      "options": {
+        "a": "A Project in the app with the files pasted into it",
+        "b": "Claude in Chrome on the repository's web page",
+        "c": "The Claude for Excel add-in, opened on a spreadsheet of the files",
+        "d": "Claude's own coding tool for working inside a codebase"
+      },
+      "key": "d",
+      "explanation": "Claude Code is an agentic coding tool that reads a codebase, edits files and runs commands."
+    },
+    {
+      "id": "rb-015",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Which statement about Claude Haiku 4.5 is right?",
+      "options": {
+        "a": "It has a 200K window and the nearest retirement date listed",
+        "b": "It has a 1M window and adaptive thinking that is always enabled",
+        "c": "It is the top tier that sits above the Opus model",
+        "d": "It is priced above Sonnet 5.5 for both input and output"
+      },
+      "key": "a",
+      "explanation": "Haiku 4.5 is the fastest and lowest-priced tier with a 200K window, and retires not sooner than 2026-10-15."
+    },
+    {
+      "id": "rb-016",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3",
+        "AS7"
+      ],
+      "stem": "Which setting trades intelligence for latency and cost within a single model?",
+      "options": {
+        "a": "The size of the context window for the request",
+        "b": "The prefill text at the start of the reply",
+        "c": "The effort level for the request",
+        "d": "The batch discount applied to the request"
+      },
+      "key": "c",
+      "explanation": "The documentation describes effort that way and says tuning it is often a better lever than switching models."
+    },
+    {
+      "id": "rb-017",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Which design puts most tokens on the cheaper model while keeping a stronger one for hard calls?",
+      "options": {
+        "a": "Running every single request on the top tier for safety",
+        "b": "Doubling the effort setting on every request it handles",
+        "c": "An orchestrator that hands bulk work to lower-cost workers",
+        "d": "Sending each request to two tiers and averaging the replies"
+      },
+      "key": "c",
+      "explanation": "Executor-advisor and orchestrator-worker patterns are the documented answer to mostly easy and occasionally hard work."
+    },
+    {
+      "id": "rb-018",
+      "module": 3,
+      "page": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+      "domains": [
+        "AS3",
+        "AS5"
+      ],
+      "stem": "A prompt behaves differently when sent to the API and when typed into a Project in the app. What is the likeliest reason?",
+      "options": {
+        "a": "Each surface wraps its own instructions, tools and defaults around it",
+        "b": "The two surfaces rely on entirely unrelated model families",
+        "c": "The app rewrites every message into another language first",
+        "d": "The API removes the final sentence of every prompt it gets"
+      },
+      "key": "a",
+      "explanation": "The same model sits behind many surfaces, but what is sent around your text differs."
+    },
+    {
+      "id": "rb-019",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS2"
+      ],
+      "stem": "A photographed table is rotated and very small, and Claude misreads one number. Which documented limit applies?",
+      "options": {
+        "a": "Claude cannot read tables in any picture that anyone gives it at all",
+        "b": "Claude refuses every image that has numbers in it",
+        "c": "Images are limited to a single one per request",
+        "d": "Poor-quality or awkwardly turned pictures can lead to mistakes"
+      },
+      "key": "d",
+      "explanation": "The vision page lists low-quality, rotated and very small images, and asks you to verify readings."
+    },
+    {
+      "id": "rb-020",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS4",
+        "AS6"
+      ],
+      "stem": "A product owner wants a model to decide a customer's loan eligibility alone. What does the course advise?",
+      "options": {
+        "a": "Let the model decide, then tell the customer afterwards",
+        "b": "Keep a qualified person in charge, with the tool as an aid",
+        "c": "Use the largest tier so that no review is needed",
+        "d": "Use deep thinking so that a separate check is unnecessary"
+      },
+      "key": "b",
+      "explanation": "Decisions with legal, medical, financial or safety consequences stay with a qualified person."
+    },
+    {
+      "id": "rb-021",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS3",
+        "AS7"
+      ],
+      "stem": "When is turning thinking up most worthwhile?",
+      "options": {
+        "a": "Short lookups and one-word labels where speed matters most to the user",
+        "b": "Rewriting a sentence in a friendlier tone for a reader",
+        "c": "Fetching today's date from the model's own memory",
+        "d": "Multi-step maths, hard debugging or analysis with many facts"
+      },
+      "key": "d",
+      "explanation": "Thinking helps on complex tasks and is billed as output, so it is wasted on simple ones."
+    },
+    {
+      "id": "rb-022",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "An agent will operate a web page through screenshots. Which precaution matters most?",
+      "options": {
+        "a": "Give it the user's saved passwords so nothing blocks it",
+        "b": "Run it in isolation with no secrets, and confirm consequential steps",
+        "c": "Turn screenshots off entirely so that costs stay down",
+        "d": "Trust any instruction that appears on whichever page it happens to visit"
+      },
+      "key": "b",
+      "explanation": "A screen is untrusted input that can carry injected instructions."
+    },
+    {
+      "id": "rb-023",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+      "domains": [
+        "AS2",
+        "AS4"
+      ],
+      "stem": "A report needs the total of 4,000 line amounts. Which design is best?",
+      "options": {
+        "a": "Claude adds the figures in a single pass through them",
+        "b": "Claude adds them twice and the team averages the two",
+        "c": "A script does the addition and Claude explains the result",
+        "d": "Claude estimates the sum from a sample of the lines"
+      },
+      "key": "c",
+      "explanation": "Exact arithmetic belongs in code; the model approximates."
+    },
+    {
+      "id": "rb-024",
+      "module": 4,
+      "page": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+      "domains": [
+        "AS4"
+      ],
+      "stem": "Which job needs no extra machinery around Claude?",
+      "options": {
+        "a": "Summarising an uploaded article for a colleague",
+        "b": "Totalling a column of invoice figures to the cent",
+        "c": "Reporting yesterday's exchange rate between two currencies",
+        "d": "Looking up a value in the company's own database"
+      },
+      "key": "a",
+      "explanation": "Language-shaped drafting and summarising suit a model, while exact, recent or private facts need code, tools or retrieval."
+    },
+    {
+      "id": "rb-025",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md",
+      "domains": [
+        "AS4"
+      ],
+      "stem": "Which step of a monthly sales commentary should stay with a person?",
+      "options": {
+        "a": "Deciding which of the variances matter to the board",
+        "b": "Drafting the narrative text that explains the variances",
+        "c": "Formatting the finished text into the board template",
+        "d": "Summarising last quarter's meeting notes for the file"
+      },
+      "key": "a",
+      "explanation": "Judgment that carries accountability stays with a person, while drafting and formatting suit Claude."
+    },
+    {
+      "id": "rb-026",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md",
+      "domains": [
+        "AS1"
+      ],
+      "stem": "Which part of a description tells Claude how to behave, such as flagging anything it is unsure about?",
+      "options": {
+        "a": "The product element",
+        "b": "The performance element",
+        "c": "The process element",
+        "d": "The provenance element"
+      },
+      "key": "b",
+      "explanation": "The three parts are product (what you want), process (how to go about it) and performance (how Claude should behave)."
+    },
+    {
+      "id": "rb-027",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS2"
+      ],
+      "stem": "Which question checks an output for completeness?",
+      "options": {
+        "a": "Does the tone of the reply sound confident enough?",
+        "b": "Is the name of the saved file tidy and consistent?",
+        "c": "Is the answer long enough to look properly thorough to a reader?",
+        "d": "What would a careful reader expect to see that is missing?"
+      },
+      "key": "d",
+      "explanation": "Completeness is about silent omissions, which a summary can have even when every sentence is accurate."
+    },
+    {
+      "id": "rb-028",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS2"
+      ],
+      "stem": "A colleague asks how reliable Claude's confident tone is as a signal. What is the course's answer?",
+      "options": {
+        "a": "It usually means that a fact has already been verified",
+        "b": "Only hedged wording ever needs a second look from a careful reader",
+        "c": "It proves nothing, so check what matters against the source",
+        "d": "It matters only when the text is a legal document"
+      },
+      "key": "c",
+      "explanation": "Confidence of tone is not a signal; check the claims that would hurt if wrong against the source of record."
+    },
+    {
+      "id": "rb-029",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Who answers for a mistake in AI-assisted work that you forwarded to others?",
+      "options": {
+        "a": "The vendor that built the model that drafted it",
+        "b": "You do, whoever drafted the text in the first place",
+        "c": "The colleague who first suggested using the tool",
+        "d": "Nobody, since an automated draft carries no author"
+      },
+      "key": "b",
+      "explanation": "You own what you send; accountability for errors stays with the person."
+    },
+    {
+      "id": "rb-030",
+      "module": 5,
+      "page": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md",
+      "domains": [
+        "AS4"
+      ],
+      "stem": "Which routine fits a team that lets an agent do several steps itself?",
+      "options": {
+        "a": "Unlimited access, because speed matters more than any kind of control",
+        "b": "Review only after a complaint has arrived from someone",
+        "c": "No record of the steps, in order to save storage",
+        "d": "A defined scope, review before consequences, and a record kept"
+      },
+      "key": "d",
+      "explanation": "Treat an agent like a new colleague with limited access."
+    },
+    {
+      "id": "rb-031",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md",
+      "domains": [
+        "AS1"
+      ],
+      "stem": "A prompt asks for a reply that is concise, thorough, clear and professional, and results vary. Which fix is best?",
+      "options": {
+        "a": "Swap the adjectives for limits you can measure, like a word cap",
+        "b": "Add a few more adjectives so that the intent is clearer",
+        "c": "Switch to a larger tier and keep the same wording",
+        "d": "Add a role line that uses a famous and senior job title"
+      },
+      "key": "a",
+      "explanation": "Stacked adjectives conflict and cannot be checked; give constraints you could verify afterwards."
+    },
+    {
+      "id": "rb-032",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md",
+      "domains": [
+        "AS1"
+      ],
+      "stem": "Where should a pasted document go in a long prompt?",
+      "options": {
+        "a": "Between two copies of the question, one on each side",
+        "b": "At the very end, after all of the instructions",
+        "c": "Near the top, with the question placed after it",
+        "d": "Anywhere at all, since order never makes a difference"
+      },
+      "key": "c",
+      "explanation": "The documentation places long inputs above the query and reports better results with queries at the end."
+    },
+    {
+      "id": "rb-033",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1"
+      ],
+      "stem": "How many examples does the best-practices page suggest for best results?",
+      "options": {
+        "a": "A single one, in order to avoid overfitting",
+        "b": "Twenty or more, in every case without exception",
+        "c": "Three to five relevant ones that vary enough",
+        "d": "None at all, since examples harm the output"
+      },
+      "key": "c",
+      "explanation": "The page says to include 3 to 5 examples that mirror the use case and cover edge cases."
+    },
+    {
+      "id": "rb-034",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1"
+      ],
+      "stem": "Which route replaces prefilling the reply on current models?",
+      "options": {
+        "a": "Structured outputs or an enum tool, plus direct instructions",
+        "b": "A longer system prompt that repeats the format twice",
+        "c": "A higher temperature setting chosen for each request",
+        "d": "A second prefill placed in the user turn instead"
+      },
+      "key": "a",
+      "explanation": "From the 4.6 models on, prefilled responses are no longer supported."
+    },
+    {
+      "id": "rb-035",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+      "domains": [
+        "AS1",
+        "AS6"
+      ],
+      "stem": "What should a template builder do with untrusted text placed between tags?",
+      "options": {
+        "a": "Trim it down to its first line, whatever the rest of it contains",
+        "b": "Convert all of it to lower case before inserting it",
+        "c": "Place it above the instructions instead of below",
+        "d": "Escape the angle brackets so it cannot close its own tag"
+      },
+      "key": "d",
+      "explanation": "Position is not a boundary; tags, a data statement and escaping do the marking."
+    },
+    {
+      "id": "rb-036",
+      "module": 6,
+      "page": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+      "domains": [
+        "AS7"
+      ],
+      "stem": "In what order does the course say to improve a weak output?",
+      "options": {
+        "a": "Rewrite everything at once, then test a single case to see what happens",
+        "b": "Diagnose the cause, change one thing, re-run the same inputs",
+        "c": "Change the model first, then rework the prompt text",
+        "d": "Add examples until it seems to work, then stop"
+      },
+      "key": "b",
+      "explanation": "The controlled fix is diagnosis, one change and a re-run of the whole evaluation set."
+    },
+    {
+      "id": "rb-037",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5"
+      ],
+      "stem": "Which item belongs in a Project's instructions rather than its knowledge?",
+      "options": {
+        "a": "The current price list for all of the products",
+        "b": "A scanned contract from one of the suppliers",
+        "c": "Last quarter's report on the sales figures",
+        "d": "The tone and format every reply should follow"
+      },
+      "key": "d",
+      "explanation": "Instructions say how to work; knowledge says what is true here."
+    },
+    {
+      "id": "rb-038",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS5",
+        "AS6"
+      ],
+      "stem": "A team lead wants colleagues to read but not change a Project. Which permission level fits?",
+      "options": {
+        "a": "Can edit access",
+        "b": "Can view access",
+        "c": "Creator access",
+        "d": "Public access"
+      },
+      "key": "b",
+      "explanation": "Can view is read-only access to contents, knowledge and instructions."
+    },
+    {
+      "id": "rb-039",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md",
+      "domains": [
+        "AS3",
+        "AS5"
+      ],
+      "stem": "What does RAG mode do for a large Project?",
+      "options": {
+        "a": "Deletes the older chats once the limit is reached",
+        "b": "Shares the Project with the whole organisation at once",
+        "c": "Retrieves the relevant parts so that more material fits",
+        "d": "Switches the model to a smaller and cheaper tier"
+      },
+      "key": "c",
+      "explanation": "On paid plans it expands capacity by up to 10 times by retrieving relevant parts."
+    },
+    {
+      "id": "rb-040",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which statement about an artifact's storage is right?",
+      "options": {
+        "a": "It may be shared, so check before entering sensitive data",
+        "b": "It is always private to the person who created it",
+        "c": "It can hold images and files as well as text",
+        "d": "It has no size limit of any kind attached to it"
+      },
+      "key": "a",
+      "explanation": "Storage is text only, up to 20 MB, personal or shared; shared storage is visible to every user."
+    },
+    {
+      "id": "rb-041",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Which pair of requirements must hold before Research can run?",
+      "options": {
+        "a": "A paid plan, and live web lookup enabled",
+        "b": "A shared Project, and a connector that is enabled",
+        "c": "An artifact, and a skill that is enabled",
+        "d": "The desktop app, and a folder connected to it"
+      },
+      "key": "a",
+      "explanation": "Research is for paid plans and needs web search switched on."
+    },
+    {
+      "id": "rb-042",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md",
+      "domains": [
+        "AS5"
+      ],
+      "stem": "Which statement about skills is correct?",
+      "options": {
+        "a": "All of them are loaded into every single chat",
+        "b": "Only the relevant ones are loaded into context when needed",
+        "c": "They can run only inside Claude Code and nowhere else",
+        "d": "They need no review at all before being shared"
+      },
+      "key": "b",
+      "explanation": "Progressive disclosure keeps unused skills out of the context window."
+    },
+    {
+      "id": "rb-043",
+      "module": 7,
+      "page": "course/07-claude-in-the-apps/03-connectors-integrations-and-working-safely.md",
+      "domains": [
+        "AS5",
+        "AS6"
+      ],
+      "stem": "What can an owner set for each tool of a connector?",
+      "options": {
+        "a": "Fast, balanced or slow, depending on the plan",
+        "b": "Public, internal or secret, depending on the file",
+        "c": "Read-only, read-write or admin, depending on the role",
+        "d": "Always allowed, needs approval, or blocked"
+      },
+      "key": "d",
+      "explanation": "Per-tool action restrictions work alongside the source system's permissions."
+    },
+    {
+      "id": "rb-044",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS3",
+        "AS4"
+      ],
+      "stem": "Which workload suits Cowork over chat?",
+      "options": {
+        "a": "A one-line definition of a term for a colleague who asked",
+        "b": "A quick brainstorm of names for a new product line",
+        "c": "A deliverable built from a folder of files and several tools",
+        "d": "A translation of a single sentence into French and German"
+      },
+      "key": "c",
+      "explanation": "Cowork suits a clear deliverable that touches files or tools; chat suits light, turn-by-turn work."
+    },
+    {
+      "id": "rb-045",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "In Claude in Chrome, which mode means nothing checks the actions?",
+      "options": {
+        "a": "Manually approve",
+        "b": "Skip all approvals",
+        "c": "Automatically approve",
+        "d": "Site allowlist mode"
+      },
+      "key": "b",
+      "explanation": "Skip all approvals means Claude does not pause and nothing checks its actions."
+    },
+    {
+      "id": "rb-046",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which statement about the Microsoft 365 add-ins' data is right?",
+      "options": {
+        "a": "They inherit every custom retention setting that is set",
+        "b": "Their chats are kept on Anthropic's servers indefinitely",
+        "c": "They keep no data of any kind for any length of time",
+        "d": "Their activity is missing from the Enterprise audit logs"
+      },
+      "key": "d",
+      "explanation": "The add-ins do not inherit custom retention and are outside the audit logs, though the Compliance API can include them."
+    },
+    {
+      "id": "rb-047",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Who sees Claude Tag's work when it is tagged in a channel?",
+      "options": {
+        "a": "Every member there, using the access set for that space",
+        "b": "Only the person who tagged it, as a private reply",
+        "c": "Only the Slack admins who installed the application",
+        "d": "Only the history of the requester's private account"
+      },
+      "key": "a",
+      "explanation": "Channel work is visible to all members and uses the access an admin set for it; a DM is personal."
+    },
+    {
+      "id": "rb-048",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which action stays off limits for Claude in Chrome in every mode?",
+      "options": {
+        "a": "Reading the text of a page that is open",
+        "b": "Filling in a harmless form on a trusted site",
+        "c": "Completing a purchase on a shopping site",
+        "d": "Taking a screenshot of the tab that is active"
+      },
+      "key": "c",
+      "explanation": "Purchases, account creation and permanent deletions are prohibited whatever the permission mode."
+    },
+    {
+      "id": "rb-049",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "What does Cowork's isolated cloud environment protect?",
+      "options": {
+        "a": "Everything that Claude is able to read for you",
+        "b": "The mailbox that has been connected to the task",
+        "c": "Your home and company network, but not what tools expose",
+        "d": "The files that sit inside any connected folder"
+      },
+      "key": "c",
+      "explanation": "The isolation does not limit what Claude reads or does through connected tools."
+    },
+    {
+      "id": "rb-050",
+      "module": 8,
+      "page": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md",
+      "domains": [
+        "AS5"
+      ],
+      "stem": "Which Claude Tag setup step needs the Owner role?",
+      "options": {
+        "a": "Pairing the Slack workspace with the organisation",
+        "b": "Mentioning Claude in a channel it has already joined",
+        "c": "Sending Claude a direct message about a task",
+        "d": "Reading a thread that Claude has already answered"
+      },
+      "key": "a",
+      "explanation": "Setup needs the Owner role in a Team or Enterprise organisation and a Slack workspace admin."
+    },
+    {
+      "id": "rb-051",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS4"
+      ],
+      "stem": "Which four competencies make up the AI fluency framework?",
+      "options": {
+        "a": "Design, Draft, Deliver and Document, in that sequence",
+        "b": "Define, Decide, Direct and Deploy, in that sequence",
+        "c": "Detect, Diagnose, Debug and Deploy, in that sequence",
+        "d": "Delegation, Description, Discernment and Diligence"
+      },
+      "key": "d",
+      "explanation": "The 4D framework names those four; module 5 teaches them as delegate, describe, discern and take responsibility."
+    },
+    {
+      "id": "rb-052",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS2",
+        "AS4"
+      ],
+      "stem": "Which check matters most for a builder using Claude-generated code?",
+      "options": {
+        "a": "Counting how many lines the code contains",
+        "b": "Running and testing it before it ships",
+        "c": "Asking Claude whether it believes it is correct",
+        "d": "Reading only the comments the code contains"
+      },
+      "key": "b",
+      "explanation": "Builders owe discernment of code and user experience: run it, test it, review it."
+    },
+    {
+      "id": "rb-053",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/01-builders-students-and-educators.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "What is the right use of Claude for learning in a course?",
+      "options": {
+        "a": "As a ghostwriter whose finished essay is handed in unchanged",
+        "b": "As a way to get around the rules that the course sets",
+        "c": "As a complete replacement for all of the course reading",
+        "d": "As a partner that asks and explains while the student thinks"
+      },
+      "key": "d",
+      "explanation": "A student should not delegate the thinking the course exists to build."
+    },
+    {
+      "id": "rb-054",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md",
+      "domains": [
+        "AS2",
+        "AS6"
+      ],
+      "stem": "Which hidden risk does the page name for non-profits?",
+      "options": {
+        "a": "Writing the reports in plain language",
+        "b": "Overstating results to a funder",
+        "c": "Working alongside volunteers on projects",
+        "d": "Keeping the records in a spreadsheet"
+      },
+      "key": "b",
+      "explanation": "Impact claims and statistics must be checked against the source before they reach a funder."
+    },
+    {
+      "id": "rb-055",
+      "module": 9,
+      "page": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md",
+      "domains": [
+        "AS4",
+        "AS6"
+      ],
+      "stem": "For a maker, what should stay with the person?",
+      "options": {
+        "a": "Resizing and formatting the finished files",
+        "b": "Transcribing the recorded interviews by hand",
+        "c": "The idea, the voice and the final choices",
+        "d": "Making variants for each different platform"
+      },
+      "key": "c",
+      "explanation": "Delegate production tasks, but keep the part that makes the work theirs."
+    },
+    {
+      "id": "rb-056",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which field is listed among the Usage Policy's high-risk uses?",
+      "options": {
+        "a": "Employment and housing decisions",
+        "b": "Weather forecasts for a local newspaper",
+        "c": "Recipe suggestions for a cooking site",
+        "d": "Travel itineraries for a holiday company"
+      },
+      "key": "a",
+      "explanation": "Legal, health, insurance, finance, employment and housing, academic testing and media are high-risk uses."
+    },
+    {
+      "id": "rb-057",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which data class is normally allowed in any tool without a special check?",
+      "options": {
+        "a": "Public material",
+        "b": "Internal material",
+        "c": "Confidential material",
+        "d": "Regulated material"
+      },
+      "key": "a",
+      "explanation": "Public data is free to use; internal needs an approved tool, and the other classes need stronger controls."
+    },
+    {
+      "id": "rb-058",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "A team asks whether replacing names with codes makes records anonymous. What is the right answer?",
+      "options": {
+        "a": "Yes, since any code at all makes records anonymous",
+        "b": "No, because a separate key can reverse the substitution",
+        "c": "Yes, as long as the codes are chosen at random",
+        "d": "No, because codes are usually longer than names"
+      },
+      "key": "b",
+      "explanation": "Pseudonymised data is still personal data under many rules."
+    },
+    {
+      "id": "rb-059",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "A free-plan user wants her chats kept out of model improvement. Which option exists?",
+      "options": {
+        "a": "Clear the browser cache after finishing each session",
+        "b": "Write a note in each chat asking it not to train",
+        "c": "Use a much shorter prompt at the start of the chat",
+        "d": "Use incognito sessions, which are excluded from training use"
+      },
+      "key": "d",
+      "explanation": "Incognito chats are excluded from improvement even when the setting is on; a request in a chat is not a control."
+    },
+    {
+      "id": "rb-060",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which habit limits prompt injection through email content?",
+      "options": {
+        "a": "Ask the assistant to ignore any hidden text it finds",
+        "b": "Turn on every available connector for completeness",
+        "c": "Keep a person confirming actions that send or delete",
+        "d": "Use Skip all approvals to avoid interrupting the task"
+      },
+      "key": "c",
+      "explanation": "Keep a person on consequential steps and limit what Claude can do."
+    },
+    {
+      "id": "rb-061",
+      "module": 10,
+      "page": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Who should receive a report of a suspected leak first?",
+      "options": {
+        "a": "The whole team, at the next regular meeting",
+        "b": "The security or IT contact, straight away",
+        "c": "The vendor, through its public discussion forum",
+        "d": "A colleague who works outside the company"
+      },
+      "key": "b",
+      "explanation": "A leak or a suspicious file is reported quickly, because waiting lets it spread."
+    },
+    {
+      "id": "rb-062",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "Which exam is aimed at professionals who use the assistant as a productivity tool?",
+      "options": {
+        "a": "Claude Certified Developer, Foundations",
+        "b": "Claude Certified Architect, Foundations",
+        "c": "Claude Certified Architect, Professional",
+        "d": "Claude Certified Associate, Foundations"
+      },
+      "key": "d",
+      "explanation": "The Associate exam is for business users of Claude and needs no software-development experience."
+    },
+    {
+      "id": "rb-063",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "What decides pass or fail on the Claude exams?",
+      "options": {
+        "a": "The total scaled score, with 720 needed",
+        "b": "The percentage reached in each separate domain",
+        "c": "The number of attempts the candidate has made",
+        "d": "The minutes that are left when the last item is done"
+      },
+      "key": "a",
+      "explanation": "Domain percentages guide revision but do not decide the result."
+    },
+    {
+      "id": "rb-064",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "A candidate's registered name differs from her photo ID. When must it be corrected?",
+      "options": {
+        "a": "At check-in, by explaining the difference to the proctor",
+        "b": "After the exam, by lodging an appeal about the result",
+        "c": "Before scheduling, through the support contact",
+        "d": "It never matters, since the proctor sees the booking"
+      },
+      "key": "c",
+      "explanation": "The name must match exactly, and a correction is made before scheduling."
+    },
+    {
+      "id": "rb-065",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS6"
+      ],
+      "stem": "Which behaviour counts as misconduct during an exam?",
+      "options": {
+        "a": "Using scratch paper that the provider supplies",
+        "b": "Asking the proctor about a technical fault",
+        "c": "Using an AI assistant for help",
+        "d": "Taking a break that was approved in advance"
+      },
+      "key": "c",
+      "explanation": "The Exam Policy lists using AI products during the exam among prohibited activities."
+    },
+    {
+      "id": "rb-066",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md",
+      "domains": [
+        "AS3"
+      ],
+      "stem": "How long must a candidate wait to retake after the second failed attempt?",
+      "options": {
+        "a": "30 days",
+        "b": "14 days",
+        "c": "90 days",
+        "d": "12 months"
+      },
+      "key": "a",
+      "explanation": "The waits are 14, 30 and 90 days after the first, second and third failed attempts."
+    },
+    {
+      "id": "rb-067",
+      "module": 11,
+      "page": "course/11-exam-readiness-1/03-reading-a-scenario-question-and-revising.md",
+      "domains": [
+        "AS7"
+      ],
+      "stem": "In a scenario question, what should you read first?",
+      "options": {
+        "a": "The longest option, since it is often the best",
+        "b": "The last option, since it is placed there for a reason",
+        "c": "The first sentence only, and then the options",
+        "d": "The ask, then the situation with it in mind"
+      },
+      "key": "d",
+      "explanation": "The working method starts with reading the ask first."
+    }
+  ]
+}
