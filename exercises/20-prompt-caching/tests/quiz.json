@@ -1,0 +1,195 @@
+{
+  "module": "20-prompt-caching",
+  "quizzes": [
+    {
+      "id": "01-the-prefix-the-breakpoint-and-the-usage-fields#q1",
+      "page": "01-the-prefix-the-breakpoint-and-the-usage-fields.md",
+      "scope": "page",
+      "stem": "A response reports `cache_read_input_tokens` of 8,000, `cache_creation_input_tokens` of 0 and `input_tokens` of 40. How many input tokens did the request carry?",
+      "options": {
+        "a": "7,960",
+        "b": "8,000",
+        "c": "40",
+        "d": "8,040"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page gives \"total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens\", so 8,000 + 0 + 40.",
+        "b": "Ruled out because the page sum adds a third term, and \"total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens\" includes the 40.",
+        "c": "Ruled out because that field holds only \"tokens after the last breakpoint, which are not cached\".",
+        "a": "Ruled out because the sum \"total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens\" has no subtraction."
+      }
+    },
+    {
+      "id": "01-the-prefix-the-breakpoint-and-the-usage-fields#q2",
+      "page": "01-the-prefix-the-breakpoint-and-the-usage-fields.md",
+      "scope": "page",
+      "stem": "A team marks a 1,500-token system prompt with `cache_control` on Claude Haiku 4.5 and sees both cache fields at 0, with no error. What explains it?",
+      "options": {
+        "a": "The text is under that model's 4,096 minimum, so it was handled as ordinary input",
+        "b": "The text is over that model's minimum, so the API is quietly returning stored answers",
+        "c": "The marker was ignored because system prompts are outside what the cache can hold",
+        "d": "The five-minute lifetime had lapsed before the first request was even sent"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"Any requests to cache fewer than this number of tokens will be processed without caching\" and gives 4,096 for Claude Haiku 4.5.",
+        "b": "Ruled out because 1,500 is below the minimum, and \"the prompt was not cached\" is what two zeros mean.",
+        "c": "Ruled out because the page's hierarchy runs \"up to and including the block designated with\" the marker, and a system block can be that block.",
+        "d": "Ruled out because \"Row 1 writes the 600 tokens\" on a first request, so there is no earlier entry to lapse."
+      }
+    },
+    {
+      "id": "01-the-prefix-the-breakpoint-and-the-usage-fields#q3",
+      "page": "01-the-prefix-the-breakpoint-and-the-usage-fields.md",
+      "scope": "page",
+      "stem": "A request puts a block with the current clock reading ahead of a large stable policy, with the marker on the policy. Every call writes everything and never reads. Why?",
+      "options": {
+        "a": "The clock block counts as a second marker, which triggers a fresh write on each turn",
+        "b": "The hash covers the marked block, so the policy is compared by itself and the clock is ignored",
+        "c": "All content before the boundary feeds the hash, so a changing line gives a new one",
+        "d": "The hash is rebuilt from the user question, which differs on each turn of the chat"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"The cache key is a hash of everything from the start of the request up to the marked block\", so a changing block before it gives a new key.",
+        "b": "Ruled out because that same sentence says the key is \"a hash of everything from the start of the request\", not of one block.",
+        "a": "Ruled out because \"Cache breakpoints themselves don't add any cost.\" and only a block carrying `cache_control` is a breakpoint.",
+        "d": "Ruled out because \"Row 2, a minute later, reads them and pays for only the new question\"."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#q1",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "page",
+      "stem": "A support bot reuses a 20,000-token prefix once every 40 minutes, around the clock. Which choice does the page's guidance favour?",
+      "options": {
+        "a": "The default TTL, since each reuse refreshes the entry free of charge and keeps it alive",
+        "b": "The one-hour TTL, since the gap is past the default but within the hour",
+        "c": "Neither TTL, since an entry survives through frequent use alone",
+        "d": "Both TTLs together, since each request has to carry the pair of settings"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page recommends the one-hour TTL for prompts used \"less frequently than 5 minutes, but more frequently than every hour\".",
+        "a": "Ruled out because the entry is \"refreshed for no additional cost each time the cached content is used\", and a 40-minute gap lets the default entry lapse first.",
+        "c": "Ruled out because the one-hour TTL exists for \"less frequently than 5 minutes, but more frequently than every hour\".",
+        "d": "Ruled out because \"You can use both 1-hour and 5-minute cache controls in the same request\" is allowed, not required."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#q2",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "page",
+      "stem": "A conversation adds 25 blocks between two requests, with one breakpoint on the final block. The second request misses the earlier write. What fixes it?",
+      "options": {
+        "a": "A label on the request, so the older entry is found by name",
+        "b": "A longer TTL on the last marker, so the older entry survives until the next request",
+        "c": "A larger `max_tokens`, so the search can reach further back through the blocks",
+        "d": "A further marker near the older spot, so a fresh entry builds up there"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says a second breakpoint near the older position starts a second lookback window there, since \"You can define up to 4 cache breakpoints\".",
+        "b": "Ruled out because the miss comes from the window: \"It checks at most 20 positions\", and a longer TTL does not widen it.",
+        "c": "Ruled out because the search \"walks backward one block at a time\", and `max_tokens` governs the reply.",
+        "a": "Ruled out because the search is \"looking for an entry an earlier request wrote\", by hash, not by a label."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#q3",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "page",
+      "stem": "A team adds an image to the fifth message of a long conversation. Which parts of the cache are invalidated?",
+      "options": {
+        "a": "Only the tool list, while the instructions and the dialogue stay intact",
+        "b": "Only the dialogue blocks; the tool list and instructions stay intact",
+        "c": "The instructions and the dialogue, while the tool list stays intact",
+        "d": "Nothing, since pictures sit outside the cached text"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"Adding/removing images anywhere in the prompt affects message blocks\", and the table shows ✓ for tools and system.",
+        "a": "Ruled out because \"Changes at each level invalidate that level and all subsequent levels\", and tools come first.",
+        "c": "Ruled out because that pattern belongs to \"Enabling/disabling web search modifies the system prompt\", not to images.",
+        "d": "Ruled out because \"Adding/removing images anywhere in the prompt affects message blocks\"."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#m1",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "module",
+      "stem": "A service fires ten calls together, all sharing a 30,000-token prefix, against a cold cache. What does the module predict?",
+      "options": {
+        "a": "One writes and nine read, since all ten share the same hash and the same prefix",
+        "b": "Each one writes, as the entry appears only once a first reply starts",
+        "c": "All read, since the entry is created the moment a request arrives",
+        "d": "One writes and nine fail, since an entry allows a single writer"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says a cache entry \"only becomes available after the first response begins\", so all ten write.",
+        "a": "Ruled out because the entry \"only becomes available after the first response begins\", so the others have nothing to read.",
+        "c": "Ruled out because the same sentence says it is available only \"after the first response begins\".",
+        "d": "Ruled out because the advice is \"wait for the first response before sending subsequent requests\", not that extra requests fail."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#m2",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "module",
+      "stem": "A prefix is sent twice within five minutes on a model that reads at 0.1 times the base price. How does the spend on the pair compare with two ordinary sends?",
+      "options": {
+        "a": "Roughly two thirds as much",
+        "b": "Roughly five eighths as much",
+        "c": "A few percent more",
+        "d": "A little over half as much"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds.",
+        "b": "Ruled out because it takes the write alone, and \"Cache read tokens are 0.1 times the base input tokens price\" applies to the second request.",
+        "c": "Ruled out because that figure is the one-hour case, from \"1-hour cache write tokens are 2 times the base input tokens price\".",
+        "d": "Ruled out because it drops the write premium: \"5-minute cache write tokens are 1.25 times the base input tokens price\"."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#m3",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "module",
+      "stem": "A request marks the system block with a five-minute breakpoint and the final message with a one-hour breakpoint. What does the module say?",
+      "options": {
+        "a": "It is refused, since the longer entry has to come first",
+        "b": "It is accepted, with both entries billed at one common rate",
+        "c": "It is accepted, with only the short entry written",
+        "d": "It is refused, since one request carries a single TTL"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"Cache entries with longer TTL must appear before shorter TTLs\".",
+        "b": "Ruled out because the writes are billed differently: \"1-hour cache write tokens are 2 times the base input tokens price\".",
+        "c": "Ruled out because \"The usage object then splits the writes\" by lifetime, so both can be written.",
+        "d": "Ruled out because \"You can use both 1-hour and 5-minute cache controls in the same request\" when ordered correctly."
+      }
+    },
+    {
+      "id": "02-prices-lifetimes-lookback-and-invalidation#m4",
+      "page": "02-prices-lifetimes-lookback-and-invalidation.md",
+      "scope": "module",
+      "stem": "A 600-token system prompt is marked on a model whose minimum is 512, and usage shows a write on every call and no reads. The prompt begins with the clock reading. What should the team do?",
+      "options": {
+        "a": "Pad the prompt so it clears the floor by a wider margin and stays well above it",
+        "b": "Raise the TTL to an hour so the entry survives between uses and keeps being read",
+        "c": "Shift that line to the end and set the boundary where unchanging text stops",
+        "d": "Switch to a larger number of explicit markers so more segments are cached separately"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The planner puts \"a volatile block moves to the very end of the request\", after the last breakpoint.",
+        "b": "Ruled out because \"Changes at each level invalidate that level and all subsequent levels\", whatever the TTL.",
+        "a": "Ruled out because the prompt already clears 512 tokens and usage shows writes, and the cause is \"a volatile block moves to the very end\" in the plan.",
+        "d": "Ruled out because \"You can define up to 4 cache breakpoints\", yet an earlier changing block still changes the hash."
+      }
+    }
+  ]
+}
