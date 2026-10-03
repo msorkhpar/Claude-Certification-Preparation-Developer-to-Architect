@@ -160,16 +160,16 @@ This quiz covers both pages of the module.
 2. A prefix is sent twice within five minutes on a model that reads at 0.1 times the base price. How does the spend on the pair
    compare with two ordinary sends?
    - **a**: Roughly two thirds as much
-   - **b**: Roughly five eighths as much
+   - **b**: Roughly one third as much
    - **c**: A few percent more
-   - **d**: A little over half as much
+   - **d**: About the same as two plain sends
 
 3. A request marks the system block with a five-minute breakpoint and the final message with a one-hour breakpoint. What does
    the module say?
-   - **a**: It is refused, since the longer entry has to come first
+   - **a**: It violates the ordering rule, since the longer entry has to come first
    - **b**: It is accepted, with both entries billed at one common rate
    - **c**: It is accepted, with only the short entry written
-   - **d**: It is refused, since one request carries a single TTL
+   - **d**: It violates a one-TTL rule, since a request carries one lifetime
 
 4. A 600-token system prompt is marked on a model whose minimum is 512, and usage shows a write on every call and no reads. The
    prompt begins with the clock reading. What should the team do?
@@ -182,7 +182,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The page says a cache entry "only becomes available after the first response begins", so all ten write. *a* is ruled out because the entry "only becomes available after the first response begins", so the others have nothing to read. *c* is ruled out because the same sentence says it is available only "after the first response begins". *d* is ruled out because the advice is "wait for the first response before sending subsequent requests", not that extra requests fail.
-2. **a**. A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds. *b* is ruled out because it takes the write alone, and "Cache read tokens are 0.1 times the base input tokens price" applies to the second request. *c* is ruled out because that figure is the one-hour case, from "1-hour cache write tokens are 2 times the base input tokens price". *d* is ruled out because it drops the write premium: "5-minute cache write tokens are 1.25 times the base input tokens price".
+2. **a**. A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds. *b* is ruled out because the first send alone costs more than that: "5-minute cache write tokens are 1.25 times the base input tokens price". *c* is ruled out because that figure is the one-hour case, from "1-hour cache write tokens are 2 times the base input tokens price". *d* is ruled out because the second send is a read: "Cache read tokens are 0.1 times the base input tokens price".
 3. **a**. The page says "Cache entries with longer TTL must appear before shorter TTLs". *b* is ruled out because the writes are billed differently: "1-hour cache write tokens are 2 times the base input tokens price". *c* is ruled out because "The usage object then splits the writes" by lifetime, so both can be written. *d* is ruled out because "You can use both 1-hour and 5-minute cache controls in the same request" when ordered correctly.
 4. **c**. The planner puts "a volatile block moves to the very end of the request", after the last breakpoint. *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because the prompt already clears 512 tokens and usage shows writes, and the cause is "a volatile block moves to the very end" in the plan. *d* is ruled out because "You can define up to 4 cache breakpoints", yet an earlier changing block still changes the hash.
 

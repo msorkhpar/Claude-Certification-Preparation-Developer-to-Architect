@@ -58,7 +58,7 @@ cost = input_tokens x P_in
 ```
 
 where `R` is 0.1 on most models, 0.05 on Claude Opus 5.5 and 0.025 on Claude Fable 5.1. The Pricing page states how the
-modifiers combine: "These multipliers stack with other pricing modifiers, including the Batch API discount and data
+modifiers combine: "These multipliers stack with other pricing modifiers such as the Batch API discount and data
 residency." The batch discount is 50 percent on input and output, so the whole sum halves; data residency with
 `inference_geo: "us"` adds 1.1 times on Claude 4.6 and later models. Fast mode, with its higher rates, is not available in a batch.
 
@@ -269,7 +269,7 @@ $4 and 0.05. A router that breaks ties by list order gives an answer that depend
 <summary>Answer key</summary>
 
 1. **b**. The page prices a 5-minute cache write at "1.25 times input", so 4,000 written tokens are not ordinary input. *a* is ruled out because output tokens are "Tokens generated, thinking included" and the table prices them at the output price, while the cache multipliers apply to input. *c* is ruled out because `input_tokens` is "Input tokens that were not read from or written to a cache". *d* is ruled out because the batch discount is "50 percent on input and output" and halves the sum, and it is not an ordering of charges.
-2. **d**. The page says "The token count is an estimate" and "Token counting is free to use but subject to requests per minute rate limits based on your usage tier." *b* is ruled out because a trial request is a billed Messages call, while the page offers counting as a separate call with "separate and independent rate limits". *c* is ruled out because the page says "to decide before paying" with counting on the new prompt, and an earlier response predicts nothing about it. *a* is ruled out because the pricing page gives prices per million tokens, while the endpoint "takes the same structured input as a Messages request" and counts it.
+2. **d**. The page says "The token count is an estimate" and "Token counting is free to use but subject to requests per minute rate limits based on your usage tier." *b* is ruled out because a trial request is a billed Messages call (the page calls counting "free to use"), while the page offers counting as a separate call with "separate and independent rate limits". *c* is ruled out because the page says "to decide before paying" with counting on the new prompt, and an earlier response predicts nothing about it. *a* is ruled out because the pricing page gives prices per million tokens, while the endpoint "takes the same structured input as a Messages request" and counts it.
 3. **b**. The practice's rule is "A cost tie goes to the lower tier", and the order of the catalog never matters. *a* is ruled out because a router that breaks ties by list order gives "an answer that depends on how the catalog was written". *c* is ruled out because the rule is "A cost tie goes to the lower tier" and never ranks windows once the limits are met. *d* is ruled out because the statement says "goes to the lower tier".
 
 </details>

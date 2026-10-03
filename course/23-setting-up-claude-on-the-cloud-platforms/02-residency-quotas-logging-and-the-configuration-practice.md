@@ -106,15 +106,15 @@ The ARN rule is a shape check only. The `foundation-model` form is the one AWS d
 3. A compliance team wants a record of prompts and completions for Claude on Google Cloud. What do the pages advise?
    - **a**: Rely on Anthropic to hold the prompts for the customer
    - **b**: Switch on request-response logging for at least thirty days
-   - **c**: Log only the errors, since the content is never needed
-   - **d**: Keep nothing, since the platform stores everything forever
+   - **c**: Log the prompts alone, since misuse shows up in what users ask
+   - **d**: Leave the platform's own defaults untouched and set nothing
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says a specific region serves `claude-sonnet-4-6` only and that the EU needs "the `eu` multi-region endpoint or a `europe-` region", so Sonnet 5.5 takes the multi-region value. *a* is ruled out because "Global endpoints: Dynamic routing for maximum availability" says nothing of keeping data in a geography. *c* is ruled out because "A specific region serves `claude-sonnet-4-6` only". *d* is ruled out because the rules say "Residency `eu` needs the `eu` multi-region endpoint or a `europe-` region".
 2. **d**. The page says "You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval", and 8 million is above it. *b* is ruled out because "Default quota is 2 million input tokens per minute (TPM)." and 8 million is far above that. *c* is ruled out because the approval named is "without additional Anthropic approval", so Anthropic is part of the decision. *a* is ruled out because the self-service ceiling is "You can request up to 5 million input TPM and 500,000 output TPM", not ten million.
-3. **b**. The page says "Enable 30-day request-response logging of your prompt and completion activity to track any model misuse by your users." *a* is ruled out because "Turning on this service does not give Google or Anthropic any access to your content." *c* is ruled out because logging is for prompts and completions, "to track any model misuse by your users". *d* is ruled out because "Anthropic recommends that you log your activity on at least a 30-day rolling basis", so the customer keeps the log.
+3. **b**. The page says "Enable 30-day request-response logging of your prompt and completion activity to track any model misuse by your users." *a* is ruled out because "Turning on this service does not give Google or Anthropic any access to your content." *c* is ruled out because the page asks for "prompt and completion activity to track any model misuse by your users", not prompts alone. *d* is ruled out because "Anthropic recommends that you log your activity on at least a 30-day rolling basis", so the customer keeps the log.
 
 </details>
 
@@ -122,7 +122,7 @@ The ARN rule is a shape check only. The `foundation-model` form is the one AWS d
 
 This quiz covers both pages of the module.
 
-1. A reviewer finds a single star where a policy names what may be called. Which practice rule does it break?
+1. A reviewer finds a single star in the policy field that points at a specific resource. Which practice rule does it break?
    - **a**: The document must carry the current version string at the top
    - **b**: Each entry must be a model ARN in a documented region, without wildcards
    - **c**: Every action must be one of the three invoke actions allowed

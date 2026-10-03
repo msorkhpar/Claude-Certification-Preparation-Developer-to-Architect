@@ -58,8 +58,7 @@ Thinking tokens are output tokens: the page lists them as "billed as output toke
 
 Source: Steering thinking.
 
-So the visible text understates the bill. Read the breakdown from `usage.output_tokens_details.thinking_tokens`: it is "always less
-than or equal to `output_tokens`", and `output_tokens` stays "the inclusive, authoritative total used for billing". Thinking also
+So the visible text understates the bill. Read the breakdown from `usage.output_tokens_details.thinking_tokens`: it is never more than `output_tokens`, and `output_tokens` is the total that is billed. Thinking also
 counts against `max_tokens`, shown or not, so a `max_tokens` sized for a plain answer is often too small once the model starts
 to think, and the call stops with `stop_reason: "max_tokens"`. The page offers two remedies and says which one to pick: raise
 `max_tokens` if the truncated answers needed the reasoning, lower the effort if they were over-thought.
@@ -223,7 +222,7 @@ the TypeScript tab the same lines are formatted with JSON quoting; the numbers a
    - **c**: The request succeeds, and thinking falls to its lowest setting
    - **d**: The request returns a 400, so lower the effort level instead
 
-2. A response has 60 words of visible text and an `output_tokens` of 1,900. The `thinking_tokens` field reads 1,650. What is
+2. A response has a short visible reply and an `output_tokens` of 1,900. The `thinking_tokens` field reads 1,650. What is
    billed as output?
    - **a**: All 1,900 tokens, since thinking is charged even when it is not shown
    - **b**: Only 250 tokens, since the thinking was hidden by the default display
@@ -233,14 +232,14 @@ the TypeScript tab the same lines are formatted with JSON quoting; the numbers a
 3. A request on Claude Haiku 4.5 puts `low` under `output_config` to save money. What does the page back?
    - **a**: Haiku 4.5 takes the setting only together with a manual budget
    - **b**: Haiku 4.5 treats `low` as its default, so the setting changes nothing
-   - **c**: That model has no such control, so the field has to be left out
+   - **c**: That model has no such control, so the setting buys no saving
    - **d**: Haiku 4.5 applies the setting to tool calls and ignores thinking
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The model table shows "400 error" for `disabled` on Opus 5.5, and the page says to "lower effort first" to cut cost. *b* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise". *c* is ruled out because the lowest setting named is Sonnet 5.5's, "up-front thinking off at high effort or below", and Opus 5.5 has no such setting. *a* is ruled out because "`max_tokens` is a strict limit" on spend and does not change how much the model thinks.
-2. **a**. The page says "You are billed for the full thinking process, not the thinking content visible in the response." *b* is ruled out because the thinking tokens are "billed as output tokens", whether the display shows them or not. *c* is ruled out because `output_tokens` stays "the inclusive, authoritative total used for billing". *d* is ruled out because the page says the visible text understates the bill: "So the visible text understates the bill."
+2. **a**. The page says "You are billed for the full thinking process, not the thinking content visible in the response." *b* is ruled out because the thinking tokens are "billed as output tokens", whether the display shows them or not. *c* is ruled out because the page bills "the full thinking process, not the thinking content visible in the response", so the answer is not the only part charged. *d* is ruled out because the page says the visible text understates the bill: "So the visible text understates the bill."
 3. **c**. The page says "Haiku 4.5 does not support effort", and the table of effort support lists the other three models. *b* is ruled out because the default row names only Opus 5.5 and the models that support effort: "The default is high on every model that supports effort except Opus 5.5". *a* is ruled out because the manual budget belongs to the thinking setting, and the page puts effort "in output_config, not inside thinking". *d* is ruled out because the page says effort "works with or without thinking" on models that support it.
 
 </details>

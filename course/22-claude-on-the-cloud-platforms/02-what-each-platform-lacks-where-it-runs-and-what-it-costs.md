@@ -85,8 +85,8 @@ logging activity "on at least a 30-day rolling basis", through CloudWatch and Cl
 Google Cloud.
 
 Caching differs in one place. The prompt caching page says caches are isolated per workspace on the Claude API but that "Bedrock and Google Cloud
-maintain organization-level cache isolation". The minimum cacheable prompt is the same on every platform, and the one-hour lifetime is available
-on both.
+maintain organization-level cache isolation". The minimum cacheable prompt is the same on every platform, and the prompt caching page lists the one-hour lifetime as available
+on both Amazon Bedrock and Google Cloud.
 
 ## The practice: one request, three front doors
 
@@ -135,10 +135,10 @@ Vertex request damages the next call that reuses it.
    - **d**: The regional kind, which is required for both aims and costs 10% more
 
 3. A team must pick between the two cloud platforms and needs structured outputs and web search from it. What do the pages show?
-   - **a**: AWS offers both, while Google's service lacks both of them
+   - **a**: AWS offers web search but not structured outputs, while Google's service lacks web search
    - **b**: AWS lacks both, while Google's service offers both
    - **c**: Both platforms offer both features without any exception at all
-   - **d**: Neither platform offers either feature in the current release
+   - **d**: Google's service offers structured outputs but lacks web search
 
 <details>
 <summary>Answer key</summary>

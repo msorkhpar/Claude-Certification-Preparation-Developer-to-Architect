@@ -25,7 +25,7 @@ credentials. The exam asks which differences exist and what each platform lacks.
 There are three doors you build requests for in this module. The **direct API** is Anthropic's own endpoint, with an API key.
 **Claude in Amazon Bedrock** serves Claude on AWS-managed infrastructure; its page says it "runs on AWS-managed infrastructure with zero
 operator access (Anthropic personnel have no access to the inference infrastructure)". **Claude on Google Cloud** serves Claude
-through Google's Agent Platform, known earlier as Vertex AI. The docs mention a fourth, Claude Platform on AWS, described as "an
+through Google's Agent Platform. The docs mention a fourth, Claude Platform on AWS, described as "an
 Anthropic-operated alternative on AWS with AWS Marketplace billing and typically same-day feature access". The practice and the
 examples cover the first three.
 

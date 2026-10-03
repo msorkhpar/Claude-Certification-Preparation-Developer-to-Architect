@@ -54,12 +54,12 @@ The page continues "always use the `custom_id` field" to match them. Position in
 
 ### Which failures to retry
 
-The four types are not all alike, and the retry rule follows from the cause:
+The four types are not all alike. The table is the course's own advice, built from the causes the page names:
 
 | Result | Cause | What to do |
 |---|---|---|
 | `errored` with `invalid_request_error` | the request is wrong | fix it first; the same request fails again |
-| `errored` with another type, such as `overloaded_error` | a fault on the service side | resubmit unchanged |
+| `errored` with another type | a fault that is not in the request | resubmit unchanged |
 | `expired` | the batch ran out of time first | resubmit unchanged |
 | `canceled` | you cancelled the batch | resubmit if you still want it |
 

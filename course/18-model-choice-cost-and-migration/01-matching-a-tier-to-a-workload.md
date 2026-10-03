@@ -66,7 +66,7 @@ proxy for the price per task:
 
 - A tokenizer change moves the count. The Pricing page says Claude 4.7 and later models use a newer tokenizer and that
   "This tokenizer produces approximately 30% more tokens for the same text." The same document costs more tokens on a newer
-  model, so compare cost per task on a sample, not per million tokens.
+  model, so compare cost per task on a sample, not per million tokens. A worked case with this module's own arithmetic: a model priced 20% lower per token whose tokenizer yields 30% more tokens costs 0.8 x 1.3 = 1.04 times as much per task, 4% more. A real pair, Claude Sonnet 4.6 at $3 and $15 and Claude Sonnet 5.5 at $2 and $10 with about 30% more tokens, costs 2/3 x 1.3, about 0.87 times as much, so it is still cheaper: the lower price won there.
 - Output costs five times input on every row, so a task that writes a lot is dominated by output. A classifier that returns a
   label is cheap on any tier; a drafting task is not.
 
@@ -111,18 +111,18 @@ earlier turns without the earlier reasoning, and should test for it.
    - **c**: Its tokenizer is older than the others
    - **d**: Its output costs more than its input
 
-3. A team moves from Sonnet 4.6 to Sonnet 5.5, which lists lower prices, and the bill for identical documents rises. Which
-   explanation fits the page?
-   - **a**: A lower list price always guarantees a lower cost per task
-   - **b**: Output on the replacement costs about twice what input costs
-   - **c**: The later tokenizer counts more tokens for the same text
-   - **d**: Models released later always cost less than earlier ones
+3. A model lists a price 20% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the
+   same text. What does the page's reasoning give for the cost of one task?
+   - **a**: It stays equal, because a tokenizer change moves only the output side
+   - **b**: It falls by about 20%, because the lower rate applies to the whole bill
+   - **c**: It rises by about 4%, because 0.8 x 1.3 is 1.04
+   - **d**: It falls by about 10%, because the two changes average out
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The page's method is to move down "until quality drops, and keep the last tier that held", and the tests show nothing is lost at the cheapest tier. *b* is ruled out because a tier above Opus is "earned by failing an evaluation, not assumed". *c* is ruled out because the method keeps "the cheapest tier that passes", not a tier in the middle. *a* is ruled out because "A newer model can be cheaper than the one it replaces, and the reverse can happen".
 2. **a**. The page says "a 300,000-token input rules Haiku 4.5 out whatever its price", because the input must fit the context window. *b* is ruled out because the latency column is relative and "depends on prompt length, output length, and thinking effort". *c* is ruled out because "A tokenizer change moves the count" and does not block an input. *d* is ruled out because the page states "Output costs five times input on every row", which is a cost fact and not a limit.
-3. **c**. The page says the newer tokenizer "produces approximately 30% more tokens for the same text", so a lower list price can still cost more per task. *b* is ruled out because "Output costs five times input on every row". *a* is ruled out because the two facts "make the price per token a poor proxy for the price per task". *d* is ruled out because "A newer model can be cheaper than the one it replaces, and the reverse can happen".
+3. **c**. The page says the newer tokenizer "produces approximately 30% more tokens for the same text", so 0.8 times 1.3 is 1.04 times the cost per task. *b* is ruled out because the two facts "make the price per token a poor proxy for the price per task". *a* is ruled out because "A tokenizer change moves the count." *d* is ruled out because the page says to "compare cost per task on a sample, not per million tokens", and the two factors multiply rather than average.
 
 </details>

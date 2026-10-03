@@ -73,7 +73,7 @@ The prompt caching page lists the changes that invalidate a cached prefix, where
 | Effort setting | model-specific | model-specific | ✘ |
 
 Changing the thinking mode or the effort always discards the cached messages, because the resolved configuration "is rendered into
-the prompt". Setting a parameter explicitly to its default is the same as omitting it, so it does not break the cache. Cached
+the prompt". The one exception on the prompt caching page is per-message effort: on models that support it, an effort change carried in a `role: "system"` message inside `messages` leaves the cached prefix intact, which a change to the top-level setting does not. Setting a parameter explicitly to its default is the same as omitting it, so it does not break the cache. Cached
 thinking blocks also cost something: in a tool loop they are cached with the tool results, and when read from the cache they "count
 as input tokens in your usage metrics". The consequence is a design rule: pick the model, the thinking mode, the effort and the
 speed once per conversation, and put everything that varies after the cached prefix.
@@ -121,7 +121,7 @@ effort. Each setting is valid alone, and the pair returns a 400.
 
 ## Quiz
 
-1. A chat feature on Opus 5.5 streams long answers to people watching the text appear, and the team wants it to arrive sooner.
+1. A chat feature on Opus 5.5 streams long answers to people watching the text appear, and the team wants it to arrive sooner without a change of tier or effort.
    Which option does the page support?
    - **a**: Fast mode, at the standard price and on every cloud platform
    - **b**: Fast mode, at twice the standard price and on the first-party API only
@@ -177,7 +177,7 @@ This quiz covers both pages of the module.
 
 4. A cost-conscious team wants cheaper answers on Opus 5.5 without losing the cache of a long conversation. Which plan fits?
    - **a**: Switch to fast mode for the cached turns and standard for the rest
-   - **b**: Lower the effort on every second turn and raise it again afterward
+   - **b**: Change the top-level effort on every second turn and restore it afterward
    - **c**: Choose the effort level once, before the first turn, and keep it
    - **d**: Disable thinking after the first answer to cut the output
 

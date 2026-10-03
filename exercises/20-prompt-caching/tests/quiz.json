@@ -141,16 +141,16 @@
       "stem": "A prefix is sent twice within five minutes on a model that reads at 0.1 times the base price. How does the spend on the pair compare with two ordinary sends?",
       "options": {
         "a": "Roughly two thirds as much",
-        "b": "Roughly five eighths as much",
+        "b": "Roughly one third as much",
         "c": "A few percent more",
-        "d": "A little over half as much"
+        "d": "About the same as two plain sends"
       },
       "key": "a",
       "explanation": {
         "a": "A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds.",
-        "b": "Ruled out because it takes the write alone, and \"Cache read tokens are 0.1 times the base input tokens price\" applies to the second request.",
+        "b": "Ruled out because the first send alone costs more than that: \"5-minute cache write tokens are 1.25 times the base input tokens price\".",
         "c": "Ruled out because that figure is the one-hour case, from \"1-hour cache write tokens are 2 times the base input tokens price\".",
-        "d": "Ruled out because it drops the write premium: \"5-minute cache write tokens are 1.25 times the base input tokens price\"."
+        "d": "Ruled out because the second send is a read: \"Cache read tokens are 0.1 times the base input tokens price\"."
       }
     },
     {
@@ -159,10 +159,10 @@
       "scope": "module",
       "stem": "A request marks the system block with a five-minute breakpoint and the final message with a one-hour breakpoint. What does the module say?",
       "options": {
-        "a": "It is refused, since the longer entry has to come first",
+        "a": "It violates the ordering rule, since the longer entry has to come first",
         "b": "It is accepted, with both entries billed at one common rate",
         "c": "It is accepted, with only the short entry written",
-        "d": "It is refused, since one request carries a single TTL"
+        "d": "It violates a one-TTL rule, since a request carries one lifetime"
       },
       "key": "a",
       "explanation": {

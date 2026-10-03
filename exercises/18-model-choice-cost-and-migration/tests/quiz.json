@@ -43,19 +43,19 @@
       "id": "01-matching-a-tier-to-a-workload#q3",
       "page": "01-matching-a-tier-to-a-workload.md",
       "scope": "page",
-      "stem": "A team moves from Sonnet 4.6 to Sonnet 5.5, which lists lower prices, and the bill for identical documents rises. Which explanation fits the page?",
+      "stem": "A model lists a price 20% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the same text. What does the page's reasoning give for the cost of one task?",
       "options": {
-        "a": "A lower list price always guarantees a lower cost per task",
-        "b": "Output on the replacement costs about twice what input costs",
-        "c": "The later tokenizer counts more tokens for the same text",
-        "d": "Models released later always cost less than earlier ones"
+        "a": "It stays equal, because a tokenizer change moves only the output side",
+        "b": "It falls by about 20%, because the lower rate applies to the whole bill",
+        "c": "It rises by about 4%, because 0.8 x 1.3 is 1.04",
+        "d": "It falls by about 10%, because the two changes average out"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says the newer tokenizer \"produces approximately 30% more tokens for the same text\", so a lower list price can still cost more per task.",
-        "b": "Ruled out because \"Output costs five times input on every row\".",
-        "a": "Ruled out because the two facts \"make the price per token a poor proxy for the price per task\".",
-        "d": "Ruled out because \"A newer model can be cheaper than the one it replaces, and the reverse can happen\"."
+        "c": "The page says the newer tokenizer \"produces approximately 30% more tokens for the same text\", so 0.8 times 1.3 is 1.04 times the cost per task.",
+        "b": "Ruled out because the two facts \"make the price per token a poor proxy for the price per task\".",
+        "a": "Ruled out because \"A tokenizer change moves the count.\"",
+        "d": "Ruled out because the page says to \"compare cost per task on a sample, not per million tokens\", and the two factors multiply rather than average."
       }
     },
     {
@@ -91,7 +91,7 @@
       "key": "d",
       "explanation": {
         "d": "The page says \"The token count is an estimate\" and \"Token counting is free to use but subject to requests per minute rate limits based on your usage tier.\"",
-        "b": "Ruled out because a trial request is a billed Messages call, while the page offers counting as a separate call with \"separate and independent rate limits\".",
+        "b": "Ruled out because a trial request is a billed Messages call (the page calls counting \"free to use\"), while the page offers counting as a separate call with \"separate and independent rate limits\".",
         "c": "Ruled out because the page says \"to decide before paying\" with counting on the new prompt, and an earlier response predicts nothing about it.",
         "a": "Ruled out because the pricing page gives prices per million tokens, while the endpoint \"takes the same structured input as a Messages request\" and counts it."
       }
@@ -204,7 +204,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The page gives the cost per request as a sum over the usage fields and says \"These multipliers stack with other pricing modifiers, including the Batch API discount and data residency.\"",
+        "c": "The page gives the cost per request as a sum over the usage fields and says \"These multipliers stack with other pricing modifiers such as the Batch API discount and data residency.\"",
         "b": "Ruled out because the tokenizer difference makes \"the price per token a poor proxy for the price per task\".",
         "a": "Ruled out because \"The token count is an estimate\" of input only, and output and cache split appear only in usage.",
         "d": "Ruled out because a usage has \"four input-side fields at three prices\", so output alone is incomplete."

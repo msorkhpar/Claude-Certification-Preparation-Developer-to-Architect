@@ -59,7 +59,7 @@ complete within 24 hours." Most batches finish in under an hour, but there is no
 "Batch results are available for 29 days after creation." The clock starts at `created_at`, not when processing ended. And a batch
 cannot be edited after submission: "once a batch has been submitted, it cannot be modified." To change it, cancel and resubmit.
 
-A job larger than one batch is cut into several. A batch above 256 MB returns a 413 `request_too_large` error. The practice at
+A job larger than one batch is cut into several. A batch above 256 MB returns a 413 `request_too_large` error. Validation of each request's `params` runs asynchronously, and "validation errors are returned when processing of the entire batch has ended", so the error for a refused parameter appears with the results. The practice at
 the end of the next page does the cutting.
 
 ### The price
@@ -114,7 +114,7 @@ The page's own list of when a batch fits starts with "Immediate responses are no
    - **c**: Send them one by one, since a batch cannot take more than a few hundred
    - **d**: Send them as a batch, at 50% of the standard price, and read the results later
 
-2. A batch request body copied from a live endpoint contains `speed` set to fast. What happens at submission?
+2. A batch request body copied from a live endpoint contains `speed` set to fast. What is the outcome for that request?
    - **a**: A validation error comes back, since that parameter is unsupported here
    - **b**: The batch runs at the fast rate, since the parameter is passed through unchanged
    - **c**: The parameter is dropped silently, and the batch runs at the standard rate
@@ -131,6 +131,6 @@ The page's own list of when a batch fits starts with "Immediate responses are no
 
 1. **d**. The page says "All usage is charged at 50% of the standard API prices" and that the batch suits work where "Immediate responses are not required". *b* is ruled out because the discount covers "input, output and special tokens" at half price. *c* is ruled out because "A Message Batch is limited to either 100,000 Message requests or 256 MB in size", which is far above a few hundred. *a* is ruled out because "Batch results come back as a single file, not a stream."
 2. **a**. The page says these parameters are "refused with a validation error". *b* is ruled out because "Fast mode tunes synchronous latency, which doesn't apply to asynchronous batch processing." *c* is ruled out because the page says they are "refused with a validation error", not dropped. *d* is ruled out because "All usage is charged at 50% of the standard API prices", with no fast rate in a batch.
-3. **c**. The page says "A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first", so 250,000 needs three. *b* is ruled out because "whichever is reached first" means the request count limit applies as well as the size. *a* is ruled out because the stated limit is "either 100,000 Message requests or 256 MB", not 128,000. *d* is ruled out because a batch cannot be edited: "once a batch has been submitted, it cannot be modified."
+3. **c**. The page says "A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first", so 250,000 needs three. *b* is ruled out because "whichever is reached first" means the request count limit applies as well as the size. *a* is ruled out because the stated limit is "either 100,000 Message requests or 256 MB", not 128,000. *d* is ruled out because the splitting is the client's job: "whichever is reached first" is a limit on what you submit, and the practice's `split_batches` does the cutting.
 
 </details>
