@@ -3,12 +3,14 @@
 usage: tools/l2_practices.py list      one line per practice: <practice dir> <variant> <variant> ...
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MODULES = re.compile(r"^(1[2-7])-")
+# L2_MODULES narrows the run to one batch, for example L2_MODULES='^(1[89]|2[0-3])-'
+MODULES = re.compile(os.environ.get("L2_MODULES", r"^(1[2-9]|2[0-3])-"))
 
 
 def practices():

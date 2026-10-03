@@ -13,7 +13,7 @@ python3 tools/l2_practices.py list | while read -r PD VARIANTS; do
   done
 done
 # the Level 2 examples: their tests, then their printed output
-for spec in examples/*/example.json; do
+for spec in ${L2_EXAMPLE_SPECS:-examples/*/example.json}; do
   d=$(basename "$(dirname "$spec")")
   for lang in python typescript; do
     file=$(python3 -c "import json,sys; print(json.load(open('$spec'))['files']['$lang'])")

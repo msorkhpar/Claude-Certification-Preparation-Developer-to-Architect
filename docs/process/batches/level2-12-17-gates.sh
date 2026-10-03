@@ -16,6 +16,7 @@ cd "$(dirname "$0")/../../.." || exit 2
 IMG=${RUNNER_IMAGE:-93d052f3fc87}      # runner image id (digest sha256:93d052f3fc87...)
 HEAVY=${HEAVY_SLOT:-../.heavy-slot/run-heavy.sh}
 mkdir -p .survey-out
+export L2_MODULES='^1[2-7]-' L2_EXAMPLES='1[3-7]-' L2_EXAMPLE_SPECS='examples/1[3-7]-*/example.json'
 python3 tools/make_plants_l2.py || exit 1
 python3 tools/test_check_quiz.py >/dev/null || { echo "check_quiz planted-defect tests failed"; exit 1; }
 python3 tools/check_quiz.py || exit 1

@@ -1,0 +1,195 @@
+{
+  "module": "23-setting-up-claude-on-the-cloud-platforms",
+  "quizzes": [
+    {
+      "id": "01-least-privilege-for-bedrock-and-vertex#q1",
+      "page": "01-least-privilege-for-bedrock-and-vertex.md",
+      "scope": "page",
+      "stem": "A policy allows bedrock:* on * for an application's role. A reviewer asks for least privilege. Which rewrite fits?",
+      "options": {
+        "a": "Keep the policy as written and add a condition that requires SSL",
+        "b": "Keep the wildcard action but name the single model's ARN in the resource",
+        "c": "Replace the wildcard with a deny statement for every other model",
+        "d": "List the one invoke action and name the single model's ARN"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says to \"grant only the permissions required to perform a task\", by \"defining the actions that can be taken on specific resources\".",
+        "b": "Ruled out because a wildcard action still grants more than \"the permissions required to perform a task\".",
+        "c": "Ruled out because \"By default, users and roles don't have permission to create or modify Amazon Bedrock resources\", so a policy should add what is needed and not rely on denies.",
+        "a": "Ruled out because conditions come after the basics: \"defining the actions that can be taken on specific resources under specific conditions\"."
+      }
+    },
+    {
+      "id": "01-least-privilege-for-bedrock-and-vertex#q2",
+      "page": "01-least-privilege-for-bedrock-and-vertex.md",
+      "scope": "page",
+      "stem": "A service account must only call a Claude endpoint on Google Cloud. The team compares a ready-made grant bundle with one it authors. What does the page favour?",
+      "options": {
+        "a": "The tailored role with just the predict permission",
+        "b": "A predefined role, since the platform maintains it for the team",
+        "c": "A basic role such as Editor, since it covers every service at once",
+        "d": "No role at all, since a service account works without any grant"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"custom roles are recommended because you create them, so you can limit their access to only the permissions that are required\".",
+        "b": "Ruled out because \"Predefined roles often contain more permissions than you need.\"",
+        "c": "Ruled out because basic roles \"provide access control to your Agent Platform resources at the project level, and are common to all Google Cloud services\", which is broad.",
+        "d": "Ruled out because \"You grant access by assigning IAM roles to principals.\""
+      }
+    },
+    {
+      "id": "01-least-privilege-for-bedrock-and-vertex#q3",
+      "page": "01-least-privilege-for-bedrock-and-vertex.md",
+      "scope": "page",
+      "stem": "A team adds the deploy permission to its invoker role just in case. What does the Google page warn?",
+      "options": {
+        "a": "It blocks the predict permission until the deploy one is removed",
+        "b": "It makes every prediction slower on the endpoint that holds it",
+        "c": "It might allow exporting other models from the project",
+        "d": "It has no effect at all, because deploy only adds serving capacity"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page warns that the deploy permission \"might allow a user to export other deployed or deployable models from the project\".",
+        "b": "Ruled out because the predict permission \"grants the service account the ability to call the endpoint for predictions\", and the page says nothing of speed.",
+        "a": "Ruled out because the same sentence shows the predict permission grants \"the ability to call the endpoint for predictions\" on its own.",
+        "d": "Ruled out because the warning is that it \"might allow a user to export other deployed or deployable models from the project\"."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#q1",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "page",
+      "stem": "A project must keep Claude traffic in the EU and use Sonnet 5.5. Which Vertex endpoint setting fits?",
+      "options": {
+        "a": "The global value, since it keeps data inside the EU by default for everyone",
+        "b": "The European multi-area value, since named places serve older names only",
+        "c": "A specific region such as europe-west4, since it is the strictest choice",
+        "d": "The us value, since Sonnet 5.5 is served there alone in this case"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says a specific region serves `claude-sonnet-4-6` only and that the EU needs \"the `eu` multi-region endpoint or a `europe-` region\", so Sonnet 5.5 takes the multi-region value.",
+        "a": "Ruled out because \"Global endpoints: Dynamic routing for maximum availability\" says nothing of keeping data in a geography.",
+        "c": "Ruled out because \"A specific region serves `claude-sonnet-4-6` only\".",
+        "d": "Ruled out because the rules say \"Residency `eu` needs the `eu` multi-region endpoint or a `europe-` region\"."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#q2",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "page",
+      "stem": "A team asks AWS for 8 million input tokens per minute on Bedrock. What do the docs say about getting it?",
+      "options": {
+        "a": "It is within the self-service range, which reaches ten million",
+        "b": "It is within the default, so nothing more is needed",
+        "c": "AWS alone decides, since the quota is a Bedrock matter only",
+        "d": "It exceeds the self-service ceiling, so Anthropic must approve it first"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval\", and 8 million is above it.",
+        "b": "Ruled out because \"Default quota is 2 million input tokens per minute (TPM).\" and 8 million is far above that.",
+        "c": "Ruled out because the approval named is \"without additional Anthropic approval\", so Anthropic is part of the decision.",
+        "a": "Ruled out because the self-service ceiling is \"You can request up to 5 million input TPM and 500,000 output TPM\", not ten million."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#q3",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "page",
+      "stem": "A compliance team wants a record of prompts and completions for Claude on Google Cloud. What do the pages advise?",
+      "options": {
+        "a": "Rely on Anthropic to hold the prompts for the customer",
+        "b": "Switch on request-response logging for at least thirty days",
+        "c": "Log the prompts alone, since misuse shows up in what users ask",
+        "d": "Leave the platform's own defaults untouched and set nothing"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"Enable 30-day request-response logging of your prompt and completion activity to track any model misuse by your users.\"",
+        "a": "Ruled out because \"Turning on this service does not give Google or Anthropic any access to your content.\"",
+        "c": "Ruled out because the page asks for \"prompt and completion activity to track any model misuse by your users\", not prompts alone.",
+        "d": "Ruled out because \"Anthropic recommends that you log your activity on at least a 30-day rolling basis\", so the customer keeps the log."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#m1",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "module",
+      "stem": "A reviewer finds a single star in the policy field that points at a specific resource. Which practice rule does it break?",
+      "options": {
+        "a": "The document must carry the current version string at the top",
+        "b": "Each entry must be a model ARN in a documented region, without wildcards",
+        "c": "Every action must be one of the three invoke actions allowed",
+        "d": "The statements must be allow statements and nothing else at all"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The rule is \"Every resource is a model ARN with a region from the Bedrock region list, the `anthropic.` model id form, and no wildcard.\"",
+        "a": "Ruled out because that rule concerns the version: \"The policy has the version `2012-10-17`\", which a star in a resource does not change.",
+        "c": "Ruled out because that rule concerns actions: \"Every action is one of the three invoke actions\".",
+        "d": "Ruled out because that rule concerns the effect: \"only `Allow` statements, and no `NotAction` or `NotResource`\"."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#m2",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "module",
+      "stem": "A reviewer sees the ready-made aiplatform user bundle attached to the calling service account. What does the practice require instead?",
+      "options": {
+        "a": "A custom role whose only permission is predict",
+        "b": "The same bundle plus a deny for the deploy permission",
+        "c": "A basic Editor grant scoped to one endpoint of the project",
+        "d": "An organization-level predefined bundle with fewer permissions"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The rule is \"The Vertex role is a custom role (its `id` starts with `projects/` or `organizations/`, not `roles/`) whose only permission is `aiplatform.endpoints.predict`.\"",
+        "b": "Ruled out because the rule asks for a role \"whose only permission is `aiplatform.endpoints.predict`\", and adding a deny leaves the bundle's extra permissions in place.",
+        "c": "Ruled out because the rule requires a custom role \"whose only permission is `aiplatform.endpoints.predict`\".",
+        "d": "Ruled out because the id \"starts with `projects/` or `organizations/`, not `roles/`\", and a predefined id starts with `roles/`."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#m3",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "module",
+      "stem": "A quota file asks for 6,000,000 input tokens per minute with anthropic_approval false. What does the review do?",
+      "options": {
+        "a": "It fails the request, since 5,000,000 is the unapproved ceiling",
+        "b": "It passes the request, since the default is 2,000,000 already",
+        "c": "It passes the request, since the output figure is under 500,000",
+        "d": "It passes the request once the region has been named in it"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The rule is \"Without Anthropic's approval a quota request is at most 5,000,000 input tokens and 500,000 output tokens per minute.\"",
+        "b": "Ruled out because \"Default quota is 2 million input tokens per minute (TPM).\" is the starting quota, and a request may go higher up to the ceiling.",
+        "c": "Ruled out because the ceiling covers both figures: \"You can request up to 5 million input TPM and 500,000 output TPM\".",
+        "d": "Ruled out because only approval lifts the ceiling: \"without additional Anthropic approval\"."
+      }
+    },
+    {
+      "id": "02-residency-quotas-logging-and-the-configuration-practice#m4",
+      "page": "02-residency-quotas-logging-and-the-configuration-practice.md",
+      "scope": "module",
+      "stem": "A project with residency us asks for endpoint us-central1 and model claude-opus-5-5. What does the review say?",
+      "options": {
+        "a": "It passes, since the global value always satisfies any residency",
+        "b": "It passes, since the region begins with the us prefix",
+        "c": "It fails, since a named location serves one older name only",
+        "d": "It fails, since the region is spelled in the wrong form"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The rule is \"A specific region serves `claude-sonnet-4-6` only\", and the model asked for is newer.",
+        "b": "Ruled out because the prefix rule, \"`us` needs `us` or a `us-` region\", is met but is not the only rule.",
+        "a": "Ruled out because the global value is \"Dynamic routing for maximum availability\", which says nothing of residency.",
+        "d": "Ruled out because the spelling is fine: \"`us` needs `us` or a `us-` region\"."
+      }
+    }
+  ]
+}

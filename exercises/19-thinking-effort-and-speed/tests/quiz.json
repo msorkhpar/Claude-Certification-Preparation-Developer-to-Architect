@@ -1,0 +1,195 @@
+{
+  "module": "19-thinking-effort-and-speed",
+  "quizzes": [
+    {
+      "id": "01-thinking-and-effort#q1",
+      "page": "01-thinking-and-effort.md",
+      "scope": "page",
+      "stem": "A team wants to cut the cost of a workload on Claude Opus 5.5 that currently thinks a lot. A developer proposes setting `thinking` to `disabled`. What does the page say?",
+      "options": {
+        "a": "The request returns a 400, so remove the output cap instead",
+        "b": "The request succeeds, and thinking stops for that call alone",
+        "c": "The request succeeds, and thinking falls to its lowest setting",
+        "d": "The request returns a 400, so lower the effort level instead"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The model table shows \"400 error\" for `disabled` on Opus 5.5, and the page says to \"lower effort first\" to cut cost.",
+        "b": "Ruled out because \"Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise\".",
+        "c": "Ruled out because the lowest setting named is Sonnet 5.5's, \"up-front thinking off at high effort or below\", and Opus 5.5 has no such setting.",
+        "a": "Ruled out because \"`max_tokens` is a strict limit\" on spend and does not change how much the model thinks."
+      }
+    },
+    {
+      "id": "01-thinking-and-effort#q2",
+      "page": "01-thinking-and-effort.md",
+      "scope": "page",
+      "stem": "A response has a short visible reply and an `output_tokens` of 1,900. The `thinking_tokens` field reads 1,650. What is billed as output?",
+      "options": {
+        "a": "All 1,900 tokens, since thinking is charged even when it is not shown",
+        "b": "Only 250 tokens, since the thinking was hidden by the default display",
+        "c": "Only 1,650 tokens, since the answer is covered by the input price",
+        "d": "About 80 tokens, since billing follows the words that are returned"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"You are billed for the full thinking process, not the thinking content visible in the response.\"",
+        "b": "Ruled out because the thinking tokens are \"billed as output tokens\", whether the display shows them or not.",
+        "c": "Ruled out because the page bills \"the full thinking process, not the thinking content visible in the response\", so the answer is not the only part charged.",
+        "d": "Ruled out because the page says the visible text understates the bill: \"So the visible text understates the bill.\""
+      }
+    },
+    {
+      "id": "01-thinking-and-effort#q3",
+      "page": "01-thinking-and-effort.md",
+      "scope": "page",
+      "stem": "A request on Claude Haiku 4.5 puts `low` under `output_config` to save money. What does the page back?",
+      "options": {
+        "a": "Haiku 4.5 takes the setting only together with a manual budget",
+        "b": "Haiku 4.5 treats `low` as its default, so the setting changes nothing",
+        "c": "That model has no such control, so the setting buys no saving",
+        "d": "Haiku 4.5 applies the setting to tool calls and ignores thinking"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"Haiku 4.5 does not support effort\", and the table of effort support lists the other three models.",
+        "b": "Ruled out because the default row names only Opus 5.5 and the models that support effort: \"The default is high on every model that supports effort except Opus 5.5\".",
+        "a": "Ruled out because the manual budget belongs to the thinking setting, and the page puts effort \"in output_config, not inside thinking\".",
+        "d": "Ruled out because the page says effort \"works with or without thinking\" on models that support it."
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#q1",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "page",
+      "stem": "A chat feature on Opus 5.5 streams long answers to people watching the text appear, and the team wants it to arrive sooner without a change of tier or effort. Which option does the page support?",
+      "options": {
+        "a": "Fast mode, at the standard price and on every cloud platform",
+        "b": "Fast mode, at twice the standard price and on the first-party API only",
+        "c": "A lower effort level, with a reduced price and shorter replies",
+        "d": "A batch, at half the price and with the replies delivered sooner"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says fast mode \"is available on the Claude API (first-party) only\" and prices it at twice the standard rate.",
+        "a": "Ruled out because \"it is not available on Claude Platform on AWS or partner-operated cloud platforms\".",
+        "c": "Ruled out because the table gives \"fast mode (Opus only)\" to streaming, and gives lowering the effort to \"Too slow to finish\".",
+        "d": "Ruled out because \"Fast mode is not available with the Batch API.\""
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#q2",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "page",
+      "stem": "A tool loop runs four calls for one user question. The team sets reasoning on for the first call and off for the last three to save tokens. What happens?",
+      "options": {
+        "a": "The API treats each call as its own turn and accepts the new setting",
+        "b": "The API returns a 400 for the first changed request and stops the loop",
+        "c": "The API keeps the first setting for the whole turn and ignores the rest",
+        "d": "The API silently disables thinking for each altered step and raises no error"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says the API does not error: it \"silently disables thinking for that request\".",
+        "b": "is ruled out by that same sentence, since the stated behavior is \"silently disables thinking for that request\" and not a 400.",
+        "c": "Ruled out because the changed request is the one that loses thinking: \"silently disables thinking for that request\".",
+        "a": "Ruled out because \"A tool-use loop is one assistant turn.\""
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#q3",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "page",
+      "stem": "A team lowers the effort for later turns of a long conversation that relies on a cached document. What follows?",
+      "options": {
+        "a": "The stored tools and system are invalidated, but the messages stay valid",
+        "b": "The stored messages are invalidated, so the text is written again",
+        "c": "The cache stays valid, because effort is applied after the prefix",
+        "d": "The cache is invalidated only when the effort is raised above the default"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says changing the thinking mode or the effort \"always discards the cached messages\".",
+        "a": "Ruled out because the messages are the part that \"always discards the cached messages\" names, while tools and system are model-specific.",
+        "c": "Ruled out because the resolved configuration \"is rendered into the prompt\", so it is not applied after the prefix.",
+        "d": "Ruled out because the messages are discarded on any change: \"always discards the cached messages\"."
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#m1",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "module",
+      "stem": "An agent on Sonnet 5.5 runs at `xhigh` effort, and a developer adds `between_tools` to stop up-front thinking. The request fails. Which statement matches the module?",
+      "options": {
+        "a": "The option is valid on Sonnet 5.5 at any effort level",
+        "b": "Each option is valid alone, yet the combination is refused by the API",
+        "c": "The option exists only on Opus models, so any use fails",
+        "d": "The option works only if a manual budget is also sent"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"Each setting is valid alone, and the pair returns a 400\".",
+        "a": "Ruled out because the mode \"needs high effort or below\".",
+        "c": "Ruled out because the table says \"skips thinking up front is Sonnet only\".",
+        "d": "Ruled out because the only budget rule is \"A manual budget is at least 1,024\", which has no link to this mode."
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#m2",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "module",
+      "stem": "A helpdesk bot prints replies live for agents and also runs overnight bulk jobs. Management wants the speed option on all of it. What does the module say?",
+      "options": {
+        "a": "It suits only the watched output, as the batch route excludes it",
+        "b": "It suits neither, since it only lowers time to first token",
+        "c": "It suits neither, because only the cloud platforms offer it",
+        "d": "It suits both, at the standard price for the bulk jobs"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"Fast mode is not available with the Batch API.\" and the speed gain is for output people watch.",
+        "b": "Ruled out because \"Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT).\"",
+        "c": "Ruled out because fast mode \"is available on the Claude API (first-party) only\".",
+        "d": "Ruled out because fast mode carries a premium and \"Fast mode is not available with the Batch API.\""
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#m3",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "module",
+      "stem": "A shared helper serves three Claude models and must never emit a parameter that one of them rejects. What design does the practice use?",
+      "options": {
+        "a": "It derives each field from the chosen tier and refuses bad pairs",
+        "b": "It sends one body to every tier and retries whenever the API objects",
+        "c": "It picks the lowest common field and drops the rest silently",
+        "d": "It reads each field from the reply to an earlier call"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The practice \"turns what an application wants into request parameters for one model\" and raises an error for the invalid pairs.",
+        "b": "Ruled out because the same sentence says it builds \"request parameters for one model\", not one shared body.",
+        "c": "Ruled out because the page warns the API \"silently disables thinking for that request\", which a silent drop would hide.",
+        "d": "Ruled out because \"The rules are the tables of this module\", not a reply."
+      }
+    },
+    {
+      "id": "02-fast-mode-tools-and-caching#m4",
+      "page": "02-fast-mode-tools-and-caching.md",
+      "scope": "module",
+      "stem": "A cost-conscious team wants cheaper answers on Opus 5.5 without losing the cache of a long conversation. Which plan fits?",
+      "options": {
+        "a": "Switch to fast mode for the cached turns and standard for the rest",
+        "b": "Change the top-level effort on every second turn and restore it afterward",
+        "c": "Choose the effort level once, before the first turn, and keep it",
+        "d": "Disable thinking after the first answer to cut the output"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says to choose once per conversation and put what varies after the cached prefix.",
+        "b": "Ruled out because \"always discards the cached messages\".",
+        "a": "Ruled out because the table row \"Speed setting (fast or standard)\" shows system and messages invalidated.",
+        "d": "Ruled out because \"Changing the thinking mode or the effort\" is on the invalidation list."
+      }
+    }
+  ]
+}
