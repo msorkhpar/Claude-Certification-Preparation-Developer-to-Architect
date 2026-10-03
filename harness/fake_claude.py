@@ -27,7 +27,7 @@ A tool step may also carry "parent": "<tool_use_id of an Agent call>": its assis
 parent_tool_use_id, as the messages that run inside a subagent do. The Agent tool itself is an ordinary tool step whose output
 is the subagent's final report. The `agents` of the initialise request are recorded as {"agents": ...} in the record file.
 A PreToolUse hook may answer allow with `updatedInput` (the stand-in runs the tool with that input) or `ask` (the call is then sent to
-`can_use_tool` even when an allow rule or a mode would have approved it); a PostToolUse hook may answer `updatedToolOutput`, which replaces the
+`can_use_tool` even when an allow rule or a mode would have approved it, and `allow` approves the call without asking, though a deny rule still wins; a PostToolUse hook may answer `updatedToolOutput`, which replaces the
 output the model sees. The PostToolUse event carries the output as `tool_response`.
 
 Rules applied to a tool step (a simplified copy of the documented behaviour, not the real binary): a tool that is
@@ -123,6 +123,8 @@ def main():
                 if effects is not None:
                     if spec.get("permissionDecision") == "ask":
                         effects["ask"] = True
+                    elif spec.get("permissionDecision") == "allow":
+                        effects["allow"] = True
                     if "updatedInput" in spec:
                         effects["updatedInput"] = spec["updatedInput"]
                     if "updatedToolOutput" in spec:
@@ -155,7 +157,8 @@ def main():
             name = tool["name"]
             if name in disallowed or mode == "dontAsk" and name not in allowed:
                 denied = f"{name} is not permitted"
-            elif (any(fnmatch.fnmatchcase(name, pattern) for pattern in allowed) or mode == "bypassPermissions") and not effects.get("ask"):
+            elif (any(fnmatch.fnmatchcase(name, pattern) for pattern in allowed) or mode == "bypassPermissions"
+                  or effects.get("allow") and mode != "dontAsk") and not effects.get("ask"):
                 pass
             else:
                 answer = ask("can_use_tool", tool_name=name, input=tool["input"], tool_use_id=tool["id"])

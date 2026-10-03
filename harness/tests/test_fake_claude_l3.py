@@ -72,7 +72,7 @@ def test_a_pre_tool_use_hook_can_change_the_input_that_the_permission_step_sees(
 
     def answer(request):
         if request["subtype"] == "hook_callback":
-            return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "updatedInput": {"command": "ls -l"}}}
+            return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask", "updatedInput": {"command": "ls -l"}}}
         return {"behavior": "allow"}
 
     _, asked, _ = run([tool("t1", "Bash"), SUCCESS], tmp_path, hooks=hooks, answer=answer)
@@ -85,3 +85,13 @@ def test_a_hook_that_answers_ask_sends_an_approved_call_to_the_permission_callba
                               else {"behavior": "deny", "message": "a person said no"})
     messages, asked, _ = run([tool("t1", "Bash"), SUCCESS], tmp_path, ["--allowedTools", "Bash"], hooks=hooks, answer=answer)
     assert [a["subtype"] for a in asked] == ["hook_callback", "can_use_tool"] and results(messages) == [("t1", "Permission denied: a person said no")]
+
+
+def test_a_hook_that_answers_allow_approves_the_call_without_asking_but_a_deny_rule_still_wins(tmp_path):
+    hooks = {"PreToolUse": [{"matcher": "Bash", "hookCallbackIds": ["pre"]}]}
+    answer = lambda request: ({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}} if request["subtype"] == "hook_callback"
+                              else {"behavior": "deny", "message": "asked"})
+    messages, asked, _ = run([tool("t1", "Bash", "ran"), SUCCESS], tmp_path, hooks=hooks, answer=answer)
+    assert [a["subtype"] for a in asked] == ["hook_callback"] and results(messages) == [("t1", "ran")]
+    messages, asked, _ = run([tool("t1", "Bash", "ran"), SUCCESS], tmp_path, ["--disallowedTools", "Bash"], hooks=hooks, answer=answer)
+    assert results(messages) == [("t1", "Permission denied: Bash is not permitted")]
