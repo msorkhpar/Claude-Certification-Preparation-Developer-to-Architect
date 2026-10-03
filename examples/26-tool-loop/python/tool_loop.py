@@ -1,4 +1,4 @@
-"""A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a forced choice.
+"""A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
 
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 """
@@ -32,7 +32,8 @@ def loop(client, question, **extra):
         if reply.stop_reason != "tool_use":
             return reply, messages
         messages.append({"role": "user", "content": [run_tool(b) for b in reply.content if b.type == "tool_use"]})
-        extra = {k: v for k, v in extra.items() if k != "tool_choice"}  # a forced choice applies to the first request only
+        if extra.get("tool_choice", {}).get("type") in ("any", "tool"):
+            extra = {k: v for k, v in extra.items() if k != "tool_choice"}  # a forced choice applies to the first request only; auto and none stay
 
 
 REPLIES = [
@@ -51,7 +52,7 @@ def main():
     print("tool results in ONE user message:", len(results), "| ids in order:", [r["tool_use_id"] for r in results])
     for r in results:
         print(f"  {r['tool_use_id']}: is_error={r.get('is_error', False)} content={r['content']!r}")
-    print("tool_choice sent on request 1 and 2:", [r.get("tool_choice") for r in transport.requests])
+    print("tool_choice sent on requests 1 and 2:", [r.get("tool_choice") for r in transport.requests])
     print("tool definitions sent carry no handler:", all(set(t) == {"name", "description", "input_schema"} for t in transport.requests[0]["tools"]))
     print("final text:", final.content[0].text)
 

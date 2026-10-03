@@ -555,7 +555,7 @@ to beat either single index.
 
 1. Two result lists come from indexes whose scores sit on different scales. How does the fusion method of the practice combine them?
    - **a**: It adds the raw scores of both indexes and sorts the totals that result
-   - **b**: It sums `1 / (k + rank)` wherever an id appears
+   - **b**: It sums `1 / (k + rank)` for each place where an id is found
    - **c**: It keeps the longer list and ignores the shorter one completely
    - **d**: It multiplies each chunk's two scores together before sorting them
 
@@ -567,7 +567,7 @@ to beat either single index.
 
 3. A company's reference material has 80,000 tokens and changes once a month. What does the write-up's rule of thumb suggest?
    - **a**: Build the full pipeline, since every base needs one of its own to work well
-   - **b**: Skip retrieval, and place everything in a cached prompt
+   - **b**: Skip retrieval, and place the whole of it in a prompt that is cached
    - **c**: Split it into 20 chunks and index only the first ones that are written
    - **d**: Train an embedding model of its own on the text of the material
 
@@ -597,7 +597,7 @@ This quiz covers both pages of the module.
    - **d**: Embed it twice and average the two vectors that result
 
 3. A keyword index and an embedding index disagree on the best chunk for a query. Why is a hybrid usually better than either alone?
-   - **a**: They miss different questions, so a merge keeps what each finds
+   - **a**: They miss different questions, so merging the results keeps what each finds
    - **b**: Their scores share one scale, which makes adding them a sound choice
    - **c**: The embedding side handles exact strings well, and the keyword side adds speed
    - **d**: The merge makes chunking of the documents unnecessary for later stages

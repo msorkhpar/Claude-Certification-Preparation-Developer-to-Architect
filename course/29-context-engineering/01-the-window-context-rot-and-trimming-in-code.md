@@ -104,7 +104,7 @@ it, with a protocol that begins "ASSUME INTERRUPTION: Your context window might 
    - **a**: Raise `max_tokens` so that the window can hold the older results as well
    - **b**: Delete the old results from the history and leave their calls in place without any reply
    - **c**: Replace the whole conversation with one summary that a model writes for the agent
-   - **d**: Swap the old outputs for a placeholder, and keep the calls
+   - **d**: Swap the old outputs for a short placeholder, and keep every call in the history
 
 2. A program must drop old messages to fit a budget. What does the page say is the unit to drop?
    - **a**: A whole turn, which keeps each tool call together with its result
@@ -115,7 +115,7 @@ it, with a protocol that begins "ASSUME INTERRUPTION: Your context window might 
 3. Why is it a mistake to fill a 1M-token window as a matter of habit?
    - **a**: Cached prefixes do not count toward the window at all in the request
    - **b**: The API refuses any request that is over half of the window in size
-   - **c**: Accuracy and recall degrade as the context grows
+   - **c**: Accuracy and recall both degrade as the amount of context grows
    - **d**: Output tokens are billed at the same price as input tokens
 
 <details>

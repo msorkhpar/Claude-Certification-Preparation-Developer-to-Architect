@@ -28,10 +28,10 @@ conversation.
 - After each reply, append it as an `assistant` message with its content blocks unchanged (text blocks and server tool
   blocks included).
 - Stop reason `tool_use`: run every `tool_use` block, in order, and append ONE `user` message that holds one `tool_result` block
-  per call (`tool_use_id` of the call, `content`), nothing else. Blocks of type `server_tool_use` are Anthropic's to run and get no
+  per call (`tool_use_id` of the call, `content`, and `is_error` only on an error result), nothing else. Blocks of type `server_tool_use` are Anthropic's to run and get no
   result. A handler's string is sent as it is and any other value as JSON text.
 - A call becomes a result with `is_error: true` and a message, and the loop goes on, when: the tool name is unknown
-  (`Unknown tool: NAME`); a key listed in the schema's `required` is missing from the input (the handler is not called); or the
+  (`Unknown tool: NAME`); a key listed in the schema's `required` is missing from the input (the handler is not called, and the message is `Missing required input: KEY`, with several missing keys joined by `, ` in the order of `required`); or the
   handler throws (the error's message).
 - `end_turn` or `stop_sequence`: status `done`. `refusal`: status `refused`. `max_tokens` or any other stop reason: status
   `truncated`. `pause_turn` (a server tool's turn that was paused): call again with the assistant message appended and no user

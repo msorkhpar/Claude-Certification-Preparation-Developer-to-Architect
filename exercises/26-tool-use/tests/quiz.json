@@ -10,7 +10,7 @@
         "a": "Anthropic's servers, after the tool is named in the request",
         "b": "The SDK client, without any involvement from their program at all",
         "c": "The model, inside the reply that it is generating for the user",
-        "d": "Their program, once it reads the `tool_use` block"
+        "d": "Their program, after it reads the `tool_use` block in the reply"
       },
       "key": "d",
       "explanation": {
@@ -33,7 +33,7 @@
       },
       "key": "a",
       "explanation": {
-        "a": "The page asks for \"at least 3–4 sentences for each tool description\" that explain what the tool does, when to use it and what it does not return.",
+        "a": "The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says all of that.",
         "c": "Ruled out because a short description is the pattern to avoid: \"Provide extremely detailed descriptions.\"",
         "b": "Ruled out because it never says \"what the tool does not return\".",
         "d": "Ruled out because the page asks for \"when to use it and when not to\", not for a call on every message."
@@ -103,14 +103,14 @@
       "stem": "A reply arrives with `stop_reason` of `pause_turn`. What does the page say to do?",
       "options": {
         "a": "Treat the reply as a refusal and stop the loop with that status",
-        "b": "Send the assistant content back unchanged and call again",
+        "b": "Pass the assistant content back untouched, and call once more",
         "c": "Run the missing tool and return its output in a `tool_result` block",
         "d": "Raise `max_tokens` and repeat the request that produced the pause"
       },
       "key": "b",
       "explanation": {
         "b": "The page says to send \"the assistant response back as it is, keep the same `tools` array\".",
-        "a": "Ruled out because the table gives a refusal its own reaction: \"status `refused`; do not call again\".",
+        "a": "Ruled out because the table gives a refusal its own reaction: \"status `refused`; the same request is not repeated\".",
         "c": "Ruled out because a paused turn \"is different from `tool_use`, which requires `tool_result` blocks\".",
         "d": "Ruled out because a raised limit belongs to a cut-off reply: \"a cut-off `tool_use` block needs a higher `max_tokens`\"."
       }
@@ -140,7 +140,7 @@
       "scope": "page",
       "stem": "Where does `disable_parallel_tool_use` go in a request?",
       "options": {
-        "a": "Inside the `tool_choice` object",
+        "a": "Within the object that selects how functions get called",
         "b": "Inside each tool definition, next to its name",
         "c": "In the system prompt, as a line of instructions",
         "d": "Alongside `max_tokens`, at the top level of the body"
@@ -161,7 +161,7 @@
       "options": {
         "a": "The system prompt is dropped from every request",
         "b": "The tool results are rejected with a 400 error",
-        "c": "No final text answer is ever possible",
+        "c": "No final answer in plain text could ever come out",
         "d": "Parallel calls turn on in place of the single forced call"
       },
       "key": "c",
@@ -179,7 +179,7 @@
       "stem": "A scripted exchange shows the weather and the time requested for two cities at once. The program sends the two results in two user messages. What is the main consequence?",
       "options": {
         "a": "Nothing changes, since the identifiers match every result to its own call in the history",
-        "b": "A rejection from the API, and a model that learns to avoid parallel calls",
+        "b": "Fewer parallel calls on later turns, as the model learns to avoid them",
         "c": "The first result is used, and the second is thrown away by the API without a warning",
         "d": "The model answers twice, once for each message that it received from the program"
       },
@@ -236,7 +236,7 @@
       "stem": "A team needs a reply in a fixed JSON shape from Claude Fable 5.1 and plans to force one tool with `tool_choice`. What happens?",
       "options": {
         "a": "The request is accepted, and the first tool listed is called by the model",
-        "b": "A 400 error, so structured outputs are the right choice here",
+        "b": "A 400 error comes back, so structured outputs are the better choice",
         "c": "The model writes an explanation first and then calls the one forced tool",
         "d": "The choice is ignored, and the model answers in plain prose without any tool"
       },

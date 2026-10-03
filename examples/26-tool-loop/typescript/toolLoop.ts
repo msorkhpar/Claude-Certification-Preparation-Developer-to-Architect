@@ -1,4 +1,4 @@
-// A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a forced choice.
+// A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
@@ -26,7 +26,7 @@ export async function loop(client: Anthropic, question: string, toolChoice?: Ant
     messages.push({ role: "assistant", content: reply.content });
     if (reply.stop_reason !== "tool_use") return { reply, messages };
     messages.push({ role: "user", content: reply.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use").map((b) => runTool(b)) });
-    choice = undefined; // a forced choice applies to the first request only
+    if (choice && (choice.type === "any" || choice.type === "tool")) choice = undefined; // a forced choice applies to the first request only; auto and none stay
   }
 }
 
@@ -60,7 +60,7 @@ async function main() {
   const results = messages[2].content as any[];
   console.log("tool results in ONE user message:", results.length, "| ids in order:", py(results.map((r) => r.tool_use_id)));
   for (const r of results) console.log(`  ${r.tool_use_id}: is_error=${py(r.is_error ?? false)} content=${py(r.content)}`);
-  console.log("tool_choice sent on request 1 and 2:", py(fake.seen.map((r) => r.body.tool_choice ?? null)));
+  console.log("tool_choice sent on requests 1 and 2:", py(fake.seen.map((r) => r.body.tool_choice ?? null)));
   console.log("tool definitions sent carry no handler:", py(fake.seen[0].body.tools.every((t: any) => Object.keys(t).sort().join() === "description,input_schema,name")));
   console.log("final text:", (reply.content[0] as { text: string }).text);
 }

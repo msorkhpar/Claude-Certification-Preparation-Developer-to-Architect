@@ -8,7 +8,7 @@ the system prompt and what in the user turn, give a constraint together with its
 burying its own important lines, and choose between asking a clarifying question and stating an assumption.
 
 Checked against the Claude API documentation (Prompting best practices, and the prompting pages for Claude Opus 5.5, Claude
-Sonnet 5.5 and Claude Fable 5.1) on 2026-10-03, and by running the example on the next page offline in the course container
+Sonnet 5.5 and Claude Fable 5.1, Tool use overview and Handle tool calls) on 2026-10-03, and by running the example on the next page offline in the course container
 (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). Wording that is the course's own advice and not a documented rule is marked
 as such.
 

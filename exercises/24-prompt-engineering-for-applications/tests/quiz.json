@@ -65,7 +65,7 @@
       "stem": "A prompt for Claude Sonnet 5.5 ends the `messages` list with an assistant turn that opens a JSON brace, to force the format. What happens?",
       "options": {
         "a": "The reply continues the brace, as it would on Claude Sonnet 4.5 or older models",
-        "b": "The request fails with a 400 error",
+        "b": "The call is rejected with a 400 error, since the model does not accept that pattern",
         "c": "The brace is dropped and the call succeeds with the normal reply",
         "d": "The reply is cut off at the first closing brace that the model writes"
       },
@@ -103,7 +103,7 @@
       "stem": "A team wants Claude Opus 5.5 to reason less on simple tickets. What does the page advise?",
       "options": {
         "a": "Add \"do not think\" to the system prompt and trust the model to comply",
-        "b": "Lower the effort level before editing the wording",
+        "b": "Reduce the effort setting first, and only then rewrite the prompt",
         "c": "Turn thinking off altogether with a parameter on the request",
         "d": "Ask for reasoning in an output field, then cut it"
       },
@@ -187,7 +187,7 @@
       "explanation": {
         "c": "The page's table replaces forcing a label with \"Structured outputs, or a tool with an `enum` field\".",
         "a": "Ruled out because for an output format, \"an example is the weaker tool\".",
-        "b": "Ruled out because the example's requests send no \"sampling parameter, which these models reject\".",
+        "b": "Ruled out because the page says requests carry no \"non-default `temperature`, `top_p` or `top_k`, which these models reject\", so a lower temperature is not available as a way to force a label.",
         "d": "Ruled out because \"What the rule does not touch is an assistant message elsewhere in the conversation\", and it does not restrict an answer."
       }
     }

@@ -26,7 +26,7 @@
       "scope": "page",
       "stem": "The schema says a field named `total` has a `minimum` of 0, and the request is sent with that schema unchanged. What happens?",
       "options": {
-        "a": "It fails with a 400 error that gives details",
+        "a": "It fails with a 400 error that comes with details of the unsupported item",
         "b": "The reply is checked against the limit and retried for the caller",
         "c": "The limit is read as a hint and the call goes on as usual",
         "d": "The constraint is applied only when the field is a whole number"
@@ -86,7 +86,7 @@
         "a": "Accept it, since in many languages a truthy value counts as the number one",
         "b": "Convert it to 1 and go on with the remaining checks of the field",
         "c": "Report a separate problem for every constraint that the field carries in the schema",
-        "d": "One problem for the value, and no further checks of it"
+        "d": "A single problem is reported for the value, and its other checks are skipped"
       },
       "key": "d",
       "explanation": {
@@ -103,7 +103,7 @@
       "stem": "Which result ends the extractor loop without another call to the model?",
       "options": {
         "a": "A reply with a valid body but a total of zero, which breaks the minimum",
-        "b": "A reply cut off at the token limit",
+        "b": "A reply that was cut off because it ran into the token limit",
         "c": "A reply whose JSON is wrapped in a code fence with prose around it",
         "d": "A reply that quotes a sentence which the document never contained"
       },
@@ -122,7 +122,7 @@
       "stem": "An invoice extractor runs on a model that supports structured outputs. The reply has the right fields and types, yet the cited sentence is one the document never contained. Who catches it?",
       "options": {
         "a": "The API, because the schema lists the evidence field as a string type",
-        "b": "Only the program, by searching the source for that wording",
+        "b": "Only the program, by searching the source text for that exact wording",
         "c": "The grammar cache, which compares each reply with the earlier replies",
         "d": "The stop reason, which flags every invented sentence at the end of the reply"
       },
@@ -140,14 +140,14 @@
       "scope": "module",
       "stem": "A team's code retries every failed reply up to five times. A document triggers a `refusal`. What is the right change?",
       "options": {
-        "a": "Stop there, report it, and issue no further call",
+        "a": "Stop there and report it, rather than repeating the same request",
         "b": "Add the refusal text to the next prompt, for the model to explain itself",
         "c": "Switch to a forced tool, which accepts every document without objection",
         "d": "Raise the attempts to ten, so that one of the later calls gets past it"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says a `refusal` has the action \"Read `stop_details` and retry on a fallback model.\", and that \"a refusal is a decision, not a malformed answer\".",
+        "a": "The page says that \"a refusal is a decision, not a malformed answer\", so the loop reports it; the documented fallback model is a different request, not a repeat.",
         "d": "Ruled out because \"The same request gets the same decision, and each call is billed.\"",
         "b": "Ruled out because \"Asking again with an error list cannot fix either\".",
         "c": "Ruled out because on some models `any` and `tool` \"return a 400 error\", and no tool choice overrides a refusal."
@@ -159,7 +159,7 @@
       "scope": "module",
       "stem": "A schema has an enum of `USD`, `EUR` and `GBP`, and a reply returns `Eur`. How should the program treat it?",
       "options": {
-        "a": "As a match, ignoring capital letters when comparing",
+        "a": "As a match, since the comparison should ignore capital letters in the value",
         "b": "As a schema violation, since the characters differ from the allowed list",
         "c": "As an API error, reported with a 400 status code on the request",
         "d": "As a refusal, because the promised shape was not honoured by the model"
@@ -180,7 +180,7 @@
       "options": {
         "a": "Close the braces itself and validate the value it guessed from the text",
         "b": "Re-prompt with the error list, so that the model finishes the missing text",
-        "c": "Report it as truncated and raise the limit",
+        "c": "Report the status as truncated, and raise the limit before asking again",
         "d": "Treat it as a refusal and switch over to a fallback model for the retry"
       },
       "key": "c",

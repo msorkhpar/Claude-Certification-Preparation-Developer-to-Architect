@@ -25,7 +25,7 @@ is the real thing.
 ## What to write
 
 - `chunk(text, size, overlap)`: split the text on whitespace into words and return windows of `size` words that start
-  `size - overlap` words apart; the last window ends at the last word and no window is repeated. No words gives an empty list.
+  `size - overlap` words apart; the windows stop at the first one that reaches the last word, so the last window ends at the last word and no window is repeated. No words gives an empty list.
   A `size` below 1, or an `overlap` below 0 or not below `size`, is an error (`ValueError` in Python, `RangeError` in
   TypeScript, `IllegalArgumentException` in Java and Kotlin).
 - `build_chunks(corpus, size, overlap)`: every document `{id, text}` becomes its chunks, with ids `<doc>#0`, `<doc>#1` and so on.

@@ -7,7 +7,7 @@
 always thinks, replace a prefilled assistant turn, lay out a long-document prompt, split a task into a prompt chain, and version the
 prompts you ship.
 
-Checked against the Claude API documentation (Prompting best practices, the migration guides and prompting pages for Claude Opus 5.5,
+Checked against the Claude API documentation (Prompting best practices, Prompt engineering overview, the migration guides and prompting pages for Claude Opus 5.5,
 Claude Sonnet 5.5 and Claude Fable 5.1, Structured outputs) on 2026-10-03, and by running the example offline in the course container
 (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). The replies in the example are illustrative, scripted exchanges in the API's shape,
 not captures.
@@ -114,15 +114,13 @@ that you have: 1. A clear definition of the success criteria for your use case 2
 first draft prompt you want to improve". A new version ships only when it does at least as well as the old one on those tests.
 
 For the first draft, the Prompt engineering overview points to a notebook: "Don't have a first draft prompt? Generate one with the metaprompt
-recipe from the Claude Cookbook." On 2026-10-03 the old documentation addresses for a prompt improver, a prompt generator and prompt
-templates all returned the Prompting best practices page, which describes none of them, so this course does not teach a Console prompt
-improver as a feature and marks it unverified.
+recipe from the Claude Cookbook." A Console prompt improver is not taught here: no current documentation page that describes it was found on 2026-10-03, so it is unverified.
 
 ### The example
 
 The example runs the two-step chain from the quote-grounding rule. Step 1 gets the documents first, the question last, and asks for quotes;
 step 2 gets only the quotes and the question. Both prompts come from versioned templates; a value that looks like a placeholder is left alone;
-a missing variable is an error; and no request ends on an assistant turn or carries a sampling parameter, which these models reject
+a missing variable is an error; and no request ends on an assistant turn or carries a non-default `temperature`, `top_p` or `top_k`, which these models reject
 (`docs/VERSIONS.md`).
 
 <!-- example: m24-prompt-chain tabs: python,typescript -->
@@ -336,7 +334,7 @@ build in your language; this module's own example runs in Python and TypeScript.
 
 1. A prompt for Claude Sonnet 5.5 ends the `messages` list with an assistant turn that opens a JSON brace, to force the format. What happens?
    - **a**: The reply continues the brace, as it would on Claude Sonnet 4.5 or older models
-   - **b**: The request fails with a 400 error
+   - **b**: The call is rejected with a 400 error, since the model does not accept that pattern
    - **c**: The brace is dropped and the call succeeds with the normal reply
    - **d**: The reply is cut off at the first closing brace that the model writes
 
@@ -348,7 +346,7 @@ build in your language; this module's own example runs in Python and TypeScript.
 
 3. A team wants Claude Opus 5.5 to reason less on simple tickets. What does the page advise?
    - **a**: Add "do not think" to the system prompt and trust the model to comply
-   - **b**: Lower the effort level before editing the wording
+   - **b**: Reduce the effort setting first, and only then rewrite the prompt
    - **c**: Turn thinking off altogether with a parameter on the request
    - **d**: Ask for reasoning in an output field, then cut it
 
@@ -395,6 +393,6 @@ This quiz covers both pages of the module.
 1. **b**. The page shows tags with a random id and says to "treat this as one guardrail alongside other prompt-injection defenses". *a* is ruled out because "data that sits in the system prompt gets the authority of an instruction". *c* is ruled out because "The tags are plain text and can be imitated". *d* is ruled out because quoting exists for focus: "This helps Claude focus on the relevant content and ignore the rest of the document".
 2. **a**. The page says "Remove a line that no test protects." and "Re-test after every edit." *b* is ruled out because the page says that "Where you might have said "CRITICAL: You MUST use this tool when...", you can use more normal prompting". *c* is ruled out because the page advises to "Say a rule once, in one place, so that two lines cannot disagree." *d* is ruled out because the user turn is for data: "Anything that changes with the request".
 3. **a**. The page says a chain is useful "when you need to inspect intermediate outputs or enforce a specific pipeline structure". *d* is ruled out because a prompt alone has no point at which to "inspect intermediate outputs or enforce a specific pipeline structure". *b* is ruled out because "Each step is a separate API call so you can log, evaluate, or branch at any point", which one large prompt lacks. *c* is ruled out because examples shape a pattern and do not verify one: "Diverse: Cover edge cases and vary enough that Claude doesn't pick up unintended patterns."
-4. **c**. The page's table replaces forcing a label with "Structured outputs, or a tool with an `enum` field". *a* is ruled out because for an output format, "an example is the weaker tool". *b* is ruled out because the example's requests send no "sampling parameter, which these models reject". *d* is ruled out because "What the rule does not touch is an assistant message elsewhere in the conversation", and it does not restrict an answer.
+4. **c**. The page's table replaces forcing a label with "Structured outputs, or a tool with an `enum` field". *a* is ruled out because for an output format, "an example is the weaker tool". *b* is ruled out because the page says requests carry no "non-default `temperature`, `top_p` or `top_k`, which these models reject", so a lower temperature is not available as a way to force a label. *d* is ruled out because "What the rule does not touch is an assistant message elsewhere in the conversation", and it does not restrict an answer.
 
 </details>

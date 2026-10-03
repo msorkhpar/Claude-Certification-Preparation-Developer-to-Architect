@@ -54,7 +54,7 @@ A tool can fail. When the handler throws, the loop catches it and sends the mess
 "Claude will then incorporate this error into its response to the user." It also gives the rule for the message: "Write instructive
 error messages. Instead of generic errors like `"failed"`, include what went wrong and what Claude should try next." The example's
 third call asks the weather of a city that its handler does not know, and the result is "No data for 'Atlantis'. Known cities: Oslo,
-Rome." The model then answered the part it could and said it had no data for the rest.
+Rome." In the scripted reply the model answers the part it can and says it has no data for the rest.
 
 An invalid call is the same case. If a tool is called without a required parameter, "you can also continue the conversation forward
 with a `tool_result` that indicates the error", and Claude retries "2-3 times with corrections before apologizing to the user". The
@@ -81,7 +81,7 @@ The loop exits on any stop reason other than `tool_use`. The documentation's tab
 | `stop_sequence` | one of your `stop_sequences` was emitted | use the reply: status `done` |
 | `tool_use` | Claude is calling a tool | run the tools and call again |
 | `max_tokens` | the response reached your limit | status `truncated`; a cut-off `tool_use` block needs a higher `max_tokens` |
-| `refusal` | Claude declined | status `refused`; do not call again |
+| `refusal` | Claude declined | status `refused`; the same request is not repeated (a fallback model is a separate option) |
 | `pause_turn` | "A server-tool loop reached its iteration limit" | send the assistant content back and call again |
 
 For `pause_turn` the page's key points are to send the assistant response back as it is, keep the same `tools` array, and remember
@@ -103,7 +103,7 @@ order of the calls, and the third one carries `is_error`.
 
 <!-- example: m26-tool-loop tabs: python,typescript -->
 ```python
-"""A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a forced choice.
+"""A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
 
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 """
@@ -137,7 +137,8 @@ def loop(client, question, **extra):
         if reply.stop_reason != "tool_use":
             return reply, messages
         messages.append({"role": "user", "content": [run_tool(b) for b in reply.content if b.type == "tool_use"]})
-        extra = {k: v for k, v in extra.items() if k != "tool_choice"}  # a forced choice applies to the first request only
+        if extra.get("tool_choice", {}).get("type") in ("any", "tool"):
+            extra = {k: v for k, v in extra.items() if k != "tool_choice"}  # a forced choice applies to the first request only; auto and none stay
 
 
 REPLIES = [
@@ -156,7 +157,7 @@ def main():
     print("tool results in ONE user message:", len(results), "| ids in order:", [r["tool_use_id"] for r in results])
     for r in results:
         print(f"  {r['tool_use_id']}: is_error={r.get('is_error', False)} content={r['content']!r}")
-    print("tool_choice sent on request 1 and 2:", [r.get("tool_choice") for r in transport.requests])
+    print("tool_choice sent on requests 1 and 2:", [r.get("tool_choice") for r in transport.requests])
     print("tool definitions sent carry no handler:", all(set(t) == {"name", "description", "input_schema"} for t in transport.requests[0]["tools"]))
     print("final text:", final.content[0].text)
 
@@ -171,12 +172,12 @@ tool results in ONE user message: 3 | ids in order: ['toolu_01', 'toolu_02', 'to
   toolu_01: is_error=False content='Oslo: 4 C, light rain'
   toolu_02: is_error=False content='09:15'
   toolu_03: is_error=True content="No data for 'Atlantis'. Known cities: Oslo, Rome."
-tool_choice sent on request 1 and 2: [{'type': 'auto', 'disable_parallel_tool_use': False}, None]
+tool_choice sent on requests 1 and 2: [{'type': 'auto', 'disable_parallel_tool_use': False}, {'type': 'auto', 'disable_parallel_tool_use': False}]
 tool definitions sent carry no handler: True
 final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data for Atlantis.
 ```
 ```typescript
-// A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a forced choice.
+// A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
@@ -204,7 +205,7 @@ export async function loop(client: Anthropic, question: string, toolChoice?: Ant
     messages.push({ role: "assistant", content: reply.content });
     if (reply.stop_reason !== "tool_use") return { reply, messages };
     messages.push({ role: "user", content: reply.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use").map((b) => runTool(b)) });
-    choice = undefined; // a forced choice applies to the first request only
+    if (choice && (choice.type === "any" || choice.type === "tool")) choice = undefined; // a forced choice applies to the first request only; auto and none stay
   }
 }
 
@@ -238,7 +239,7 @@ async function main() {
   const results = messages[2].content as any[];
   console.log("tool results in ONE user message:", results.length, "| ids in order:", py(results.map((r) => r.tool_use_id)));
   for (const r of results) console.log(`  ${r.tool_use_id}: is_error=${py(r.is_error ?? false)} content=${py(r.content)}`);
-  console.log("tool_choice sent on request 1 and 2:", py(fake.seen.map((r) => r.body.tool_choice ?? null)));
+  console.log("tool_choice sent on requests 1 and 2:", py(fake.seen.map((r) => r.body.tool_choice ?? null)));
   console.log("tool definitions sent carry no handler:", py(fake.seen[0].body.tools.every((t: any) => Object.keys(t).sort().join() === "description,input_schema,name")));
   console.log("final text:", (reply.content[0] as { text: string }).text);
 }
@@ -252,7 +253,7 @@ tool results in ONE user message: 3 | ids in order: ['toolu_01', 'toolu_02', 'to
   toolu_01: is_error=False content='Oslo: 4 C, light rain'
   toolu_02: is_error=False content='09:15'
   toolu_03: is_error=True content="No data for 'Atlantis'. Known cities: Oslo, Rome."
-tool_choice sent on request 1 and 2: [{'type': 'auto', 'disable_parallel_tool_use': False}, None]
+tool_choice sent on requests 1 and 2: [{'type': 'auto', 'disable_parallel_tool_use': False}, {'type': 'auto', 'disable_parallel_tool_use': False}]
 tool definitions sent carry no handler: True
 final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data for Atlantis.
 ```
@@ -260,8 +261,8 @@ final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data 
 
 Read the output. The model was called twice, with stop reasons `tool_use` and `end_turn`. After the first reply the message list is
 user, assistant, user, assistant, and the three results sit in one user message with the ids `toolu_01` to `toolu_03` in order. The
-tool definitions sent carry no handler: the model sees the schema, and "never sees your implementation". `tool_choice` was sent on the
-first request only, since a forced choice must not repeat.
+tool definitions sent carry no handler: the model sees the schema, and "never sees your implementation". `auto` was sent unchanged on both requests; the loop
+would drop a forced choice after the first request, which is the course's own rule and is covered on the next page.
 
 Java and Kotlin readers: the practice on the third page builds this loop in your language.
 
@@ -289,7 +290,7 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
 
 3. A reply arrives with `stop_reason` of `pause_turn`. What does the page say to do?
    - **a**: Treat the reply as a refusal and stop the loop with that status
-   - **b**: Send the assistant content back unchanged and call again
+   - **b**: Pass the assistant content back untouched, and call once more
    - **c**: Run the missing tool and return its output in a `tool_result` block
    - **d**: Raise `max_tokens` and repeat the request that produced the pause
 
@@ -298,6 +299,6 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
 
 1. **b**. The page says "Write instructive error messages", with "what went wrong and what Claude should try next". *a* is ruled out because the model should "incorporate this error into its response to the user", which needs the loop to continue. *c* is ruled out because "An exception that becomes an empty string tells the model the call worked." *d* is ruled out because the error result is how the model learns of the failure: "you can also continue the conversation forward with a `tool_result` that indicates the error".
 2. **d**. The page says "In the user message containing tool results, the tool_result blocks must come FIRST in the content array." *a* is ruled out because the trap is "Sending results one message at a time", and the rule is to "Return every result together in the next user message". *c* is ruled out because a sentence before the first result "will cause a 400 error". *b* is ruled out because results are sent by the user: "a user message with the `tool_result` blocks".
-3. **b**. The page says to send "the assistant response back as it is, keep the same `tools` array". *a* is ruled out because the table gives a refusal its own reaction: "status `refused`; do not call again". *c* is ruled out because a paused turn "is different from `tool_use`, which requires `tool_result` blocks". *d* is ruled out because a raised limit belongs to a cut-off reply: "a cut-off `tool_use` block needs a higher `max_tokens`".
+3. **b**. The page says to send "the assistant response back as it is, keep the same `tools` array". *a* is ruled out because the table gives a refusal its own reaction: "status `refused`; the same request is not repeated". *c* is ruled out because a paused turn "is different from `tool_use`, which requires `tool_result` blocks". *d* is ruled out because a raised limit belongs to a cut-off reply: "a cut-off `tool_use` block needs a higher `max_tokens`".
 
 </details>

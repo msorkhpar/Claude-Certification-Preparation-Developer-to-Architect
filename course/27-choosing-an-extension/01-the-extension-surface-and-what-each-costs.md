@@ -109,7 +109,7 @@ their matching events regardless of source."
    - **a**: A line in the persistent project file, loaded in every session
    - **b**: A hook that fires on every edit
    - **c**: An output style that sets the tone of each reply
-   - **d**: A skill
+   - **d**: A skill, which holds the procedure and loads when invoked
 
 2. A repository's CLAUDE.md has grown to 600 lines of endpoint documentation. What does the page advise?
    - **a**: Move the detail into skills, which load only when needed

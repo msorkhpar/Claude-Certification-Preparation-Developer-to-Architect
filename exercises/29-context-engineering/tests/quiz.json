@@ -10,7 +10,7 @@
         "a": "Raise `max_tokens` so that the window can hold the older results as well",
         "b": "Delete the old results from the history and leave their calls in place without any reply",
         "c": "Replace the whole conversation with one summary that a model writes for the agent",
-        "d": "Swap the old outputs for a placeholder, and keep the calls"
+        "d": "Swap the old outputs for a short placeholder, and keep every call in the history"
       },
       "key": "d",
       "explanation": {
@@ -47,7 +47,7 @@
       "options": {
         "a": "Cached prefixes do not count toward the window at all in the request",
         "b": "The API refuses any request that is over half of the window in size",
-        "c": "Accuracy and recall degrade as the context grows",
+        "c": "Accuracy and recall both degrade as the amount of context grows",
         "d": "Output tokens are billed at the same price as input tokens"
       },
       "key": "c",
@@ -121,7 +121,7 @@
       "scope": "page",
       "stem": "A request enables citations on one document and includes `output_config.format` with a JSON schema. What happens?",
       "options": {
-        "a": "A 400 error comes back",
+        "a": "A 400 error comes back, because the features conflict",
         "b": "The reply is JSON with the citations inside the schema's fields",
         "c": "The citations are dropped, and the schema is applied alone",
         "d": "The schema is dropped, and the citations come back alone"
@@ -205,7 +205,7 @@
       "key": "c",
       "explanation": {
         "c": "The page says \"It goes first in `messages`, in place of the messages it summarizes\", and \"Send it in future requests exactly as it came.\"",
-        "b": "Ruled out because summarized messages left after the block \"are sent to Claude again\", with no error.",
+        "b": "Ruled out because \"the summarized messages are removed, or the request returns a 400 error (`compaction_block_misplaced`)\", and here they stay in front of the block.",
         "a": "Ruled out because a block with a changed signature is rejected: \"The signature and content must be exactly as returned.\"",
         "d": "Ruled out because the block belongs in `messages`, not elsewhere: \"the block comes first\"."
       }

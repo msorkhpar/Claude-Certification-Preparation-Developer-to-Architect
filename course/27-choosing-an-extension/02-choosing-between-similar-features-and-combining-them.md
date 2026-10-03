@@ -107,7 +107,7 @@ A short chain of questions covers most scenarios:
 
 1. A team must make sure that Claude never touches a file named `.env`. Which feature gives the guarantee?
    - **a**: A line in CLAUDE.md that forbids the edit
-   - **b**: A `PreToolUse` hook that blocks the edit
+   - **b**: A hook on the `PreToolUse` event that rejects it
    - **c**: A skill that explains why the file is private
    - **d**: An output style that tells Claude to refuse
 
@@ -115,7 +115,7 @@ A short chain of questions covers most scenarios:
    - **a**: A line in CLAUDE.md, which is loaded in full at the launch of each session
    - **b**: A skill, which adds everything that it reads to the main window as well
    - **c**: A hook, which runs a script once per session when the work starts
-   - **d**: A subagent, which returns only a summary
+   - **d**: A subagent, which works in its own window and hands back only a summary
 
 3. A team connects Claude to its database and wants the model to use the tables and queries well. What does the page suggest?
    - **a**: Only an MCP server, since it provides everything that the work needs
@@ -143,13 +143,13 @@ This quiz covers both pages of the module.
    - **d**: An output style, because it applies to the whole session
 
 2. A team uses the same set of skills, hooks and MCP servers in six repositories. What does the documentation suggest?
-   - **a**: Package them as a plugin, shared through a marketplace
+   - **a**: Package them as one plugin that each repository installs
    - **b**: Copy the files into each repository by hand and keep them in step
    - **c**: Put the whole set into one long CLAUDE.md in each repository
    - **d**: Convert every item into a subagent that is spawned for each task
 
 3. A workflow that deploys to production must never start unless a person types its name. Which setting does the page give?
-   - **a**: `disable-model-invocation: true`, which hides it until invoked
+   - **a**: `disable-model-invocation: true`, which hides it until you invoke it yourself
    - **b**: A longer description, which makes Claude hesitate before it considers using it
    - **c**: A line in CLAUDE.md that asks Claude to wait for a person to approve the run
    - **d**: An output style that makes every reply shorter and more formal for the user

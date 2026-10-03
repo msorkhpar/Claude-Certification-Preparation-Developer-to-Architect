@@ -37,8 +37,8 @@ Stages 1 to 5 can be tested without a model. The practice at the end of the next
 
 A chunk is a window of words. The practice's `chunk(text, size, overlap)` returns windows of `size` words that start `size - overlap`
 words apart, so each window repeats the last `overlap` words of the one before it, and the last window ends at the last word. The
-overlap exists because a sentence cut at a boundary loses its meaning on both sides; with overlap, at least one chunk holds it
-whole. Too small a chunk loses context, and too large a chunk dilutes the match and spends the prompt. There is no right size
+overlap exists because a sentence cut at a boundary loses its meaning on both sides; with an overlap at least as long as the sentence, at least one chunk
+holds it whole. Too small a chunk loses context, and too large a chunk dilutes the match and spends the prompt. There is no right size
 in general: measure it on your questions. The example uses 14 words with an overlap of 4, which suits its short invented
 documents and nothing else.
 
@@ -79,7 +79,7 @@ from that page:
 
 - Choose by dataset and domain fit, "Inference performance" and "Customization", the three factors it lists.
 - For retrieval, use the `input_type` parameter to say whether the text is a query or a document, and "Do not omit `input_type` or set
-  `input_type=None`." The provider then prepends a different prompt to each, which improves retrieval quality.
+  `input_type=None`." The provider then prepends a different prompt to each, which can lead to better retrieval quality.
 - Separate models are offered for code, law and finance, and a family of rerankers (`rerank-2.5`) takes a query and a list of documents
   and returns them ranked.
 
@@ -108,18 +108,18 @@ better. The next page shows how to merge them.
    - **a**: Only a reranker, since the earlier stages cannot see digits
    - **b**: An embedding of every passage, because a code has a meaning like other codes
    - **c**: Neither, because a code is too short to be indexed at all
-   - **d**: A keyword index, because it matches the exact term
+   - **d**: A keyword index, because it matches the exact term as written
 
 2. A team asks where to get embeddings for Claude-based retrieval. What does the documentation say?
-   - **a**: Anthropic offers no model of its own, and names Voyage AI as one provider
+   - **a**: Anthropic has no model of its own, and names Voyage AI as a provider
    - **b**: Use the embedding endpoint of the Messages API, which every model has
    - **c**: Ask Claude to write the vectors, since it understands the text
    - **d**: Train a model on the Claude API's logs, which are provided for this
 
-3. A cut falls in the middle of a key sentence. What does overlap do about it?
+3. A cut falls in the middle of a key sentence of three words, and the overlap is four words. What does overlap do about it?
    - **a**: The sentence is stored twice, as a single longer chunk of its own
    - **b**: The sentence is dropped from every chunk so that no half survives
-   - **c**: At least one window holds it whole
+   - **c**: At least one window keeps it intact, as the repeated span is longer
    - **d**: The cut moves to the next paragraph without being asked
 
 <details>
@@ -127,6 +127,6 @@ better. The next page shows how to merge them.
 
 1. **d**. The page says "BM25 is exact. It finds `E-4012` when the query holds it." *b* is ruled out because an embedding "is weaker with exact strings". *c* is ruled out because "A rare word such as an error code outweighs common words". *a* is ruled out because the reranker is the optional fifth stage, and the page says the keyword index "finds `E-4012` when the query holds it".
 2. **a**. The page quotes "Anthropic does not offer its own embedding model." and names Voyage AI. *b* is ruled out because "Anthropic does not offer its own embedding model", so no endpoint exists. *c* is ruled out because an embedding model is a trained model that "turns text into a vector of numbers", not a text generator. *d* is ruled out because the documentation tells you to "assess a variety of embeddings vendors", and says nothing about logs.
-3. **c**. The page says "with overlap, at least one chunk holds it whole". *b* is ruled out because "a sentence cut at a boundary loses its meaning on both sides", and overlap keeps it. *a* is ruled out because each window "repeats the last `overlap` words of the one before it", and does not build a separate chunk. *d* is ruled out because windows are cut by words: "the last window ends at the last word".
+3. **c**. The page says "with an overlap at least as long as the sentence, at least one chunk holds it whole". *b* is ruled out because "a sentence cut at a boundary loses its meaning on both sides", and overlap keeps it. *a* is ruled out because each window "repeats the last `overlap` words of the one before it", and does not build a separate chunk. *d* is ruled out because windows are cut by words: "the last window ends at the last word".
 
 </details>

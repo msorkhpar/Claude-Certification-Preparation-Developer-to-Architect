@@ -358,7 +358,7 @@ Java and Kotlin readers: the practice of the next page implements the parser and
    - **d**: Structured outputs with the schema in the output configuration
 
 2. The schema says a field named `total` has a `minimum` of 0, and the request is sent with that schema unchanged. What happens?
-   - **a**: It fails with a 400 error that gives details
+   - **a**: It fails with a 400 error that comes with details of the unsupported item
    - **b**: The reply is checked against the limit and retried for the caller
    - **c**: The limit is read as a hint and the call goes on as usual
    - **d**: The constraint is applied only when the field is a whole number

@@ -63,7 +63,7 @@ the field, in four cases:
   `claude-mythos-5-1`);
 - the type is `tool` and no tool has the given name.
 
-The last rule for the loop is about repetition. A forced choice (`any` or `tool`) applies to the first request only. If it were sent
+The last rule for the loop is the course's own reasoning, not a documented rule, and it is about repetition. A forced choice (`any` or `tool`) applies to the first request only. If it were sent
 again, the model would have to call a tool each time and could never give a final answer. From the second request on the loop sends
 `{"type": "auto"}`, while `auto` and `none` are sent unchanged every time.
 
@@ -128,7 +128,7 @@ first request.
    - **d**: A separate user message for each call, so that each one can be checked alone
 
 2. Where does `disable_parallel_tool_use` go in a request?
-   - **a**: Inside the `tool_choice` object
+   - **a**: Within the object that selects how functions get called
    - **b**: Inside each tool definition, next to its name
    - **c**: In the system prompt, as a line of instructions
    - **d**: Alongside `max_tokens`, at the top level of the body
@@ -136,7 +136,7 @@ first request.
 3. A loop forced `{"type": "tool", "name": "lookup"}` on every request. What goes wrong?
    - **a**: The system prompt is dropped from every request
    - **b**: The tool results are rejected with a 400 error
-   - **c**: No final text answer is ever possible
+   - **c**: No final answer in plain text could ever come out
    - **d**: Parallel calls turn on in place of the single forced call
 
 <details>
@@ -154,7 +154,7 @@ This quiz covers all three pages of the module.
 
 1. A scripted exchange shows the weather and the time requested for two cities at once. The program sends the two results in two user messages. What is the main consequence?
    - **a**: Nothing changes, since the identifiers match every result to its own call in the history
-   - **b**: A rejection from the API, and a model that learns to avoid parallel calls
+   - **b**: Fewer parallel calls on later turns, as the model learns to avoid them
    - **c**: The first result is used, and the second is thrown away by the API without a warning
    - **d**: The model answers twice, once for each message that it received from the program
 
@@ -172,7 +172,7 @@ This quiz covers all three pages of the module.
 
 4. A team needs a reply in a fixed JSON shape from Claude Fable 5.1 and plans to force one tool with `tool_choice`. What happens?
    - **a**: The request is accepted, and the first tool listed is called by the model
-   - **b**: A 400 error, so structured outputs are the right choice here
+   - **b**: A 400 error comes back, so structured outputs are the better choice
    - **c**: The model writes an explanation first and then calls the one forced tool
    - **d**: The choice is ignored, and the model answers in plain prose without any tool
 

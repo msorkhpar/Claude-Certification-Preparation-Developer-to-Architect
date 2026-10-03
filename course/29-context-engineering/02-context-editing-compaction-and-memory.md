@@ -25,7 +25,7 @@ dependence on the platform's behaviour. The exam asks which tool fits which prob
 "Context editing allows you to selectively clear specific content from conversation history as it grows." It is enabled with a beta
 header, `context-management-2025-06-27`, and a `context_management` parameter that holds a list of edits. The strategy for tool
 results is `clear_tool_uses_20250919`: "Automatically clears the oldest tool results in chronological order" and replaces each with
-placeholder text. By default only results are cleared; calls stay unless `clear_tool_inputs` is set. Its parameters:
+placeholder text. By default only results are cleared; the call's parameters stay unless `clear_tool_inputs` is set, and the `tool_use` block itself stays. Its parameters:
 
 | Parameter | Default | Meaning |
 |---|---|---|
@@ -98,7 +98,7 @@ file sizes and expire old files. A failed operation is an ordinary error result 
 
 ### Choosing and combining
 
-The documentation pairs them: "Context editing clears specific tool results on the client. Compaction automatically summarizes the whole
+Context editing clears by rule, as above. On compaction the memory tool page says: "Compaction automatically summarizes the whole
 conversation on the server when the conversation approaches the context window limit." And for long-running agents, "consider using both:
 compaction keeps the active context small without client-side bookkeeping, and memory preserves the information that must survive
 summarization." A compaction request cannot be combined with `context_management` on the same request.

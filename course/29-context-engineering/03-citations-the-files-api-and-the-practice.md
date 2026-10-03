@@ -404,7 +404,7 @@ summary among the messages it folds.
 ## Quiz
 
 1. A request enables citations on one document and includes `output_config.format` with a JSON schema. What happens?
-   - **a**: A 400 error comes back
+   - **a**: A 400 error comes back, because the features conflict
    - **b**: The reply is JSON with the citations inside the schema's fields
    - **c**: The citations are dropped, and the schema is applied alone
    - **d**: The schema is dropped, and the citations come back alone
@@ -462,7 +462,7 @@ This quiz covers all three pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The page pairs them: "consider using both: compaction keeps the active context small without client-side bookkeeping, and memory preserves the information that must survive summarization." *a* is ruled out because "Your context window might be reset at any moment", so a prompt cannot hold state. *c* is ruled out because the Files API stores files and does not clear anything: "upload and manage files". *d* is ruled out because prompt caching changes what you pay: "prompt caching changes what you pay for those tokens, not whether they count."
-2. **c**. The page says "It goes first in `messages`, in place of the messages it summarizes", and "Send it in future requests exactly as it came." *b* is ruled out because summarized messages left after the block "are sent to Claude again", with no error. *a* is ruled out because a block with a changed signature is rejected: "The signature and content must be exactly as returned." *d* is ruled out because the block belongs in `messages`, not elsewhere: "the block comes first".
+2. **c**. The page says "It goes first in `messages`, in place of the messages it summarizes", and "Send it in future requests exactly as it came." *b* is ruled out because "the summarized messages are removed, or the request returns a 400 error (`compaction_block_misplaced`)", and here they stay in front of the block. *a* is ruled out because a block with a changed signature is rejected: "The signature and content must be exactly as returned." *d* is ruled out because the block belongs in `messages`, not elsewhere: "the block comes first".
 3. **d**. The page says "cite in one call, and shape the result in a second call that has no documents". *b* is ruled out because "Citations and structured outputs are incompatible." *c* is ruled out because "citations must be enabled on all or none of the documents within a request." *a* is ruled out because "`title` and `context` fields of a document are passed to the model but are not citable", and a schema there is not applied.
 4. **b**. The page says "Tool result blocks must immediately follow their corresponding tool use blocks in the message history", and that a list which keeps one without the other "fails with a 400 error". *a* is ruled out because "The newest turn always stays, even if it alone is over the budget." *c* is ruled out because a pinned turn is a whole turn: "Optionally pin the first turn". *d* is ruled out because a second compaction "should fold the first summary into the new one".
 
