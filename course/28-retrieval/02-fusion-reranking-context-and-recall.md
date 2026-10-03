@@ -561,13 +561,13 @@ to beat either single index.
 
 2. A reranker is given a pool of 10 chunks, and the passage with the answer is ranked 14th by the merged list. What happens?
    - **a**: The reranker finds it and moves it to the front of the final list
-   - **b**: It is never considered, since the scorer sees only the first ten
+   - **b**: The candidate count is raised for that question by the scorer itself
    - **c**: It is added to the candidates when its score is high enough to qualify
-   - **d**: The candidate count is raised for that question by the scorer itself
+   - **d**: It is never considered, since the scorer sees only the first ten
 
 3. A company's reference material has 80,000 tokens and changes once a month. What does the write-up's rule of thumb suggest?
-   - **a**: Skip retrieval, and place everything in a cached prompt
-   - **b**: Build the full pipeline, since every base needs one of its own to work well
+   - **a**: Build the full pipeline, since every base needs one of its own to work well
+   - **b**: Skip retrieval, and place everything in a cached prompt
    - **c**: Split it into 20 chunks and index only the first ones that are written
    - **d**: Train an embedding model of its own on the text of the material
 
@@ -575,8 +575,8 @@ to beat either single index.
 <summary>Answer key</summary>
 
 1. **b**. The page says "an id's score is the sum, over the lists that hold it, of `1 / (k + rank)`". *a* is ruled out because "the scores cannot be added" when they are on different scales. *c* is ruled out because "an id at the top of one list and absent from the other still scores". *d* is ruled out because "Fusion uses only the ranks", with no multiplication of scores.
-2. **b**. The page says "Only the pool takes part: a chunk outside it is never considered". *a* is ruled out because "reranking cannot fix a retrieval that missed". *c* is ruled out because the pool is "the first `pool` ids of the merged ranking" and nothing is added to it afterwards. *d* is ruled out because "the pool must be large enough to contain the answer", and a scorer has no control over it.
-3. **a**. The page says "under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval". *b* is ruled out because "A pipeline adds stages that can each fail". *c* is ruled out because the guide for retrieval is to "retrieve 20 chunks rather than fewer", which is a count to retrieve and not a way to index. *d* is ruled out because "The rule is about size, not quality", and it says nothing about training a model.
+2. **d**. The page says "Only the pool takes part: a chunk outside it is never considered". *a* is ruled out because "reranking cannot fix a retrieval that missed". *c* is ruled out because the pool is "the first `pool` ids of the merged ranking" and nothing is added to it afterwards. *b* is ruled out because "the pool must be large enough to contain the answer", and a scorer has no control over it.
+3. **b**. The page says "under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval". *a* is ruled out because "A pipeline adds stages that can each fail". *c* is ruled out because the guide for retrieval is to "retrieve 20 chunks rather than fewer", which is a count to retrieve and not a way to index. *d* is ruled out because "The rule is about size, not quality", and it says nothing about training a model.
 
 </details>
 
@@ -585,8 +585,8 @@ to beat either single index.
 This quiz covers both pages of the module.
 
 1. A question returns a fluent answer from the wrong passage, and the team wants to find which stage failed. What should they do first?
-   - **a**: Measure recall at k on a set with known source documents
-   - **b**: Switch to a larger model and read a few more answers
+   - **a**: Switch to a larger model and read a few more answers
+   - **b**: Measure recall at k on a set with known source documents
    - **c**: Lengthen the prompt with more rules about citing sources
    - **d**: Raise the temperature to see whether another passage appears
 
@@ -603,17 +603,17 @@ This quiz covers both pages of the module.
    - **d**: The merge makes chunking of the documents unnecessary for later stages
 
 4. A team reads a published failure-rate drop of 67% and promises the same drop to a customer. What is wrong with the promise?
-   - **a**: The figure comes from the source's datasets, and yours needs measuring
+   - **a**: The figure applies only to embeddings, which the customer does not use
    - **b**: The figure is too small to be useful for any real system that is deployed
-   - **c**: The figure applies only to embeddings, which the customer does not use
+   - **c**: The figure comes from the source's datasets, and yours needs measuring
    - **d**: The figure was measured with a retired model that no longer exists
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says "The way to see it is to measure retrieval on its own", with questions "whose source documents are known". *b* is ruled out because "Fluent output hides that", and a larger model reads the same retrieved passages. *c* is ruled out because the failure sits in what was retrieved: "the passage with the answer never reached the prompt". *d* is ruled out because temperature changes the wording of the answer, and "A fluent answer can come from the wrong passage".
+1. **b**. The page says "The way to see it is to measure retrieval on its own", with questions "whose source documents are known". *a* is ruled out because "Fluent output hides that", and a larger model reads the same retrieved passages. *c* is ruled out because the failure sits in what was retrieved: "the passage with the answer never reached the prompt". *d* is ruled out because temperature changes the wording of the answer, and "A fluent answer can come from the wrong passage".
 2. **a**. The page says to prepend "chunk-specific explanatory context to each chunk before embedding" and before building the keyword index. *b* is ruled out because the problem is lost surroundings: "A chunk lifted out of its document can lose its meaning." *c* is ruled out because the fix keeps the chunk: the model is asked "to write that sentence for each chunk". *d* is ruled out because the fix is that "the chunk is indexed as a short sentence of context followed by the text", and a doubled vector adds no information.
 3. **a**. The page says "The two indexes fail on different questions, which is why most systems use both." *b* is ruled out because "the scores cannot be added" when they sit on different scales. *c* is ruled out because "BM25 is exact", and the embedding "is weaker with exact strings". *d* is ruled out because "A chunk is a window of words", and the merge works on chunks that already exist.
-4. **a**. The page says "These are the write-up's figures, measured on its datasets" and "Measure your own." *b* is ruled out because the figures "show an order of magnitude and a ranking of the techniques". *c* is ruled out because the 67% row is "Those two, with reranking added", so it is not embeddings alone. *d* is ruled out because "The percentages for contextual retrieval below are Anthropic's measurements on its own datasets", and the page names no model.
+4. **c**. The page says "These are the write-up's figures, measured on its datasets" and "Measure your own." *b* is ruled out because the figures "show an order of magnitude and a ranking of the techniques". *a* is ruled out because the 67% row is "Those two, with reranking added", so it is not embeddings alone. *d* is ruled out because "The percentages for contextual retrieval below are Anthropic's measurements on its own datasets", and the page names no model.
 
 </details>

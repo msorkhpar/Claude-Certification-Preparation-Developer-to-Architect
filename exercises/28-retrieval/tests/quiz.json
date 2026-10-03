@@ -7,17 +7,17 @@
       "scope": "page",
       "stem": "A support bot must find the passage that contains the error code E-4012. Which approach is the reliable one?",
       "options": {
-        "a": "A keyword index, because it matches the exact term",
+        "a": "Only a reranker, since the earlier stages cannot see digits",
         "b": "An embedding of every passage, because a code has a meaning like other codes",
         "c": "Neither, because a code is too short to be indexed at all",
-        "d": "Only a reranker, since the earlier stages cannot see digits"
+        "d": "A keyword index, because it matches the exact term"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The page says \"BM25 is exact. It finds `E-4012` when the query holds it.\"",
+        "d": "The page says \"BM25 is exact. It finds `E-4012` when the query holds it.\"",
         "b": "Ruled out because an embedding \"is weaker with exact strings\".",
         "c": "Ruled out because \"A rare word such as an error code outweighs common words\".",
-        "d": "Ruled out because the reranker is the optional fifth stage, and the page says the keyword index \"finds `E-4012` when the query holds it\"."
+        "a": "Ruled out because the reranker is the optional fifth stage, and the page says the keyword index \"finds `E-4012` when the query holds it\"."
       }
     },
     {
@@ -26,15 +26,15 @@
       "scope": "page",
       "stem": "A team asks where to get embeddings for Claude-based retrieval. What does the documentation say?",
       "options": {
-        "a": "Use the embedding endpoint of the Messages API, which every model has",
-        "b": "Anthropic offers no model of its own, and names Voyage AI as one provider",
+        "a": "Anthropic offers no model of its own, and names Voyage AI as one provider",
+        "b": "Use the embedding endpoint of the Messages API, which every model has",
         "c": "Ask Claude to write the vectors, since it understands the text",
         "d": "Train a model on the Claude API's logs, which are provided for this"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The page quotes \"Anthropic does not offer its own embedding model.\" and names Voyage AI.",
-        "a": "Ruled out because \"Anthropic does not offer its own embedding model\", so no endpoint exists.",
+        "a": "The page quotes \"Anthropic does not offer its own embedding model.\" and names Voyage AI.",
+        "b": "Ruled out because \"Anthropic does not offer its own embedding model\", so no endpoint exists.",
         "c": "Ruled out because an embedding model is a trained model that \"turns text into a vector of numbers\", not a text generator.",
         "d": "Ruled out because the documentation tells you to \"assess a variety of embeddings vendors\", and says nothing about logs."
       }
@@ -45,16 +45,16 @@
       "scope": "page",
       "stem": "A cut falls in the middle of a key sentence. What does overlap do about it?",
       "options": {
-        "a": "At least one window holds it whole",
+        "a": "The sentence is stored twice, as a single longer chunk of its own",
         "b": "The sentence is dropped from every chunk so that no half survives",
-        "c": "The sentence is stored twice, as a single longer chunk of its own",
+        "c": "At least one window holds it whole",
         "d": "The cut moves to the next paragraph without being asked"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page says \"with overlap, at least one chunk holds it whole\".",
+        "c": "The page says \"with overlap, at least one chunk holds it whole\".",
         "b": "Ruled out because \"a sentence cut at a boundary loses its meaning on both sides\", and overlap keeps it.",
-        "c": "Ruled out because each window \"repeats the last `overlap` words of the one before it\", and does not build a separate chunk.",
+        "a": "Ruled out because each window \"repeats the last `overlap` words of the one before it\", and does not build a separate chunk.",
         "d": "Ruled out because windows are cut by words: \"the last window ends at the last word\"."
       }
     },
@@ -84,16 +84,16 @@
       "stem": "A reranker is given a pool of 10 chunks, and the passage with the answer is ranked 14th by the merged list. What happens?",
       "options": {
         "a": "The reranker finds it and moves it to the front of the final list",
-        "b": "It is never considered, since the scorer sees only the first ten",
+        "b": "The candidate count is raised for that question by the scorer itself",
         "c": "It is added to the candidates when its score is high enough to qualify",
-        "d": "The candidate count is raised for that question by the scorer itself"
+        "d": "It is never considered, since the scorer sees only the first ten"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The page says \"Only the pool takes part: a chunk outside it is never considered\".",
+        "d": "The page says \"Only the pool takes part: a chunk outside it is never considered\".",
         "a": "Ruled out because \"reranking cannot fix a retrieval that missed\".",
         "c": "Ruled out because the pool is \"the first `pool` ids of the merged ranking\" and nothing is added to it afterwards.",
-        "d": "Ruled out because \"the pool must be large enough to contain the answer\", and a scorer has no control over it."
+        "b": "Ruled out because \"the pool must be large enough to contain the answer\", and a scorer has no control over it."
       }
     },
     {
@@ -102,15 +102,15 @@
       "scope": "page",
       "stem": "A company's reference material has 80,000 tokens and changes once a month. What does the write-up's rule of thumb suggest?",
       "options": {
-        "a": "Skip retrieval, and place everything in a cached prompt",
-        "b": "Build the full pipeline, since every base needs one of its own to work well",
+        "a": "Build the full pipeline, since every base needs one of its own to work well",
+        "b": "Skip retrieval, and place everything in a cached prompt",
         "c": "Split it into 20 chunks and index only the first ones that are written",
         "d": "Train an embedding model of its own on the text of the material"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "The page says \"under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval\".",
-        "b": "Ruled out because \"A pipeline adds stages that can each fail\".",
+        "b": "The page says \"under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval\".",
+        "a": "Ruled out because \"A pipeline adds stages that can each fail\".",
         "c": "Ruled out because the guide for retrieval is to \"retrieve 20 chunks rather than fewer\", which is a count to retrieve and not a way to index.",
         "d": "Ruled out because \"The rule is about size, not quality\", and it says nothing about training a model."
       }
@@ -121,15 +121,15 @@
       "scope": "module",
       "stem": "A question returns a fluent answer from the wrong passage, and the team wants to find which stage failed. What should they do first?",
       "options": {
-        "a": "Measure recall at k on a set with known source documents",
-        "b": "Switch to a larger model and read a few more answers",
+        "a": "Switch to a larger model and read a few more answers",
+        "b": "Measure recall at k on a set with known source documents",
         "c": "Lengthen the prompt with more rules about citing sources",
         "d": "Raise the temperature to see whether another passage appears"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "The page says \"The way to see it is to measure retrieval on its own\", with questions \"whose source documents are known\".",
-        "b": "Ruled out because \"Fluent output hides that\", and a larger model reads the same retrieved passages.",
+        "b": "The page says \"The way to see it is to measure retrieval on its own\", with questions \"whose source documents are known\".",
+        "a": "Ruled out because \"Fluent output hides that\", and a larger model reads the same retrieved passages.",
         "c": "Ruled out because the failure sits in what was retrieved: \"the passage with the answer never reached the prompt\".",
         "d": "Ruled out because temperature changes the wording of the answer, and \"A fluent answer can come from the wrong passage\"."
       }
@@ -178,16 +178,16 @@
       "scope": "module",
       "stem": "A team reads a published failure-rate drop of 67% and promises the same drop to a customer. What is wrong with the promise?",
       "options": {
-        "a": "The figure comes from the source's datasets, and yours needs measuring",
+        "a": "The figure applies only to embeddings, which the customer does not use",
         "b": "The figure is too small to be useful for any real system that is deployed",
-        "c": "The figure applies only to embeddings, which the customer does not use",
+        "c": "The figure comes from the source's datasets, and yours needs measuring",
         "d": "The figure was measured with a retired model that no longer exists"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page says \"These are the write-up's figures, measured on its datasets\" and \"Measure your own.\"",
+        "c": "The page says \"These are the write-up's figures, measured on its datasets\" and \"Measure your own.\"",
         "b": "Ruled out because the figures \"show an order of magnitude and a ranking of the techniques\".",
-        "c": "Ruled out because the 67% row is \"Those two, with reranking added\", so it is not embeddings alone.",
+        "a": "Ruled out because the 67% row is \"Those two, with reranking added\", so it is not embeddings alone.",
         "d": "Ruled out because \"The percentages for contextual retrieval below are Anthropic's measurements on its own datasets\", and the page names no model."
       }
     }

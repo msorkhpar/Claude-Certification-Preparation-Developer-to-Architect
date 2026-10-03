@@ -117,28 +117,28 @@ Case `e6` is the rule about types in code: `true` for a `qty` of type `integer` 
 
 1. A reply arrives as a friendly sentence, then JSON inside a code block, then a closing remark. Which reading order does the page give?
    - **a**: Reject the whole reply, since extra words around the data are not allowed
-   - **b**: Strip only the leading sentence, then parse whatever text is left over
-   - **c**: The first fence's body, else the span from the first brace to the last
+   - **b**: The first fence's body, else the span from the first brace to the last
+   - **c**: Strip only the leading sentence, then parse whatever text is left over
    - **d**: Parse the last line alone, since data tends to follow the prose in a reply
 
 2. A validator meets `true` where the schema wants an integer quantity. What does the page decide?
    - **a**: Accept it, since in many languages a truthy value counts as the number one
    - **b**: Convert it to 1 and go on with the remaining checks of the field
-   - **c**: One problem for the value, and no further checks of it
-   - **d**: Report a separate problem for every constraint that the field carries in the schema
+   - **c**: Report a separate problem for every constraint that the field carries in the schema
+   - **d**: One problem for the value, and no further checks of it
 
 3. Which result ends the extractor loop without another call to the model?
    - **a**: A reply with a valid body but a total of zero, which breaks the minimum
-   - **b**: A reply that quotes a sentence which the document never contained
+   - **b**: A reply cut off at the token limit
    - **c**: A reply whose JSON is wrapped in a code fence with prose around it
-   - **d**: A reply cut off at the token limit
+   - **d**: A reply that quotes a sentence which the document never contained
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The page's steps are to take the first fence's body, then "the span from the first `{` to the last `}`". *a* is ruled out because the reader "repairs a harmless habit" of wrapping the data in words. *b* is ruled out because the steps start from the fence or the braces: "If the text has a code fence, take the body of the first fence". *d* is ruled out because the steps name no position for the data, only "Take the span from the first `{` to the last `}`".
-2. **c**. The page says "A wrong type stops the checks of that value." and "`true` is not a quantity". *a* is ruled out because "A boolean is never a number or an integer". *b* is ruled out because the reader "does not repair a broken value", and the same holds for a value. *d* is ruled out because "A wrong type stops the checks of that value", so no further problem is added.
-3. **d**. The page says a reply at the limit has the action "Raise `max_tokens` or continue the response", and that "Asking again with an error list cannot fix either". *a* is ruled out because the validator "returns a list of problems, each with a path", and the next call uses it. *b* is ruled out because a failed check leads to a repair: "the next call needs the whole conversation". *c* is ruled out because "If the text has a code fence, take the body of the first fence", so the reply is read and not rejected.
+1. **b**. The page's steps are to take the first fence's body, then "the span from the first `{` to the last `}`". *a* is ruled out because the reader "repairs a harmless habit" of wrapping the data in words. *c* is ruled out because the steps start from the fence or the braces: "If the text has a code fence, take the body of the first fence". *d* is ruled out because the steps name no position for the data, only "Take the span from the first `{` to the last `}`".
+2. **d**. The page says "A wrong type stops the checks of that value." and "`true` is not a quantity". *a* is ruled out because "A boolean is never a number or an integer". *b* is ruled out because the reader "does not repair a broken value", and the same holds for a value. *c* is ruled out because "A wrong type stops the checks of that value", so no further problem is added.
+3. **b**. The page says a reply at the limit has the action "Raise `max_tokens` or continue the response", and that "Asking again with an error list cannot fix either". *a* is ruled out because the validator "returns a list of problems, each with a path", and the next call uses it. *d* is ruled out because a failed check leads to a repair: "the next call needs the whole conversation". *c* is ruled out because "If the text has a code fence, take the body of the first fence", so the reply is read and not rejected.
 
 </details>
 
@@ -153,29 +153,29 @@ This quiz covers both pages of the module.
    - **d**: The stop reason, which flags every invented sentence at the end of the reply
 
 2. A team's code retries every failed reply up to five times. A document triggers a `refusal`. What is the right change?
-   - **a**: Raise the attempts to ten, so that one of the later calls gets past it
+   - **a**: Stop there, report it, and issue no further call
    - **b**: Add the refusal text to the next prompt, for the model to explain itself
    - **c**: Switch to a forced tool, which accepts every document without objection
-   - **d**: Stop there, report it, and issue no further call
+   - **d**: Raise the attempts to ten, so that one of the later calls gets past it
 
 3. A schema has an enum of `USD`, `EUR` and `GBP`, and a reply returns `Eur`. How should the program treat it?
-   - **a**: As a schema violation, since the characters differ from the allowed list
-   - **b**: As a match, ignoring capital letters when comparing
+   - **a**: As a match, ignoring capital letters when comparing
+   - **b**: As a schema violation, since the characters differ from the allowed list
    - **c**: As an API error, reported with a 400 status code on the request
    - **d**: As a refusal, because the promised shape was not honoured by the model
 
 4. A reply with `stop_reason` of `max_tokens` holds `{"vendor": "Acme`. Which step should the program take?
    - **a**: Close the braces itself and validate the value it guessed from the text
-   - **b**: Report it as truncated and raise the limit
-   - **c**: Re-prompt with the error list, so that the model finishes the missing text
+   - **b**: Re-prompt with the error list, so that the model finishes the missing text
+   - **c**: Report it as truncated and raise the limit
    - **d**: Treat it as a refusal and switch over to a fallback model for the retry
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "If the string is not in the document, the model made it up or changed it", and the check "needs no model". *a* is ruled out because "A schema cannot say that a number is at least 0, that a quotation occurs in the document". *c* is ruled out because the cache only holds a compiled grammar: "Compiled grammars are cached for 24 hours from last use". *d* is ruled out because "The loop reads `stop_reason` before the body", and it reports why generation ended, not whether the text is true.
-2. **d**. The page says a `refusal` has the action "Read `stop_details` and retry on a fallback model.", and that "a refusal is a decision, not a malformed answer". *a* is ruled out because "The same request gets the same decision, and each call is billed." *b* is ruled out because "Asking again with an error list cannot fix either". *c* is ruled out because on some models `any` and `tool` "return a 400 error", and no tool choice overrides a refusal.
-3. **b**. The page says "Compare enum values case-insensitively, and avoid enum values that differ only in capitalization." *a* is ruled out because the response completes normally, "with no error and no special `stop_reason`", and the difference is only in capital letters. *c* is ruled out for the same reason, since the response is "with no error and no special `stop_reason`". *d* is ruled out because "A refusal is a result to report", and it is marked by its stop reason, which this reply lacks.
-4. **b**. The page says "Raise `max_tokens` or continue the response", and "The reader repairs a harmless habit. It does not repair a broken value". *a* is ruled out because "guessing missing braces turns a cut-off reply into a wrong record". *c* is ruled out because "Asking again with an error list cannot fix either: a cut-off reply needs a larger limit". *d* is ruled out because "a refusal is a decision, not a malformed answer", and a cut-off reply is a different stop reason.
+2. **a**. The page says a `refusal` has the action "Read `stop_details` and retry on a fallback model.", and that "a refusal is a decision, not a malformed answer". *d* is ruled out because "The same request gets the same decision, and each call is billed." *b* is ruled out because "Asking again with an error list cannot fix either". *c* is ruled out because on some models `any` and `tool` "return a 400 error", and no tool choice overrides a refusal.
+3. **a**. The page says "Compare enum values case-insensitively, and avoid enum values that differ only in capitalization." *b* is ruled out because the response completes normally, "with no error and no special `stop_reason`", and the difference is only in capital letters. *c* is ruled out for the same reason, since the response is "with no error and no special `stop_reason`". *d* is ruled out because "A refusal is a result to report", and it is marked by its stop reason, which this reply lacks.
+4. **c**. The page says "Raise `max_tokens` or continue the response", and "The reader repairs a harmless habit. It does not repair a broken value". *a* is ruled out because "guessing missing braces turns a cut-off reply into a wrong record". *b* is ruled out because "Asking again with an error list cannot fix either: a cut-off reply needs a larger limit". *d* is ruled out because "a refusal is a decision, not a malformed answer", and a cut-off reply is a different stop reason.
 
 </details>

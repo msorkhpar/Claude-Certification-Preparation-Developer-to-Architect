@@ -108,8 +108,8 @@ their matching events regardless of source."
 1. A team keeps pasting the same release checklist into the chat. Which feature does the documentation's trigger table name?
    - **a**: A line in the persistent project file, loaded in every session
    - **b**: A hook that fires on every edit
-   - **c**: A skill
-   - **d**: An output style that sets the tone of each reply
+   - **c**: An output style that sets the tone of each reply
+   - **d**: A skill
 
 2. A repository's CLAUDE.md has grown to 600 lines of endpoint documentation. What does the page advise?
    - **a**: Move the detail into skills, which load only when needed
@@ -126,7 +126,7 @@ their matching events regardless of source."
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The trigger table says "You paste the same playbook into chat for the third time" calls for a skill. *a* is ruled out because that file is "Persistent context loaded every conversation", not a procedure kept for the moment it is needed. *b* is ruled out because a hook fits "automation that must run on every matching event", not a procedure to read and follow. *d* is ruled out because an output style is for "a voice, length or format wanted in every response".
+1. **d**. The trigger table says "You paste the same playbook into chat for the third time" calls for a skill. *a* is ruled out because that file is "Persistent context loaded every conversation", not a procedure kept for the moment it is needed. *b* is ruled out because a hook fits "automation that must run on every matching event", not a procedure to read and follow. *c* is ruled out because an output style is for "a voice, length or format wanted in every response".
 2. **a**. The page says "Keep CLAUDE.md under 200 lines." and that reference material goes to skills, "which load on demand". *b* is ruled out because "CLAUDE.md is paid for on every request", not once per session. *c* is ruled out because a subagent is for "context isolation, parallel tasks, specialized workers", not for reference text. *d* is ruled out because a hook "costs nothing in context unless its output is added as messages", and one that prints the reference would add it to every event.
 3. **c**. The table says a hook loads "nothing, since they run externally" and costs "zero, unless the hook returns context". *a* is ruled out because for a skill the "descriptions are in every request". *b* is ruled out because an output style loads "the active style's full instructions" with a cost on "every request". *d* is ruled out because "CLAUDE.md is paid for on every request", with its full content loaded at session start.
 

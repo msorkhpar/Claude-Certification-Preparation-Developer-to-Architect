@@ -283,13 +283,13 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
 
 2. The assistant turn holds two `tool_use` blocks. How does the next request carry the outputs?
    - **a**: Two user messages, one result in each, in the order of the calls
-   - **b**: One user message with both results first and any text after them
+   - **b**: One assistant message in which both outputs are recorded as text
    - **c**: One user message that opens with a sentence and then lists the results
-   - **d**: One assistant message in which both outputs are recorded as text
+   - **d**: One user message with both results first and any text after them
 
 3. A reply arrives with `stop_reason` of `pause_turn`. What does the page say to do?
-   - **a**: Send the assistant content back unchanged and call again
-   - **b**: Treat the reply as a refusal and stop the loop with that status
+   - **a**: Treat the reply as a refusal and stop the loop with that status
+   - **b**: Send the assistant content back unchanged and call again
    - **c**: Run the missing tool and return its output in a `tool_result` block
    - **d**: Raise `max_tokens` and repeat the request that produced the pause
 
@@ -297,7 +297,7 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
 <summary>Answer key</summary>
 
 1. **b**. The page says "Write instructive error messages", with "what went wrong and what Claude should try next". *a* is ruled out because the model should "incorporate this error into its response to the user", which needs the loop to continue. *c* is ruled out because "An exception that becomes an empty string tells the model the call worked." *d* is ruled out because the error result is how the model learns of the failure: "you can also continue the conversation forward with a `tool_result` that indicates the error".
-2. **b**. The page says "In the user message containing tool results, the tool_result blocks must come FIRST in the content array." *a* is ruled out because the trap is "Sending results one message at a time", and the rule is to "Return every result together in the next user message". *c* is ruled out because a sentence before the first result "will cause a 400 error". *d* is ruled out because results are sent by the user: "a user message with the `tool_result` blocks".
-3. **a**. The page says to send "the assistant response back as it is, keep the same `tools` array". *b* is ruled out because the table gives a refusal its own reaction: "status `refused`; do not call again". *c* is ruled out because a paused turn "is different from `tool_use`, which requires `tool_result` blocks". *d* is ruled out because a raised limit belongs to a cut-off reply: "a cut-off `tool_use` block needs a higher `max_tokens`".
+2. **d**. The page says "In the user message containing tool results, the tool_result blocks must come FIRST in the content array." *a* is ruled out because the trap is "Sending results one message at a time", and the rule is to "Return every result together in the next user message". *c* is ruled out because a sentence before the first result "will cause a 400 error". *b* is ruled out because results are sent by the user: "a user message with the `tool_result` blocks".
+3. **b**. The page says to send "the assistant response back as it is, keep the same `tools` array". *a* is ruled out because the table gives a refusal its own reaction: "status `refused`; do not call again". *c* is ruled out because a paused turn "is different from `tool_use`, which requires `tool_result` blocks". *d* is ruled out because a raised limit belongs to a cut-off reply: "a cut-off `tool_use` block needs a higher `max_tokens`".
 
 </details>
