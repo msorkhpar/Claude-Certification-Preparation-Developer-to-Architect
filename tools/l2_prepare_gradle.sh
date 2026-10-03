@@ -1,0 +1,14 @@
+#!/bin/sh
+# Gradle 9.8.0 (checksum-pinned) and its warmed plugin and JUnit cache, for the Kotlin practices (idempotent; one online warm-up).
+# usage: tools/l2_prepare_gradle.sh <runner image id>   (cwd = repository root)
+IMG=$1; W=$(pwd)
+if [ ! -d "$W/.survey-out/gradle/gradle-9.8.0" ]; then
+  mkdir -p "$W/.survey-out/gradle"
+  curl -sSL -o "$W/.survey-out/gradle/g.zip" https://services.gradle.org/distributions/gradle-9.8.0-bin.zip
+  echo "bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c  $W/.survey-out/gradle/g.zip" | sha256sum -c - || exit 2
+  (cd "$W/.survey-out/gradle" && unzip -q g.zip)
+fi
+FIRST=$(python3 tools/l2_practices.py list | head -1 | cut -d' ' -f1)
+if [ ! -d "$W/.survey-out/gradle/home/caches" ]; then   # one online warm-up resolves the pinned plugin and JUnit
+  tools/run_practice.sh "$IMG" kotlin "$FIRST" reference online
+fi

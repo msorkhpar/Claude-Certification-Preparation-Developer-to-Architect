@@ -44,7 +44,7 @@ def key_paragraphs(md):
 
 
 def main():
-    for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name)):
+    for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-7])-", p.name)):
         quizzes = []
         for page in sorted(folder.glob("*.md")):
             md = page.read_text()

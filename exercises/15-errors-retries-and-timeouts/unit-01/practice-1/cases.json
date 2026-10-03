@@ -1,0 +1,20 @@
+{
+  "practice": "15-errors-retries-and-timeouts/unit-01/practice-1",
+  "name": "retry",
+  "tests": {"java": "RetryTest", "kotlin": "RetryTest"},
+  "cases": {
+    "m1": {"kind": "main", "python": "test_m1_overloaded_twice_then_success_returns_the_good_reply_after_two_waits", "typescript": "m1 overloaded twice then success returns the good reply after two waits", "java": "m1_overloadedTwiceThenSuccessReturnsTheGoodReplyAfterTwoWaits", "kotlin": "m1_overloadedTwiceThenSuccessReturnsTheGoodReplyAfterTwoWaits"},
+    "e1": {"kind": "edge", "python": "test_e1_client_errors_are_not_retried", "typescript": "e1 client errors are not retried", "java": "e1_clientErrorsAreNotRetried", "kotlin": "e1_clientErrorsAreNotRetried"},
+    "e2": {"kind": "edge", "python": "test_e2_retry_after_is_a_floor_for_the_wait", "typescript": "e2 retry-after is a floor for the wait", "java": "e2_retryAfterIsAFloorForTheWait", "kotlin": "e2_retryAfterIsAFloorForTheWait"},
+    "e3": {"kind": "edge", "python": "test_e3_delay_doubles_up_to_the_cap_and_the_jitter_is_applied_last", "typescript": "e3 delay doubles up to the cap and the jitter is applied last", "java": "e3_delayDoublesUpToTheCapAndTheJitterIsAppliedLast", "kotlin": "e3_delayDoublesUpToTheCapAndTheJitterIsAppliedLast"},
+    "e4": {"kind": "edge", "python": "test_e4_a_spend_cap_429_is_not_retried", "typescript": "e4 a spend-cap 429 is not retried", "java": "e4_aSpendCap429IsNotRetried", "kotlin": "e4_aSpendCap429IsNotRetried"},
+    "e5": {"kind": "edge", "python": "test_e5_connection_errors_are_retried_like_server_errors", "typescript": "e5 connection errors are retried like server errors", "java": "e5_connectionErrorsAreRetriedLikeServerErrors", "kotlin": "e5_connectionErrorsAreRetriedLikeServerErrors"},
+    "e6": {"kind": "edge", "python": "test_e6_giving_up_reports_the_last_reply_and_does_not_wait_after_the_last_attempt", "typescript": "e6 giving up reports the last reply and does not wait after the last attempt", "java": "e6_givingUpReportsTheLastReplyAndDoesNotWaitAfterTheLastAttempt", "kotlin": "e6_givingUpReportsTheLastReplyAndDoesNotWaitAfterTheLastAttempt"}
+  },
+  "plants": {
+    "wrong-retry-everything": {"caught_by": ["e1"], "defect": "retries every failing status, including 400, 401 and 404"},
+    "wrong-ignore-retry-after": {"caught_by": ["e2"], "defect": "waits by its own schedule and never reads retry-after"},
+    "wrong-no-cap": {"caught_by": ["e3"], "defect": "lets the delay double without limit"},
+    "wrong-sleep-after-last": {"caught_by": ["e6"], "defect": "waits once more after the final failed attempt"}
+  }
+}

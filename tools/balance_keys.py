@@ -55,7 +55,7 @@ def process(path, counter):
     path.write_text(md)
 
 
-for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name)):
+for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-7])-", p.name)):
     counter = [0]
     for page in sorted(folder.glob("*.md")):
         process(page, counter)
