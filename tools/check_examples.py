@@ -2,8 +2,9 @@
 """Check (or with --fill, write) the example blocks of the pages against examples/ and the outputs the
 container produced (.survey-out/ex-<example>-<lang>-out.txt).
 A block's code fences must equal the source files exactly, and each output fence the program's real output.
-usage: tools/check_examples.py [--fill]
+usage: tools/check_examples.py [--fill] [page glob under the repository root, e.g. 'course/1[2-7]-*/*.md' ...]
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -13,7 +14,11 @@ EXAMPLES = {
     "m1-sampler": ("01-language-model", {"python": "sampler.py", "typescript": "sampler.ts"}),
     "m2-toy-bpe": ("02-toy-tokenizer", {"python": "bpe.py", "typescript": "bpe.ts"}),
 }
-FENCE = {"python": "python", "typescript": "typescript"}
+# Examples from Level 2 on describe themselves: examples/<dir>/example.json = {"id": ..., "files": {lang: file}}
+for _spec in sorted(ROOT.glob("examples/*/example.json")):
+    _data = json.loads(_spec.read_text())
+    EXAMPLES[_data["id"]] = (_spec.parent.name, _data["files"])
+FENCE = {"python": "python", "typescript": "typescript", "java": "java", "kotlin": "kotlin"}
 PLACE = {"python": ("EXAMPLE_PYTHON", "EXAMPLE_OUT_PY"), "typescript": ("EXAMPLE_TS", "EXAMPLE_OUT_TS")}
 
 
@@ -27,9 +32,10 @@ def expected(eid):
     return parts
 
 
-def main(fill):
+def main(fill, globs):
     problems = 0
-    for page in sorted((ROOT / "course").glob("*/*.md")):
+    pages = sorted({p for g in globs for p in ROOT.glob(g)}) if globs else sorted((ROOT / "course").glob("*/*.md"))
+    for page in pages:
         md = page.read_text()
         new = md
         for m in re.finditer(r"<!-- example: (\S+) tabs: ([\w,]+) -->\n(.*?)<!-- /example -->", md, re.S):
@@ -52,4 +58,4 @@ def main(fill):
 
 
 if __name__ == "__main__":
-    sys.exit(main("--fill" in sys.argv))
+    sys.exit(main("--fill" in sys.argv, [a for a in sys.argv[1:] if not a.startswith("--")]))

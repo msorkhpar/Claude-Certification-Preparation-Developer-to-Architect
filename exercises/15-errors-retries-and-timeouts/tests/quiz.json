@@ -1,0 +1,195 @@
+{
+  "module": "15-errors-retries-and-timeouts",
+  "quizzes": [
+    {
+      "id": "01-error-classes-by-type-and-origin#q1",
+      "page": "01-error-classes-by-type-and-origin.md",
+      "scope": "page",
+      "stem": "A nightly job gets a 403 `permission_error` on every call after its key was moved to another workspace. What is the origin, and what is the first action?",
+      "options": {
+        "a": "Your account is at fault, so repair its access and do not retry",
+        "b": "The provider is at fault, so retry with back-off until it clears",
+        "c": "Capacity is at fault, so wait for the retry-after interval",
+        "d": "Your request is at fault, so repair the body and send it again"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The table puts 403 under \"Your access\", and \"a person has to act\", so retrying is waste.",
+        "b": "Ruled out because for the provider \"something broke on their side\", which is the 500 and 504 case.",
+        "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\".",
+        "d": "Ruled out because a 403 belongs to \"Your credential or account\", and a repaired body would meet the same refusal."
+      }
+    },
+    {
+      "id": "01-error-classes-by-type-and-origin#q2",
+      "page": "01-error-classes-by-type-and-origin.md",
+      "scope": "page",
+      "stem": "A request that carries a very large attachment returns a 413 `request_too_large`. Which action does the table give?",
+      "options": {
+        "a": "Wait for the retry-after interval, since this is a capacity error",
+        "b": "Retry with back-off, since the provider will probably recover soon",
+        "c": "Shrink the payload below the documented ceiling, then send it again",
+        "d": "Resolve the conflict with a concurrent write, then try the call again"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The table lists 413 under \"Your request size\" with the action \"Shrink it (32 MB limit on Messages)\".",
+        "b": "Ruled out because for the provider \"something broke on their side\", and a 413 is not that.",
+        "a": "Ruled out because capacity means \"the request was fine and the service could not take it now\", which a size refusal is not.",
+        "d": "Ruled out because a conflict belongs to the \"State of a resource\" row, not to the size of the body."
+      }
+    },
+    {
+      "id": "02-retry-back-off-and-idempotency#q1",
+      "page": "02-retry-back-off-and-idempotency.md",
+      "scope": "page",
+      "stem": "A service retries every 5xx and 429 at once, three times in a row. During a provider overload its own traffic triples and the errors last longer. What is the best change?",
+      "options": {
+        "a": "Retry five times in a row instead of three, so that one attempt lands after the overload",
+        "b": "Wait with a doubling, capped pause plus jitter, and honour any retry-after value",
+        "c": "Retry only the 429 responses and treat every 5xx response as final, since those are the provider's fault",
+        "d": "Add a fixed one-second pause between the attempts, so that every client waits the same short time"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page's three ideas are exponential growth, a cap and jitter, and \"wait the larger of your back-off and the header\".",
+        "a": "Ruled out because immediate attempts add load, while the doubling means \"a long outage is met with fewer and fewer requests\".",
+        "c": "Ruled out because the table lists \"500, 504 and 529\" under \"Retry\".",
+        "d": "Ruled out because \"after an outage, every client retries on the same schedule, and the recovering service meets all of them at once\"."
+      }
+    },
+    {
+      "id": "02-retry-back-off-and-idempotency#q2",
+      "page": "02-retry-back-off-and-idempotency.md",
+      "scope": "page",
+      "stem": "A tool in an agent files a support ticket. A timeout makes the surrounding call retry, and customers receive two tickets. Which design fixes it?",
+      "options": {
+        "a": "Wait longer between the attempts so that the first one can finish",
+        "b": "Lower the retry count of the call to zero for all tools",
+        "c": "Ask the model in the prompt not to call the tool a second time",
+        "d": "Give each filing its own key and check it before the action runs"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"make such tools idempotent: pass your own unique key, check it before acting, and store the result under it\".",
+        "b": "Ruled out because without retries a transient failure fails a customer, and \"retry the call, never the side effect\" separates the two.",
+        "c": "Ruled out because \"a prompt is a request to the model, not a guarantee\", and the retry happens in code.",
+        "a": "Ruled out because the problem is that the first attempt may already have succeeded, and \"if the first attempt actually succeeded on the server and only the answer was lost\", waiting does not undo it."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#q1",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "page",
+      "stem": "A screen that a user watches calls the API with the SDK defaults, and a stuck connection now leaves users waiting for about half an hour. Which change does the page recommend first?",
+      "options": {
+        "a": "Raise the number of retries so that a stuck call is more likely to succeed in the end",
+        "b": "Set a total deadline from the latency budget and fit the timeout and attempts under it",
+        "c": "Turn on debug logging so that the stuck call is recorded in full for later reading",
+        "d": "Lower only the connect timeout, since the stall happens while the connection opens"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says to \"set the total deadline from the latency budget of module 12, then choose a per-attempt timeout and an attempt count that fit under it\".",
+        "a": "Ruled out because \"three attempts of ten minutes each\" is the cause of the half hour, and more retries lengthen it.",
+        "c": "Ruled out because logging records the wait and does not shorten it, and \"debug logging is a development tool\".",
+        "d": "Ruled out because a stall on an open connection is the read clock: \"Read: how long to wait between bytes of the reply\"."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#q2",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "page",
+      "stem": "A support engineer asks for one item from a failing call so that the provider can find it. Which item should the log have kept?",
+      "options": {
+        "a": "The reply text, so that the provider can see what the model wrote in answer",
+        "b": "The complete request body, so that the call can be replayed from the log later",
+        "c": "The key used for the call, so that the provider can match the account at once",
+        "d": "The request id from the response, so that the team behind the API can trace the exchange"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page calls the request id \"the one handle the provider's support can use\".",
+        "b": "Ruled out because \"prompts and replies unless the spec says they may be stored\" stay out of the log.",
+        "c": "Ruled out because the log must not hold \"the API key and the authorization or x-api-key header\".",
+        "a": "Ruled out because \"neither job needs a secret or a customer's text\", and the reply is customer-facing text."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m1",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "A job's calls sometimes fail with a lost network link, and sometimes with a 409 because two workers touched the same resource. Which handling fits the page?",
+      "options": {
+        "a": "Repeat both at once with no delay, since every failure is temporary and clears by itself",
+        "b": "Repeat the first kind, and the second only after the clash is resolved",
+        "c": "Repeat neither, since a status error is always the fault of the request that was sent",
+        "d": "Repeat only the second, since the first has no status that the code could read"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page's table lists \"A lost or timed-out connection (no status)\" and \"408, 409 (once the conflict is resolved)\" under \"Retry\".",
+        "a": "Ruled out because a 409 is retried only \"once the conflict is resolved\".",
+        "c": "Ruled out because a lost link is retried: \"A lost or timed-out connection (no status)\" is the first row.",
+        "d": "Ruled out because the SDKs retry \"because of a network connectivity problem\" as well."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m2",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "A user-facing summary call has a budget of 2,000 ms. Its client allows three attempts with a 1,000 ms timeout and waits 500 ms, then 1,000 ms, between them. What is the worst case for the caller?",
+      "options": {
+        "a": "About four and a half seconds, which is more than twice the target",
+        "b": "One second, because the timeout bounds the whole call from start to finish",
+        "c": "About two seconds, because the waits between the attempts are not counted",
+        "d": "Thirty seconds, because the default timeout still applies to every attempt"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page's formula is \"attempts x timeout + sum of the waits between attempts\": three seconds of attempts and one and a half seconds of waits make four and a half.",
+        "b": "Ruled out because \"the time a caller may wait is not the timeout\".",
+        "c": "Ruled out because the formula adds \"the waits between attempts\".",
+        "d": "Ruled out because the page has you \"choose a per-attempt timeout and an attempt count that fit under it\", and a one-second timeout replaces the ten-minute default."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m3",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "Users behind a corporate proxy report that streamed answers arrive in one lump and, now and then, as an HTML page. Which origin does the page point to first?",
+      "options": {
+        "a": "The network path, where a device rewrites or buffers the traffic",
+        "b": "Their credential, which the proxy has stripped from the calls",
+        "c": "Capacity, because the provider could not take every request",
+        "d": "The output limit, because the replies are cut before the end"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page's table lists \"works locally, fails behind the proxy\" under the path, with the checks \"Is the body still JSON? Is the stream buffered?\".",
+        "b": "Ruled out because a credential fault is a \"401 or 403 from one environment only\", and a stripped key would not give an HTML page with partial streaming.",
+        "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\", with a 429 or 529 status.",
+        "d": "Ruled out because a cut reply is \"replies cut mid-sentence, status 200\" and does not come as HTML."
+      }
+    },
+    {
+      "id": "03-timeouts-logging-and-debugging#m4",
+      "page": "03-timeouts-logging-and-debugging.md",
+      "scope": "module",
+      "stem": "Errors with status 529 appear in bursts each time a marketing campaign multiplies the job's traffic. What does the page's table suggest?",
+      "options": {
+        "a": "Raise the output limit, since the replies are probably being cut before the end",
+        "b": "Rotate the key, since the credential is the likely origin of such errors",
+        "c": "Back off, and bring the load up in gradual steps",
+        "d": "Fix the proxy, since the network path is the likely origin of such errors"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The table lists \"529 in bursts\" with the check \"Is your traffic ramping fast?\" and the cure \"Back off; ramp up gradually\".",
+        "b": "Ruled out because the credential row is about \"Which key does that environment load?\", and a 529 is no credential fault.",
+        "a": "Ruled out because a cut reply is \"Replies cut mid-sentence, status 200\", not a 529.",
+        "d": "Ruled out because the path row is \"Is the body still JSON? Is the stream buffered?\", and a 529 carries a JSON body."
+      }
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "module": "17-streaming",
+  "quizzes": [
+    {
+      "id": "01-events-and-assembling-a-message#q1",
+      "page": "01-events-and-assembling-a-message.md",
+      "scope": "page",
+      "stem": "A handler adds up the output token count of every `message_delta` it receives and reports three times the real cost. What does the page say it should do instead?",
+      "options": {
+        "a": "Overwrite the earlier figure, since each event restates the running tally",
+        "b": "Take the input count from the final event and the output count from the first",
+        "c": "Sum them all and then subtract the figure that the opening event gave",
+        "d": "Drop the field and measure the pieces of text that arrived in the stream"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"The output count in message_delta is cumulative: replace the stored one, do not add to it\".",
+        "b": "Ruled out because \"the output count comes from the last message_delta\" and the input count from `message_start`.",
+        "c": "Ruled out because the page says \"do not add to it\".",
+        "d": "Ruled out because usage is read from the events: \"Input tokens come from message_start\"."
+      }
+    },
+    {
+      "id": "01-events-and-assembling-a-message#q2",
+      "page": "01-events-and-assembling-a-message.md",
+      "scope": "page",
+      "stem": "A stream breaks in the middle of the fragments of a tool call's input. What should the code do?",
+      "options": {
+        "a": "Join the fragments received so far and parse them as the input",
+        "b": "Run the tool with whatever the first fragment held",
+        "c": "Throw the piece away and report the whole message as failed",
+        "d": "Keep the block and mark the message as a short one"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"Raise, so that the caller can decide\" when a stream just stopped, because it \"is an incomplete message, not a short one\".",
+        "a": "Ruled out because the fragments \"are not valid JSON until the block ends\".",
+        "b": "Ruled out because \"A fragment of tool input is a piece of text, not an object\".",
+        "d": "Ruled out because the page says \"an incomplete message, not a short one\"."
+      }
+    },
+    {
+      "id": "02-tool-use-errors-and-when-to-stream#q1",
+      "page": "02-tool-use-errors-and-when-to-stream.md",
+      "scope": "page",
+      "stem": "A client prints text as it arrives. Midway, an `error` event with `overloaded_error` appears although the HTTP status was 200. What is the right handling?",
+      "options": {
+        "a": "Keep the partial text as the final answer and finish the turn without more work",
+        "b": "Treat the call as failed, drop the partial output and send the whole request again",
+        "c": "Ignore the event, since the status line already reported that the call went well",
+        "d": "Resume the stream from the last received byte once the service has recovered"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"discard the partial output first and retry the whole request\".",
+        "a": "Ruled out because the partial text is the loss: \"the user may already have read the partial text\" and the answer is cut short, so it is not final.",
+        "c": "Ruled out because \"A status check alone cannot tell you a stream succeeded\".",
+        "d": "Ruled out because a stream that failed midway \"cannot be resumed from the last byte\"."
+      }
+    },
+    {
+      "id": "02-tool-use-errors-and-when-to-stream#q2",
+      "page": "02-tool-use-errors-and-when-to-stream.md",
+      "scope": "page",
+      "stem": "A team streams a long report only because they believe it lowers the bill. According to the page, what is the better reason to stream?",
+      "options": {
+        "a": "Fewer errors, since a started call cannot fail after its first byte",
+        "b": "A lower price for each of the output tokens",
+        "c": "An exemption from the limits that apply to other calls",
+        "d": "Readers see words while the rest is still being written"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page's first case is \"A person is waiting for a long answer\", and \"The first words appear at once\".",
+        "b": "Ruled out because \"Streaming changes when the bytes arrive, not what the tokens cost\".",
+        "c": "Ruled out because \"Streamed calls count against the same limits as the others\".",
+        "a": "Ruled out because \"That is why an error can arrive after the 200 status line\"."
+      }
+    },
+    {
+      "id": "02-tool-use-errors-and-when-to-stream#m1",
+      "page": "02-tool-use-errors-and-when-to-stream.md",
+      "scope": "module",
+      "stem": "A support app shows a streamed reply that includes a tool call. When may it run the tool?",
+      "options": {
+        "a": "After the block holding it has stopped and its joined fragments have parsed",
+        "b": "As soon as the tool name appears in the opening event of the block",
+        "c": "Whenever the first fragment turns out to be a complete object",
+        "d": "Before the text, because tool blocks are always listed in front"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"do not act on a tool call until its block has stopped and its input has parsed\".",
+        "b": "Ruled out because \"The input is incomplete until the block stops\".",
+        "c": "Ruled out because a fragment is not an object: \"the fragment is not an object, and the object that comes is not final until the block ends\".",
+        "d": "Ruled out because \"content lists the blocks in index order\", not by kind."
+      }
+    },
+    {
+      "id": "02-tool-use-errors-and-when-to-stream#m2",
+      "page": "02-tool-use-errors-and-when-to-stream.md",
+      "scope": "module",
+      "stem": "Which pair of behaviours does a correct assembler show for an unrecognised event type and for a stream that ends early?",
+      "options": {
+        "a": "It skips both and returns the content it holds",
+        "b": "It raises on the first and returns what the second gave",
+        "c": "It skips the first and raises on the second",
+        "d": "It raises on both so that nothing is guessed"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says to \"ignore event types you do not know\" and that a stream without `message_stop` \"is an incomplete message, not a short one\".",
+        "b": "Ruled out because the first is skipped \"because the API may add new ones\".",
+        "a": "Ruled out because a cut stream \"is an incomplete message, not a short one\".",
+        "d": "Ruled out because the first is skipped: \"ignore event types you do not know\"."
+      }
+    },
+    {
+      "id": "02-tool-use-errors-and-when-to-stream#m3",
+      "page": "02-tool-use-errors-and-when-to-stream.md",
+      "scope": "module",
+      "stem": "A team adds streaming to a feature. Which of the problems below does it leave unchanged?",
+      "options": {
+        "a": "A proxy that drops quiet connections during long generations",
+        "b": "The share of the rate limit that each reply uses",
+        "c": "A visitor who sees no text during the first seconds",
+        "d": "A very long answer that a plain call would refuse to start"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"Streamed calls count against the same limits as the others\", so the share of the limit is unchanged.",
+        "a": "Ruled out because \"Events keep arriving, so a proxy never sees an idle connection\".",
+        "c": "Ruled out because \"The first words appear at once\".",
+        "d": "Ruled out because \"the SDKs refuse a non-streaming request that they expect to take longer than about ten minutes\", which streaming avoids."
+      }
+    },
+    {
+      "id": "02-tool-use-errors-and-when-to-stream#m4",
+      "page": "02-tool-use-errors-and-when-to-stream.md",
+      "scope": "module",
+      "stem": "A stream holds a thinking block, a text block and a tool block. In which order does an assembler list them?",
+      "options": {
+        "a": "By how many fragments each one received",
+        "b": "By the moment at which each one finished",
+        "c": "With thinking first, text next and tools last",
+        "d": "By the index that the events give each one"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"content lists the blocks in index order\".",
+        "b": "Ruled out because the order is \"not in the order they stopped\".",
+        "c": "Ruled out because \"Blocks are never sorted by type\".",
+        "a": "Ruled out because blocks are \"never sorted by type or by size\", and a fragment count is a size."
+      }
+    }
+  ]
+}

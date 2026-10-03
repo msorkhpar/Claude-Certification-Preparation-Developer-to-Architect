@@ -1,0 +1,19 @@
+{
+  "practice": "14-the-messages-api/unit-01/practice-1",
+  "name": "conversation",
+  "tests": {"java": "ConversationTest", "kotlin": "ConversationTest"},
+  "cases": {
+    "m1": {"kind": "main", "python": "test_m1_every_request_carries_the_whole_history_in_order", "typescript": "m1 every request carries the whole history in order", "java": "m1_everyRequestCarriesTheWholeHistoryInOrder", "kotlin": "m1_everyRequestCarriesTheWholeHistoryInOrder"},
+    "e1": {"kind": "edge", "python": "test_e1_usage_adds_up_over_the_turns", "typescript": "e1 usage adds up over the turns", "java": "e1_usageAddsUpOverTheTurns", "kotlin": "e1_usageAddsUpOverTheTurns"},
+    "e2": {"kind": "edge", "python": "test_e2_a_failed_call_leaves_no_dangling_user_turn", "typescript": "e2 a failed call leaves no dangling user turn", "java": "e2_aFailedCallLeavesNoDanglingUserTurn", "kotlin": "e2_aFailedCallLeavesNoDanglingUserTurn"},
+    "e3": {"kind": "edge", "python": "test_e3_stop_reason_is_reported_and_max_tokens_marks_the_reply_truncated", "typescript": "e3 stop reason is reported and max_tokens marks the reply truncated", "java": "e3_stopReasonIsReportedAndMaxTokensMarksTheReplyTruncated", "kotlin": "e3_stopReasonIsReportedAndMaxTokensMarksTheReplyTruncated"},
+    "e4": {"kind": "edge", "python": "test_e4_system_is_a_top_level_field_and_stop_sequences_are_passed_on", "typescript": "e4 system is a top-level field and stop sequences are passed on", "java": "e4_systemIsATopLevelFieldAndStopSequencesArePassedOn", "kotlin": "e4_systemIsATopLevelFieldAndStopSequencesArePassedOn"},
+    "e5": {"kind": "edge", "python": "test_e5_each_request_is_a_snapshot_and_history_is_a_copy", "typescript": "e5 each request is a snapshot and history is a copy", "java": "e5_eachRequestIsASnapshotAndHistoryIsACopy", "kotlin": "e5_eachRequestIsASnapshotAndHistoryIsACopy"},
+    "e6": {"kind": "edge", "python": "test_e6_a_blank_turn_is_refused_before_anything_is_sent", "typescript": "e6 a blank turn is refused before anything is sent", "java": "e6_aBlankTurnIsRefusedBeforeAnythingIsSent", "kotlin": "e6_aBlankTurnIsRefusedBeforeAnythingIsSent"}
+  },
+  "plants": {
+    "wrong-send-last-only": {"caught_by": ["m1"], "defect": "sends only the newest user turn, as if the API remembered the rest"},
+    "wrong-no-rollback": {"caught_by": ["e2"], "defect": "keeps the user turn when the call fails, so the next request has two user turns in a row"},
+    "wrong-shared-list": {"caught_by": ["e5"], "defect": "hands its own history list to send, so later turns rewrite earlier requests"}
+  }
+}
