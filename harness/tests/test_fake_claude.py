@@ -26,7 +26,10 @@ def run(script, args=(), answers=None, tmp_path=None):
             send({"type": "control_response", "response": {"subtype": "success", "request_id": message["request_id"], "response": decision}})
         else:
             messages.append(message)
-    child.stdin.close()
+            if message.get("type") == "result":
+                child.stdin.close()  # a single-shot run: the stand-in leaves when its input ends
+    if not child.stdin.closed:
+        child.stdin.close()
     return messages, asked, child.wait(timeout=20)
 
 
