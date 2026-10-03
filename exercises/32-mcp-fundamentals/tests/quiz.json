@@ -1,0 +1,252 @@
+{
+  "module": "32-mcp-fundamentals",
+  "quizzes": [
+    {
+      "id": "01-hosts-clients-servers-and-primitives#q1",
+      "page": "01-hosts-clients-servers-and-primitives.md",
+      "scope": "page",
+      "stem": "An AI application connects to a ticketing system and a document store, both exposed through MCP. How is the connecting side organized?",
+      "options": {
+        "a": "A single client multiplexes both servers over one shared connection",
+        "b": "The host talks to each server directly, with no client component",
+        "c": "Each server creates a client inside itself to call the application back",
+        "d": "The host creates one client for each server, each with a dedicated link"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"The MCP host accomplishes this by creating one MCP client for each MCP server\", and that each client \"maintains a dedicated connection with its corresponding MCP server\".",
+        "a": "Ruled out because each client \"maintains a dedicated connection with its corresponding MCP server\", so none is shared.",
+        "b": "Ruled out because the client is \"A component that maintains a connection to an MCP server and obtains context from an MCP server for the MCP host to use\".",
+        "c": "Ruled out because it is the host that does the creating: \"The MCP host accomplishes this by creating one MCP client for each MCP server\"."
+      }
+    },
+    {
+      "id": "01-hosts-clients-servers-and-primitives#q2",
+      "page": "01-hosts-clients-servers-and-primitives.md",
+      "scope": "page",
+      "stem": "A developer offers three things: a function the model may call to book flights, a read-only data document that the application attaches as context, and a ready-made instruction that a user selects from a menu. Which primitives fit, in that order?",
+      "options": {
+        "a": "A prompt, a tool, a resource",
+        "b": "A resource, a prompt, a tool",
+        "c": "A tool, a prompt, a resource",
+        "d": "A tool, a resource, a prompt"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A function the model calls is a tool, because tools \"are model-controlled, meaning AI models can discover and invoke them automatically\". Read-only data that the application attaches is a resource, which the application \"can access this information directly and decide how to use it\". A template that a person picks is a prompt.",
+        "a": "Ruled out because a resource is the one the application \"can access this information directly and decide how to use it\", so it cannot stand for the function the model calls.",
+        "b": "Ruled out because tools \"are model-controlled, meaning AI models can discover and invoke them automatically\", so the first item is a tool.",
+        "c": "Ruled out because the data document is a resource, which gives \"read-only access to information\", and the menu item is a prompt."
+      }
+    },
+    {
+      "id": "01-hosts-clients-servers-and-primitives#q3",
+      "page": "01-hosts-clients-servers-and-primitives.md",
+      "scope": "page",
+      "stem": "How does a client written for the 2026-07-28 revision tell a server which protocol version it speaks?",
+      "options": {
+        "a": "An initialize exchange that opens a session and fixes it for later calls",
+        "b": "A header on the first call only, which the server remembers afterwards",
+        "c": "A mandatory discovery call that must precede every other call",
+        "d": "Each call carries it in its metadata field, with no opening handshake"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Every request declares the protocol version it is using\" in its metadata field, and that the server \"accepts or rejects each request independently\".",
+        "a": "Ruled out because the legacy versions \"establish a session with an initialize handshake\", and the modern ones have none.",
+        "b": "Ruled out because the server \"accepts or rejects each request independently\", so nothing is remembered from a first call.",
+        "c": "Ruled out because a client \"is free to invoke any RPC inline\", so discovery is optional."
+      }
+    },
+    {
+      "id": "02-writing-a-server#q1",
+      "page": "02-writing-a-server.md",
+      "scope": "page",
+      "stem": "A stdio server prints a debug line with the language's ordinary print function, and the client then fails to parse the stream. Why?",
+      "options": {
+        "a": "The client reads standard error as well, and treats any text there as fatal",
+        "b": "Printed lines are queued and delivered after the tool call has ended",
+        "c": "The SDK forbids logging libraries, so every debug line is rejected",
+        "d": "Standard output carries only protocol messages, so stray text corrupts it"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"The server MUST NOT write anything to its stdout that is not a valid MCP message.\"",
+        "a": "Ruled out because the client \"SHOULD NOT assume stderr output indicates error conditions\".",
+        "b": "Ruled out because the stream carries one message per line and \"The server MUST NOT write anything to its stdout that is not a valid MCP message\", with no queue of printed lines.",
+        "c": "Ruled out because the guide says to use a logger that writes to stderr: \"Never write to stdout. Writing to stdout will corrupt the JSON-RPC messages and break your server.\""
+      }
+    },
+    {
+      "id": "02-writing-a-server#q2",
+      "page": "02-writing-a-server.md",
+      "scope": "page",
+      "stem": "A search tool receives a date range in the wrong format, and the server wants the model to try again with a fix. How should the failure be reported?",
+      "options": {
+        "a": "As a JSON-RPC error response, which is passed to the model for retries",
+        "b": "As a protocol error that says the request itself is malformed",
+        "c": "By returning empty text, which signals the model to ask the user",
+        "d": "As an ordinary result flagged as an error, with a readable explanation"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says tool execution errors \"contain actionable feedback that language models can use to self-correct and retry with adjusted parameters\", and lists \"Input validation errors (e.g., date in wrong format, value out of range)\" among them.",
+        "a": "Ruled out because \"Clients MAY provide protocol errors to language models, though these are less likely to result in successful recovery.\"",
+        "b": "Ruled out because a wrong format is an \"Input validation errors (e.g., date in wrong format, value out of range)\", which is a tool execution error and not a malformed request.",
+        "c": "Ruled out because \"Clients SHOULD provide tool execution errors to language models to enable self-correction\", which needs text that says what to change."
+      }
+    },
+    {
+      "id": "02-writing-a-server#q3",
+      "page": "02-writing-a-server.md",
+      "scope": "page",
+      "stem": "A tool declares that it only reads data, and a client skips the confirmation prompt for it because of that declaration. What does the specification say about trusting the declaration?",
+      "options": {
+        "a": "Hints are binding, so a read-only tool never needs confirmation",
+        "b": "Hints are checked by the SDK, which blocks any tool that writes",
+        "c": "Hints are trusted once the first call has succeeded without an error",
+        "d": "Hints are unverified claims, unless the origin is vetted"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page quotes the specification: \"clients MUST consider tool annotations to be untrusted unless they come from trusted servers.\"",
+        "a": "Ruled out because \"there SHOULD always be a human in the loop with the ability to deny tool invocations\".",
+        "b": "Ruled out because annotations are only \"Optional properties describing tool behavior\" and nothing in the SDK enforces them.",
+        "c": "Ruled out because trust depends on where the server comes from, \"unless they come from trusted servers\", and not on how a first call went."
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#q1",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "page",
+      "stem": "A server's tools are not showing up in a host, and the team cannot tell why. Which first step does the documentation recommend?",
+      "options": {
+        "a": "Reinstall the host application, since a corrupt cache hides tools",
+        "b": "Write the server again in another language to rule out an SDK defect there",
+        "c": "Add output to stdout so that the host can see the server's progress",
+        "d": "Try it standalone in the Inspector, with no other application involved"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Test it standalone with the Inspector\" is one of the documented steps and that the guide calls it \"This should be your first stop.\"",
+        "a": "Ruled out because the documented steps check the server rather than the host: \"Verify server process is running\".",
+        "b": "Ruled out because the steps go through logs, the process and \"Test standalone with Inspector\" before anything is rewritten.",
+        "c": "Ruled out because \"Local MCP servers should not log messages to stdout (standard out), as this will interfere with protocol operation.\""
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#q2",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "page",
+      "stem": "A stdio server started by a host cannot find credentials that work in the developer's shell. Which documented behavior explains it?",
+      "options": {
+        "a": "The host wipes the whole environment on purpose, to keep secrets away from servers",
+        "b": "Credentials are read from the shell only when the transport used is HTTP",
+        "c": "The server receives its variables only after the first tool call has arrived",
+        "d": "Only a limited subset is inherited, so extra variables go in the config"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page quotes the guide: \"MCP servers launched over stdio inherit only a limited subset of environment variables automatically (the exact set is platform-dependent).\"",
+        "a": "Ruled out because servers \"inherit only a limited subset of environment variables automatically\", which is some of them, not none.",
+        "b": "Ruled out because the fix is to \"set an env key in the host's configuration\", whatever the transport.",
+        "c": "Ruled out because the variables are fixed when the process is launched: \"MCP servers launched over stdio inherit only a limited subset of environment variables automatically\"."
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#q3",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "page",
+      "stem": "A CI job must exercise a server without a browser and print machine-readable results. Which Inspector client fits?",
+      "options": {
+        "a": "The web one, run headless with the default settings",
+        "b": "The terminal-UI one, since it prints results as JSON",
+        "c": "None, because the Inspector can only run interactively",
+        "d": "The scriptable command-line mode, built for pipelines"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page's table says the CLI is \"A scriptable, machine-readable client for CI, shell pipelines, and coding agents.\"",
+        "a": "Ruled out because the web one is \"A full graphical inspector in the browser. The default, and the richest surface.\"",
+        "b": "Ruled out because the terminal one is \"An interactive terminal UI, for when a browser isn't available or wanted.\"",
+        "c": "Ruled out because the CLI is \"A scriptable, machine-readable client for CI, shell pipelines, and coding agents.\""
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#m1",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "module",
+      "stem": "A server works in the Inspector, but the host cannot start it from its configuration file, which gives a relative path to the data folder. What does the documentation blame?",
+      "options": {
+        "a": "A host can launch only servers that were first registered with the Inspector",
+        "b": "Relative paths can resolve only when the server runs over Streamable HTTP",
+        "c": "A host can pass along no environment variables, so the data path is lost",
+        "d": "The directory can be undefined, so locations should be written in full"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The third page quotes the guide: the directory of a launched server \"may be undefined (like / on macOS) since the client could be started from anywhere\", so use absolute paths.",
+        "a": "Ruled out because the guide says \"the same principles apply to any stdio-based MCP client\", and no registration with the Inspector exists.",
+        "b": "Ruled out because \"testing from the command line uses the directory where you run the command\", which is the contrast, and the transport is not part of it.",
+        "c": "Ruled out because servers \"inherit only a limited subset of environment variables automatically\", which is some of them and not none."
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#m2",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "module",
+      "stem": "Under the 2026-07-28 revision, a server needs to ask the user a question in the middle of a call, but the incoming call declared no matching feature. What does the server return?",
+      "options": {
+        "a": "An unsupported-version error that lists the versions it accepts",
+        "b": "An invalid-params error, since the metadata fields are absent",
+        "c": "A tool result flagged as an error, saying the user cannot be reached",
+        "d": "A missing-capability error, naming whatever the metadata omitted"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The third page says that if the server needs a capability that the request's client capabilities did not declare, \"it returns a MissingRequiredClientCapabilityError (code -32021) naming the missing capabilities\".",
+        "a": "Ruled out because an unsupported-version error is one that \"lists the server's supported versions in its data field\", and the version was fine here.",
+        "b": "Ruled out because \"A request missing either required field is rejected with error -32602\", and the required fields were sent.",
+        "c": "Ruled out because the error is \"returned as an error with its own code\", so a client can tell it from a failed tool."
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#m3",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "module",
+      "stem": "A team must build an MCP server that speaks the newest protocol version. Which of the four SDKs used in the course reached that version when it was checked?",
+      "options": {
+        "a": "All four, since they share one specification and release together",
+        "b": "Only the Kotlin library, because it is the newest of the four",
+        "c": "Only the Java library, which the documentation ranks in its top tier overall",
+        "d": "Only the Python library; the other three stop at an earlier revision"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The first page says the Python SDK speaks both eras, and that the other three \"contain no support for 2026-07-28, and their latest revision is 2025-11-25\".",
+        "a": "Ruled out because three of them \"contain no support for 2026-07-28\".",
+        "b": "Ruled out because the Kotlin SDK is one of the three whose \"latest revision is 2025-11-25\".",
+        "c": "Ruled out because \"Java is Tier 2 and Kotlin is Tier 3\", and the Java SDK stops at the earlier revision as well."
+      }
+    },
+    {
+      "id": "03-clients-testing-and-debugging#m4",
+      "page": "03-clients-testing-and-debugging.md",
+      "scope": "module",
+      "stem": "A query matches no stored entries. How does the course's notes server answer?",
+      "options": {
+        "a": "With a tool error that tells the model to ask the user for a new query",
+        "b": "With a protocol error, as for an unknown tool, so that the client logs it",
+        "c": "With a resource error for the missing note, as for a bad id",
+        "d": "With ordinary text saying that nothing fits, and the error flag stays off"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The third page says that with no match the search answers `No notes match \"{query}\"`, \"which is not an error\".",
+        "a": "Ruled out because the answer is \"which is not an error\", so there is no tool error to read.",
+        "b": "Ruled out because protocol errors \"indicate issues with the request structure itself that models are less likely to be able to fix\", and the request here is valid.",
+        "c": "Ruled out because the protocol error that says `No note {id}` is \"for reading a note that does not exist\", and \"a search that finds nothing is a normal answer\"."
+      }
+    }
+  ]
+}
