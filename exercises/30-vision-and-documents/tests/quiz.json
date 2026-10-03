@@ -24,7 +24,7 @@
       "id": "01-images-limits-and-cost#q2",
       "page": "01-images-limits-and-cost.md",
       "scope": "page",
-      "stem": "A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands too low on the original. What explains the miss?",
+      "stem": "A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands above and to the left of the line on the original. What explains the miss?",
       "options": {
         "a": "The picture it viewed was 924 by 1307, so every returned value needs rescaling by that size",
         "b": "The reply was normalized to a 0 to 1000 grid and was then used as plain pixels",
@@ -123,14 +123,14 @@
       "options": {
         "a": "Receipts can be billed as documents, which carry a flat surcharge per page",
         "b": "A single image can use up to roughly three times more visual tokens there",
-        "c": "Every upload can be stored for a month and billed for the storage it occupies",
+        "c": "Every image can be charged a fixed amount whatever its size",
         "d": "The tier can charge for padding rows as separate tokens at a higher price"
       },
       "key": "b",
       "explanation": {
         "b": "The first page says that \"High-resolution images can use up to roughly three times more visual tokens than the same image on a standard-tier model\".",
         "a": "Ruled out because \"Standard API pricing applies with no additional PDF fees.\"",
-        "c": "Ruled out because Claude does not keep uploads: \"uploaded images are not stored beyond the request.\"",
+        "c": "Ruled out because \"The price of an image is its token count times the model's input price\", so size matters.",
         "d": "Ruled out because \"The padding holds no content\", and the cost is the token count of the image."
       }
     },

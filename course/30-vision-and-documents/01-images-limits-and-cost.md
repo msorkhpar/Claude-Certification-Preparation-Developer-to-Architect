@@ -320,7 +320,7 @@ The limitations list is short and testable. Claude "cannot be used to name peopl
    - **c**: Convert each page to GIF so that the stricter size limit stops counting it
    - **d**: Downscale each file to 2000 px or less per side, or cap the batch at twenty
 
-2. A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands too low on the original. What explains the miss?
+2. A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands above and to the left of the line on the original. What explains the miss?
    - **a**: The picture it viewed was 924 by 1307, so every returned value needs rescaling by that size
    - **b**: The reply was normalized to a 0 to 1000 grid and was then used as plain pixels
    - **c**: Claude pads every image on the top and left, which moved the origin downward

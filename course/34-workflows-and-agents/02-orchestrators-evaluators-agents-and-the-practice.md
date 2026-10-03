@@ -23,7 +23,7 @@ Three things go wrong in the plain version, and the practice grades them. The pl
 
 In this workflow "one LLM call generates a response while another provides evaluation and feedback in a loop." It fits "when we have clear evaluation criteria, and when iterative refinement provides measurable value". The article names two signs of a good fit: model output can be demonstrably improved when a person states feedback, and the model can give that feedback. Literary translation is its example, and so are searches where the evaluator decides whether another round is worth it.
 
-The loop needs an exit, or two. A score at or above a threshold accepts the draft. Otherwise the loop ends after a maximum number of rounds, and the best draft wins, not the last one, because a late revision can be worse. The judge's reply is model text too. If it cannot be read, the sound reading is a score of zero with a message that says so, and the loop goes on: treating an unreadable reply as a pass would accept an unchecked draft. If the writer itself throws, the loop stops at once and reports the best draft so far, which may be none.
+The loop needs an exit, or two. A score at or above a threshold accepts the draft. Otherwise the loop ends after a maximum number of rounds, and the best draft wins, not the last one. When two drafts tie on score, the earliest of them wins, because a late revision can be worse. The judge's reply is model text too. If it cannot be read, the sound reading is a score of zero with a message that says so, and the loop goes on: treating an unreadable reply as a pass would accept an unchecked draft. If the writer itself throws, the loop stops at once and reports the best draft so far, which may be none.
 
 ### The earlier patterns, side by side
 

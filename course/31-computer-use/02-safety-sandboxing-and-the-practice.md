@@ -65,7 +65,7 @@ The practice is in `exercises/31-computer-use/unit-01/practice-1/statement.md`, 
    - **c**: Use a larger screen so that hidden text is displayed more clearly
    - **d**: Add a line to the prompt that tells Claude to ignore text on web pages
 
-2. After many turns, a loop that keeps every screenshot starts to fail, even though each image is small. What does the documentation give as the reason?
+2. After many turns, a loop that keeps every screenshot starts to fail. What does the documentation give as the reason?
    - **a**: The API rejects any conversation that holds more than ten screenshots in total
    - **b**: Every screenshot uses up a unit of a daily quota that the toolset enforces
    - **c**: Claude deletes old screenshots after three turns to save space on its side

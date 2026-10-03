@@ -92,7 +92,7 @@ This quiz covers both pages of the module.
 1. A mobile app uploads photos of receipts and the cost per request is higher than expected on a model in the high-resolution tier. Which statement from the module explains it?
    - **a**: Receipts can be billed as documents, which carry a flat surcharge per page
    - **b**: A single image can use up to roughly three times more visual tokens there
-   - **c**: Every upload can be stored for a month and billed for the storage it occupies
+   - **c**: Every image can be charged a fixed amount whatever its size
    - **d**: The tier can charge for padding rows as separate tokens at a higher price
 
 2. An agent returns a bounding box for a table on a scanned page, and the box sits slightly off when drawn on the original. The team divided the coordinates by the extent of the padded picture. What is the correct divisor?
@@ -116,7 +116,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The first page says that "High-resolution images can use up to roughly three times more visual tokens than the same image on a standard-tier model". *a* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because Claude does not keep uploads: "uploaded images are not stored beyond the request." *d* is ruled out because "The padding holds no content", and the cost is the token count of the image.
+1. **b**. The first page says that "High-resolution images can use up to roughly three times more visual tokens than the same image on a standard-tier model". *a* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because "The price of an image is its token count times the model's input price", so size matters. *d* is ruled out because "The padding holds no content", and the cost is the token count of the image.
 2. **a**. The first page says: "Always normalize or rescale by the resized dimensions, not the padded dimensions." *c* is ruled out because the point Claude returned lies in the resized picture, and "a 1920×1080 screenshot resizes to 1456×819" shows that the original size differs from it. *b* is ruled out because that is the padded size, and "The padding holds no content". *d* is ruled out because the budget is a token count, and the page says only that "the visual token limit is what determines the final size", which is not a length in pixels.
 3. **a**. The first page says that setting `"transformations": {"oversized_image": "error"}` makes the API reject an image that would be resized, "with a `400`, instead of resizing it." *b* is ruled out because "High-resolution support is automatic on the listed models and requires no beta header or client-side opt-in." *c* is ruled out because "a successful count doesn't mean the image is within the Messages API's request limits". *d* is ruled out because the documented behaviour is rejection "instead of resizing it", and no output limit is involved.
 4. **c**. The pages combine the Files API, where "the payload stays small" and an id replaces the bytes, with "a workspace for each tenant". *b* is ruled out because base64 resends the bytes on every request, and "a stricter per-image dimension limit applies" is a limit to stay under and not a feature. *a* is ruled out because on Amazon Bedrock and Google Cloud "only base64 sources are available", so a link does not work there. *d* is ruled out because "Animations are unsupported, and only the first frame is used."

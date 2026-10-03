@@ -57,6 +57,7 @@ Without limits, "the loop runs until Claude finishes on its own", which is fine 
 | `error_max_turns` | Hit the maxTurns limit before finishing |
 | `error_max_budget_usd` | Hit the maxBudgetUsd limit before finishing |
 | `error_during_execution` | An error interrupted the loop, for example a cancelled request |
+| `error_max_structured_output_retries` | No valid structured output was produced within the retry limit |
 
 "The result field holds the final text output and is only present on the success variant, so always check the subtype before reading it." Every subtype carries cost, usage, turn count and session ID, so you can track spend and resume even after an error. In Python the cost and usage are optional, so test them for `None`.
 

@@ -46,7 +46,7 @@ The line between them is a rule: "Servers MUST NOT use form mode elicitation to 
 
 ### Sampling, roots and logging are deprecated
 
-Sampling lets a server ask the client's model for a completion, without a key of its own. In 2026-07-28 it is deprecated, together with roots and logging over the protocol: "New implementations SHOULD NOT adopt it; existing implementations SHOULD migrate to integrating directly with LLM provider APIs." Deprecated features stay in the specification for at least twelve months and then become eligible for removal; the registry gives 2027-07-28 as the earliest. The migration for roots is to pass directories through tool parameters, resource URIs or configuration, and for logging to write to stderr (stdio) or use OpenTelemetry. The course still teaches sampling, because the Python SDK still implements it and the example shows it, and because the exam asks what it is.
+Sampling lets a server ask the client's model for a completion, without a key of its own. In 2026-07-28 it is deprecated, together with roots and logging over the protocol. For sampling the specification says: "New implementations SHOULD NOT adopt it; existing implementations SHOULD migrate to integrating directly with LLM provider APIs." Deprecated features stay in the specification for at least twelve months and then become eligible for removal; the registry gives 2027-07-28 as the earliest. The migration for roots is to pass directories through tool parameters, resource URIs or configuration, and for logging to write to stderr (stdio) or use OpenTelemetry. The course still teaches sampling, because the Python SDK still implements it and the example shows it, and because the exam asks what it is.
 
 ### Notifications, progress and cancellation
 
