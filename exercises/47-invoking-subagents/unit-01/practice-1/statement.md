@@ -42,6 +42,15 @@ and `maxConcurrent`.
 - `run_team(prompt, options)` (async) collects every message of a single-shot run and returns `{"messages", "error"}`. The SDK raises after
   an error result, so the messages received so far are kept and the error text is returned, or null when the run ended well.
 
+## Why each step is there, and what you should see
+
+1. **`build_options`: the definition and the limits.** The exam expects each subagent type to have a description, a system prompt and a tool restriction, and a coordinator whose team is bounded. A definition with no tool list inherits every tool, which is why the practice defaults to the read-only set. *You should see* the options carry every agent with its tools and model, no subagent able to spawn, and the depth, concurrency, budget and turn limits on the options and in the environment.
+2. **`spawned`: recognise delegation.** The exam's tool is called Task and the current one Agent, so a detector has to know both. *You should see* both names found, the default `general-purpose` type filled in, and no other tool call counted.
+3. **`by_subagent`: attribute the messages.** A message that ran inside a subagent carries the id of the call that started it. *You should see* the inner messages counted under their spawn and the coordinator's own messages counted for nobody.
+4. **`make_brief`: pass the context in the prompt.** Subagents do not inherit the coordinator's context, so the prompt is the only channel. *You should see* the task, the files, the known facts and the return format in a fixed layout, and blank items left out.
+5. **`package_finding` and `merge_findings`: keep content apart from metadata.** The exam asks for structured data that separates a claim from its source, so that attribution survives the merge. *You should see* the source held beside the claim and never written into it, and two sources for one claim both kept.
+6. **`run_team` and the SDK case.** *You should see* the real SDK, driven by the course's stand-in for the binary, show the spawn, the inner messages and the agents that were sent, and the messages received before an error kept.
+
 ## The cases
 
 | Id | What it checks |

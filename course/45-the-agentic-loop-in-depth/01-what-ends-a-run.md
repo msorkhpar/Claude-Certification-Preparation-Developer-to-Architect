@@ -7,6 +7,8 @@
 
 Checked on 2026-10-03 against the Claude Code documentation page "How the agent loop works", the Claude API pages "Handle tool calls" and "Stop reasons and fallback", and Anthropic's engineering article on building effective agents. The example runs offline in Python (`anthropic` 1.11.0) and TypeScript (`@anthropic-ai/sdk` 0.131.0) against scripted replies in the shape of the Messages API, so it shows no live output. This page deepens module 26, page 2, where the loop was first written, and module 35, page 1, where the Agent SDK ran it for you.
 
+> **Exam guide and current product.** *What the guide states, and so what the exam keys:* the loop continues while the stop reason is `tool_use` and ends when it is `end_turn`; the results of the tools are added to the conversation between iterations so that the model can reason about its next action; and three anti-patterns are named, which are reading natural-language signals to decide when to stop, an arbitrary iteration cap as the main stopping mechanism, and treating the presence of assistant text as a sign of completion. *What the current product does (documentation checked 2026-10-03):* the pair is the common case, but the API documents more values (`stop_sequence`, `max_tokens`, `refusal`, and `pause_turn` for server tools), so a loop written for two values mishandles a cut-off or refused reply; and an iteration limit is a documented control (`max_turns` in the Agent SDK, with its own result subtype) whose proper job is the backstop described on this page. On the exam, pick the option that continues on `tool_use` and ends on `end_turn`; in your own code, give every other value a status of its own.
+
 ## Why it matters
 
 The first Architect domain is agentic architecture, and its first task is the loop. The exam does not ask you to write one. It shows a loop that looks reasonable and asks what will go wrong: a loop that stops when the model says it is finished, a loop that runs "at most five" times. In production the same mistakes are quieter. A run is cut off in the middle of a task and reported as complete, a tool never runs because the model said "done" a sentence too early, a runaway run is stopped only by the bill. All three come from asking the wrong thing to end the loop.
@@ -286,9 +288,11 @@ Read the output line by line. In scenario A the stop-reason loop makes two model
 
 ## Traps
 
-1. **Stopping on a word in the text.** A reply with a tool call can say "done", and a reply that ends the turn can say "next I will call a tool". Decide on `stop_reason`, and run every tool call the reply holds.
-2. **Making the count the loop.** A fixed number of calls ends long tasks half done and returns a partial reply as the answer. Keep the count as a backstop, above the real need, with a status that is not `done`.
-3. **Returning the text of a tool-calling reply as the answer.** The text in front of a `tool_use` block is narration. Only the reply that ends the turn holds the answer.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"Stop when the reply says it is done."** It is tempting because the text is what the user reads. The exam rejects it: a reply can say "done" in front of a tool call, and a reply that ends the turn can say "next I will call a tool". Decide on `stop_reason`, and run every tool call the reply holds.
+2. **"Loop at most five times and return the last reply."** It is tempting because it cannot run away. The exam rejects a count as the primary stopper: a long task is cut off half done and a partial reply is reported as the answer. Keep the count as a backstop, above the real need, with a status that is not `done`.
+3. **"Return the text of the reply as the answer."** It is tempting because every reply has text. The exam rejects it: the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer.
 
 ## Quiz
 

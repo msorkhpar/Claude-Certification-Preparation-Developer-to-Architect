@@ -40,6 +40,15 @@ arguments) returns `{"status", "answer", "findings", "failed", "dropped", "gaps"
 6. Call `synthesizer` once with copies of all findings, in the order they arrived. Status is `complete` when no gaps remain and nothing
    failed, otherwise `partial`. `gaps` is what the last review still reported (empty when complete), `rounds` the number of refinement rounds.
 
+## Why each step is there, and what you should see
+
+1. **Delegate only when it pays** (step 1). The exam expects a coordinator that chooses its subagents from the complexity of the query and does not send everything through the full pipeline. *You should see* a question the planner answers itself finish with no subagent call.
+2. **Partition the scope** (step 2). The exam asks for distinct subtopics or sources to minimise duplicated work, and a cap on the team. *You should see* the empty and the repeated subtasks listed as dropped with their reasons, and the team no larger than `max_agents`.
+3. **Send each subagent its own brief and nothing else** (step 3). Subagents work in isolated context and do not inherit what the coordinator knows. *You should see* the briefs received equal the briefs planned, whatever the other subagents found, and one failing subagent leave the others' findings in place.
+4. **Do not synthesize from nothing** (step 4). An error message is not evidence. *You should see* status `failed` with no reviewer or synthesizer call when no subagent returned a finding.
+5. **Refine where the gaps are** (step 5). The exam describes a loop in which the coordinator finds gaps, re-delegates targeted queries and stops when coverage is enough. *You should see* only the gaps sent out again, cleaned and capped, and the first-round subtasks left alone.
+6. **End with an honest status** (step 6). *You should see* `complete` only when nothing failed and no gap is left, and `partial` with the remaining gaps when the round limit stopped the loop.
+
 ## The cases
 
 | Id | What it checks |

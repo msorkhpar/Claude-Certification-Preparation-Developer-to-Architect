@@ -49,10 +49,12 @@ The tests script the four roles and grade seven cases: the main hub-and-spoke ru
 
 ## Traps
 
-1. **Sending everyone out again in each round.** The first-round findings are already in hand. Send out the gaps, as new briefs, and keep the rest.
-2. **Letting a failure into the synthesis.** An error message is not evidence. Record it against its scope and say what is missing.
-3. **A review with no end.** A reviewer finds one more gap every time. Cap the rounds, return the gaps that are left and let the status say `partial`.
-4. **Passing big outputs through the lead.** The lead pays for them twice and loses detail in each summary. Store them, and pass a reference.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"Run every subagent again in each review round."** It is tempting because it is simple to code. The exam rejects it: the first-round findings are already in hand. Send out the gaps as new briefs, and keep the rest.
+2. **"Fold a failed subagent's error message into the answer."** It is tempting because the run then looks complete. The exam rejects it: an error message is not evidence. Record it against its scope and say what is missing.
+3. **"Keep reviewing until no gap is left."** It is tempting because it promises full coverage. The exam rejects it: a reviewer finds one more gap every time. Cap the rounds, return the gaps that are left and let the status say `partial`.
+4. **"Pass big outputs through the lead so that it sees everything."** It is tempting because it keeps the lead informed. The exam rejects it: the lead pays for them twice and loses detail in each summary. Store them, and pass a reference.
 
 ## Quiz
 
@@ -80,19 +82,19 @@ The tests script the four roles and grade seven cases: the main hub-and-spoke ru
 
 This quiz covers both pages of the module.
 
-1. Two of the three subagents of a research team come back with almost the same findings on the same period. Which cause fits best?
+1. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. On one question, two of the three subagents come back with almost the same findings on the same period. Which cause fits best?
    - **a**: The coordinator ran too few rounds of review after the first answers
    - **b**: The context of one subagent leaked into another during the run
    - **c**: The briefs did not divide the scope or say what each part must leave out
    - **d**: The subagents ran on a smaller model than the coordinator uses
 
-2. A coordinator starts the same five subagents for every query, including "what is the boiling point of water". Which redesign fits best?
+2. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. The coordinator starts the same five subagents for every query, including "what is the boiling point of water". Which redesign fits best?
    - **a**: Keep the five subagents but lower the token limit of each one
-   - **b**: Scale the team to the request, down to a solo worker for a plain fact
+   - **b**: Scale the team to what is asked, down to a solo worker for a plain fact
    - **c**: Let the five subagents share one context so that they finish sooner
    - **d**: Start the team only when the user asks for a long report
 
-3. Specialist agents hand forty-page drafts up through the coordinator, and cost rises while details get lost in the summaries. Which architecture change fits best?
+3. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and cost rises while details get lost in the summaries. Which architecture change fits best?
    - **a**: Cap the turns of each specialist so that its drafts stay short and focused
    - **b**: Ask the coordinator to condense every draft before the next specialist starts work
    - **c**: Hand each specialist the coordinator's whole conversation so that drafts can be rebuilt

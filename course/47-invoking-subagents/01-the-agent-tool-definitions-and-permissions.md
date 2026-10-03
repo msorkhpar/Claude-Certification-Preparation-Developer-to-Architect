@@ -7,6 +7,8 @@
 
 Checked on 2026-10-03 against the Claude Code documentation pages "Subagents in the SDK", "Configure permissions", "Intercept and control agent behavior with hooks" and "Subagents in Claude Code": Python `claude-agent-sdk` 0.2.163 and TypeScript `@anthropic-ai/claude-agent-sdk` 0.3.287, the versions the course ran. The example ran offline through the course's scripted stand-in for the Claude Code binary (`harness/fake_claude.py`), which speaks the SDK's protocol and replays a script: no model was called, no network was used and no API key was involved. The stand-in is not the real binary, and it orders the messages of a subagent in its own way. This page deepens module 35 (the SDK), module 39 (subagent files) and module 46 (the design of the team).
 
+> **Exam guide and current product.** *What the guide states, and so what the exam keys:* subagents are spawned with the Task tool, and `allowedTools` has to include Task for a coordinator to invoke them; a subagent definition holds a description, a system prompt and tool restrictions; and fork-based session management belongs to the same task statement (module 51 treats forking). *What the current product does (documentation checked 2026-10-03, Claude Code v2.1.x):* the tool is `Agent`, and `Task` is kept as the name in the init tools list and in blocks before v2.1.63. `allowed_tools` adds allow rules, so a listed tool is auto-approved; a tool that is not listed still exists, and the permissions page counts `Agent` among the tools "that don't ask before running", so in the default mode a spawn does not wait for an approval whether or not it is listed. What takes the ability away is the tool list of the agent or `disallowed_tools`. On the exam, keep the guide's answer when a question asks what must be in place for the coordinator to spawn (list the spawn tool in `allowedTools`); in practice, list `Agent` to state the intent, and look first at the description and the prompt when a coordinator never delegates.
+
 ## Why it matters
 
 The coordinator of module 46 is a decision. This module is how the decision is carried out in the SDK, and the exam asks about the mechanism: how a subagent gets started, what you must pass it, what it may do, how you see it in the stream, and what changes when several run at once. The mechanism has details that decide whether a team is safe: a definition with no `tools` list, a parent in `bypassPermissions`, a spawn that you cannot recognise because you matched the wrong tool name.
@@ -249,10 +251,12 @@ Read it from the top. The spawn line shows the tool name `Agent`, the subagent t
 
 ## Traps
 
-1. **A definition with no `tools` list.** The subagent inherits every tool available to subagents, including the ones that write and run commands. List the tools.
-2. **Matching only one tool name.** Spawns appear as `Agent`, and as `Task` before v2.1.63 and in the init tools list. Match both, or an older run looks like it never delegated.
-3. **Running the parent in `bypassPermissions` and trusting the subagents' definitions.** A definition can never set bypass, but a bypass parent passes it down. The controls that still hold are deny rules, ask rules and hooks.
-4. **Blaming the model when a subagent is never used.** Write the description as "when to use this agent", or name the subagent in the prompt.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"A subagent with no tool list is safe if its prompt says to be careful."** It is tempting because the prompt is easy to write. The exam rejects it: the subagent inherits every tool available to subagents, including the ones that write and run commands. List the tools; a restriction is a property of the definition.
+2. **"Look for the Task tool to see whether the coordinator delegated."** It is tempting because the guide uses that name. The exam keys the guide's name, and the product moved on: spawns appear as `Agent`, and as `Task` before v2.1.63 and in the init tools list. Match both, or an older run looks as if it never delegated.
+3. **"Run the parent in bypass mode, because each subagent's definition limits it."** It is tempting because the definition has a `permissionMode` field. The exam rejects it: a definition can never set bypass, but a bypass parent passes it down. The controls that still hold are deny rules, ask rules and hooks.
+4. **"If a subagent is never used, strengthen the coordinator's system prompt."** It is tempting because the prompt is the visible lever. The exam rejects it: the subagent's description is what the model reads to decide, so write it as when to use the agent, or name the subagent in the prompt.
 
 ## Quiz
 

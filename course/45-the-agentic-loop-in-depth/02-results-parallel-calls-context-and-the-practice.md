@@ -51,10 +51,12 @@ The tests script the model and grade seven cases: the main loop, the stop reason
 
 ## Traps
 
-1. **Assuming the order of tools in one turn.** Read-only tools may run concurrently, and your custom tools run one after another unless they are marked read-only. A dependency between two tools belongs in two turns.
-2. **Saying a rule once, in the first prompt.** Compaction can drop it. Put rules that must hold for the whole run in `CLAUDE.md`, or enforce them in a hook.
-3. **Reading `usage` as the cost of the run.** It covers the main loop only. Use `modelUsage` when subagents were used.
-4. **Treating the null stop reason of a crashed run as a bug in your parser.** The result of a session crash has none, and its cost fields may be zero.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"The tools of one turn run in the order the model listed them."** It is tempting because the list is ordered. The exam rejects it: read-only tools may run concurrently, and your custom tools run one after another unless they are marked read-only. A dependency between two tools belongs in two turns.
+2. **"Say the rule once, in the first prompt."** It is tempting because the prompt is read on every turn. The exam rejects it: compaction can drop it. Put rules that must hold for the whole run in `CLAUDE.md`, or enforce them in a hook.
+3. **"The usage field tells what the run cost."** It is tempting because it is the field in the result. The exam rejects it: it covers the main loop only. Use `modelUsage` when subagents were used.
+4. **"A null stop reason is a bug in the parser."** It is tempting because every other reply has one. The exam rejects it: the result of a session crash has none, and its cost fields may be zero.
 
 ## Quiz
 

@@ -37,6 +37,14 @@ keeps the conversation in a state the API accepts. Pick your language folder (`p
    turn, return status `max_turns` with the messages as they stand (they end with the last tool results, so the run can be resumed).
    A reply that ends the turn on the last allowed call is still `done`. `turns` is the number of model calls made.
 
+## Why each step is there, and what you should see
+
+1. **Keep the conversation as the model's memory** (steps 1 and 2). The exam expects the results of the tools to be appended to the history so that the model can reason about its next action, and the replies to be kept as they came. *You should see* the second model call receive the first reply and its tool results, and a change that you make to your own list leave an earlier call's input as it was.
+2. **Decide on the stop reason alone** (step 3, first part). The exam names reading the text for a completion signal as an anti-pattern, because a reply can say "done" and call a tool in the same breath. *You should see* a reply that says "done" with a tool call continue, and a reply that says "I will call a tool" with the end of its turn stop.
+3. **Answer every call, once, in one message** (step 3, `tool_use`). The API needs a result for every call of a turn, and a failure is information for the model, not a reason to stop. *You should see* all the results of a turn together, in order, with the failing or unknown tool flagged and the run going on.
+4. **Give the turn limit its proper job** (step 4). The exam rejects an arbitrary cap as the main stopper and accepts it as a backstop. *You should see* an endless run end with its own status and the messages intact, and a run that finishes on the last allowed call still report `done`.
+5. **Give every other value a status** (step 3, the rest). A cut-off, a refusal and a value you have never seen are different events. *You should see* `truncated`, `refused` and `unexpected` come out as themselves, and nothing more sent after a malformed reply.
+
 ## The cases
 
 | Id | What it checks |

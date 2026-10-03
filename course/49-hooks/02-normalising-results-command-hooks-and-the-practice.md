@@ -104,11 +104,13 @@ Nine cases grade it: the three tiers, the boundaries (each limit belongs to the 
 
 ## Traps
 
-1. **A guard that crashes.** An unhandled exception in a command hook exits with 1, which does not block. Catch failures and exit 2.
-2. **Normalising errors away.** A hook that rewrites an error message into a tidy result hides the failure from the model. Touch only the fields you know, and leave the rest.
-3. **Deleting the raw value without a record.** Convert for the model, and log the original in the hook if anyone will need it.
-4. **A committed guard that a service never loads.** With `setting_sources=[]` the command hooks in settings files are not collected. Say which kinds of hook run in each deployment.
-5. **A judged hook sold as a guarantee.** A prompt-based hook is a model's decision at a fixed point. It is evaluated by rate and is not a gate.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"The guard script fails on bad input, which stops the call."** It is tempting because a crash looks like a refusal. The exam rejects it: an unhandled exception exits with 1, which does not block. Catch failures and exit 2.
+2. **"Normalise by rewriting every result, errors included."** It is tempting because the output then always looks tidy. The exam rejects it: a hook that rewrites an error message into a tidy result hides the failure from the model. Touch only the fields you know, and leave the rest.
+3. **"Replace the raw value and keep no record."** It is tempting because the model should see one value only. The exam rejects it when anyone will need the original: convert for the model, and log the original in the hook.
+4. **"The committed guard protects every deployment."** It is tempting because the file is in the repository. The exam rejects it: with `setting_sources=[]` the command hooks in settings files are not collected. Say which kinds of hook run in each deployment.
+5. **"Use a prompt-based hook as the guarantee."** It is tempting because it runs at a fixed point. The exam rejects it: it is a model's decision at a fixed point, evaluated by rate, and not a gate.
 
 ## Quiz
 

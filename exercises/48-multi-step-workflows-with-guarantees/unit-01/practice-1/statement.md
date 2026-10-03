@@ -51,6 +51,15 @@ limit in Java) with three methods. In Python and TypeScript the names are `state
   "refunds_done": [...], "blocked": [...], "recommended_action"}`. The recommended action is `verify_identity_manually` when the desk is
   locked, otherwise `review_refund` when the most recent refusal was `needs_human`, otherwise `review_case`.
 
+## Why each step is there, and what you should see
+
+1. **Check the prerequisite in code, every time.** The exam contrasts programmatic enforcement with prompt guidance, and says that where compliance must be deterministic a prompt has a non-zero failure rate. *You should see* a refund before verification refused with `identity_required`, and the backend log show that the call never arrived.
+2. **Keep the facts in the desk, not in the model's report.** *You should see* the verified customer set only by a successful check, and cleared by a failed one, so that an earlier success cannot be reused.
+3. **Check the object, the amount and the limit.** A chain of prerequisites is the architect's design: who, which object, how much, within what authority. *You should see* another customer's order refused and never remembered, and a refund beyond what is left, or of zero, refused with its own code.
+4. **Return a refusal the model can act on.** The result carries a code for the logs and a sentence for the model. *You should see* `BLOCKED code: message` as an error result, and the model's next step possible from the message.
+5. **Keep a way out.** *You should see* `escalate` work in every state, including a locked desk.
+6. **Hand over a record, not a transcript.** The exam expects a structured hand-off with the customer, the cause and a recommended action for a person who cannot see the conversation. *You should see* the record built from the desk's state, with every refusal listed and the recommended action chosen by rule.
+
 ## The cases
 
 | Id | What it checks |

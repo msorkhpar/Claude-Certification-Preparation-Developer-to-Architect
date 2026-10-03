@@ -38,6 +38,14 @@ Names are Python's; the TypeScript names are `preRefund`, `postNormalise`, `buil
 - `settings_hooks(script="python3 .claude/hooks/guard.py", timeout=10)` returns the `hooks` block of `.claude/settings.json`: a PreToolUse
   entry with the matcher `Bash` and one hook `{"type": "command", "command": script, "timeout": timeout}`.
 
+## Why each step is there, and what you should see
+
+1. **`pre_refund`: the guarantee before the tool.** The exam asks for a hook on the outgoing call that blocks a policy violation, such as a refund above a threshold, and sends the case toward a person; a prompt cannot promise that. *You should see* three tiers (allow, ask, deny), a denial whose reason names the amount and the limit so that the model can escalate, and a denial for an amount that cannot be read.
+2. **`post_normalise`: one format for the model.** The exam asks for a PostToolUse hook that turns the formats of different tools (timestamps, status codes, amounts) into one before the model processes them. *You should see* the date, the status word and the decimal amount, and plain text or already readable output left alone, so that a second run changes nothing.
+3. **`build_options`: register on tool names.** *You should see* the two hooks under their events, matchers that name tools and not paths, and a timeout on each.
+4. **`command_hook` and `settings_hooks`: the same idea in Claude Code.** A command hook speaks through its exit code, and only 2 blocks. *You should see* exit 2 with a reason for the pushes and deletes, exit 0 for the rest, exit 2 for input that is not JSON, and the settings block that runs it.
+5. **The SDK case.** *You should see* the real SDK, against the stand-in, give the model an order with a date and a status word, and never run the refund of 900.
+
 ## The cases
 
 | Id | What it checks |

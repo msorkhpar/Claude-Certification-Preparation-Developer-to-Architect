@@ -7,6 +7,8 @@
 
 Checked on 2026-10-03 against the Claude Code documentation pages "Subagents in the SDK", "Intercept and control agent behavior with hooks" and "Subagents in Claude Code", and Anthropic's engineering article on its multi-agent research system, with `claude-agent-sdk` 0.2.163 and `@anthropic-ai/claude-agent-sdk` 0.3.287. The practice runs offline in Python and TypeScript through the course's stand-in for the Claude Code binary; no model and no network are used. The structured-finding design in the last section is this course's own, built on the article's advice and labelled as such.
 
+> **Exam guide and current product.** *What the guide states, and so what the exam keys:* subagents are run in parallel by emitting several spawn calls in a single coordinator response, not across separate turns, and the context that a subagent needs, with source details kept apart from content, goes into its prompt. *What the current product does (documentation checked 2026-10-03):* the same holds for context, since only the prompt string passes from parent to subagent. For timing, subagents run in the background by default, so a spawn call that omits `run_in_background` returns without waiting, and Claude sets it to false when it needs the result first. The exam keys several calls in one response for parallel work; in the SDK, also check whether the coordinator must wait for a result before its next step.
+
 ## Why it matters
 
 A subagent works on what it is given. The exam's third task of the first domain is about giving it the right thing, in the right form, and getting something back that the coordinator can use: complete context in the prompt, parallel invocation where the parts are independent, and results in a structure that keeps the source of every claim. The failures are familiar. A subagent re-reads files the coordinator already read, three subagents run one after another when they could have run together, and a final report quotes a figure that nobody can trace.
@@ -77,10 +79,12 @@ The tests grade nine cases, the last through the real SDK against the stand-in: 
 
 ## Traps
 
-1. **A brief that says only the task.** The subagent does not have your conversation, so it re-reads and re-derives, or guesses. Put the files, the facts and the return format in the brief.
-2. **Starting subagents one after another that could run together.** Independent parts finish in the time of the slowest. Run dependent parts in sequence, and write the second brief with the first result.
-3. **Trusting the coordinator to repeat a report word for word.** It may summarize. If the words matter, instruct it to keep them, or read the tool result.
-4. **Writing the source into the claim.** The merge can no longer see that two sentences are one claim, and a summary can drop the source with the sentence.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"The task alone is a sufficient brief; the subagent can find the rest."** It is tempting because the subagent has tools. The exam rejects it: the subagent does not have your conversation, so it re-reads and re-derives, or guesses. Put the files, the facts and the return format in the brief.
+2. **"Start the subagents one at a time, so that nothing conflicts."** It is tempting because it is easy to reason about. The exam rejects it for independent parts: they finish in the time of the slowest when run together, and several calls in one coordinator response start them together. Run dependent parts in sequence, and write the second brief with the first result.
+3. **"The coordinator will repeat a subagent's report word for word."** It is tempting because the report is right there. The exam rejects it: the coordinator may summarize. If the words matter, instruct it to keep them, or read the tool result.
+4. **"Write the source into the claim, as a sentence."** It is tempting because it reads well. The exam rejects it: the merge can no longer see that two sentences are one claim, and a summary can drop the source with the sentence. Keep the content apart from the metadata.
 
 ## Quiz
 

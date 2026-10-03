@@ -63,6 +63,8 @@ In this course's judgement, putting the check in the tool is the most robust of 
 
 ### `tool_choice` is not the gate
 
+> **Exam guide and current product.** *What the guide states, and so what the exam keys:* for the order of steps (task 1.4) it keys programmatic enforcement, hooks and prerequisite gates such as blocking the refund until the customer lookup has returned a verified id, over prompt instructions, which have a non-zero failure rate. Separately, in its tool-design and structured-output tasks (2.3 and 4.3) it describes forcing a named tool with `tool_choice` on the first request and doing the later steps in follow-up turns, and using `any` to guarantee that a tool is called. *What works on current models (the "Define tools" page, checked 2026-10-03):* `any` and `tool` "return a 400 error" on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1, and they are also not supported with manual extended thinking; the page names `auto` with strict tool use, or structured outputs, as what to use instead, and says that prompting still influences which tool `auto` picks. It shows forced use working on other models (it names Claude Opus 5 as supporting it, with adaptive thinking on). Where forcing works, it applies to the request that sets it, and "changes to the `tool_choice` parameter will invalidate cached message blocks", while tool definitions and system prompts remain cached. So the working design on current models is the gate in the loop, and a first call that must be a particular tool is made by code (the dispatcher refuses everything else until it has happened). On the exam, answer an ordering question with enforcement in code, and answer a question that asks how to make the first request call a named tool with the forced choice the guide describes. Where a schema in this course has a field whose data may be absent, it is optional and nullable so that the model is not pushed to invent a value (module 62); the input schemas of this module's tools have only required fields, since each value is always known at the call.
+
 A common half-answer is to force the first tool with `tool_choice`, so that `verify_identity` always comes first. It fails twice. Where it is available, a forced choice works on the request that sets it: "the API prefills the assistant message to force a tool to be used". It says nothing about the checks that follow, so the model can still call the refund on turn three after a failed verification. And on the models of this course it is not available: forced tool use returns a 400 error on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1 (module 26). The documentation's alternative for a guaranteed call is `auto` with strict tool use for a valid input, which guarantees the shape of the call and not its place in a sequence. An order between steps is a property of the program that runs them.
 
 ### The example
@@ -265,10 +267,12 @@ The first loop ran the refund as its only backend call: the money moved before a
 
 ## Traps
 
-1. **Adding words to the prompt.** "ALWAYS verify identity first" lowers the rate of the skip and does not make it zero. When the step cannot be undone, the rule belongs in the code that runs the tools.
-2. **Trusting the model's account of what happened.** "I have verified the customer" is text. The gate keeps the fact itself, set only by a successful verification call, and clears it on a failure.
-3. **Refusing without telling the model why.** A bare error or an empty result sends the model guessing. Return a flagged result with the missing step in it.
-4. **Treating `tool_choice` as a sequence.** It does not apply to the later calls, and the models of this course reject a forced choice.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"Add ALWAYS verify identity first to the system prompt."** It is tempting because it is the cheapest change. The exam rejects it: the sentence lowers the rate of the skip and does not make it zero, and the step cannot be undone. The rule belongs in the code that runs the tools.
+2. **"Trust the model's report that the customer was verified."** It is tempting because the model says so in plain words. The exam rejects it: "I have verified the customer" is text. The gate keeps the fact itself, set only by a successful verification call, and clears it on a failure.
+3. **"Refuse the call with a bare error."** It is tempting because the call is stopped either way. The exam rejects it: a bare error or an empty result sends the model guessing. Return a flagged result with the missing step in it.
+4. **"Force the verification tool with tool_choice, and the order is guaranteed."** It is tempting because it sounds like enforcement. The exam keys programmatic gating for ordering (task 1.4), and a forced choice applies only to the request that sets it, so later calls are free. On current models it is also refused with a 400 error.
 
 ## Quiz
 

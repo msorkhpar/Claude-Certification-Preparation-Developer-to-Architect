@@ -35,6 +35,14 @@ The practice's refusals are `identity_required`, `order_not_owned`, `order_not_c
 
 Two of the refusals close the desk for the model: a refund over the limit, and a lock after repeated failed identity checks. The practice keeps one tool outside the gate, `escalate`, which is always allowed. This is a design rule for any gated agent: **the path to a person must not depend on a prerequisite that may be the thing that failed**. An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit (module 45). The lock matters for a second reason: without it, a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries. Three failures in a row lock the desk, and a successful check resets the count, so ordinary typing mistakes do not lock anyone out.
 
+### Several concerns in one message
+
+Customers rarely send one concern at a time: "I want a refund on order O9, my address changed, and why was I charged twice?" The exam's third skill for this task is to split such a message into distinct items, look into each of them in parallel with the shared context they need, and then write one answer. Three things make that work.
+
+- **Split first.** The coordinator lists the items before any tool runs, so that each has its own question and its own result, and none is lost behind another.
+- **Share the facts, not the conclusions.** The items share what is true of the session: the verified customer and the orders already looked up. In this module that is the desk's state, which lives in the code that runs the tools, so every parallel investigation sees the same verified identity and none can verify itself. Each item is told its own question and not the other items' findings (module 46).
+- **One synthesis, with the gate still in force.** A refund that comes out of the second item passes the same gate as any other. If one item needs a person, the hand-off below is for that item, and the others are answered.
+
 ### The structured hand-off
 
 When the case goes to a person, the person should not have to read the conversation to learn what happened. The hand-off is a record that the gate produces from its own state, which the model cannot embellish:
@@ -71,10 +79,12 @@ The tests play the model by making the calls in the order it would, and grade se
 
 ## Traps
 
-1. **A gate with no way out.** If every tool is behind the prerequisite, a blocked agent can only loop. Keep `escalate` outside the gate.
-2. **Checking the object, not the owner.** An order id that exists is not an order that belongs to this customer. Compare the owner with the verified person, and do not reveal whose it is.
-3. **Letting the model write the hand-off.** A summary written by the model can leave out what went wrong. Build the record from the gate's own state, and add the model's reason as one field.
-4. **Putting the policy's judgement in code, or its thresholds in the prompt.** The order of steps and the limits belong in the gate. Whether a complaint deserves a refund belongs to the model and, above the limit, to a person.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"If the agent is blocked, make every tool wait for the prerequisite, escalation included."** It is tempting because it is the strictest gate. The exam rejects it: if every tool is behind the prerequisite, a blocked agent can only loop. Keep `escalate` outside the gate.
+2. **"Check that the order exists."** It is tempting because a lookup succeeded. The exam rejects it: an order id that exists is not an order that belongs to this customer. Compare the owner with the verified person, and do not reveal whose it is.
+3. **"Let the model write the hand-off summary."** It is tempting because the model has the whole conversation. The exam rejects it: a summary written by the model can leave out what went wrong. Build the record from the gate's own state, and add the model's reason as one field.
+4. **"Put the policy in the prompt, including its thresholds, and put judgement in code."** It is tempting because both are rules of some kind. The exam rejects it: the order of steps and the limits belong in the gate. Whether a complaint deserves a refund belongs to the model and, above the limit, to a person.
 
 ## Quiz
 
@@ -102,19 +112,19 @@ The tests play the model by making the calls in the order it would, and grade se
 
 This quiz covers both pages of the module.
 
-1. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. What should the gate's state say next?
+1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. What should the gate's state say next?
    - **a**: Customers A and B are both verified, because the new check adds evidence
    - **b**: Customer A is still verified, since an earlier check succeeded
    - **c**: No one is cleared, so every protected step is refused again
    - **d**: Customer A stays verified until the model confirms which one is meant
 
-2. A policy allows refunds only for items that arrived damaged. The team encodes "damaged" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?
+2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes "damaged" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?
    - **a**: Keep extending the keyword list until the valid claims finally pass through it
    - **b**: Let the model judge condition, and keep steps, amounts and limits as rules
    - **c**: Move the refund limit into the prompt as well, so that the gate has fewer rules
    - **d**: Drop the ownership check altogether, so that more claims reach the model
 
-3. A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?
+3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?
    - **a**: A judge model that grades every single conversation for the order of its steps in it
    - **b**: A larger live sample, since zero in five hundred proves the rate is zero
    - **c**: The same live run with the verification rule written in capitals

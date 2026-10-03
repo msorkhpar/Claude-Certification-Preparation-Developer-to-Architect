@@ -7,6 +7,8 @@
 
 Checked on 2026-10-03 against Anthropic's engineering article on its multi-agent research system, its article on building effective agents, and the Claude Code documentation pages "Subagents in the SDK" and "Subagents in Claude Code". The example runs offline in Python (`anthropic` 1.11.0) and TypeScript (`@anthropic-ai/sdk` 0.131.0) against scripted replies in the shape of the Messages API, so it shows no live output. Module 34 introduced the orchestrator-workers pattern, module 35 the SDK's subagent option and module 39 the subagent file; this module is about the design of the team.
 
+> **Exam guide and current product.** *What the guide states, and so what the exam keys:* a coordinator manages all communication between subagents, handles errors and routes information (hub and spoke); subagents work in isolated context and do not inherit the coordinator's conversation; the coordinator chooses which subagents to invoke from the complexity of the query, and an overly narrow split risks incomplete coverage of a broad topic. *What the current product does (documentation checked 2026-10-03):* a subagent's final message is the only thing that returns to its parent, which is the hub and spoke of the guide. The tool that starts a subagent is named `Agent` and was named `Task` in the guide's era and in older SDK versions (module 47). The product also has optional ways to break the pattern: a subagent that has the `SendMessage` tool is told the names of the other agents in the session, and agent teams, an experimental and disabled-by-default feature, coordinate sessions with shared tasks and messaging. The exam keys the hub and spoke; choose the option that routes through the coordinator, and treat peer messaging as a choice that gives up the observability and control that the guide asks for.
+
 ## Why it matters
 
 Scenario S3 of the Architect exam is a multi-agent research system, and its questions are about the team, not the model. Two subagents come back with the same findings. A subagent cannot answer because the coordinator told it "look into the supply chain" and nothing else. One failed subagent takes the whole report down. A lead agent spawns a team for a question that one agent could have answered. Each of these is a decision in the coordinator, and a coordinator is mostly code and a prompt, so an architect is expected to be able to find the decision.
@@ -42,6 +44,10 @@ The coordinator itself is a loop (module 45) whose "tool" is the delegation. A m
 **A complete brief.** The article's checklist is short: "Each subagent needs an objective, an output format, guidance on the tools and sources to use, and clear task boundaries." Add what the page above says: every fact the subagent needs, written into the brief itself. The output format matters for the next step: if every subagent reports in the same shape (findings first, then a source line) the coordinator can compare and merge them.
 
 **Dynamic choice.** The research article ties effort to the question: "Simple fact-finding requires just 1 agent with 3-10 tool calls, direct comparisons might need 2-4 subagents with 10-15 calls each, and complex research might use more than 10 subagents with clearly divided responsibilities." A coordinator that starts the same team for every query overspends on easy questions and may underspend on hard ones. The scale is a rule you write into the coordinator's prompt or code. The Agent SDK also gives you hard limits for when a model-driven lead is too generous: nesting is limited to "up to three layers below the main conversation" by default (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`, set to `1` to stop nesting), at most 20 subagents run at once by default (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`), and the budget cap counts the subagents' spending toward the total. Page 2 comes back to the spend.
+
+### The split can be too narrow
+
+The mirror image of a vague brief is a plan that divides a broad topic into too few, too obvious parts. Each subagent then does its part well, and the answer still leaves out what no part covered. The research article states the cause on the brief's side: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information". A coordinator therefore does two things about coverage. It writes the split from the question's facets, not from the first parts that come to mind. And it checks the findings against the question afterwards and sends out what is missing, which page 2 builds.
 
 ### When the coordinator should not delegate at all
 
@@ -229,9 +235,13 @@ Read the three subagent lines. Each request has one message, the role's system p
 
 ## Traps
 
-1. **A vague brief.** "Research the supply chain" sent to three subagents gets three overlapping answers. Give each its facet, its period or source, its output format and a line saying what it must not cover.
-2. **Sharing the history to be safe.** Passing the coordinator's conversation or the other reports into a brief removes the isolation that keeps the context small, and gives the subagents what they will then repeat. Pass what the subagent needs, not what the coordinator has.
-3. **Delegating everything.** A fixed team for every query costs about fifteen times the tokens of a chat, and a task with shared context or many dependencies does not split. Ask first whether the parts are independent.
+These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected.
+
+1. **"Send every subagent the same broad brief, to be thorough."** It is tempting because it is quick to write. The exam rejects it: three subagents given "Research the supply chain" return three overlapping answers. Give each its facet, its period or source, its output format and a line saying what it must not cover.
+2. **"Share the coordinator's conversation so that nobody lacks context."** It is tempting because it looks safe. The exam rejects it: it removes the isolation that keeps the context small, and it hands the subagents what they will repeat. A brief carries what the subagent needs, not what the coordinator has.
+3. **"Always run the full team, for thoroughness."** It is tempting because a fixed pipeline is simple. The exam rejects it: a fixed team for every query costs about fifteen times the tokens of a chat, and a task with shared context or many dependencies does not split. The coordinator first asks whether the parts are independent.
+4. **"Split the topic into the few parts that are obvious."** It is tempting because the split is fast. The exam rejects it: a narrow split leaves part of a broad topic uncovered. The coordinator checks coverage afterwards (page 2) and sends out the gaps.
+5. **"Let the subagents pass findings to each other to save the coordinator's context."** It is tempting because it shortens the path. The exam rejects it: all communication runs through the coordinator, for observability, one way of handling errors and control over what flows where.
 
 ## Quiz
 
