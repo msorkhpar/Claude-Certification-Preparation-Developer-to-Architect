@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the quizzes of Level 1 modules: pages agree with quiz.json, shape and wording rules hold.
+"""Check the quizzes of Levels 1 to 3 (modules 1 to 50 so far): pages agree with quiz.json, shape and wording rules hold.
 
 Rules (CLAUDE.md quiz rules that a script can check):
   - every question has four options a-d and a key among them;
@@ -19,7 +19,7 @@ Rules (CLAUDE.md quiz rules that a script can check):
     the key carries none, and the key is not the only hedged option (some, may, can, usually, where needed);
   - the key is the longest option in at most 40 percent of a module's questions (warning above 30 percent); the mock
     exam is counted on its own questions;
-  - no two questions of Level 1 have stem+key token sets with Jaccard similarity of 0.5 or more;
+  - no two questions of the course so far have stem+key token sets with Jaccard similarity of 0.5 or more;
   - the stem holds no evaluative word that names the key's quality (balanced, safest, proper, correct way, ...).
 usage: tools/check_quiz.py [module-folder-prefix ...]   exit 1 on any finding
 """
@@ -363,12 +363,12 @@ def check_module(folder):
 
 
 def main(argv):
-    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", p.name))
+    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[1-4][0-9]|50)-", p.name))
     if argv:
         folders = [f for f in folders if any(f.name.startswith(a) for a in argv)]
     total = 0
     items = {}
-    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", p.name)):
+    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[1-4][0-9]|50)-", p.name)):
         for pg in sorted(f.glob("*.md")):
             for kind, questions, keys in parse_page_quizzes(pg.read_text()):
                 for n, ((stem, opts), key) in enumerate(zip(questions, keys), start=1):
