@@ -120,19 +120,19 @@ memory before you look, because recall effort is what strengthens memory.
 
 ## Quiz
 
-1. A scenario describes a manager asking Claude to summarise a regulation, with a clause cited. Among the options is one
-   that has the assistant rate its own certainty. Which distractor family is this?
-   - **a**: Self-verification, where the model vouches for itself
-   - **b**: Too much machinery, meaning a heavy build for a simple problem
-   - **c**: A different problem, meaning a real fix aimed at the wrong target
-   - **d**: Right idea, wrong moment, meaning a correct step taken too late
+1. A scenario describes a support team whose short, high-volume replies are too costly, and the ask is "what is the
+   most likely fix". Following the method, which label should the candidate write down before reading the options?
+   - **a**: A choice of tier, the sort a busy desk faces
+   - **b**: A data-sensitivity problem, the sort personal records raise
+   - **c**: Missing context, the sort a thin prompt leaves behind
+   - **d**: A verification gap, the sort a confident-looking citation raises
 
-2. A candidate spends several minutes going over the whole scenario twice before locating the question sentence, and then
-   runs short of time. Which step of the working method was skipped?
-   - **a**: Begin with the ask itself, then take in the situation with that in mind
-   - **b**: Form a one-line answer only after reading every option in turn
-   - **c**: Change an answer only after spotting a new fact in the text
-   - **d**: Count the answers to select just before submitting the item
+2. A candidate keeps choosing answers that are correct in general but ignore that the people in the item have a week
+   and a small budget. Which habit of the method would have separated the best answer from the merely possible?
+   - **a**: Naming the problem type before reading the options
+   - **b**: Marking the limits that apply before weighing the replies
+   - **c**: Predicting a one-line answer before looking at the choices
+   - **d**: Changing an answer only after rereading the item once more
 
 3. With three weeks left, a candidate misses most mock questions on one heavily weighted topic area. Which plan fits the
    page?
@@ -144,8 +144,17 @@ memory before you look, because recall effort is what strengthens memory.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The table gives "Asks the model to confirm itself" as the self-verification family, with "Ask Claude how confident it is" as its sound. *b* is ruled out because "Too much machinery" means "Solves a simple problem with a heavy build", and a request for a rating builds nothing. *c* is ruled out because "A different problem" is one that "Fixes something real that is not the one described", while this option targets the real problem with a weak method. *d* is ruled out because "Right idea, wrong moment" is a "Correct step done too early, too late or out of order", and a self-rating is not a correct step at any time.
-2. **a**. The first step of the method is "Read the ask first", then the situation is read with it in mind. *b* is ruled out because the method says "Form a one-line answer, then look for it", so the prediction comes before the options and not after them. *c* is ruled out because "A new fact you noticed is a reason; a feeling is not" concerns revising an answer, not the order of reading. *d* is ruled out because the step reads "Check it again before you submit", which comes at the end and does not explain time lost at the start.
+1. **a**. The method says to name the problem type first, and the Associate guide's sample of "a high volume of
+   short replies where speed and cost matter" is a model-choice decision. *d* is ruled out because the verification
+   sample is "a summary with a confident-looking citation", which is not a cost problem. *b* is ruled out because
+   the data sample is "a spreadsheet of personal data under a restrictive policy". *c* is ruled out because the
+   guide's sample of "a high volume of short replies where speed and cost matter" ends in a faster, lower-cost
+   model, not a longer prompt.
+2. **b**. The method says "the constraint is what separates the best option from the merely possible one", so the
+   week and the budget are marked first. *a* is ruled out because a label predicts the shape of the answer, while
+   "Cost, speed, risk, policy, audience, a deadline" decide between answers of that shape. *d* is ruled out because
+   "A new fact you noticed is a reason; a feeling is not" concerns revising, not choosing. *c* is ruled out because
+   a prediction that matches nothing sends you back: "If none matches, re-read the constraint".
 3. **c**. The plan is to study the weakest domains first and work the review bank for them on the spaced schedule. *b* is ruled out because the mock's job is to "Test readiness under time, and find weak domains", not to be learned by heart. *a* is ruled out because the plan says to "Study the weakest domains first, weighted by their share of the exam". *d* is ruled out because the plan says to "Take the mock exam once, untimed, and mark each miss with its domain and the reason" before any second attempt.
 
 </details>
@@ -154,19 +163,20 @@ memory before you look, because recall effort is what strengthens memory.
 
 This quiz covers pages 1 to 3 of the module and the mock exam page.
 
-1. A candidate with a documented need for extra time wants to sit the Architect Foundations exam. She books a slot first,
-   then requests the adjustment. Which statement is accurate?
-   - **a**: The slot is fine, since adjustments are granted on the day itself
-   - **b**: Approval had to come before the appointment was made
-   - **c**: Approval is unnecessary, as a proctor can add time whenever asked
-   - **d**: The adjustment can be made only at a test centre, forcing a rebooking
+1. Three weeks before an online sitting, a candidate has taken the mock once, untimed, and her misses cluster in the
+   topic area that carries the most weight. She has not yet checked her computer and connection for the test. Which
+   plan fits the module?
+   - **a**: Study that block in spaced sessions from the bank, and run Pearson's trial well ahead
+   - **b**: Memorise the mock's answers, and book a test centre to avoid the computer check
+   - **c**: Revise only the topics she already knows, since they carry the most marks
+   - **d**: Retake the mock every day until the score rises, and test the computer on the day
 
-2. A score report shows 80 percent in one domain, 40 percent in another and a scaled score of 700. What should the candidate
-   conclude?
-   - **a**: A fail, and a retake can happen the very next day at no extra cost
-   - **b**: A pass, because the strong section outweighs the weak one
-   - **c**: A fail, as the pass mark is 720; study the weak area first
-   - **d**: Borderline, so a reviewer will re-score the weakest section by hand
+2. A candidate fails the Associate exam with a scaled score of 700 against a pass mark of 720, and wants the soonest
+   sensible second attempt. Which plan matches the module?
+   - **a**: Sit it again the next day under the same booking and fee
+   - **b**: Wait 14 days, then sit it at a reduced fee as a second attempt
+   - **c**: Wait 14 days, pay the full fee once more, and aim study at the weakest domains
+   - **d**: Wait 90 days, since the wait depends on how far the score fell short
 
 3. On a 60-item sitting of 120 minutes, a candidate spends five minutes on each of the first twenty items. What follows?
    - **a**: She should rush the first items instead, since early items carry most weight
@@ -184,8 +194,14 @@ This quiz covers pages 1 to 3 of the module and the mock exam page.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The fixed order is to request the accommodation and wait for approval before scheduling. *a* is ruled out because "Extra time or a break you did not arrange in advance is not available on the day". *c* is ruled out because "an unapproved break counts as misconduct", so a proctor cannot add time on request. *d* is ruled out because accommodations are for "documented disabilities or needs, in line with applicable law", with no limit to test centres.
-2. **c**. The pass mark is a scaled score of 720, so 700 fails, and the sensible reaction is to use the domain figures to aim revision. *b* is ruled out because pass or fail "depends on the total scaled score", not on the stronger domain. *a* is ruled out because retake waits are "14 days after the first, 30 days after the second", and each attempt costs the full fee. *d* is ruled out because you get "pass or fail, your scaled score, and the percentage correct in each domain", with no review of a score by hand.
+1. **a**. The plan is to study the weakest heavy domain on the spaced schedule and to run the provider's system test
+   well before the day. *d* is ruled out because the table says to "Run Pearson's system test on the computer and
+   connection" before the exam, not on it. *b* is ruled out because the mock is there to "Test readiness under time,
+   and find weak domains", not to be learned by heart. *c* is ruled out because the plan says "Study the weakest
+   domains first, weighted by their share of the exam".
+2. **c**. The first failed attempt carries a 14-day wait, every attempt costs the full fee, and the domain figures
+   show where to study. *a* is ruled out because the waits are "14 days after the first, 30 days after the second,
+   90 days after the third". *b* is ruled out because "Each attempt costs the full fee". *d* is ruled out because the waits run "14 days after the first, 30 days after the second, 90 days after the third", so 90 days belongs to the third failure and not to the score.
 3. **d**. Twenty items at five minutes use 100 of the 120 minutes, leaving 20 minutes for 40 items. *b* is ruled out because the page says to "leave no item blank by choice", since no penalty for a wrong answer is described. *c* is ruled out because the exam is "120 minutes of exam time", a fixed limit. *a* is ruled out because the sensible pattern is "answering what you know and keeping a note of the uncertain ones", not rushing the start.
 4. **b**. The routine pairs spaced practice on misses with learning the interface from the provider's tutorial, well before the day. *a* is ruled out because the mock exists to "Test readiness under time, and find weak domains". *c* is ruled out because "Spaced practice over weeks does more than one long session". *d* is ruled out because "Short daily sessions beat long weekend ones", and two mocks in a day is a long session.
 

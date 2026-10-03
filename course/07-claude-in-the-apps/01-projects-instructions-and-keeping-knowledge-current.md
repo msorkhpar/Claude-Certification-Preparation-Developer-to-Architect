@@ -24,8 +24,7 @@ for a month now: what went stale?" A Project is only as good as the least curren
 
 The help centre describes a Project as a self-contained workspace with its own chat histories and knowledge base.
 Inside one you can upload documents, text, code or other files, write project instructions, and hold focused chats
-that start with all of that already in view. A free account can hold up to five Projects; the paid plans have no
-such cap on the page. Projects use plan allowance like any other chat.
+that start with all of that already in view. A free account can hold up to five Projects; the page gives no limit for the paid plans. Projects use plan allowance like any other chat.
 
 Three pieces matter for the exam:
 
@@ -44,7 +43,8 @@ be refreshed by updating a file.
 
 Everything in a Project competes for the context window (module 1). On the paid plans the help centre says that when a
 Project approaches the context limit Claude enables RAG mode, retrieval of the relevant parts, which expands
-capacity by up to 10 times while keeping quality. Two consequences follow. A big knowledge base is possible, and
+the Project's capacity. (An earlier reading of the page gave a multiplier of up to 10 times; it was not found again on
+2026-10-02, so treat the figure as checked on 2026-10-02, unverified detail.) Two consequences follow. A big knowledge base is possible, and
 a retrieved passage is only as good as its source, so a muddled file produces muddled answers at scale.
 
 ### Sharing a Project
@@ -130,16 +130,17 @@ Review:    the file name is March. The pricing file for October exists in Drive.
    - **c**: Ask Claude to mention any figure it feels unsure about at the end of each reply
    - **d**: Replace the snapshot with a synced Drive link, so the newest edition is read
 
-2. A new Project gives accurate answers for a week, then a colleague pastes the current refund percentage straight
-   into the Project's instructions. Two months later the policy is revised. Which flaw caused the wrong replies?
-   - **a**: A volatile figure lives where no file refresh can reach
-   - **b**: Memory kept the older percentage from a previous chat
-   - **c**: Sharing the workspace shows the percentage to every member with access
-   - **d**: Retrieval mode drops numbers when the context grows large
+2. In March a colleague pastes the refund percentage into a Project's instructions. In June the policy changes, the
+   team deletes the March policy file and uploads the June one, yet July replies still quote the March percentage.
+   What explains it?
+   - **a**: A second copy of the figure sits in text that no replaced document reaches
+   - **b**: Memory carried the March percentage over from an earlier conversation
+   - **c**: The old and new editions both remain in the knowledge base, and Claude quotes either
+   - **d**: Sharing the Project keeps showing members the percentage they saw first
 
 3. An operations lead supports several clients, whose background material and house rules must never mix. Which
    set-up fits?
-   - **a**: Run one long chat and paste each customer's material into it in turn
+   - **a**: Run one long chat and paste each customer's material into it in turn as the work arrives
    - **b**: Create one Project and put all customers' guidance into a single instruction block
    - **c**: Give each customer a Project holding that customer's own instructions and documents
    - **d**: Depend on memory alone, since Claude saves context from every chat it has
@@ -148,7 +149,12 @@ Review:    the file name is March. The pricing file for October exists in Drive.
 <summary>Answer key</summary>
 
 1. **d**. A synced document follows its source, so the next read gets the latest version (connecting a document instead of copying it). *b* is ruled out because "an instruction is a request and a deleted file is a guarantee", and the old figure would still be in the knowledge base. *c* is ruled out because "Quality in is quality out", and asking for self-doubt does not repair a stale source. *a* is ruled out because "Two versions of one document side by side invite Claude to quote either".
-2. **a**. The instructions say how to work and the files say what is true, and a figure typed into the instructions is a second copy that no file update will touch (the first trap). *b* is ruled out because memory is described as holding "preferences and context that Claude picked up", and nothing in the scenario involves an earlier chat. *c* is ruled out because "anyone with access can read the instructions and every file in the knowledge base" is about who sees the content, not whether it is current. *d* is ruled out because retrieval "expands capacity by up to 10 times while keeping quality", and it is not described as dropping numbers.
+2. **a**. Instructions say how to work and files say what is true, so a figure typed into the instructions is a
+   second copy that no file update will touch (the first trap). *b* is ruled out because memory "holds preferences
+   and context that Claude picked up, not the authoritative text of a policy". *c* is ruled out because the team
+   deleted the March file, whereas the page warns about "Two versions of one document side by side". *d* is ruled
+   out because "anyone with access can read the instructions and every file in the knowledge base" describes who
+   sees the content, not whether it is current.
 3. **c**. Each Project is a self-contained space, so "one Project's context does not leak into another" (the memory paragraph). *b* is ruled out because "Everything in a Project competes for the context window", and one block of mixed rules lets one customer's rules bleed into another's. *a* is ruled out because the table says chats are "The actual tasks; each can be restarted without losing the first two", and one long chat gives that up. *d* is ruled out because "memory is not a substitute for a knowledge file" and holds preferences, not each customer's authoritative documents.
 
 </details>

@@ -137,32 +137,44 @@ same thread.
 
 ## Quiz
 
-1. An operations lead asks Claude in Chrome to tidy her supplier portal. A page there contains white-on-white text
-   telling the assistant to open a payment form. Which behaviour does the page describe?
-   - **a**: Claude follows the text, because it appears on a site the lead opened
-   - **b**: Classifiers screen the content, and some actions stay off limits
-   - **c**: The extension ignores hidden text on every page, so this cannot occur
-   - **d**: Skipping approvals turns the screening on automatically for web content
+1. An operations lead runs Claude in Chrome in Automatically approve mode on a supplier portal. A page there holds
+   white-on-white text telling the assistant to open a payment form. Which behaviour does the page describe?
+   - **a**: Claude follows the text, since the portal is a site the lead chose to visit
+   - **b**: The extension strips hidden text before reading, so it never reaches Claude
+   - **c**: Screening switches off in this mode, since the lead has delegated the decisions
+   - **d**: Screening covers each step, and financial transactions stay off limits
 
-2. An Enterprise compliance team asks whether use of the Excel add-in appears in the organisation's audit logs and
-   follows its custom retention setting. What is the accurate answer?
-   - **a**: Only the outputs are logged, and only for a day after each session
-   - **b**: Yes, since every Claude product writes into the one audit trail kept for the whole organisation
-   - **c**: Yes, once the Excel add-in is installed from the store listing
-   - **d**: No: the tools sit outside that trail and disregard those preferences
+2. An Enterprise team with the Compliance API enabled wants one record of the Excel add-in's use, and wants its
+   custom data-retention rule to govern it. What does the page support?
+   - **a**: Sessions are included as a public beta, but the deletion schedule does not carry over
+   - **b**: Neither the API nor the audit logs cover it, so no central record exists
+   - **c**: Chat history sits on Anthropic's servers, so the deletion schedule governs it
+   - **d**: Use shows in the audit logs, and the custom deletion schedule applies to it
 
-3. A colleague wants private help drafting a delicate reply, using her saved connectors, without the team
-   seeing it. Where should she write to Claude Tag?
-   - **a**: In the busiest channel, since the answers are visible only to her
-   - **b**: In a direct message, which runs under her own account and tools
-   - **c**: In a group conversation, which is billed to her personal plan
-   - **d**: In a channel, with a request to hide the reply afterwards
+3. A manager wants Claude Tag to draft a delicate reply from her saved connectors, hidden from the team, with the
+   usage counted against her individual account. Where should she write to it?
+   - **a**: In a channel where an admin set up the connectors for everyone there
+   - **b**: In a direct message, whose access and cost belong to the sender
+   - **c**: In a channel, then ask Claude to hide the reply afterwards
+   - **d**: In a group direct message with one trusted colleague
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page describes classifiers that screen incoming content and each action, and actions such as completing instructions found in web content are off limits whatever the mode. *a* is ruled out because the page lists "completing instructions found in emails or web content" among the actions that are off limits. *c* is ruled out because the page says "the risk is not zero", so the screening does not make such text impossible. *d* is ruled out because "Skip all approvals" means "nothing checks its actions", so it removes the checking.
-2. **d**. The page says the add-ins "do not inherit your organisation's custom data-retention settings" and that their activity is not in the Enterprise audit logs. *b* is ruled out because "their activity is not in the Enterprise audit logs", although Compliance API coverage exists for some organisations. *c* is ruled out because "their activity is not in the Enterprise audit logs" is stated for the add-ins in general, and installing from AppSource does not change it. *a* is ruled out because "Inputs and outputs are deleted from Anthropic's backend within 30 days", not after a day.
-3. **b**. A direct message runs on your own claude.ai account with your own connectors, and only you see it (the table). *a* is ruled out because work in a channel is "visible to everyone there", not only to the sender. *c* is ruled out because a group conversation uses "The access an admin set for the workspace" and is billed to the organisation. *d* is ruled out because the page says a personal task "belongs in a direct message", and a channel shows everything Claude does there.
+1. **d**. The page describes classifiers that screen incoming content and each action, and purchases and other
+   financial transactions are off limits whatever the mode. *a* is ruled out because the page lists "completing
+   instructions found in emails or web content" among the actions that are off limits. *b* is ruled out because the
+   page reports an attack rate while "saying plainly that the risk is not zero". *c* is ruled out because in this
+   mode "Claude keeps working and reviews each action for safety, blocking what it judges unsafe".
+2. **a**. The page says add-in sessions are included in the Compliance API, and that the add-ins "do not inherit
+   your organisation's custom data-retention settings". *d* is ruled out because "their activity is not in the
+   Enterprise audit logs". *b* is ruled out because "add-in sessions are included in it" for Enterprise
+   organisations with the Compliance API enabled. *c* is ruled out because "Chat history is stored in your browser,
+   not on Anthropic's servers".
+3. **b**. A direct message uses "Your own claude.ai account and your own connectors", and only you see it (the
+   table). *a* is ruled out because a channel gives "What an admin set up for that channel; everyone there gets the
+   same access" and the organisation pays. *d* is ruled out because a group direct message uses "The access an admin
+   set for the workspace" and is paid by the organisation. *c* is ruled out because "Work in a channel is visible to
+   everyone there and uses the channel's access", so hiding the reply later does not undo that.
 
 </details>

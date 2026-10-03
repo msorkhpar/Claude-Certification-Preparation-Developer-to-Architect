@@ -76,11 +76,11 @@ Associate need not configure them but should know they exist and which one answe
 | What is recorded | Audit logs, a Compliance API, and streaming of Cowork events to the organisation's monitoring tools |
 | How long data is kept | Retention settings, including custom retention or zero data retention for Enterprise agreements |
 | Cost | Spend controls at the organisation and per person; a monthly spend limit for Claude Tag |
-| Where Claude acts in a chat tool | Claude Tag access limited to chosen channels and people, with its own accounts in other tools so its actions are traceable |
+| Where Claude acts in a chat tool | Claude Tag access limited to chosen channels and people, with its own accounts in other tools, each with the narrowest role that covers the work, so its actions are traceable and its access can be cut off without touching anyone else's |
 
 Two cautions. First, controls interact with features: a few features are unavailable under strict data agreements
 (Claude Tag where zero data retention or customer-managed encryption applies, memory under HIPAA or custom retention
-agreements, Claude in Chrome for HIPAA organisations), so a strict setting can switch a feature off. Second, coverage is
+agreements, Claude in Chrome for HIPAA organisations, and Cowork, which the HIPAA-ready plans page says is not yet covered under Anthropic's business associate agreement), so a strict setting can switch a feature off. Second, coverage is
 not uniform: the Microsoft 365 add-ins are outside the Enterprise audit logs and do not inherit custom retention
 settings, so "we log everything" needs checking product by product.
 
@@ -115,19 +115,20 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 
 ## Quiz
 
-1. A user asks Claude in Chrome to compare supplier pages. One page carries hidden text telling the assistant to open the
-   user's webmail and forward invoices. Which pair of conditions made this attack possible?
-   - **a**: The user ran the extension on a work laptop, and on a fast home connection
-   - **b**: Untrusted content could be read, and consequential actions could be taken
-   - **c**: The page used large images, and the browser was not fully up to date
-   - **d**: The supplier was unknown, and the user had saved no earlier chats
+1. A company lets Claude read incoming support emails and also move money to buyers, both unattended. An email
+   carries hidden text telling it to pay a stranger. Which change preserves the mailbox reading and breaks the attack's condition?
+   - **a**: Tell Claude in its standing instructions to ignore any email that changes its task
+   - **b**: Let it go on checking inbound messages, but have a person approve every transfer
+   - **c**: Add a home-built screen that scores each email and leave transfers unattended
+   - **d**: Stop it from opening the mailbox and leave the transfers automatic
 
-2. An Enterprise administrator wants Claude to view requests in a helpdesk connector, yet insist on a human click before
-   any request is resolved. Which control matches?
-   - **a**: A monthly spend limit applied to the whole workspace, set by an owner
-   - **b**: A switch that turns web search off for chat and Cowork across the organisation
-   - **c**: Scanning of uploaded skills and plugins for malicious content before they are used
-   - **d**: A per-tool permission, allowed for looking up and needing approval for changing
+2. A security team must show which actions the company's Slack agent took in its ticket tool, under a name that is
+   not a person's, and must be able to cut the agent's access without touching staff accounts. Which setup meets
+   both?
+   - **a**: Let it act under the login of whoever tagged it, so each change names that person
+   - **b**: Share one administrator login among the staff who use the agent
+   - **c**: Give it a login of its own there, with the narrowest role that covers the work
+   - **d**: Rely on the Microsoft 365 audit logs, since every Claude product writes to them
 
 3. A manager asks an analyst to put a full customer export into Claude to get a report by tonight. Policy forbids regulated
    personal data in the tool. What is the best step?
@@ -139,8 +140,16 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page states the condition for harm: "the risk exists when Claude can read untrusted content and take consequential actions". *a* is ruled out because "Take either away and the danger drops", and a laptop or a connection is neither of the two conditions. *c* is ruled out because the attack plants instructions in content, and the page says the first habit is "Limit what Claude reads to sources you trust", not to tidy images or updates. *d* is ruled out because an earlier chat history plays no part in the condition for harm, which is "read untrusted content and take consequential actions".
-2. **d**. The per-tool setting lets reading run while a status change needs approval (the controls table). *b* is ruled out because the table places web search under "Where the web can reach", which does not touch connector actions. *c* is ruled out because scanning belongs to "Untrusted skills and plugins", not to what a connector may do. *a* is ruled out because a spend limit belongs under "Spend controls at the organisation and per person", which is cost and not permission.
+1. **b**. The risk "exists when Claude can read untrusted content and take consequential actions", and a person on
+   the consequential step removes the second condition while the first stays. *a* is ruled out because the condition
+   for harm is unchanged by a request, and the page calls the position "safer than before, not safe enough to stop
+   paying attention". *d* is ruled out because, although "Take either away and the danger drops", it gives up the mailbox reading that the company wants to keep. *c*
+   is ruled out because a screen only filters, and the page's habit is to "Keep a person on consequential steps".
+2. **c**. Claude Tag acts through its own accounts, so its actions are traceable and its access can be cut off
+   separately (the controls table). *a* is ruled out because the agent's "access can be cut off without touching
+   anyone else's" only when it does not borrow someone's login. *b* is ruled out because each account gets "the
+   narrowest role that covers the work", which a shared administrator login does not. *d* is ruled out because
+   "coverage is not uniform: the Microsoft 365 add-ins are outside the Enterprise audit logs".
 3. **b**. The best answer "raises the conflict with the person who owns the policy and proposes a compliant path". *a* is ruled out because "Missing or unclear policy is not permission", and a verbal approval is not an exception from the policy owner. *c* is ruled out because the wrong answers include those that "refuse everything, or quietly find a way around", and an aggregated report is a compliant path. *d* is ruled out because "do not work around the rule (a personal account, a different tool, a rewording that hides the data)".
 
 </details>
@@ -149,19 +158,19 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 
 This quiz covers both pages of the module.
 
-1. A recruiter wants Claude to screen applicants' CVs into "advance" and "reject" lists that go to hiring managers. Which
-   step meets the Usage Policy and good practice?
-   - **a**: Let Claude finalise both sets, since it explains every ranking it gives
-   - **b**: A qualified person reviews the outcomes, and recipients are told AI assisted
-   - **c**: Remove candidates' names, then send the sets out with no review at all
-   - **d**: Run the screening in a personal account, so the content stays private to her
+1. A staffing firm lets Claude sort CVs into two piles for hiring managers, and also deploys it as the public face
+   of its applicant helpdesk. Which pair of duties does the Usage Policy impose?
+   - **a**: A qualified reviewer for the piles, and no notice, since the helpdesk only answers questions about orders
+   - **b**: A notice of AI use on each pile, which also covers the helpdesk, and no reviewer
+   - **c**: Removal of candidates' names, and a yearly audit of the helpdesk's answers
+   - **d**: A qualified reviewer before anyone relies on the result, and a notice of AI use when each visit begins
 
-2. A colleague forwards a spreadsheet from an outside vendor and asks Claude for a summary with the Excel add-in. Rows contain
-   white text addressed to the assistant. What is the most appropriate precaution?
-   - **a**: Use a trusted copy and check each prompt, since external files can hide commands
-   - **b**: Turn on cross-app mode, so that a second document can check what the first one holds
-   - **c**: Delete the add-in's saved instructions so that nothing exists for the text to override
-   - **d**: Rely on the audit log to catch whatever damage might be done afterwards
+2. A clinic's analyst wants Claude's help with a sheet of patient names and diagnoses, and the clinic is under a
+   strict data contract. Which opening step fits?
+   - **a**: Remove identifiers first, then use only the features its agreements leave available
+   - **b**: Upload the sheet to a consumer account, where chats are not used for training unless allowed
+   - **c**: Replace names with codes, keep the key in the sheet, and upload it
+   - **d**: Ask an owner to enable every feature, then upload the sheet to the strongest one
 
 3. An analyst discovers that a shared document contains a hidden line aimed at AI tools, telling them to send a summary to
    an outside address. What should she do?
@@ -170,19 +179,32 @@ This quiz covers both pages of the module.
    - **c**: Try the line in a spare chat to find out whether it really works as claimed
    - **d**: Raise it at the next team meeting, which falls a few weeks away in the calendar
 
-4. A hospital group that has a HIPAA agreement asks whether staff may turn on memory and use Claude in Chrome on patient pages.
-   Which answer is correct?
-   - **a**: Yes, since an owner can enable any feature across the whole organisation
-   - **b**: Yes, if staff keep incognito mode switched on at all times during use
-   - **c**: No: both are unavailable or not recommended under that arrangement
-   - **d**: Only Chrome, since memory has no data retention at all after a session
+4. A hospital group on a HIPAA-ready Enterprise plan asks whether staff may turn on memory, and also use Cowork on a
+   shared folder of patient letters. Which answer fits the module?
+   - **a**: Turn on both, since an owner can enable any feature for the whole organisation
+   - **b**: Turn on Cowork only, limited to a dedicated folder
+   - **c**: Turn on memory only, switched off for each chat before the first message
+   - **d**: Leave both off here and ask the compliance owner what the agreement covers
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Hiring decisions are a high-risk use: a qualified professional reviews them and recipients are told AI helped. *a* is ruled out because "qualified professional in the field must review the content or decision before it is disseminated or finalised", and a model's own explanation is not a reviewer. *c* is ruled out because the review must happen "before it is disseminated or finalised", and removing names does not replace it. *d* is ruled out because "do not work around the rule (a personal account, a different tool, a rewording that hides the data)".
-2. **a**. The page says external files can carry hidden instructions, so the precaution is a trusted copy and careful confirmations. *b* is ruled out because more reach is not a precaution: the user habit is "Limit what Claude can do". *c* is ruled out because the hidden text is in the data, and the page warns that "files from outside can carry hidden instructions", whatever the add-in's own settings say. *d* is ruled out because "the Microsoft 365 add-ins are outside the Enterprise audit logs and do not inherit custom retention settings", so there is nothing to rely on.
+1. **d**. Employment decisions are high-risk, so a qualified professional reviews them, and a consumer-facing
+   chatbot must disclose that it is AI at the beginning of each chat session. *a* is ruled out because "consumer-facing chatbots must also disclose that the user is talking to AI rather than a human". *b* is ruled out because
+   a "qualified professional in the field must review the content or decision", so a notice cannot replace the
+   reviewer. *c* is ruled out because the review comes "before it is disseminated or finalised", not as a yearly
+   audit afterwards.
+2. **a**. Regulated data stays out of a tool unless the contract allows it, so identifiers go first, and strict
+   agreements switch some features off. *d* is ruled out because "a strict setting can switch a feature off", so an
+   owner cannot enable what the agreement removes. *b* is ruled out because regulated data goes "Not in a tool
+   unless policy and the contract explicitly allow it; otherwise anonymise first", whatever the plan's training
+   terms. *c* is ruled out because "Pseudonymised data is still personal data under many rules, because the key can
+   reverse it".
 3. **a**. A suspicious file is reported to the security or IT contact straight away, because the same file may reach others. *b* is ruled out because deleting the line leaves others unaware, and "the same file may reach others". *c* is ruled out because running it in a tool that reads untrusted content re-creates the danger, and "Take either away and the danger drops". *d* is ruled out because "A leak or a suspicious file is reported quickly; waiting lets it spread."
-4. **c**. Memory is not available under HIPAA agreements, and Claude in Chrome is not available to HIPAA organisations. *b* is ruled out because "the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements", which incognito mode does not change. *a* is ruled out because "a strict setting can switch a feature off", so an owner cannot enable what the agreement removes. *d* is ruled out because the page names both features among those unavailable under strict data agreements: "Claude in Chrome is not available to HIPAA organisations".
+4. **d**. Memory is unavailable under HIPAA agreements and Cowork is not yet covered by the business associate
+   agreement, so the question goes to the person who owns the policy. *a* is ruled out because "a strict setting can
+   switch a feature off", so an owner cannot enable what the agreement removes. *b* is ruled out because Cowork is
+   "not yet covered under Anthropic's business associate agreement", and a dedicated folder limits reach, not
+   coverage. *c* is ruled out because "the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements".
 
 </details>

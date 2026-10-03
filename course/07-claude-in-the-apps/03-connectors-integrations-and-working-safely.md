@@ -120,12 +120,11 @@ Module 8 teaches both, with Cowork and Claude Tag.
    - **c**: The workspace holding the chat must be shared before the area becomes visible
    - **d**: The area is too big for retrieval to cope with in a single request
 
-2. A company wants Claude to read tickets in its helpdesk system but never close one without a person's click. Which
-   setting fits?
-   - **a**: Allow viewing outright, and make the resolving action wait for approval
-   - **b**: Block the whole connector, then have staff paste the items into a chat
-   - **c**: Allow every tool, then tell Claude in its instructions to be careful
-   - **d**: Give all agents one shared login, so nobody's access differs from another's
+2. A company connects its helpdesk to Claude. Agents may read tickets and add internal notes freely, but ending a ticket must wait for a person's click, and trainees must not see escalated tickets. Which design meets both rules?
+   - **a**: Require approval to close, and write the group's limit into the connector's instructions
+   - **b**: Allow every tool without approval and expect the helpdesk to stop the trainees
+   - **c**: Require approval to close, and leave the group's limit in the source system itself
+   - **d**: Require approval to close, and give that group wider access through Claude's settings
 
 3. A team lead finds a handy link on a forum that would add a custom connector in seconds. What is the best step?
    - **a**: Install it, then watch the first few replies for anything odd
@@ -137,7 +136,10 @@ Module 8 teaches both, with Cowork and Claude Tag.
 <summary>Answer key</summary>
 
 1. **a**. "Claude inherits each person's permissions from the connected service", so the manager's reach, not the administrator's, decides what appears. *b* is ruled out because the page names permissions as the cause of a missing result ("the connector cannot reach it from Claude for them either") and says nothing about the age of material. *c* is ruled out because "Fixing a connector's reach is done in the source system", not by sharing a workspace. *d* is ruled out because the page ties a missing result to access, as in "the connector cannot reach it from Claude for them either", and never to size.
-2. **a**. Each tool can be "always allowed, needs approval or blocked", so reading can run freely while closing needs a click. *b* is ruled out because "each tool can be always allowed, needs approval or blocked" means a per-tool setting exists, and blocking everything gives up the reading the company wants. *c* is ruled out because "organisation settings are controls, and a quiet instruction not to store something is not one", and an instruction to be careful is likewise only a request. *d* is ruled out because "Each person signs in to the service themselves", and a shared login erases the individual permission model.
+2. **c**. Each tool can be set to need approval, and Claude inherits each person's permissions, so a restriction on one group belongs in the source system. *a* is ruled out because "Fixing a connector's reach is done in the source system,
+   by changing who can open what, not by rewording an instruction". *b* is ruled out because an organisation can
+   "let Claude read a system and require a human click before it writes to it", and always allowing every tool gives
+   that up. *d* is ruled out because "A connector cannot give anyone more access than they already have".
 3. **c**. The checklist says to connect only to servers from trusted organisations and to read the scopes before approving them. *b* is ruled out because "a custom connector has not been verified by Anthropic", whatever the plan allows. *a* is ruled out because "Remote tools can change after you approve them", so a good first reply proves nothing about later behaviour. *d* is ruled out because "the page suggests On demand when you have ten or more connectors", which is about tool loading and not about what a server may do.
 
 </details>
@@ -161,26 +163,36 @@ This quiz covers every page of the module.
    - **c**: A skill for the procedure, a connector for the data, an artifact for the output
    - **d**: Three separate chats, one per stage, with material copied across by hand
 
-3. A new hire installs a free skill from a public forum that also requests mailbox access through a custom
-   connector. Which risk is the most serious?
-   - **a**: The free plan would block the install, leaving the skill unusable
-   - **b**: The skill would slow replies by filling the context window
-   - **c**: The connector would keep a duplicate mailbox for model training
-   - **d**: Concealed instructions could steer Claude into exposing private messages
+3. A new hire installs a free skill found on a public forum. Its page says the skill also needs a custom connector
+   to the hire's work email, and the hire's plan allows both. Which step belongs before installing?
+   - **a**: Confirm that the plan lists skills and custom connectors, then install it
+   - **b**: Trial it in a private chat first and judge it by the first few replies
+   - **c**: Install it on the hire's account only, so colleagues stay out of reach
+   - **d**: Inspect the package contents and confirm who operates the server it calls
 
-4. Two colleagues put one question to the same Project and receive different answers. Only one of them has
-   connected an email account to Claude. What is the most likely reason?
-   - **a**: Saved context is common to all colleagues, so one overwrote the other
-   - **b**: Each person's tools work with that person's own sign-in and rights
-   - **c**: An artifact made by one colleague replaced the other's replies
-   - **d**: The tool uses the Project owner's sign-in for everybody who chats there
+4. Two colleagues ask the same shared Project about one finance folder. One receives a summary, the other is told
+   nothing was found. Both reached the storage through the same custom connector, which the owner enabled. What
+   should the owner check first?
+   - **a**: Reconnect the storage for the second colleague under the owner's credentials
+   - **b**: Reword the Project instructions to search the whole folder
+   - **c**: Switch the connector to On demand so tools stop crowding the chat
+   - **d**: Compare what each of them is allowed to see in the source system
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A synced document follows its source, and the knowledge base is readable by everyone with access, so private notes stay out (pages 1 and 3). *a* is ruled out because "an uploaded file is a copy as of the day you uploaded it", and sharing exposes everything the knowledge holds. *c* is ruled out because "A figure typed into the instructions is a second copy that no file update will touch". *d* is ruled out because "Do not use it for a question that one document answers", and a policy file is that case.
 2. **c**. A skill carries a repeatable procedure, a connector reads live data, and an artifact is a deliverable someone can open and edit. *b* is ruled out because "A short answer stays inline in the chat", which does not suit a file to be edited. *a* is ruled out because a plugin is "A role's bundle of procedures and connections", and not the means of handing one deliverable to one buyer. *d* is ruled out because "A skill is a reusable procedure Claude pulls in when the task matches", which copying by hand gives up.
-3. **d**. A skill and a connector both carry instructions that Claude follows, and the pages name prompt injection and data exfiltration as the main risks. *b* is ruled out because "Only the pertinent skills enter the context window", so length is not the main danger. *c* is ruled out because "raw connector content is excluded from model improvement unless you copy it into a chat yourself". *a* is ruled out because "Skills are available on Free, Pro, Max, Team and Enterprise plans", so the free plan does not block them.
-4. **b**. "Each person signs in to the service themselves", so a connector shows what that person can reach. *a* is ruled out because "Each project has its own separate memory space and dedicated project summary", and nothing lets one colleague's saved context overwrite another's. *c* is ruled out because "Artifacts are private by default", so one person's artifact does not replace another's replies. *d* is ruled out because "Each person signs in to the service themselves", and the sign-in belongs to the person who chats.
+3. **d**. A skill carries instructions and scripts that Claude follows, and a custom connector "has not been
+   verified by Anthropic", so the contents and the operator need checking first. *a* is ruled out because "A skill
+   can carry scripts and instructions that Claude follows", so plan availability says nothing about safety. *b* is
+   ruled out because the page says to "review code dependencies and bundled resources first", and a first reply
+   cannot show them. *c* is ruled out because "The page names prompt injection and data exfiltration as the most
+   significant risks", and the mailbox in danger is the installer's own.
+4. **d**. Claude inherits each person's permissions, so two people can get different answers because they can see
+   different files. *a* is ruled out because a connector "does not bypass the source system's permissions". *b* is
+   ruled out because "Fixing a connector's reach is done in the source system, by changing who can open what, not by
+   rewording an instruction". *c* is ruled out because On demand is suggested "when you have ten or more connectors,
+   so that the conversation is not crowded with tools", which is about loading and not about reach.
 
 </details>

@@ -16,16 +16,22 @@ sources are kept outside the repository. Every exam in the table has a public of
 | Claude Certified Architect, Foundations | CCAR-F | Solution architects building production applications with Claude | 60 | $125 | Levels 1 to 3 | **confirmed** |
 | Claude Certified Architect, Professional | CCAR-P | Mid to senior architects who design, build and govern production Claude solutions | 63 | $175 | Levels 1 to 4 | **confirmed** |
 
-**Common terms (confirmed):** 120 minutes of exam time (about 135 minutes of seat time with
-check-in and survey); multiple-choice and multiple-response items, each item stating how many
+**Common terms (confirmed):** 120 minutes of exam time; multiple-choice and multiple-response items, each item stating how many
 answers to select; proctored online or at a Pearson test centre; a scaled score from 100 to 1,000
 with 720 to pass, reported as pass or fail with a percent-correct figure per domain; valid for 12
 months from the date awarded; renewal on time by a free non-proctored assessment, a lapsed
 credential needs the full exam again; retakes after 14, 30 and 90 days following the first,
 second and third failed attempt, at most four attempts in a rolling 12 months, each attempt at the
-full fee. **Eligibility (confirmed):** candidates must work at an organisation in Anthropic's
-Claude Partner Network (free to join for organisations bringing Claude to market), use a partner
-e-mail address and be at least 18; partner tiers get fee discounts. The Associate, Developer and Professional guides state that no course is mandatory and the
+full fee. Cancellation or rescheduling is allowed up to 24 hours before the appointment, and a change inside 24
+hours forfeits the fee (confirmed in the guides; Pearson's page for Anthropic exams gives 48 hours, so use
+the longer notice). The guides tell candidates to review the Certification Terms and the Exam Policy before
+registering; the Policy and Terms (updated 2026-06-25) say a certification is valid for its stated term, must be
+renewed before it ends, and cannot be renewed once expired (confirmed). Partner tiers get fee discounts at
+checkout (confirmed in the guides). **Reported, not found on any official guide, Terms or Policy read on
+2026-10-02:** that candidates must work at an organisation in Anthropic's Claude Partner Network, must register
+with a partner e-mail address, must be at least 18, and that the sitting takes about 135 minutes in all with
+check-in and survey. The course pages say only what the guides state and tell the reader to check the
+registration page. The Associate, Developer and Professional guides state that no course is mandatory and the
 experience they describe is recommended (about six months with Claude for the Developer and
 Professional exams, three or more years in architecture for the Professional); the Architect
 Foundations guide describes a typical candidate with six months or more of hands-on experience. **Exam-day rules (confirmed):** valid

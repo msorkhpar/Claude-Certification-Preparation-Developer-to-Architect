@@ -127,12 +127,12 @@ aligned?) and ownership.
    - **c**: Description: phrase the request as a longer, more detailed paragraph
    - **d**: Discernment: execute it against realistic cases and inspect the results
 
-2. A university student must compose an analytical essay for a graded course that allows AI help only for planning. Which
-   use fits best?
-   - **a**: Ask Claude to probe the outline, then do the analysing personally
-   - **b**: Ask Claude for the full essay, then edit the style to sound personal
-   - **c**: Have Claude write the argument, and cite it as a source
-   - **d**: Paste the essay prompt and submit the response with minor tweaks
+2. A university student drafts a graded argumentative essay. The course allows AI help for planning only, and she
+   wants to find where her case is weakest. Which use fits?
+   - **a**: Ask Claude for a model paragraph on her topic, then rewrite it in her voice
+   - **b**: Have Claude draft her weakest section, cite it as a source, and write the rest herself
+   - **c**: Paste the essay prompt and keep only the sentences that match her view
+   - **d**: Ask Claude to challenge her outline, then do all the writing herself
 
 3. A teacher asks Claude for a quiz on a unit and gets ten questions. Which step best reflects discernment and
    ownership?
@@ -145,7 +145,12 @@ aligned?) and ownership.
 <summary>Answer key</summary>
 
 1. **d**. The builder's costly mistake is "Shipping unrun output", and the natural check is to "Run it, test it, review it". *b* is ruled out because "A builder is someone who owns the whole arc from a customer's problem to a shipped solution", so the function is hers to verify. *c* is ruled out because the weight for builders falls on "Discernment of code and user experience", and a longer request does not test the result. *a* is ruled out because telling users is honest but does not test anything, and the natural check is to "Run it, test it, review it".
-2. **a**. A student uses Claude as a partner by questioning the outline while the thinking remains theirs. *b* is ruled out because "the thinking the course exists to build" must not be handed over, and editing style does not return it. *c* is ruled out because "writing the analysis with Claude and submitting it defeats the point", whatever the citation says. *d* is ruled out because "submits its essay as their own" is the example of misuse given, and minor tweaks do not change that.
+2. **d**. A student uses Claude as a partner by questioning the plan while the thinking and the writing stay hers.
+   *a* is ruled out because "writing the analysis with Claude and submitting it defeats the point and may breach the
+   institution's rules", and rewording a model paragraph still hands the thinking over. *b* is ruled out because the
+   student does not delegate "the thinking the course exists to build", and a citation does not return it. *c* is
+   ruled out because "one who submits its essay as their own is not" using it as a partner, and selecting sentences
+   keeps that authorship problem.
 3. **c**. Discernment is judging accuracy and alignment with the stated outcome, and the educator owns what students are taught. *b* is ruled out because the educator "Checks: accuracy of the content taught", and a past good quiz does not show this one is right. *a* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades", and passing the checking to pupils gives that up. *d* is ruled out because asking Claude to mark itself is not the check, and the page lists "accuracy of the content taught" among the things the educator checks personally.
 
 </details>

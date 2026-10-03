@@ -124,17 +124,24 @@ produced with a confident voice.
    - **c**: Reformat the amounts into one column so the sum is easier to follow
    - **d**: Ask for the sum again with an instruction to double-check each step
 
-2. An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are
-   sometimes wrong on crowded shelves. Which design response fits what the documentation says?
-   - **a**: Shrink each photo heavily to simplify the scene, which makes the counts dependable
-   - **b**: Crop each photo to a single row, which makes the counts exact
+2. An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes
+   wrong on crowded shelves, and the total feeds a purchasing decision. Which design response fits what the
+   documentation says?
+   - **a**: Shrink each photo heavily so the scene looks simpler to the model
+   - **b**: Crop each photo to a single row and add up the row counts afterwards
    - **c**: Label the figures approximate and verify the important ones against real stock
-   - **d**: Switch to a larger model, which makes the counts dependable
+   - **d**: Switch to a larger model and treat its counts as final in the weekly purchasing report
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *d* is ruled out because a re-check request "does not change that the model sees pieces", and the section says the fix is not a better prompt. *b* is ruled out because reasoning "needs a check that does not come from the same reasoning", and the model's own report of certainty is not one. *c* is ruled out because exact arithmetic on long numbers is "approximate unless the model does the work in a tool", however the amounts are laid out.
-2. **c**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked. *b* is ruled out because Claude "can give approximate counts of objects in an image but might not always be precisely accurate", whatever the crop. *a* is ruled out because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels", so heavy shrinking makes it worse. *d* is ruled out because the page says "Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
+2. **c**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in
+   high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked. *a* is ruled
+   out because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small
+   images under 200 pixels", so heavy shrinking makes it worse. *b* is ruled out because Claude "can give
+   approximate counts of objects in an image but might not always be precisely accurate", and adding up many
+   approximate counts does not make the total exact. *d* is ruled out because the page says "Do not use Claude for
+   tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
 
 </details>

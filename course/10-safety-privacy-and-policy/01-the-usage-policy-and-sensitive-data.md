@@ -59,7 +59,7 @@ interpretation, healthcare decisions, insurance underwriting and claims, financi
 and housing decisions, academic testing and admissions, and media or journalistic content. Two requirements apply. A
 **qualified professional in the field must review** the content or decision before it is disseminated or finalised
 (human-in-the-loop). And if model output is presented directly to individuals or consumers, you must **disclose that AI
-helped produce it**, at a minimum at the start of each session. A person drafting a letter for their own review is
+helped produce it**, at a minimum at the beginning of each session. Separately, consumer-facing chatbots must also disclose that the user is talking to AI rather than a human, at a minimum at the beginning of each chat session. A person drafting a letter for their own review is
 not outside the rule's spirit: the more the output decides something about a person, the more a qualified human must
 sit between the model and that person.
 
@@ -136,12 +136,12 @@ is not recommended on pages with regulated data. A tool's availability can itsel
 
 ## Quiz
 
-1. An HR coordinator wants Claude to summarise survey comments that include employees' names and health details. Policy
-   restricts regulated personal data. Which step is best?
-   - **a**: Summarise the comments by hand and keep every AI tool out of it
-   - **b**: Upload the comments as they are, then tell Claude to leave names out
-   - **c**: Upload the comments to a private account to sidestep the policy altogether
-   - **d**: Redact identities and medical specifics first, then condense the remarks
+1. An HR coordinator wants Claude to summarise survey comments by department. The comments include employees' names
+   and health details, and policy restricts regulated personal data. Which step fits?
+   - **a**: Upload the comments unchanged and tell Claude to leave all names out of the summary
+   - **b**: Get a manager's approval and upload the file to a tool the team already likes
+   - **c**: Swap each name for a code and treat the file as anonymous
+   - **d**: Redact identifiers and clinical specifics, keep the grouping, then check the output
 
 2. A team uses Claude to draft decision letters about loan applications that go straight to applicants. Under the Usage
    Policy which pair of safeguards applies to this use?
@@ -150,18 +150,25 @@ is not recommended on pages with regulated data. A tool's availability can itsel
    - **c**: A second model's approval of each letter, and removal of applicants' names
    - **d**: A legal sign-off once a year, and a note in the privacy policy
 
-3. A consultant says: "These sales figures are for internal analysis, so the customer names can stay in the file."
+3. A consultant says: "These sales figures are for internal analysis only, so the customer identities can stay in
+   the file." The analyst must compare purchases across two years, and policy restricts regulated personal data.
    What is the best response?
-   - **a**: Swap each name for a code, and treat the result as fully anonymous
-   - **b**: Agree, because personal details matter only when results leave the building
-   - **c**: Labels follow the data, not the audience: strip identifiers or aggregate
-   - **d**: Keep everything as it is and ask Claude not to hold on to the data
+   - **a**: Swap each name for a code, keep the codes in the file, and then call the data anonymous
+   - **b**: Keep the file as it is, since internal analysis lowers the data's class to internal
+   - **c**: Aggregate to totals per segment and per period, then remove names and account numbers
+   - **d**: Keep the file and ask Claude not to retain the figures after the session ends
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The task can proceed if the data changes: remove the identifiers and sensitive details first (anonymise before you upload). *b* is ruled out because the rule is that asking is "a request, and it does not satisfy a policy control", whatever Claude is told. *c* is ruled out because the organisation's policy "can be stricter than the Usage Policy and decides which tools and data are permitted at work", and a private account does not sidestep it. *a* is ruled out because "You can usually keep the task and drop the identity", so a refusal to use any tool is unnecessary.
-2. **a**. Financial decisions that affect individuals are high-risk: a qualified professional reviews them and recipients are told AI helped. *b* is ruled out because the requirement is that you "disclose that AI helped produce it, at a minimum at the start of each session", which a footer and a count do not provide. *c* is ruled out because the reviewer must be a "qualified professional in the field", and a second model is not one. *d* is ruled out because the review must happen "before it is disseminated or finalised", not once a year.
-3. **c**. The class is set by the data, so the identifiers go or the rows are aggregated before upload. *b* is ruled out because "internal use does not change the class of the data", so the names stay sensitive. *a* is ruled out because "Pseudonymised data is still personal data under many rules, because the key can reverse it". *d* is ruled out because asking Claude not to retain the file "is a request, and it does not satisfy a policy control".
+1. **d**. The task can proceed if the data changes: remove identifiers and sensitive specifics, keep what the
+   summary needs, then check for re-identification. *a* is ruled out because asking Claude to leave names out "is a
+   request, and it does not satisfy a policy control". *b* is ruled out because the organisation's policy "decides which tools and data are permitted at work", and a manager's liking for a tool does not change that. *c* is ruled out because "Pseudonymised
+   data is still personal data under many rules, because the key can reverse it".
+2. **a**. Financial decisions that affect individuals are high-risk: a qualified professional reviews them and recipients are told AI helped. *b* is ruled out because the requirement is that you "disclose that AI helped produce it, at a minimum at the beginning of each session", which a footer and a count do not provide. *c* is ruled out because the reviewer must be a "qualified professional in the field", and a second model is not one. *d* is ruled out because the review must happen "before it is disseminated or finalised", not once a year.
+3. **c**. Aggregation is the strongest technique, the comparison needs trends and not rows, and the class is set by
+   the data. *a* is ruled out because "Pseudonymised data is still personal data under many rules, because the key
+   can reverse it". *b* is ruled out because "internal use does not change the class of the data". *d* is ruled out
+   because asking Claude not to retain the file "is a request, and it does not satisfy a policy control".
 
 </details>

@@ -117,12 +117,12 @@ and they differ by role only because the people relying differ.
 
 ## Quiz
 
-1. A non-profit's analyst wants Claude to find trends in a spreadsheet of beneficiaries' names, addresses and health
-   notes. Policy restricts sharing personal data. Which approach is best?
-   - **a**: Upload everything unchanged, since the analysis serves the mission
-   - **b**: Remove identifiers or aggregate first, then analyse and verify
-   - **c**: Upload it and ask Claude to forget the data once the work is done
-   - **d**: Skip the analysis entirely, because personal data can never be analysed
+1. A non-profit's analyst must show a funder which neighbourhoods have the most health referrals, using a sheet of
+   beneficiaries' names, addresses and health notes. Policy restricts sharing personal data. Which approach fits?
+   - **a**: Group the entries by area and remove identifiers, then check the totals
+   - **b**: Paste ten full records first to test the method on a sample
+   - **c**: Switch to a faster, cheaper model for the sensitive records
+   - **d**: Upload the full sheet and ask Claude to leave names out of its findings
 
 2. A small shop owner has Claude draft replies to customers about delivery times. One reply promises delivery in two
    days, a figure the owner never supplied. What is the best response?
@@ -141,7 +141,12 @@ and they differ by role only because the people relying differ.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The best answer anonymises or aggregates first and checks results (the non-profit exam angle). *a* is ruled out because "Donor and beneficiary records are sensitive", so the mission does not allow an as-is upload. *c* is ruled out because the rule is "classify first, remove identifiers before analysis", and asking Claude to forget does not remove the exposure. *d* is ruled out because the course frames data analysis as a normal use handled with care, and the page says "the usual rule applies" rather than a ban.
+1. **a**. The best answer anonymises or aggregates first and checks the results, and the funder's question needs
+   areas, not individuals. *d* is ruled out because the rule is "classify first, remove identifiers before
+   analysis", and leaving names out of the findings does not keep them out of the upload. *b* is ruled out because
+   "Donor and beneficiary records are sensitive", so ten full records are still exposure. *c* is ruled out because
+   "High-volume, low-stakes drafting suits a faster, cheaper model", and the tier chosen does not change the class
+   of the data.
 2. **d**. A reply that states a date is a promise the owner holds, so each date is checked against the actual policy. *b* is ruled out because the check is "that a confident reply to a customer is not invented", so confidence proves nothing. *c* is ruled out because "A small owner has no one else to catch the error", and asking the same tool whether it is right does not check the policy. *a* is ruled out because "High-volume, low-stakes drafting suits a faster, cheaper model" with a spot check, so stopping altogether is not needed.
 3. **b**. Delegate production and keep authorship, the page's guidance for makers. *a* is ruled out because the maker keeps "the part that makes the work theirs", and a whole story signed by her is not that. *c* is ruled out because "Disclosure matters more here than in many fields", and presenting AI work as unaided is the opposite. *d* is ruled out because "For a maker the distinctive voice is the product", and the visual direction is part of it.
 
@@ -151,38 +156,59 @@ and they differ by role only because the people relying differ.
 
 This quiz covers both pages of the module.
 
-1. A teacher and a fundraiser each get a draft from Claude. Which pairing of person and essential check is right?
-   - **a**: The first checks the length of the text; the second checks only the layout and the font used
-   - **b**: The first verifies content and fit; the second verifies claimed impact against sources
-   - **c**: The first asks Claude to score its draft; the second trusts it because the mission is good
-   - **d**: The first judges how confident the draft sounds; the second checks how quickly it arrived
+1. Two staff members each receive a readable draft from Claude: a lesson rubric for one, a funding appeal for the other. Which pair of checks matches what each of them owns?
+   - **a**: First: spelling and tone; second: sentence length and layout
+   - **b**: First: pupils' reactions once it is handed out; second: donors' reactions once it is sent
+   - **c**: First: accuracy and fit to the stated outcome; second: each impact claim against its source
+   - **d**: First: Claude's own rating of its accuracy; second: Claude's own rating of its sources
 
-2. A freelancer working for a charity can use a tool that turns the supporter list into personalised letters citing each
-   person's past gifts. Which concern is most serious?
-   - **a**: Those records are sensitive, so identifiers need care before they leave
-   - **b**: The letters might come out a little shorter than the writer usually drafts
-   - **c**: The writer could lose the chance to open each letter differently each time
-   - **d**: Claude cannot produce text in the charity's voice at all, whatever the prompt says
+2. A freelancer working for a charity wants Claude to write personalised thank-you notes that cite each supporter's
+   past gifts, working from the full supporter list. Charity policy says personal data may not leave its systems
+   unprotected. What should happen first?
+   - **a**: Send twenty complete records to test the tone of the notes
+   - **b**: Strip names and addresses, then use templates with merge fields
+   - **c**: Pick a faster, cheaper model, since thanks are low-stakes drafting
+   - **d**: Ask Claude to confirm that it will not keep the supporters' details
 
-3. Which statement best explains why the same four habits lead to different checks for different people?
-   - **a**: Each person answers for something else, so verification and disclosure vary
-   - **b**: The habits change names depending on the audience of the course in question
-   - **c**: Only builders must check output, since others only draft text for review
-   - **d**: Diligence applies to organisations, while individuals only describe what they want
+3. A student's course bans AI help on a graded essay. A freelance illustrator's commission contract is silent on AI.
+   Both are tempted to use Claude. What fits each of them?
+   - **a**: The first leaves it out; the second uses it for production and says what was done
+   - **b**: The first uses it for planning only; the second uses it and says so
+   - **c**: The first leaves it out; the second uses it and says nothing unless a client asks
+   - **d**: The first leaves it out; the second uses it freely and stays silent, as the contract says nothing
 
-4. A bakery owner has Claude draft the ingredient warnings for a new product line from the wholesaler's data sheet. Which
-   step matters most before publishing?
-   - **a**: Ask Claude to rate how sure it is about the whole list of warnings
-   - **b**: Make the wording friendlier in tone for customers who will read it
-   - **c**: Confirm each statement against the original specification
-   - **d**: Add a line saying that an AI drafted the notice, to be fully open
+4. Claude turns a wholesaler's data sheet into allergen notes for a bakery's new product line. One note says "may
+   contain nuts" for an item that the sheet marks nut-free. What should the owner do?
+   - **a**: Treat it as a one-off slip and correct only that item
+   - **b**: Ask Claude to explain how it reached that note, then trust the rest
+   - **c**: Compare every listed statement with the original document before anything goes out
+   - **d**: Add a line saying an AI drafted the notice, and publish the rest unchanged
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The educator checks accuracy and fit with the outcome, and the fundraiser checks impact claims against the source. *a* is ruled out because the page lists "Impact claims and statistics against source" as the check that matters most for a non-profit, not layout. *c* is ruled out because the fundraiser checks "every claim about impact, every statistic and every funder requirement against the source", so trusting a draft is no check. *d* is ruled out because the educator "Checks: accuracy of the content taught", and sounding confident proves nothing.
-2. **a**. Donor records are sensitive, and the rule is to classify first and remove identifiers. *b* is ruled out because the page names "data analysis with personal records is the classic scenario", not letter length. *c* is ruled out because greeting variety is not among the risks the page lists, such as "Overstating results to a funder". *d* is ruled out because the non-profit delegates "first drafts of grant proposals and appeals", so letters in its voice are an ordinary use.
-3. **a**. The page says the habits are shared and that the right answer depends on what the person owns. *b* is ruled out because "The audience courses reuse this frame and change where the weight falls", so the habits keep their names. *c* is ruled out because the fundraiser's line begins "Checks: every claim about impact, every statistic and every funder requirement against the source", so others check too. *d* is ruled out because the table row "Diligence is mainly about" gives each column an item, so it applies to individuals too.
-4. **c**. Warnings about ingredients are facts a customer relies on, and the check is against the original specification. *b* is ruled out because for a small business the check that matters most is "Prices, dates and promises against policy", not tone. *a* is ruled out because "A small owner has no one else to catch the error", and self-rating is not verification. *d* is ruled out because being open does not verify a claim, and "A customer reply that states a price or a deadline is a promise the business owns".
+1. **c**. The educator checks accuracy and alignment with the outcome, and the fundraiser checks impact claims
+   against the source. *a* is ruled out because the educator's checks include "alignment with the stated outcome",
+   which spelling and tone do not cover. *b* is ruled out because the educator "Owns: what students are taught, how
+   they are assessed and the fairness of grades", and the fundraiser must check "every claim about impact, every
+   statistic and every funder requirement against the source" before the audience reacts. *d* is ruled out because
+   the page lists "Impact claims and statistics against source" as the check that matters most, and a self-rating is
+   not a comparison with a source.
+2. **b**. Donor records are sensitive, so identifiers come out before the data goes anywhere, and the notes can be
+   merged afterwards. *a* is ruled out because "the best answer anonymises or aggregates first and checks results",
+   and twenty complete records are still personal data. *d* is ruled out because "Donor and beneficiary records are
+   sensitive" and the rule is to "classify first, remove identifiers before analysis", which a promise from the tool
+   does not replace. *c* is ruled out because "High-volume, low-stakes drafting suits a faster, cheaper model" is
+   about cost, and the data class is unchanged by the tier.
+3. **a**. Where a setting has a rule, follow it; where it has none, say what you did, and a maker delegates
+   production while keeping authorship. *d* is ruled out because the page says that when a setting has no rule, "say
+   what you did". *b* is ruled out because "When the setting has a rule about AI help, follow it", and a ban leaves
+   no room for planning help. *c* is ruled out because "Disclosure matters more here than in many fields", and the
+   maker answers for audiences' and commissioners' expectations.
+4. **c**. A statement customers rely on is checked against the source, and one error shows the rest are unproven.
+   *a* is ruled out because a small owner builds in "a short list of facts to verify before sending", which means
+   checking the whole notice, not one item. *b* is ruled out because the check is "that an answer matches the actual
+   policy and not a plausible one", and an explanation from the same tool is not that comparison. *d* is ruled out
+   because "the draft is the start of the judging", and a disclosure line does not correct any statement.
 
 </details>

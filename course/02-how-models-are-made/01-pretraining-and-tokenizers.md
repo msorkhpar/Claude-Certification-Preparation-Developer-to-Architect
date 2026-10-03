@@ -244,17 +244,21 @@ larger scale.
    - **c**: Move to a model with a larger context window available
    - **d**: Run the same question five times and take the most common figure
 
-2. A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do
-   better next week. They call the API directly and store no history. Which expectation is accurate?
+2. A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do better
+   next week. They call the API directly. Which expectation is accurate?
    - **a**: The weights absorb the fix and apply it to every later session by default
    - **b**: A tuned copy of the model is created under the account for later calls
-   - **c**: Only a request that carries the amended guidance in its own input can benefit
-   - **d**: The provider's overnight training folds the chats into the model
+   - **c**: Only a request that carries the amended guidance in its own input gains from it
+   - **d**: A window large enough keeps the correction available to every future request
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap). *b* is ruled out because "a model answers it by approximation", so a demand for exactness does not change how the part number is cut into pieces. *c* is ruled out because "The window is how much text fits per request", a capacity that does not change how a part number is cut into pieces. *d* is ruled out because "Questions about individual characters (how many letters, which letter is third, reverse this string) are harder for it than they look", so repeating the question repeats the weakness.
-2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it. *a* is ruled out because "A conversation with Claude does not teach it anything that carries to the next conversation". *b* is ruled out because "The Claude API does not currently offer fine-tuning", so no tuned copy is made by calling it. *d* is ruled out because "Weights are fixed at inference time; a later session starts from the same model", so chats do not change it next week.
+2. **c**. Weights are fixed at inference and what looks like learning is the context window (the weights section),
+   so only a call that carries the fix in its input can use it. *a* is ruled out because "A conversation with Claude
+   does not teach it anything that carries to the next conversation". *b* is ruled out because "The Claude API does
+   not currently offer fine-tuning", so no tuned copy is made by calling it. *d* is ruled out because "The window is
+   how much text fits per request", and a request holds only what is sent with it.
 
 </details>
