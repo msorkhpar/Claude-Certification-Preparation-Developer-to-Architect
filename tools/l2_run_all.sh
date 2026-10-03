@@ -8,6 +8,7 @@ tools/l2_prepare_caches.sh "$IMG" || exit 2
 tools/l2_prepare_gradle.sh "$IMG" || exit 2
 python3 tools/l2_practices.py list | while read -r PD VARIANTS; do
   for lang in python typescript java kotlin; do
+    [ -d "$PD/$lang" ] || continue   # a practice may exist in some languages only
     tools/l2_run_practice.sh "$IMG" "$lang" "$PD" $VARIANTS
     echo "$PD $lang done rc=$?"
   done
