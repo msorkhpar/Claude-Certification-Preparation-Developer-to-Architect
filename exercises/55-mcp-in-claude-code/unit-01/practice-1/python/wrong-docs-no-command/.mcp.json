@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "http",
+      "url": "${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "docs": {
+      "type": "stdio",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py"],
+      "env": {
+        "DOCS_API_KEY": "${DOCS_API_KEY}"
+      }
+    },
+    "core": {
+      "type": "http",
+      "url": "${CORE_MCP_URL:-https://core-mcp.example.com/mcp}",
+      "alwaysLoad": true
+    },
+    "schema": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/schema_server.py"]
+    }
+  }
+}
