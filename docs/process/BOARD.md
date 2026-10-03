@@ -61,7 +61,7 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 
 | Row | Task | Status |
 |---|---|---|
-| J-1 | Java practices and examples build with Gradle (Kotlin DSL), like the Kotlin ones, so the course image grades them; convert modules 6 and 13 to 17 | todo |
+| J-1 | Java practices and examples build with Gradle (Kotlin DSL), like the Kotlin ones, so the course image grades them; convert modules 6 and 13 to 17 | **done:** the seven Java practices (modules 6 and 13 to 17, and the agent-loop exercise) build with `build.gradle.kts` and `settings.gradle.kts`, no `pom.xml` remains; the run scripts and graders read Gradle output; the examples of those modules have no Java side. Proved offline: every reference passes, every starter fails, every plant fails on its named case on an assertion. |
 
 ## Framework work
 
@@ -73,6 +73,7 @@ repository's fixture unit runs on it. What the course needs is stated in `docs/I
 
 | Date | Entry |
 |---|---|
+| 2026-10-03 | J-1 done: the Java practices of modules 6 and 13 to 17 moved from Maven to Gradle (Kotlin DSL); gates `level1-1-6-gates.sh` and `level2-12-17-gates.sh` pass with Java graded through Gradle offline. |
 | 2026-10-02 | Level 2 modules 18 to 23 authored on branch `feat/level2-18-23`: 13 pages (model choice and cost, thinking and effort, prompt caching, Message Batches, Claude on the cloud platforms, setting them up), six offline examples, six practices in Python, TypeScript, Java and Kotlin (Java and Kotlin on Gradle) with planted wrong solutions proved offline, 39 page quiz questions and 24 module quiz questions. Independent reader: 2 pages pass, 10 weak, 1 fail and 49 of 63 questions pass before the fix round; every finding was fixed. Gate: `sh docs/process/batches/level2-18-23-gates.sh`. Unverified: the resource ARN type for the `bedrock-mantle` action. |
 | 2026-10-02 | Level 2 modules 12 to 17 authored on branch `feat/level2-12-17`: 16 pages, five offline examples, five practices in Python, TypeScript, Java and Kotlin with planted wrong solutions proved offline, quizzes for every page and module. Gate: `sh docs/process/batches/level2-12-17-gates.sh`. |
 | 2026-10-02 | Level 1 modules 7 to 11 authored on branch `feat/level1-7-11`: 13 pages (apps, apps in depth, roles, safety and policy, exam readiness), 39 page quiz questions and 20 module quiz questions, a 30-question Level 1 mock exam, 131 flashcards and a 67-item spaced-review bank with their checker and planted-defect tests; the quiz checker, key balancer and quiz.json builder now cover modules 1 to 11 and a mock-exam section; gate `docs/process/batches/level1-7-11-gates.sh`. App and exam-logistics facts were read from official pages on this date and are marked with it on the pages. Awaiting the register's verification and Q-L1's independent quiz reader. |

@@ -18,4 +18,4 @@ python3 tools/build_quiz_json.py >/dev/null && git diff --quiet -- exercises/*/t
 "$HEAVY" ccp-survey tools/run_all_practices.sh "$IMG" > .survey-out/gate-run.txt 2>&1
 rc=$?; echo "heavy job rc=$rc"; [ $rc -eq 0 ] || { tail -20 .survey-out/gate-run.txt; exit 1; }
 python3 tools/grade_practice.py || exit 1
-python3 tools/check_examples.py
+python3 tools/check_examples.py 'course/0[1-6]-*/*.md'
