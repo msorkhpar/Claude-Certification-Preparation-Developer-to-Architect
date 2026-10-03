@@ -44,6 +44,16 @@ def analyse(lang, text, cases):
         kinds = re.findall(r"^  (\w*Error)\b", section, re.M)
         if len(kinds) != len(failed) or any(k != "AssertionError" for k in kinds):
             problems.append(f"failure types {sorted(set(kinds))} are not all AssertionError (or a failure has none)")
+    elif lang == "java" and "> Task :" in text:  # Gradle output, read like Kotlin's
+        if re.search(r"error: |Execution failed for task ':compileJava'|Execution failed for task ':compileTestJava'", text):
+            problems.append("compilation error")
+        suite = cases["tests"]["java"]
+        for m in re.finditer(suite + r" > (\w+)\(\) FAILED\n\s+(\S+)", text):
+            failed.add(names.get(m.group(1), m.group(1)))
+            if "AssertionFailedError" not in m.group(2):
+                problems.append(f"{m.group(1)}: {m.group(2)}")
+        if "BUILD FAILED" in text and not failed and not problems:
+            problems.append("the build failed without a failing test")
     elif lang == "java":
         if "COMPILATION ERROR" in text:
             problems.append("compilation error")

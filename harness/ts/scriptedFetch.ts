@@ -7,6 +7,8 @@ export type Reply = {
   body?: unknown;
   headers?: Record<string, string>;
   sse?: Array<{ type: string } & Record<string, unknown>>;
+  text?: string; // a raw body, such as the .jsonl file of batch results
+  contentType?: string; // for `text`; defaults to application/x-jsonl
   networkError?: boolean; // the connection fails before any reply
 };
 
@@ -38,6 +40,9 @@ export function scriptedFetch(script: Array<Reply | ((body: any) => Reply)>, opt
       if (reply.networkError) throw new TypeError("fetch failed");
       if (reply.sse) {
         return new Response(sseEncode(reply.sse), { status: 200, headers: { "content-type": "text/event-stream", ...reply.headers } });
+      }
+      if (reply.text !== undefined) {
+        return new Response(reply.text, { status: reply.status ?? 200, headers: { "content-type": reply.contentType ?? "application/x-jsonl", ...reply.headers } });
       }
       return new Response(JSON.stringify(reply.body), { status: reply.status ?? 200, headers: { "content-type": "application/json", ...reply.headers } });
     } finally {

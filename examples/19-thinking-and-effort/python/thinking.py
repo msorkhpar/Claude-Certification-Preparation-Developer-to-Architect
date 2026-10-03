@@ -13,6 +13,12 @@ THINKING_BLOCK = {"type": "thinking", "thinking": "", "signature": "illustrative
 USAGE = {"input_tokens": 410, "output_tokens": 1900, "output_tokens_details": {"thinking_tokens": 1650}}
 
 
+def thinking_tokens(usage):
+    """usage.output_tokens_details.thinking_tokens, read whether the SDK types the field or keeps it as an extra."""
+    details = getattr(usage, "output_tokens_details", None) or (usage.model_extra or {}).get("output_tokens_details")
+    return details["thinking_tokens"] if isinstance(details, dict) else details.thinking_tokens
+
+
 def request(client, effort):
     return client.messages.create(model=MODEL, max_tokens=8000, thinking={"type": "adaptive"}, output_config={"effort": effort},
                                   messages=[{"role": "user", "content": "Which of these two schedules has no conflicts?"}])
@@ -25,9 +31,8 @@ def main():
     sent = transport.requests[0]
     print("thinking sent:", sent["thinking"], "| effort sent:", sent["output_config"])
     print("blocks:", [b.type for b in reply.content], "| thinking text shown:", repr(reply.content[0].thinking))
-    details = reply.usage.model_extra["output_tokens_details"]
-    answer = reply.usage.output_tokens - details["thinking_tokens"]
-    print(f"output_tokens {reply.usage.output_tokens} = thinking {details['thinking_tokens']} + answer {answer}")
+    thinking = thinking_tokens(reply.usage)
+    print(f"output_tokens {reply.usage.output_tokens} = thinking {thinking} + answer {reply.usage.output_tokens - thinking}")
     print(f"output cost: ${reply.usage.output_tokens * PRICE_OUT / 1_000_000:.4f} (thinking is billed as output, shown or not)")
     quick = request(client, "low")
     print("a low-effort turn may skip thinking:", [b.type for b in quick.content], "| output_tokens", quick.usage.output_tokens)
