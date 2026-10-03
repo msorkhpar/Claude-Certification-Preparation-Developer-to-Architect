@@ -2,7 +2,7 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the first modules of Level 2 (Developer),
-modules 12 to 35:
+modules 12 to 41:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -41,6 +41,12 @@ modules 12 to 35:
 | `33-mcp-advanced/` | MCP advanced | 2 |
 | `34-workflows-and-agents/` | Workflows and agents | 2 |
 | `35-the-claude-agent-sdk/` | The Claude Agent SDK | 3 |
+| `36-managed-and-self-hosted-agents/` | Managed and self-hosted agents | 2 |
+| `37-agent-frameworks-compared/` | Agent frameworks compared | 2 |
+| `38-claude-code-for-developers/` | Claude Code for developers | 3 |
+| `39-extending-claude-code/` | Extending Claude Code | 3 |
+| `40-claude-in-the-software-life-cycle/` | Claude in the software life cycle | 2 |
+| `41-security-and-safety/` | Security and safety | 3 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names

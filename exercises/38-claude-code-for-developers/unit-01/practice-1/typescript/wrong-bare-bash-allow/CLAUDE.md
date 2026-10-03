@@ -1,0 +1,24 @@
+# Invoice API
+
+A small service that stores invoices and exports them as CSV.
+
+## Commands
+
+- Run the tests: `make test`
+- Lint: `make lint`
+- Releases go through CI. Do not run `make deploy` from a session.
+
+## Conventions
+
+- Python 3.12, type hints on public functions.
+- Handlers live in `src/api/handlers/`, one module per resource.
+- Branch names are `feature/<ticket>`; commit messages start with the ticket id.
+
+## Architecture
+
+See @docs/architecture.md for the module layout.
+
+## Gotchas
+
+- Tests need `INVOICE_DB_URL` to point at the local SQLite file; `make test` sets it.
+- IMPORTANT: never edit files under `migrations/` by hand; add a new migration instead.

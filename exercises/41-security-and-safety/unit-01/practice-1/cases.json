@@ -1,0 +1,140 @@
+{
+  "practice": "41-security-and-safety/unit-01/practice-1",
+  "name": "gate",
+  "tests": {
+    "java": "GateTest",
+    "kotlin": "GateTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_untrusted_text_reaches_the_model_only_as_one_json_string_that_says_where_it_came_from",
+      "typescript": "m1 untrusted text reaches the model only as one json string that says where it came from",
+      "java": "m1_untrustedTextReachesTheModelOnlyAsOneJsonStringThatSaysWhereItCameFrom",
+      "kotlin": "m1_untrustedTextReachesTheModelOnlyAsOneJsonStringThatSaysWhereItCameFrom"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_screen_names_injection_signals_and_a_flagged_result_is_withheld_with_an_error",
+      "typescript": "e1 a screen names injection signals and a flagged result is withheld with an error",
+      "java": "e1_aScreenNamesInjectionSignalsAndAFlaggedResultIsWithheldWithAnError",
+      "kotlin": "e1_aScreenNamesInjectionSignalsAndAFlaggedResultIsWithheldWithAnError"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_reads_and_writes_stay_inside_the_project_and_away_from_secrets_and_protected_folders",
+      "typescript": "e2 reads and writes stay inside the project and away from secrets and protected folders",
+      "java": "e2_readsAndWritesStayInsideTheProjectAndAwayFromSecretsAndProtectedFolders",
+      "kotlin": "e2_readsAndWritesStayInsideTheProjectAndAwayFromSecretsAndProtectedFolders"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_bash_is_limited_to_a_few_read_only_commands_and_dangerous_or_chained_ones_are_refused",
+      "typescript": "e3 bash is limited to a few read only commands and dangerous or chained ones are refused",
+      "java": "e3_bashIsLimitedToAFewReadOnlyCommandsAndDangerousOrChainedOnesAreRefused",
+      "kotlin": "e3_bashIsLimitedToAFewReadOnlyCommandsAndDangerousOrChainedOnesAreRefused"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_fetch_and_email_obey_the_host_and_domain_lists_and_refuse_credentials_in_a_url",
+      "typescript": "e4 fetch and email obey the host and domain lists and refuse credentials in a url",
+      "java": "e4_fetchAndEmailObeyTheHostAndDomainListsAndRefuseCredentialsInAUrl",
+      "kotlin": "e4_fetchAndEmailObeyTheHostAndDomainListsAndRefuseCredentialsInAUrl"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_once_untrusted_content_is_in_the_session_anything_that_changes_things_asks_or_is_refused",
+      "typescript": "e5 once untrusted content is in the session anything that changes things asks or is refused",
+      "java": "e5_onceUntrustedContentIsInTheSessionAnythingThatChangesThingsAsksOrIsRefused",
+      "kotlin": "e5_onceUntrustedContentIsInTheSessionAnythingThatChangesThingsAsksOrIsRefused"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_secrets_card_numbers_and_addresses_are_redacted_in_text_and_in_the_audit",
+      "typescript": "e6 secrets card numbers and addresses are redacted in text and in the audit",
+      "java": "e6_secretsCardNumbersAndAddressesAreRedactedInTextAndInTheAudit",
+      "kotlin": "e6_secretsCardNumbersAndAddressesAreRedactedInTextAndInTheAudit"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_hook_answer_follows_the_documented_shapes_and_repeated_denials_raise_an_alert",
+      "typescript": "e7 the hook answer follows the documented shapes and repeated denials raise an alert",
+      "java": "e7_theHookAnswerFollowsTheDocumentedShapesAndRepeatedDenialsRaiseAnAlert",
+      "kotlin": "e7_theHookAnswerFollowsTheDocumentedShapesAndRepeatedDenialsRaiseAnAlert"
+    }
+  },
+  "plants": {
+    "wrong-concatenate": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "joins the source and the text into one string instead of encoding them as JSON"
+    },
+    "wrong-screen-case-sensitive": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "matches the override signal only in the exact letter case"
+    },
+    "wrong-screen-leaks": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "puts the start of the flagged text into the error that withholds it"
+    },
+    "wrong-prefix-sibling": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "treats a folder whose name merely starts like the project folder as inside it"
+    },
+    "wrong-env-variants": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "protects .env but not .env.local or the other .env files"
+    },
+    "wrong-chain-allowed": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "checks the first word only, so a chained or redirected command passes"
+    },
+    "wrong-host-suffix": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "matches a host by the end of its name without the dot, so a lookalike host passes"
+    },
+    "wrong-email-tainted-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets an email go out after untrusted content entered the session"
+    },
+    "wrong-luhn-skip": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "redacts any long number as a card without the Luhn check"
+    },
+    "wrong-audit-raw": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes the arguments to the audit unredacted"
+    },
+    "wrong-hook-exit2": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "answers a denial with exit code 2 and not with the documented JSON and exit code 0"
+    },
+    "wrong-alert-asks": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "counts questions as denials when it raises an alert"
+    }
+  }
+}
