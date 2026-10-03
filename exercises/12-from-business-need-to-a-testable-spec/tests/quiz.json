@@ -1,0 +1,195 @@
+{
+  "module": "12-from-business-need-to-a-testable-spec",
+  "quizzes": [
+    {
+      "id": "01-requirements-for-a-claude-feature#q1",
+      "page": "01-requirements-for-a-claude-feature.md",
+      "scope": "page",
+      "stem": "A product owner asks that a new feature for writing customer emails must \"sound professional\". The team wants a requirement that a test can fail. Which version is best?",
+      "options": {
+        "a": "Ninety percent of outputs in a fixed sample of forty tickets pass a tone rubric that a grader applies",
+        "b": "The support lead reads a handful of outputs before release and judges that they sound professional",
+        "c": "The prompt gives the instruction to write in a professional and courteous voice whenever it replies",
+        "d": "Customers rate each email after sending, and the feature stays while the ratings stay positive"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "It states a rate over a fixed sample and names a grader, which is what the page asks of a quality requirement: a number over that set.",
+        "b": "Ruled out because \"a requirement that only a person's impression can settle is a wish\", and a read-through by one lead is only an impression.",
+        "c": "Ruled out because a rule in a prompt \"is only a request to the model\", and a prompt line is not a test.",
+        "d": "Ruled out because ratings after sending are an operational signal, while the acceptance criterion must be \"written before the first prompt is tried\"."
+      }
+    },
+    {
+      "id": "01-requirements-for-a-claude-feature#q2",
+      "page": "01-requirements-for-a-claude-feature.md",
+      "scope": "page",
+      "stem": "A draft spec for an invoice-extraction feature lists the fields to extract, the accepted file types and the expected accuracy. Which missing item does the page expect a reviewer to flag first?",
+      "options": {
+        "a": "The exact system prompt that the developers plan to use for the extraction",
+        "b": "One expected output string for each sample invoice, compared character by character",
+        "c": "A statement of what the system does when the call fails, is refused or is cut short",
+        "d": "An out-of-scope line saying who may see the extracted values after the run"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Failure behaviour is the row the page says teams forget, because a spec without it produces code without it.",
+        "a": "Ruled out because \"a requirement is a sentence a test can fail\", and a planned prompt is an implementation choice, not a sentence to test.",
+        "b": "Ruled out because quality \"is stated as a rate over a set of examples, not as a single expected string\".",
+        "d": "Ruled out because an out-of-scope line is useful, but \"the fourth row is the one teams forget\", and the fourth row is failure behaviour."
+      }
+    },
+    {
+      "id": "02-budgets-and-matching-an-architecture#q1",
+      "page": "02-budgets-and-matching-an-architecture.md",
+      "scope": "page",
+      "stem": "A feature must label two million archived tickets overnight, and nobody reads the labels until morning. The team proposes a pool of workers that call the API one ticket at a time all night. Which change fits the requirement best?",
+      "options": {
+        "a": "Stream every reply from the workers so that the first words of each label arrive sooner",
+        "b": "Hand the whole job to the batch interface, which halves the price and runs unattended",
+        "c": "Move the workers to the fastest tier so that the overnight window is certain to be enough",
+        "d": "Chain a second call after each label that checks the label before the result is stored"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Nobody is waiting and volume is large, which the page assigns to a batch: \"most batches finishing in less than 1 hour while reducing costs by 50%\".",
+        "a": "Ruled out because streaming \"does not shorten the total time\", and no reader is watching the words arrive.",
+        "c": "Ruled out because a faster tier is correct only \"if your evaluation set (page 1) says its quality holds\", and it does not change the cost.",
+        "d": "Ruled out because \"chaining calls multiplies latency\" and also cost, and the requirement gives no reason for a second call."
+      }
+    },
+    {
+      "id": "02-budgets-and-matching-an-architecture#q2",
+      "page": "02-budgets-and-matching-an-architecture.md",
+      "scope": "page",
+      "stem": "A requirement says customer data may only be processed in the United States. A developer plans to use `claude-haiku-4-5-20251001` and set `inference_geo` to `\"us\"` on every request. What does the page predict?",
+      "options": {
+        "a": "The calls succeed and are billed at 1.1 times the standard rate for inference kept in the US",
+        "b": "The calls succeed and run in any region, because the unsupported setting is quietly dropped",
+        "c": "The calls fail with a 429 error, because the capacity inside the US for that model is limited",
+        "d": "The calls fail with a 400 error, because the setting is not supported on that model"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says a request that sets the geography on Claude Haiku 4.5 or an earlier model \"return a 400 error\".",
+        "a": "Ruled out because the 1.1 times price belongs to models where the setting is \"supported on Claude 4.6 and later\", which excludes this one.",
+        "b": "Ruled out because the documentation says such requests \"return a 400 error\", so the setting is rejected and not dropped.",
+        "c": "Ruled out because the page says rate limits \"are shared across all geos\" in the sense of one pool, and the error for an unsupported setting is a 400, not a capacity error."
+      }
+    },
+    {
+      "id": "03-the-life-cycle-and-a-spec-you-can-test#q1",
+      "page": "03-the-life-cycle-and-a-spec-you-can-test.md",
+      "scope": "page",
+      "stem": "A team's nightly report job started returning slightly different summaries after a provider released an update. The code names its model with a moving alias. What does the page say is the underlying mistake?",
+      "options": {
+        "a": "The job should have been interactive, so that a person could review its output live",
+        "b": "A deliberate pin was missing, so behaviour moved without a regression run",
+        "c": "The summaries were never written down as requirements before the first prompt was tried",
+        "d": "The nightly schedule should have been replaced by a fixed monthly cost budget for the job"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "An alias that moves \"changes behaviour under you\", and the routine is to pin an id and change it on purpose, with a regression run.",
+        "a": "Ruled out because the symptom has nothing to do with live review, and the maintain routine is to \"re-run the evaluation set against the new model\".",
+        "c": "Ruled out because a missing spec is a separate fault, while the symptom is described by \"a silent change of model is a silent change of behaviour\".",
+        "d": "Ruled out because a cost budget does not decide which model answers, and the page's fix is to \"pin the model id\" in configuration."
+      }
+    },
+    {
+      "id": "03-the-life-cycle-and-a-spec-you-can-test#q2",
+      "page": "03-the-life-cycle-and-a-spec-you-can-test.md",
+      "scope": "page",
+      "stem": "A client library crashes whenever the API adds a new field to a response, although the API's documented rules allow additions. What is the best fix?",
+      "options": {
+        "a": "Pin an older API version header to stop any new property from appearing in the reply body",
+        "b": "Ask the provider to announce each new addition before it is released to the public",
+        "c": "Wrap every call in a retry so that the crash is repeated until it clears for good",
+        "d": "Take only the properties the code needs and skip everything else in the reply"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says to be tolerant of additions and strict about what you send, which means reading only what the code uses.",
+        "a": "Ruled out because earlier versions are deprecated and \"may be unavailable for new users\", and additions arrive within the current one.",
+        "c": "Ruled out because \"a retry cannot help, because the same reply is parsed the same way again\".",
+        "b": "Ruled out because the policy already says Anthropic \"may add additional values to the output\", so no announcement is promised."
+      }
+    },
+    {
+      "id": "03-the-life-cycle-and-a-spec-you-can-test#m1",
+      "page": "03-the-life-cycle-and-a-spec-you-can-test.md",
+      "scope": "module",
+      "stem": "A feature must return a complete answer to a waiting user within two seconds. The team's design is a chain of five calls, each taking about one second. Which action fits best?",
+      "options": {
+        "a": "Stream the final stage so that its first words appear sooner for the person waiting",
+        "b": "Merge or remove stages until the summed time sits inside the budget",
+        "c": "Request a higher usage plan from the provider so that each individual call runs faster",
+        "d": "Move the whole pipeline to asynchronous batches, which are processed at half the price"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Chained calls add up, so the fix is to cut the sequence: \"a requirement of two seconds rules out a five-call pipeline\".",
+        "a": "Ruled out because \"streaming does not shorten the total time\", and the requirement is for the complete answer.",
+        "c": "Ruled out because a higher tier \"does not make one call finish sooner\".",
+        "d": "Ruled out because a batch \"is the right design when nobody is waiting\", and a user is waiting."
+      }
+    },
+    {
+      "id": "03-the-life-cycle-and-a-spec-you-can-test#m2",
+      "page": "03-the-life-cycle-and-a-spec-you-can-test.md",
+      "scope": "module",
+      "stem": "After a team swaps its model for a newer id, the support lead says the new one feels better. What should happen before release?",
+      "options": {
+        "a": "Rerun the fixed evaluation set on the candidate id and compare it with the acceptance rate",
+        "b": "Accept the lead's impression, since the replacement is the more recent release of the family",
+        "c": "Switch to the moving alias so that every later upgrade arrives without any change in the code",
+        "d": "Compare the monthly bill of the two models over a single representative week of production traffic"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The maintain routine is to re-run the evaluation set against the new model and compare, so the change is judged on numbers.",
+        "b": "Ruled out because \"a requirement that only a person's impression can settle is a wish\".",
+        "c": "Ruled out because \"a silent change of model is a silent change of behaviour\".",
+        "d": "Ruled out because a bill covers cost alone, while the routine says to \"re-run the evaluation set against the new model\" for quality."
+      }
+    },
+    {
+      "id": "03-the-life-cycle-and-a-spec-you-can-test#m3",
+      "page": "03-the-life-cycle-and-a-spec-you-can-test.md",
+      "scope": "module",
+      "stem": "A feature runs comfortably under its entry-level request limit on average, but a quarterly campaign sends four times that rate for ten minutes, and the first requests of the burst are refused. Which response fits best?",
+      "options": {
+        "a": "Size for the highest peak, then ask for a bigger allowance or smooth the traffic",
+        "b": "Size for the daily average, because capacity refills continuously over each minute of the day",
+        "c": "Shorten every reply from the model so that each single request counts for less against the limit",
+        "d": "Switch the residency setting to global so that a second and separate pool becomes available"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The bucket can be emptied by a burst whatever the average is, so the page asks for the peak and offers a higher tier or a smoother load.",
+        "b": "Ruled out because the page says \"write the peak, not the mean\".",
+        "c": "Ruled out because \"a request counts against the request limit however short its reply is\".",
+        "d": "Ruled out because \"rate limits are shared across all geos\", so no second pool appears."
+      }
+    },
+    {
+      "id": "03-the-life-cycle-and-a-spec-you-can-test#m4",
+      "page": "03-the-life-cycle-and-a-spec-you-can-test.md",
+      "scope": "module",
+      "stem": "A help site must answer visitors only from the company's own policy documents, one answer for each visitor, with the visitor waiting. Which design fits best?",
+      "options": {
+        "a": "Chain three separate calls that draft, check and polish the reply before it is shown",
+        "b": "Run an agent loop that explores the documents until the loop is satisfied with what it found",
+        "c": "Fetch the matching passages, then ask once for a reply grounded in them",
+        "d": "Submit each question as part of an overnight batch that is collected the next morning"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Answers that must come from the company's own documents point to retrieval followed by one call.",
+        "b": "Ruled out because an agent loop is for when \"the path depends on what is found and cannot be listed in advance\".",
+        "a": "Ruled out because a chain is for \"several dependent steps, each checkable\", and three calls would also cost latency.",
+        "d": "Ruled out because a batch \"is the right design when nobody is waiting\"."
+      }
+    }
+  ]
+}

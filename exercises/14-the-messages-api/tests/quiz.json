@@ -1,0 +1,195 @@
+{
+  "module": "14-the-messages-api",
+  "quizzes": [
+    {
+      "id": "01-turns-roles-and-content-blocks#q1",
+      "page": "01-turns-roles-and-content-blocks.md",
+      "scope": "page",
+      "stem": "A support bot works well in testing, where the developer types fast, but real users report that it answers each message as though it were the first. The code sends the newest user message and the system prompt each time. What is the cause?",
+      "options": {
+        "a": "The history of earlier turns is not part of the requests",
+        "b": "The system prompt should hold a summary of the earlier talk",
+        "c": "The output limit is too low for the model to recall earlier turns",
+        "d": "The model needs a different tier for multi-turn memory"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"the Messages API is stateless\", so the client has to send the whole history each time.",
+        "b": "Ruled out because the system prompt is a top-level field for \"instructions that apply from the start\", and a hand-made summary is not how history is kept.",
+        "c": "Ruled out because \"a conversation exists only as the list your code sends each time\", and no output limit supplies a missing list.",
+        "d": "Ruled out because \"the model keeps nothing between requests\", whichever tier answers."
+      }
+    },
+    {
+      "id": "01-turns-roles-and-content-blocks#q2",
+      "page": "01-turns-roles-and-content-blocks.md",
+      "scope": "page",
+      "stem": "After a move from Claude Sonnet 4.5 to Claude Sonnet 5.5, every request of a JSON-extraction job returns a 400. The code ends each list with a message from the model's side that holds an opening brace. Which fix is best?",
+      "options": {
+        "a": "Put the brace in a message with the role system at the end of the list",
+        "b": "Keep the trailing message but lower the sampling temperature to zero",
+        "c": "Drop the final entry and ask for the format through structured outputs",
+        "d": "Move the brace into the system field so that the reply still begins with it"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Prefill is not supported on current models, and the page names structured outputs and system-prompt instructions as the replacements.",
+        "b": "Ruled out because \"a request that does returns a 400 invalid_request_error\", whatever the temperature.",
+        "a": "Ruled out because a system-role message is for \"instructions that only become relevant later\" and does not pre-fill a reply.",
+        "d": "Ruled out because the field is for \"instructions that hold from the first turn\", and an instruction does not start a reply with a given character."
+      }
+    },
+    {
+      "id": "02-limits-stop-reasons-and-usage#q1",
+      "page": "02-limits-stop-reasons-and-usage.md",
+      "scope": "page",
+      "stem": "A nightly job asks for a JSON report and sometimes crashes in the JSON parser, with no error status from the API. Which first check does the page recommend?",
+      "options": {
+        "a": "Lower the sampling temperature so that the report is less variable from one night to the next",
+        "b": "Read `stop_reason` and treat `max_tokens` as a cut reply before using the text",
+        "c": "Add a stop sequence at the end of every field that the report holds",
+        "d": "Catch the HTTP status of the call and retry every status above 399"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"stop_reason indicates normal completion; HTTP errors indicate failures\", so a cut reply arrives as a normal 200 and only `stop_reason` shows it.",
+        "a": "Ruled out because \"a larger ceiling does not slow short answers\" and variability is not what truncates a reply.",
+        "c": "Ruled out because a stop sequence ends a reply early at a chosen string and does not stop it being cut: \"the model usually stops by itself, well before the ceiling\".",
+        "d": "Ruled out because a `max_tokens` cut carries a 200 status: \"a `max_tokens` or a `refusal` arrives with status 200\"."
+      }
+    },
+    {
+      "id": "02-limits-stop-reasons-and-usage#q2",
+      "page": "02-limits-stop-reasons-and-usage.md",
+      "scope": "page",
+      "stem": "A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400 until they delete a line that sets the sampling temperature to 0.2. What should they do about `top_p`, which they also set?",
+      "options": {
+        "a": "Replace it with `top_k`, which the page says the model still accepts",
+        "b": "Keep it and raise it to 1.0, which the page says is safest",
+        "c": "Keep it, because only the temperature setting is rejected on that model and the others pass",
+        "d": "Omit it as well, since any non-default value is rejected for that release"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says a non-default value of any of the three settings \"is rejected with a 400 error\" on the current models.",
+        "b": "Ruled out because \"the upgrade is a deletion, not a change of value\", and the page does not name 1.0 or any value as safe.",
+        "c": "Ruled out because \"a non-default value of any of them is rejected with a 400 error\", and the three are named together.",
+        "a": "Ruled out because \"temperature, top_p and top_k used to be the knobs of randomness\", and the page rejects all three, so `top_k` is no way out."
+      }
+    },
+    {
+      "id": "03-the-conversation-state-the-client-keeps#q1",
+      "page": "03-the-conversation-state-the-client-keeps.md",
+      "scope": "page",
+      "stem": "A chat client appends each user turn to its history before calling the API. After a night of occasional 529 errors, some conversations answer oddly, and their stored history shows two user turns in a row. What is the best fix?",
+      "options": {
+        "a": "Retry every failed call forever so that no turn is ever left without its answer by morning",
+        "b": "Take that entry out again whenever the call raises, so that only whole exchanges are kept",
+        "c": "Merge any two consecutive user turns into one when the history is saved",
+        "d": "Store only the assistant turns, which are the ones that the model produced"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The rule is to \"commit a turn only when the whole exchange succeeded\", which means removing the user turn on any failure.",
+        "a": "Ruled out because a retry is a separate decision, and the page says the retry \"will send a different conversation from the one the user saw\" if the history is damaged.",
+        "c": "Ruled out because a merge hides the damage while \"the next request contains two user turns in a row\" in the very same way, and a question that never got an answer stays in the history.",
+        "d": "Ruled out because \"the whole list goes in every request\", and a list without user turns is not a conversation."
+      }
+    },
+    {
+      "id": "03-the-conversation-state-the-client-keeps#q2",
+      "page": "03-the-conversation-state-the-client-keeps.md",
+      "scope": "page",
+      "stem": "A product team notices that a support conversation of 40 turns costs far more than four conversations of 10 turns, although the total number of questions is the same. What explains it?",
+      "options": {
+        "a": "The system prompt is repeated once for every question, so it dominates the bill",
+        "b": "Long conversations are charged at a higher price for each output token that is produced",
+        "c": "The model writes longer replies as a conversation grows, and the replies dominate the bill in the end",
+        "d": "Each call repeats the earlier exchanges, so the input bill grows with the square of the length"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"the input cost of a conversation grows with the square of its length\", because each turn resends everything before it.",
+        "b": "Ruled out because nothing on the page prices long conversations differently, and the growth comes from input: \"every turn resends everything before it\".",
+        "c": "Ruled out because \"turn n sends about 200 n input tokens\", which is growth in input and not in replies.",
+        "a": "Ruled out because the system prompt is the same size on every turn, and the page says \"every turn resends everything before it\", so the history is what grows."
+      }
+    },
+    {
+      "id": "03-the-conversation-state-the-client-keeps#m1",
+      "page": "03-the-conversation-state-the-client-keeps.md",
+      "scope": "module",
+      "stem": "After a team adds a tool, some conversations fail with a 400 or lose the model's reasoning when they are resumed from the database. The save code keeps only the text of each reply. What is the best fix?",
+      "options": {
+        "a": "Save the usage totals with each turn so that the conversation can be rebuilt from them",
+        "b": "Store each reply's content list exactly as received and send it back unchanged",
+        "c": "Save the model id with each turn so that the same tier answers after a resume",
+        "d": "Follow every tool result with an explanatory text block when the turn is rebuilt"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Storing only text drops `tool_use` and thinking blocks, and the page says to \"store the content list as received\".",
+        "a": "Ruled out because usage totals are \"cost, and an early warning for the context window\", not a way to rebuild a conversation.",
+        "c": "Ruled out because the model id belongs to the \"settings that do not change per turn\", and it does not carry blocks.",
+        "d": "Ruled out because adding text after tool results \"can teach the model to expect user input after every tool call\"."
+      }
+    },
+    {
+      "id": "03-the-conversation-state-the-client-keeps#m2",
+      "page": "03-the-conversation-state-the-client-keeps.md",
+      "scope": "module",
+      "stem": "A client receives `stop_reason` of `max_tokens` on the fifth turn of a conversation. Which handling fits the module?",
+      "options": {
+        "a": "Mark the reply truncated, keep it in the history, and let the user ask to continue next",
+        "b": "End the list with the cut text as an assistant turn so that the model resumes writing",
+        "c": "Treat the turn as failed and remove it, because a cut reply is not a whole exchange",
+        "d": "Raise the sampling temperature so that the model finishes inside the limit the next time it runs"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A truncated reply is kept: \"cut replies stay in the history\", and the user can ask to continue in a normal turn.",
+        "b": "Ruled out because \"a request that does returns a 400 invalid_request_error\", and ending the list with an assistant turn is a prefill.",
+        "c": "Ruled out because the rollback rule is to \"commit a turn only when the whole exchange succeeded\", and a cut reply is a completed exchange.",
+        "d": "Ruled out because \"a non-default value of any of them is rejected with a 400 error\", and sampling does not control where the limit cuts."
+      }
+    },
+    {
+      "id": "03-the-conversation-state-the-client-keeps#m3",
+      "page": "03-the-conversation-state-the-client-keeps.md",
+      "scope": "module",
+      "stem": "A team wants an early warning before long chats approach the context window and become expensive. Which signal can the client compute from every reply?",
+      "options": {
+        "a": "The sum of the three input-token fields of the usage object, compared with the model's ceiling",
+        "b": "The count of turns so far, since every turn adds the same number of tokens to the request body",
+        "c": "The output-token count alone, because the reply is what fills the window",
+        "d": "The appearance of the context-window stop reason, which says the limit is close"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says the total input is the sum of three numbers, and that counting tokens makes the growth visible.",
+        "b": "Ruled out because \"turn n sends about 200 n input tokens\", so each turn adds more than the one before and a turn count is a poor proxy.",
+        "c": "Ruled out because the page says \"the input cost of a conversation grows with the square of its length\", and the history is input.",
+        "d": "Ruled out because that value reports that \"the context window filled before max_tokens\", which is already too late."
+      }
+    },
+    {
+      "id": "03-the-conversation-state-the-client-keeps#m4",
+      "page": "03-the-conversation-state-the-client-keeps.md",
+      "scope": "module",
+      "stem": "A developer logs each request body for debugging and finds that bodies logged earlier in a conversation change after later turns. Which defect fits best?",
+      "options": {
+        "a": "A failed call was not rolled back before the error finally left the function that made it",
+        "b": "The assistant content was rebuilt from text and not stored as received",
+        "c": "The payload holds the client's own history list instead of a snapshot of it",
+        "d": "The system prompt is resent with every turn and grows each time"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page describes it: \"if the request body holds the client's own history list, a later turn changes earlier requests\".",
+        "b": "Ruled out because the page says to \"store the content list as received\", which concerns what a turn contains, not whether old requests change.",
+        "a": "Ruled out because the rollback rule is to \"commit a turn only when the whole exchange succeeded\", and it concerns failures.",
+        "d": "Ruled out because \"system is the same top-level field on every request\", so it does not grow."
+      }
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "module": "13-one-rest-api-under-every-sdk",
+  "quizzes": [
+    {
+      "id": "01-the-http-contract#q1",
+      "page": "01-the-http-contract.md",
+      "scope": "page",
+      "stem": "A team hand-writes a client in a language that has no SDK. The request carries the content type and the key, and the body copies the documentation's example, yet every call fails with a 400. Which addition is most likely missing?",
+      "options": {
+        "a": "The version header that names the API revision in use by the caller",
+        "b": "An accept header that names the media type the client wants back",
+        "c": "A user-agent header that names the client library and its version",
+        "d": "A workspace header that names the workspace this call should run under"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The overview lists the version header as required, and a hand-written client has to send it itself.",
+        "b": "Ruled out because \"the overview marks no Accept or User-Agent header as required\".",
+        "c": "is ruled out for the same reason: \"the overview marks no Accept or User-Agent header as required\".",
+        "d": "Ruled out because the workspace header is needed \"only when the key spans several workspaces\"."
+      }
+    },
+    {
+      "id": "01-the-http-contract#q2",
+      "page": "01-the-http-contract.md",
+      "scope": "page",
+      "stem": "A gateway between a service and the provider starts answering some failures with web pages. The service's failure handler throws while decoding them. Which design is best?",
+      "options": {
+        "a": "Decode the body as JSON first and stop the process whenever that decoding fails",
+        "b": "Ask the gateway team to promise that every reply stays JSON in the provider's own format",
+        "c": "Map each non-2xx status to a typed fault, using the raw text if the body is not JSON",
+        "d": "Retry each failing call until the body decodes cleanly into the expected shape"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A hand-written client has to cope with a non-JSON body, so the handler falls back to the text.",
+        "b": "Ruled out because \"always JSON is the API's promise about its own errors\", and a gateway is not covered by it.",
+        "a": "Ruled out because \"a hand-written client must keep working when the body is HTML\".",
+        "d": "Ruled out because \"the proxy answers the same page again\"."
+      }
+    },
+    {
+      "id": "02-what-the-sdk-does-for-you#q1",
+      "page": "02-what-the-sdk-does-for-you.md",
+      "scope": "page",
+      "stem": "Verbose diagnostics are on in a deployed service. Credentials look masked in the output, but customers' messages show up in it. What should the team do?",
+      "options": {
+        "a": "Keep it on, because the SDK masks everything sensitive in a reply or request",
+        "b": "Switch that mode off for live traffic and record request ids instead",
+        "c": "Hash the API key before it is configured so that the output cannot reveal it",
+        "d": "Log only the failing calls so that less customer text reaches the output"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says that \"customer text does not belong in a log by default\", and request ids are the safe handle for a support ticket.",
+        "a": "Ruled out because \"sensitive data in request and response bodies may still be visible\".",
+        "c": "Ruled out because \"headers are partly redacted, bodies are not\", and the leak is in the bodies.",
+        "d": "Ruled out because failing calls carry customer text too, and \"customer text does not belong in a log by default\"."
+      }
+    },
+    {
+      "id": "02-what-the-sdk-does-for-you#q2",
+      "page": "02-what-the-sdk-does-for-you.md",
+      "scope": "page",
+      "stem": "A service sets nothing on its SDK client and calls the API in a month where the organisation has already reached its monthly spend cap. What happens to each call?",
+      "options": {
+        "a": "It is attempted once, because the SDK reads the cap and stops early",
+        "b": "It is attempted once, because a 429 is never retried by the SDK",
+        "c": "It is attempted three times, and the third attempt succeeds after a pause",
+        "d": "It is attempted three times in all, and every attempt fails"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Two retries after the first attempt make three, and a spend-cap 429 \"stays in force until the next month begins\".",
+        "b": "Ruled out because \"certain errors are automatically retried 2 times by default\".",
+        "c": "Ruled out because the cap \"stays in force until the next month begins\", so no pause helps.",
+        "a": "Ruled out because \"two retries is a default for a generic caller\" and the SDK does not inspect the cap."
+      }
+    },
+    {
+      "id": "03-streaming-transport-and-connections#q1",
+      "page": "03-streaming-transport-and-connections.md",
+      "scope": "page",
+      "stem": "A team's report generator sets a very large `max_tokens` on a non-streaming call and now fails intermittently on the office network after several minutes without any reply. Which change is best?",
+      "options": {
+        "a": "Open a websocket so that the server can push the report when it is ready",
+        "b": "Turn on server-sent events so that data keeps flowing while the long text is produced",
+        "c": "Raise the client timeout so that the call may stay silent for longer",
+        "d": "Split the report into three prompts and send them over three connections"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Streaming keeps data moving: \"Bytes keep flowing, and the connection is not idle\".",
+        "a": "Ruled out because \"there is no client-to-server traffic to carry\" in a model call, and a websocket is \"not what the API sends\".",
+        "c": "Ruled out because \"Some networks may drop idle connections after a variable period of time\", so a longer timeout on your side does not help.",
+        "d": "Ruled out because \"the call is silent for as long as the generation takes\", and each of three connections would be silent while its own part is written."
+      }
+    },
+    {
+      "id": "03-streaming-transport-and-connections#q2",
+      "page": "03-streaming-transport-and-connections.md",
+      "scope": "page",
+      "stem": "A developer proposes a websocket between a web page and the model API so that the page can send a stop signal during a long answer. What does the page say is the better design?",
+      "options": {
+        "a": "Add a second HTTP request that tells the model to stop generating",
+        "b": "Keep the single HTTP request and poll it every second for the next words",
+        "c": "Switch to the websocket, because only that protocol allows a cancel",
+        "d": "Keep the single HTTP request and stream, and cancel by closing the connection"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says the client cancels \"by closing the connection\", with the stream running on one ordinary HTTP request.",
+        "b": "Ruled out because \"the server answers with a normal HTTP response whose body is a stream of server-sent events\", so the words arrive without polling.",
+        "c": "Ruled out because \"a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return\".",
+        "a": "Ruled out because the page documents \"breaking out of the loop or calling stream.controller.abort()\", not a second request."
+      }
+    },
+    {
+      "id": "03-streaming-transport-and-connections#m1",
+      "page": "03-streaming-transport-and-connections.md",
+      "scope": "module",
+      "stem": "A hand-written client and an SDK client call the API from the same service. After the provider adds a field to replies, only the hand-written client starts failing. Which cause is most likely?",
+      "options": {
+        "a": "It has no retries, which the SDK would have supplied automatically",
+        "b": "Its parser rejects properties that it does not recognise",
+        "c": "It lacks the identifying platform headers that the SDK sends",
+        "d": "It was written against an older revision of the contract header"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A client that fails on an unknown field breaks \"on a change the versioning page allows\", and the habit is to read what you need and ignore the rest.",
+        "a": "Ruled out because a retry cannot cure a parse failure, and \"retrying does not help: the proxy answers the same page again\" shows the same logic for a repeated reply.",
+        "c": "Ruled out because the SDK's extra headers \"help debugging and are not part of your contract\".",
+        "d": "Ruled out because \"the only current value of anthropic-version is 2023-06-01\", and an older one \"may be unavailable for new users\"."
+      }
+    },
+    {
+      "id": "03-streaming-transport-and-connections#m2",
+      "page": "03-streaming-transport-and-connections.md",
+      "scope": "module",
+      "stem": "A service builds a new SDK client for every streamed call, and its latency and open-socket count grow under load. Which change is best?",
+      "options": {
+        "a": "Keep a single instance created at start-up and let every request handler share it",
+        "b": "Move the calls to a websocket so that one connection is kept open",
+        "c": "Turn streaming off so that fewer sockets are used by each of the calls",
+        "d": "Raise the output limit so that fewer calls are needed for the same work"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says to create one client and share it, because \"a new client means a new connection pool each time\".",
+        "b": "Ruled out because \"a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return\".",
+        "c": "Ruled out because streaming is what keeps long calls from being dropped as idle: \"Bytes keep flowing, and the connection is not idle\".",
+        "d": "Ruled out because \"the cost shows up as latency and sockets\" and comes from the number of clients, which the output limit does not change."
+      }
+    },
+    {
+      "id": "03-streaming-transport-and-connections#m3",
+      "page": "03-streaming-transport-and-connections.md",
+      "scope": "module",
+      "stem": "A call that asks for incremental output returns 200 and a few events, and then the network drops. A developer records the call as successful because of the 200. What should the page's reader tell them?",
+      "options": {
+        "a": "The code shows only that the reply began, so the end must be checked as well",
+        "b": "The code is final, since the server sends it after the whole message is written",
+        "c": "The events already received form a complete message and can be stored as the result",
+        "d": "The call needs a longer timeout value so that the code can arrive before the drop"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page's second trap says \"a 200 does not mean the answer is complete\", so the end of the stream has to be checked as well.",
+        "b": "Ruled out because \"the connection stays open until the message is complete\", so the status comes first.",
+        "c": "Ruled out because \"a streamed reply can start with a 200 and still end with an error event\".",
+        "d": "Ruled out because \"some networks may drop idle connections after a variable period of time\", and a longer timeout on your side does not stop a drop."
+      }
+    },
+    {
+      "id": "03-streaming-transport-and-connections#m4",
+      "page": "03-streaming-transport-and-connections.md",
+      "scope": "module",
+      "stem": "A team must report a failing call to the provider's support while keeping its logs free of secrets and customer text. Which record should the service keep for each call?",
+      "options": {
+        "a": "The authorization header and the body, so that the call can be reproduced",
+        "b": "The complete request and reply, so that support staff can replay them",
+        "c": "The request id, the status and the error type, without bodies or keys",
+        "d": "Only the time of the call, since the provider can find the call from it"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The request id is what support asks for: \"include it when you contact support about a specific request\", and the status and type classify the failure.",
+        "b": "Ruled out because \"customer text does not belong in a log by default\".",
+        "a": "Ruled out because an error message that is logged \"is read by people who must not see a key\", and a header would carry the key.",
+        "d": "Ruled out because the documentation says to \"include it when you contact support about a specific request\", and a time stamp is not that id."
+      }
+    }
+  ]
+}

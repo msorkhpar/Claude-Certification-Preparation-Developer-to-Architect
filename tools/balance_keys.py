@@ -55,7 +55,10 @@ def process(path, counter):
     path.write_text(md)
 
 
+ONLY = sys.argv[1:]  # folder-name prefixes to balance; none means every module folder
 for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[0-7])-", p.name)):
+    if ONLY and not any(folder.name.startswith(a) for a in ONLY):
+        continue
     counter = [0]
     for page in sorted(folder.glob("*.md")):
         process(page, counter)
