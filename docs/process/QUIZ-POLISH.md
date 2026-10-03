@@ -25,3 +25,5 @@ distractors, repeated themes: anonymise-first, cheap-tier escalation, faster tie
 - 02-prompt: q1, q2, m1, m2, m4
 - 03-scenario: q1, q2, m1, m2
 - mock exam: x2, x3, x4, x5, x7, x8, x11, x16, x20, x24, x26, x28, x30
+
+- 18-model-choice-cost-and-migration, 19-thinking-effort-and-speed: the key is the longest option in 31% and 40% of the module questions (checker warnings); rebalance option lengths.
