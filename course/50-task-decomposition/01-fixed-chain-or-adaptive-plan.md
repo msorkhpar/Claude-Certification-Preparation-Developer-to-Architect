@@ -251,15 +251,15 @@ The exam's answer options for this task statement follow a pattern. These are th
    - **d**: Keep the single request and add an instruction to treat every file with equal care
 
 2. A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?
-   - **a**: Start at the first directory and write tests for each file in alphabetical order
-   - **b**: Ask the model for the complete list of test cases before it has read any code
+   - **a**: Fix one subtask per directory in advance and run them in order
+   - **b**: Ask the model to plan every test in advance, then run that plan to the end
    - **c**: Map the structure, rank the areas by impact, then re-plan as dependencies appear
-   - **d**: Generate tests for every file in parallel and keep the ones that happen to pass
+   - **d**: Pick the largest files first and write tests for them until time runs out
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Each file gets a full review in its own context, and a second pass sees the relations. *b* is ruled out because repetition keeps what causes the problem: "A request that holds a dozen files spends that budget on text before the review begins". *c* is ruled out because halves keep the dilution and still hide the relations between the halves: "The exam calls the effect attention dilution". *d* is ruled out because an instruction does not change what fills the context: "LLM performance degrades as context fills".
-2. **c**. An open-ended task is mapped first and planned from what is found. *a* is ruled out because the next directory changes what should be done: "a pipeline that marches through steps that no longer make sense". *b* is ruled out because a plan made before any ground truth is a guess: "the plan is made before any ground truth exists". *d* is ruled out because it skips the planning that the findings feed: "The plan is made again after each step."
+2. **c**. An open-ended task is mapped first and planned from what is found. *a* is ruled out because a fixed order cannot follow the findings: "a pipeline that marches through steps that no longer make sense". *b* is ruled out because a plan made before any ground truth is a guess: "the plan is made before any ground truth exists". *d* is ruled out because size is not impact: "mapped, ranked and then planned again as dependencies appear".
 
 </details>

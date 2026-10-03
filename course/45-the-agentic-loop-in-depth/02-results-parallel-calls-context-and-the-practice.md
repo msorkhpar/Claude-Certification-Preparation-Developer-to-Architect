@@ -66,17 +66,18 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: That both run in the order requested, since every custom tool runs one after another here
    - **d**: That the reader waits, since the SDK works out the dependency from the tool names
 
-4. A long refactoring run was told in its first prompt never to touch the vendor folder. After many turns it edits a vendored script, and the logs show that a compaction happened. Which design prevents a repeat?
-   - **a**: Ask a helper agent to remember the rule and report it back to the main agent
-   - **b**: Write the rule in capital letters at the very start of the first prompt of each run
-   - **c**: Lower the number of turns allowed per run so that the window never nears its limit
-   - **d**: Keep the rule in the project memory file, which is injected again on every request
+4. A finance dashboard reads the `usage` field of every result to report what agent runs cost, but the invoices are higher for the runs that delegated to subagents. What explains the gap, and what is the fix?
+   - **a**: Add the cost of the helpers by parsing their own messages out of the stream
+   - **b**: Treat the figure as complete and look for unlogged retries in the application
+   - **c**: It covers only the lead loop, so consult the per-model accounting for the whole tree
+   - **d**: The figure is zeroed whenever a run is cut off, so leave those runs out
+
 
 <details>
 <summary>Answer key</summary>
 
 3. **b**. The page says to put a dependency in two turns, because the model decides what to ask for in one turn and the SDK promises no order between the calls it makes together. *a* is ruled out because the documented rule is about conflicts among tools that change state: "Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK does not read names for dependencies: "a dependency belongs in two turns."
-4. **d**. A memory file loaded through the setting sources is added to every request, so compaction cannot drop the rule. *b* is ruled out because the instruction is exactly what a summary replaces: "Compaction replaces older messages with a summary, so specific instructions from early in the conversation may not be preserved." *c* is ruled out because compaction follows the size of the context, not the turn count: "When the window nears its limit the SDK compacts". *a* is ruled out because a helper agent hands back only its report: "only its final response returns to the parent."
+4. **c**. The `usage` figure counts one loop only, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
 
 </details>
 
@@ -97,10 +98,10 @@ This quiz covers both pages of the module.
    - **d**: Call the model again with the same messages and hope for a call
 
 3. A dashboard alerts on every run that ends with a null stop reason and zero cost, and the team suspects a parsing bug. What explains those runs?
-   - **a**: A turn limit, which always reports a zero cost for the unfinished run
-   - **b**: A refusal by the model, which is always reported with a null stop reason first
+   - **a**: A turn limit, which can report a zero cost for the unfinished run of the agent
+   - **b**: A refusal by the model, which is reported with a null stop reason at first sight
    - **c**: A normal run, since a completed task has no further reason left to give
-   - **d**: A crashed session, which closes with neither a final verdict nor any spend figures
+   - **d**: A crashed session, which closes in an error result whose figures may be blanked
 
 <details>
 <summary>Answer key</summary>

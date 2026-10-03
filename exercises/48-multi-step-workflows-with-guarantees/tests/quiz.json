@@ -24,26 +24,26 @@
       "id": "01-prompt-or-code-where-a-guarantee-lives#q2",
       "page": "01-prompt-or-code-where-a-guarantee-lives.md",
       "scope": "page",
-      "stem": "A team forces the verification tool through tool_choice on the first request, believing the order of steps is now guaranteed. Which gap remains?",
+      "stem": "On a model that supports forced tool use, a team forces the verification tool through tool_choice on the first request, believing the order of steps is now guaranteed. Which gap remains?",
       "options": {
-        "a": "Every later tool stays blocked until verification returns a result",
-        "b": "The first request is left unconstrained, since a forced choice is only advisory",
+        "a": "Later tools can stay blocked until verification returns a result",
+        "b": "Text written before the call changes the order in which the tools run",
         "c": "Later turns are unconstrained, so a refund can still follow a failed check",
-        "d": "The forced call skips the schema, so its input may be malformed"
+        "d": "The forced choice leaves every later request uncached, so the cost rises"
       },
       "key": "c",
       "explanation": {
         "c": "A forced choice applies to the request that sets it, and nothing carries it to later calls.",
-        "b": "Ruled out because the first call is forced: \"the API prefills the assistant message to force a tool to be used\".",
+        "b": "Ruled out because the model writes no text before a forced call: \"the API prefills the assistant message to force a tool to be used\".",
         "a": "Ruled out because nothing links the later tools to it: \"An order between steps is a property of the program that runs them.\"",
-        "d": "Ruled out because the shape of an input is a separate matter, which strict tool use handles: \"which guarantees the shape of the call and not its place in a sequence\"."
+        "d": "Ruled out because only the message blocks are reprocessed: \"tool definitions and system prompts remain cached\"."
       }
     },
     {
       "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#q1",
       "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
       "scope": "page",
-      "stem": "A refund gate becomes stricter after three failed identity checks: it now refuses every tool, escalation included. A locked-out customer's chat loops until the turn limit. What went wrong?",
+      "stem": "A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?",
       "options": {
         "a": "The lock should have waited for ten failures instead of three",
         "b": "The route to a person depended on the same safeguard that had tripped",
@@ -65,7 +65,7 @@
       "stem": "A refund over the limit is escalated with the full chat transcript attached, and reviewers spend minutes finding what was verified and what was blocked. Which change helps most?",
       "options": {
         "a": "Keep the transcript, but have the model highlight its key lines",
-        "b": "Ask the model to write a much longer and fuller summary of the whole conversation",
+        "b": "Attach a model-written summary of the conversation beside the full transcript",
         "c": "Add the customer's complete order history to the escalation",
         "d": "Provide a record from the gate's own state, with the agent's reason as a field"
       },

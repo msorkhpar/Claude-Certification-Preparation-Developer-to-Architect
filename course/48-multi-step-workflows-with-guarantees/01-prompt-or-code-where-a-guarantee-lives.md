@@ -282,16 +282,17 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: A generic error that says only that the call failed
    - **d**: The refund's result after running the verification itself
 
-2. A team forces the verification tool through tool_choice on the first request, believing the order of steps is now guaranteed. Which gap remains?
-   - **a**: Every later tool stays blocked until verification returns a result
-   - **b**: The first request is left unconstrained, since a forced choice is only advisory
+2. On a model that supports forced tool use, a team forces the verification tool through tool_choice on the first request, believing the order of steps is now guaranteed. Which gap remains?
+   - **a**: Later tools can stay blocked until verification returns a result
+   - **b**: Text written before the call changes the order in which the tools run
    - **c**: Later turns are unconstrained, so a refund can still follow a failed check
-   - **d**: The forced call skips the schema, so its input may be malformed
+   - **d**: The forced choice leaves every later request uncached, so the cost rises
+
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Every call needs an answer, and an error that names the missing step lets the model do it and try again. *b* is ruled out because the API requires a result: "Tool result blocks must immediately follow their corresponding tool use blocks in the message history." *c* is ruled out because the documentation's advice is to "include what went wrong and what Claude should try next". *d* is ruled out because the model must obtain the code from the customer: "the gate refuses and says what is missing".
-2. **c**. A forced choice applies to the request that sets it, and nothing carries it to later calls. *b* is ruled out because the first call is forced: "the API prefills the assistant message to force a tool to be used". *a* is ruled out because nothing links the later tools to it: "An order between steps is a property of the program that runs them." *d* is ruled out because the shape of an input is a separate matter, which strict tool use handles: "which guarantees the shape of the call and not its place in a sequence".
+2. **c**. A forced choice applies to the request that sets it, and nothing carries it to later calls. *b* is ruled out because the model writes no text before a forced call: "the API prefills the assistant message to force a tool to be used". *a* is ruled out because nothing links the later tools to it: "An order between steps is a property of the program that runs them." *d* is ruled out because only the message blocks are reprocessed: "tool definitions and system prompts remain cached".
 
 </details>

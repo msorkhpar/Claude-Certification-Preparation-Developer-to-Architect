@@ -26,17 +26,17 @@
       "scope": "page",
       "stem": "A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?",
       "options": {
-        "a": "Start at the first directory and write tests for each file in alphabetical order",
-        "b": "Ask the model for the complete list of test cases before it has read any code",
+        "a": "Fix one subtask per directory in advance and run them in order",
+        "b": "Ask the model to plan every test in advance, then run that plan to the end",
         "c": "Map the structure, rank the areas by impact, then re-plan as dependencies appear",
-        "d": "Generate tests for every file in parallel and keep the ones that happen to pass"
+        "d": "Pick the largest files first and write tests for them until time runs out"
       },
       "key": "c",
       "explanation": {
         "c": "An open-ended task is mapped first and planned from what is found.",
-        "a": "Ruled out because the next directory changes what should be done: \"a pipeline that marches through steps that no longer make sense\".",
+        "a": "Ruled out because a fixed order cannot follow the findings: \"a pipeline that marches through steps that no longer make sense\".",
         "b": "Ruled out because a plan made before any ground truth is a guess: \"the plan is made before any ground truth exists\".",
-        "d": "Ruled out because it skips the planning that the findings feed: \"The plan is made again after each step.\""
+        "d": "Ruled out because size is not impact: \"mapped, ranked and then planned again as dependencies appear\"."
       }
     },
     {
@@ -65,9 +65,9 @@
       "stem": "A large review runs one pass per module and then a final pass across modules. What should the final pass receive?",
       "options": {
         "a": "The full text of every module, so that it can read the code that it compares",
-        "b": "Only the findings of the earlier passes, with every other detail removed",
+        "b": "The findings of the earlier passes together with the diff of the whole change",
         "c": "The diff of the whole change, because the modules are in the repository already",
-        "d": "A name plus a digest per examined unit, written to carry its offers and needs"
+        "d": "A name and a short summary for each, listing what it offers and what it expects"
       },
       "key": "d",
       "explanation": {
@@ -100,19 +100,19 @@
       "id": "02-per-item-passes-adaptive-guards-and-the-practice#m2",
       "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
       "scope": "module",
-      "stem": "A review has twelve independent per-source reads and one final comparison, which uses their summaries. Which schedule fits the dependencies?",
+      "stem": "A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?",
       "options": {
-        "a": "Start the comparison first so that it can guide the reads while they are running",
-        "b": "Start them side by side, and begin the last step once the others are complete",
-        "c": "Run each read strictly one after another, since parallel runs would overlap",
-        "d": "Run the comparison together with the reads and merge when each one is ready"
+        "a": "Ask it to restate the goal more carefully before each next step",
+        "b": "Plan every step up front, so that no drift is possible",
+        "c": "Hand it the output of each action so far, such as a test run or a file listing",
+        "d": "Switch to a fixed chain, since a chain cannot drift from the code"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "The reads are independent and the comparison depends on all of them.",
-        "a": "Ruled out because the comparison reads their summaries: \"it starts when the last has finished\".",
-        "c": "Ruled out because independent work may overlap: \"the divided subtasks can be parallelized for speed\".",
-        "d": "Ruled out because the comparison would have nothing to read: \"The cross pass depends on all of them\"."
+        "c": "The planner needs ground truth from each step, not its own earlier guesses.",
+        "a": "Ruled out because the source of the drift is what it is shown: \"a plan that is made from the model's own previous guesses drifts\".",
+        "b": "Ruled out because an up-front plan has no results to use: \"the plan is made before any ground truth exists\".",
+        "d": "Ruled out because a chain does not adapt: \"If step two finds that step three is pointless, the chain runs step three.\""
       }
     },
     {

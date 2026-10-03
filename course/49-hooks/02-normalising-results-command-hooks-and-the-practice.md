@@ -144,7 +144,7 @@ This quiz covers both pages of the module.
    - **c**: The money has already moved by then, so the control belongs ahead of the call
    - **d**: The limit is read from the output, so it should be read from the input instead
 
-2. A PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?
+2. On Claude Code v2.1.210 or later, a PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?
    - **a**: A normal result, because the operation went ahead while the gate was still waiting
    - **b**: A message that no reply arrived before the deadline, and the operation is withheld
    - **c**: A rejection from a person, and the whole run stops until someone responds to it

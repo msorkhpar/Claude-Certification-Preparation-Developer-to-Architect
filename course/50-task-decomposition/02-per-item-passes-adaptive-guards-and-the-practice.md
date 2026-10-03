@@ -96,9 +96,9 @@ These are the wrong answers that the exam's scenarios offer for this task statem
 
 4. A large review runs one pass per module and then a final pass across modules. What should the final pass receive?
    - **a**: The full text of every module, so that it can read the code that it compares
-   - **b**: Only the findings of the earlier passes, with every other detail removed
+   - **b**: The findings of the earlier passes together with the diff of the whole change
    - **c**: The diff of the whole change, because the modules are in the repository already
-   - **d**: A name plus a digest per examined unit, written to carry its offers and needs
+   - **d**: A name and a short summary for each, listing what it offers and what it expects
 
 <details>
 <summary>Answer key</summary>
@@ -118,11 +118,12 @@ This quiz covers both pages of the module.
    - **c**: Use the plain sequence on each, as the steps are known and none affects another
    - **d**: Use a pass for each plus a cross pass, because that many items need a cross pass
 
-2. A review has twelve independent per-source reads and one final comparison, which uses their summaries. Which schedule fits the dependencies?
-   - **a**: Start the comparison first so that it can guide the reads while they are running
-   - **b**: Start them side by side, and begin the last step once the others are complete
-   - **c**: Run each read strictly one after another, since parallel runs would overlap
-   - **d**: Run the comparison together with the reads and merge when each one is ready
+2. A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?
+   - **a**: Ask it to restate the goal more carefully before each next step
+   - **b**: Plan every step up front, so that no drift is possible
+   - **c**: Hand it the output of each action so far, such as a test run or a file listing
+   - **d**: Switch to a fixed chain, since a chain cannot drift from the code
+
 
 3. A source file has four thousand lines, which is too long for one pass. How should it be handled?
    - **a**: Send its first part only, because the beginning of a file is the most important
@@ -134,7 +135,8 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. Known steps and independent items call for the simplest shape. *a* is ruled out because capability has a price: "Agentic systems often trade latency and cost for better task performance." *b* is ruled out because the systems do not interact, so nothing is gained by a shared planner: "A fixed chain, run once for each item". *d* is ruled out because a cross pass is for items that affect each other: "Items that do not (forty services, each given the same checklist) need only the chain, run forty times."
-2. **b**. The reads are independent and the comparison depends on all of them. *a* is ruled out because the comparison reads their summaries: "it starts when the last has finished". *c* is ruled out because independent work may overlap: "the divided subtasks can be parallelized for speed". *d* is ruled out because the comparison would have nothing to read: "The cross pass depends on all of them".
+2. **c**. The planner needs ground truth from each step, not its own earlier guesses. *a* is ruled out because the source of the drift is what it is shown: "a plan that is made from the model's own previous guesses drifts". *b* is ruled out because an up-front plan has no results to use: "the plan is made before any ground truth exists". *d* is ruled out because a chain does not adapt: "If step two finds that step three is pointless, the chain runs step three."
+
 3. **d**. Parts keep each pass small and the summary joins them. *a* is ruled out because the rest of the file would never be reviewed: "A file that does not fit a pass of its own is cut into parts of a fixed number of lines". *b* is ruled out because a sentence does not carry the interfaces: "what the file offers (the functions and types others use, with their parameters)". *c* is ruled out because the whole file brings back the problem of the split: "spends that budget on text before the review begins".
 
 </details>

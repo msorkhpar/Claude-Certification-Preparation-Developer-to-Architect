@@ -88,7 +88,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 ## Quiz
 
-3. A refund gate becomes stricter after three failed identity checks: it now refuses every tool, escalation included. A locked-out customer's chat loops until the turn limit. What went wrong?
+3. A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?
    - **a**: The lock should have waited for ten failures instead of three
    - **b**: The route to a person depended on the same safeguard that had tripped
    - **c**: The turn limit should have been set a lot lower, so that the loop ended sooner
@@ -96,7 +96,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 4. A refund over the limit is escalated with the full chat transcript attached, and reviewers spend minutes finding what was verified and what was blocked. Which change helps most?
    - **a**: Keep the transcript, but have the model highlight its key lines
-   - **b**: Ask the model to write a much longer and fuller summary of the whole conversation
+   - **b**: Attach a model-written summary of the conversation beside the full transcript
    - **c**: Add the customer's complete order history to the escalation
    - **d**: Provide a record from the gate's own state, with the agent's reason as a field
 
