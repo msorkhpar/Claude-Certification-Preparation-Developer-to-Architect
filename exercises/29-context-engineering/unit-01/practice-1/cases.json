@@ -1,0 +1,103 @@
+{
+  "practice": "29-context-engineering/unit-01/practice-1",
+  "name": "context",
+  "tests": {
+    "java": "ContextTest",
+    "kotlin": "ContextTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_an_over_budget_conversation_becomes_a_summary_and_the_newest_turn",
+      "typescript": "m1 an over budget conversation becomes a summary and the newest turn",
+      "java": "m1_anOverBudgetConversationBecomesASummaryAndTheNewestTurn",
+      "kotlin": "m1_anOverBudgetConversationBecomesASummaryAndTheNewestTurn"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_old_tool_results_are_cleared_but_their_calls_and_flags_stay",
+      "typescript": "e1 old tool results are cleared but their calls and flags stay",
+      "java": "e1_oldToolResultsAreClearedButTheirCallsAndFlagsStay",
+      "kotlin": "e1_oldToolResultsAreClearedButTheirCallsAndFlagsStay"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_window_drops_whole_turns_and_never_splits_a_tool_call_from_its_result",
+      "typescript": "e2 the window drops whole turns and never splits a tool call from its result",
+      "java": "e2_theWindowDropsWholeTurnsAndNeverSplitsAToolCallFromItsResult",
+      "kotlin": "e2_theWindowDropsWholeTurnsAndNeverSplitsAToolCallFromItsResult"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_conversation_within_budget_or_with_nothing_older_is_left_alone",
+      "typescript": "e3 a conversation within budget or with nothing older is left alone",
+      "java": "e3_aConversationWithinBudgetOrWithNothingOlderIsLeftAlone",
+      "kotlin": "e3_aConversationWithinBudgetOrWithNothingOlderIsLeftAlone"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_second_compaction_folds_the_earlier_summary_into_the_new_one",
+      "typescript": "e4 a second compaction folds the earlier summary into the new one",
+      "java": "e4_aSecondCompactionFoldsTheEarlierSummaryIntoTheNewOne",
+      "kotlin": "e4_aSecondCompactionFoldsTheEarlierSummaryIntoTheNewOne"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_citation_that_does_not_match_its_document_is_reported",
+      "typescript": "e5 a citation that does not match its document is reported",
+      "java": "e5_aCitationThatDoesNotMatchItsDocumentIsReported",
+      "kotlin": "e5_aCitationThatDoesNotMatchItsDocumentIsReported"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_footnotes_number_each_distinct_source_once_in_order_of_appearance",
+      "typescript": "e6 footnotes number each distinct source once in order of appearance",
+      "java": "e6_footnotesNumberEachDistinctSourceOnceInOrderOfAppearance",
+      "kotlin": "e6_footnotesNumberEachDistinctSourceOnceInOrderOfAppearance"
+    }
+  },
+  "plants": {
+    "wrong-clear-all": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "clears every tool result, the newest ones too"
+    },
+    "wrong-clear-excluded": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "clears the results of tools that were to be kept"
+    },
+    "wrong-window-splits-pair": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "drops single messages, so a tool result can lose its call"
+    },
+    "wrong-summarise-under-budget": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "summarises a conversation that already fits"
+    },
+    "wrong-skips-old-summary": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the earlier summary out of what the summariser reads"
+    },
+    "wrong-cited-end-inclusive": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "reads the end of a cited span as inclusive"
+    },
+    "wrong-footnote-duplicates": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "gives a source that is cited twice a second number"
+    }
+  }
+}
