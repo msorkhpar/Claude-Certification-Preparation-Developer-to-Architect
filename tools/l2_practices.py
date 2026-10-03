@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 # L2_MODULES narrows the run to one batch, for example L2_MODULES='^(1[89]|2[0-3])-'
-MODULES = re.compile(os.environ.get("L2_MODULES", r"^(1[2-9]|2[0-3])-"))
+MODULES = re.compile(os.environ.get("L2_MODULES", r"^(1[2-9]|2[0-9])-"))
 
 
 def practices():

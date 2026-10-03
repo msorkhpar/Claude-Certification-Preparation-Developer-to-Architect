@@ -1,0 +1,103 @@
+{
+  "practice": "28-retrieval/unit-01/practice-1",
+  "name": "retrieval",
+  "tests": {
+    "java": "RetrievalTest",
+    "kotlin": "RetrievalTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_hybrid_search_finds_what_each_single_index_misses",
+      "typescript": "m1 hybrid search finds what each single index misses",
+      "java": "m1_hybridSearchFindsWhatEachSingleIndexMisses",
+      "kotlin": "m1_hybridSearchFindsWhatEachSingleIndexMisses"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_chunks_overlap_and_end_at_the_last_word",
+      "typescript": "e1 chunks overlap and end at the last word",
+      "java": "e1_chunksOverlapAndEndAtTheLastWord",
+      "kotlin": "e1_chunksOverlapAndEndAtTheLastWord"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_rare_word_outweighs_common_ones_and_short_chunks_win",
+      "typescript": "e2 a rare word outweighs common ones and short chunks win",
+      "java": "e2_aRareWordOutweighsCommonOnesAndShortChunksWin",
+      "kotlin": "e2_aRareWordOutweighsCommonOnesAndShortChunksWin"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_fusion_rewards_agreement_and_breaks_ties_by_id",
+      "typescript": "e3 fusion rewards agreement and breaks ties by id",
+      "java": "e3_fusionRewardsAgreementAndBreaksTiesById",
+      "kotlin": "e3_fusionRewardsAgreementAndBreaksTiesById"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_reranking_orders_the_pool_by_the_scorer",
+      "typescript": "e4 reranking orders the pool by the scorer",
+      "java": "e4_rerankingOrdersThePoolByTheScorer",
+      "kotlin": "e4_rerankingOrdersThePoolByTheScorer"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_recall_counts_documents_not_chunks",
+      "typescript": "e5 recall counts documents not chunks",
+      "java": "e5_recallCountsDocumentsNotChunks",
+      "kotlin": "e5_recallCountsDocumentsNotChunks"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_context_sentence_makes_a_bare_chunk_findable",
+      "typescript": "e6 a context sentence makes a bare chunk findable",
+      "java": "e6_aContextSentenceMakesABareChunkFindable",
+      "kotlin": "e6_aContextSentenceMakesABareChunkFindable"
+    }
+  },
+  "plants": {
+    "wrong-no-overlap": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "moves the window by its whole size, so the overlap is lost"
+    },
+    "wrong-no-idf": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "scores every matching word the same, common or rare"
+    },
+    "wrong-fuse-by-votes": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "counts the lists that hold an id and ignores its rank in them"
+    },
+    "wrong-rerank-ascending": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "puts the lowest scored chunk first"
+    },
+    "wrong-pool-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reranks the whole ranking instead of the first pool ids"
+    },
+    "wrong-recall-by-chunk": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "counts the chunks of a relevant document each time"
+    },
+    "wrong-context-ignored": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "indexes the bare chunk text and drops the context sentence"
+    }
+  }
+}

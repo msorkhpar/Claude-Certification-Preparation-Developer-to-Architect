@@ -1,0 +1,103 @@
+{
+  "practice": "26-tool-use/unit-01/practice-1",
+  "name": "toolloop",
+  "tests": {
+    "java": "ToolLoopTest",
+    "kotlin": "ToolLoopTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_tool_call_is_run_and_its_result_sent_back_until_the_model_ends_its_turn",
+      "typescript": "m1 a tool call is run and its result sent back until the model ends its turn",
+      "java": "m1_aToolCallIsRunAndItsResultSentBackUntilTheModelEndsItsTurn",
+      "kotlin": "m1_aToolCallIsRunAndItsResultSentBackUntilTheModelEndsItsTurn"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_parallel_calls_get_one_user_message_with_every_result_in_order",
+      "typescript": "e1 parallel calls get one user message with every result in order",
+      "java": "e1_parallelCallsGetOneUserMessageWithEveryResultInOrder",
+      "kotlin": "e1_parallelCallsGetOneUserMessageWithEveryResultInOrder"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_failing_unknown_or_malformed_call_becomes_an_error_result_and_the_loop_goes_on",
+      "typescript": "e2 a failing unknown or malformed call becomes an error result and the loop goes on",
+      "java": "e2_aFailingUnknownOrMalformedCallBecomesAnErrorResultAndTheLoopGoesOn",
+      "kotlin": "e2_aFailingUnknownOrMalformedCallBecomesAnErrorResultAndTheLoopGoesOn"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_number_of_turns_is_bounded",
+      "typescript": "e3 the number of turns is bounded",
+      "java": "e3_theNumberOfTurnsIsBounded",
+      "kotlin": "e3_theNumberOfTurnsIsBounded"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_refusal_and_truncation_end_the_loop_and_a_paused_turn_continues",
+      "typescript": "e4 refusal and truncation end the loop and a paused turn continues",
+      "java": "e4_refusalAndTruncationEndTheLoopAndAPausedTurnContinues",
+      "kotlin": "e4_refusalAndTruncationEndTheLoopAndAPausedTurnContinues"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_tool_choice_is_validated_for_the_model_and_a_forced_choice_applies_to_the_first_request_only",
+      "typescript": "e5 tool choice is validated for the model and a forced choice applies to the first request only",
+      "java": "e5_toolChoiceIsValidatedForTheModelAndAForcedChoiceAppliesToTheFirstRequestOnly",
+      "kotlin": "e5_toolChoiceIsValidatedForTheModelAndAForcedChoiceAppliesToTheFirstRequestOnly"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_results_that_are_not_text_are_sent_as_json_text",
+      "typescript": "e6 results that are not text are sent as json text",
+      "java": "e6_resultsThatAreNotTextAreSentAsJsonText",
+      "kotlin": "e6_resultsThatAreNotTextAreSentAsJsonText"
+    }
+  },
+  "plants": {
+    "wrong-result-per-message": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "sends each tool result in a user message of its own"
+    },
+    "wrong-swallow-errors": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sends a failing tool's message without the error flag"
+    },
+    "wrong-extra-turn": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "makes one model call more than the turn limit"
+    },
+    "wrong-ignore-stop-reason": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reports a refusal as a cut-off answer"
+    },
+    "wrong-forced-every-turn": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "repeats a forced tool choice on every request, so the model can never finish"
+    },
+    "wrong-forced-on-new-models": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets a forced tool choice through for models that reject it"
+    },
+    "wrong-repr-result": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "sends the language's text form of an object instead of JSON"
+    }
+  }
+}

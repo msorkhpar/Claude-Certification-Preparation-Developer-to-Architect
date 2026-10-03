@@ -2,7 +2,7 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the first modules of Level 2 (Developer),
-modules 12 to 23:
+modules 12 to 29:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -29,6 +29,12 @@ modules 12 to 23:
 | `21-message-batches/` | Message Batches | 2 |
 | `22-claude-on-the-cloud-platforms/` | Claude on the cloud platforms | 2 |
 | `23-setting-up-claude-on-the-cloud-platforms/` | Setting up Claude on the cloud platforms | 2 |
+| `24-prompt-engineering-for-applications/` | Prompt engineering for applications | 2 |
+| `25-structured-output-and-defensive-parsing/` | Structured output and defensive parsing | 2 |
+| `26-tool-use/` | Tool use | 3 |
+| `27-choosing-an-extension/` | Choosing an extension | 2 |
+| `28-retrieval/` | Retrieval | 2 |
+| `29-context-engineering/` | Context engineering | 3 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
