@@ -18,8 +18,8 @@ on models after Opus 4.6 and Sonnet 4.6; the later models use adaptive thinking 
 Dateless ids from the 4.6 generation on are themselves pinned snapshots. Haiku 4.5 has the
 nearest retirement date, so the course's examples default to Sonnet 5.5 for ordinary work and name
 Haiku only where a cheap tier is the point. Older models still available are listed on the
-official model pages; the course does not use them. Prices, cache-read ratios and the batch
-discount are read from the pricing page at release, not copied here.
+official model pages; the course does not use them. Prices, cache multipliers and the batch
+discount are in the section "Prices, caching, batches, thinking and cloud platforms" below.
 
 ## Sampling parameters (`temperature`, `top_p`, `top_k`)
 
@@ -33,6 +33,39 @@ rejected") and the Fable 5.1 page lists non-default values of all three as retur
 "What's new" page does not repeat the rule, but "Migrating to Claude Sonnet 5.5" states it directly (Claude Sonnet 4.6
 and earlier and Claude Haiku 4.5 accept the three; on Sonnet 5.5 a non-default value returns a 400 error). Claude Haiku 4.5 predates that cut and is not covered by these sentences; the course
 does not use a sampling setting on it. Re-check at release.
+
+## Prices, caching, batches, thinking and cloud platforms
+
+Read on 2026-10-02 from the Anthropic documentation (Prompt caching, Batch processing, Thinking, Steering
+thinking, Effort, Fast mode, Claude in Amazon Bedrock, Claude on Google Cloud), the Amazon Bedrock User Guide page on
+identity-based policy examples and the Google Cloud documentation on Agent Platform access control with IAM and on
+Claude models. Re-check at release.
+
+| Model | Input $/MTok | Output $/MTok | 5-minute write | 1-hour write | Cache read | Batch input / output | Minimum cacheable prompt |
+|---|---|---|---|---|---|---|---|
+| Claude Fable 5.1 | 10 | 50 | 12.50 | 20 | 0.25 (0.025 times) | 5 / 25 | 512 tokens |
+| Claude Opus 5.5 | 4 | 20 | 5 | 8 | 0.20 (0.05 times) | 2 / 10 | 512 tokens |
+| Claude Sonnet 5.5 | 2 | 10 | 2.50 | 4 | 0.20 (0.1 times) | 1 / 5 | 512 tokens |
+| Claude Haiku 4.5 | 1 | 5 | 1.25 | 2 | 0.10 (0.1 times) | 0.50 / 2.50 | 4,096 tokens |
+
+- Cache multipliers: a 5-minute write is 1.25 times the base input price, a 1-hour write 2 times, a read 0.1 times, except Opus 5.5
+  (0.05) and Fable 5.1 (0.025). They stack with the batch discount. The default lifetime is 5 minutes and is refreshed free by each
+  use; the lookback window is 20 blocks; at most 4 breakpoints; a 1-hour entry must come before 5-minute entries.
+- Batches: 50 percent of standard prices; at most 100,000 requests or 256 MB; expire after 24 hours; results kept 29 days from creation;
+  `stream`, `speed` and `max_tokens` of 0 are refused; `custom_id` is 1 to 64 characters of letters, digits, hyphen and underscore.
+- Thinking: Fable 5.1 and Opus 5.5 are adaptive and always on; Sonnet 5.5 is adaptive and accepts `between_tools` at high effort or below;
+  Haiku 4.5 takes a manual budget of at least 1,024 and below `max_tokens`. Effort goes in `output_config.effort` and is not supported on
+  Haiku 4.5. A thinking or effort change invalidates cached messages.
+- Fast mode: `speed: "fast"` with the beta header `fast-mode-2026-02-01`, up to 2.5 times the output speed, at twice the price on Opus 5.5
+  ($8 input and $40 output); Opus 5.5, Opus 5 and Opus 4.8 only; first-party API only; not in a batch.
+- Bedrock: endpoint `https://bedrock-mantle.<region>.api.aws/anthropic/v1/messages`, model ids with the `anthropic.` prefix, header
+  `anthropic-version: 2023-06-01`; no Message Batches, Files API, server-side tools or structured outputs; regional endpoints cost 10 percent
+  more than global; default quota 2 million input tokens per minute, up to 5 million input and 500,000 output without extra approval.
+- Google Cloud: `rawPredict` URL with the model in it, `anthropic_version` of `vertex-2023-10-16` in the body; global, multi-region (`us`, `eu`)
+  and regional endpoints, the last two at a 10 percent premium; specific regions serve Claude Sonnet 4.6 and earlier only; web search and
+  structured outputs are available, Message Batches and the Files API are not.
+- Not verified on an official page: the resource ARN type to use with the `bedrock-mantle:CreateInference` action (the course checks the
+  documented `foundation-model` shape only), and a Vertex `streamRawPredict` URL (not used).
 
 ## SDKs by language
 

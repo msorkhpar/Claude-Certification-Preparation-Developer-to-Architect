@@ -2,7 +2,7 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the first modules of Level 2 (Developer),
-modules 12 to 17:
+modules 12 to 23:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -23,6 +23,12 @@ modules 12 to 17:
 | `15-errors-retries-and-timeouts/` | Errors, retries and timeouts | 3 |
 | `16-async-concurrency-and-backpressure/` | Async, concurrency and backpressure | 2 |
 | `17-streaming/` | Streaming | 2 |
+| `18-model-choice-cost-and-migration/` | Model choice, cost and migration | 3 |
+| `19-thinking-effort-and-speed/` | Thinking, effort and speed | 2 |
+| `20-prompt-caching/` | Prompt caching | 2 |
+| `21-message-batches/` | Message Batches | 2 |
+| `22-claude-on-the-cloud-platforms/` | Claude on the cloud platforms | 2 |
+| `23-setting-up-claude-on-the-cloud-platforms/` | Setting up Claude on the cloud platforms | 2 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
