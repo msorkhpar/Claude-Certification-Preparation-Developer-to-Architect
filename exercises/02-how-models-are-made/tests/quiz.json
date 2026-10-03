@@ -24,19 +24,19 @@
       "id": "01-pretraining-and-tokenizers#q2",
       "page": "01-pretraining-and-tokenizers.md",
       "scope": "page",
-      "stem": "A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do better next week. They call the API directly and store no history. Which expectation is accurate?",
+      "stem": "A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do better next week. They call the API directly. Which expectation is accurate?",
       "options": {
         "a": "The weights absorb the fix and apply it to every later session by default",
         "b": "A tuned copy of the model is created under the account for later calls",
-        "c": "Only a request that carries the amended guidance in its own input can benefit",
-        "d": "The provider's overnight training folds the chats into the model"
+        "c": "Only a request that carries the amended guidance in its own input gains from it",
+        "d": "A window large enough keeps the correction available to every future request"
       },
       "key": "c",
       "explanation": {
-        "c": "Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it.",
-        "a": "Ruled out because \"A conversation with Claude does not teach it anything that carries to the next conversation\".",
-        "b": "Ruled out because \"The Claude API does not currently offer fine-tuning\", so no tuned copy is made by calling it.",
-        "d": "Ruled out because \"Weights are fixed at inference time; a later session starts from the same model\", so chats do not change it next week."
+        "c": "Weights are fixed at inference and what looks like learning is the context window (the weights section),\n   so only a call that carries the fix in its input can use it.",
+        "a": "Ruled out because \"A conversation with Claude\n   does not teach it anything that carries to the next conversation\".",
+        "b": "Ruled out because \"The Claude API does\n   not currently offer fine-tuning\", so no tuned copy is made by calling it.",
+        "d": "Ruled out because \"The window is\n   how much text fits per request\", and a request holds only what is sent with it."
       }
     },
     {
@@ -48,7 +48,7 @@
         "a": "Pretraining on a far larger corpus than the raw model saw",
         "b": "A later round of tuning on curated examples and replies ranked by people",
         "c": "A separate look-up store of answers that the assistant consults",
-        "d": "A larger attention mechanism that lets the model reread the question"
+        "d": "A larger attention mechanism that lets the model reread the whole question"
       },
       "key": "b",
       "explanation": {
@@ -74,7 +74,7 @@
         "d": "Knowledge that changes monthly belongs in the context, and the glossary says the Claude API does not currently offer fine-tuning (the second trap and the table).",
         "b": "Ruled out because \"the Claude API does not currently offer fine-tuning\", so the monthly request cannot be made through this route.",
         "c": "Ruled out because the table lists \"Memory of your previous conversations\" among the things training does not give, so pasted corrections are not recalled.",
-        "a": "Ruled out because the table lists \"Access to your files, systems or today's date\" among the things training does not give, and a manual revised monthly outruns any cut-off."
+        "a": "Ruled out because the table lists \"Knowledge of anything after the cut-off\" among the things training does not give, and \"the standard route is to put the knowledge in the context\"."
       }
     },
     {
@@ -85,22 +85,22 @@
       "options": {
         "a": "Pretraining gave next-word prediction; later tuning and human rankings gave the helpful manner",
         "b": "Feedback training gave next-word prediction; pretraining gave the helpful manner",
-        "c": "The tokenizer gave next-word prediction; attention gave the helpful manner",
+        "c": "Tuning on curated examples gave both, and pretraining only supplied the vocabulary",
         "d": "Pretraining gave both, since a larger corpus makes a raw model follow instructions"
       },
       "key": "a",
       "explanation": {
-        "a": "Pretraining teaches continuation, and fine-tuning and feedback training turn the continuer into an assistant (page 2, the stages section).",
-        "b": "Ruled out because pretraining is where the model starts to \"learn to continue text on a very large corpus\", so the order is reversed.",
-        "c": "Ruled out because the tokenizer only exists so that \"text must be cut into pieces and each piece mapped to an integer\", and attention weighs context; neither is a training stage that shapes manner.",
-        "d": "Ruled out because a pretrained model \"is not inherently good at answering questions or following instructions\", whatever the corpus size."
+        "a": "Pretraining teaches continuation, and fine-tuning and feedback training turn the continuer into an\n   assistant (page 2, the stages section).",
+        "b": "Ruled out because pretraining is where the model starts to \"learn\n   to continue text on a very large corpus\", so the order is reversed.",
+        "c": "Ruled out because the tokenizer \"is\n   built before pretraining and fixed afterwards\" and pretraining is where the model learns to continue text, so\n   tuning cannot have given that skill.",
+        "d": "Ruled out because a pretrained model \"is not inherently good at\n   answering questions or following instructions\", whatever the corpus size."
       }
     },
     {
       "id": "02-fine-tuning-feedback-and-what-training-gives#m2",
       "page": "02-fine-tuning-feedback-and-what-training-gives.md",
       "scope": "module",
-      "stem": "A localisation lead notices that one paragraph needs noticeably more tokens in one language than in another. Which explanation fits best?",
+      "stem": "A localisation lead budgets translation runs by word count, then finds that one paragraph needs noticeably more tokens in one language than in another. Which explanation fits best?",
       "options": {
         "a": "That language was added by later fine-tuning, which re-cut its text into extra pieces",
         "b": "The larger window used for that language forces the text into finer pieces",
@@ -121,10 +121,10 @@
       "scope": "module",
       "stem": "A reviewer waves through a number in a report because the assistant is described as built to tell the truth. Which reply is the soundest?",
       "options": {
-        "a": "Training on written principles removed unsupported claims, so the figure stands",
+        "a": "Training on written principles removed unsupported claims, so a skim of the figure is enough",
         "b": "That is a training goal, not a guarantee, so the figure needs checking",
-        "c": "The model reports high confidence, so the figure stands",
-        "d": "A prompt can demand truthfulness, so asking for it makes the figure safe"
+        "c": "The model reports high confidence, so asking it to re-check is the control",
+        "d": "A prompt can demand truthfulness, so add that line and skip the check"
       },
       "key": "b",
       "explanation": {

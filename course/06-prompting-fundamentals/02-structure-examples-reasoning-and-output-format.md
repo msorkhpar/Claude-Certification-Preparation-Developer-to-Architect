@@ -184,12 +184,12 @@ format in the prompt, and check it in code.**
    - **a**: Repeat the clearest example three times so the pattern is firmer
    - **b**: Add twelve more clear cases so the set is large enough to cover everything
    - **c**: Delete the examples and describe the boundary in a long paragraph
-   - **d**: Replace the set with three to five varied samples, including one that is hard to call
+   - **d**: Replace the set with a few varied samples, including one that is hard to call
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Tags that separate data from instructions, with the content named as data and escaped, are the structure technique (the tags section and the second trap). *a* is ruled out because "Tags and a statement that the content is data do the marking", and a bare rule marks nothing. *d* is ruled out because "Order is not a boundary". *c* is ruled out because "text that is clearly marked as data is harder to mistake for instructions", so structure protects the prompt and a stronger tier does not replace it.
-2. **d**. The page asks for relevant, diverse examples, cites 3-5 for best results, and the first trap says to include a borderline case. *a* is ruled out because examples must "vary enough that Claude doesn't pick up unintended patterns", and repeating one adds none. *c* is ruled out because an example "shows the model the target instead of describing it", so deleting them loses the demonstration. *b* is ruled out because the page says "Include 3-5 examples for best results", and twelve similar cases add cost without a boundary.
+2. **d**. The page asks for relevant, diverse examples, cites 3-5 for best results, and the first trap says to include a borderline case. *a* is ruled out because examples must "vary enough that Claude doesn't pick up unintended patterns", and repeating one adds none. *c* is ruled out because an example "shows the model the target instead of describing it", so deleting them loses the demonstration. *b* is ruled out because "Three easy, near-identical examples teach one pattern", and twelve more clear cases are just as alike.
 
 </details>

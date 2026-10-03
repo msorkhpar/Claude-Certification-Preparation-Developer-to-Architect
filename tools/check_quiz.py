@@ -14,7 +14,13 @@ Rules (CLAUDE.md quiz rules that a script can check):
     on the page the quiz closes (for a module quiz: on any page of the module, quiz sections excluded);
   - no doubled adjacent word in a stem, option or explanation; no stem or option ends on a preposition, article or
     conjunction (cut-off text);
-  - a module question's stem shares at most half of its content stems with any page question of the same module.
+  - a module question's stem shares at most half of its content stems with any page question of the same module;
+  - form tell: not all three distractors carry an absolute marker (always, never, only, every, all, none, ...) while
+    the key carries none, and the key is not the only hedged option (some, may, can, usually, where needed);
+  - the key is the longest option in at most 40 percent of a module's questions (warning above 30 percent); the mock
+    exam is counted on its own questions;
+  - no two questions of Level 1 have stem+key token sets with Jaccard similarity of 0.5 or more;
+  - the stem holds no evaluative word that names the key's quality (balanced, safest, proper, correct way, ...).
 usage: tools/check_quiz.py [module-folder-prefix ...]   exit 1 on any finding
 """
 import json
@@ -55,6 +61,7 @@ def stem_of(stem):
     return words(re.sub(r"`[^`]*`", " ", stem))
 
 
+QID = {"Quiz": "q", "Module quiz": "m", "Mock exam": "x"}
 MIN_QUOTE_WORDS = 4
 MAX_STEM_OVERLAP = 0.5
 QUOTE = re.compile(r'"([^"]+)"')
@@ -78,7 +85,7 @@ def norm(text):
 
 def prose_of(md):
     """The page text before its quiz sections."""
-    return re.split(r"^## (?:Quiz|Module quiz)\n", md, maxsplit=1, flags=re.M)[0]
+    return re.split(r"^## (?:Quiz|Module quiz|Mock exam)\n", md, maxsplit=1, flags=re.M)[0]
 
 
 def check_quotes(qid, explanation, key, prose):
@@ -109,7 +116,52 @@ def check_duplicate(qid, stem, page_stems):
 
 
 LENGTH_RATIO = 1.3
-LONGEST_SHARE = 0.4
+LONGEST_WARN = 0.3
+LONGEST_FAIL = 0.4
+ABSOLUTE = re.compile(r"\b(always|never|only|every|all|none|nil|ignore[sd]?|ignoring|forbid\w*|regardless|guaranteed?|exact(?:ly)?)\b", re.I)
+HEDGE = re.compile(r"\b(some|may|can|usually|where needed)\b", re.I)
+GIVEAWAY = re.compile(r"\b(balanced|safest|proper(?:ly)?|correct way|right way|best[- ]practices?)\b", re.I)
+NEAR_DUP = 0.5
+
+
+def check_form_tell(qid, opts, key):
+    """The key must not be the only option of its kind: all-absolute distractors, or a lone hedged key."""
+    others = [v for k, v in opts.items() if k != key]
+    problems = []
+    if len(others) == 3 and all(ABSOLUTE.search(v) for v in others) and not ABSOLUTE.search(opts[key]):
+        problems.append(f"{qid}: form tell: all three distractors carry an absolute marker, the key none")
+    if HEDGE.search(opts[key]) and not any(HEDGE.search(v) for v in others):
+        problems.append(f"{qid}: form tell: the key alone is hedged")
+    return problems
+
+
+def check_giveaway(qid, stem):
+    """The stem must not carry an evaluative word that names the key's quality."""
+    hit = GIVEAWAY.search(re.sub(r"`[^`]*`", " ", stem))
+    return [f"{qid}: stem word {hit.group(1).lower()!r} names the key's quality"] if hit else []
+
+
+def jaccard(a, b):
+    return len(a & b) / len(a | b) if a | b else 0.0
+
+
+def check_near_duplicates(items):
+    """items: {qid: (stem, key text)}; every pair with Jaccard similarity of stem+key stems >= NEAR_DUP is a finding."""
+    sets = {qid: stems(re.sub(r"`[^`]*`", " ", stem) + " " + key) for qid, (stem, key) in items.items()}
+    ids = sorted(sets)
+    return [f"{a} and {b}: near-duplicate questions (Jaccard {jaccard(sets[a], sets[b]):.2f})"
+            for i, a in enumerate(ids) for b in ids[i + 1:] if jaccard(sets[a], sets[b]) >= NEAR_DUP]
+
+
+def longest_verdict(label, hits, total):
+    """Return (finding, warning) for the share of questions whose key is the longest option."""
+    if not total:
+        return None, None
+    share = hits / total
+    msg = f"{label}: key is the longest option in {hits} of {total} questions ({share:.0%})"
+    if share > LONGEST_FAIL:
+        return msg + f", limit {LONGEST_FAIL:.0%}", None
+    return None, (msg if share > LONGEST_WARN else None)
 
 
 def key_length_ratio(opts, key):
@@ -155,6 +207,8 @@ def check_question(qid, stem, opts, key):
     inside = contained_echo(opts[key], plain)
     if inside and not shared and not echoed:
         problems.append(f"{qid}: key echoes the stem inside a longer word {sorted(inside)}")
+    problems += check_form_tell(qid, opts, key)
+    problems += check_giveaway(qid, stem)
     ratio = key_length_ratio(opts, key)
     if ratio > LENGTH_RATIO:
         problems.append(f"{qid}: key is {ratio:.2f} times the mean distractor length (limit {LENGTH_RATIO})")
@@ -179,7 +233,7 @@ def check_key_paragraph(qid, para, key):
 
 def key_paragraphs(md):
     result = []
-    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+    for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         _, _, keyblock = m.group(2).partition("<details>")
         result.append(re.findall(r"^\d+\. (\*\*[a-d]\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M))
     return result
@@ -188,7 +242,7 @@ def key_paragraphs(md):
 def parse_page_quizzes(md):
     """Return a list of (heading, [(stem, {letter: text})], [key letters]) per quiz section."""
     out = []
-    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+    for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         body = m.group(2)
         qblock, _, keyblock = body.partition("<details>")
         questions = []
@@ -218,7 +272,8 @@ def check_module(folder):
     data = json.loads(qj.read_text())
     by_id = {q["id"]: q for q in data["quizzes"]}
     seen = set()
-    longest_total = longest_hits = 0
+    longest = {}
+    all_items = {}
     pages = sorted(folder.glob("*.md"))
     module_prose = "\n".join(prose_of(p.read_text()) for p in pages)
     page_stems = {}
@@ -227,13 +282,24 @@ def check_module(folder):
             if kind == "Quiz":
                 for n, (stem, _) in enumerate(questions, start=1):
                     page_stems[f"{page.stem}#q{n}"] = stem
+    level_prose, level_stems = None, {}
+    if any(k == "Mock exam" for pg in pages for k, _, _ in parse_page_quizzes(pg.read_text())):
+        level_prose = "\n".join(prose_of(pg.read_text()) for f in sorted(ROOT.joinpath("course").iterdir())
+                                if f.is_dir() and re.match(r"(0[1-9]|1[01])-", f.name) for pg in sorted(f.glob("*.md")))
+        for f in sorted(ROOT.joinpath("course").iterdir()):
+            if f.is_dir() and re.match(r"(0[1-9]|1[01])-", f.name):
+                for pg in sorted(f.glob("*.md")):
+                    for kind, questions, _ in parse_page_quizzes(pg.read_text()):
+                        if kind != "Mock exam":
+                            for n, (stem, _) in enumerate(questions, start=1):
+                                level_stems[f"{pg.stem}#{kind[0].lower()}{n}"] = stem
     for page in pages:
         md = page.read_text()
         for kind, questions, keys in parse_page_quizzes(md):
             if len(keys) != len(questions):
                 problems.append(f"{page.name}: {kind} has {len(questions)} questions but {len(keys)} keys")
             for n, (stem, opts) in enumerate(questions, start=1):
-                qid = f"{page.stem}#{'m' if kind == 'Module quiz' else 'q'}{n}"
+                qid = f"{page.stem}#{QID[kind]}{n}"
                 q = by_id.get(qid)
                 if q is None:
                     problems.append(f"{qid}: not in quiz.json")
@@ -249,21 +315,28 @@ def check_module(folder):
                 if sorted(q.get("explanation", {})) != list("abcd"):
                     problems.append(f"{qid}: quiz.json must explain every option a-d")
                 problems += check_question(qid, stem, opts, q["key"])
-                problems += check_quotes(qid, q.get("explanation", {}), q["key"],
-                                         module_prose if kind == "Module quiz" else prose_of(md))
+                scope_prose = {"Quiz": prose_of(md), "Module quiz": module_prose, "Mock exam": level_prose}[kind]
+                problems += check_quotes(qid, q.get("explanation", {}), q["key"], scope_prose)
                 if kind == "Module quiz":
                     problems += check_duplicate(qid, stem, page_stems)
+                if kind == "Mock exam":
+                    problems += check_duplicate(qid, stem, level_stems)
                 paras = key_paragraphs(md)
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
                 if n - 1 < len(paras[idx]):
                     problems += check_key_paragraph(qid, paras[idx][n - 1], q["key"])
-                longest_total += 1
-                longest_hits += key_is_longest(opts, q["key"])
+                grp = longest.setdefault("mock exam" if kind == "Mock exam" else "module", [0, 0])
+                grp[0] += key_is_longest(opts, q["key"])
+                grp[1] += 1
     for qid in by_id:
         if qid not in seen:
             problems.append(f"{qid}: in quiz.json but not on any page")
-    if longest_total and longest_hits / longest_total > LONGEST_SHARE:
-        print(f"warning: {folder.name}: key is the longest option in {longest_hits} of {longest_total} questions")
+    for name, (hits, total) in sorted(longest.items()):
+        finding, warning = longest_verdict(f"{folder.name} ({name})", hits, total)
+        if finding:
+            problems.append(finding)
+        if warning:
+            print(f"warning: {warning}")
     keys_used = [q["key"] for q in data["quizzes"]]
     for letter in "abcd":
         if keys_used and keys_used.count(letter) > (len(keys_used) + 1) // 2:
@@ -272,10 +345,20 @@ def check_module(folder):
 
 
 def main(argv):
-    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"0[1-6]-", p.name))
+    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name))
     if argv:
         folders = [f for f in folders if any(f.name.startswith(a) for a in argv)]
     total = 0
+    items = {}
+    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name)):
+        for pg in sorted(f.glob("*.md")):
+            for kind, questions, keys in parse_page_quizzes(pg.read_text()):
+                for n, ((stem, opts), key) in enumerate(zip(questions, keys), start=1):
+                    if key in opts:
+                        items[f"{f.name[:2]}/{pg.stem[:2]}#{QID[kind]}{n}" if kind != "Mock exam" else f"mock#x{n}"] = (stem, opts[key])
+    for p in check_near_duplicates(items):
+        print(p)
+        total += 1
     for f in folders:
         probs = check_module(f)
         total += len(probs)

@@ -21,7 +21,7 @@ def process(path, counter):
     md = path.read_text()
     out = []
     pos = 0
-    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+    for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         body = m.group(2)
         qblock, sep, keyblock = body.partition("<details>")
         qs = list(re.finditer(r"^(\d+)\. (.*?)(?=^\d+\. |\Z)", qblock, re.S | re.M))
@@ -55,7 +55,7 @@ def process(path, counter):
     path.write_text(md)
 
 
-for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"0[1-6]-", p.name)):
+for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name)):
     counter = [0]
     for page in sorted(folder.glob("*.md")):
         process(page, counter)

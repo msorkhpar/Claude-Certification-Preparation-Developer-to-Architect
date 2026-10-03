@@ -145,7 +145,7 @@ against a prompt that goes out with a hole in it. A guarantee belongs in code, a
 This quiz covers all four pages of the module.
 
 1. A classification prompt gets most tickets right but keeps mislabelling sarcastic ones, and nobody can see
-   why. The team wants answers before touching anything. Which step fits best?
+   why. Which step fits best?
    - **a**: Swap in a larger model and see whether the sarcastic cases improve
    - **b**: Leave the wording alone and sort the failures against the diagnosis table
    - **c**: Add twenty more examples of sarcasm and rewrite the instructions at the same time
@@ -176,7 +176,7 @@ This quiz covers all four pages of the module.
 5. A prompt asks Claude how many units of a product the warehouse holds right now, and it answers with a
    confident, wrong number. Which change addresses the cause?
    - **a**: Wire in a query against the live database and let the model phrase the result
-   - **b**: Ask for a confidence score on each count so doubtful ones can be dropped
+   - **b**: Ask for a confidence score on each count so that doubtful ones can be dropped later
    - **c**: Move to the largest tier, whose knowledge is the most complete
    - **d**: Tell Claude to answer only with the numbers it is certain about
 

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import (check_duplicate, check_key_paragraph, check_question, check_quotes,  # noqa: E402
+from check_quiz import (check_duplicate, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
                         key_is_longest)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
@@ -82,5 +82,26 @@ expect("plant: option ends with a preposition", check_question("t#q1", STEM, dic
 expect("plant: option ends with an article", check_question("t#q1", STEM, dict(CLEAN, c="Raise the output cap on the"), "a"), True)
 expect("plant: stem ends with a conjunction", check_question("t#q1", STEM[:-1] + " and", CLEAN, "a"), True)
 expect("clean: well-formed option ending", check_question("t#q1", STEM, dict(CLEAN, b="Split every document into chapters, by hand."), "a"), False)
+
+# (h) form tell, giveaway stem word, near-duplicates, key-longest rate
+ABS = {"a": "Measure the input again for the target model", "b": "Always split every document into chapters by hand",
+       "c": "Never raise the output cap on the request body", "d": "Ignore the tokenizer and keep the old limit"}
+expect("plant: all distractors absolute, key plain", check_question("t#q1", STEM, ABS, "a"), True)
+expect("clean: one distractor absolute", check_question("t#q1", STEM, dict(CLEAN, b="Always split documents into chapters by hand"), "a"), False)
+HEDGED = dict(CLEAN, a="Measure the input again where needed for the target model")
+expect("plant: key alone hedged", check_question("t#q1", STEM, HEDGED, "a"), True)
+expect("clean: hedge shared with a distractor", check_question("t#q1", STEM, dict(HEDGED, c="Raise the output cap where needed on the request body"), "a"), False)
+for word in ("balanced", "safest", "proper", "correct way", "right way", "best-practice"):
+    expect(f"plant: stem word {word}", check_question("t#q1", f"The team wants the {word} fix after the vendor changes the tokenizer settings.", CLEAN, "a"), True)
+expect("clean: stem without evaluative word", check_question("t#q1", STEM, CLEAN, "a"), False)
+D = {"p#q1": ("A nightly job rejects the largest reports after the vendor changes tokenizer settings", "Measure the input again for the target model"),
+     "p#q2": ("A nightly job rejects the largest reports after the vendor changes tokenizer settings", "Measure the input again for the new target model"),
+     "p#q3": ("A localisation lead sees one paragraph cost more in one script than another", "Compare token counts per script")}
+expect("plant: near-duplicate questions", check_near_duplicates(D), True)
+expect("clean: distinct questions", check_near_duplicates({k: v for k, v in D.items() if k != "p#q2"}), False)
+expect("plant: key longest above 40 percent fails", [f for f in [longest_verdict("m", 5, 10)[0]] if f], True)
+expect("plant: key longest 35 percent warns only", [f for f in [longest_verdict("m", 7, 20)[0]] if f], False)
+expect("plant: key longest 35 percent gives a warning", [w for w in [longest_verdict("m", 7, 20)[1]] if w], True)
+expect("clean: key longest 30 percent", [w for w in longest_verdict("m", 3, 10)] and [w for w in longest_verdict("m", 3, 10) if w], False)
 
 sys.exit(1 if failures else 0)

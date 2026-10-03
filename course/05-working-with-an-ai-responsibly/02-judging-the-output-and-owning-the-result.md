@@ -158,12 +158,12 @@ This quiz covers both pages of the module.
    - **c**: The recipient answers, since the number was accepted without question
    - **d**: The sender answers, but only if the work lacked a note about the AI's part
 
-4. A team asks Claude to fill a supplier price table from a PDF. The result has every row filled, including
-   a cost the PDF never states. Which pair of actions fits both pages?
-   - **a**: Check only the layout and tone of the result, and accept the data as given
-   - **b**: Ask it to give a confidence beside each entry, and keep the ones it marks high
-   - **c**: Tell it to leave no cell empty, and label the invented entries as estimates
-   - **d**: Tell it to say so when a value is absent instead of estimating, and keep any gap it reports
+4. A team asks Claude to fill a supplier price table from a PDF. Every row comes back filled, including one cost the
+   PDF never states, and the table goes to the finance director today. Which pair of actions fits both pages?
+   - **a**: Accept the table as it stands, since figures that fit the layout are probably right
+   - **b**: Ask for a confidence beside each entry, then keep the entries marked high
+   - **c**: Fill the unknown cost with the average of the other rows and label it an estimate
+   - **d**: Ask it to report any missing value, keep that gap, and check the other entries against the source
 
 <details>
 <summary>Answer key</summary>
@@ -171,6 +171,11 @@ This quiz covers both pages of the module.
 1. **a**. Judgment that carries accountability stays with a person, and figures are checked against the source of record however clean past drafts were (page 1 delegation table; page 2 checking routine). *b* is ruled out because the table gives "Decide which variances matter to the board" to a person, as judgment with accountability, and a clean run does not move it. *c* is ruled out because "A good draft does not show the figures were right", so a run of clean drafts is no reason to stop verifying. *d* is ruled out because "Self-reported confidence is not a measure of accuracy", and a flag from the model replaces neither the person nor the check.
 2. **c**. The description should say who reads it and show the target style, and the iterate-not-re-roll method compares the new result with the last (page 1, describe; page 2, iterate). *b* is ruled out because "Regenerating the same request and hoping is the reflex", and an identical request is a second guess. *a* is ruled out because a role line names no reader or purpose, and the page says to "Add what a colleague new to the job would need". *d* is ruled out because "the description is where most of the quality is decided", and a higher tier does not know the readers either.
 3. **b**. The sender owns what was sent, and figures are checked against the source of record before release (page 2, take responsibility and the checking routine; page 1, where checking every figure sits with a person or a script). *a* is ruled out because "You own what you send, whoever drafted it". *c* is ruled out because "the person who relied on it will not distinguish between you and the tool", so blame does not move to the reader. *d* is ruled out because "An error in AI-assisted work is your error to correct", with or without a disclosure note; disclosure is a separate duty.
-4. **d**. Page 1 puts the rule in the description ("say so rather than estimating"), and page 2 says a declared gap is information to keep. *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because "the careless move is to fill the gap with an estimate", and a label on an invented value still puts it in the table. *a* is ruled out because "Readers check tone and grammar, which are visible, and skip figures and citations", which is where the damage is.
+4. **d**. Page 1 puts the rule in the description ("say so rather than estimating"), page 2 says a declared gap is
+   information to keep, and the figures that remain are checked against the source of record. *a* is ruled out
+   because "Readers check tone and grammar, which are visible, and skip figures and citations", which is where the
+   damage is. *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *c* is ruled out
+   because "the careless move is to fill the gap with an estimate", and a label on an invented value still puts it
+   in the table.
 
 </details>

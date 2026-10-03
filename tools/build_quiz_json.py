@@ -13,6 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_quiz import ROOT, parse_page_quizzes  # noqa: E402
 
+QID = {"Quiz": "q", "Module quiz": "m", "Mock exam": "x"}
+SCOPE = {"Quiz": "page", "Module quiz": "module", "Mock exam": "level"}
 GROUP = re.compile(r"(?:\*[a-d]\*(?:, and |, | and )?)+")
 
 
@@ -34,7 +36,7 @@ def explanations(key_paragraph, key_letter):
 
 def key_paragraphs(md):
     result = []
-    for m in re.finditer(r"^## (Quiz|Module quiz)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
+    for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         _, _, keyblock = m.group(2).partition("<details>")
         paras = re.findall(r"^\d+\. (\*\*[a-d]\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M)
         result.append(paras)
@@ -42,7 +44,7 @@ def key_paragraphs(md):
 
 
 def main():
-    for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"0[1-6]-", p.name)):
+    for folder in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|1[01])-", p.name)):
         quizzes = []
         for page in sorted(folder.glob("*.md")):
             md = page.read_text()
@@ -51,9 +53,9 @@ def main():
             for (kind, questions, keys), paras in zip(parsed, keyparas):
                 for n, ((stem, opts), key, para) in enumerate(zip(questions, keys, paras), start=1):
                     quizzes.append({
-                        "id": f"{page.stem}#{'m' if kind == 'Module quiz' else 'q'}{n}",
+                        "id": f"{page.stem}#{QID[kind]}{n}",
                         "page": page.name,
-                        "scope": "module" if kind == "Module quiz" else "page",
+                        "scope": SCOPE[kind],
                         "stem": stem,
                         "options": opts,
                         "key": key,
