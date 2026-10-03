@@ -1,0 +1,121 @@
+{
+  "practice": "50-task-decomposition/unit-01/practice-1",
+  "name": "decompose",
+  "tests": {
+    "java": "DecomposeTest",
+    "kotlin": "DecomposeTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_each_file_is_reviewed_alone_and_the_cross_pass_reads_their_summaries",
+      "typescript": "m1 each file is reviewed alone and the cross pass reads their summaries",
+      "java": "m1_eachFileIsReviewedAloneAndTheCrossPassReadsTheirSummaries",
+      "kotlin": "m1_eachFileIsReviewedAloneAndTheCrossPassReadsTheirSummaries"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_file_pass_sees_only_its_own_file_and_the_cross_pass_sees_summaries_never_the_text",
+      "typescript": "e1 a file pass sees only its own file and the cross pass sees summaries never the text",
+      "java": "e1_aFilePassSeesOnlyItsOwnFileAndTheCrossPassSeesSummariesNeverTheText",
+      "kotlin": "e1_aFilePassSeesOnlyItsOwnFileAndTheCrossPassSeesSummariesNeverTheText"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_long_file_is_reviewed_in_labelled_parts_and_a_blank_file_is_skipped",
+      "typescript": "e2 a long file is reviewed in labelled parts and a blank file is skipped",
+      "java": "e2_aLongFileIsReviewedInLabelledPartsAndABlankFileIsSkipped",
+      "kotlin": "e2_aLongFileIsReviewedInLabelledPartsAndABlankFileIsSkipped"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_failing_file_is_reported_and_left_out_of_the_cross_pass_which_needs_two_files",
+      "typescript": "e3 a failing file is reported and left out of the cross pass which needs two files",
+      "java": "e3_aFailingFileIsReportedAndLeftOutOfTheCrossPassWhichNeedsTwoFiles",
+      "kotlin": "e3_aFailingFileIsReportedAndLeftOutOfTheCrossPassWhichNeedsTwoFiles"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_planner_is_asked_again_after_each_step_with_the_steps_so_far_and_the_loop_ends_when_it_says_done",
+      "typescript": "e4 the planner is asked again after each step with the steps so far and the loop ends when it says done",
+      "java": "e4_thePlannerIsAskedAgainAfterEachStepWithTheStepsSoFarAndTheLoopEndsWhenItSaysDone",
+      "kotlin": "e4_thePlannerIsAskedAgainAfterEachStepWithTheStepsSoFarAndTheLoopEndsWhenItSaysDone"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_loop_stops_on_a_repeated_subtask_or_no_next_step_or_an_unreadable_reply_and_counts_the_step_limit_exactly",
+      "typescript": "e5 the loop stops on a repeated subtask or no next step or an unreadable reply and counts the step limit exactly",
+      "java": "e5_theLoopStopsOnARepeatedSubtaskOrNoNextStepOrAnUnreadableReplyAndCountsTheStepLimitExactly",
+      "kotlin": "e5_theLoopStopsOnARepeatedSubtaskOrNoNextStepOrAnUnreadableReplyAndCountsTheStepLimitExactly"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_strategy_follows_what_is_known_about_the_steps_and_whether_the_items_interact",
+      "typescript": "e6 the strategy follows what is known about the steps and whether the items interact",
+      "java": "e6_theStrategyFollowsWhatIsKnownAboutTheStepsAndWhetherTheItemsInteract",
+      "kotlin": "e6_theStrategyFollowsWhatIsKnownAboutTheStepsAndWhetherTheItemsInteract"
+    }
+  },
+  "plants": {
+    "wrong-shared-context": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "gives each file pass the text of every file"
+    },
+    "wrong-cross-gets-text": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "hands the cross pass the file text beside the summaries"
+    },
+    "wrong-no-chunking": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sends a long file in one piece whatever the limit"
+    },
+    "wrong-blank-reviewed": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "reviews a file that holds only blank lines"
+    },
+    "wrong-failed-in-cross": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "keeps a failed file among the reviewed ones"
+    },
+    "wrong-cross-with-one": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "runs the cross pass when only one file was reviewed"
+    },
+    "wrong-no-history": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "asks the planner without the steps done so far"
+    },
+    "wrong-repeat-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets the planner repeat a subtask"
+    },
+    "wrong-limit-off-by-one": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "runs one step more than the step limit"
+    },
+    "wrong-strategy-items-first": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "chooses per item and cross even when the steps are not known"
+    }
+  }
+}

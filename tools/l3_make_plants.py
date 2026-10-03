@@ -206,6 +206,61 @@ PLANTS[f"{X}/49-hooks/unit-01/practice-1"] = {
     }),
 }
 
+PLANTS[f"{X}/50-task-decomposition/unit-01/practice-1"] = {
+    "python": ("decompose.py", {
+        "wrong-shared-context": [('chunk = "\\n".join(lines[part * max_lines:(part + 1) * max_lines])', 'chunk = "\\n".join(i["text"] for i in files)')],
+        "wrong-cross-gets-text": [('{"path": p, "summary": r["summary"]} for p, r in reviewed.items()', '{"path": p, "summary": r["summary"], "text": "source"} for p, r in reviewed.items()')],
+        "wrong-no-chunking": [("parts = math.ceil(len(lines) / max_lines)", "parts, max_lines = 1, len(lines)")],
+        "wrong-blank-reviewed": [("if not text.strip():", "if not text:")],
+        "wrong-failed-in-cross": [("failed[path] = str(error)\n            continue", 'failed[path] = str(error)\n            reviewed[path] = {"findings": [], "summary": "", "parts": parts}\n            continue')],
+        "wrong-cross-with-one": [("if len(reviewed) >= 2:", "if len(reviewed) >= 1:")],
+        "wrong-no-history": [("plan = planner(goal, [dict(step) for step in steps])", "plan = planner(goal, [])")],
+        "wrong-repeat-allowed": [('        if subtask.lower() in {step["subtask"].lower() for step in steps}:\n            return finish("stuck", reason=f"repeated subtask: {subtask}")\n', "")],
+        "wrong-limit-off-by-one": [("if len(steps) >= max_steps:", "if len(steps) > max_steps:")],
+        "wrong-strategy-items-first": [('    if not steps_known:\n        return "adaptive"\n    if items >= 2 and task.get("items_interact") is True:\n        return "per_item_then_cross"\n',
+                                         '    if items >= 2 and task.get("items_interact") is True:\n        return "per_item_then_cross"\n    if not steps_known:\n        return "adaptive"\n')],
+    }),
+    "typescript": ("decompose.ts", {
+        "wrong-shared-context": [('lines.slice(part * maxLines, (part + 1) * maxLines).join("\\n")', 'files.map((f) => f.text).join("\\n")')],
+        "wrong-cross-gets-text": [("({ path, summary: r.summary })", '({ path, summary: r.summary, text: "source" })')],
+        "wrong-no-chunking": [("const parts = Math.ceil(lines.length / maxLines);", "const parts = 1;\n    maxLines = lines.length;")],
+        "wrong-blank-reviewed": [("if (!text.trim()) {", "if (!text) {")],
+        "wrong-failed-in-cross": [("failed[path] = error instanceof Error ? error.message : String(error);\n      continue;", 'failed[path] = error instanceof Error ? error.message : String(error);\n      reviewed[path] = { findings: [], summary: "", parts };\n      continue;')],
+        "wrong-cross-with-one": [("if (Object.keys(reviewed).length >= 2) {", "if (Object.keys(reviewed).length >= 1) {")],
+        "wrong-no-history": [("const plan = planner(goal, steps.map((s) => ({ ...s })));", "const plan = planner(goal, []);")],
+        "wrong-repeat-allowed": [('    if (steps.some((s) => s.subtask.toLowerCase() === subtask.toLowerCase())) return finish("stuck", "", `repeated subtask: ${subtask}`);\n', "")],
+        "wrong-limit-off-by-one": [("if (steps.length >= maxSteps)", "if (steps.length > maxSteps)")],
+        "wrong-strategy-items-first": [('  if (!stepsKnown) return "adaptive";\n  if (items >= 2 && task.items_interact === true) return "per_item_then_cross";\n',
+                                         '  if (items >= 2 && task.items_interact === true) return "per_item_then_cross";\n  if (!stepsKnown) return "adaptive";\n')],
+    }),
+    "java": ("Decompose.java", {
+        "wrong-shared-context": [('String chunk = String.join("\\n", lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));', 'String chunk = String.join("\\n", files.stream().map(f -> f.get("text")).toList());')],
+        "wrong-cross-gets-text": [('one.put("summary", (String) ((Map<String, Object>) e.getValue()).get("summary"));', 'one.put("summary", (String) ((Map<String, Object>) e.getValue()).get("summary"));\n                one.put("text", "source");')],
+        "wrong-no-chunking": [("int parts = (lines.size() + maxLines - 1) / maxLines;", "int parts = 1;\n            maxLines = lines.size();")],
+        "wrong-blank-reviewed": [("if (text.isBlank()) {", "if (text.isEmpty()) {")],
+        "wrong-failed-in-cross": [('failed.put(path, String.valueOf(error.getMessage()));\n                continue;', 'failed.put(path, String.valueOf(error.getMessage()));\n                reviewed.put(path, map("findings", new ArrayList<String>(), "summary", "", "parts", parts));\n                continue;')],
+        "wrong-cross-with-one": [("if (reviewed.size() >= 2) {", "if (reviewed.size() >= 1) {")],
+        "wrong-no-history": [("Object reply = planner.apply(goal, history);", "Object reply = planner.apply(goal, new ArrayList<>());")],
+        "wrong-repeat-allowed": [('            for (Map<String, String> step : steps) {\n                if (step.get("subtask").toLowerCase(Locale.ROOT).equals(subtask.toLowerCase(Locale.ROOT))) {\n                    return map("status", "stuck", "summary", "", "steps", steps, "reason", "repeated subtask: " + subtask);\n                }\n            }\n', "")],
+        "wrong-limit-off-by-one": [("if (steps.size() >= maxSteps)", "if (steps.size() > maxSteps)")],
+        "wrong-strategy-items-first": [('        if (!known) return "adaptive";\n        if (count >= 2 && Boolean.TRUE.equals(task.get("items_interact"))) return "per_item_then_cross";\n',
+                                         '        if (count >= 2 && Boolean.TRUE.equals(task.get("items_interact"))) return "per_item_then_cross";\n        if (!known) return "adaptive";\n')],
+    }),
+    "kotlin": ("Decompose.kt", {
+        "wrong-shared-context": [('val chunk = lines.subList(part * maxLines, minOf(lines.size, (part + 1) * maxLines)).joinToString("\\n")', 'val chunk = files.joinToString("\\n") { it.getValue("text") }')],
+        "wrong-cross-gets-text": [('linkedMapOf("path" to path, "summary" to r["summary"] as String)', 'linkedMapOf("path" to path, "summary" to r["summary"] as String, "text" to "source")')],
+        "wrong-no-chunking": [("val parts = (lines.size + maxLines - 1) / maxLines", "val parts = 1")],
+        "wrong-blank-reviewed": [("if (text.isBlank()) {", "if (text.isEmpty()) {")],
+        "wrong-failed-in-cross": [("failed[path] = error.message.toString()\n            continue", 'failed[path] = error.message.toString()\n            reviewed[path] = linkedMapOf("findings" to findings, "summary" to "", "parts" to parts)\n            continue')],
+        "wrong-cross-with-one": [("if (reviewed.size >= 2) {", "if (reviewed.size >= 1) {")],
+        "wrong-no-history": [("val reply = planner(goal, steps.map { LinkedHashMap(it) })", "val reply = planner(goal, emptyList())")],
+        "wrong-repeat-allowed": [('        if (steps.any { it.getValue("subtask").lowercase() == subtask.lowercase() }) return finish("stuck", reason = "repeated subtask: $subtask")\n', "")],
+        "wrong-limit-off-by-one": [("if (steps.size >= maxSteps)", "if (steps.size > maxSteps)")],
+        "wrong-strategy-items-first": [('    if (!known) return "adaptive"\n    if (count >= 2 && task["items_interact"] == true) return "per_item_then_cross"\n',
+                                         '    if (count >= 2 && task["items_interact"] == true) return "per_item_then_cross"\n    if (!known) return "adaptive"\n')],
+    }),
+}
+
 # --- PLANTS ABOVE ---
 
 
