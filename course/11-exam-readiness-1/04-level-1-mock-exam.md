@@ -197,7 +197,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Share one Project widely and tell its instructions to withhold the salary bands
    - **b**: Share one Project widely with view-only access, which keeps viewers out of the knowledge
    - **c**: Share one Project widely now, and delete the salary bands later if anyone objects
-   - **d**: Put the confidential figures in a second workspace for HR alone and share the other widely
+   - **d**: Move the confidential figures to a separate area restricted to HR, and share the other widely
 
 23. A team wants every Claude Tag reply in one Slack channel to be brief and to link its source. How should the lead set this up?
     - **a**: Edit the model's settings so that its temperature drops to a lower value
@@ -334,8 +334,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    page 1). *a* is ruled out because "Judge the source before you add it", and a merged file adds a new unchecked
    source. *b* is ruled out because "an instruction is a request and a deleted file is a guarantee", so the conflict
    stays possible. *d* is ruled out because "memory is not a substitute for a knowledge file".
-22. **d**. Sharing shows the instructions and every file to everyone with access, so the bands live in a Project
-   that only HR can open (module 7, page 1). *a* is ruled out because the guidance is "Treat sharing as publishing",
+22. **d**. Sharing shows the instructions and every file to everyone with access, so the bands live in a separate
+   Project that only HR can open (module 7, page 1). *a* is ruled out because the guidance is "Treat sharing as publishing",
    and an instruction is a request. *b* is ruled out because can view gives "read-only access to contents, knowledge
    and instructions", which is reading. *c* is ruled out because "anyone with access can read the instructions and
    every file in the knowledge base", and deleting later does not undo that.
