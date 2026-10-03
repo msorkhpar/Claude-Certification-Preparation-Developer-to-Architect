@@ -114,22 +114,22 @@ An eval grades a set of cases once. The same checks can run on every live reply:
    - **d**: Cosine similarity between embeddings of both texts
 
 2. A model that scores output replies "Score: 4, because the tone is polite" for one case, and the harness cannot parse it. How should the harness record that case?
-   - **a**: As a failure with the reason that the reply was ungradable
+   - **a**: As a score of 4 read from the first digit of the text
    - **b**: As a pass, since the reply mentions a score above the threshold
    - **c**: As a skipped case that is left out of the pass rate
-   - **d**: As a score of 4 read from the first digit of the text
+   - **d**: As a failure with the reason that the reply was ungradable
 
 3. A check expects the field `count` to equal the number 3, and the application's output holds the string "3". The grader compares both sides as text and passes it. What is wrong?
    - **a**: Nothing is wrong, because the digits are the same in both forms of it
-   - **b**: The check should have used a model grader to judge the number
-   - **c**: The type differs, and a program reading the value would reject it
+   - **b**: The type differs, and a program reading the value would reject it
+   - **c**: The check should have used a model grader to judge the number
    - **d**: The expected value should have been written as a string instead
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page lists exact match for "tasks with clear-cut, categorical answers", and the course's rule is to "use the first one that can decide the case". *a* is ruled out because a model grader belongs to "A judgement no code can make", and a label comparison is not that. *c* is ruled out because a human grader decides "Anything, slowly", and 2,000 overnight cases need an automated grader, since the page says to "Structure questions to allow for automated grading". *d* is ruled out because similarity scores answer "Whether two texts say the same thing", which is a different question from whether two labels are equal.
-2. **a**. The page says "a reply that is not a bare score counts as ungradable, and an ungradable case fails". *b* is ruled out because the contract is "Output only the number", and the page says "an ungradable case fails" whatever the prose mentions. *c* is ruled out because a skipped case would hide the grader's drift, while the course says to "Count the ungradable cases in the report". *d* is ruled out because "a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade".
-3. **c**. The page says that a grader comparing both sides as text "passes values that a program reading the field would reject". *a* is ruled out because "A structure check also compares types", and matching digits do not make matching types. *b* is ruled out because a structure check decides this by parsing, and a model grader belongs to "A judgement no code can make". *d* is ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: "Comparing JSON fields as text".
+2. **d**. The page says "a reply that is not a bare score counts as ungradable, and an ungradable case fails". *b* is ruled out because the contract is "Output only the number", and the page says "an ungradable case fails" whatever the prose mentions. *c* is ruled out because a skipped case would hide the grader's drift, while the course says to "Count the ungradable cases in the report". *a* is ruled out because "a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade".
+3. **b**. The page says that a grader comparing both sides as text "passes values that a program reading the field would reject". *a* is ruled out because "A structure check also compares types", and matching digits do not make matching types. *c* is ruled out because a structure check decides this by parsing, and a model grader belongs to "A judgement no code can make". *d* is ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: "Comparing JSON fields as text".
 
 </details>

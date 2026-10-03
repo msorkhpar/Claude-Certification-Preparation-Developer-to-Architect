@@ -259,28 +259,28 @@ The practice is the diagnosis function. You write, in the language of your choic
 
 1. In a trace, the final user entry carried a tool's output and then a line of commentary. The reply came back as `end_turn` with an empty content list. Which diagnosis fits?
    - **a**: The model chose to stop, so add a user message asking it to continue
-   - **b**: The service dropped the output, so retry the same call unchanged
+   - **b**: The request layout is at fault, so return the result unaccompanied
    - **c**: The account reached a limit, so raise the quota before anything else
-   - **d**: The request layout is at fault, so return the result unaccompanied
+   - **d**: The service dropped the output, so retry the same call unchanged
 
 2. Our code could not read this reply: "Sure! Here is the answer: {"label": "spam"} Hope it helps." What does the routine conclude?
-   - **a**: The parser was too strict, so pull out the object first
+   - **a**: The account lacks access to structured output, so request it
    - **b**: The model failed to produce JSON, so validate and ask it again
    - **c**: The service truncated the body, so retry the call with back-off
-   - **d**: The account lacks access to structured output, so request it
+   - **d**: The parser was too strict, so pull out the object first
 
 3. A trace holds a 529, then a retry that returns a good response, then nothing else. What is the finding?
    - **a**: No failure at all, since the final response was good
-   - **b**: A failure of the model, with no recovery afterwards
-   - **c**: A service failure that the application survived
+   - **b**: A service failure that the application survived
+   - **c**: A failure of the model, with no recovery afterwards
    - **d**: An integration failure that needs a fix in code
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The table says that when text follows the tool result the origin is "The integration: send the tool result alone", and the routine's step 4 says "An `end_turn` with no content blocks is an empty reply. Look at the request before it." *a* is ruled out because that is the answer only when no text followed: the table gives "The model: add a new user message that asks it to continue" for "If no". *b* is ruled out because "A dropped connection has none: it is the network, and it belongs to the service side", while here a response arrived with a stop reason. *c* is ruled out because a limit arrives as an error: "An `error` event has one, and the table of page 1 gives its origin and recovery".
-2. **a**. The table says that an object in the text makes it "The integration: the parser was too strict, so extract the object first". *b* is ruled out because "The model: it did not produce JSON, so validate and ask again" applies only when no object is in the text, and here one is. *c* is ruled out because a cut-off arrives as a stop reason: "A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response". *d* is ruled out because an access failure arrives as an error status: "An `error` event has one, and the table of page 1 gives its origin and recovery".
-3. **c**. The page says "A 529 is retried and succeeds, so the application recovered", and "A later good response means the failure was survived". *a* is ruled out because the diagnosis names a failure even when it recovered: "Read from the top. The diagnosis names the first failing event". *b* is ruled out because the first failing event is a 529, which is not model output, and the page says "A 529 is retried and succeeds, so the application recovered". *d* is ruled out because "a bug in your request fails the same way each time", while this request succeeded on the retry.
+1. **b**. The table says that when text follows the tool result the origin is "The integration: send the tool result alone", and the routine's step 4 says "An `end_turn` with no content blocks is an empty reply. Look at the request before it." *a* is ruled out because that is the answer only when no text followed: the table gives "The model: add a new user message that asks it to continue" for "If no". *d* is ruled out because "A dropped connection has none: it is the network, and it belongs to the service side", while here a response arrived with a stop reason. *c* is ruled out because a limit arrives as an error: "An `error` event has one, and the table of page 1 gives its origin and recovery".
+2. **d**. The table says that an object in the text makes it "The integration: the parser was too strict, so extract the object first". *b* is ruled out because "The model: it did not produce JSON, so validate and ask again" applies only when no object is in the text, and here one is. *c* is ruled out because a cut-off arrives as a stop reason: "A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response". *a* is ruled out because an access failure arrives as an error status: "An `error` event has one, and the table of page 1 gives its origin and recovery".
+3. **b**. The page says "A 529 is retried and succeeds, so the application recovered", and "A later good response means the failure was survived". *a* is ruled out because the diagnosis names a failure even when it recovered: "Read from the top. The diagnosis names the first failing event". *c* is ruled out because the first failing event is a 529, which is not model output, and the page says "A 529 is retried and succeeds, so the application recovered". *d* is ruled out because "a bug in your request fails the same way each time", while this request succeeded on the retry.
 
 </details>
 
@@ -290,34 +290,34 @@ This quiz covers both pages of the module.
 
 1. A call returns a 429 that carries no `retry-after` header, and its error code says the organisation reached its monthly spend ceiling. What does the module advise?
    - **a**: Back off with jitter, since waiting restores access within seconds
-   - **b**: Split the work into smaller calls so that each one fits beneath the ceiling
-   - **c**: Hand it to a person, since waiting restores nothing
+   - **b**: Hand it to a person, since waiting restores nothing
+   - **c**: Split the work into smaller calls so that each one fits beneath the ceiling
    - **d**: Move the call to a fallback model, since this one is overloaded
 
 2. After switching the model id, every call returns a 400 whose message says that forcing a call is unsupported. The incident notes list four suspects. Which should the team investigate first?
-   - **a**: The provider's capacity in the region where the traffic is sent
-   - **b**: The `tool_choice` setting that the new release rejects
+   - **a**: The `tool_choice` setting that the new release rejects
+   - **b**: The provider's capacity in the region where the traffic is sent
    - **c**: The wording of the system message, which may have drifted
    - **d**: The key's permissions on the organisation's workspace
 
 3. A reply ends cleanly with stop reason `end_turn`, but the downstream code throws on it, and the logged output is a sentence followed by a fenced block of JSON. Which statement is true?
-   - **a**: The fault is the model's, since it ignored the instruction to return only JSON
+   - **a**: The fault is likely the integration's parser, and a test should script this sample
    - **b**: The fault is the service's, so the call should be repeated until it is clean
    - **c**: The fault is the account's, so the output format needs a higher plan
-   - **d**: The fault is likely the integration's parser, and a test should script this sample
+   - **d**: The fault is the model's, since it ignored the instruction to return only JSON
 
 4. A bug in a tool-use loop is fixed in production on a Friday evening. Which follow-up does the module recommend?
    - **a**: Close the incident, since the fix was deployed
    - **b**: Add a note to the runbook and rely on the next on-call
-   - **c**: Lower the retry budget so that the failure is less visible
-   - **d**: Scrub the trace and add it to the eval set as a case
+   - **c**: Scrub the trace and add it to the eval set as a case
+   - **d**: Lower the retry budget so that the failure is less visible
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The table sends "Your credential or account (401, 402, 403, a spend cap)" to a person, because "No retry can supply a key or a payment". *a* is ruled out because capacity failures are the ones where you "Wait for the header, or back off with jitter, then retry", and this response has no such header. *b* is ruled out because the module's rule is to "retry only what can change by itself", and smaller calls do not change an organisation's ceiling. *d* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and this is not an overload.
-2. **b**. The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5 and Sonnet 5.5, with the recovery "change the request". *a* is ruled out because a 400 is a request status and capacity failures are "429 with `retry-after`, 529". *c* is ruled out because "None is cured by a retry, a longer timeout or a different prompt". *d* is ruled out because permissions are the 403 row, "Your credential or account (401, 402, 403, a spend cap)", and a 400 names a rejected request.
-3. **d**. The table says an object between the first `{` and the last `}` makes it "The integration: the parser was too strict, so extract the object first", and the page says to prove a fix "with a test that scripts the trace". *a* is ruled out because the trap warns "Assuming the model when the output is odd", and the output does hold the JSON. *b* is ruled out because the module's rule is to "retry only what can change by itself", and a repeat gives the same shape. *c* is ruled out because the account row is "Your credential or account (401, 402, 403, a spend cap)", which arrives as an error status, and this call returned text.
-4. **d**. The page says "A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite." *a* is ruled out because "A bug that is fixed without a test or an eval case will return", as the last trap puts it. *b* is ruled out because a runbook note records the bug and does not test for it, and the page says "The bug cannot return unseen" once it is a case. *c* is ruled out because a smaller budget hides failures, while the routine says to "note whether the application recovered".
+1. **b**. The table sends "Your credential or account (401, 402, 403, a spend cap)" to a person, because "No retry can supply a key or a payment". *a* is ruled out because capacity failures are the ones where you "Wait for the header, or back off with jitter, then retry", and this response has no such header. *c* is ruled out because the module's rule is to "retry only what can change by itself", and smaller calls do not change an organisation's ceiling. *d* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and this is not an overload.
+2. **a**. The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5 and Sonnet 5.5, with the recovery "change the request". *b* is ruled out because a 400 is a request status and capacity failures are "429 with `retry-after`, 529". *c* is ruled out because "None is cured by a retry, a longer timeout or a different prompt". *d* is ruled out because permissions are the 403 row, "Your credential or account (401, 402, 403, a spend cap)", and a 400 names a rejected request.
+3. **a**. The table says an object between the first `{` and the last `}` makes it "The integration: the parser was too strict, so extract the object first", and the page says to prove a fix "with a test that scripts the trace". *d* is ruled out because the trap warns "Assuming the model when the output is odd", and the output does hold the JSON. *b* is ruled out because the module's rule is to "retry only what can change by itself", and a repeat gives the same shape. *c* is ruled out because the account row is "Your credential or account (401, 402, 403, a spend cap)", which arrives as an error status, and this call returned text.
+4. **c**. The page says "A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite." *a* is ruled out because "A bug that is fixed without a test or an eval case will return", as the last trap puts it. *b* is ruled out because a runbook note records the bug and does not test for it, and the page says "The bug cannot return unseen" once it is a case. *d* is ruled out because a smaller budget hides failures, while the routine says to "note whether the application recovered".
 
 </details>

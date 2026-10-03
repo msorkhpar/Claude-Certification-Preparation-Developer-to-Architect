@@ -267,8 +267,8 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
 ## Quiz
 
 1. A new prompt raises the overall pass rate from 0.78 to 0.84. The per-item comparison shows that one input which passed before now fails. What should the team do?
-   - **a**: Ship it, because the pass rate rose
-   - **b**: Review that regression, then accept or repair it
+   - **a**: Review that regression, then accept or repair it
+   - **b**: Ship it, because the pass rate rose
    - **c**: Delete the failing item from the set, since it is noisy
    - **d**: Rerun the set until that input passes
 
@@ -279,17 +279,17 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
    - **d**: A label that was copied wrongly from a spreadsheet into the set
 
 3. A team re-grades 800 items with a model every night, and nobody waits for the result. Which option lowers the cost of that work the most?
-   - **a**: Submit it through the Message Batches API
+   - **a**: Remove the edge items because they are rare
    - **b**: Run the work again on every commit instead of once a day
-   - **c**: Remove the edge items because they are rare
+   - **c**: Submit it through the Message Batches API
    - **d**: Grade every item twice and keep the higher score
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says that "An average never excuses a regression": "If a case passed before and fails now, a person looks at it", and then the decision is made. *a* is ruled out because the example's v2 also raised the average, and the page says "An average never excuses a regression". *c* is ruled out because "A case that disappears is not a pass", and dropping the case that fails "is the easiest way to improve a score". *d* is ruled out because a rerun until the input passes treats a signal as noise, while the page says "a flaky case is a finding".
+1. **a**. The page says that "An average never excuses a regression": "If a case passed before and fails now, a person looks at it", and then the decision is made. *b* is ruled out because the example's v2 also raised the average, and the page says "An average never excuses a regression". *c* is ruled out because "A case that disappears is not a pass", and dropping the case that fails "is the easiest way to improve a score". *d* is ruled out because a rerun until the input passes treats a signal as noise, while the page says "a flaky case is a finding".
 2. **a**. The page says a prefilled assistant message "returns a 400 on Claude 4.6 and later models", and that a regression run on the new id "turns each of those into a failed case the same afternoon". *b* is ruled out because an example sentence typo is a prompt edit, which the table already puts "Before the merge, as a check on the pull request". *c* is ruled out because the grader's scale belongs to the grader, and the new id changes the application's behaviour: "Models differ, and a migration changes behaviour". *d* is ruled out because a wrongly copied label is a data error, and "The set lives in the repository beside the prompt", so a review of the diff finds it.
-3. **a**. The page says the Message Batches API "charges half the standard price for work that can wait up to a day", and calls a nightly regression run "the typical batch job". *b* is ruled out because a run on every commit multiplies the requests, and the page says "A quick check on a pull request stays synchronous and small". *c* is ruled out because "The edge tag has its own threshold", since the edge cases are where regressions hide. *d* is ruled out because grading twice doubles the requests, and keeping the higher score contradicts the rule to "pass it only if every run passes".
+3. **c**. The page says the Message Batches API "charges half the standard price for work that can wait up to a day", and calls a nightly regression run "the typical batch job". *b* is ruled out because a run on every commit multiplies the requests, and the page says "A quick check on a pull request stays synchronous and small". *a* is ruled out because "The edge tag has its own threshold", since the edge cases are where regressions hide. *d* is ruled out because grading twice doubles the requests, and keeping the higher score contradicts the rule to "pass it only if every run passes".
 
 </details>
 
@@ -310,10 +310,10 @@ This quiz covers all three pages of the module.
    - **d**: A human who reads every single item that the set holds
 
 3. A prompt change scores better overall, and the team wants to be sure the improvement is real before launch. Which pair of checks gives the most trustworthy answer?
-   - **a**: A comparison per case, and a run on held-out cases
+   - **a**: A larger set of the same easy cases, and a stricter threshold
    - **b**: A second run of the same cases, and a review of the average
    - **c**: A review of the edits, and the same cases graded by a person
-   - **d**: A larger set of the same easy cases, and a stricter threshold
+   - **d**: A comparison per case, and a run on held-out cases
 
 4. A case passes in two of three repeated runs. How should the harness treat it?
    - **a**: As a pass, since most runs passed
@@ -326,7 +326,7 @@ This quiz covers all three pages of the module.
 
 1. **b**. A good criterion names "a metric, a threshold, a data set, and a baseline to beat", and the four traits ask for "quantitative metrics or well-defined qualitative scales". *a* is ruled out because a promise to review is a process and does not make the criterion measurable: "Nobody can say what number or scale a result would have". *c* is ruled out because a longer list of qualities repeats the problem, since good, accurate and natural are "wishes until they carry a number or a scale and a data set". *d* is ruled out because the page says "Most use cases need multidimensional evaluation along several success criteria", which means a number for each, not one ranking in a sentence.
 2. **c**. The page lists a "Structure check" for "A reply that must parse and carry the right fields", and says it "parses the whole output as JSON". *a* is ruled out because a model grader belongs to "A judgement no code can make", and a field comparison is code. *b* is ruled out because similarity answers "Whether two texts say the same thing", and a queue name has an exact right value. *d* is ruled out because the case is graded by a script, and a human belongs in "A sample, to check the model grader".
-3. **a**. The page says "Compare per case" and to "Keep a held-out slice that the loop never touches and run it at the end". *b* is ruled out because rerunning the same cases repeats the tuned set, and "The score is then a memory test". *c* is ruled out because a list of edits records effort and a person grading the same cases still scores the cases the prompt was shaped by, and the page says "More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals". *d* is ruled out because "Grading only what is easy to grade" measures a different task, and a threshold on easy cases does not change that.
+3. **d**. The page says "Compare per case" and to "Keep a held-out slice that the loop never touches and run it at the end". *b* is ruled out because rerunning the same cases repeats the tuned set, and "The score is then a memory test". *c* is ruled out because a list of edits records effort and a person grading the same cases still scores the cases the prompt was shaped by, and the page says "More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals". *a* is ruled out because "Grading only what is easy to grade" measures a different task, and a threshold on easy cases does not change that.
 4. **b**. The page says a case "passes only if every run passes", and that "A case that passes in some runs and fails in others is flaky". *a* is ruled out because a case that fails sometimes will fail for some customers, which is why "a flaky case is a finding". *c* is ruled out because discarding the failing run removes the evidence, and the page says to "pass it only if every run passes". *d* is ruled out because the criteria "can say how many flaky cases are tolerated", which needs the count to include it.
 
 </details>

@@ -257,6 +257,25 @@ prompt leak". Re-check at release.
 - Not verified by a run: Claude Code itself, Managed Agents, the GitHub Action, Code Review, routines, any plugin install, and any
   model's response to an injection. The examples and practices prove the course's own models of the documented rules, offline.
 
+## Evaluation, debugging and the Developer exam (modules 42 to 44)
+
+Read on 2026-10-03 from the Claude API documentation pages "Define success criteria and build evaluations", "Prompt engineering overview",
+"Claude API errors", "Stop reasons and fallback" and "Handle streaming refusals", and from the Developer exam guide (version 1.0, effective July 2026).
+
+- Success criteria: four traits (specific, measurable, achievable, relevant), eight common criteria, and the advice that most use cases need
+  several dimensions at once. Evals: three design principles (task-specific, automated when possible, volume over quality) and grader examples
+  for exact match, cosine similarity, ROUGE-L and three model-graded scales. The page's model-graded examples carry the comment that a different model
+  should grade than the one that wrote the output. A Console evaluation tool was not found on the pages read and the course does not mention it.
+- Errors and stop reasons: the status table, the error shape with `request_id`, the `request-id` header, errors after a 200 on a stream, and the
+  validation errors that appear after a model change (prefill on Claude 4.6 and later, edited thinking blocks, `thinking` types, forced `tool_choice`
+  on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1). Stop reasons: `end_turn`, `max_tokens`, `stop_sequence`, `tool_use`, `pause_turn`,
+  `refusal` and `model_context_window_exceeded`. A refusal is a successful response with `stop_details`, and the page advises a fallback model or a
+  context reset; an empty `end_turn` is documented, with text after a tool result as a cause.
+- The exam guide: 53 items, 120 minutes, scaled score with 720 to pass, eight domains with the weights in `docs/EXAM-MAP.md`, skills and their weights
+  inside each domain, and three sample questions (used on module 44, page 1, with credit).
+- The eval harness semantics and the diagnosis table of the practices are the course's own design, built from this advice. They are not product
+  features. Not verified by a run: model-graded agreement with people and live refusals.
+
 ## Not yet pinned
 
 Python, Node, JDK and Kotlin versions for the container, Gradle, and the test runners are chosen

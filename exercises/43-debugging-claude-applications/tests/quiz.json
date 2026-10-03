@@ -1,0 +1,195 @@
+{
+  "module": "43-debugging-claude-applications",
+  "quizzes": [
+    {
+      "id": "01-failure-types-origins-and-recoveries#q1",
+      "page": "01-failure-types-origins-and-recoveries.md",
+      "scope": "page",
+      "stem": "A service sends a request with a prefilled assistant message to a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?",
+      "options": {
+        "a": "Retry each call with exponential back-off and jitter",
+        "b": "Hand the problem to the billing owner of the organisation",
+        "c": "Move the traffic to a fallback model and keep the same request",
+        "d": "Drop the pre-written closing block so that the user speaks last"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The errors page lists the rejected prefill under \"Common validation errors\": \"This model does not support assistant message prefill. The conversation must end with a user message.\" The module adds that a migration error has the recovery \"change the request\".",
+        "a": "Ruled out because \"A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure\".",
+        "c": "Ruled out because a fallback model is the recovery for a refusal, where the table says \"Use a fallback model, or reset the context\", and the 400 is a rejected request.",
+        "b": "Ruled out because billing problems are the 402 row, \"Your credential or account (401, 402, 403, a spend cap)\", and this is a 400."
+      }
+    },
+    {
+      "id": "01-failure-types-origins-and-recoveries#q2",
+      "page": "01-failure-types-origins-and-recoveries.md",
+      "scope": "page",
+      "stem": "A reply to a long-document summary ends mid-sentence, with status 200 and a stop reason of `max_tokens`. What is the origin and the right fix?",
+      "options": {
+        "a": "The integration's limit, so raise it or continue the turn",
+        "b": "The model, so reword the prompt to ask for shorter output",
+        "c": "The service, so retry the same call after a short pause",
+        "d": "The account, so ask for a higher quota on the organisation"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The table reads `max_tokens` as \"Integration: the limit is yours\" with the recovery \"Raise `max_tokens` or continue the response\".",
+        "c": "Ruled out because a retry repeats the same limit, and the page says \"A cut-off reply is usually your setting\".",
+        "b": "Ruled out because the trap says \"A reply cut by `max_tokens` needs a larger limit or a continuation, and no wording will change it\".",
+        "d": "Ruled out because the status is 200 and no quota was exceeded: stop reasons are \"part of the response body\" and not account errors."
+      }
+    },
+    {
+      "id": "01-failure-types-origins-and-recoveries#q3",
+      "page": "01-failure-types-origins-and-recoveries.md",
+      "scope": "page",
+      "stem": "An assistant's reply arrives with status 200 and a stop reason of `refusal`. The team's dashboard shows nothing wrong. What does the documentation imply?",
+      "options": {
+        "a": "Nothing is wrong, because the dashboard counts only failed calls",
+        "b": "The same request will usually succeed if it is sent again unchanged",
+        "c": "A refusal is invisible to an error rate, so it needs its own signal",
+        "d": "The model is overloaded and the call should wait for a retry header"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"Refusals are responses, not errors\", so \"monitoring built only on error rates won't surface it\".",
+        "a": "Ruled out because the refusal is a real failure of the request, and the course's advice is to \"track refusals as their own signal\".",
+        "b": "Ruled out because \"Re-sending a refused request to the same model usually results in another refusal\".",
+        "d": "Ruled out because waiting for a retry header is the recovery for capacity failures: \"Wait for the header, or back off with jitter, then retry\", while this reply has status 200."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#q1",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "page",
+      "stem": "In a trace, the final user entry carried a tool's output and then a line of commentary. The reply came back as `end_turn` with an empty content list. Which diagnosis fits?",
+      "options": {
+        "a": "The model chose to stop, so add a user message asking it to continue",
+        "b": "The request layout is at fault, so return the result unaccompanied",
+        "c": "The account reached a limit, so raise the quota before anything else",
+        "d": "The service dropped the output, so retry the same call unchanged"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The table says that when text follows the tool result the origin is \"The integration: send the tool result alone\", and the routine's step 4 says \"An `end_turn` with no content blocks is an empty reply. Look at the request before it.\"",
+        "a": "Ruled out because that is the answer only when no text followed: the table gives \"The model: add a new user message that asks it to continue\" for \"If no\".",
+        "d": "Ruled out because \"A dropped connection has none: it is the network, and it belongs to the service side\", while here a response arrived with a stop reason.",
+        "c": "Ruled out because a limit arrives as an error: \"An `error` event has one, and the table of page 1 gives its origin and recovery\"."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#q2",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "page",
+      "stem": "Our code could not read this reply: \"Sure! Here is the answer: {\"label\": \"spam\"} Hope it helps.\" What does the routine conclude?",
+      "options": {
+        "a": "The account lacks access to structured output, so request it",
+        "b": "The model failed to produce JSON, so validate and ask it again",
+        "c": "The service truncated the body, so retry the call with back-off",
+        "d": "The parser was too strict, so pull out the object first"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The table says that an object in the text makes it \"The integration: the parser was too strict, so extract the object first\".",
+        "b": "Ruled out because \"The model: it did not produce JSON, so validate and ask again\" applies only when no object is in the text, and here one is.",
+        "c": "Ruled out because a cut-off arrives as a stop reason: \"A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response\".",
+        "a": "Ruled out because an access failure arrives as an error status: \"An `error` event has one, and the table of page 1 gives its origin and recovery\"."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#q3",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "page",
+      "stem": "A trace holds a 529, then a retry that returns a good response, then nothing else. What is the finding?",
+      "options": {
+        "a": "No failure at all, since the final response was good",
+        "b": "A service failure that the application survived",
+        "c": "A failure of the model, with no recovery afterwards",
+        "d": "An integration failure that needs a fix in code"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"A 529 is retried and succeeds, so the application recovered\", and \"A later good response means the failure was survived\".",
+        "a": "Ruled out because the diagnosis names a failure even when it recovered: \"Read from the top. The diagnosis names the first failing event\".",
+        "c": "Ruled out because the first failing event is a 529, which is not model output, and the page says \"A 529 is retried and succeeds, so the application recovered\".",
+        "d": "Ruled out because \"a bug in your request fails the same way each time\", while this request succeeded on the retry."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#m1",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "module",
+      "stem": "A call returns a 429 that carries no `retry-after` header, and its error code says the organisation reached its monthly spend ceiling. What does the module advise?",
+      "options": {
+        "a": "Back off with jitter, since waiting restores access within seconds",
+        "b": "Hand it to a person, since waiting restores nothing",
+        "c": "Split the work into smaller calls so that each one fits beneath the ceiling",
+        "d": "Move the call to a fallback model, since this one is overloaded"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The table sends \"Your credential or account (401, 402, 403, a spend cap)\" to a person, because \"No retry can supply a key or a payment\".",
+        "a": "Ruled out because capacity failures are the ones where you \"Wait for the header, or back off with jitter, then retry\", and this response has no such header.",
+        "c": "Ruled out because the module's rule is to \"retry only what can change by itself\", and smaller calls do not change an organisation's ceiling.",
+        "d": "Ruled out because a fallback model is the recovery for a refusal, where the table says \"Use a fallback model, or reset the context\", and this is not an overload."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#m2",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "module",
+      "stem": "After switching the model id, every call returns a 400 whose message says that forcing a call is unsupported. The incident notes list four suspects. Which should the team investigate first?",
+      "options": {
+        "a": "The `tool_choice` setting that the new release rejects",
+        "b": "The provider's capacity in the region where the traffic is sent",
+        "c": "The wording of the system message, which may have drifted",
+        "d": "The key's permissions on the organisation's workspace"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5 and Sonnet 5.5, with the recovery \"change the request\".",
+        "b": "Ruled out because a 400 is a request status and capacity failures are \"429 with `retry-after`, 529\".",
+        "c": "Ruled out because \"None is cured by a retry, a longer timeout or a different prompt\".",
+        "d": "Ruled out because permissions are the 403 row, \"Your credential or account (401, 402, 403, a spend cap)\", and a 400 names a rejected request."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#m3",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "module",
+      "stem": "A reply ends cleanly with stop reason `end_turn`, but the downstream code throws on it, and the logged output is a sentence followed by a fenced block of JSON. Which statement is true?",
+      "options": {
+        "a": "The fault is likely the integration's parser, and a test should script this sample",
+        "b": "The fault is the service's, so the call should be repeated until it is clean",
+        "c": "The fault is the account's, so the output format needs a higher plan",
+        "d": "The fault is the model's, since it ignored the instruction to return only JSON"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The table says an object between the first `{` and the last `}` makes it \"The integration: the parser was too strict, so extract the object first\", and the page says to prove a fix \"with a test that scripts the trace\".",
+        "d": "Ruled out because the trap warns \"Assuming the model when the output is odd\", and the output does hold the JSON.",
+        "b": "Ruled out because the module's rule is to \"retry only what can change by itself\", and a repeat gives the same shape.",
+        "c": "Ruled out because the account row is \"Your credential or account (401, 402, 403, a spend cap)\", which arrives as an error status, and this call returned text."
+      }
+    },
+    {
+      "id": "02-reading-a-trace-and-the-practice#m4",
+      "page": "02-reading-a-trace-and-the-practice.md",
+      "scope": "module",
+      "stem": "A bug in a tool-use loop is fixed in production on a Friday evening. Which follow-up does the module recommend?",
+      "options": {
+        "a": "Close the incident, since the fix was deployed",
+        "b": "Add a note to the runbook and rely on the next on-call",
+        "c": "Scrub the trace and add it to the eval set as a case",
+        "d": "Lower the retry budget so that the failure is less visible"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite.\"",
+        "a": "Ruled out because \"A bug that is fixed without a test or an eval case will return\", as the last trap puts it.",
+        "b": "Ruled out because a runbook note records the bug and does not test for it, and the page says \"The bug cannot return unseen\" once it is a case.",
+        "d": "Ruled out because a smaller budget hides failures, while the routine says to \"note whether the application recovered\"."
+      }
+    }
+  ]
+}

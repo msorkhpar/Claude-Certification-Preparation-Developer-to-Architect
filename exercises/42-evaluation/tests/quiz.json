@@ -7,17 +7,17 @@
       "scope": "page",
       "stem": "A team's goal reads \"the extraction model should work well\". Which rewrite meets the documentation's four traits of a good criterion?",
       "options": {
-        "a": "Raise the field-level F1 above 0.9 on 500 held-out invoices, beating today's 0.86",
+        "a": "Reach full accuracy on all fields so that no invoice ever needs a manual check",
         "b": "Make the model as accurate as an expert human reviewer on every invoice",
         "c": "Improve extraction until reviewers feel the output is clearly better",
-        "d": "Reach full accuracy on all fields so that no invoice ever needs a manual check"
+        "d": "Raise the field-level F1 above 0.9 on 500 held-out invoices, beating today's 0.86"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "It names a metric (F1), a threshold above the current baseline, and a data set the model was not tuned on, which are the parts of the page's good example: \"a held-out test set* of 10,000 diverse Twitter posts (Relevant), which is a 5% improvement over the current baseline (Achievable)\".",
+        "d": "It names a metric (F1), a threshold above the current baseline, and a data set the model was not tuned on, which are the parts of the page's good example: \"a held-out test set* of 10,000 diverse Twitter posts (Relevant), which is a 5% improvement over the current baseline (Achievable)\".",
         "b": "Ruled out because a target fails the Achievable trait when \"The target is beyond what current frontier models can do\", and this one names no metric.",
         "c": "Ruled out because a feeling has no number, while a criterion must \"Use quantitative metrics or well-defined qualitative scales\".",
-        "d": "Ruled out because full accuracy on every field ignores \"Base your targets on industry benchmarks, prior experiments, AI research, or expert knowledge\"."
+        "a": "Ruled out because full accuracy on every field ignores \"Base your targets on industry benchmarks, prior experiments, AI research, or expert knowledge\"."
       }
     },
     {
@@ -26,15 +26,15 @@
       "scope": "page",
       "stem": "A support bot's eval set contains 40 polite, well-formed questions. Production shows empty messages, pasted logs and abusive input. What is the best change to the set?",
       "options": {
-        "a": "Replace the questions with a smaller group graded by hand",
-        "b": "Add tagged cases for those awkward situations, sampled from live traffic",
+        "a": "Add tagged cases for those awkward situations, sampled from live traffic",
+        "b": "Replace the questions with a smaller group graded by hand",
         "c": "Keep the set unchanged and raise the passing threshold",
         "d": "Ask the model to write more polite questions of the same kind"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The first principle is to \"Design evals that mirror your real-world task distribution\", and its list of edge cases includes irrelevant or nonexistent input data and \"Poor, harmful, or irrelevant user input\".",
-        "a": "Ruled out because the page says \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals\".",
+        "a": "The first principle is to \"Design evals that mirror your real-world task distribution\", and its list of edge cases includes irrelevant or nonexistent input data and \"Poor, harmful, or irrelevant user input\".",
+        "b": "Ruled out because the page says \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals\".",
         "c": "Ruled out because a stricter threshold on the same easy cases still measures a different task and, in the page's words, \"Don't forget to factor in edge cases!\".",
         "d": "Ruled out because the course's advice is to \"Write the awkward inputs by hand\", and more polite questions add none."
       }
@@ -83,17 +83,17 @@
       "scope": "page",
       "stem": "A model that scores output replies \"Score: 4, because the tone is polite\" for one case, and the harness cannot parse it. How should the harness record that case?",
       "options": {
-        "a": "As a failure with the reason that the reply was ungradable",
+        "a": "As a score of 4 read from the first digit of the text",
         "b": "As a pass, since the reply mentions a score above the threshold",
         "c": "As a skipped case that is left out of the pass rate",
-        "d": "As a score of 4 read from the first digit of the text"
+        "d": "As a failure with the reason that the reply was ungradable"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The page says \"a reply that is not a bare score counts as ungradable, and an ungradable case fails\".",
+        "d": "The page says \"a reply that is not a bare score counts as ungradable, and an ungradable case fails\".",
         "b": "Ruled out because the contract is \"Output only the number\", and the page says \"an ungradable case fails\" whatever the prose mentions.",
         "c": "Ruled out because a skipped case would hide the grader's drift, while the course says to \"Count the ungradable cases in the report\".",
-        "d": "Ruled out because \"a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade\"."
+        "a": "Ruled out because \"a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade\"."
       }
     },
     {
@@ -103,15 +103,15 @@
       "stem": "A check expects the field `count` to equal the number 3, and the application's output holds the string \"3\". The grader compares both sides as text and passes it. What is wrong?",
       "options": {
         "a": "Nothing is wrong, because the digits are the same in both forms of it",
-        "b": "The check should have used a model grader to judge the number",
-        "c": "The type differs, and a program reading the value would reject it",
+        "b": "The type differs, and a program reading the value would reject it",
+        "c": "The check should have used a model grader to judge the number",
         "d": "The expected value should have been written as a string instead"
       },
-      "key": "c",
+      "key": "b",
       "explanation": {
-        "c": "The page says that a grader comparing both sides as text \"passes values that a program reading the field would reject\".",
+        "b": "The page says that a grader comparing both sides as text \"passes values that a program reading the field would reject\".",
         "a": "Ruled out because \"A structure check also compares types\", and matching digits do not make matching types.",
-        "b": "Ruled out because a structure check decides this by parsing, and a model grader belongs to \"A judgement no code can make\".",
+        "c": "Ruled out because a structure check decides this by parsing, and a model grader belongs to \"A judgement no code can make\".",
         "d": "Ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: \"Comparing JSON fields as text\"."
       }
     },
@@ -121,15 +121,15 @@
       "scope": "page",
       "stem": "A new prompt raises the overall pass rate from 0.78 to 0.84. The per-item comparison shows that one input which passed before now fails. What should the team do?",
       "options": {
-        "a": "Ship it, because the pass rate rose",
-        "b": "Review that regression, then accept or repair it",
+        "a": "Review that regression, then accept or repair it",
+        "b": "Ship it, because the pass rate rose",
         "c": "Delete the failing item from the set, since it is noisy",
         "d": "Rerun the set until that input passes"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The page says that \"An average never excuses a regression\": \"If a case passed before and fails now, a person looks at it\", and then the decision is made.",
-        "a": "Ruled out because the example's v2 also raised the average, and the page says \"An average never excuses a regression\".",
+        "a": "The page says that \"An average never excuses a regression\": \"If a case passed before and fails now, a person looks at it\", and then the decision is made.",
+        "b": "Ruled out because the example's v2 also raised the average, and the page says \"An average never excuses a regression\".",
         "c": "Ruled out because \"A case that disappears is not a pass\", and dropping the case that fails \"is the easiest way to improve a score\".",
         "d": "Ruled out because a rerun until the input passes treats a signal as noise, while the page says \"a flaky case is a finding\"."
       }
@@ -159,16 +159,16 @@
       "scope": "page",
       "stem": "A team re-grades 800 items with a model every night, and nobody waits for the result. Which option lowers the cost of that work the most?",
       "options": {
-        "a": "Submit it through the Message Batches API",
+        "a": "Remove the edge items because they are rare",
         "b": "Run the work again on every commit instead of once a day",
-        "c": "Remove the edge items because they are rare",
+        "c": "Submit it through the Message Batches API",
         "d": "Grade every item twice and keep the higher score"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page says the Message Batches API \"charges half the standard price for work that can wait up to a day\", and calls a nightly regression run \"the typical batch job\".",
+        "c": "The page says the Message Batches API \"charges half the standard price for work that can wait up to a day\", and calls a nightly regression run \"the typical batch job\".",
         "b": "Ruled out because a run on every commit multiplies the requests, and the page says \"A quick check on a pull request stays synchronous and small\".",
-        "c": "Ruled out because \"The edge tag has its own threshold\", since the edge cases are where regressions hide.",
+        "a": "Ruled out because \"The edge tag has its own threshold\", since the edge cases are where regressions hide.",
         "d": "Ruled out because grading twice doubles the requests, and keeping the higher score contradicts the rule to \"pass it only if every run passes\"."
       }
     },
@@ -216,17 +216,17 @@
       "scope": "module",
       "stem": "A prompt change scores better overall, and the team wants to be sure the improvement is real before launch. Which pair of checks gives the most trustworthy answer?",
       "options": {
-        "a": "A comparison per case, and a run on held-out cases",
+        "a": "A larger set of the same easy cases, and a stricter threshold",
         "b": "A second run of the same cases, and a review of the average",
         "c": "A review of the edits, and the same cases graded by a person",
-        "d": "A larger set of the same easy cases, and a stricter threshold"
+        "d": "A comparison per case, and a run on held-out cases"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The page says \"Compare per case\" and to \"Keep a held-out slice that the loop never touches and run it at the end\".",
+        "d": "The page says \"Compare per case\" and to \"Keep a held-out slice that the loop never touches and run it at the end\".",
         "b": "Ruled out because rerunning the same cases repeats the tuned set, and \"The score is then a memory test\".",
         "c": "Ruled out because a list of edits records effort and a person grading the same cases still scores the cases the prompt was shaped by, and the page says \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals\".",
-        "d": "Ruled out because \"Grading only what is easy to grade\" measures a different task, and a threshold on easy cases does not change that."
+        "a": "Ruled out because \"Grading only what is easy to grade\" measures a different task, and a threshold on easy cases does not change that."
       }
     },
     {
