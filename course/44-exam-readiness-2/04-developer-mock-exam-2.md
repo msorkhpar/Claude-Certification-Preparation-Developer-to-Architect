@@ -152,11 +152,11 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Switch both sessions to plan mode so that neither writes until approved
    - **d**: Give every run a separate worktree, each one placed on a branch of its own
 
-18. A team sized a nightly job from measurements on an older release, and after moving to Claude Opus 5.5 its bill is higher for identical documents. What explains it?
-   - **a**: Output pricing rose for that release, so each reply costs more per piece
-   - **b**: The newer tokenizer cuts the same text into more pieces, so the estimate must be redone
-   - **c**: The window shrank, so the job now sends each document in two requests
-   - **d**: The counting endpoint became chargeable on that release, so the bill grew
+18. A reply begins with a confident wrong figure, and the rest of the answer then builds on it without any correction. What explains this?
+   - **a**: The model consults a stored draft of the whole answer and then defends that draft
+   - **b**: Each later piece is chosen with the earlier text in view, so the slip becomes context
+   - **c**: The window dropped the opening lines, so the model lost track of what it had said
+   - **d**: A hidden checker reviews each sentence and approves it before the sentence is shown
 
 19. A team sends an entire 800,000-token archive with every request because the window allows it, and answers are getting worse while bills climb. Which change fits best?
    - **a**: Move to a model whose window is larger, so that accuracy holds as it fills
@@ -170,17 +170,17 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Add a second line that repeats the instruction in capital letters
    - **d**: Split the key into two halves placed in different turns of the conversation
 
-21. A template places submitted text between document tags, and one submission contains a closing tag followed by a new instruction that the model then obeys. Which change fits best?
-   - **a**: Move the submitted text above the task so that its position marks it as data
-   - **b**: Ask the model in capital letters to disregard any instruction inside the tags
-   - **c**: Neutralise the angle brackets in the inserted material before it is assembled
-   - **d**: Wrap the text in a second pair of tags, since nesting keeps it from closing the first
+21. A classification prompt carries five examples. Some show the label alone and others wrap it in a sentence, and live replies now vary in the same way. Which change fits best?
+   - **a**: Add more sentence-style samples so that this style outweighs the other one
+   - **b**: Drop every sample and rely on the written instruction to fix the shape
+   - **c**: Rewrite every sample answer so that all of them share one identical layout
+   - **d**: Wrap every sample in extra tags so that the model separates them better
 
-22. A refund prompt answers with a made-up decision whenever the policy is silent on the customer's situation. Which change to the specification fits best?
-   - **a**: Add a role line that calls the assistant the most careful analyst in the company
-   - **b**: Add a constraint that names a fallback value, and a test message that triggers it
+22. A support prompt is one long paragraph, and reviewers cannot tell which piece of it causes made-up verdicts when the policy is silent. Which change fits best?
+   - **a**: Give the assistant a flattering role so that it feels bound to be careful
+   - **b**: Separate the parts, then add a fallback value and a test for it
    - **c**: Ask for a longer reply in which the model explains its reasoning at length
-   - **d**: Move the policy below the task so that the model reads the policy last
+   - **d**: Move the documents below the task so that the policy is read last
 
 23. A team plans to use the token-counting tool before each message request and worries that those calls will use up the allowance for its message calls. What should the review say?
    - **a**: Counting needs a paid tier of its own before it can be used at all in a live service
@@ -388,11 +388,11 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 15. **c**. "Claude does not work well when you ask for normalized coordinates", so the program normalises (module 30, page 1). *a* is ruled out because "Claude then pads every image on the bottom and right up to a multiple of 28" by itself. *b* is ruled out because "Always normalize or rescale by the resized dimensions, not the padded dimensions". *d* is ruled out because "every box and point it returns is in that size and not in yours", whatever the source type.
 16. **b**. The order is "Enterprise over personal, and personal over project" (module 39, page 1). *a* is ruled out because committing only shares a skill: "Commit it so your team gets it too". *c* is ruled out because "When two skills share a name, the location decides". *d* is ruled out because "When two skills share a name, the location decides", so one copy wins and the other is not merged.
 17. **d**. "Each git worktree is a separate checkout on its own branch" (module 40, page 1). *a* is ruled out because the rule is "Commit on a branch, never on main". *b* is ruled out because memory text is only context: "Claude treats them as context, not enforced configuration". *c* is ruled out because plan mode only delays the writes: "Claude reads files and proposes a plan but makes no edits until you approve".
-18. **b**. The page says that Claude Opus 4.7 and later models "use a newer tokenizer and the same text produces about 30 percent more tokens than on earlier models" (module 1, page 1). *a* is ruled out because the rise comes from the input side, since "the same text produces about 30 percent more tokens". *c* is ruled out because the page lists "1M tokens for Claude Fable 5.1, Opus 5.5 and Sonnet 5.5", so the window did not shrink. *d* is ruled out because "The token counting endpoint is free", so it adds nothing to the bill.
+18. **b**. The page says "An answer is a long chain of single choices, each made with everything before it in view" (module 1, page 1). *a* is ruled out because "There is no plan stored somewhere and no lookup of a finished answer". *c* is ruled out because every choice is "made with everything before it in view", so the opening lines are still there. *d* is ruled out because the loop is only "The model computes, for every token it knows, how likely it is to come next", with no review step in it.
 19. **d**. "A bigger window is capacity, not a reason to send everything" (module 4, page 1). *a* is ruled out because "accuracy and recall degrade as the window fills". *b* is ruled out because "more context isn't automatically better". *c* is ruled out because "cost grows with every token you send", whatever the effort.
 20. **a**. "protecting a secret is a job for code" (module 6, page 1). *b* is ruled out because "a role is a request, not a credential". *c* is ruled out because such a line "is a request that can be argued around". *d* is ruled out because "a role is not a safeguard", and both halves still sit in the context.
-21. **c**. The page says "A template builder replaces those characters in untrusted text", because a document "could close its own tag and pretend to continue the prompt" (module 6, page 2). *a* is ruled out because "Order is not a boundary". *b* is ruled out because tags "and a statement that the content is data do the marking", and escaping what you insert is what stops a closing tag. *d* is ruled out because nesting is for "when the content nests", and an unescaped closing tag still ends the outer tag.
-22. **b**. The page says "every part is something a test can check", and its checks include one for the fallback value on an ambiguous message (module 6, page 3). *a* is ruled out because the Role part answers "Who is doing the work?", and a flattering role sets no rule. *c* is ruled out because it is an edit with nothing to check it against, and "you cannot tell whether an edit helped". *d* is ruled out because the page says "Order: material first, the task last", so the move works against the stated order.
+21. **c**. The page states the course's own rule to "keep the format consistent across examples, since the model will copy inconsistencies" (module 6, page 2). *a* is ruled out because the count is not the problem: "Include 3-5 examples for best results." *b* is ruled out because multi-shot is for when "The task has subtle boundaries, or the format is unusual". *d* is ruled out because tags only mark examples as "wrapped in <example> tags", so that they are distinguished from instructions, and they do not change what the answers look like.
+22. **b**. The page treats the prompt "like a short contract" whose parts are each checkable, with a constraint for the silent case and a test for it (module 6, page 3). *a* is ruled out because, as module 6, page 1 puts it, "A role is a request, not a credential". *c* is ruled out because what must hold is stated as a constraint: "use only the policy; if the policy does not decide the case, say", and a longer reply pins nothing down. *d* is ruled out because the page says "Order: material first, the task last".
 23. **c**. The endpoint's own limits are stated: "it has its own limits" (module 18, page 2). *a* is ruled out because "Token counting is free to use". *b* is ruled out because it is "subject to requests per minute rate limits based on your usage tier". *d* is ruled out because "Token counting and message creation have separate and independent rate limits".
 24. **d**. "A feature that waits for the first word gains little" (module 19, page 2). *a* is ruled out because "Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)". *b* is ruled out because "Fast mode is not available with the Batch API". *c* is ruled out because on Opus 5.5 it is priced "twice the standard $4 and $20".
 25. **c**. "Marking costs nothing by itself" (module 20, page 1). *a* is ruled out because "You pay for what is written, what is read and what is neither". *b* is ruled out because "Cache breakpoints themselves don't add any cost". *d* is ruled out because "You can place up to four" explicit breakpoints, each of which can be read.

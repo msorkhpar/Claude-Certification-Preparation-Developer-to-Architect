@@ -1525,19 +1525,19 @@
       "id": "04-developer-mock-exam-2#x18",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A team sized a nightly job from measurements on an older release, and after moving to Claude Opus 5.5 its bill is higher for identical documents. What explains it?",
+      "stem": "A reply begins with a confident wrong figure, and the rest of the answer then builds on it without any correction. What explains this?",
       "options": {
-        "a": "Output pricing rose for that release, so each reply costs more per piece",
-        "b": "The newer tokenizer cuts the same text into more pieces, so the estimate must be redone",
-        "c": "The window shrank, so the job now sends each document in two requests",
-        "d": "The counting endpoint became chargeable on that release, so the bill grew"
+        "a": "The model consults a stored draft of the whole answer and then defends that draft",
+        "b": "Each later piece is chosen with the earlier text in view, so the slip becomes context",
+        "c": "The window dropped the opening lines, so the model lost track of what it had said",
+        "d": "A hidden checker reviews each sentence and approves it before the sentence is shown"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says that Claude Opus 4.7 and later models \"use a newer tokenizer and the same text produces about 30 percent more tokens than on earlier models\" (module 1, page 1).",
-        "a": "Ruled out because the rise comes from the input side, since \"the same text produces about 30 percent more tokens\".",
-        "c": "Ruled out because the page lists \"1M tokens for Claude Fable 5.1, Opus 5.5 and Sonnet 5.5\", so the window did not shrink.",
-        "d": "Ruled out because \"The token counting endpoint is free\", so it adds nothing to the bill."
+        "b": "The page says \"An answer is a long chain of single choices, each made with everything before it in view\" (module 1, page 1).",
+        "a": "Ruled out because \"There is no plan stored somewhere and no lookup of a finished answer\".",
+        "c": "Ruled out because every choice is \"made with everything before it in view\", so the opening lines are still there.",
+        "d": "Ruled out because the loop is only \"The model computes, for every token it knows, how likely it is to come next\", with no review step in it."
       }
     },
     {
@@ -1582,38 +1582,38 @@
       "id": "04-developer-mock-exam-2#x21",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A template places submitted text between document tags, and one submission contains a closing tag followed by a new instruction that the model then obeys. Which change fits best?",
+      "stem": "A classification prompt carries five examples. Some show the label alone and others wrap it in a sentence, and live replies now vary in the same way. Which change fits best?",
       "options": {
-        "a": "Move the submitted text above the task so that its position marks it as data",
-        "b": "Ask the model in capital letters to disregard any instruction inside the tags",
-        "c": "Neutralise the angle brackets in the inserted material before it is assembled",
-        "d": "Wrap the text in a second pair of tags, since nesting keeps it from closing the first"
+        "a": "Add more sentence-style samples so that this style outweighs the other one",
+        "b": "Drop every sample and rely on the written instruction to fix the shape",
+        "c": "Rewrite every sample answer so that all of them share one identical layout",
+        "d": "Wrap every sample in extra tags so that the model separates them better"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says \"A template builder replaces those characters in untrusted text\", because a document \"could close its own tag and pretend to continue the prompt\" (module 6, page 2).",
-        "a": "Ruled out because \"Order is not a boundary\".",
-        "b": "Ruled out because tags \"and a statement that the content is data do the marking\", and escaping what you insert is what stops a closing tag.",
-        "d": "Ruled out because nesting is for \"when the content nests\", and an unescaped closing tag still ends the outer tag."
+        "c": "The page states the course's own rule to \"keep the format consistent across examples, since the model will copy inconsistencies\" (module 6, page 2).",
+        "a": "Ruled out because the count is not the problem: \"Include 3-5 examples for best results.\"",
+        "b": "Ruled out because multi-shot is for when \"The task has subtle boundaries, or the format is unusual\".",
+        "d": "Ruled out because tags only mark examples as \"wrapped in <example> tags\", so that they are distinguished from instructions, and they do not change what the answers look like."
       }
     },
     {
       "id": "04-developer-mock-exam-2#x22",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A refund prompt answers with a made-up decision whenever the policy is silent on the customer's situation. Which change to the specification fits best?",
+      "stem": "A support prompt is one long paragraph, and reviewers cannot tell which piece of it causes made-up verdicts when the policy is silent. Which change fits best?",
       "options": {
-        "a": "Add a role line that calls the assistant the most careful analyst in the company",
-        "b": "Add a constraint that names a fallback value, and a test message that triggers it",
+        "a": "Give the assistant a flattering role so that it feels bound to be careful",
+        "b": "Separate the parts, then add a fallback value and a test for it",
         "c": "Ask for a longer reply in which the model explains its reasoning at length",
-        "d": "Move the policy below the task so that the model reads the policy last"
+        "d": "Move the documents below the task so that the policy is read last"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says \"every part is something a test can check\", and its checks include one for the fallback value on an ambiguous message (module 6, page 3).",
-        "a": "Ruled out because the Role part answers \"Who is doing the work?\", and a flattering role sets no rule.",
-        "c": "Ruled out because it is an edit with nothing to check it against, and \"you cannot tell whether an edit helped\".",
-        "d": "Ruled out because the page says \"Order: material first, the task last\", so the move works against the stated order."
+        "b": "The page treats the prompt \"like a short contract\" whose parts are each checkable, with a constraint for the silent case and a test for it (module 6, page 3).",
+        "a": "is ruled out because, as module 6, page 1 puts it, \"A role is a request, not a credential\".",
+        "c": "Ruled out because what must hold is stated as a constraint: \"use only the policy; if the policy does not decide the case, say\", and a longer reply pins nothing down.",
+        "d": "Ruled out because the page says \"Order: material first, the task last\"."
       }
     },
     {
