@@ -1,0 +1,195 @@
+{
+  "module": "40-claude-in-the-software-life-cycle",
+  "quizzes": [
+    {
+      "id": "01-git-committed-configuration-and-versioned-prompts#q1",
+      "page": "01-git-committed-configuration-and-versioned-prompts.md",
+      "scope": "page",
+      "stem": "A developer prefers a cheaper model on their own machine. Where is that choice kept?",
+      "options": {
+        "a": "`.mcp.json`, which lists the servers used by one project in the repository",
+        "b": "`.claude/settings.json`, which is committed for the whole team of developers",
+        "c": "`CLAUDE.md`, which every session loads before the first prompt is typed",
+        "d": "`.claude/settings.local.json`, which is listed in the ignore file"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The table puts \"One developer's overrides\" in `.claude/settings.local.json`, which is \"No, in `.gitignore`\".",
+        "b": "Ruled out because the file is committed and holds \"Team permission rules, default model, hooks, plugins\", so the choice would reach the whole team.",
+        "c": "Ruled out because `CLAUDE.md` holds \"Commands, conventions, the git workflow\", and is not a place for a model setting.",
+        "a": "Ruled out because `.mcp.json` holds \"The MCP servers a project uses\"."
+      }
+    },
+    {
+      "id": "01-git-committed-configuration-and-versioned-prompts#q2",
+      "page": "01-git-committed-configuration-and-versioned-prompts.md",
+      "scope": "page",
+      "stem": "A workflow sends a long instruction string that someone edits whenever results look wrong. What step makes those edits safe?",
+      "options": {
+        "a": "Move it to its own file with a version, a changelog entry and a review",
+        "b": "Shorten it so that fewer words are open to change in each separate edit",
+        "c": "Store it in an environment variable so the repository never holds the text",
+        "d": "Let Claude rewrite it every night from the previous day's results alone"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says to keep \"One file per prompt, in the repository\", with \"A version in the file\", \"A changelog entry for every change\" and \"A review of the change\".",
+        "b": "Ruled out because the page says \"A reworded prompt is a behaviour change\", and a shorter prompt is still unversioned and unreviewed.",
+        "c": "Ruled out because \"keys and tokens are read from the environment or from GitHub Secrets\", and a prompt needs history, which an environment variable lacks.",
+        "d": "Ruled out because a rewrite nobody reviews is the problem: \"A review of the change, ideally with a sample of inputs\"."
+      }
+    },
+    {
+      "id": "01-git-committed-configuration-and-versioned-prompts#q3",
+      "page": "01-git-committed-configuration-and-versioned-prompts.md",
+      "scope": "page",
+      "stem": "A pull request adds one entry to the shared settings that allows a new shell command. How should it be reviewed?",
+      "options": {
+        "a": "Not at all, because a project permission rule has no effect on others",
+        "b": "Lightly, because settings files hold preferences and not behaviour",
+        "c": "Like a build script, because it changes what runs on every machine",
+        "d": "By Claude alone, because the model wrote the line in the first place"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine\", so such pull requests \"deserve the same care as a change to a build script\".",
+        "b": "Ruled out because such a line \"changes what runs on every teammate's machine\", which is behaviour and not preference.",
+        "a": "Ruled out because the file is committed and shared, so the rule \"changes what runs on every teammate's machine\".",
+        "d": "Ruled out because \"Pull requests that touch these files deserve the same care as a change to a build script\", with a person deciding."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#q1",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "page",
+      "stem": "A workflow starts a runner whenever anyone posts anything, and the bill follows the volume. Which line fixes it?",
+      "options": {
+        "a": "A longer `timeout-minutes` value on the job that runs the step",
+        "b": "An `if` on the job that tests the comment body for `@claude`",
+        "c": "A larger `--max-turns` value in the arguments of the action step",
+        "d": "A write permission on the contents of the repository for the job"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"Without the `if`, a runner starts for every comment in the repository\", and the guard is `if: contains(github.event.comment.body, '@claude')`.",
+        "a": "Ruled out because the timeout bounds one run and does not stop runs from starting: the page lists it with \"workflow-level timeouts to avoid runaway jobs\".",
+        "c": "Ruled out because \"Set `--max-turns` in `claude_args` to limit iterations\", which acts inside a run and does not stop one from starting.",
+        "d": "Ruled out because write access is a permission and not a trigger filter, and the page says \"Grant the least a job needs\"."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#q2",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "page",
+      "stem": "A review job should inspect the code and post findings. Which permission set fits?",
+      "options": {
+        "a": "Write access to every scope, so the job never fails for a missing grant",
+        "b": "Write access to the contents, so that findings can be committed",
+        "c": "No permissions at all, because comments need no access to the code",
+        "d": "Read access to the contents, plus the token needed for authentication"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"A job that only reviews needs `contents: read`\", and the review example reads pull requests and issues as well.",
+        "b": "Ruled out because the page says \"Reading is enough to review\", and write access lets a compromised run change the repository.",
+        "c": "Ruled out because \"A job that only reviews needs `contents: read`\", so some access to the code is required.",
+        "a": "Ruled out because the page says \"Grant the least a job needs\", and a grant of every scope is the opposite."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#q3",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "page",
+      "stem": "A team wants Claude's review to stop a merge until findings are fixed. What does Code Review do?",
+      "options": {
+        "a": "It fails the check run whenever a finding is marked important by the review",
+        "b": "It completes its check run as neutral, so branch protection never blocks on it",
+        "c": "It approves the pull request when no finding is marked important at all",
+        "d": "It requests changes from the author on every single finding it posts"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules.\"",
+        "a": "Ruled out because the same sentence says the check run \"always completes with a neutral conclusion\", so it never fails.",
+        "c": "Ruled out because findings \"don't approve or block\" a pull request, and so an empty review is no approval.",
+        "d": "Ruled out because findings are posted \"as inline comments\", and Code Review \"so it advises, and a person merges\"."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#m1",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "module",
+      "stem": "A team wants its own rules about money handling and generated files applied only when pull requests are checked, and not in ordinary sessions. Which file holds them?",
+      "options": {
+        "a": "`CLAUDE.md`, which every session reads before its first prompt",
+        "b": "`REVIEW.md`, read by the agents that examine the diff",
+        "c": "`.claude/settings.json`, which the whole team commits to the repository",
+        "d": "`prompts/CHANGELOG.md`, which lists the prompt versions and their dates"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says `REVIEW.md` holds \"review-only instructions\", and that you use it \"to say what your team wants flagged, at what severity, and how findings are reported\".",
+        "a": "Ruled out because `CLAUDE.md` is \"shared project instructions that Claude Code uses for all tasks, not just reviews\".",
+        "c": "Ruled out because the first page gives that file \"Team permission rules, default model, hooks, plugins\", which are settings and not review instructions.",
+        "d": "Ruled out because the changelog explains versions of prompts, and the first page says it must have \"A changelog entry for every change\" and not review rules."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#m2",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "module",
+      "stem": "A prompt file is at version 1.2.0, and its changelog's newest heading says 1.1.0. What does a reviewer conclude?",
+      "options": {
+        "a": "The edit is unrecorded, because the record and the number disagree",
+        "b": "The prompt is older than its record, so it should be reverted at once",
+        "c": "The number is wrong, because the record always wins out in such a case",
+        "d": "Nothing, because the changelog is only for people to read"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The first page says the changelog's \"latest heading equals the file's version\", so a mismatch means a change nobody recorded.",
+        "b": "Ruled out because the rule is only a heading that is \"whose latest heading equals the file's version\", and it names no age comparison.",
+        "c": "Ruled out because the only rule is \"whose latest heading equals the file's version\", with no winner, so a reviewer asks for the missing entry.",
+        "d": "Ruled out because the page says \"A reviewer reading the pull request sees what changed and why\", which makes it part of the review."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#m3",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "module",
+      "stem": "A job must start only for a new note that names the bot, and a second note on the same issue must not stop work that is running. Which pair of settings fits?",
+      "options": {
+        "a": "A guard on the comment body, with `cancel-in-progress` set to false",
+        "b": "No guard on the comment body, with `cancel-in-progress` set to true",
+        "c": "A guard on the comment body, with `cancel-in-progress` set to true",
+        "d": "No guard on the comment body, with `cancel-in-progress` set to false"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says to guard the job with `if: contains(github.event.comment.body, '@claude')`, and for an implementation run to \"leave it `false` so that a second comment does not kill work in progress.\"",
+        "b": "Ruled out because \"Without the `if`, a runner starts for every comment in the repository\".",
+        "c": "Ruled out because `cancel-in-progress: true` suits a review: \"so a new push replaces the review of an outdated commit\".",
+        "d": "Ruled out because it lacks the guard, and \"Without the `if`, a runner starts for every comment in the repository\"."
+      }
+    },
+    {
+      "id": "02-ci-code-review-and-repository-events#m4",
+      "page": "02-ci-code-review-and-repository-events.md",
+      "scope": "module",
+      "stem": "A team must choose how to run a nightly dependency review that keeps working when nobody's laptop is on, with no workflow in the repository. Which option fits?",
+      "options": {
+        "a": "A hook in the settings file that fires after each edit",
+        "b": "A mention workflow that waits for someone to comment",
+        "c": "A routine with a scheduled trigger on Anthropic's cloud",
+        "d": "A subagent in the project folder that starts at midnight"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says a routine is \"a saved Claude Code configuration\", with a scheduled trigger, and it runs on cloud infrastructure so it keeps working \"while your laptop is closed\".",
+        "b": "Ruled out because \"its job starts only when the comment mentions the bot\", and the job here is nightly.",
+        "a": "Ruled out because the page lists \"Triggers are scheduled (hourly, nightly, weekly, or once)\" for routines, and a hook has no schedule and no open session.",
+        "d": "Ruled out because \"Triggers are scheduled (hourly, nightly, weekly, or once)\" belongs to a routine, and a subagent has no clock."
+      }
+    }
+  ]
+}

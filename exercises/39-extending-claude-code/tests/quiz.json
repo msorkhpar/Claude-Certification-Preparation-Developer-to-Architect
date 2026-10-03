@@ -1,0 +1,252 @@
+{
+  "module": "39-extending-claude-code",
+  "quizzes": [
+    {
+      "id": "01-skills-and-how-they-compare#q1",
+      "page": "01-skills-and-how-they-compare.md",
+      "scope": "page",
+      "stem": "A description reads only \"Release helper\", and Claude never loads that package when users ask for a changelog. What is the first fix?",
+      "options": {
+        "a": "Raise the tool grant so that the skill may run any shell command",
+        "b": "Move the folder into the enterprise location so it takes priority",
+        "c": "Add the value true on the model-invocation field in the frontmatter",
+        "d": "State what it does and when to use it, in everyday words"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says the description is \"What the skill does and when to use it. Claude uses this to decide when to apply the skill.\"",
+        "b": "Ruled out because location decides which skill wins when \"two skills share a name\", and has no bearing on whether Claude matches a request.",
+        "c": "Ruled out because the table says `true` \"stops Claude from starting it by itself\", which is the opposite of what the team wants.",
+        "a": "Ruled out because a tool grant is for \"Tools Claude may use without asking while the skill runs\", and a skill that is never loaded never runs."
+      }
+    },
+    {
+      "id": "01-skills-and-how-they-compare#q2",
+      "page": "01-skills-and-how-they-compare.md",
+      "scope": "page",
+      "stem": "A team requires that no agent ever pushes to the main branch. Which extension fits best?",
+      "options": {
+        "a": "A hook or a deny rule, because it always runs and cannot be skipped",
+        "b": "A line in the project memory file that forbids pushing to that branch",
+        "c": "A skill whose instructions tell Claude never to push to the main branch",
+        "d": "A subagent that reviews each command before Claude is allowed to run it"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"A rule that must never be broken belongs in a hook or a deny rule\", and a hook is \"a program that always runs\".",
+        "c": "Ruled out because \"a skill is instructions Claude may follow\".",
+        "b": "Ruled out because a memory file is guidance of the same kind, and the page says \"Persistent context loaded every conversation\" is for conventions and \"always do X\" rules.",
+        "d": "Ruled out because a subagent is \"An isolated context that returns summarised results\" for side tasks, and not a gate that every command must pass."
+      }
+    },
+    {
+      "id": "01-skills-and-how-they-compare#q3",
+      "page": "01-skills-and-how-they-compare.md",
+      "scope": "page",
+      "stem": "A skill tags a release and creates a GitHub release. Which frontmatter is right?",
+      "options": {
+        "a": "Automatic invocation on, with the whole Bash tool pre-approved",
+        "b": "Automatic invocation on, with the two command patterns pre-approved",
+        "c": "Automatic invocation off, with two command patterns pre-approved",
+        "d": "Automatic invocation off, with the whole Bash tool pre-approved"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says a task skill with side effects should set `disable-model-invocation: true`, and that `allowed-tools: Bash(git tag *) Bash(gh release create *)` \"approves two command families\".",
+        "a": "Ruled out because the page says bare `Bash` \"approves every shell command for that turn\".",
+        "b": "Ruled out because \"a person should start it\" when a skill has side effects.",
+        "d": "Ruled out because it keeps the person in control but the page says bare `Bash` \"turns a narrow skill into an open one\"."
+      }
+    },
+    {
+      "id": "02-subagents-and-hooks#q1",
+      "page": "02-subagents-and-hooks.md",
+      "scope": "page",
+      "stem": "A reviewer subagent's file has no `tools` line. What can it do?",
+      "options": {
+        "a": "Read only, because a review of code needs nothing more than reading it",
+        "b": "Use every tool of the session, including editing and running commands",
+        "c": "Nothing at all, because an empty list gives the subagent no tools to use",
+        "d": "Use only the tools that the main conversation allows without asking first"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"Omit it and the subagent inherits every tool\", and \"a reviewer with no `tools` line can edit files and run commands\".",
+        "a": "Ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: \"Bound a subagent by listing its tools.\"",
+        "c": "Ruled out because the table says \"Omit it and the subagent inherits every tool\", which is the opposite of none.",
+        "d": "Ruled out because a subagent has \"specific tool access, and independent permissions\", and an omitted list does not narrow it to the main conversation's pre-approvals."
+      }
+    },
+    {
+      "id": "02-subagents-and-hooks#q2",
+      "page": "02-subagents-and-hooks.md",
+      "scope": "page",
+      "stem": "A hook script is meant to stop `git push`. Which behaviour stops the call?",
+      "options": {
+        "a": "Printing a warning to standard output and exiting with code 1",
+        "b": "Exiting with code 0 after logging the command to a file",
+        "c": "Exiting with code 3 after writing a reason to standard error",
+        "d": "Exiting with code 2 with the reason written to standard error"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Exit 2: Claude Code blocks the action. Write a reason to stderr.\"",
+        "a": "Ruled out because with an exit code of 1 and plain-text output \"the action proceeds as a non-blocking error\", and a warning does not stop the call.",
+        "b": "Ruled out because \"Exit 0: no objection\", and a logging hook \"does not weaken a guard hook\" and does not block either.",
+        "c": "Ruled out because exit code 3 is an \"other exit code\", and the page says to \"Treat it as a bug in the hook, because it does not stop the call.\""
+      }
+    },
+    {
+      "id": "02-subagents-and-hooks#q3",
+      "page": "02-subagents-and-hooks.md",
+      "scope": "page",
+      "stem": "A team wants the learnings of a subagent to travel with the repository. Which memory choice fits?",
+      "options": {
+        "a": "The user scope, which lives in the home directory of each single person",
+        "b": "The project scope, whose directory is shareable via version control",
+        "c": "The local scope, which is kept out of version control on purpose here",
+        "d": "No scope applies, because memory is always private to a single machine"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The table says the `project` scope is for knowledge that is \"project-specific and shareable via version control\".",
+        "a": "Ruled out because the `user` scope is `~/.claude/agent-memory/<name>/`, for an agent that \"should remember across all projects\", in each person's home directory.",
+        "c": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\".",
+        "d": "Ruled out because the project scope's directory \"shareable via version control\" is the page's own counterexample, so not every memory is private."
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#q1",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "page",
+      "stem": "A plugin declares a dependency on `~2.1.0`, and the dependency's maintainer publishes 2.1.4 and then 2.2.0. Which version do the plugin's users receive?",
+      "options": {
+        "a": "2.1.4, because the range takes patch updates and not the 2.2 line",
+        "b": "2.2.0, because a range always follows the newest release that exists",
+        "c": "2.1.0, because a range freezes the first version that it matched once",
+        "d": "Neither, because ranges are resolved only for plugins that carry no version"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says with `~2.1.0` \"users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`.\"",
+        "b": "Ruled out because a pinned range does not follow the newest release: \"Without a version constraint, a dependency moves to each new release its marketplace publishes\".",
+        "c": "Ruled out because the dependency \"installs at the highest git tag that satisfies this range\", which is 2.1.4 and not the first match.",
+        "d": "Ruled out because \"resolution is by git tag\" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained."
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#q2",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "page",
+      "stem": "A team wants every contributor to receive a tool bundle without a manual install. Where does the configuration go?",
+      "options": {
+        "a": "The repository's own `.claude/settings.json`, naming a marketplace and an enabled entry",
+        "b": "Each person's home settings file, copied by hand from a wiki page of the team",
+        "c": "The manifest, which lists the people who should install the bundle on their machines",
+        "d": "The memory file, which names the bundle in a sentence for Claude to read each time"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says to set two keys in the repository's `.claude/settings.json`, so that the marketplace and the enabled plugin reach every contributor.",
+        "b": "Ruled out because hand copying is what the shared file replaces, and the page gives the repository's file as the way \"to give a repository's contributors a plugin without each of them installing it\".",
+        "c": "Ruled out because the manifest is \"a `plugin.json` file, called the manifest, that names the plugin\", and it lists dependencies and not people.",
+        "d": "Ruled out because the page says to \"set two keys in the repository's `.claude/settings.json`\", which is configuration and not a sentence in a memory file."
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#q3",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "page",
+      "stem": "An agent file shipped inside a plugin sets `permissionMode: bypassPermissions` to run quietly. What happens?",
+      "options": {
+        "a": "The plugin fails to load, because the loader rejects the whole file",
+        "b": "The agent skips every prompt, exactly as the value says it should",
+        "c": "The value is dropped at load time, because the loader skips such fields",
+        "d": "The agent asks once, then remembers the answer for the whole session"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"These fields are ignored when loading agents from a plugin.\"",
+        "b": "Ruled out because the fields are \"ignored when loading agents from a plugin\", so the agent keeps its normal prompts.",
+        "a": "Ruled out because \"These fields are ignored when loading agents from a plugin\", so the file still loads.",
+        "d": "Ruled out because no remembered approval is described, and the page names the fix: \"Ship the guard in `hooks/hooks.json`.\""
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#m1",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team needs one rule enforced for every command, with an explanation given to Claude, and the rule must hold in every project that installs their tooling. Which design fits?",
+      "options": {
+        "a": "A skill in each repository that tells Claude to avoid the action",
+        "b": "A hook in a plugin that blocks with exit code 2 and a reason",
+        "c": "A subagent in the plugin that reviews each command before it runs",
+        "d": "A line in each memory file that forbids the action by its name"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The hooks section gives \"deterministic control: certain actions always happen rather than relying on the LLM to choose to run them\", exit 2 blocks and \"Write a reason to stderr\", and a plugin carries the hook to every project that enables it.",
+        "a": "Ruled out because \"a skill is instructions Claude may follow\", and not a rule that holds.",
+        "c": "Ruled out because a subagent is \"An isolated context that returns summarised results\" and is not a gate for every command.",
+        "d": "Ruled out because a memory file holds \"Persistent context loaded every conversation\", which is guidance and not enforcement."
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#m2",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "module",
+      "stem": "One skill drafts release summaries and another tags and ships a release. Which pair of settings fits?",
+      "options": {
+        "a": "The first for a person alone, the second on automatic loading",
+        "b": "Both on automatic loading, so that Claude can finish unaided",
+        "c": "The first on automatic loading, the second for a person alone",
+        "d": "Both for a person alone, so that neither is ever loaded at all"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"A skill that writes release notes is harmless and Claude can start it when asked\", while a skill with side effects needs `disable-model-invocation: true`.",
+        "b": "Ruled out because for a skill with side effects \"a person should start it\".",
+        "a": "Ruled out because it reverses the safety, and the first sentence of the page's reasoning is \"A skill that writes release notes is harmless and Claude can start it when asked\".",
+        "d": "Ruled out because \"Claude loads it by itself when your request matches its description\", and the harmless skill gains from that."
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#m3",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A repository's `.claude/settings.json` registers a marketplace and enables a plugin, but a new contributor has not yet approved the folder. What happens?",
+      "options": {
+        "a": "The entries apply only to managed settings, never to a repository",
+        "b": "The plugin installs at once, because the file is in the repository",
+        "c": "A prompt appears for each plugin, listing its hooks and its scripts",
+        "d": "Claude Code ignores the entries without a message until trust is given"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says the entries \"apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message.\"",
+        "b": "Ruled out because trust comes first: \"A repository cannot install code on a machine that has not trusted it.\"",
+        "c": "Ruled out because the page says \"Claude Code ignores them without a message\", which describes no prompt.",
+        "a": "Ruled out because the page says \"the same two keys go in managed settings\" for a whole organisation, and the repository's file covers its own contributors."
+      }
+    },
+    {
+      "id": "03-plugins-sharing-and-the-practice#m4",
+      "page": "03-plugins-sharing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A subagent should review code and remember wording the team prefers, with that knowledge committed with the code. Which fields fit?",
+      "options": {
+        "a": "Every tool and the user memory scope",
+        "b": "Read-only tools and the project memory scope",
+        "c": "Read-only tools and the local memory scope",
+        "d": "Every tool and no memory field at all"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is \"shareable via version control\".",
+        "a": "Ruled out because \"Omit it and the subagent inherits every tool\", and the `user` scope lives in the home directory and is not committed.",
+        "c": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\".",
+        "d": "Ruled out because \"Omit it and the subagent inherits every tool\", and without `memory` the subagent keeps no knowledge across conversations."
+      }
+    }
+  ]
+}

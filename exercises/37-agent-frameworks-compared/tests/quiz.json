@@ -1,0 +1,157 @@
+{
+  "module": "37-agent-frameworks-compared",
+  "quizzes": [
+    {
+      "id": "01-three-families-of-agent-frameworks#q1",
+      "page": "01-three-families-of-agent-frameworks.md",
+      "scope": "page",
+      "stem": "A bank's loan flow must always check identity, then credit, then ask a person to approve, and an interrupted application must not repeat the credit check. Which style fits?",
+      "options": {
+        "a": "A single prompt, because the order is stated in the text of the call",
+        "b": "A model-driven loop, because the model picks each next step on its own",
+        "c": "A typed agent, because the loan is a record of fixed shape and size",
+        "d": "A graph, because each node saves state and resumes after a stop"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Checkpointers persist a thread's graph state as checkpoints\", and a resumed run \"repeats no earlier node\", so the credit check is not paid for twice.",
+        "b": "Ruled out because the table gives the next step to \"The model, at each turn\", and the loan order must always be fixed.",
+        "c": "Ruled out because a typed agent has \"Validated output\" but \"Types guard the edges of the model's freedom. They do not choose the route.\"",
+        "a": "Ruled out because a prompt keeps no state, and the page gives the graph, not the prompt, the job of resuming: \"the run resumes from the last checkpoint\"."
+      }
+    },
+    {
+      "id": "01-three-families-of-agent-frameworks#q2",
+      "page": "01-three-families-of-agent-frameworks.md",
+      "scope": "page",
+      "stem": "A team's agent receives a request type nobody planned for. Which style handles it with the least extra code?",
+      "options": {
+        "a": "A model-driven loop, since the model chooses its own steps",
+        "b": "A graph with a node written for every request type that may arrive",
+        "c": "A graph, since a missing edge falls back to the last node of the flow",
+        "d": "A fixed script, since the replies follow a template that was written"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says the model-driven route is \"whatever the model chooses, so the same code handles a case nobody planned for.\"",
+        "c": "Ruled out because \"a case you did not draw has no path\", and there is no fallback edge.",
+        "b": "Ruled out because the graph is for a process that is \"known and must be auditable\", and a node for every type is the elaborate logic the model-driven authors reject: \"elaborate orchestration logic, state machines, and predefined workflows\".",
+        "d": "Ruled out because a script has \"the other side of the same choice\" in full, and a request type nobody wrote down gets no handling."
+      }
+    },
+    {
+      "id": "01-three-families-of-agent-frameworks#q3",
+      "page": "01-three-families-of-agent-frameworks.md",
+      "scope": "page",
+      "stem": "A model-driven loop calls a tool again and again and never produces a final reply. What does the engineering post recommend?",
+      "options": {
+        "a": "A second model that repeats the same call for confirmation",
+        "b": "A larger context window, so that the loop can finish its work",
+        "c": "A stopping condition such as a maximum number of iterations",
+        "d": "A typed schema, which ends the loop when the data is valid"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The post lists \"stopping conditions (such as a maximum number of iterations) to maintain control.\"",
+        "b": "Ruled out because \"a loop that never ends must be cut off\", and a larger window does not give the loop an end.",
+        "a": "Ruled out because a repeat of the same call adds cost without a stop, and \"Agentic systems often trade latency and cost for better task performance\".",
+        "d": "Ruled out because a schema checks shape, and \"Validation proves the shape\", not that a loop has finished."
+      }
+    },
+    {
+      "id": "02-framework-or-sdk#q1",
+      "page": "02-framework-or-sdk.md",
+      "scope": "page",
+      "stem": "A team's feature is one model call that summarises a document, with retrieved passages added to the prompt. What does the engineering advice suggest?",
+      "options": {
+        "a": "A graph framework, so that the single call is saved as a checkpoint file",
+        "b": "Improving the lone request with in-context examples and a search step",
+        "c": "A managed agent, so that no code has to run inside the service itself",
+        "d": "A multi-agent system, so that one agent reviews the finished work of another agent"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The post says \"For many applications, however, optimizing single LLM calls with retrieval and in-context examples is usually enough.\"",
+        "a": "Ruled out because the page says a framework \"earns its place when the feature it brings is one you need\", and one call needs no checkpoint.",
+        "d": "Ruled out because the advice is \"finding the simplest solution possible, and only increasing complexity when needed.\"",
+        "c": "Ruled out because Managed Agents is chosen when \"The task is long-running or asynchronous\", and this is one short call."
+      }
+    },
+    {
+      "id": "02-framework-or-sdk#q2",
+      "page": "02-framework-or-sdk.md",
+      "scope": "page",
+      "stem": "A developer reports that a framework agent gives odd answers and that nobody can see the text sent to the model. Which cost of frameworks is this?",
+      "options": {
+        "a": "A licence fee that rises with every request the agent makes to a model",
+        "b": "A cap on the number of tools that one agent may hold at a time",
+        "c": "A duty to run the model on hardware that the team owns and operates",
+        "d": "Extra layers that obscure the underlying prompts and responses"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The post says frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug.\"",
+        "a": "Ruled out because the page lists what a framework hides and what it couples: \"Your state format, your tool definitions and your tests then follow the framework's releases\", and it names no fee.",
+        "b": "Ruled out because the page lists what a framework gives you, \"tool schemas and parsing, retries, tracing hooks\", and names no tool cap.",
+        "c": "Ruled out because \"Keeping the model call behind a thin function of your own limits the damage\", and the page sets no hardware duty."
+      }
+    },
+    {
+      "id": "02-framework-or-sdk#q3",
+      "page": "02-framework-or-sdk.md",
+      "scope": "page",
+      "stem": "A product must survive a restart and resume a long task, and the team does not want to operate the sandbox in which the code runs. Which option is the smallest that fits?",
+      "options": {
+        "a": "The Messages API, with a loop that the team writes and stores",
+        "b": "Managed Agents, with the session kept on Anthropic's side",
+        "c": "A graph framework, hosted and upgraded by the team itself",
+        "d": "The Claude Code CLI, started by a person every morning"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The table gives Managed Agents the task that is \"long-running or asynchronous\" for those who want \"no sandbox to run\", with the session stored by Anthropic.",
+        "a": "Ruled out because a loop of your own leaves \"The loop, the tools, the state\" and the sandbox to the team, which is more than the smallest option.",
+        "c": "Ruled out because a graph is chosen when you \"need its state, resume or typed output, and will pay in coupling\", and the team would still host it.",
+        "d": "Ruled out because the table row for Managed Agents reads \"The task is long-running or asynchronous and you want no sandbox to run\", and a person starting a CLI each morning is not a service that resumes."
+      }
+    },
+    {
+      "id": "02-framework-or-sdk#m1",
+      "page": "02-framework-or-sdk.md",
+      "scope": "module",
+      "stem": "A team must choose between a graph framework and a model-driven loop for a fixed approval chain that regulators audit. Which is better, and why?",
+      "options": {
+        "a": "The route written down in code, because it is open to inspection",
+        "b": "The loop, because the model reorders approvals to save time and effort",
+        "c": "The loop, because a model-driven route is easier to reproduce later",
+        "d": "The graph, because it removes the need for any tests of the flow itself"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The first page says a graph is for a process that is \"known and must be auditable\", with the next step decided \"You, in advance\".",
+        "b": "Ruled out because the table gives the next step to \"The model, at each turn\", and an approval chain must not be reordered.",
+        "c": "Ruled out because \"The route is whatever the model chooses\", and that is harder to reproduce, not easier.",
+        "d": "Ruled out because the page leaves the checks in place: \"Validation proves the shape.\""
+      }
+    },
+    {
+      "id": "02-framework-or-sdk#m2",
+      "page": "02-framework-or-sdk.md",
+      "scope": "module",
+      "stem": "A team adopts a framework and later wants to leave it. Which earlier decision would have made leaving cheap?",
+      "options": {
+        "a": "Copying the framework's source into the repository of the product",
+        "b": "Using the framework's internal types in every module of the code",
+        "c": "Keeping tools and the model call behind its own thin functions",
+        "d": "Storing the state in the private format that the framework defines"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"Keeping the model call behind a thin function of your own limits the damage\", and the trap advises \"Keep your tools and your model call behind your own functions\".",
+        "a": "Ruled out because the trap is \"Coupling the whole codebase to one framework\", and a copy of the source would tie the repository to one.",
+        "b": "Ruled out because internal types spread the same coupling: \"Your state format, your tool definitions and your tests then follow the framework's releases.\"",
+        "d": "Ruled out because a private state format is the first thing the page lists as following the releases: \"Your state format, your tool definitions and your tests\"."
+      }
+    }
+  ]
+}
