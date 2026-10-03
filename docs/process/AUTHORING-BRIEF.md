@@ -1,0 +1,66 @@
+# Authoring brief: what every writing batch does
+
+A writing batch takes a run of modules from the frozen outline to merged pages, examples, practices
+and quizzes. The batch's own brief names its modules and worktree; everything else is here.
+
+## Read first
+
+`CLAUDE.md`; `docs/IDEA.md`, `docs/EXAM-MAP.md`, `docs/COURSE-OUTLINE.md` (the batch's rows),
+`docs/VERSIONS.md` (pinned models and SDKs, sampling parameters), `docs/process/COURSE-PRODUCTION.md`,
+`docs/process/BOARD.md` (decisions), `docs/process/FEASIBILITY.md`, `docs/process/QUIZ-POLISH.md` (the
+patterns to avoid); `course/README.md` (markup); the merged modules as the model of a page, an example,
+a practice and a quiz; `harness/`; `tools/` and the latest `docs/process/batches/*-gates.sh`.
+
+## Sources
+
+Study every source for a module before writing it: the official Anthropic documentation, the official
+Academy course topics, the official exam guides, and the third-party guides and question sets in the
+source register outside the repository. A source whose licence permits copying may be adapted, with a
+credit line on the page; every other source is studied and never copied. Record what each page used in
+the batch's sources note in the register folder outside the repository, and create no other file
+outside the worktree. Web requests carry no personal data; nothing is signed into; no API key exists.
+
+## What a batch produces
+
+- **Pages:** level, exam codes, outcome, why it matters, the idea, examples, two or three traps, quiz;
+  every item of the module's Covers cell, to the depth an exam scenario needs. A product claim comes
+  from an official page read during the batch, and the page names the date and versions it was checked
+  on. Model output shown on a page is an official quotation or an exchange labelled illustrative.
+- **Examples:** projects under `examples/` that run offline against `harness/`, in Python and
+  TypeScript at least and in Java and Kotlin where the topic exists in them; the output on the page is
+  the container's output.
+- **Practices:** in Python, TypeScript, Java and Kotlin (Python and TypeScript only where the Agent SDK
+  is needed): statement, starter, tests mapped to case ids for the main ask and the edge cases, a
+  reference solution, at least two planted wrong solutions per language. Proved offline in the runner
+  image with the network off: the reference passes, the starter fails, every plant fails on an
+  assertion on its named case.
+- **Quizzes:** exam-style scenarios with one best answer and three plausible practitioner mistakes;
+  options parallel in form and similar in length; no stem word or giveaway synonym in the key; no lone
+  hedged, composite or absolute-free key; no key copied from a page sentence; each wrong option excluded
+  by a quoted passage that really excludes it; module questions combine pages; no duplicates.
+  `tools/check_quiz.py` enforces what it can.
+
+## Before hand-back
+
+1. Run one independent reader (read-only, fresh, strict, with a fact spot-check against official
+   pages), then one fix round on everything it marks weak or failing (board D14).
+2. Re-check every product claim the batch could not verify on an official page; correct it or remove
+   it.
+3. Write `docs/process/batches/<batch>-gates.sh`: quiz checker and its tests, quiz.json up to date,
+   examples, every practice in every language in one heavy-slot job, grading, coverage. It exits 0 after
+   the last edit and commit.
+
+## Rules of the house
+
+Every container or test run goes through the heavy-job slot, one at a time, never in the background,
+with its real exit status read; a refusal is waited out, never bypassed. Docker runs on the
+`desktop-linux` context with no host `/tmp` mounts, and scratch images and containers are removed. Commit
+messages end with the attribution line in `CLAUDE.md`'s convention; before each commit, check for
+personal data and for third-party names outside credit lines. Update the board's M4 to M6 lines and add
+a log line.
+
+## Hand-back
+
+Commits; pages, examples and practices per module; the per-language proof table; quiz counts; the
+reader's counts before and after the fix round; credit lines used; anything unverified; the gate
+command.
