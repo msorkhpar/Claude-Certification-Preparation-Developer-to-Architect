@@ -1,0 +1,110 @@
+{
+  "practice": "32-mcp-fundamentals/unit-01/practice-1",
+  "name": "notes",
+  "tests": {
+    "java": "NotesTest",
+    "kotlin": "NotesTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_client_can_save_a_note_find_it_and_read_it_back",
+      "typescript": "m1 a client can save a note find it and read it back",
+      "java": "m1_aClientCanSaveANoteFindItAndReadItBack",
+      "kotlin": "m1_aClientCanSaveANoteFindItAndReadItBack"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_server_declares_tools_resources_and_prompts_and_names_its_tools",
+      "typescript": "e1 the server declares tools resources and prompts and names its tools",
+      "java": "e1_theServerDeclaresToolsResourcesAndPromptsAndNamesItsTools",
+      "kotlin": "e1_theServerDeclaresToolsResourcesAndPromptsAndNamesItsTools"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_bad_input_comes_back_as_a_tool_error_the_model_can_read",
+      "typescript": "e2 bad input comes back as a tool error the model can read",
+      "java": "e2_badInputComesBackAsAToolErrorTheModelCanRead",
+      "kotlin": "e2_badInputComesBackAsAToolErrorTheModelCanRead"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_search_ignores_case_keeps_id_order_honours_the_limit_and_says_when_nothing_matches",
+      "typescript": "e3 search ignores case keeps id order honours the limit and says when nothing matches",
+      "java": "e3_searchIgnoresCaseKeepsIdOrderHonoursTheLimitAndSaysWhenNothingMatches",
+      "kotlin": "e3_searchIgnoresCaseKeepsIdOrderHonoursTheLimitAndSaysWhenNothingMatches"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_tool_annotations_tell_a_client_which_tool_only_reads",
+      "typescript": "e4 tool annotations tell a client which tool only reads",
+      "java": "e4_toolAnnotationsTellAClientWhichToolOnlyReads",
+      "kotlin": "e4_toolAnnotationsTellAClientWhichToolOnlyReads"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_resources_give_the_count_a_note_by_id_and_an_error_for_a_missing_one",
+      "typescript": "e5 resources give the count a note by id and an error for a missing one",
+      "java": "e5_resourcesGiveTheCountANoteByIdAndAnErrorForAMissingOne",
+      "kotlin": "e5_resourcesGiveTheCountANoteByIdAndAnErrorForAMissingOne"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_prompt_lists_the_notes_and_defaults_the_tone",
+      "typescript": "e6 the prompt lists the notes and defaults the tone",
+      "java": "e6_thePromptListsTheNotesAndDefaultsTheTone",
+      "kotlin": "e6_thePromptListsTheNotesAndDefaultsTheTone"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_ids_are_sequential_and_a_failed_call_does_not_use_one",
+      "typescript": "e7 ids are sequential and a failed call does not use one",
+      "java": "e7_idsAreSequentialAndAFailedCallDoesNotUseOne",
+      "kotlin": "e7_idsAreSequentialAndAFailedCallDoesNotUseOne"
+    }
+  },
+  "plants": {
+    "wrong-error-not-flagged": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "reports bad input as an ordinary result instead of a tool error"
+    },
+    "wrong-case-sensitive": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "matches the query only with the same letter case"
+    },
+    "wrong-no-limit": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "returns every hit and ignores the limit argument"
+    },
+    "wrong-read-only-unmarked": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "does not mark the search tool as read-only"
+    },
+    "wrong-plural": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "says 1 notes instead of 1 note"
+    },
+    "wrong-default-tone": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "uses another default tone when the client gives none"
+    },
+    "wrong-no-trim": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "keeps the spaces around a title and a text, so a blank one passes as given"
+    }
+  }
+}

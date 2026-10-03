@@ -7,7 +7,8 @@ W=$(pwd); NAME=$(echo "$PD" | tr '/' '_'); VARS="$*"
 mkdir -p "$W/.survey-out/gradle/home"
 case "$LANGX" in
   python|typescript)
-    docker --context desktop-linux run --rm --network none -v "$W/$PD/$LANGX:/work:ro" -v "$W/.survey-out:/o" -w /work --entrypoint sh "$IMG" -c \
+    docker --context desktop-linux run --rm --network none -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONPATH=/w/.survey-out/py/site:/w -e NODE_PATH=/node_modules \
+      -v "$W:/w:ro" -v "$W/.survey-out/npm/off/node_modules:/node_modules:ro" -v "$W/$PD/$LANGX:/work:ro" -v "$W/.survey-out:/o" -w /work --entrypoint sh "$IMG" -c \
       "for v in $VARS; do ./run.sh \$v > /o/$NAME-$LANGX-\$v.txt 2>&1; echo rc=\$? >> /o/$NAME-$LANGX-\$v.txt; done" ;;
   java)
     mkdir -p "$W/$PD/.build-java"

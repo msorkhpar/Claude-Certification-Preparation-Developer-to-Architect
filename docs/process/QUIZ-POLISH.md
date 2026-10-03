@@ -27,3 +27,11 @@ distractors, repeated themes: anonymise-first, cheap-tier escalation, faster tie
 - mock exam: x2, x3, x4, x5, x7, x8, x11, x16, x20, x24, x26, x28, x30
 
 - 18-model-choice-cost-and-migration, 19-thinking-effort-and-speed: the key is the longest option in 31% and 40% of the module questions (checker warnings); rebalance option lengths.
+
+- Level 2 modules 30 to 35 (independent reader: 29 pass, 33 weak, 4 fail of 66; the four fails were fixed in the batch and not re-read). Remaining WEAK items, with the recurring reasons (strawman distractors with the key a near-verbatim page sentence; a key that is the only composite, colon, hedged or negated option, or the longest):
+  - 30: 01#q1, 02#q1 (stem names no model window), 02#q2, 02#q3, 02#m2, 02#m4
+  - 31: 01#q1, 02#q1, 02#q3, 02#m2, 02#m3, 02#m4
+  - 32: 01#q1, 01#q2, 02#q3, 03#q2, 03#q3, 03#m3
+  - 33: 02#q2, 02#q3, 02#m1, 02#m3
+  - 34: 01#q1, 01#q2, 02#q2, 02#m1, 02#m2, 02#m3
+  - 35: 02#q1, 02#q2, 03#q3, 03#m2; the 02#q3 answer (raw exception message) differs from the Python MCP SDK behaviour on the module 32 page: different products, say so on the page at the next pass

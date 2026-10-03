@@ -2,9 +2,9 @@
 # Offline install of the pinned SDKs from the local caches that the fetch scripts filled (idempotent).
 # usage: tools/l2_prepare_caches.sh <runner image id>     (cwd = repository root; runs with --network none)
 IMG=$1; W=$(pwd)
-if [ ! -d "$W/.survey-out/py/site/mcp" ]; then
+if [ ! -d "$W/.survey-out/py/site/mcp" ] || [ ! -d "$W/.survey-out/py/site/claude_agent_sdk" ]; then
   docker --context desktop-linux run --rm --network none --user 1000:1000 -e HOME=/work/home -v "$W/.survey-out/py:/work" -w /work --entrypoint sh "$IMG" -c \
-    'mkdir -p home && python3 -m pip install --no-index --find-links wheelhouse --target site anthropic==1.11.0 mcp==2.2.0 pydantic==2.13.5 2>&1 | tail -1' || exit 1
+    'mkdir -p home && python3 -m pip install --no-index --find-links wheelhouse --target site anthropic==1.11.0 mcp==2.2.0 claude-agent-sdk==0.2.163 pydantic==2.13.5 2>&1 | tail -1' || exit 1
 fi
 if [ ! -d "$W/.survey-out/npm/off/node_modules/@anthropic-ai/sdk" ]; then
   docker --context desktop-linux run --rm --network none --user 1000:1000 -e HOME=/work/home -v "$W/.survey-out/npm:/work" -w /work --entrypoint sh "$IMG" -c \

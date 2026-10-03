@@ -1,0 +1,195 @@
+{
+  "module": "31-computer-use",
+  "quizzes": [
+    {
+      "id": "01-the-toolset-the-loop-and-scaling#q1",
+      "page": "01-the-toolset-the-loop-and-scaling.md",
+      "scope": "page",
+      "stem": "A team adds the computer use toolset to a request and expects Claude to press keys on the machine. Which part performs the keystroke?",
+      "options": {
+        "a": "Claude itself, through a remote link that the toolset opens",
+        "b": "An Anthropic server that replays the call on the desktop",
+        "c": "The beta header on the request, which enables key presses",
+        "d": "Your own program, inside an environment that you set up"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says the toolset \"gives Claude 17 member tools such as screenshot, left_click, type, and zoom, and your application runs every call in an environment you control.\"",
+        "a": "Ruled out because the documentation describes the loop as one where the application translates the calls, and Claude \"never touches the machine\" in this design.",
+        "b": "Ruled out because \"Your application receives the tool use requests, translates them into actions in your computing environment\", and no Anthropic server replays them.",
+        "c": "Ruled out because \"The request needs no beta header.\""
+      }
+    },
+    {
+      "id": "01-the-toolset-the-loop-and-scaling#q2",
+      "page": "01-the-toolset-the-loop-and-scaling.md",
+      "scope": "page",
+      "stem": "A single reply from Claude contains a click, a text entry and a screenshot request, and the click fails. What should the application send back for the last two calls?",
+      "options": {
+        "a": "Error results with the fixed halt wording, and neither action run",
+        "b": "The screenshot for the last call and an error for the text entry",
+        "c": "Nothing for them, since the batch is abandoned after a failure",
+        "d": "Normal results for both, because the earlier failure does not matter"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"if one fails, don't run the rest\", and that every later action gets `is_error: true` with exactly the text `Not executed: an earlier computer action in this turn failed.`",
+        "d": "Ruled out because \"Later actions depend on earlier ones, because the type enters text into whatever the click focused.\"",
+        "b": "Ruled out because a screenshot after a failed click would run against a screen that no longer looks as expected, and \"if one fails, don't run the rest\".",
+        "c": "Ruled out because leaving a block unanswered is an invalid request, \"so an agent loop that reads only the first block fails on its next call\"."
+      }
+    },
+    {
+      "id": "01-the-toolset-the-loop-and-scaling#q3",
+      "page": "01-the-toolset-the-loop-and-scaling.md",
+      "scope": "page",
+      "stem": "The application shrinks every screenshot to half its size before returning it. Claude replies with a click at a spot in the shrunken image. What must the application do before clicking?",
+      "options": {
+        "a": "Click exactly where Claude said, since the toolset converts coordinates",
+        "b": "Treat the numbers as relative to the last zoomed region",
+        "c": "Scale the position back up by the factor it used, onto the real display",
+        "d": "Give the toolset the true display size so that the API scales for you"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page quotes the documentation: \"If you scale screenshots down before returning them, scale Claude's coordinates back up before applying them to the real display.\"",
+        "a": "Ruled out because \"coordinates are always in the pixel space of the screenshots you return\", which is the shrunken picture here.",
+        "b": "Ruled out because after a zoom Claude \"still expresses coordinates in the full screenshot's space, never relative to the zoomed image\".",
+        "d": "Ruled out because \"the toolset takes no display dimensions and the API doesn't downscale for you\"."
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#q1",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "page",
+      "stem": "An agent browses supplier websites in a container that holds the team's admin password, so that it can log in to portals. A hidden line on one page tells the agent to send the password to an outside address. Which precaution from the documentation addresses this exposure?",
+      "options": {
+        "a": "Rely on the classifiers alone, since they replace the other precautions",
+        "b": "Keep secrets away from the machine and allow only listed destinations",
+        "c": "Use a larger screen so that hidden text is displayed more clearly",
+        "d": "Add a line to the prompt that tells Claude to ignore text on web pages"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page lists two precautions for this: \"Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft\", and \"Limiting internet access to an allowlist of domains to reduce exposure to malicious content.\"",
+        "a": "Ruled out because \"The precautions above remain important even with these classifiers in place.\"",
+        "d": "Ruled out because \"Claude will follow commands found in content even when they conflict with your instructions\", so a line in the prompt is not a control.",
+        "c": "Ruled out because the commands may be \"instructions embedded in webpages or images\", and a larger screen only shows them better."
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#q2",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "page",
+      "stem": "After many turns, a loop that keeps every screenshot starts to fail. What does the documentation give as the reason?",
+      "options": {
+        "a": "The API rejects any conversation that holds more than ten screenshots in total",
+        "b": "Every screenshot uses up a unit of a daily quota that the toolset enforces",
+        "c": "Claude deletes old screenshots after three turns to save space on its side",
+        "d": "A request holding over twenty pictures puts a stricter limit on all of them"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page quotes the documentation: \"Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit.\"",
+        "a": "Ruled out because the limit is \"more than 20 images\" in a single request, not ten in a conversation.",
+        "b": "Ruled out because \"Pricing follows the standard tool use pricing\", with no quota unit per screenshot.",
+        "c": "Ruled out because \"All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment\", so the application holds and prunes them, not Claude."
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#q3",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "page",
+      "stem": "A loop on Claude Sonnet 5.5 keeps growing its context with screenshots, and an engineer proposes dropping the oldest one each turn on the client. What does the documentation advise?",
+      "options": {
+        "a": "Drop one every turn, which keeps the cached prefix byte-identical",
+        "b": "Resize to 2000 px or less per side and let the server clear earlier results",
+        "c": "Keep the whole history, because only the first screenshot counts",
+        "d": "Remove them in groups of three on the client, with no other side effects"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says the documentation prefers resizing screenshots to \"2000 px or less\" per side and server-side tool result clearing, which drops old results from the context.",
+        "a": "Ruled out because \"Dropping a screenshot every turn changes the prefix every turn and invalidates the cache.\"",
+        "d": "Ruled out because removing an earlier screenshot \"invalidates every later thinking block in every request that still carries those turns\".",
+        "c": "Ruled out because every image in a request over 20 images \"is held to a stricter per-side limit\", not only the later ones."
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#m1",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A migration moves a working integration from Claude Opus 4.6 to Claude Sonnet 5.5 on the Claude API. What changes in the tools array?",
+      "options": {
+        "a": "The old entry stays, and the new model accepts it unchanged",
+        "b": "A single entry replaces the earlier definition, with no beta header",
+        "c": "A beta header is added so that the new toolset can be enabled",
+        "d": "The entry gains width and height fields that match the screen"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The first page says \"Claude 5.5 and later models support computer use only through this toolset\" and that \"The request needs no beta header.\"",
+        "a": "Ruled out because \"Claude 5.5 and later models support computer use only through this toolset\", so the old entry does not carry over.",
+        "d": "Ruled out because the entry rejects the display fields, and \"coordinates are always in the pixel space of the screenshots you return\".",
+        "c": "Ruled out because \"The request needs no beta header.\""
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#m2",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A payment form appears in the middle of a batch that the app has already started. Where must the check by a person sit?",
+      "options": {
+        "a": "Ahead of every single block, since one turn finishes several steps",
+        "b": "Only at the start of the task, when the user's request arrives",
+        "c": "Never, because classifiers steer the model away from unsafe clicks",
+        "d": "Once, after every block has run and the screen has been captured"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The first page says that \"a batch can finish a multistep action inside one turn\", so the check goes before each block runs.",
+        "d": "Ruled out because the page says to \"make that check before each block runs\", and a check after the batch comes too late.",
+        "b": "Ruled out because the documentation asks for \"Asking a human to confirm decisions that might result in meaningful real-world consequences\", and a payment appears at a point the first request never named.",
+        "c": "Ruled out because the classifier layer is a second one: \"That layer is not a replacement\"."
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#m3",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "module",
+      "stem": "An application sizes screenshots with the rule of the practice, on a model of the high-resolution tier. What is the effect?",
+      "options": {
+        "a": "It works everywhere, but finer detail that the larger budget allows is lost",
+        "b": "Coordinates from Claude must now be multiplied instead of divided",
+        "c": "The tier needs a beta header, so requests without it fail",
+        "d": "The API rejects the screenshots, since they fall below a minimum size"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The first page says the rule of the practice is \"safe on every model\", and \"it costs detail on a high-resolution model\".",
+        "d": "Ruled out because the rule \"is safe on every model\", and the page names no minimum size.",
+        "b": "Ruled out because \"scale Claude's coordinates back up before applying them to the real display\" holds for any scale.",
+        "c": "Ruled out because \"The request needs no beta header.\""
+      }
+    },
+    {
+      "id": "02-safety-sandboxing-and-the-practice#m4",
+      "page": "02-safety-sandboxing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A compliance team asks where the screenshots from a computer use session are kept. What is the documented answer?",
+      "options": {
+        "a": "In a vault that Anthropic holds for every session by default",
+        "b": "In the Files API, where the workspace can read them later",
+        "c": "In the customer's own environment, and not at Anthropic",
+        "d": "Nowhere, since screenshots are deleted as soon as Claude answers"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The second page quotes the documentation: \"All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment, not by Anthropic.\"",
+        "a": "Ruled out because \"Anthropic processes the images and action requests in real time as part of the API call\".",
+        "b": "Ruled out because \"Computer use is a client-side tool.\"",
+        "d": "Ruled out because the documentation says \"Always carefully review and verify Claude's computer use actions and logs\", which needs logs to exist."
+      }
+    }
+  ]
+}
