@@ -1,0 +1,138 @@
+{
+  "module": "52-designing-tool-interfaces",
+  "quizzes": [
+    {
+      "id": "01-descriptions-names-and-boundaries#q1",
+      "page": "01-descriptions-names-and-boundaries.md",
+      "scope": "page",
+      "stem": "Logs show an agent often calls `get_customer` when users ask about orders, instead of `lookup_order`. Each tool has a one-line summary (“Retrieves customer information”, “Retrieves order details”) and accepts similar identifiers. What is the best first step?",
+      "options": {
+        "a": "Rewrite both texts with input shapes, sample requests and where each one stops",
+        "b": "Add five to eight worked examples of order requests to the system prompt",
+        "c": "Put a layer before each turn that picks the tool by keywords and id patterns",
+        "d": "Merge both into a single `lookup_entity` tool that works out which backend to ask"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The cause is thin descriptions, and the first fix is to make each say what it takes and where it stops.",
+        "b": "Ruled out because worked examples in the prompt \"leave the descriptions as thin as they were\" and cost tokens on every request.",
+        "c": "Ruled out because \"a routing layer bypasses the model's own reading of the request\" and is a component to build.",
+        "d": "Ruled out because merging \"is a legitimate design but a larger change than a first step needs\"."
+      }
+    },
+    {
+      "id": "01-descriptions-names-and-boundaries#q2",
+      "page": "01-descriptions-names-and-boundaries.md",
+      "scope": "page",
+      "stem": "Since the team added the sentence \"Always check the customer's account first.\" to an agent's prompt, it calls `get_customer` before every order question, although the `lookup_order` description is clear. Which change most directly removes the unwanted pull?",
+      "options": {
+        "a": "Add a third tool that wraps both lookups behind one name",
+        "b": "Add a routing layer in front of the model for order questions",
+        "c": "Rephrase that rule so that no keyword ties it to one function",
+        "d": "Cut each description down to a single sentence"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The keyword in the rule pulls the choice, so the rule is what to change.",
+        "b": "Ruled out because a routing layer \"bypasses the model's own reading of the request\" and leaves the prompt as it was.",
+        "a": "Ruled out because a wrapper adds a third name to choose from, and \"More tools don't always lead to better outcomes.\"",
+        "d": "Ruled out because the documentation says \"Aim for at least 3–4 sentences for each tool description\", and a shorter text separates the tools less."
+      }
+    },
+    {
+      "id": "02-results-annotations-large-tool-sets-and-the-practice#q1",
+      "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
+      "scope": "page",
+      "stem": "A `search_orders` tool returns every match, sometimes thousands of rows, and fills the context before the agent can act. What change helps most?",
+      "options": {
+        "a": "Send all rows, with a request that the model ignore the extras",
+        "b": "Serve one page with a cursor and a note on narrowing the search",
+        "c": "Cut the list at a fixed length without any message",
+        "d": "Wait for larger context windows, which will remove the problem"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A page with a cursor bounds the result, and the note tells the agent how to go on.",
+        "a": "Ruled out because \"Bloated responses waste context and make it harder for Claude to extract what matters.\"",
+        "c": "Ruled out because \"If you choose to truncate responses, be sure to steer agents with helpful instructions.\"",
+        "d": "Ruled out because the article expects \"the need for context-efficient tools to remain\"."
+      }
+    },
+    {
+      "id": "02-results-annotations-large-tool-sets-and-the-practice#q2",
+      "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
+      "scope": "page",
+      "stem": "A `find_documents` tool answers with the sentence \"Found these documents: Maintenance Schedule, Lab Access Plan.\" The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?",
+      "options": {
+        "a": "Return each hit with a stable identifier and the fields the following step needs",
+        "b": "Add a prompt rule that tells the model to derive each id from the title it was shown",
+        "c": "Return every stored field of each hit, so that nothing is missing",
+        "d": "Lengthen the sentence, describing each document in more prose"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The tool should hand the next step a real identifier, in a result trimmed to what that step needs.",
+        "b": "Ruled out because the documentation asks the tool to \"Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references\", not the model to reconstruct them.",
+        "c": "Ruled out because a result should \"include only the fields Claude needs to reason about its next step\".",
+        "d": "Ruled out because more prose adds length and no handle: \"Bloated responses waste context and make it harder for Claude to extract what matters.\""
+      }
+    },
+    {
+      "id": "02-results-annotations-large-tool-sets-and-the-practice#m1",
+      "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that look up customers and orders, issue refunds and escalate to a person. Over a week of logs it repeatedly picks a tool that is unable to serve the request, although the system prompt was reworded three times. What does this indicate?",
+      "options": {
+        "a": "The tool list is too short, so more tools should be added to cover cases",
+        "b": "The model needs more instructions about tools, so the prompt should grow",
+        "c": "The texts cannot separate the options, so the surface needs redesign",
+        "d": "The tools are served by several services, which makes selection unstable"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault.",
+        "b": "Ruled out because more instructions can pull the wrong way: an instruction \"contains a keyword that now pulls every order question toward\" one tool, over the descriptions.",
+        "a": "Ruled out because the article warns that \"Too many tools or overlapping tools can also distract agents from pursuing efficient strategies.\"",
+        "d": "Ruled out because where a tool is served is not a selection fault: the choice runs on \"a name, a description and a schema\"."
+      }
+    },
+    {
+      "id": "02-results-annotations-large-tool-sets-and-the-practice#m2",
+      "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?",
+      "options": {
+        "a": "Give both agents the same pair, with a written rule to prefer the first",
+        "b": "Rename one for pages fetched online, with a text that covers only those",
+        "c": "Remove the descriptions entirely, so the names alone decide the choice",
+        "d": "Ask each agent to explain its reasoning in a parameter of the call"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A web-specific name and description removes the overlap at its source.",
+        "a": "Ruled out because a preference rule outside the descriptions is the kind of nudge that \"contains a keyword that now pulls every order question toward\" one tool, instead of the text the model reads.",
+        "c": "Ruled out because the description is where the model learns \"When it should be used (and when it shouldn't)\".",
+        "d": "Ruled out because \"A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal.\""
+      }
+    },
+    {
+      "id": "02-results-annotations-large-tool-sets-and-the-practice#m3",
+      "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. It uses one MCP server with eight tools whose schemas take about 3% of the context window, and the team sets `ENABLE_TOOL_SEARCH=auto`. What does the SDK do?",
+      "options": {
+        "a": "Loads all of them at the start, as they are under the activation level",
+        "b": "Defers all eight and loads them on demand, since the mode is enabled",
+        "c": "Defers the three least used tools and keeps the rest loaded at the start",
+        "d": "Defers all but the tools that the first prompt happens to name"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Under `auto` the point is 10% of the window, and below it everything loads at the start.",
+        "b": "Ruled out because \"Below that, the SDK loads every tool definition into context upfront.\"",
+        "c": "Ruled out because the rule gives no partial deferral, and \"Below that, the SDK loads every tool definition into context upfront.\"",
+        "d": "Ruled out because the choice turns on the size of the definitions, not on the prompt: \"When the total reaches 10% of the window, tool search activates.\""
+      }
+    }
+  ]
+}

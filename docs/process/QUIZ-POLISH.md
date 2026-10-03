@@ -61,3 +61,12 @@ distractors, repeated themes: anonymise-first, cheap-tier escalation, faster tie
   - 50: 01#q2 (key is the longest and the only one with three steps), 02#q2 (the whole-change diff in two options is ruled out by no passage), 02#m2 (key is the longest; the rule-out of d does not address drift), 02#m3 (the page says that neither source covers long files; mark it practice-only)
   - The key letters follow the same sequence in every module, as in earlier levels: the balancing tool restarts for each module; vary the start for each module at the next pass.
 
+- Level 3 modules 51 to 56 (independent reader: 15 pass, 24 weak, 4 fail of 43; the four fails were replaced, five weak items were reworded, and the replacements were re-read twice: first pass 0 pass, 5 weak, 2 fail of 7; second pass of the 7 changed items 6 pass, 1 weak, 0 fail; the reader's fact findings were fixed in the batch). Remaining WEAK items, with the recurring reasons (distractors that are near strawmen, a key that is the longest or the only list-shaped option, a key that rests on the course's own design and not on a documented rule, a stem that states the rule its key applies):
+  - 51: 01#q2, 02#m1, 02#m3
+  - 52: 01#q2, 02#q1, 02#m1, 02#m2
+  - 53: 01#q1, 02#q1, 02#m2, 02#m3 (near the scenario of 15 02#q2)
+  - 54: 02#q2 (the course's design), 02#m1, 02#m2, 02#m3
+  - 55: 01#q2 (the exam's two-scope answer would be user scope; tighten option c), 02#q1, 02#q2 (near rb-069), 02#q3, 02#m2
+  - 56: 02#m1, 02#m3
+  - The key letters of modules 51 and 52 no longer share one sequence; vary the start of the sequence per module at the next pass.
+

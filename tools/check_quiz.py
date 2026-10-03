@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the quizzes of Levels 1 to 3 (modules 1 to 50 so far): pages agree with quiz.json, shape and wording rules hold.
+"""Check the quizzes of Levels 1 to 3 (every module so far): pages agree with quiz.json, shape and wording rules hold.
 
 Rules (CLAUDE.md quiz rules that a script can check):
   - every question has four options a-d and a key among them;
@@ -363,12 +363,12 @@ def check_module(folder):
 
 
 def main(argv):
-    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[1-4][0-9]|50)-", p.name))
+    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[1-9][0-9])-", p.name))
     if argv:
         folders = [f for f in folders if any(f.name.startswith(a) for a in argv)]
     total = 0
     items = {}
-    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[1-4][0-9]|50)-", p.name)):
+    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[1-9][0-9])-", p.name)):
         for pg in sorted(f.glob("*.md")):
             for kind, questions, keys in parse_page_quizzes(pg.read_text()):
                 for n, ((stem, opts), key) in enumerate(zip(questions, keys), start=1):

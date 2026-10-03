@@ -1,0 +1,165 @@
+{
+  "practice": "56-the-built-in-tools/unit-01/practice-1",
+  "name": "explorer_setup",
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_permission_rules_let_an_explorer_read_search_and_take_notes_but_not_change_the_source",
+      "typescript": "m1 the permission rules let an explorer read search and take notes but not change the source"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_read_rule_protects_secrets_from_reading_searching_and_writing",
+      "typescript": "e1 a read rule protects secrets from reading searching and writing"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_only_rule_forms_that_are_consulted_are_used_and_no_whole_tool_that_changes_things_is_allowed",
+      "typescript": "e2 only rule forms that are consulted are used and no whole tool that changes things is allowed"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_explorer_agent_reads_and_searches_and_says_when_to_use_it",
+      "typescript": "e3 the explorer agent reads and searches and says when to use it"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_sdk_options_make_the_search_tools_available_and_remove_the_tools_that_change_things",
+      "typescript": "e4 the sdk options make the search tools available and remove the tools that change things"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_exploration_plan_starts_with_a_search_then_reads_and_never_reads_everything_first",
+      "typescript": "e5 the exploration plan starts with a search then reads and never reads everything first"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_edit_fallback_widens_the_anchor_then_replaces_all_then_rewrites_the_file",
+      "typescript": "e6 the edit fallback widens the anchor then replaces all then rewrites the file"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e7 no file holds a personal path an address or a key"
+    }
+  },
+  "plants": {
+    "wrong-no-src-deny": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "drops the denial of edits under src"
+    },
+    "wrong-bash-bare": {
+      "caught_by": [
+        "m1",
+        "e2"
+      ],
+      "defect": "allows the whole Bash tool instead of read-only git patterns"
+    },
+    "wrong-notes-everywhere": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "allows edits to every path instead of notes only"
+    },
+    "wrong-write-rule": {
+      "caught_by": [
+        "m1",
+        "e2"
+      ],
+      "defect": "writes the notes rule for the Write tool, whose path rules are never matched"
+    },
+    "wrong-no-env-deny": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "drops the denial of reading the environment file"
+    },
+    "wrong-grep-rule": {
+      "caught_by": [
+        "e1",
+        "e2"
+      ],
+      "defect": "writes the secrets rule for Grep instead of Read"
+    },
+    "wrong-agent-edit": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "gives the explorer the Edit tool"
+    },
+    "wrong-agent-bash": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "gives the explorer the Bash tool"
+    },
+    "wrong-agent-no-use-when": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the when-to-use sentence out of the description"
+    },
+    "wrong-agent-unbounded": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the turn limit out of the agent"
+    },
+    "wrong-options-no-search": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "lists only Read in tools, so the search tools are missing"
+    },
+    "wrong-options-allow-bash": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "pre-approves Bash in allowedTools"
+    },
+    "wrong-options-no-disallow": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "removes only Bash and leaves Edit and Write in the context"
+    },
+    "wrong-plan-read-first": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "reads the entry points before any search"
+    },
+    "wrong-plan-read-all": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "starts by reading every file"
+    },
+    "wrong-no-export-step": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "traces usage by function name without listing exported names"
+    },
+    "wrong-fallback-rewrite-first": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "rewrites the whole file before widening the anchor"
+    },
+    "wrong-fallback-no-replace-all": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves replace_all out of the remedies"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes a personal home path into the plan"
+    }
+  }
+}

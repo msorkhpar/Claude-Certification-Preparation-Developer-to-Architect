@@ -1,0 +1,138 @@
+{
+  "module": "54-distributing-tools-across-agents",
+  "quizzes": [
+    {
+      "id": "01-scoped-tool-sets-per-agent#q1",
+      "page": "01-scoped-tool-sets-per-agent.md",
+      "scope": "page",
+      "stem": "A synthesis subagent often needs to confirm a date or a name while it writes. Each time it returns control to the coordinator, which calls the search subagent and then the synthesis subagent again, and latency has grown by about 40 percent. Most checks are simple lookups and a few need real investigation. What is the best design?",
+      "options": {
+        "a": "Give it a small verifier tool for the quick cases and route the hard ones through the hub",
+        "b": "Let the synthesis subagent collect every check and return them in one batch at the end",
+        "c": "Give the synthesis subagent each of the search tools so that it can answer any check itself",
+        "d": "Have the search subagent save extra context around each source in case a check comes up"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A narrow tool serves the frequent case and the coordinator keeps the rare one.",
+        "b": "Ruled out because \"Waiting to hand back all the checks at the end blocks later steps that depend on earlier verified facts\".",
+        "c": "Ruled out because \"Giving the synthesis agent every search tool over-provisions it and brings back the misuse\".",
+        "d": "Ruled out because \"Speculative caching cannot reliably predict what the synthesis agent will need to check\"."
+      }
+    },
+    {
+      "id": "01-scoped-tool-sets-per-agent#q2",
+      "page": "01-scoped-tool-sets-per-agent.md",
+      "scope": "page",
+      "stem": "An analysis subagent holds a general `fetch_url` tool, and it sometimes fetches pages that have nothing to do with the documents it was given. Which change fits best?",
+      "options": {
+        "a": "Add a sentence to its prompt saying that only links to the supplied files may be fetched",
+        "b": "Swap it for a loader that takes only the job's links and refuses the rest with a reason",
+        "c": "Take the tool away and have the coordinator paste each file's text into the brief by hand",
+        "d": "Give it a second tool that reports the host of each link before the fetch is made"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A constraint inside the tool holds whatever the model decides.",
+        "a": "Ruled out because \"an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use\".",
+        "c": "Ruled out because \"Taking a tool away is not the fix when the role really needs the capability\".",
+        "d": "Ruled out because \"adding a tool to describe the first adds to the list and restricts nothing\"."
+      }
+    },
+    {
+      "id": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice#q1",
+      "page": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "scope": "page",
+      "stem": "To force a first tool on a model that rejects forcing, a team offers only that tool in the first request and the full list in every later one. Which cost does the first change carry?",
+      "options": {
+        "a": "Only the message blocks are processed again, as for any change of tool choice",
+        "b": "Nothing is processed again, since definitions that are removed stay cached",
+        "c": "Only the system prompt is processed again, because it sits above the messages",
+        "d": "The whole cached prefix is processed again, since the definitions differ"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Changing the definitions changes the first layer of the cache, and every layer after it.",
+        "a": "Ruled out because that holds only for the choice: \"Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache\".",
+        "b": "is ruled out for the same reason, since the list is part of the cached prefix: \"Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache\".",
+        "c": "Ruled out because the layers cascade downward: \"Changes at each level invalidate that level and all subsequent levels.\""
+      }
+    },
+    {
+      "id": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice#q2",
+      "page": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "scope": "page",
+      "stem": "A loop on a model that rejects forced tool use offers one tool with automatic choice, and a reply comes back as plain text with no tool call. What should the loop do?",
+      "options": {
+        "a": "Accept the text as the answer, since the model decided that it needed no tool",
+        "b": "Resend the request with `any` as the choice so that the model has to call something",
+        "c": "Treat it as a miss, ask once more, and hand the case to a person if it recurs",
+        "d": "Keep the same request going in a loop until the turn limit ends the run"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A missed call is a miss, and the loop handles it.",
+        "a": "Ruled out because \"A reply of text only, when a call was required, is a miss\".",
+        "b": "Ruled out because the parameter is refused there: \"`any` and `tool` return a 400 error\".",
+        "d": "Ruled out because \"Looping until the turn limit turns a missed call into a run that ends with nothing\"."
+      }
+    },
+    {
+      "id": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice#m1",
+      "page": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The tool that closes a customer's account carries a description that warns the model to use it carefully. What should actually limit it?",
+      "options": {
+        "a": "A longer warning in the description, with an example of when not to call it",
+        "b": "An extra required parameter in which the model states why it is calling",
+        "c": "A place at the end of the tool list, where the model is less likely to pick it",
+        "d": "Authorisation and scope enforced in code, whatever the caller asks"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A limit that the model cannot talk its way around lives in code.",
+        "a": "Ruled out because \"an instruction not to use a tool is a request\".",
+        "b": "Ruled out because a field in which the model states its reason \"is a claim by the model, not a check\".",
+        "c": "Ruled out because \"the place of a tool in the list is not a limit on what it can do\"."
+      }
+    },
+    {
+      "id": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice#m2",
+      "page": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. Refunds cannot be undone, the policy cap is 500, and every refund needs a person's approval. A call for 450 arrives and nobody has approved it. What should the tool layer return?",
+      "options": {
+        "a": "A result that runs the refund, since the amount is under the cap",
+        "b": "A result that runs the refund, with a note to a person for review later",
+        "c": "A flagged refusal that waits for a human sign-off on this very request",
+        "d": "A refusal with no reason given, so that the model cannot argue with it"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "An irreversible call waits for a person even under the cap.",
+        "a": "Ruled out because \"An irreversible call needs an approval even when the amount is under the cap\".",
+        "b": "Ruled out because \"a review after the fact cannot undo an irreversible call\".",
+        "d": "Ruled out because \"it says what is needed and who can give it, so the agent can pass the case on\"."
+      }
+    },
+    {
+      "id": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice#m3",
+      "page": "02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. All subagents hold the same 18 tools, including the one that sends the finished report, and the synthesis subagent has begun running web searches. Which redesign fits best?",
+      "options": {
+        "a": "Split the list by role, and give the last irreversible step one owner, behind an approval",
+        "b": "Keep the shared list and add a sentence for each role to its prompt, naming the tools it should use",
+        "c": "Cut the shared list to the ten most used tools, though it is still the same for every role",
+        "d": "Run every request through a classifier that enables a subset of the tools for that request"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Scoped lists remove the misuse, and the irreversible step has an owner and an approval.",
+        "b": "Ruled out because a prompt line is a request: \"an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use\".",
+        "c": "Ruled out because \"an agent outside its specialisation misuses what it holds\".",
+        "d": "Ruled out because \"a router adds a component to keep correct\"."
+      }
+    }
+  ]
+}
