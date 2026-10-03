@@ -105,6 +105,23 @@ def check_quotes(qid, explanation, key, prose):
     return problems
 
 
+def check_named_page(qid, text):
+    """A Developer mock question's key explanation names the page that answers it, as (module N, page M), and quotes
+    a phrase of 4 or more words that appears verbatim in that page's prose."""
+    m = re.search(r"\(module (\d+), page (\d+)\)", text)
+    if not m:
+        return [f"{qid}: the key explanation does not name its page as (module N, page M)"]
+    folders = sorted((ROOT / "course").glob(f"{int(m.group(1)):02d}-*"))
+    pages = sorted(folders[0].glob("*.md")) if folders else []
+    if not pages or not 1 <= int(m.group(2)) <= len(pages):
+        return [f"{qid}: the named page (module {m.group(1)}, page {m.group(2)}) does not exist"]
+    named = norm(prose_of(pages[int(m.group(2)) - 1].read_text()))
+    quotes = [q for q in QUOTE.findall(text) if len(q.split()) >= MIN_QUOTE_WORDS]
+    if not any(norm(q) in named for q in quotes):
+        return [f"{qid}: the key explanation quotes nothing of 4 or more words from the named page (module {m.group(1)}, page {m.group(2)})"]
+    return []
+
+
 def check_duplicate(qid, stem, page_stems):
     """A module question must not restate a page question of the same module."""
     mine = stems(re.sub(r"`[^`]*`", " ", stem))
@@ -285,14 +302,13 @@ def check_module(folder):
     level_prose, level_stems = None, {}
     if any(k == "Mock exam" for pg in pages for k, _, _ in parse_page_quizzes(pg.read_text())):
         level_prose = "\n".join(prose_of(pg.read_text()) for f in sorted(ROOT.joinpath("course").iterdir())
-                                if f.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[01])-", f.name) for pg in sorted(f.glob("*.md")))
+                                if f.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", f.name) for pg in sorted(f.glob("*.md")))
         for f in sorted(ROOT.joinpath("course").iterdir()):
-            if f.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[01])-", f.name):
+            if f.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", f.name):
                 for pg in sorted(f.glob("*.md")):
                     for kind, questions, _ in parse_page_quizzes(pg.read_text()):
-                        if kind != "Mock exam":
-                            for n, (stem, _) in enumerate(questions, start=1):
-                                level_stems[f"{pg.stem}#{kind[0].lower()}{n}"] = stem
+                        for n, (stem, _) in enumerate(questions, start=1):
+                            level_stems[f"{pg.stem}#{QID[kind]}{n}"] = stem
     for page in pages:
         md = page.read_text()
         for kind, questions, keys in parse_page_quizzes(md):
@@ -320,7 +336,9 @@ def check_module(folder):
                 if kind == "Module quiz":
                     problems += check_duplicate(qid, stem, page_stems)
                 if kind == "Mock exam":
-                    problems += check_duplicate(qid, stem, level_stems)
+                    problems += check_duplicate(qid, stem, {k: v for k, v in level_stems.items() if not k.startswith(page.stem + "#")})
+                    if folder.name.startswith("44-"):
+                        problems += check_named_page(qid, q.get("explanation", {}).get(q["key"], ""))
                 paras = key_paragraphs(md)
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
                 if n - 1 < len(paras[idx]):
@@ -345,17 +363,17 @@ def check_module(folder):
 
 
 def main(argv):
-    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[01])-", p.name))
+    folders = sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", p.name))
     if argv:
         folders = [f for f in folders if any(f.name.startswith(a) for a in argv)]
     total = 0
     items = {}
-    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[01])-", p.name)):
+    for f in sorted(p for p in (ROOT / "course").iterdir() if p.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", p.name)):
         for pg in sorted(f.glob("*.md")):
             for kind, questions, keys in parse_page_quizzes(pg.read_text()):
                 for n, ((stem, opts), key) in enumerate(zip(questions, keys), start=1):
                     if key in opts:
-                        items[f"{f.name[:2]}/{pg.stem[:2]}#{QID[kind]}{n}" if kind != "Mock exam" else f"mock#x{n}"] = (stem, opts[key])
+                        items[f"{f.name[:2]}/{pg.stem[:2]}#{QID[kind]}{n}"] = (stem, opts[key])
     for p in check_near_duplicates(items):
         print(p)
         total += 1
