@@ -27,6 +27,8 @@ A `tool_use` block of the toolset looks like `{"type": "tool_use", "id", "name":
 
 - `scale_for(width, height)`: `min(1, 1568 / longest side, sqrt(1,150,000 / (width * height)))`. `scaled_size(width, height)` is
   `(int(width * scale), int(height * scale))`.
+  This is the documentation's example for models with the 1568 px and about 1.15 megapixel limits, so it is safe for every model. A model in the
+  high-resolution tier accepts up to 2576 px on the long edge and 4784 visual tokens, and the lesson explains how that changes the scale.
 - `to_screen(x, y, scale, screen)`: divide by the scale, round half to even, and clamp into `0 .. width - 1` and `0 .. height - 1`.
 - `perform(screen, name, args, scale, confirm)` returns `(content, is_error)`. The content is a string, or for `screenshot` and `zoom` a
   list holding one block `{"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": render(...)}}`.
