@@ -1,7 +1,7 @@
 # Tools: where they run, schemas, descriptions and tool_choice
 
 **Level:** Developer · **Module 26:** Tool use · **Page 1 of 3**
-**Exams:** DV3; A3.1, A3.2
+**Exams:** DV5; A1.1, A2.1
 
 **After this page you can** say where each kind of tool runs and what your code is responsible for, write a tool definition that
 the model can use well, decide when to add `strict: true`, choose a `tool_choice` value, and name the models that reject a forced

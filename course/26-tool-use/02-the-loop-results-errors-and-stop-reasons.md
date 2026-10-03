@@ -1,7 +1,7 @@
 # The loop: results, errors and stop reasons
 
 **Level:** Developer · **Module 26:** Tool use · **Page 2 of 3**
-**Exams:** DV3; A3.1, A3.2
+**Exams:** DV5; A1.1, A2.1
 
 **After this page you can** write the loop that runs a model's tool calls, format the user message that carries the results,
 report a failure to the model with `is_error` so that it can recover, react to every stop reason, and bound the loop so that it cannot

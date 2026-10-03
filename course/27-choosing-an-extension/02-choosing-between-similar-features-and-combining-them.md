@@ -1,7 +1,7 @@
 # Choosing between similar features and combining them
 
 **Level:** Developer · **Module 27:** Choosing an extension · **Page 2 of 2**
-**Exams:** DV3; A3.2
+**Exams:** DV5, DV7
 
 **After this page you can** tell a skill from a subagent, CLAUDE.md from a skill, a hook from a skill, MCP from a skill, and a
 subagent from a dynamic workflow; say which of them can enforce a rule and which can only request it; and combine features the way the

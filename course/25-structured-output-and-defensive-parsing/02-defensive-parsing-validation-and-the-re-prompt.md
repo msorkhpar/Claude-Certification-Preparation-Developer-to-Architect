@@ -1,7 +1,7 @@
 # Defensive parsing, validation and the re-prompt
 
 **Level:** Developer · **Module 25:** Structured output and defensive parsing · **Page 2 of 2**
-**Exams:** DV3; A3.1
+**Exams:** DV1, DV4; A4.3, A4.4
 
 **After this page you can** read JSON out of a reply that wraps it in prose, validate a value against a schema and report every
 problem with its path, check that a quotation really occurs in the source, ask the model again with the problems listed, bound

@@ -1,7 +1,7 @@
 # Parallel calls, the tool runner and the practice
 
 **Level:** Developer · **Module 26:** Tool use · **Page 3 of 3**
-**Exams:** DV3; A3.1, A3.2
+**Exams:** DV5; A1.1, A2.1
 
 **After this page you can** run several tool calls from one assistant turn and return them correctly, turn parallel calls off with the
 right field, check a `tool_choice` before the request is sent, say what the SDK's tool runner does for you and what it does not, and

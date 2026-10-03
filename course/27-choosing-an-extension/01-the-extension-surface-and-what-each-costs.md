@@ -1,7 +1,7 @@
 # The extension surface and what each piece costs
 
 **Level:** Developer · **Module 27:** Choosing an extension · **Page 1 of 2**
-**Exams:** DV3; A3.2
+**Exams:** DV5, DV7
 
 **After this page you can** name the extension points of Claude Code, say what each one is for, say when each one loads into
 context and what it costs there, and pick the feature that a stated trigger calls for.
@@ -35,6 +35,12 @@ customize what Claude knows, connect it to external services, and automate workf
 Two more appear in the same table: code intelligence, which connects Claude to a language server for symbol navigation and live type
 errors, and dynamic workflows, scripts that Claude writes to run many subagents in the background. The course names them and does not
 build with them.
+
+The same choice exists one level down, in the Messages API. A tool you define yourself is a user-defined client tool: "You write the
+schema, you execute the code, you return the results." A tool that a remote MCP server offers can be reached from the API through the
+MCP connector, which lets you "Connect to remote MCP servers from the Messages API without a separate MCP client." A built-in or
+Anthropic-schema tool such as `bash` or `text_editor` needs no schema of your own. The choice is the same question each time: who
+owns the capability, who runs it, and what it costs to describe to the model on every request.
 
 The sentence on skills is worth knowing: "Skills are the most flexible extension. A skill is a markdown file containing knowledge,
 workflows, or instructions." A skill can be invoked with a command such as `/deploy`, or Claude can load it when it is relevant.

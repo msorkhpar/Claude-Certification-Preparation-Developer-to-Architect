@@ -1,7 +1,7 @@
 # Getting JSON: schemas, structured outputs and strict tools
 
 **Level:** Developer · **Module 25:** Structured output and defensive parsing · **Page 1 of 2**
-**Exams:** DV3; A3.1
+**Exams:** DV1, DV4; A4.3, A4.4
 
 **After this page you can** choose between asking for JSON in a prompt, structured outputs and strict tool use, write a schema the
 API accepts, say which constraints the API cannot enforce and your program must, and name the two replies whose body does not follow
