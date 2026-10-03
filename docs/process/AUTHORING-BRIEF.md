@@ -26,6 +26,12 @@ outside the worktree. Web requests carry no personal data; nothing is signed int
   every item of the module's Covers cell, to the depth an exam scenario needs. A product claim comes
   from an official page read during the batch, and the page names the date and versions it was checked
   on. Model output shown on a page is an official quotation or an exchange labelled illustrative.
+- **Exam framing:** where an official exam guide's wording or model of a feature differs from the
+  current product (a renamed tool, a setting the guide treats as a hard gate, two controls the product
+  merges), the page says both in a short labelled box: what the guide states, which the exam keys, and
+  what the product does now, with the date and version checked. Questions are keyed to the guide and their
+  explanation notes the difference. Traps are written as the exam's tempting wrong answers and why the exam
+  rejects them. Architect questions sit inside a named scenario of two or three sentences.
 - **Examples:** projects under `examples/` that run offline against `harness/`, in Python and
   TypeScript at least and in Java and Kotlin where the topic exists in them; the output on the page is
   the container's output.
