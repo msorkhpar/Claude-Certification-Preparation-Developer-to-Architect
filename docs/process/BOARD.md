@@ -62,7 +62,7 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 | Row | Task | Status |
 |---|---|---|
 | J-1 | Java practices and examples build with Gradle (Kotlin DSL), like the Kotlin ones, so the course image grades them; convert modules 6 and 13 to 17 | **done:** the seven Java practices (modules 6 and 13 to 17, and the agent-loop exercise) build with `build.gradle.kts` and `settings.gradle.kts`, no `pom.xml` remains; the run scripts and graders read Gradle output; the examples of those modules have no Java side. Proved offline: every reference passes, every starter fails, every plant fails on its named case on an assertion. |
-| R-1 | Before Level 3: Level 2 complete, the framework milestone closed, then the Java course built and run on the new framework and base images with no change in behaviour; any difference is fixed in the framework, backward compatibly | todo |
+| R-1 | Before Level 3: Level 2 complete, the framework milestone closed, then the Java course built and run on the new framework and base images with no change in behaviour; any difference is fixed in the framework, backward compatibly | **done:** no change in behaviour: validate, site and export match (only image tags and recorded commits move), all 743 references and 248 starter and plant runs give the same results, live site and Run identical; the editor base has no changed input |
 
 ## Framework work
 
