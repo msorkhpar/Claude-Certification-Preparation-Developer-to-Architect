@@ -16,9 +16,9 @@ M9.**
 | M5 | Examples with recorded exchanges, verified offline in the container | doing: Level 1 modules 1-6; Level 2 modules 12-44 (thirty examples in Python and TypeScript, harness extended with a scripted stand-in for the Claude Code binary) | Every example's tests pass offline; planted wrong output fails |
 | M6 | Practices, quizzes and mock exams | doing: Level 1 modules 1-11 (quizzes for every page and module, the Level 1 mock exam of 30 questions, a flashcard set and a spaced-review bank), awaiting the independent quiz reader; Level 2 modules 12-44 (twenty-seven practices proved offline, those of modules 12-34, 41, 42 and 43 in four languages and modules 35, 38, 39 and 40 in Python and TypeScript; quizzes for every page and module; modules 18-23 passed one independent reader and one fix round; modules 24-29 await the register's check; modules 30-35 passed one independent reader and one fix round; modules 36-41 likewise; modules 42-44 passed one independent reader and one fix round, with two Developer mock exams of 53 questions, a Level 2 flashcard set of 218 cards and a review bank of 110 items; see the log) | Reference passes, planted wrong solutions fail on assertions, starter fails; quizzes passed the reader |
 | Q-L1 | A quiz polish pass over all of Level 1: one independent reader judges the whole level | done | Level 1 judged by readers; remaining WEAK items are listed in docs/process/QUIZ-POLISH.md |
-| M7a | Early site: Levels 1 and 2 built with studyforge without narration (ingest, validate, site, runner, editor) and served locally for review | todo, now, beside the Level 3 batches | Zero console errors; practices run end to end; editor opens; the owner can open it |
-| M7b | The site rebuilt as Levels 3 and 4 merge, still without narration | todo | Every merged level appears; the M7a checks still pass |
-| M8 | Narration of the lesson prose | todo | A listened sample from every level |
+| M7a | Early site: Levels 1 and 2 built with studyforge without narration (ingest, validate, site, runner, editor) and served locally for review | doing: build office started, beside the Level 3 batches | Zero console errors; practices run end to end; editor opens; the owner can open it |
+| M7b | The site rebuilt without narration after each later level merges: once when Level 3 is complete (after L3-F), once when Level 4 is complete | todo | Every merged level appears; the M7a checks still pass |
+| M8 | Narration of the lesson prose of all four levels, last, after Levels 3 and 4 are merged and M7b has rebuilt the site (D15) | todo | A listened sample from every level |
 | M9 | Release-ready: exam facts and model ids re-checked, images, learner `main`, README | todo | A cold pull on a clean machine runs the course |
 
 ## Decisions
@@ -71,6 +71,9 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 | L3-D | Level 3 batch: modules 63 to 69, review passes and reliability (A4.5, A4.6, A5) | todo, after L3-C |
 | L3-E | Level 3 batch: modules 70 to 74, scenarios S1 to S5 with capstones | todo, after L3-D |
 | L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | todo, after L3-E |
+| S-3 | Rebuild the site with Level 3 (M7b) | todo, after L3-F |
+| L4 | Level 4 batches: modules 79 to 94, Architect Professional | todo, after L3-F |
+| S-4 | Rebuild the site with Level 4 (M7b), then narration of all four levels (M8), then release checks (M9) | todo, after L4 |
 
 ## Framework work
 
