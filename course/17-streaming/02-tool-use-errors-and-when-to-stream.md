@@ -7,7 +7,8 @@
 response began, and decide when streaming is worth its complexity.
 
 Checked against the Claude API documentation (Streaming messages, API errors, the Python and TypeScript SDK pages) on
-2026-10-02, and by running the example of the previous page offline in the course container. The error and the tool call
+2026-10-02, and by running the example of the previous page offline in the course container with `anthropic` 1.11.0 and
+`@anthropic-ai/sdk` 0.131.0. The error and the tool call
 in this page are the ones that example produced.
 
 ## Why it matters
@@ -80,16 +81,16 @@ code.
 
 2. A team streams a long report only because they believe it lowers the bill. According to the page, what is the better
    reason to stream?
-   - **a**: A tool input that is valid at every fragment
+   - **a**: Fewer errors, since a started call cannot fail after its first byte
    - **b**: A lower price for each of the output tokens
    - **c**: An exemption from the limits that apply to other calls
-   - **d**: A lengthy reply that a person is waiting to read
+   - **d**: Readers see words while the rest is still being written
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "discard the partial output first and retry the whole request". *a* is ruled out because the partial text is the loss: "the user may already have read the partial text" and the answer is cut short, so it is not final. *c* is ruled out because "A status check alone cannot tell you a stream succeeded". *d* is ruled out because a stream that failed midway "cannot be resumed from the last byte".
-2. **d**. The page's first case is "A person is waiting for a long answer". *b* is ruled out because "Streaming changes when the bytes arrive, not what the tokens cost". *c* is ruled out because "Streamed calls count against the same limits as the others". *a* is ruled out because "the fragment is not an object, and the object that comes is not final until the block ends".
+2. **d**. The page's first case is "A person is waiting for a long answer", and "The first words appear at once". *b* is ruled out because "Streaming changes when the bytes arrive, not what the tokens cost". *c* is ruled out because "Streamed calls count against the same limits as the others". *a* is ruled out because "That is why an error can arrive after the 200 status line".
 
 </details>
 
@@ -109,11 +110,11 @@ This quiz covers both pages of the module.
    - **c**: It skips the first and raises on the second
    - **d**: It raises on both so that nothing is guessed
 
-3. A job generates a thirty-minute report behind a proxy that cuts idle connections. Why does streaming help?
-   - **a**: The output limit rises, so the report fits in a single answer
-   - **b**: Steady events keep the link active, so no timer ever expires
-   - **c**: The proxy is avoided by sending the events through another port
-   - **d**: The output is compressed, so it crosses the proxy faster
+3. A team adds streaming to a feature. Which of the problems below does it leave unchanged?
+   - **a**: A proxy that drops quiet connections during long generations
+   - **b**: The share of the rate limit that each reply uses
+   - **c**: A visitor who sees no text during the first seconds
+   - **d**: A very long answer that a plain call would refuse to start
 
 4. A stream holds a thinking block, a text block and a tool block. In which order does an assembler list them?
    - **a**: By how many fragments each one received
@@ -126,7 +127,7 @@ This quiz covers both pages of the module.
 
 1. **a**. The page says "do not act on a tool call until its block has stopped and its input has parsed". *b* is ruled out because "The input is incomplete until the block stops". *c* is ruled out because a fragment is not an object: "the fragment is not an object, and the object that comes is not final until the block ends". *d* is ruled out because "content lists the blocks in index order", not by kind.
 2. **c**. The page says to "ignore event types you do not know" and that a stream without `message_stop` "is an incomplete message, not a short one". *b* is ruled out because the first is skipped "because the API may add new ones". *a* is ruled out because a cut stream "is an incomplete message, not a short one". *d* is ruled out because the first is skipped: "ignore event types you do not know".
-3. **b**. The page says "Events keep arriving, so a proxy never sees an idle connection". *a* is ruled out because streaming changes when the bytes arrive "or what the limits allow". *c* is ruled out because a stream is "the same POST request to the same URL". *d* is ruled out because "Streaming changes when the bytes arrive", and it does not change the size of what arrives.
-4. **d**. The page says "content lists the blocks in index order". *b* is ruled out because the order is "not in the order they stopped". *c* is ruled out because blocks are "never sorted by type or by size". *a* is ruled out because the order is fixed by the index: "content lists the blocks in index order".
+3. **b**. The page says "Streamed calls count against the same limits as the others", so the share of the limit is unchanged. *a* is ruled out because "Events keep arriving, so a proxy never sees an idle connection". *c* is ruled out because "The first words appear at once". *d* is ruled out because "the SDKs refuse a non-streaming request that they expect to take longer than about ten minutes", which streaming avoids.
+4. **d**. The page says "content lists the blocks in index order". *b* is ruled out because the order is "not in the order they stopped". *c* is ruled out because "Blocks are never sorted by type". *a* is ruled out because blocks are "never sorted by type or by size", and a fragment count is a size.
 
 </details>

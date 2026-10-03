@@ -141,10 +141,10 @@ timeout disables it. That is a design hint and not an obstacle: if you see it, y
 
 This quiz covers all three pages of the module.
 
-1. A hand-written client and an SDK client call the API from the same service. After the provider adds a field to
-   replies, only the hand-written client starts failing. Which cause is most likely?
+1. A hand-written client and an SDK client call the API from the same service. After the provider adds a new stop
+   reason value, only the hand-written client starts failing. Which cause is most likely?
    - **a**: It has no retries, which the SDK would have supplied automatically
-   - **b**: Its parser rejects properties that it does not recognise
+   - **b**: Its logic assumes that the set of labels it saw is complete
    - **c**: It lacks the identifying platform headers that the SDK sends
    - **d**: It was written against an older revision of the contract header
 
@@ -172,7 +172,7 @@ This quiz covers all three pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A client that fails on an unknown field breaks "on a change the versioning page allows", and the habit is to read what you need and ignore the rest. *a* is ruled out because a retry cannot cure a parse failure, and "retrying does not help: the proxy answers the same page again" shows the same logic for a repeated reply. *c* is ruled out because the SDK's extra headers "help debugging and are not part of your contract". *d* is ruled out because "the only current value of anthropic-version is 2023-06-01", and an older one "may be unavailable for new users".
+1. **b**. A client that fails on an unknown value breaks "on a change the versioning page allows", and the page says a stop reason is among the values "you do not know" that must be tolerated, not only a field. *a* is ruled out because a retry cannot cure a parse failure, and "retrying does not help: the proxy answers the same page again" shows the same logic for a repeated reply. *c* is ruled out because the SDK's extra headers "help debugging and are not part of your contract". *d* is ruled out because "the only current value of anthropic-version is 2023-06-01", and an older one "may be unavailable for new users".
 2. **a**. The page says to create one client and share it, because "a new client means a new connection pool each time". *b* is ruled out because "a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return". *c* is ruled out because streaming is what keeps long calls from being dropped as idle: "Bytes keep flowing, and the connection is not idle". *d* is ruled out because "the cost shows up as latency and sockets" and comes from the number of clients, which the output limit does not change.
 3. **a**. The page's second trap says "a 200 does not mean the answer is complete", so the end of the stream has to be checked as well. *b* is ruled out because "the connection stays open until the message is complete", so the status comes first. *c* is ruled out because "a streamed reply can start with a 200 and still end with an error event". *d* is ruled out because "some networks may drop idle connections after a variable period of time", and a longer timeout on your side does not stop a drop.
 4. **c**. The request id is what support asks for: "include it when you contact support about a specific request", and the status and type classify the failure. *b* is ruled out because "customer text does not belong in a log by default". *a* is ruled out because an error message that is logged "is read by people who must not see a key", and a header would carry the key. *d* is ruled out because the documentation says to "include it when you contact support about a specific request", and a time stamp is not that id.

@@ -225,7 +225,7 @@ real latency, compute the bound from the limit you must stay under, and leave he
    loses the labels of the tickets that succeeded because the gather raised. Which change is best?
    - **a**: Split the tickets into two gathers of 4,000 and run them in turn, one after the other
    - **b**: Rerun the whole gather until it comes back without raising an exception at all
-   - **c**: Bound the calls in flight and collect every outcome in input order
+   - **c**: Cap the work in flight, and record each outcome in its slot, failures included
    - **d**: Lower the timeout on each request so that the failing calls give up much sooner
 
 <details>

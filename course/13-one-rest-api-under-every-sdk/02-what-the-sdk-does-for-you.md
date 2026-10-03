@@ -252,9 +252,9 @@ how a key reaches a log.
 
 1. Verbose diagnostics are on in a deployed service. Credentials look masked in the output, but customers' messages show
    up in it. What should the team do?
-   - **a**: Keep it on, because the SDK masks everything sensitive in a reply or request
+   - **a**: Keep it on, because the SDK masks sensitive data in request and response bodies
    - **b**: Switch that mode off for live traffic and record request ids instead
-   - **c**: Hash the API key before it is configured so that the output cannot reveal it
+   - **c**: Redact the headers further so that the output holds no credentials at all
    - **d**: Log only the failing calls so that less customer text reaches the output
 
 2. A service sets nothing on its SDK client and calls the API in a month where the organisation has already reached

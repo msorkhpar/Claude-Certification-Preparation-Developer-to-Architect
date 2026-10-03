@@ -266,12 +266,12 @@ after the last attempt, spending time to learn nothing.
 
 ## Quiz
 
-1. A service retries every 5xx and 429 immediately, three times, with no delay. During a provider overload the
-   service's own traffic triples and the errors last longer. What is the best change?
-   - **a**: Retry five times so that one of the attempts succeeds after the overload
+1. A service retries every 5xx and 429 at once, three times in a row. During a provider overload its own traffic
+   triples and the errors last longer. What is the best change?
+   - **a**: Retry five times in a row instead of three, so that one attempt lands after the overload
    - **b**: Wait with a doubling, capped pause plus jitter, and honour any retry-after value
-   - **c**: Retry only the 429 responses, since the 5xx responses cannot be retried
-   - **d**: Add a fixed one-second pause so that every client waits the same time
+   - **c**: Retry only the 429 responses and treat every 5xx response as final, since those are the provider's fault
+   - **d**: Add a fixed one-second pause between the attempts, so that every client waits the same short time
 
 2. A tool in an agent files a support ticket. A timeout makes the surrounding call retry, and customers receive two
    tickets. Which design fixes it?
@@ -283,7 +283,7 @@ after the last attempt, spending time to learn nothing.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page's three ideas are exponential growth, a cap and jitter, and "wait the larger of your back-off and the header". *a* is ruled out because more immediate attempts add traffic to an overloaded service: "a long outage is met with fewer and fewer requests" is the point of the doubling. *c* is ruled out because the table lists "500, 504 and 529" under "Retry". *d* is ruled out because "after an outage, every client retries on the same schedule, and the recovering service meets all of them at once".
+1. **b**. The page's three ideas are exponential growth, a cap and jitter, and "wait the larger of your back-off and the header". *a* is ruled out because immediate attempts add load, while the doubling means "a long outage is met with fewer and fewer requests". *c* is ruled out because the table lists "500, 504 and 529" under "Retry". *d* is ruled out because "after an outage, every client retries on the same schedule, and the recovering service meets all of them at once".
 2. **d**. The page says "make such tools idempotent: pass your own unique key, check it before acting, and store the result under it". *b* is ruled out because without retries a transient failure fails a customer, and "retry the call, never the side effect" separates the two. *c* is ruled out because "a prompt is a request to the model, not a guarantee", and the retry happens in code. *a* is ruled out because the problem is that the first attempt may already have succeeded, and "if the first attempt actually succeeded on the server and only the answer was lost", waiting does not undo it.
 
 </details>

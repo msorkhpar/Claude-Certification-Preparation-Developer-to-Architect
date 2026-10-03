@@ -132,7 +132,7 @@ test, and the test stays in the suite as the regression guard. If you cannot scr
    - **a**: The reply text, so that the provider can see what the model wrote in answer
    - **b**: The complete request body, so that the call can be replayed from the log later
    - **c**: The key used for the call, so that the provider can match the account at once
-   - **d**: The request id from the response header or the error body
+   - **d**: The request id from the response, so that the team behind the API can trace the exchange
 
 <details>
 <summary>Answer key</summary>
@@ -146,12 +146,12 @@ test, and the test stays in the suite as the regression guard. If you cannot scr
 
 This quiz covers all three pages of the module.
 
-1. A service reports a 400 `invalid_request_error` on all calls after switching to Claude Opus 5.5, and its wrapper has
-   been sending each call four times. What is the best change?
-   - **a**: Add jitter to the delays so that the four attempts are spaced out over time
-   - **b**: Correct the rejected setting, and treat every 400 as final
-   - **c**: Raise the timeout so that the fourth attempt has time to succeed after all
-   - **d**: Move the calls to a batch so that the wrapper runs its attempts less often
+1. A job's calls sometimes fail with a lost network link, and sometimes with a 409 because two workers touched the same
+   resource. Which handling fits the page?
+   - **a**: Repeat both at once with no delay, since every failure is temporary and clears by itself
+   - **b**: Repeat the first kind, and the second only after the clash is resolved
+   - **c**: Repeat neither, since a status error is always the fault of the request that was sent
+   - **d**: Repeat only the second, since the first has no status that the code could read
 
 2. A user-facing summary call has a budget of 2,000 ms. Its client allows three attempts with a 1,000 ms timeout and
    waits 500 ms, then 1,000 ms, between them. What is the worst case for the caller?
@@ -167,19 +167,19 @@ This quiz covers all three pages of the module.
    - **c**: Capacity, because the provider could not take every request
    - **d**: The output limit, because the replies are cut before the end
 
-4. An incident review finds a customer's message in the log of a failed call, and the SDK's most detailed log level was on.
-   Which statement is right?
-   - **a**: The leak is expected, since a failed call must always be logged in full for the on-call team
-   - **b**: The SDK redacts every body, so the leak must have come from some other library in use
-   - **c**: Verbose logging records bodies, so keep it off in production and record ids instead
-   - **d**: The leak proves that the retries were turned off for that call and that nobody noticed
+4. Errors with status 529 appear in bursts each time a marketing campaign multiplies the job's traffic. What does the
+   page's table suggest?
+   - **a**: Raise the output limit, since the replies are probably being cut before the end
+   - **b**: Rotate the key, since the credential is the likely origin of such errors
+   - **c**: Back off, and bring the load up in gradual steps
+   - **d**: Fix the proxy, since the network path is the likely origin of such errors
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A 400 is the "your request" origin, and "the same request will fail again", so no retry helps. *a* is ruled out because "retrying them costs time and hides the real fault", and spacing out useless attempts keeps them useless. *c* is ruled out because "the same request will fail again", whatever the timeout. *d* is ruled out because "a 400, 401, 404 or 413 returns the same answer each time", and a batch carries the same requests.
+1. **b**. The page's table lists "A lost or timed-out connection (no status)" and "408, 409 (once the conflict is resolved)" under "Retry". *a* is ruled out because a 409 is retried only "once the conflict is resolved". *c* is ruled out because a lost link is retried: "A lost or timed-out connection (no status)" is the first row. *d* is ruled out because the SDKs retry "because of a network connectivity problem" as well.
 2. **a**. The page's formula is "attempts x timeout + sum of the waits between attempts": three seconds of attempts and one and a half seconds of waits make four and a half. *b* is ruled out because "the time a caller may wait is not the timeout". *c* is ruled out because the formula adds "the waits between attempts". *d* is ruled out because the page has you "choose a per-attempt timeout and an attempt count that fit under it", and a one-second timeout replaces the ten-minute default.
 3. **a**. The page's table lists "works locally, fails behind the proxy" under the path, with the checks "Is the body still JSON? Is the stream buffered?". *b* is ruled out because a credential fault is a "401 or 403 from one environment only", and a stripped key would not give an HTML page with partial streaming. *c* is ruled out because capacity means "the request was fine and the service could not take it now", with a 429 or 529 status. *d* is ruled out because a cut reply is "replies cut mid-sentence, status 200" and does not come as HTML.
-4. **c**. The page says that at debug "all HTTP requests and responses are logged, including headers and bodies", so ids are logged instead. *b* is ruled out because "sensitive data in request and response bodies may still be visible". *a* is ruled out because the page says to "log ids, statuses and counts" and keep prompts out. *d* is ruled out because "the log level comes from the ANTHROPIC_LOG environment variable or a client option", which is separate from retries.
+4. **c**. The table lists "529 in bursts" with the check "Is your traffic ramping fast?" and the cure "Back off; ramp up gradually". *b* is ruled out because the credential row is about "Which key does that environment load?", and a 529 is no credential fault. *a* is ruled out because a cut reply is "Replies cut mid-sentence, status 200", not a 529. *d* is ruled out because the path row is "Is the body still JSON? Is the stream buffered?", and a 529 carries a JSON body.
 
 </details>

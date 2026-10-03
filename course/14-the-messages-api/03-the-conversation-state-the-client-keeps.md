@@ -182,7 +182,7 @@ languages.
 
 Every turn resends everything before it. If each exchange adds about 200 tokens, turn *n* sends about 200 *n* input
 tokens, and a conversation of *n* turns pays for about 200 *n*(*n* + 1) / 2 input tokens in total: **the input cost
-of a conversation grows with the square of its length**. A 40-turn conversation costs roughly 20 times what the
+of a conversation grows with the square of its length**. A 40-turn conversation costs roughly 15 times what the
 first 10 turns did, not 4 times. Three controls exist, taught later: prompt caching makes the repeated prefix cheaper
 (module 19) and does not count cached reads toward the input-token rate limit on most models, compaction summarises
 old turns (module 25), and a hard cap on turns ends the conversation politely. Until you add one, the client should at
@@ -282,8 +282,8 @@ This quiz covers all three pages of the module.
 
 3. A team wants an early warning before long chats approach the context window and become expensive. Which signal
    can the client compute from every reply?
-   - **a**: The sum of the three input-token fields of the usage object, compared with the model's ceiling
-   - **b**: The count of turns so far, since every turn adds the same number of tokens to the request body
+   - **a**: The total of the three input-token fields in the usage object
+   - **b**: The count of turns so far, since each turn adds the same number of tokens
    - **c**: The output-token count alone, because the reply is what fills the window
    - **d**: The appearance of the context-window stop reason, which says the limit is close
 

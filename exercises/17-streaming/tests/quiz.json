@@ -24,19 +24,19 @@
       "id": "01-events-and-assembling-a-message#q2",
       "page": "01-events-and-assembling-a-message.md",
       "scope": "page",
-      "stem": "A stream stops after a content block and the connection closes with no `message_stop` event. What should the assembler return?",
+      "stem": "A stream breaks in the middle of the fragments of a tool call's input. What should the code do?",
       "options": {
-        "a": "A message whose stop reason is `end_turn`",
-        "b": "The text it has, marked as a short answer",
-        "c": "An error that says the message is incomplete",
-        "d": "A blank message so that the caller can try again"
+        "a": "Join the fragments received so far and parse them as the input",
+        "b": "Run the tool with whatever the first fragment held",
+        "c": "Throw the piece away and report the whole message as failed",
+        "d": "Keep the block and mark the message as a short one"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says a stream like that \"is an incomplete message, not a short one\".",
-        "b": "Ruled out because the same sentence says \"an incomplete message, not a short one\".",
-        "a": "Ruled out because \"the stop reason arrives in message_delta, near the end, so a cut stream has none\".",
-        "d": "Ruled out because accepting it hides the loss: \"Raise, so that the caller can decide\"."
+        "c": "The page says \"Raise, so that the caller can decide\" when a stream just stopped, because it \"is an incomplete message, not a short one\".",
+        "a": "Ruled out because the fragments \"are not valid JSON until the block ends\".",
+        "b": "Ruled out because \"A fragment of tool input is a piece of text, not an object\".",
+        "d": "Ruled out because the page says \"an incomplete message, not a short one\"."
       }
     },
     {
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A team streams a long report only because they believe it lowers the bill. According to the page, what is the better reason to stream?",
       "options": {
-        "a": "A tool input that is valid at every fragment",
+        "a": "Fewer errors, since a started call cannot fail after its first byte",
         "b": "A lower price for each of the output tokens",
         "c": "An exemption from the limits that apply to other calls",
-        "d": "A lengthy reply that a person is waiting to read"
+        "d": "Readers see words while the rest is still being written"
       },
       "key": "d",
       "explanation": {
-        "d": "The page's first case is \"A person is waiting for a long answer\".",
+        "d": "The page's first case is \"A person is waiting for a long answer\", and \"The first words appear at once\".",
         "b": "Ruled out because \"Streaming changes when the bytes arrive, not what the tokens cost\".",
         "c": "Ruled out because \"Streamed calls count against the same limits as the others\".",
-        "a": "Ruled out because \"the fragment is not an object, and the object that comes is not final until the block ends\"."
+        "a": "Ruled out because \"That is why an error can arrive after the 200 status line\"."
       }
     },
     {
@@ -119,19 +119,19 @@
       "id": "02-tool-use-errors-and-when-to-stream#m3",
       "page": "02-tool-use-errors-and-when-to-stream.md",
       "scope": "module",
-      "stem": "A job generates a thirty-minute report behind a proxy that cuts idle connections. Why does streaming help?",
+      "stem": "A team adds streaming to a feature. Which of the problems below does it leave unchanged?",
       "options": {
-        "a": "The output limit rises, so the report fits in a single answer",
-        "b": "Steady events keep the link active, so no timer ever expires",
-        "c": "The proxy is avoided by sending the events through another port",
-        "d": "The output is compressed, so it crosses the proxy faster"
+        "a": "A proxy that drops quiet connections during long generations",
+        "b": "The share of the rate limit that each reply uses",
+        "c": "A visitor who sees no text during the first seconds",
+        "d": "A very long answer that a plain call would refuse to start"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says \"Events keep arriving, so a proxy never sees an idle connection\".",
-        "a": "Ruled out because streaming changes when the bytes arrive \"or what the limits allow\".",
-        "c": "Ruled out because a stream is \"the same POST request to the same URL\".",
-        "d": "Ruled out because \"Streaming changes when the bytes arrive\", and it does not change the size of what arrives."
+        "b": "The page says \"Streamed calls count against the same limits as the others\", so the share of the limit is unchanged.",
+        "a": "Ruled out because \"Events keep arriving, so a proxy never sees an idle connection\".",
+        "c": "Ruled out because \"The first words appear at once\".",
+        "d": "Ruled out because \"the SDKs refuse a non-streaming request that they expect to take longer than about ten minutes\", which streaming avoids."
       }
     },
     {
@@ -149,8 +149,8 @@
       "explanation": {
         "d": "The page says \"content lists the blocks in index order\".",
         "b": "Ruled out because the order is \"not in the order they stopped\".",
-        "c": "Ruled out because blocks are \"never sorted by type or by size\".",
-        "a": "Ruled out because the order is fixed by the index: \"content lists the blocks in index order\"."
+        "c": "Ruled out because \"Blocks are never sorted by type\".",
+        "a": "Ruled out because blocks are \"never sorted by type or by size\", and a fragment count is a size."
       }
     }
   ]

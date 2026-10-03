@@ -28,7 +28,7 @@
       "options": {
         "a": "Split the tickets into two gathers of 4,000 and run them in turn, one after the other",
         "b": "Rerun the whole gather until it comes back without raising an exception at all",
-        "c": "Bound the calls in flight and collect every outcome in input order",
+        "c": "Cap the work in flight, and record each outcome in its slot, failures included",
         "d": "Lower the timeout on each request so that the failing calls give up much sooner"
       },
       "key": "c",
@@ -85,15 +85,15 @@
       "options": {
         "a": "Cap the parallel work with a semaphore, then pace what remains",
         "b": "Raise the retry count so that each refusal is repeated sooner than before",
-        "c": "Switch to blocking calls so that the work goes through one item at a time",
-        "d": "Drop the refused item so that the rest of the work finishes without delay"
+        "c": "Send the work through more clients so that each one carries fewer calls",
+        "d": "Raise the timeout on every request so that slow calls are not abandoned"
       },
       "key": "a",
       "explanation": {
         "a": "The page's order is \"Bound and pace first; retry last\".",
         "b": "Ruled out because \"retrying a burst you could have avoided spends the time and the quota twice\".",
-        "c": "Ruled out because with a blocking call \"the server answers nobody else\" while it waits.",
-        "d": "Ruled out because the rule is to collect every outcome, \"in input order, and decide about the failures afterwards\"."
+        "c": "Ruled out because the page says \"Don't create more than one client in the same application\", since each has its own pools.",
+        "d": "Ruled out because the bound is what \"protects the connection pool and the rate limit\", and a timeout does not bound the burst."
       }
     },
     {

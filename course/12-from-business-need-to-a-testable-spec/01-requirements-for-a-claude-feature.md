@@ -123,12 +123,12 @@ R3  Input: any thread, when the model call fails with a 429, a 5xx or a timeout.
    - **a**: The exact system prompt that the developers plan to use for the extraction
    - **b**: One expected output string for each sample invoice, compared character by character
    - **c**: A statement of what the system does when the call fails, is refused or is cut short
-   - **d**: An out-of-scope line saying who may see the extracted values after the run
+   - **d**: A choice of typeface for the page that lists the extracted values
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. It states a rate over a fixed sample and names a grader, which is what the page asks of a quality requirement: a number over that set. *b* is ruled out because "a requirement that only a person's impression can settle is a wish", and a read-through by one lead is only an impression. *c* is ruled out because a rule in a prompt "is only a request to the model", and a prompt line is not a test. *d* is ruled out because ratings after sending are an operational signal, while the acceptance criterion must be "written before the first prompt is tried".
-2. **c**. Failure behaviour is the row the page says teams forget, because a spec without it produces code without it. *a* is ruled out because "a requirement is a sentence a test can fail", and a planned prompt is an implementation choice, not a sentence to test. *b* is ruled out because quality "is stated as a rate over a set of examples, not as a single expected string". *d* is ruled out because an out-of-scope line is useful, but "the fourth row is the one teams forget", and the fourth row is failure behaviour.
+2. **c**. Failure behaviour is the row the page says teams forget, because a spec without it produces code without it. *a* is ruled out because "a requirement is a sentence a test can fail", and a planned prompt is an implementation choice, not a sentence to test. *b* is ruled out because quality "is stated as a rate over a set of examples, not as a single expected string". *d* is ruled out because a typeface does not change what the system does, and "the fourth row is the one teams forget", and the fourth row is failure behaviour.
 
 </details>

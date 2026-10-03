@@ -28,7 +28,7 @@ uses everywhere is one request:
 | Part | Value |
 |---|---|
 | Method and path | `POST /v1/messages` |
-| Authentication | `Authorization: Bearer <token>`, where the token is your API key or a short-lived access token; the legacy `x-api-key` header is still supported |
+| Authentication | `Authorization: Bearer <token>`, where the token is your API key or a short-lived access token; the legacy `x-api-key` header is still supported (the examples on this page use it, as the fallback the overview allows) |
 | Version | `anthropic-version: 2023-06-01`, which the overview lists as required |
 | Body type | `content-type: application/json` |
 | Body | JSON with at least `model`, `max_tokens` and `messages` |

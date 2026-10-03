@@ -56,7 +56,7 @@ Four rules turn that table into code:
    The output count in `message_delta` is cumulative: replace the stored one, do not add to it.
 
 The versioning policy lets the API add event types, so ignore event types you do not know, because the API may add new
-ones. `ping` is the first example of such an event: the SDK's raw iteration drops it before your loop sees it.
+ones. `ping` is the first example of such an event: the raw iteration of the Python and TypeScript SDKs drops it before your loop sees it.
 
 A stream that ends without `message_stop` is an incomplete message, not a short one. The stop reason arrives in
 `message_delta`, near the end, so a cut stream has none.
@@ -292,17 +292,16 @@ or build file. The starter fails every test.
    - **c**: Sum them all and then subtract the figure that the opening event gave
    - **d**: Drop the field and measure the pieces of text that arrived in the stream
 
-2. A stream stops after a content block and the connection closes with no `message_stop` event. What should the assembler
-   return?
-   - **a**: A message whose stop reason is `end_turn`
-   - **b**: The text it has, marked as a short answer
-   - **c**: An error that says the message is incomplete
-   - **d**: A blank message so that the caller can try again
+2. A stream breaks in the middle of the fragments of a tool call's input. What should the code do?
+   - **a**: Join the fragments received so far and parse them as the input
+   - **b**: Run the tool with whatever the first fragment held
+   - **c**: Throw the piece away and report the whole message as failed
+   - **d**: Keep the block and mark the message as a short one
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says "The output count in message_delta is cumulative: replace the stored one, do not add to it". *b* is ruled out because "the output count comes from the last message_delta" and the input count from `message_start`. *c* is ruled out because the page says "do not add to it". *d* is ruled out because usage is read from the events: "Input tokens come from message_start".
-2. **c**. The page says a stream like that "is an incomplete message, not a short one". *b* is ruled out because the same sentence says "an incomplete message, not a short one". *a* is ruled out because "the stop reason arrives in message_delta, near the end, so a cut stream has none". *d* is ruled out because accepting it hides the loss: "Raise, so that the caller can decide".
+2. **c**. The page says "Raise, so that the caller can decide" when a stream just stopped, because it "is an incomplete message, not a short one". *a* is ruled out because the fragments "are not valid JSON until the block ends". *b* is ruled out because "A fragment of tool input is a piece of text, not an object". *d* is ruled out because the page says "an incomplete message, not a short one".
 
 </details>

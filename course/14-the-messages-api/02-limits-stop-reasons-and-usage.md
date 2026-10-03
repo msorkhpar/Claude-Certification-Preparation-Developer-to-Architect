@@ -54,7 +54,7 @@ Read it after every call. The documentation gives seven values:
 | `tool_use` | The model wants a tool run | Run the tools and send back `tool_result` blocks (module 22) |
 | `pause_turn` | A server-side tool loop reached its iteration limit (10 by default) | Send the reply back as an assistant turn and call again so the model can finish |
 | `refusal` | The model declined to answer | Read `stop_details`, which names the policy category; plan a fallback |
-| `model_context_window_exceeded` | The context window filled before `max_tokens` | Treat the reply as truncated: valid but limited |
+| `model_context_window_exceeded` | The context window filled before `max_tokens` (documented in the beta namespace) | Treat the reply as truncated: valid but limited |
 
 Two rules sit under the table. First, in the documentation's words, "stop_reason indicates normal completion; HTTP
 errors indicate failures": a `max_tokens` or a `refusal` arrives with status 200, so a client that looks only at the
@@ -132,8 +132,8 @@ a deletion, not a change of value.
 
 2. A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400 until they delete a line that
    sets the sampling temperature to 0.2. What should they do about `top_p`, which they also set?
-   - **a**: Replace it with `top_k`, which the page says the model still accepts
-   - **b**: Keep it and raise it to 1.0, which the page says is safest
+   - **a**: Replace it with `top_k`, which the model still accepts
+   - **b**: Keep it and raise it to 1.0, which is the safest setting
    - **c**: Keep it, because only the temperature setting is rejected on that model and the others pass
    - **d**: Omit it as well, since any non-default value is rejected for that release
 

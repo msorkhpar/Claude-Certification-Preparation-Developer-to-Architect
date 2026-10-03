@@ -54,7 +54,8 @@ tier's monthly spend cap, "API usage pauses until 00:00 UTC on the first day of 
 429 with the same `rate_limit_error` type but **no `retry-after` header**, and with `error.details.error_code` set to
 `enforced_spend_limit_reached`. Retrying fails until access resumes, and the SDK's automatic retries do not know
 that. Read the error code before you decide to wait. Both kinds are set for the whole organisation, so no setting on
-one request changes them.
+one request changes them. The errors page adds that limits on a Claude Code workspace can return a 429 with a `retry-after`, so the
+header alone does not tell the two kinds apart.
 
 **A 400 can be a spend limit.** A limit you set yourself, below the tier's cap, also stops requests, and it returns a
 400 `invalid_request_error` whose message begins "You have reached your specified API usage limits". Lifting the limit
@@ -133,24 +134,23 @@ The debugging routine that the exam rewards is short:
 
 ## Quiz
 
-1. After a model upgrade a nightly job gets a 400 `invalid_request_error` on every call, with a message saying the
-   conversation must end with a user message. What is the origin, and what is the first action?
-   - **a**: Your request is at fault, so fix the request and do not retry
+1. A nightly job gets a 403 `permission_error` on every call after its key was moved to another workspace.
+   What is the origin, and what is the first action?
+   - **a**: Your account is at fault, so repair its access and do not retry
    - **b**: The provider is at fault, so retry with back-off until it clears
    - **c**: Capacity is at fault, so wait for the retry-after interval
-   - **d**: The account is at fault, so ask billing to restore access
+   - **d**: Your request is at fault, so repair the body and send it again
 
-2. A batch job receives a 429 `rate_limit_error` on every call from the first day of a month, with no `retry-after`
-   header and an error code that says the monthly limit is enforced. What should the job do?
-   - **a**: Add jitter to the delays so that the calls spread out
-   - **b**: Retry with longer back-off, since every 429 is a rate limit
-   - **c**: Stop retrying and raise the ceiling or wait for access to resume
-   - **d**: Switch the residency setting so that another pool is used
+2. A request that carries a very large attachment returns a 413 `request_too_large`. Which action does the table give?
+   - **a**: Wait for the retry-after interval, since this is a capacity error
+   - **b**: Retry with back-off, since the provider will probably recover soon
+   - **c**: Shrink the payload below the documented ceiling, then send it again
+   - **d**: Resolve the conflict with a concurrent write, then try the call again
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The table puts 400 under "your request" and says the same request fails again, so "retrying is waste". *b* is ruled out because the provider's statuses are 500 and 504, and the 400 origin is "your request (or a limit you set)". *c* is ruled out because capacity means "the request was fine and the service could not take it now", and the 400 names a request defect. *d* is ruled out because the account origin is "401, 402, 403, and the spend limits", and a message about the list order is not one of them.
-2. **c**. The page says a spend-cap 429 has no `retry-after`, and that "retrying fails until access resumes". *b* is ruled out because "the SDK's automatic retries do not know that", and a longer back-off still fails until the next month. *a* is ruled out because jitter spreads load, and the page says to read the error code "before you decide to wait". *d* is ruled out because both kinds are "set for the whole organisation", so no setting on one request gives another pool.
+1. **a**. The table puts 403 under "Your access", and "a person has to act", so retrying is waste. *b* is ruled out because for the provider "something broke on their side", which is the 500 and 504 case. *c* is ruled out because capacity means "the request was fine and the service could not take it now". *d* is ruled out because a 403 belongs to "Your credential or account", and a repaired body would meet the same refusal.
+2. **c**. The table lists 413 under "Your request size" with the action "Shrink it (32 MB limit on Messages)". *b* is ruled out because for the provider "something broke on their side", and a 413 is not that. *a* is ruled out because capacity means "the request was fine and the service could not take it now", which a size refusal is not. *d* is ruled out because a conflict belongs to the "State of a resource" row, not to the size of the body.
 
 </details>

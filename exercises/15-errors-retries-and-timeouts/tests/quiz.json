@@ -5,55 +5,55 @@
       "id": "01-error-classes-by-type-and-origin#q1",
       "page": "01-error-classes-by-type-and-origin.md",
       "scope": "page",
-      "stem": "After a model upgrade a nightly job gets a 400 `invalid_request_error` on every call, with a message saying the conversation must end with a user message. What is the origin, and what is the first action?",
+      "stem": "A nightly job gets a 403 `permission_error` on every call after its key was moved to another workspace. What is the origin, and what is the first action?",
       "options": {
-        "a": "Your request is at fault, so fix the request and do not retry",
+        "a": "Your account is at fault, so repair its access and do not retry",
         "b": "The provider is at fault, so retry with back-off until it clears",
         "c": "Capacity is at fault, so wait for the retry-after interval",
-        "d": "The account is at fault, so ask billing to restore access"
+        "d": "Your request is at fault, so repair the body and send it again"
       },
       "key": "a",
       "explanation": {
-        "a": "The table puts 400 under \"your request\" and says the same request fails again, so \"retrying is waste\".",
-        "b": "Ruled out because the provider's statuses are 500 and 504, and the 400 origin is \"your request (or a limit you set)\".",
-        "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\", and the 400 names a request defect.",
-        "d": "Ruled out because the account origin is \"401, 402, 403, and the spend limits\", and a message about the list order is not one of them."
+        "a": "The table puts 403 under \"Your access\", and \"a person has to act\", so retrying is waste.",
+        "b": "Ruled out because for the provider \"something broke on their side\", which is the 500 and 504 case.",
+        "c": "Ruled out because capacity means \"the request was fine and the service could not take it now\".",
+        "d": "Ruled out because a 403 belongs to \"Your credential or account\", and a repaired body would meet the same refusal."
       }
     },
     {
       "id": "01-error-classes-by-type-and-origin#q2",
       "page": "01-error-classes-by-type-and-origin.md",
       "scope": "page",
-      "stem": "A batch job receives a 429 `rate_limit_error` on every call from the first day of a month, with no `retry-after` header and an error code that says the monthly limit is enforced. What should the job do?",
+      "stem": "A request that carries a very large attachment returns a 413 `request_too_large`. Which action does the table give?",
       "options": {
-        "a": "Add jitter to the delays so that the calls spread out",
-        "b": "Retry with longer back-off, since every 429 is a rate limit",
-        "c": "Stop retrying and raise the ceiling or wait for access to resume",
-        "d": "Switch the residency setting so that another pool is used"
+        "a": "Wait for the retry-after interval, since this is a capacity error",
+        "b": "Retry with back-off, since the provider will probably recover soon",
+        "c": "Shrink the payload below the documented ceiling, then send it again",
+        "d": "Resolve the conflict with a concurrent write, then try the call again"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says a spend-cap 429 has no `retry-after`, and that \"retrying fails until access resumes\".",
-        "b": "Ruled out because \"the SDK's automatic retries do not know that\", and a longer back-off still fails until the next month.",
-        "a": "Ruled out because jitter spreads load, and the page says to read the error code \"before you decide to wait\".",
-        "d": "Ruled out because both kinds are \"set for the whole organisation\", so no setting on one request gives another pool."
+        "c": "The table lists 413 under \"Your request size\" with the action \"Shrink it (32 MB limit on Messages)\".",
+        "b": "Ruled out because for the provider \"something broke on their side\", and a 413 is not that.",
+        "a": "Ruled out because capacity means \"the request was fine and the service could not take it now\", which a size refusal is not.",
+        "d": "Ruled out because a conflict belongs to the \"State of a resource\" row, not to the size of the body."
       }
     },
     {
       "id": "02-retry-back-off-and-idempotency#q1",
       "page": "02-retry-back-off-and-idempotency.md",
       "scope": "page",
-      "stem": "A service retries every 5xx and 429 immediately, three times, with no delay. During a provider overload the service's own traffic triples and the errors last longer. What is the best change?",
+      "stem": "A service retries every 5xx and 429 at once, three times in a row. During a provider overload its own traffic triples and the errors last longer. What is the best change?",
       "options": {
-        "a": "Retry five times so that one of the attempts succeeds after the overload",
+        "a": "Retry five times in a row instead of three, so that one attempt lands after the overload",
         "b": "Wait with a doubling, capped pause plus jitter, and honour any retry-after value",
-        "c": "Retry only the 429 responses, since the 5xx responses cannot be retried",
-        "d": "Add a fixed one-second pause so that every client waits the same time"
+        "c": "Retry only the 429 responses and treat every 5xx response as final, since those are the provider's fault",
+        "d": "Add a fixed one-second pause between the attempts, so that every client waits the same short time"
       },
       "key": "b",
       "explanation": {
         "b": "The page's three ideas are exponential growth, a cap and jitter, and \"wait the larger of your back-off and the header\".",
-        "a": "Ruled out because more immediate attempts add traffic to an overloaded service: \"a long outage is met with fewer and fewer requests\" is the point of the doubling.",
+        "a": "Ruled out because immediate attempts add load, while the doubling means \"a long outage is met with fewer and fewer requests\".",
         "c": "Ruled out because the table lists \"500, 504 and 529\" under \"Retry\".",
         "d": "Ruled out because \"after an outage, every client retries on the same schedule, and the recovering service meets all of them at once\"."
       }
@@ -105,7 +105,7 @@
         "a": "The reply text, so that the provider can see what the model wrote in answer",
         "b": "The complete request body, so that the call can be replayed from the log later",
         "c": "The key used for the call, so that the provider can match the account at once",
-        "d": "The request id from the response header or the error body"
+        "d": "The request id from the response, so that the team behind the API can trace the exchange"
       },
       "key": "d",
       "explanation": {
@@ -119,19 +119,19 @@
       "id": "03-timeouts-logging-and-debugging#m1",
       "page": "03-timeouts-logging-and-debugging.md",
       "scope": "module",
-      "stem": "A service reports a 400 `invalid_request_error` on all calls after switching to Claude Opus 5.5, and its wrapper has been sending each call four times. What is the best change?",
+      "stem": "A job's calls sometimes fail with a lost network link, and sometimes with a 409 because two workers touched the same resource. Which handling fits the page?",
       "options": {
-        "a": "Add jitter to the delays so that the four attempts are spaced out over time",
-        "b": "Correct the rejected setting, and treat every 400 as final",
-        "c": "Raise the timeout so that the fourth attempt has time to succeed after all",
-        "d": "Move the calls to a batch so that the wrapper runs its attempts less often"
+        "a": "Repeat both at once with no delay, since every failure is temporary and clears by itself",
+        "b": "Repeat the first kind, and the second only after the clash is resolved",
+        "c": "Repeat neither, since a status error is always the fault of the request that was sent",
+        "d": "Repeat only the second, since the first has no status that the code could read"
       },
       "key": "b",
       "explanation": {
-        "b": "A 400 is the \"your request\" origin, and \"the same request will fail again\", so no retry helps.",
-        "a": "Ruled out because \"retrying them costs time and hides the real fault\", and spacing out useless attempts keeps them useless.",
-        "c": "Ruled out because \"the same request will fail again\", whatever the timeout.",
-        "d": "Ruled out because \"a 400, 401, 404 or 413 returns the same answer each time\", and a batch carries the same requests."
+        "b": "The page's table lists \"A lost or timed-out connection (no status)\" and \"408, 409 (once the conflict is resolved)\" under \"Retry\".",
+        "a": "Ruled out because a 409 is retried only \"once the conflict is resolved\".",
+        "c": "Ruled out because a lost link is retried: \"A lost or timed-out connection (no status)\" is the first row.",
+        "d": "Ruled out because the SDKs retry \"because of a network connectivity problem\" as well."
       }
     },
     {
@@ -176,19 +176,19 @@
       "id": "03-timeouts-logging-and-debugging#m4",
       "page": "03-timeouts-logging-and-debugging.md",
       "scope": "module",
-      "stem": "An incident review finds a customer's message in the log of a failed call, and the SDK's most detailed log level was on. Which statement is right?",
+      "stem": "Errors with status 529 appear in bursts each time a marketing campaign multiplies the job's traffic. What does the page's table suggest?",
       "options": {
-        "a": "The leak is expected, since a failed call must always be logged in full for the on-call team",
-        "b": "The SDK redacts every body, so the leak must have come from some other library in use",
-        "c": "Verbose logging records bodies, so keep it off in production and record ids instead",
-        "d": "The leak proves that the retries were turned off for that call and that nobody noticed"
+        "a": "Raise the output limit, since the replies are probably being cut before the end",
+        "b": "Rotate the key, since the credential is the likely origin of such errors",
+        "c": "Back off, and bring the load up in gradual steps",
+        "d": "Fix the proxy, since the network path is the likely origin of such errors"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says that at debug \"all HTTP requests and responses are logged, including headers and bodies\", so ids are logged instead.",
-        "b": "Ruled out because \"sensitive data in request and response bodies may still be visible\".",
-        "a": "Ruled out because the page says to \"log ids, statuses and counts\" and keep prompts out.",
-        "d": "Ruled out because \"the log level comes from the ANTHROPIC_LOG environment variable or a client option\", which is separate from retries."
+        "c": "The table lists \"529 in bursts\" with the check \"Is your traffic ramping fast?\" and the cure \"Back off; ramp up gradually\".",
+        "b": "Ruled out because the credential row is about \"Which key does that environment load?\", and a 529 is no credential fault.",
+        "a": "Ruled out because a cut reply is \"Replies cut mid-sentence, status 200\", not a 529.",
+        "d": "Ruled out because the path row is \"Is the body still JSON? Is the stream buffered?\", and a 529 carries a JSON body."
       }
     }
   ]

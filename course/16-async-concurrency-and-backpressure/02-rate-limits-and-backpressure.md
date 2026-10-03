@@ -7,7 +7,8 @@
 what backpressure is and where it is applied, and write a bounded worker pool that pulls its input lazily.
 
 Checked against the Claude API documentation (rate limits, API errors, batch processing, Streaming messages) on
-2026-10-02, and by running the practice offline in the course container (Python, TypeScript, Java and Kotlin). Limits
+2026-10-02, and by running the practice offline in the course container (Python, TypeScript, Java and Kotlin; the SDK
+versions are `anthropic` 1.11.0 and `@anthropic-ai/sdk` 0.131.0 for the example of page 1). Limits
 are the documentation's on that date and are re-checked at release.
 
 ## Why it matters
@@ -145,8 +146,8 @@ This quiz covers both pages of the module.
 1. Twelve tickets are sent together, and the provider refuses one with a 429. The team wants fewer refusals first. What comes first?
    - **a**: Cap the parallel work with a semaphore, then pace what remains
    - **b**: Raise the retry count so that each refusal is repeated sooner than before
-   - **c**: Switch to blocking calls so that the work goes through one item at a time
-   - **d**: Drop the refused item so that the rest of the work finishes without delay
+   - **c**: Send the work through more clients so that each one carries fewer calls
+   - **d**: Raise the timeout on every request so that slow calls are not abandoned
 
 2. A pipeline's first stage outpaces the stage behind it, and memory grows during long runs. Which fix is best?
    - **a**: Give the process more memory so that the buffer can hold the whole run
@@ -169,7 +170,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page's order is "Bound and pace first; retry last". *b* is ruled out because "retrying a burst you could have avoided spends the time and the quota twice". *c* is ruled out because with a blocking call "the server answers nobody else" while it waits. *d* is ruled out because the rule is to collect every outcome, "in input order, and decide about the failures afterwards".
+1. **a**. The page's order is "Bound and pace first; retry last". *b* is ruled out because "retrying a burst you could have avoided spends the time and the quota twice". *c* is ruled out because the page says "Don't create more than one client in the same application", since each has its own pools. *d* is ruled out because the bound is what "protects the connection pool and the rate limit", and a timeout does not bound the burst.
 2. **c**. The page says "bound the queue between them: a full queue makes the model stage wait". *b* is ruled out because "a fast producer and a slow consumer meet in an unbounded buffer". *a* is ruled out because "the buffer is your memory". *d* is ruled out because retries only repeat load, and "spends the time and the quota twice".
 3. **b**. The page's relation is "requests in flight equal the rate times the call duration", so ten times two gives twenty. *a* is ruled out because "requests in flight equal the rate times" the duration, with no division. *c* is ruled out because the page says "Use the limit and your measured latency". *d* is ruled out because "equal the rate times the call duration" keeps the rate in the product.
 4. **d**. The pool "returns one outcome per item in input order" and "lets one failure stand alone". *b* is ruled out because that is what a bare gather does, and "rejects on the first rejection" loses the rest. *c* is ruled out because the pool "lets one failure stand alone" and does not loop on it. *a* is ruled out because the pool "returns one outcome per item in input order".
