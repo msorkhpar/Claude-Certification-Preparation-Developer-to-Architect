@@ -1,0 +1,176 @@
+{
+  "practice": "54-distributing-tools-across-agents/unit-01/practice-1",
+  "name": "distribute",
+  "tests": {
+    "java": "DistributeTest",
+    "kotlin": "DistributeTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_each_role_gets_only_the_tools_of_its_specialisation_in_catalog_order",
+      "typescript": "m1 each role gets only the tools of its specialisation in catalog order",
+      "java": "m1_eachRoleGetsOnlyTheToolsOfItsSpecialisationInCatalogOrder",
+      "kotlin": "m1_eachRoleGetsOnlyTheToolsOfItsSpecialisationInCatalogOrder"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_role_over_its_budget_or_given_an_unknown_or_unscoped_outside_tool_or_a_duplicate_catalog_name_is_refused",
+      "typescript": "e1 a role over its budget or given an unknown or unscoped outside tool or a duplicate catalog name is refused",
+      "java": "e1_aRoleOverItsBudgetOrGivenAnUnknownOrUnscopedOutsideToolOrADuplicateCatalogNameIsRefused",
+      "kotlin": "e1_aRoleOverItsBudgetOrGivenAnUnknownOrUnscopedOutsideToolOrADuplicateCatalogNameIsRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_an_irreversible_tool_is_given_only_by_an_explicit_grant",
+      "typescript": "e2 an irreversible tool is given only by an explicit grant",
+      "java": "e2_anIrreversibleToolIsGivenOnlyByAnExplicitGrant",
+      "kotlin": "e2_anIrreversibleToolIsGivenOnlyByAnExplicitGrant"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_model_that_accepts_forcing_gets_the_native_choice_and_the_others_get_auto_with_strict_tools_and_one_named_tool",
+      "typescript": "e3 a model that accepts forcing gets the native choice and the others get auto with strict tools and one named tool",
+      "java": "e3_aModelThatAcceptsForcingGetsTheNativeChoiceAndTheOthersGetAutoWithStrictToolsAndOneNamedTool",
+      "kotlin": "e3_aModelThatAcceptsForcingGetsTheNativeChoiceAndTheOthersGetAutoWithStrictToolsAndOneNamedTool"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_change_of_tool_choice_costs_the_cached_messages_a_change_of_tools_costs_everything_and_a_repeat_costs_nothing",
+      "typescript": "e4 a change of tool choice costs the cached messages a change of tools costs everything and a repeat costs nothing",
+      "java": "e4_aChangeOfToolChoiceCostsTheCachedMessagesAChangeOfToolsCostsEverythingAndARepeatCostsNothing",
+      "kotlin": "e4_aChangeOfToolChoiceCostsTheCachedMessagesAChangeOfToolsCostsEverythingAndARepeatCostsNothing"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_reply_is_checked_against_the_call_that_was_required",
+      "typescript": "e5 a reply is checked against the call that was required",
+      "java": "e5_aReplyIsCheckedAgainstTheCallThatWasRequired",
+      "kotlin": "e5_aReplyIsCheckedAgainstTheCallThatWasRequired"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_an_unknown_tool_a_wrong_owner_or_a_bad_amount_is_refused",
+      "typescript": "e6 an unknown tool a wrong owner or a bad amount is refused",
+      "java": "e6_anUnknownToolAWrongOwnerOrABadAmountIsRefused",
+      "kotlin": "e6_anUnknownToolAWrongOwnerOrABadAmountIsRefused"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_cap_is_inclusive_and_an_irreversible_call_needs_approval_that_never_lifts_the_cap",
+      "typescript": "e7 the cap is inclusive and an irreversible call needs approval that never lifts the cap",
+      "java": "e7_theCapIsInclusiveAndAnIrreversibleCallNeedsApprovalThatNeverLiftsTheCap",
+      "kotlin": "e7_theCapIsInclusiveAndAnIrreversibleCallNeedsApprovalThatNeverLiftsTheCap"
+    }
+  },
+  "plants": {
+    "wrong-sorted-names": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "lists a role's tools alphabetically instead of in catalog order"
+    },
+    "wrong-no-budget": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "lets a role have more tools than the budget"
+    },
+    "wrong-unscoped-extra": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "grants an outside tool that is not marked as a scoped cross-role tool"
+    },
+    "wrong-duplicates-ok": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts two catalog entries with the same name"
+    },
+    "wrong-irreversible-by-tag": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "gives an irreversible tool to every role whose specialisation matches"
+    },
+    "wrong-forces-everywhere": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "forces the tool choice on models that reject it"
+    },
+    "wrong-fallback-all-tools": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "offers every tool in the fallback for a named first tool"
+    },
+    "wrong-fallback-no-verify": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "does not ask for the reply to be checked in the fallback"
+    },
+    "wrong-tools-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "does not count a narrower tool list as a change that costs the whole cache"
+    },
+    "wrong-choice-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "does not count a changed tool choice as a cost to the cached messages"
+    },
+    "wrong-repeat-costs": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reports a cost for a request that repeats the previous one"
+    },
+    "wrong-missed-call-ok": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "accepts a reply with no tool call when one was required"
+    },
+    "wrong-any-tool-counts": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "accepts any tool when a particular one was required first"
+    },
+    "wrong-default-allow": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "allows a tool that the policy does not name"
+    },
+    "wrong-owner-unchecked": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "does not compare the customer with the verified one"
+    },
+    "wrong-cap-exclusive": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "refuses an amount equal to the cap"
+    },
+    "wrong-approval-lifts-cap": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "lets an approval allow an amount above the cap"
+    },
+    "wrong-approval-skipped": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "allows an irreversible call without an approval"
+    }
+  }
+}
