@@ -1,4 +1,195 @@
 {
   "module": "10-safety-privacy-and-policy",
-  "quizzes": []
+  "quizzes": [
+    {
+      "id": "01-the-usage-policy-and-sensitive-data#q1",
+      "page": "01-the-usage-policy-and-sensitive-data.md",
+      "scope": "page",
+      "stem": "An HR coordinator wants Claude to summarise survey comments that include employees' names and health details. Policy restricts regulated personal data. Which step is best?",
+      "options": {
+        "a": "Summarise the comments by hand and keep every AI tool out of it",
+        "b": "Upload the comments as they are, then tell Claude to leave names out",
+        "c": "Upload the comments to a private account to sidestep the policy altogether",
+        "d": "Redact identities and medical specifics first, then condense the remarks"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The task can proceed if the data changes: remove the identifiers and sensitive details first (anonymise before you upload).",
+        "b": "Ruled out because the rule is that asking is \"a request, and it does not satisfy a policy control\", whatever Claude is told.",
+        "c": "Ruled out because the organisation's policy \"can be stricter than the Usage Policy and decides which tools and data are permitted at work\", and a private account does not sidestep it.",
+        "a": "Ruled out because \"You can usually keep the task and drop the identity\", so a refusal to use any tool is unnecessary."
+      }
+    },
+    {
+      "id": "01-the-usage-policy-and-sensitive-data#q2",
+      "page": "01-the-usage-policy-and-sensitive-data.md",
+      "scope": "page",
+      "stem": "A team uses Claude to draft decision letters about loan applications that go straight to applicants. Under the Usage Policy which pair of safeguards applies to this use?",
+      "options": {
+        "a": "A qualified reviewer before sending, and disclosure that AI helped",
+        "b": "A confidentiality footer on each letter, and a monthly accuracy count",
+        "c": "A second model's approval of each letter, and removal of applicants' names",
+        "d": "A legal sign-off once a year, and a note in the privacy policy"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Financial decisions that affect individuals are high-risk: a qualified professional reviews them and recipients are told AI helped.",
+        "b": "Ruled out because the requirement is that you \"disclose that AI helped produce it, at a minimum at the start of each session\", which a footer and a count do not provide.",
+        "c": "Ruled out because the reviewer must be a \"qualified professional in the field\", and a second model is not one.",
+        "d": "Ruled out because the review must happen \"before it is disseminated or finalised\", not once a year."
+      }
+    },
+    {
+      "id": "01-the-usage-policy-and-sensitive-data#q3",
+      "page": "01-the-usage-policy-and-sensitive-data.md",
+      "scope": "page",
+      "stem": "A consultant says: \"These sales figures are for internal analysis, so the customer names can stay in the file.\" What is the best response?",
+      "options": {
+        "a": "Swap each name for a code, and treat the result as fully anonymous",
+        "b": "Agree, because personal details matter only when results leave the building",
+        "c": "Labels follow the data, not the audience: strip identifiers or aggregate",
+        "d": "Keep everything as it is and ask Claude not to hold on to the data"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The class is set by the data, so the identifiers go or the rows are aggregated before upload.",
+        "b": "Ruled out because \"internal use does not change the class of the data\", so the names stay sensitive.",
+        "a": "Ruled out because \"Pseudonymised data is still personal data under many rules, because the key can reverse it\".",
+        "d": "Ruled out because asking Claude not to retain the file \"is a request, and it does not satisfy a policy control\"."
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#q1",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "page",
+      "stem": "A user asks Claude in Chrome to compare supplier pages. One page carries hidden text telling the assistant to open the user's webmail and forward invoices. Which pair of conditions made this attack possible?",
+      "options": {
+        "a": "The user ran the extension on a work laptop, and on a fast home connection",
+        "b": "Untrusted content could be read, and consequential actions could be taken",
+        "c": "The page used large images, and the browser was not fully up to date",
+        "d": "The supplier was unknown, and the user had saved no earlier chats"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page states the condition for harm: \"the risk exists when Claude can read untrusted content and take consequential actions\".",
+        "a": "Ruled out because \"Take either away and the danger drops\", and a laptop or a connection is neither of the two conditions.",
+        "c": "Ruled out because the attack plants instructions in content, and the page says the first habit is \"Limit what Claude reads to sources you trust\", not to tidy images or updates.",
+        "d": "Ruled out because an earlier chat history plays no part in the condition for harm, which is \"read untrusted content and take consequential actions\"."
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#q2",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "page",
+      "stem": "An Enterprise administrator wants Claude to view requests in a helpdesk connector, yet insist on a human click before any request is resolved. Which control matches?",
+      "options": {
+        "a": "A monthly spend limit applied to the whole workspace, set by an owner",
+        "b": "A switch that turns web search off for chat and Cowork across the organisation",
+        "c": "Scanning of uploaded skills and plugins for malicious content before they are used",
+        "d": "A per-tool permission, allowed for looking up and needing approval for changing"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The per-tool setting lets reading run while a status change needs approval (the controls table).",
+        "b": "Ruled out because the table places web search under \"Where the web can reach\", which does not touch connector actions.",
+        "c": "Ruled out because scanning belongs to \"Untrusted skills and plugins\", not to what a connector may do.",
+        "a": "Ruled out because a spend limit belongs under \"Spend controls at the organisation and per person\", which is cost and not permission."
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#q3",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "page",
+      "stem": "A manager asks an analyst to put a full customer export into Claude to get a report by tonight. Policy forbids regulated personal data in the tool. What is the best step?",
+      "options": {
+        "a": "Upload the export anyway, since the manager approved the request verbally",
+        "b": "Explain the clash, offer an aggregated version, and ask the rule's owner",
+        "c": "Refuse to produce the report and say nothing more about the matter to anyone",
+        "d": "Paste the export into a personal account that has no organisational policy attached"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The best answer \"raises the conflict with the person who owns the policy and proposes a compliant path\".",
+        "a": "Ruled out because \"Missing or unclear policy is not permission\", and a verbal approval is not an exception from the policy owner.",
+        "c": "Ruled out because the wrong answers include those that \"refuse everything, or quietly find a way around\", and an aggregated report is a compliant path.",
+        "d": "Ruled out because \"do not work around the rule (a personal account, a different tool, a rewording that hides the data)\"."
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#m1",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "module",
+      "stem": "A recruiter wants Claude to screen applicants' CVs into \"advance\" and \"reject\" lists that go to hiring managers. Which step meets the Usage Policy and good practice?",
+      "options": {
+        "a": "Let Claude finalise both sets, since it explains every ranking it gives",
+        "b": "A qualified person reviews the outcomes, and recipients are told AI assisted",
+        "c": "Remove candidates' names, then send the sets out with no review at all",
+        "d": "Run the screening in a personal account, so the content stays private to her"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Hiring decisions are a high-risk use: a qualified professional reviews them and recipients are told AI helped.",
+        "a": "Ruled out because \"qualified professional in the field must review the content or decision before it is disseminated or finalised\", and a model's own explanation is not a reviewer.",
+        "c": "Ruled out because the review must happen \"before it is disseminated or finalised\", and removing names does not replace it.",
+        "d": "Ruled out because \"do not work around the rule (a personal account, a different tool, a rewording that hides the data)\"."
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#m2",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "module",
+      "stem": "A colleague forwards a spreadsheet from an outside vendor and asks Claude for a summary with the Excel add-in. Rows contain white text addressed to the assistant. What is the most appropriate precaution?",
+      "options": {
+        "a": "Use a trusted copy and check each prompt, since external files can hide commands",
+        "b": "Turn on cross-app mode, so that a second document can check what the first one holds",
+        "c": "Delete the add-in's saved instructions so that nothing exists for the text to override",
+        "d": "Rely on the audit log to catch whatever damage might be done afterwards"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says external files can carry hidden instructions, so the precaution is a trusted copy and careful confirmations.",
+        "b": "Ruled out because more reach is not a precaution: the user habit is \"Limit what Claude can do\".",
+        "c": "Ruled out because the hidden text is in the data, and the page warns that \"files from outside can carry hidden instructions\", whatever the add-in's own settings say.",
+        "d": "Ruled out because \"the Microsoft 365 add-ins are outside the Enterprise audit logs and do not inherit custom retention settings\", so there is nothing to rely on."
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#m3",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "module",
+      "stem": "An analyst discovers that a shared document contains a hidden line aimed at AI tools, telling them to send a summary to an outside address. What should she do?",
+      "options": {
+        "a": "Tell the security contact now, and keep that item away from assistants",
+        "b": "Delete the line and carry on as before, since it is now harmless to everyone",
+        "c": "Try the line in a spare chat to find out whether it really works as claimed",
+        "d": "Raise it at the next team meeting, which falls a few weeks away in the calendar"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A suspicious file is reported to the security or IT contact straight away, because the same file may reach others.",
+        "b": "Ruled out because deleting the line leaves others unaware, and \"the same file may reach others\".",
+        "c": "Ruled out because running it in a tool that reads untrusted content re-creates the danger, and \"Take either away and the danger drops\".",
+        "d": "Ruled out because \"A leak or a suspicious file is reported quickly; waiting lets it spread.\""
+      }
+    },
+    {
+      "id": "02-prompt-injection-controls-and-escalation#m4",
+      "page": "02-prompt-injection-controls-and-escalation.md",
+      "scope": "module",
+      "stem": "A hospital group that has a HIPAA agreement asks whether staff may turn on memory and use Claude in Chrome on patient pages. Which answer is correct?",
+      "options": {
+        "a": "Yes, since an owner can enable any feature across the whole organisation",
+        "b": "Yes, if staff keep incognito mode switched on at all times during use",
+        "c": "No: both are unavailable or not recommended under that arrangement",
+        "d": "Only Chrome, since memory has no data retention at all after a session"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Memory is not available under HIPAA agreements, and Claude in Chrome is not available to HIPAA organisations.",
+        "b": "Ruled out because \"the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements\", which incognito mode does not change.",
+        "a": "Ruled out because \"a strict setting can switch a feature off\", so an owner cannot enable what the agreement removes.",
+        "d": "Ruled out because the page names both features among those unavailable under strict data agreements: \"Claude in Chrome is not available to HIPAA organisations\"."
+      }
+    }
+  ]
 }
