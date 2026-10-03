@@ -23,6 +23,13 @@ Steps:
                                                               the final result message (always last)
     {"exit": 2}                                               the process dies at once with that exit code (a crash)
 
+A tool step may also carry "parent": "<tool_use_id of an Agent call>": its assistant and user messages then carry that
+parent_tool_use_id, as the messages that run inside a subagent do. The Agent tool itself is an ordinary tool step whose output
+is the subagent's final report. The `agents` of the initialise request are recorded as {"agents": ...} in the record file.
+A PreToolUse hook may answer allow with `updatedInput` (the stand-in runs the tool with that input) or `ask` (the call is then sent to
+`can_use_tool` even when an allow rule or a mode would have approved it, and `allow` approves the call without asking, though a deny rule still wins; a PostToolUse hook may answer `updatedToolOutput`, which replaces the
+output the model sees. The PostToolUse event carries the output as `tool_response`.
+
 Rules applied to a tool step (a simplified copy of the documented behaviour, not the real binary): a tool that is
 not in --tools (when that flag is given) does not exist (MCP tools are not affected by --tools); PreToolUse hooks registered at the handshake are called
 and may deny; a tool in --disallowedTools is denied; a tool in --allowedTools (a pattern such as mcp__calc__* matches too) runs without asking; permission mode
@@ -91,13 +98,13 @@ def main():
                 pending[msg["response"]["request_id"]] = msg["response"]
         return pending.pop(rid)
 
-    def assistant(blocks, stop="end_turn"):
-        send({"type": "assistant", "session_id": session, "parent_tool_use_id": None,
+    def assistant(blocks, stop="end_turn", parent=None):
+        send({"type": "assistant", "session_id": session, "parent_tool_use_id": parent,
               "message": {"id": "msg_stub", "role": "assistant", "model": model, "content": blocks, "stop_reason": stop,
                           "usage": {"input_tokens": 1, "output_tokens": 1}}})
 
-    def run_hooks(event, tool):
-        """Call the SDK's hook callbacks that match; return a deny reason or None."""
+    def run_hooks(event, tool, effects=None, response=None):
+        """Call the SDK's hook callbacks that match; return a deny reason or None. `effects` collects updatedInput, ask and updatedToolOutput."""
         for entry in hooks.get(event, []):
             matcher = entry.get("matcher")
             if matcher and tool["name"] not in matcher.split("|"):
@@ -105,13 +112,23 @@ def main():
             for cb in entry.get("hookCallbackIds", []):
                 answer = ask("hook_callback", callback_id=cb, tool_use_id=tool["id"],
                              input={"hook_event_name": event, "session_id": session, "tool_name": tool["name"],
-                                    "tool_input": tool["input"], "tool_use_id": tool["id"]})
+                                    "tool_input": tool["input"], "tool_use_id": tool["id"],
+                                    **({"tool_response": response} if response is not None else {})})
                 out = (answer.get("response") or {})
                 spec = out.get("hookSpecificOutput") or {}
                 if spec.get("permissionDecision") == "deny":
                     return spec.get("permissionDecisionReason", "denied by a hook")
                 if out.get("decision") == "block":
                     return out.get("reason", "blocked by a hook")
+                if effects is not None:
+                    if spec.get("permissionDecision") == "ask":
+                        effects["ask"] = True
+                    elif spec.get("permissionDecision") == "allow":
+                        effects["allow"] = True
+                    if "updatedInput" in spec:
+                        effects["updatedInput"] = spec["updatedInput"]
+                    if "updatedToolOutput" in spec:
+                        effects["updatedToolOutput"] = spec["updatedToolOutput"]
         return None
 
     def mcp_call(tool):
@@ -129,14 +146,19 @@ def main():
         return "".join(c.get("text", "") for c in result.get("content", [])), bool(result.get("isError"))
 
     def run_tool(tool):
-        assistant([{"type": "tool_use", "id": tool["id"], "name": tool["name"], "input": tool["input"]}], "tool_use")
+        parent = tool.get("parent")
+        effects = {}
+        assistant([{"type": "tool_use", "id": tool["id"], "name": tool["name"], "input": tool["input"]}], "tool_use", parent)
         denied = None if available is None or tool["name"] in available or tool["name"].startswith("mcp__") else f"No such tool available: {tool['name']}"
-        denied = denied or run_hooks("PreToolUse", tool)
+        denied = denied or run_hooks("PreToolUse", tool, effects)
+        if denied is None and "updatedInput" in effects:
+            tool = {**tool, "input": effects["updatedInput"]}
         if denied is None:
             name = tool["name"]
             if name in disallowed or mode == "dontAsk" and name not in allowed:
                 denied = f"{name} is not permitted"
-            elif any(fnmatch.fnmatchcase(name, pattern) for pattern in allowed) or mode == "bypassPermissions":
+            elif (any(fnmatch.fnmatchcase(name, pattern) for pattern in allowed) or mode == "bypassPermissions"
+                  or effects.get("allow") and mode != "dontAsk") and not effects.get("ask"):
                 pass
             else:
                 answer = ask("can_use_tool", tool_name=name, input=tool["input"], tool_use_id=tool["id"])
@@ -149,8 +171,11 @@ def main():
             content, is_error = (denied if denied.startswith("No such tool") else f"Permission denied: {denied}"), True
         else:
             content, is_error = mcp_call(tool) if tool["name"].startswith("mcp__") else (tool.get("output", ""), bool(tool.get("is_error")))
-            run_hooks("PostToolUse", tool)
-        send({"type": "user", "session_id": session, "parent_tool_use_id": None,
+            post = {}
+            run_hooks("PostToolUse", tool, post, response=content)
+            if "updatedToolOutput" in post:
+                content = post["updatedToolOutput"]
+        send({"type": "user", "session_id": session, "parent_tool_use_id": parent,
               "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": tool["id"],
                                                        "content": content, "is_error": is_error}]}})
         return denied is None
@@ -164,6 +189,7 @@ def main():
             request = msg["request"]
             if request.get("subtype") == "initialize":
                 hooks.update(request.get("hooks") or {})
+                rec("agents", request.get("agents"))
             send({"type": "control_response", "response": {"subtype": "success", "request_id": msg["request_id"], "response": {"commands": [], "models": []}}})
         elif kind == "user" and turns:
             send({"type": "system", "subtype": "init", "session_id": session, "model": model, "cwd": "/work",

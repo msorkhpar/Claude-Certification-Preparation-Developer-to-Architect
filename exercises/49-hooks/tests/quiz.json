@@ -1,0 +1,138 @@
+{
+  "module": "49-hooks",
+  "quizzes": [
+    {
+      "id": "01-what-a-hook-decides-and-what-it-cannot-undo#q1",
+      "page": "01-what-a-hook-decides-and-what-it-cannot-undo.md",
+      "scope": "page",
+      "stem": "A PreToolUse hook is meant to rewrite a command before it runs. It returns the new input in a field next to `hookSpecificOutput`, and the original command runs unchanged. What is the cause?",
+      "options": {
+        "a": "The value is honoured only when nested in the answer structure",
+        "b": "A rewrite takes effect only if the hook answers with a deferral",
+        "c": "Commands can be rewritten only by a hook that runs as a separate program",
+        "d": "The rewrite was applied, then undone by the session's permission mode"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The answer is read only from its documented place.",
+        "b": "Ruled out because a deferral discards the change: \"the input is dropped\".",
+        "c": "Ruled out because callback hooks may change input too: \"Pair `updatedInput` with `permissionDecision: 'allow'` to auto-approve the modified input\".",
+        "d": "Ruled out because nothing undoes a change that is applied: \"the modified input still applies and flows through the normal permission evaluation\"."
+      }
+    },
+    {
+      "id": "01-what-a-hook-decides-and-what-it-cannot-undo#q2",
+      "page": "01-what-a-hook-decides-and-what-it-cannot-undo.md",
+      "scope": "page",
+      "stem": "A team adds a hook with the matcher `src/payments/*` to review every write under that folder. The hook never fires. What is the best fix?",
+      "options": {
+        "a": "Switch the matcher to a regular expression that also lists every file in the folder",
+        "b": "Raise the timeout so that the matcher has time to evaluate the paths",
+        "c": "Attach it to the file-editing tools and test the path inside the callback",
+        "d": "Move the hook to the PostToolUse event, which evaluates paths after the write"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A matcher sees only the name of the tool, so the path is read from the input.",
+        "a": "Ruled out because \"Matchers only match tool names, not file paths or other arguments.\"",
+        "b": "Ruled out because the timeout bounds the callback and has nothing to do with matching: \"Each callback runs with a timeout in seconds\".",
+        "d": "Ruled out because the post event comes after the tool and cannot change what a matcher sees: \"the tool already ran\"."
+      }
+    },
+    {
+      "id": "02-normalising-results-command-hooks-and-the-practice#q1",
+      "page": "02-normalising-results-command-hooks-and-the-practice.md",
+      "scope": "page",
+      "stem": "A support agent uses three vendor systems: one gives epoch seconds, one a numeric status code, one local date text. The model keeps comparing dates wrongly. Which fix fits best, given that the team does not own them?",
+      "options": {
+        "a": "A longer system prompt that teaches the model each vendor's date format by example",
+        "b": "A PostToolUse hook that supplies one readable format as the replacement output",
+        "c": "A PreToolUse hook that refuses any call whose answer is hard to read for the agent",
+        "d": "A larger model for the support agent, since comparison is a reasoning task for it"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The hook converts once, in code, for any tool, before the model reads the result.",
+        "a": "Ruled out because a conversion in the model's head can be wrong, and the page assigns that task to code: \"is a prompt for a task with a right answer\".",
+        "c": "Ruled out because the hook runs after the tool and cannot refuse it: \"The hook runs after the tool.\"",
+        "d": "Ruled out because a larger model still converts by reasoning, and the page names the reliable place: \"A PostToolUse hook is the place to make them consistent, once, in code.\""
+      }
+    },
+    {
+      "id": "02-normalising-results-command-hooks-and-the-practice#q2",
+      "page": "02-normalising-results-command-hooks-and-the-practice.md",
+      "scope": "page",
+      "stem": "A team commits a git-push guard to the project's `.claude/settings.json`. Its batch service runs the SDK with `setting_sources=[]` and a callback hook for refunds. A push attempt from the service is not blocked. Why?",
+      "options": {
+        "a": "The callback hook overrides every command hook that the settings define",
+        "b": "Command hooks are meant for interactive sessions of Claude Code only",
+        "c": "The guard's timeout is too short for a batch service, so the call proceeds",
+        "d": "Nothing reads that checked-in file here, so its shell commands are skipped"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "With no setting sources the SDK collects only the callbacks.",
+        "a": "Ruled out because the two kinds run side by side: \"next to its callbacks, in parallel and with the most restrictive answer applying\".",
+        "b": "Ruled out because the SDK collects \"shell command hooks from settings files when the corresponding `setting_sources` entry is enabled\".",
+        "c": "Ruled out because the timeout is a setting of the command and says nothing about whether the file is read: \"with the timeout in seconds\"."
+      }
+    },
+    {
+      "id": "02-normalising-results-command-hooks-and-the-practice#m1",
+      "page": "02-normalising-results-command-hooks-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team checks the refund limit in a PostToolUse hook and, when a refund is above the limit, the hook exits with code 2. Large refunds still happen. What is the cause, and the fix?",
+      "options": {
+        "a": "Exit 2 does not block in the SDK, so the hook must return a denial",
+        "b": "Post hooks may not fire at all, so the limit needs a much longer timeout",
+        "c": "The money has already moved by then, so the control belongs ahead of the call",
+        "d": "The limit is read from the output, so it should be read from the input instead"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A post hook runs after the effect.",
+        "a": "Ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it \"Shows stderr to Claude; the tool already ran\".",
+        "b": "Ruled out because the turn-limit case is a different one: \"Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute\".",
+        "d": "Ruled out because the field read is not the fault: \"A control that must prevent an effect therefore belongs in `PreToolUse`\"."
+      }
+    },
+    {
+      "id": "02-normalising-results-command-hooks-and-the-practice#m2",
+      "page": "02-normalising-results-command-hooks-and-the-practice.md",
+      "scope": "module",
+      "stem": "On Claude Code v2.1.210 or later, a PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?",
+      "options": {
+        "a": "A normal result, because the operation went ahead while the gate was still waiting",
+        "b": "A message that no reply arrived before the deadline, and the operation is withheld",
+        "c": "A rejection from a person, and the whole run stops until someone responds to it",
+        "d": "Nothing at all, and the turn simply waits until the gate finally gives its answer"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A timed-out gate is the safe case: nothing runs and the model is told.",
+        "a": "Ruled out because the tool is not run: \"Claude Code doesn't run the tool call\".",
+        "c": "Ruled out because the model gets a result and the turn goes on: \"Claude receives a tool result stating the hook didn't respond before its timeout\".",
+        "d": "Ruled out because a callback past its timeout is stopped: \"Claude Code cancels it and discards its output\"."
+      }
+    },
+    {
+      "id": "02-normalising-results-command-hooks-and-the-practice#m3",
+      "page": "02-normalising-results-command-hooks-and-the-practice.md",
+      "scope": "module",
+      "stem": "A second callback was written to use the corrected input that a first callback produces, and it sometimes sees the original. What is the right design?",
+      "options": {
+        "a": "Register the second one first so that it always runs before the other",
+        "b": "Add a delay to the second one so that the first has time to finish",
+        "c": "Return the corrected input from both, so that the last one applies",
+        "d": "Merge both steps into one function, as handlers finish in any order"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Callbacks are not a pipeline.",
+        "a": "Ruled out because the order of registration does not set the order of completion: \"all matching hooks run in parallel\".",
+        "b": "Ruled out because a delay guesses at an order that nothing fixes: \"completion order is non-deterministic\".",
+        "c": "Ruled out because the callbacks are not ranked: \"Two hooks cannot be a pipeline.\""
+      }
+    }
+  ]
+}

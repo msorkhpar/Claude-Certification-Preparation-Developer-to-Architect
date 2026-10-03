@@ -2,7 +2,7 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the modules of Level 2 (Developer),
-modules 12 to 44, which is the whole of Level 2:
+modules 12 to 44, which is the whole of Level 2, and the first modules of Level 3 (Architect), modules 45 to 50:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -50,6 +50,12 @@ modules 12 to 44, which is the whole of Level 2:
 | `42-evaluation/` | Evaluation | 3 |
 | `43-debugging-claude-applications/` | Debugging Claude applications | 2 |
 | `44-exam-readiness-2/` | Exam readiness 2 (two pages and two Developer mock exams) | 4 |
+| `45-the-agentic-loop-in-depth/` | The agentic loop, in depth | 2 |
+| `46-coordinator-and-subagents/` | Coordinator and subagents | 2 |
+| `47-invoking-subagents/` | Invoking subagents | 2 |
+| `48-multi-step-workflows-with-guarantees/` | Multi-step workflows with guarantees | 2 |
+| `49-hooks/` | Hooks | 2 |
+| `50-task-decomposition/` | Task decomposition | 2 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names

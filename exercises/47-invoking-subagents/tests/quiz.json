@@ -1,0 +1,138 @@
+{
+  "module": "47-invoking-subagents",
+  "quizzes": [
+    {
+      "id": "01-the-agent-tool-definitions-and-permissions#q1",
+      "page": "01-the-agent-tool-definitions-and-permissions.md",
+      "scope": "page",
+      "stem": "A team gives its security-review subagent the one-word blurb \"Helper.\" The coordinator keeps reviewing code itself and never delegates. Which change makes delegation likely?",
+      "options": {
+        "a": "Rewrite the description to state when this specialist should be called",
+        "b": "Raise the agent's turn limit so that starting it is worth the extra effort",
+        "c": "Move the review instructions from the description into the agent's own prompt",
+        "d": "Set the nesting depth to three so that the model is allowed to delegate at all"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The model reads the description to decide whether to delegate, so it must say when the agent applies.",
+        "b": "Ruled out because a turn limit only bounds a run that has started: \"Turns before it stops; the output is then marked partial, and the agent can be resumed\".",
+        "c": "Ruled out because the prompt is the agent's own role, while the description is \"Natural language description of when to use this agent\".",
+        "d": "Ruled out because nesting concerns subagents that spawn their own: \"The practice removes `Agent` from every subagent's list and sets the nesting depth to one, so that only the coordinator decides how large the team is.\""
+      }
+    },
+    {
+      "id": "01-the-agent-tool-definitions-and-permissions#q2",
+      "page": "01-the-agent-tool-definitions-and-permissions.md",
+      "scope": "page",
+      "stem": "A dashboard counts delegations by looking for calls to the Agent tool in the message stream. Replayed logs from earlier runs show subagent reports, yet the dashboard reports zero delegations. What fixes it?",
+      "options": {
+        "a": "Read the tools list of the init message, where the tool is always named Agent",
+        "b": "Look for the subagent's name in the assistant's text blocks",
+        "c": "Match the former name Task in the call blocks too, besides the current one",
+        "d": "Add Agent to the allowed tools so that its calls show up in the stream"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Older versions named the tool Task in the call blocks, so both names must be matched.",
+        "b": "Ruled out because a spawn is a tool call, not text: the model \"calls a tool named `Agent` with an input that names the one it wants\".",
+        "a": "Ruled out because the two lists differ: the tool \"appears as Agent in tool_use blocks but as Task in the system:init tools list\".",
+        "d": "Ruled out because the entry does not change what is logged: a spawn needs no approval of its own, and listing it \"makes the intent explicit\"."
+      }
+    },
+    {
+      "id": "02-context-parallel-subagents-and-the-practice#q1",
+      "page": "02-context-parallel-subagents-and-the-practice.md",
+      "scope": "page",
+      "stem": "A coordinator spawns a subagent when it did not set `run_in_background`, and then writes its answer to the user before the subagent has reported. What explains it?",
+      "options": {
+        "a": "Delegated work launches immediately unless the call asks for a foreground wait",
+        "b": "The spend cap was reached, so the subagent never started and nothing was reported",
+        "c": "Subagents are started one at a time, so the second one was still queued",
+        "d": "The concurrency limit refused the spawn without telling the coordinator anything"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The documentation's default is a background launch, and a coordinator that needs the result first has to ask for a foreground run.",
+        "b": "Ruled out because a spent cap is reported, not silent: \"spawning another subagent fails with `Budget limit reached`\".",
+        "c": "Ruled out because the SDK runs them together: \"Multiple subagents can run concurrently, so independent subtasks finish in the time of the slowest one rather than the sum of all of them.\"",
+        "d": "Ruled out because the refusal is a result that the coordinator reads: \"the spawn is refused with the tool result `Concurrent subagent limit reached`, and the coordinator reads it like any other result\"."
+      }
+    },
+    {
+      "id": "02-context-parallel-subagents-and-the-practice#q2",
+      "page": "02-context-parallel-subagents-and-the-practice.md",
+      "scope": "page",
+      "stem": "A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact in different words. Which change fits best?",
+      "options": {
+        "a": "Keep only the first source of every repeated fact, so that answers stay short",
+        "b": "Ask the synthesizer to cite sources by recalling where each figure appeared",
+        "c": "Write the source into each claim sentence, in brackets right after the text",
+        "d": "Return each claim and its origin as separate fields, and combine on claims"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Content and metadata in separate fields let the merge recognise one claim and keep every source.",
+        "b": "Ruled out because \"attribution is a property of the data, and the synthesis cannot be asked to rebuild it from prose.\"",
+        "c": "Ruled out because \"The metadata is never written into the claim string, because then the merge could not recognise that two sentences are the same claim.\"",
+        "a": "Ruled out because the sources are the evidence: \"two subagents that found the same fact independently strengthen it, and the reader sees both sources\"."
+      }
+    },
+    {
+      "id": "02-context-parallel-subagents-and-the-practice#m1",
+      "page": "02-context-parallel-subagents-and-the-practice.md",
+      "scope": "module",
+      "stem": "A CI coordinator runs in bypassPermissions, and its reviewer definition lists only the tools Read and Grep. A teammate fears that the reviewer can still do anything, because the mode skips prompts. Which limit remains?",
+      "options": {
+        "a": "Nothing at all, because the mode removes every restriction on the tree",
+        "b": "The permission mode in its own definition, which overrides the parent's mode entirely",
+        "c": "Its own capability set, since whatever is left out is absent from its session",
+        "d": "The parent's allowed tools, which cap what the mode may approve"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A tool that is not in the subagent's session cannot be called, whatever the mode.",
+        "b": "Ruled out because a definition cannot loosen a bypass parent or override it: \"A subagent runs in `bypassPermissions` mode only when the parent session itself does.\"",
+        "a": "Ruled out because \"A tool you leave out isn't in the subagent's session at all: Claude works without it, with no permission prompt or error.\"",
+        "d": "Ruled out because \"allowed_tools does not constrain bypassPermissions\"."
+      }
+    },
+    {
+      "id": "02-context-parallel-subagents-and-the-practice#m2",
+      "page": "02-context-parallel-subagents-and-the-practice.md",
+      "scope": "module",
+      "stem": "The final answer of a coordinator paraphrases a subagent's findings and drops the line numbers that the user needs. Which fix fits best?",
+      "options": {
+        "a": "Raise the subagent's turn limit so that its report becomes much longer and fuller",
+        "b": "Tell the parent to keep the report verbatim, or read the tool result directly",
+        "c": "Remove the return-format line from the brief so that the report is less rigid",
+        "d": "Switch the subagent to a larger model so that its summaries keep more of the detail"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The parent may summarize, so the words that matter must be kept by instruction or read from the result.",
+        "a": "Ruled out because the paraphrase happens in the parent, which \"may summarize it in its own response\".",
+        "c": "Ruled out because the format line decides what comes back: \"The return format tells it what the coordinator will do with the answer.\"",
+        "d": "Ruled out because a larger model does not stop the coordinator from summarizing: \"The parent receives the subagent's final report, but may summarize it in its own response.\""
+      }
+    },
+    {
+      "id": "02-context-parallel-subagents-and-the-practice#m3",
+      "page": "02-context-parallel-subagents-and-the-practice.md",
+      "scope": "module",
+      "stem": "Six delegates run side by side, and each asks for approval before reading files, which floods the operator. Which design fits best?",
+      "options": {
+        "a": "Take the Read tool out of the definitions, so that nothing can ever prompt",
+        "b": "Set bypassPermissions in each agent definition, so that none of them asks again",
+        "c": "Run the six one after another, so that only one asks at any given time",
+        "d": "Pre-approve those lookups in a PreToolUse hook, or in inherited rules"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A hook or inherited rules answer the repeated requests once, in one place.",
+        "b": "Ruled out because a definition cannot set bypass: \"A subagent runs in `bypassPermissions` mode only when the parent session itself does.\"",
+        "c": "Ruled out because sequencing independent work costs time: \"independent subtasks finish in the time of the slowest one rather than the sum of all of them\".",
+        "a": "Ruled out because a subagent without the tool cannot read: \"A tool you leave out isn't in the subagent's session at all: Claude works without it\"."
+      }
+    }
+  ]
+}

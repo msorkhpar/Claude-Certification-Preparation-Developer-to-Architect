@@ -99,6 +99,10 @@ D = {"p#q1": ("A nightly job rejects the largest reports after the vendor change
      "p#q3": ("A localisation lead sees one paragraph cost more in one script than another", "Compare token counts per script")}
 expect("plant: near-duplicate questions", check_near_duplicates(D), True)
 expect("clean: distinct questions", check_near_duplicates({k: v for k, v in D.items() if k != "p#q2"}), False)
+# the duplicate rule is level-wide: a Level 3 question that restates a Level 2 question is flagged, whatever the module numbers
+CROSS = {"35/02#q2": D["p#q1"], "46/01#q1": D["p#q2"], "47/01#q1": D["p#q3"]}
+expect("plant: near-duplicate across Level 2 and Level 3", [p for p in check_near_duplicates(CROSS) if "35/02#q2" in p and "46/01#q1" in p], True)
+expect("clean: unrelated questions across Level 2 and Level 3", [p for p in check_near_duplicates(CROSS) if "47/01#q1" in p], False)
 expect("plant: key longest above 40 percent fails", [f for f in [longest_verdict("m", 5, 10)[0]] if f], True)
 expect("plant: key longest 35 percent warns only", [f for f in [longest_verdict("m", 7, 20)[0]] if f], False)
 expect("plant: key longest 35 percent gives a warning", [w for w in [longest_verdict("m", 7, 20)[1]] if w], True)

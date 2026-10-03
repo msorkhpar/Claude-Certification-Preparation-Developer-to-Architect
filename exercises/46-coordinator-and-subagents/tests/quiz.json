@@ -1,0 +1,138 @@
+{
+  "module": "46-coordinator-and-subagents",
+  "quizzes": [
+    {
+      "id": "01-hub-and-spoke-and-what-the-coordinator-owns#q1",
+      "page": "01-hub-and-spoke-and-what-the-coordinator-owns.md",
+      "scope": "page",
+      "stem": "A coordinator spends ten turns locating the broken check and its failure text, then tells a subagent only to \"fix the broken check\". The subagent opens other modules and edits the wrong one. What should the coordinator have done?",
+      "options": {
+        "a": "Put the path, the exact message and its decisions so far into the prompt it hands over",
+        "b": "Rely on the subagent to inherit the parent's earlier tool results by itself, unprompted",
+        "c": "Name a stronger model for the subagent in its definition file",
+        "d": "Add a line telling the subagent to ask the coordinator whenever it is unsure"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found.",
+        "b": "Ruled out because nothing is inherited: \"The only content you pass from parent to subagent is the Agent tool's prompt string\".",
+        "c": "Ruled out because the problem is missing information, and \"a vague brief produces vague work.\"",
+        "d": "Ruled out because the subagent cannot converse with its parent while it runs: \"only its final message returns to the parent\"."
+      }
+    },
+    {
+      "id": "01-hub-and-spoke-and-what-the-coordinator-owns#q2",
+      "page": "01-hub-and-spoke-and-what-the-coordinator-owns.md",
+      "scope": "page",
+      "stem": "A team plans a multi-agent design for a feature whose planning, coding and verifying steps all draw on the same evolving sources, with the user steering between steps. Which choice fits best?",
+      "options": {
+        "a": "Run the three steps as parallel subagents to cut the total waiting time",
+        "b": "Give each step to its own subagent so that every context stays clean and small",
+        "c": "Stay in one single conversation, since the phases lean on shared context",
+        "d": "Add a coordinator that merges what the three step-agents produce at the end"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The steps depend on one shared context and on steering, which a team cannot give.",
+        "b": "Ruled out because the documentation lists this case for the main conversation: \"multiple phases share significant context, such as planning, implementation, and testing\".",
+        "a": "Ruled out because a delegate loses time: a subagent that is not a fork \"starts fresh and may need time to gather context\".",
+        "d": "Ruled out because the dependencies are the problem: \"some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit\"."
+      }
+    },
+    {
+      "id": "02-review-iteration-failures-and-the-practice#q1",
+      "page": "02-review-iteration-failures-and-the-practice.md",
+      "scope": "page",
+      "stem": "A subagent's call is cut short by a rate limit, and the coordinator's synthesis quotes the line \"API error: rate limited\" as if it were a finding. What should the coordinator do instead?",
+      "options": {
+        "a": "Keep the error line among the findings so that the user sees what happened",
+        "b": "Record the scope as failed and tell the user what is missing",
+        "c": "Instruct the synthesizer to skip any sentence that looks like an error",
+        "d": "Send the whole team out again until every subagent succeeds"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A failure belongs to its scope, and the user is owed a list of what is missing.",
+        "a": "Ruled out because the documentation says of such an error that it \"is never delivered as its result\", so it is not evidence.",
+        "c": "Ruled out because the problem is then hidden: \"A partial answer looks like a full one\".",
+        "d": "Ruled out because it is the other coordinator mistake: \"Sending every brief out again in the next round doubles the cost and adds repeats\"."
+      }
+    },
+    {
+      "id": "02-review-iteration-failures-and-the-practice#q2",
+      "page": "02-review-iteration-failures-and-the-practice.md",
+      "scope": "page",
+      "stem": "After its first wave of subagents the lead finds that two of five sections are weak. It sends every assignment out again, and the bill doubles with little new content. Which change fits best?",
+      "options": {
+        "a": "Stop after the first wave and report the whole answer as complete and final",
+        "b": "Start more subagents in the first wave so that fewer gaps appear afterwards",
+        "c": "Let the synthesis step fill the weak sections from what the model already knows",
+        "d": "Dispatch follow-ups for the flagged gaps alone, inside a fixed number of rounds"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The review names the gaps, only they are sent out again, and the rounds are capped.",
+        "b": "Ruled out because every wave is paid for: \"multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance.\"",
+        "c": "Ruled out because \"a gap is found by the review and closed by a subagent, never invented by the synthesis.\"",
+        "a": "Ruled out because the answer is complete only when \"no gap remains and nothing failed\"."
+      }
+    },
+    {
+      "id": "02-review-iteration-failures-and-the-practice#m1",
+      "page": "02-review-iteration-failures-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. On one question, two of the three subagents come back with almost the same findings on the same period. Which cause fits best?",
+      "options": {
+        "a": "The coordinator ran too few rounds of review after the first answers",
+        "b": "The context of one subagent leaked into another during the run",
+        "c": "The briefs did not divide the scope or say what each part must leave out",
+        "d": "The subagents ran on a smaller model than the coordinator uses"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Overlap comes from the brief, because the subagents cannot see each other.",
+        "b": "Ruled out because nothing crosses between subagents: \"A subagent does not know the user's original question, the plan, the other subagents\".",
+        "a": "Ruled out because review cannot undo duplicate work already paid for, and the page puts the cause in the briefs: \"Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information.\"",
+        "d": "Ruled out because the model size is not the cause in the article's example: \"one subagent explored the 2021 automotive chip crisis while 2 others duplicated work investigating current 2025 supply chains.\""
+      }
+    },
+    {
+      "id": "02-review-iteration-failures-and-the-practice#m2",
+      "page": "02-review-iteration-failures-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. The coordinator starts the same five subagents for every query, including \"what is the boiling point of water\". Which redesign fits best?",
+      "options": {
+        "a": "Keep the five subagents but lower the token limit of each one",
+        "b": "Scale the team to what is asked, down to a solo worker for a plain fact",
+        "c": "Let the five subagents share one context so that they finish sooner",
+        "d": "Start the team only when the user asks for a long report"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The effort should follow the question: \"Simple fact-finding requires just 1 agent with 3-10 tool calls\".",
+        "a": "Ruled out because the cost of the team comes from running it: \"agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats\".",
+        "c": "Ruled out because a shared context is what a team does not have: \"The only content you pass from parent to subagent is the Agent tool's prompt string\".",
+        "d": "Ruled out because a long report does not make a team worth its cost: \"the value of the task is high enough to pay for the increased performance\"."
+      }
+    },
+    {
+      "id": "02-review-iteration-failures-and-the-practice#m3",
+      "page": "02-review-iteration-failures-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and cost rises while details get lost in the summaries. Which architecture change fits best?",
+      "options": {
+        "a": "Cap the turns of each specialist so that its drafts stay short and focused",
+        "b": "Ask the coordinator to condense every draft before the next specialist starts work",
+        "c": "Hand each specialist the coordinator's whole conversation so that drafts can be rebuilt",
+        "d": "Keep each output in an outside store and forward only a short pointer"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A reference keeps the output out of the lead's window and out of its summaries.",
+        "b": "Ruled out because condensing loses detail: \"This prevents information loss during multi-stage processing\".",
+        "c": "Ruled out because copying through conversation history is the cost: \"reduces token overhead from copying large outputs through conversation history\".",
+        "a": "Ruled out because a cap on turns does not change where the outputs travel, and the lead still reads each one: \"Rather than requiring subagents to communicate everything through the lead agent\"."
+      }
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "module": "50-task-decomposition",
+  "quizzes": [
+    {
+      "id": "01-fixed-chain-or-adaptive-plan#q1",
+      "page": "01-fixed-chain-or-adaptive-plan.md",
+      "scope": "page",
+      "stem": "A team reviews a fourteen-file change by sending all the files in one request. The comments are deep for the first files and thin for the last ones, and a changed signature in one file is never matched against its callers elsewhere. Which restructuring fits best?",
+      "options": {
+        "a": "Give each source its own examination, then run a pass over what they concluded",
+        "b": "Send the same single request three times and merge the answers into one report",
+        "c": "Split the change into two halves of seven files and review each half in one request",
+        "d": "Keep the single request and add an instruction to treat every file with equal care"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Each file gets a full review in its own context, and a second pass sees the relations.",
+        "b": "Ruled out because repetition keeps what causes the problem: \"A request that holds a dozen files spends that budget on text before the review begins\".",
+        "c": "Ruled out because halves keep the dilution and still hide the relations between the halves: \"The exam calls the effect attention dilution\".",
+        "d": "Ruled out because an instruction does not change what fills the context: \"LLM performance degrades as context fills\"."
+      }
+    },
+    {
+      "id": "01-fixed-chain-or-adaptive-plan#q2",
+      "page": "01-fixed-chain-or-adaptive-plan.md",
+      "scope": "page",
+      "stem": "A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?",
+      "options": {
+        "a": "Fix one subtask per directory in advance and run them in order",
+        "b": "Ask the model to plan every test in advance, then run that plan to the end",
+        "c": "Map the structure, rank the areas by impact, then re-plan as dependencies appear",
+        "d": "Pick the largest files first and write tests for them until time runs out"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "An open-ended task is mapped first and planned from what is found.",
+        "a": "Ruled out because a fixed order cannot follow the findings: \"a pipeline that marches through steps that no longer make sense\".",
+        "b": "Ruled out because a plan made before any ground truth is a guess: \"the plan is made before any ground truth exists\".",
+        "d": "Ruled out because size is not impact: \"mapped, ranked and then planned again as dependencies appear\"."
+      }
+    },
+    {
+      "id": "02-per-item-passes-adaptive-guards-and-the-practice#q1",
+      "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "scope": "page",
+      "stem": "In an adaptive investigation the step chooser keeps proposing \"list the test files\", which was already done, and the loop hits its step limit each time. What is the best change?",
+      "options": {
+        "a": "Double the step limit so that the planner has room to move on by itself",
+        "b": "Halt with a stuck status once a task repeats, and name the repeated one",
+        "c": "Remove the planner's history so that every request is judged on its own",
+        "d": "Let the worker skip the repeated subtask silently and carry on with the next"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A repeated subtask is a lack of progress, and a status says so.",
+        "a": "Ruled out because the limit is a backstop and the cause is the lack of progress: \"A loop that runs into it needs a progress check\".",
+        "c": "Ruled out because the history is what lets the planner see what it has done: \"The planner is given the goal and the steps done so far\".",
+        "d": "Ruled out because a silent skip leaves no status behind: \"so that a reader of the result can tell them apart\"."
+      }
+    },
+    {
+      "id": "02-per-item-passes-adaptive-guards-and-the-practice#q2",
+      "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "scope": "page",
+      "stem": "A large review runs one pass per module and then a final pass across modules. What should the final pass receive?",
+      "options": {
+        "a": "The full text of every module, so that it can read the code that it compares",
+        "b": "The findings of the earlier passes together with the diff of the whole change",
+        "c": "The diff of the whole change, because the modules are in the repository already",
+        "d": "A name and a short summary for each, listing what it offers and what it expects"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Summaries are the interface between the passes.",
+        "a": "Ruled out because the text would bring the overload back: \"the one overloaded request that the split removed\".",
+        "b": "Ruled out because findings alone say nothing about what the files offer: \"what the file offers (the functions and types others use, with their parameters)\".",
+        "c": "Ruled out because the final pass needs each file's conclusions: \"The cross pass needs what each file pass concluded about what the file offers\"."
+      }
+    },
+    {
+      "id": "02-per-item-passes-adaptive-guards-and-the-practice#m1",
+      "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "scope": "module",
+      "stem": "A platform team runs one fixed checklist (lint, test, report) over forty unrelated systems. A colleague wants an adaptive planner for each because it is more capable. What is the best answer?",
+      "options": {
+        "a": "Use it, because a planner improves on a fixed checklist of steps in every respect",
+        "b": "Use one planner for the forty of them in a single shared session instead",
+        "c": "Use the plain sequence on each, as the steps are known and none affects another",
+        "d": "Use a pass for each plus a cross pass, because that many items need a cross pass"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Known steps and independent items call for the simplest shape.",
+        "a": "Ruled out because capability has a price: \"Agentic systems often trade latency and cost for better task performance.\"",
+        "b": "Ruled out because the systems do not interact, so nothing is gained by a shared planner: \"A fixed chain, run once for each item\".",
+        "d": "Ruled out because a cross pass is for items that affect each other: \"Items that do not (forty services, each given the same checklist) need only the chain, run forty times.\""
+      }
+    },
+    {
+      "id": "02-per-item-passes-adaptive-guards-and-the-practice#m2",
+      "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?",
+      "options": {
+        "a": "Ask it to restate the goal more carefully before each next step",
+        "b": "Plan every step up front, so that no drift is possible",
+        "c": "Hand it the output of each action so far, such as a test run or a file listing",
+        "d": "Switch to a fixed chain, since a chain cannot drift from the code"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The planner needs ground truth from each step, not its own earlier guesses.",
+        "a": "Ruled out because the source of the drift is what it is shown: \"a plan that is made from the model's own previous guesses drifts\".",
+        "b": "Ruled out because an up-front plan has no results to use: \"the plan is made before any ground truth exists\".",
+        "d": "Ruled out because a chain does not adapt: \"If step two finds that step three is pointless, the chain runs step three.\""
+      }
+    },
+    {
+      "id": "02-per-item-passes-adaptive-guards-and-the-practice#m3",
+      "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "scope": "module",
+      "stem": "A source file has four thousand lines, which is too long for one pass. How should it be handled?",
+      "options": {
+        "a": "Send its first part only, because the beginning of a file is the most important",
+        "b": "Summarise the file in one sentence and use the sentence in its place",
+        "c": "Send the whole file anyway, because splitting loses what connects its separate parts",
+        "d": "Inspect it in labelled parts, and let the joined summaries carry what spans them"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Parts keep each pass small and the summary joins them.",
+        "a": "Ruled out because the rest of the file would never be reviewed: \"A file that does not fit a pass of its own is cut into parts of a fixed number of lines\".",
+        "b": "Ruled out because a sentence does not carry the interfaces: \"what the file offers (the functions and types others use, with their parameters)\".",
+        "c": "Ruled out because the whole file brings back the problem of the split: \"spends that budget on text before the review begins\"."
+      }
+    }
+  ]
+}
