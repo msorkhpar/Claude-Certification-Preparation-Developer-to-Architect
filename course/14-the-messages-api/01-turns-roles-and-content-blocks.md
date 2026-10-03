@@ -51,8 +51,9 @@ message with the role `system` as the first entry is not allowed.
 
 One newer feature changes the picture slightly: on Claude Fable 5.1, Opus 5.5 and Sonnet 5.5 (and some others named
 on the page), you can include a message with `"role": "system"` **after a user turn** to add an instruction part-way
-through a conversation. It has the same authority as the top-level field, and because it is appended at the end it
-does not invalidate a cached prefix that came before it. Use the top-level field for instructions that hold from the
+through a conversation. It is applied as a system instruction, takes precedence over the top-level field when the two conflict, and because it
+is appended at the end it does not invalidate a cached prefix that came before it. It must follow a user turn and cannot
+be the first entry in `messages`. Use the top-level field for instructions that hold from the
 first turn, and the mid-conversation message for instructions that only become relevant later.
 
 ### Content: a string or a list of blocks

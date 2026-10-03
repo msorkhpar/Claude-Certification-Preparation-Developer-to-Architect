@@ -30,8 +30,8 @@ reference says models released after Claude Opus 4.6 do not support setting it, 
 backwards compatibility and that every other value is rejected. The Opus 5.5 migration guide states the same
 for `temperature`, `top_p` and `top_k` ("Omit ... or leave them at their defaults: any other value is
 rejected") and the Fable 5.1 page lists non-default values of all three as returning a 400 error. The Sonnet 5.5
-"What's new" page does not repeat the rule; it follows from the Messages reference, which covers every model
-released after Opus 4.6. Claude Haiku 4.5 predates that cut and is not covered by these sentences; the course
+"What's new" page does not repeat the rule, but "Migrating to Claude Sonnet 5.5" states it directly (Claude Sonnet 4.6
+and earlier and Claude Haiku 4.5 accept the three; on Sonnet 5.5 a non-default value returns a 400 error). Claude Haiku 4.5 predates that cut and is not covered by these sentences; the course
 does not use a sampling setting on it. Re-check at release.
 
 ## SDKs by language

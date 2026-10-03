@@ -54,8 +54,8 @@ tier's monthly spend cap, "API usage pauses until 00:00 UTC on the first day of 
 429 with the same `rate_limit_error` type but **no `retry-after` header**, and with `error.details.error_code` set to
 `enforced_spend_limit_reached`. Retrying fails until access resumes, and the SDK's automatic retries do not know
 that. Read the error code before you decide to wait. Both kinds are set for the whole organisation, so no setting on
-one request changes them. The errors page adds that limits on a Claude Code workspace can return a 429 with a `retry-after`, so the
-header alone does not tell the two kinds apart.
+one request changes them. The errors page adds that a spend limit on a Claude Code workspace can return a 429 where other
+workspace limits return a 400, so read the error code and message, not the status alone.
 
 **A 400 can be a spend limit.** A limit you set yourself, below the tier's cap, also stops requests, and it returns a
 400 `invalid_request_error` whose message begins "You have reached your specified API usage limits". Lifting the limit
