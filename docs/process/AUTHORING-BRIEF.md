@@ -38,7 +38,9 @@ outside the worktree. Web requests carry no personal data; nothing is signed int
   options parallel in form and similar in length; no stem word or giveaway synonym in the key; no lone
   hedged, composite or absolute-free key; no key copied from a page sentence; each wrong option excluded
   by a quoted passage that really excludes it; module questions combine pages; no duplicates.
-  `tools/check_quiz.py` enforces what it can.
+  `tools/check_quiz.py` enforces what it can. It cannot see a question that tests the same fact in
+  other words: before writing a mock-exam or module question, search every `quiz.json` and mock exam
+  of the course so far for the same fact; a same-fact question is a restatement, however it is worded.
 
 ## Before hand-back
 
