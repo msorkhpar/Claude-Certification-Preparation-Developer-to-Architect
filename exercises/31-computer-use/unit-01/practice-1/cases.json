@@ -1,0 +1,110 @@
+{
+  "practice": "31-computer-use/unit-01/practice-1",
+  "name": "computer",
+  "tests": {
+    "java": "ComputerTest",
+    "kotlin": "ComputerTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_loop_runs_scaled_actions_and_sends_every_result_in_one_message",
+      "typescript": "m1 the loop runs scaled actions and sends every result in one message",
+      "java": "m1_theLoopRunsScaledActionsAndSendsEveryResultInOneMessage",
+      "kotlin": "m1_theLoopRunsScaledActionsAndSendsEveryResultInOneMessage"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_screen_is_scaled_to_what_the_model_may_see_and_clicks_are_scaled_back",
+      "typescript": "e1 the screen is scaled to what the model may see and clicks are scaled back",
+      "java": "e1_theScreenIsScaledToWhatTheModelMaySeeAndClicksAreScaledBack",
+      "kotlin": "e1_theScreenIsScaledToWhatTheModelMaySeeAndClicksAreScaledBack"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_click_on_a_risky_element_needs_a_persons_confirmation",
+      "typescript": "e2 a click on a risky element needs a persons confirmation",
+      "java": "e2_aClickOnARiskyElementNeedsAPersonsConfirmation",
+      "kotlin": "e2_aClickOnARiskyElementNeedsAPersonsConfirmation"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_failed_action_stops_the_rest_of_its_batch",
+      "typescript": "e3 a failed action stops the rest of its batch",
+      "java": "e3_aFailedActionStopsTheRestOfItsBatch",
+      "kotlin": "e3_aFailedActionStopsTheRestOfItsBatch"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_invalid_actions_come_back_as_error_results_with_a_reason",
+      "typescript": "e4 invalid actions come back as error results with a reason",
+      "java": "e4_invalidActionsComeBackAsErrorResultsWithAReason",
+      "kotlin": "e4_invalidActionsComeBackAsErrorResultsWithAReason"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_loop_ends_on_a_stop_reason_or_at_the_turn_limit",
+      "typescript": "e5 the loop ends on a stop reason or at the turn limit",
+      "java": "e5_theLoopEndsOnAStopReasonOrAtTheTurnLimit",
+      "kotlin": "e5_theLoopEndsOnAStopReasonOrAtTheTurnLimit"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_old_screenshots_are_replaced_so_the_context_does_not_fill_up",
+      "typescript": "e6 old screenshots are replaced so the context does not fill up",
+      "java": "e6_oldScreenshotsAreReplacedSoTheContextDoesNotFillUp",
+      "kotlin": "e6_oldScreenshotsAreReplacedSoTheContextDoesNotFillUp"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_screenshots_and_zooms_are_sent_at_the_size_the_model_may_see",
+      "typescript": "e7 screenshots and zooms are sent at the size the model may see",
+      "java": "e7_screenshotsAndZoomsAreSentAtTheSizeTheModelMaySee",
+      "kotlin": "e7_screenshotsAndZoomsAreSentAtTheSizeTheModelMaySee"
+    }
+  },
+  "plants": {
+    "wrong-unscaled-click": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "uses the model's coordinates as screen coordinates without scaling them back"
+    },
+    "wrong-no-confirm": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "clicks a payment element without asking a person"
+    },
+    "wrong-continue-after-failure": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "keeps running the actions of a batch after one has failed"
+    },
+    "wrong-result-per-message": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "sends each tool result in a user message of its own"
+    },
+    "wrong-screenshot-full-size": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "sends the screenshot at the full screen size instead of the scaled size"
+    },
+    "wrong-prune-oldest-kept": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps the oldest screenshots and removes the newest"
+    },
+    "wrong-extra-turn": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "makes one model call more than the turn limit"
+    }
+  }
+}
