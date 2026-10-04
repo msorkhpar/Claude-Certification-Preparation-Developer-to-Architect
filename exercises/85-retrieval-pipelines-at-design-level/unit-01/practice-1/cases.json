@@ -1,0 +1,128 @@
+{
+  "practice": "85-retrieval-pipelines-at-design-level/unit-01/practice-1",
+  "name": "pipeline",
+  "tests": {
+    "java": "PipelineTest",
+    "kotlin": "PipelineTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_sections_become_chunks_that_carry_their_title_and_section_and_the_version_of_their_document",
+      "typescript": "m1 sections become chunks that carry their title and section and the version of their document",
+      "java": "m1_sectionsBecomeChunksThatCarryTheirTitleAndSectionAndTheVersionOfTheirDocument",
+      "kotlin": "m1_sectionsBecomeChunksThatCarryTheirTitleAndSectionAndTheVersionOfTheirDocument"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_long_section_splits_at_sentence_ends_under_the_word_limit_and_every_part_keeps_the_prefix",
+      "typescript": "e1 a long section splits at sentence ends under the word limit and every part keeps the prefix",
+      "java": "e1_aLongSectionSplitsAtSentenceEndsUnderTheWordLimitAndEveryPartKeepsThePrefix",
+      "kotlin": "e1_aLongSectionSplitsAtSentenceEndsUnderTheWordLimitAndEveryPartKeepsThePrefix"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_code_outweighs_a_word_and_a_word_in_no_chunk_matches_nothing",
+      "typescript": "e2 a code outweighs a word and a word in no chunk matches nothing",
+      "java": "e2_aCodeOutweighsAWordAndAWordInNoChunkMatchesNothing",
+      "kotlin": "e2_aCodeOutweighsAWordAndAWordInNoChunkMatchesNothing"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_search_for_a_reader_never_returns_a_chunk_of_a_document_that_reader_may_not_see",
+      "typescript": "e3 a search for a reader never returns a chunk of a document that reader may not see",
+      "java": "e3_aSearchForAReaderNeverReturnsAChunkOfADocumentThatReaderMayNotSee",
+      "kotlin": "e3_aSearchForAReaderNeverReturnsAChunkOfADocumentThatReaderMayNotSee"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_mechanism_follows_the_corpus_size_then_the_data_shape_then_the_query_pattern",
+      "typescript": "e4 the mechanism follows the corpus size then the data shape then the query pattern",
+      "java": "e4_theMechanismFollowsTheCorpusSizeThenTheDataShapeThenTheQueryPattern",
+      "kotlin": "e4_theMechanismFollowsTheCorpusSizeThenTheDataShapeThenTheQueryPattern"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_reindex_keeps_unchanged_documents_replaces_changed_ones_adds_new_ones_and_drops_removed_ones",
+      "typescript": "e5 a reindex keeps unchanged documents replaces changed ones adds new ones and drops removed ones",
+      "java": "e5_aReindexKeepsUnchangedDocumentsReplacesChangedOnesAddsNewOnesAndDropsRemovedOnes",
+      "kotlin": "e5_aReindexKeepsUnchangedDocumentsReplacesChangedOnesAddsNewOnesAndDropsRemovedOnes"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_stale_lists_the_chunks_whose_document_changed_or_vanished",
+      "typescript": "e6 stale lists the chunks whose document changed or vanished",
+      "java": "e6_staleListsTheChunksWhoseDocumentChangedOrVanished",
+      "kotlin": "e6_staleListsTheChunksWhoseDocumentChangedOrVanished"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_recall_counts_every_labelled_question_and_a_question_with_no_results_is_a_miss",
+      "typescript": "e7 recall counts every labelled question and a question with no results is a miss",
+      "java": "e7_recallCountsEveryLabelledQuestionAndAQuestionWithNoResultsIsAMiss",
+      "kotlin": "e7_recallCountsEveryLabelledQuestionAndAQuestionWithNoResultsIsAMiss"
+    }
+  },
+  "plants": {
+    "wrong-no-prefix": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "leaves the title and section out of the chunk text"
+    },
+    "wrong-no-split": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "never splits a long section"
+    },
+    "wrong-code-weight": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "scores a code like any other word"
+    },
+    "wrong-filter-after-cut": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "applies the access filter after it has taken the best k, so a reader gets fewer results than exist"
+    },
+    "wrong-always-index": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "builds an index even for a corpus that fits a cached prompt"
+    },
+    "wrong-table-chunked": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "cuts a table into chunks and searches them instead of querying it"
+    },
+    "wrong-reindex-additive": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "keeps the old chunks of a document that changed"
+    },
+    "wrong-reindex-keeps-removed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "keeps the chunks of a document that no longer exists"
+    },
+    "wrong-stale-ignores-removed": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "does not call the chunks of a removed document stale"
+    },
+    "wrong-recall-answered-only": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "divides by the questions that had results instead of all labelled questions"
+    }
+  }
+}

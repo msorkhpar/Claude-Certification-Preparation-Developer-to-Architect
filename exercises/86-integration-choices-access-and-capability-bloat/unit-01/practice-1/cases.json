@@ -1,0 +1,122 @@
+{
+  "practice": "86-integration-choices-access-and-capability-bloat/unit-01/practice-1",
+  "name": "capability",
+  "tests": {
+    "java": "CapabilityTest",
+    "kotlin": "CapabilityTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_an_agent_loses_the_tools_its_role_does_not_need_and_the_risky_ones_among_them_are_named",
+      "typescript": "m1 an agent loses the tools its role does not need and the risky ones among them are named",
+      "java": "m1_anAgentLosesTheToolsItsRoleDoesNotNeedAndTheRiskyOnesAmongThemAreNamed",
+      "kotlin": "m1_anAgentLosesTheToolsItsRoleDoesNotNeedAndTheRiskyOnesAmongThemAreNamed"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_tool_that_is_held_and_needed_but_never_used_is_reported_as_dormant_and_never_removed",
+      "typescript": "e1 a tool that is held and needed but never used is reported as dormant and never removed",
+      "java": "e1_aToolThatIsHeldAndNeededButNeverUsedIsReportedAsDormantAndNeverRemoved",
+      "kotlin": "e1_aToolThatIsHeldAndNeededButNeverUsedIsReportedAsDormantAndNeverRemoved"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_small_set_loads_whole_and_a_large_one_defers_when_it_has_ten_tools_or_over_ten_thousand_tokens",
+      "typescript": "e2 a small set loads whole and a large one defers when it has ten tools or over ten thousand tokens",
+      "java": "e2_aSmallSetLoadsWholeAndALargeOneDefersWhenItHasTenToolsOrOverTenThousandTokens",
+      "kotlin": "e2_aSmallSetLoadsWholeAndALargeOneDefersWhenItHasTenToolsOrOverTenThousandTokens"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_number_of_tools_kept_loaded_stays_between_three_and_five_and_ties_are_broken_by_name",
+      "typescript": "e3 the number of tools kept loaded stays between three and five and ties are broken by name",
+      "java": "e3_theNumberOfToolsKeptLoadedStaysBetweenThreeAndFiveAndTiesAreBrokenByName",
+      "kotlin": "e3_theNumberOfToolsKeptLoadedStaysBetweenThreeAndFiveAndTiesAreBrokenByName"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_mechanism_follows_the_counterpart_then_the_path_then_the_number_of_clients",
+      "typescript": "e4 the mechanism follows the counterpart then the path then the number of clients",
+      "java": "e4_theMechanismFollowsTheCounterpartThenThePathThenTheNumberOfClients",
+      "kotlin": "e4_theMechanismFollowsTheCounterpartThenThePathThenTheNumberOfClients"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_call_needs_the_users_scope_and_the_agents_scope_and_an_unknown_tool_is_refused",
+      "typescript": "e5 a call needs the users scope and the agents scope and an unknown tool is refused",
+      "java": "e5_aCallNeedsTheUsersScopeAndTheAgentsScopeAndAnUnknownToolIsRefused",
+      "kotlin": "e5_aCallNeedsTheUsersScopeAndTheAgentsScopeAndAnUnknownToolIsRefused"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_gateway_checks_the_credential_then_the_model_then_the_tool_then_the_rate",
+      "typescript": "e6 the gateway checks the credential then the model then the tool then the rate",
+      "java": "e6_theGatewayChecksTheCredentialThenTheModelThenTheToolThenTheRate",
+      "kotlin": "e6_theGatewayChecksTheCredentialThenTheModelThenTheToolThenTheRate"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_gateway_keeps_a_record_of_every_decision_with_the_team_or_unknown_and_no_content",
+      "typescript": "e7 the gateway keeps a record of every decision with the team or unknown and no content",
+      "java": "e7_theGatewayKeepsARecordOfEveryDecisionWithTheTeamOrUnknownAndNoContent",
+      "kotlin": "e7_theGatewayKeepsARecordOfEveryDecisionWithTheTeamOrUnknownAndNoContent"
+    }
+  },
+  "plants": {
+    "wrong-risky-everything": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "names every removed tool as risky"
+    },
+    "wrong-dormant-removed": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "removes a needed tool because nobody used it"
+    },
+    "wrong-defer-count-only": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "ignores the size of the definitions when it decides whether to defer"
+    },
+    "wrong-keep-unclamped": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "keeps as many tools loaded as it is asked to, with no floor or ceiling"
+    },
+    "wrong-ties-by-insertion": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "breaks a tie in usage by the order the tools were listed"
+    },
+    "wrong-mechanism-path-first": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "answers a call in code before it asks whether the counterpart is an agent"
+    },
+    "wrong-auth-user-only": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets any call through that the user may make, whatever the agent holds"
+    },
+    "wrong-gateway-rate-first": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "counts the rate before it checks the model"
+    },
+    "wrong-gateway-audit-empty-on-deny": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "keeps no record of a denied request"
+    }
+  }
+}

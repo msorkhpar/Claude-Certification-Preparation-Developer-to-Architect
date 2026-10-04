@@ -1,0 +1,138 @@
+{
+  "module": "87-observability-at-scale",
+  "quizzes": [
+    {
+      "id": "01-what-to-keep-where-it-failed-and-what-must-not-be-logged#q1",
+      "page": "01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+      "scope": "page",
+      "stem": "A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show. Which rule fits best?",
+      "options": {
+        "a": "Retain every request that errored, ran slowly or drew a complaint, and pick the others by a hash of the id",
+        "b": "Raise the random share from one percent to five, and have an engineer review what that larger share holds at the end of each week",
+        "c": "Retain only the requests of the largest customers, because their heavy usage accounts for the greatest part of all conversations",
+        "d": "Store metrics only, and rely on the daily error count to show what went wrong, since that costs almost nothing"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Tail-based sampling can look at the outcome, so it retains what failed, what was slow and what a user flagged, and takes a share of the rest by id.",
+        "b": "Ruled out because \"a random share of one percent holds almost none of them, and five percent holds few more\".",
+        "c": "Ruled out because \"Sampling by customer size covers heavy use and says nothing about which requests failed\".",
+        "d": "Ruled out because a metric \"says that something changed. It never says where or why\"."
+      }
+    },
+    {
+      "id": "01-what-to-keep-where-it-failed-and-what-must-not-be-logged#q2",
+      "page": "01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+      "scope": "page",
+      "stem": "In one trace, the orchestrator, a researcher agent and a download tool all show an error. The orchestrator's message says the research step failed. Where does the failure originate?",
+      "options": {
+        "a": "In the orchestrator, because it is the first component the user's request reached",
+        "b": "In the researcher, because it is the first agent below the orchestrator to show an error",
+        "c": "In the deepest span that broke, the call at the bottom of the chain",
+        "d": "In the planning model call, because a poor plan would send the researcher to a bad source"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The deepest failing span is the origin, and the spans above it only relay its error.",
+        "a": "Ruled out because \"the first span to turn red is not the origin\".",
+        "b": "is ruled out for the same reason: \"The span that reports an error is often only passing on the error of the span below it\".",
+        "d": "Ruled out because the fix is to \"Read the trace to the deepest failure\", and the deepest failure here is the tool, not a model call."
+      }
+    },
+    {
+      "id": "02-drift-alerts-and-the-practice#q1",
+      "page": "02-drift-alerts-and-the-practice.md",
+      "scope": "page",
+      "stem": "After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and retrieval hits are down by 40 percent, and nobody was told. Which practice would have caught it?",
+      "options": {
+        "a": "Page the on-call engineer when the error rate passes a fixed ceiling, which covers every failure",
+        "b": "Hold a stored baseline for each metric and flag any move beyond a tolerance, rising or falling",
+        "c": "Read a sample of the conversations each week and note anything that looks odd to the reader",
+        "d": "Watch only the metrics that moved down, since a rise just means that the product is used more"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A baseline for each metric, compared in both directions with a tolerance, flags a system that got worse without failing.",
+        "a": "Ruled out because \"An error rate alone misses a system that is wrong without failing\".",
+        "c": "Ruled out because \"Reading a sample of conversations each week finds what a reader happens to see, and it does not scale to two million conversations\".",
+        "d": "Ruled out because \"a rise is as likely to be a fault as growth\"."
+      }
+    },
+    {
+      "id": "02-drift-alerts-and-the-practice#q2",
+      "page": "02-drift-alerts-and-the-practice.md",
+      "scope": "page",
+      "stem": "A team pages its on-call engineer whenever a single minute of tool errors passes the threshold. The pages come nightly and are mostly noise. Which change fits?",
+      "options": {
+        "a": "Raise the threshold until the nightly pages stop, so that only the very large outages are ever reported again",
+        "b": "Average the error rate over each full day so that a single spike cannot cross the line",
+        "c": "Send the alert to a shared channel that people read in the morning, in place of paging anybody at night",
+        "d": "Fire only after several windows in a row are over, and accept that many windows of delay"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "An alert on a change that lasts, several windows in a row, removes the one-window spikes at the price of delay.",
+        "a": "Ruled out because \"Raising the threshold until the pages stop hides the real incident with the noise\".",
+        "c": "Ruled out because \"A message nobody reads at night turns a page into a log line\".",
+        "b": "Ruled out because \"A daily average smooths a one-hour outage into a normal day\"."
+      }
+    },
+    {
+      "id": "02-drift-alerts-and-the-practice#m1",
+      "page": "02-drift-alerts-and-the-practice.md",
+      "scope": "module",
+      "stem": "A project commits a settings file in its repository that turns on prompt logging for telemetry, so that a reviewer can read developers' prompts. What does Claude Code do with it?",
+      "options": {
+        "a": "It captures the prompts of everyone who clones the repository, starting with the first session",
+        "b": "It captures the prompts only in sessions where each developer has also enabled tracing",
+        "c": "It ignores the exporter variables found there, so they come from managed or per-user configuration",
+        "d": "It applies the setting but redacts the prompts anyway, because redaction cannot be changed"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Claude Code ignores the exporter variables in a repository's settings.",
+        "a": "Ruled out because \"a repository can't use them to turn telemetry on\".",
+        "b": "Ruled out because the sentence continues \"choose where it goes, or capture content\".",
+        "d": "Ruled out because \"each is opened by a separate variable\", so redaction can be changed, just not from a repository."
+      }
+    },
+    {
+      "id": "02-drift-alerts-and-the-practice#m2",
+      "page": "02-drift-alerts-and-the-practice.md",
+      "scope": "module",
+      "stem": "A complaint must be followed through the gateway, the orchestrator, two subagents and a tool, each logging in its own format. The records cannot be joined into one story. What was missing?",
+      "options": {
+        "a": "A common timestamp format across the services, so that the records can be sorted into a single list",
+        "b": "A single identifier taken at the edge, passed to every service and kept beside whatever they write",
+        "c": "A longer retention period for the logs, so that all of the records are still there when somebody needs them",
+        "d": "One central log store that every service writes to, in place of the separate stores that each of them has now"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A shared identifier, taken at the edge and written everywhere, joins the records.",
+        "a": "Ruled out because \"Time alone cannot join records: two requests at the same millisecond look the same\".",
+        "c": "Ruled out because \"keeping records longer keeps the same unjoinable records longer\".",
+        "d": "Ruled out because \"A central store collects the records and still does not say which belong together\"."
+      }
+    },
+    {
+      "id": "02-drift-alerts-and-the-practice#m3",
+      "page": "02-drift-alerts-and-the-practice.md",
+      "scope": "module",
+      "stem": "After each team added the conversation id as a metric label, the metrics bill tripled, and the dashboards are used no differently. Which fix fits?",
+      "options": {
+        "a": "Move the metrics to a much larger store and carry on with the labels that the teams have added",
+        "b": "Remove the id from the whole system, since single conversations are rarely worth reading",
+        "c": "Store a random tenth of the metric points, so that the number of series that must be kept falls",
+        "d": "Take the identifier off the series, and keep it in traces and events, which hold single occurrences"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The id is high-cardinality, so it belongs on the traces and events, which are meant for single occurrences.",
+        "a": "Ruled out because \"Moving to a larger store pays for the series and leaves their count growing\".",
+        "c": "Ruled out because \"a random sample of metric points gives a wrong rate: metrics are counts, and a missing count is a wrong count\".",
+        "b": "Ruled out because \"Dropping the id from everything gives up the ability to look at one conversation, which the traces exist for\"."
+      }
+    }
+  ]
+}

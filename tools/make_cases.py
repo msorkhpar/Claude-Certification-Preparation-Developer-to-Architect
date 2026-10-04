@@ -1360,6 +1360,142 @@ PRACTICES[f"{X}/84-cost-and-capacity-engineering/unit-01/practice-1"] = {
     },
 }
 # --- L4 79-84 END ---
+
+# ===== Level 4: modules 85 to 89 =====
+PRACTICES[f"{X}/85-retrieval-pipelines-at-design-level/unit-01/practice-1"] = {
+    "name": "pipeline", "suite": "PipelineTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "sections become chunks that carry their title and section and the version of their document"),
+        ("e1", "edge", "a long section splits at sentence ends under the word limit and every part keeps the prefix"),
+        ("e2", "edge", "a code outweighs a word and a word in no chunk matches nothing"),
+        ("e3", "edge", "a search for a reader never returns a chunk of a document that reader may not see"),
+        ("e4", "edge", "the mechanism follows the corpus size then the data shape then the query pattern"),
+        ("e5", "edge", "a reindex keeps unchanged documents replaces changed ones adds new ones and drops removed ones"),
+        ("e6", "edge", "stale lists the chunks whose document changed or vanished"),
+        ("e7", "edge", "recall counts every labelled question and a question with no results is a miss"),
+    ],
+    "plants": {
+        "wrong-no-prefix": (["m1"], "leaves the title and section out of the chunk text"),
+        "wrong-no-split": (["e1"], "never splits a long section"),
+        "wrong-code-weight": (["e2"], "scores a code like any other word"),
+        "wrong-filter-after-cut": (["e3"], "applies the access filter after it has taken the best k, so a reader gets fewer results than exist"),
+        "wrong-always-index": (["e4"], "builds an index even for a corpus that fits a cached prompt"),
+        "wrong-table-chunked": (["e4"], "cuts a table into chunks and searches them instead of querying it"),
+        "wrong-reindex-additive": (["e5"], "keeps the old chunks of a document that changed"),
+        "wrong-reindex-keeps-removed": (["e5"], "keeps the chunks of a document that no longer exists"),
+        "wrong-stale-ignores-removed": (["e6"], "does not call the chunks of a removed document stale"),
+        "wrong-recall-answered-only": (["e7"], "divides by the questions that had results instead of all labelled questions"),
+    },
+}
+
+PRACTICES[f"{X}/86-integration-choices-access-and-capability-bloat/unit-01/practice-1"] = {
+    "name": "capability", "suite": "CapabilityTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "an agent loses the tools its role does not need and the risky ones among them are named"),
+        ("e1", "edge", "a tool that is held and needed but never used is reported as dormant and never removed"),
+        ("e2", "edge", "a small set loads whole and a large one defers when it has ten tools or over ten thousand tokens"),
+        ("e3", "edge", "the number of tools kept loaded stays between three and five and ties are broken by name"),
+        ("e4", "edge", "the mechanism follows the counterpart then the path then the number of clients"),
+        ("e5", "edge", "a call needs the users scope and the agents scope and an unknown tool is refused"),
+        ("e6", "edge", "the gateway checks the credential then the model then the tool then the rate"),
+        ("e7", "edge", "the gateway keeps a record of every decision with the team or unknown and no content"),
+    ],
+    "plants": {
+        "wrong-risky-everything": (["m1"], "names every removed tool as risky"),
+        "wrong-dormant-removed": (["e1"], "removes a needed tool because nobody used it"),
+        "wrong-defer-count-only": (["e2"], "ignores the size of the definitions when it decides whether to defer"),
+        "wrong-keep-unclamped": (["e3"], "keeps as many tools loaded as it is asked to, with no floor or ceiling"),
+        "wrong-ties-by-insertion": (["e3"], "breaks a tie in usage by the order the tools were listed"),
+        "wrong-mechanism-path-first": (["e4"], "answers a call in code before it asks whether the counterpart is an agent"),
+        "wrong-auth-user-only": (["e5"], "lets any call through that the user may make, whatever the agent holds"),
+        "wrong-gateway-rate-first": (["e6"], "counts the rate before it checks the model"),
+        "wrong-gateway-audit-empty-on-deny": (["e7"], "keeps no record of a denied request"),
+    },
+}
+
+PRACTICES[f"{X}/87-observability-at-scale/unit-01/practice-1"] = {
+    "name": "triage", "suite": "TriageTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "every trace gets one reason and a healthy trace is kept by its id"),
+        ("e1", "edge", "an error outranks a slow root which outranks retries which outrank a flag"),
+        ("e2", "edge", "the root cause is the deepest failing span and its path starts at the root"),
+        ("e3", "edge", "a stale or empty retrieval is blamed only when no span failed"),
+        ("e4", "edge", "drift reports a move in either direction over the tolerance and never divides by zero"),
+        ("e5", "edge", "an alert needs consecutive windows over the threshold and a dip starts the count again"),
+        ("e6", "edge", "a log record drops the content fields unless they are allowed by name"),
+        ("e7", "edge", "a requests trail joins the events of every component in time order"),
+    ],
+    "plants": {
+        "wrong-error-after-slow": (["e1"], "labels a trace that failed and was slow as slow"),
+        "wrong-no-feedback": (["m1"], "drops a trace the user flagged as a bad answer"),
+        "wrong-retries-ignored": (["e1"], "does not keep a trace in which one tool was called three times"),
+        "wrong-root-reporter": (["e2"], "blames the first failing span, which only reported its child's error"),
+        "wrong-stale-first": (["e3"], "blames a stale retrieval even when another span failed"),
+        "wrong-drift-up-only": (["e4"], "misses a metric that fell"),
+        "wrong-alert-no-reset": (["e5"], "keeps counting windows across a window that was under the threshold"),
+        "wrong-redact-keeps-content": (["e6"], "keeps prompts and tool inputs in the log record"),
+        "wrong-redact-ignores-allowed": (["e6"], "drops a content field even when it is allowed by name"),
+        "wrong-trail-unsorted": (["e7"], "lists a request's events in the order they were received"),
+    },
+}
+
+PRACTICES[f"{X}/88-evaluation-and-optimisation/unit-01/practice-1"] = {
+    "name": "evalkit", "suite": "EvalKitTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a segment table reports accuracy and error cost with the costliest segment first"),
+        ("e1", "edge", "a segment with no cost entry costs one per error and no results give an empty table"),
+        ("e2", "edge", "a percentile uses the nearest rank and does not need sorted input"),
+        ("e3", "edge", "a test with fewer cases than the minimum in either arm decides nothing"),
+        ("e4", "edge", "a difference is called only when it clears the 95 percent bar and the better side is named"),
+        ("e5", "edge", "a shadow run is held for a regression in a protected segment or for more losses than gains"),
+        ("e6", "edge", "diagnosis checks the evidence then the grounding then the format then the stronger model"),
+        ("e7", "edge", "model choice takes the cheapest option that meets the accuracy floor and the latency limit"),
+    ],
+    "plants": {
+        "wrong-pct-truncated": (["m1"], "rounds an accuracy down instead of to the nearest whole percent"),
+        "wrong-sorted-by-name": (["m1"], "orders the report by segment name and not by error cost"),
+        "wrong-default-cost-zero": (["e1"], "makes the errors of a segment with no cost entry free"),
+        "wrong-percentile-floor": (["e2"], "takes the rank rounded down, so the 95th percentile of four values is the third"),
+        "wrong-percentile-unsorted": (["e2"], "reads the percentile from the values in the order they arrived"),
+        "wrong-ab-min-ignored": (["e3"], "gives a verdict on a handful of cases"),
+        "wrong-ab-always-new": (["e4"], "names the new version as better whenever it clears the bar, even when it is worse"),
+        "wrong-ab-90-percent": (["e4"], "uses the 90 percent bar and calls a difference that could be chance"),
+        "wrong-gate-net-only": (["e5"], "ships a version that lost a right answer in a protected segment because it gained as many elsewhere"),
+        "wrong-gate-protected-only": (["e5"], "ships a version that lost more answers than it gained in segments that are not protected"),
+        "wrong-diagnose-grounding-late": (["e6"], "checks the format before it asks whether the answer is supported by the evidence"),
+        "wrong-choose-ignores-latency": (["e7"], "picks a model that is too slow because it meets the accuracy floor"),
+        "wrong-choose-ties-by-order": (["e7"], "breaks a tie in cost by the order the options were listed"),
+    },
+}
+
+PRACTICES[f"{X}/89-migration-and-model-upgrades-at-scale/unit-01/practice-1"] = {
+    "name": "rollout", "suite": "RolloutTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a change that regresses nothing and stays inside its limits gets a go with no reasons"),
+        ("e1", "edge", "a must pass case that fails blocks the change and the ids are listed in order"),
+        ("e2", "edge", "a protected segment that lost answers blocks the change even when gains elsewhere match the losses"),
+        ("e3", "edge", "more losses than gains blocks the change and both counts are named"),
+        ("e4", "edge", "a cost rise over the limit blocks the change and a rise exactly at the limit does not"),
+        ("e5", "edge", "the tail is the nearest rank 95th percentile and a single slow case does not block"),
+        ("e6", "edge", "a roll out advances when healthy holds with too few requests and rolls back to zero when errors pass the limit"),
+        ("e7", "edge", "the retirement calendar counts days ranks the nearest first and names the level"),
+        ("e8", "edge", "migration removes the settings the new model refuses and names each change"),
+    ],
+    "plants": {
+        "wrong-must-pass-ignored": (["e1"], "lets a change through although a case that must pass now fails"),
+        "wrong-protected-ignored": (["e2"], "ignores a loss in a protected segment when the totals are equal"),
+        "wrong-net-loss-ignored": (["e3"], "does not block a change that loses more answers than it gains"),
+        "wrong-cost-at-limit": (["e4"], "blocks a cost rise that equals the limit"),
+        "wrong-cost-rounded": (["e4"], "rounds the cost rise up to the next whole percent instead of down"),
+        "wrong-p95-max": (["e5"], "judges the tail by the slowest single case"),
+        "wrong-rollout-min-ignored": (["e6"], "moves a stage on before it has seen enough requests"),
+        "wrong-rollout-no-rollback": (["e6"], "keeps advancing a roll-out whose errors passed the limit"),
+        "wrong-days-by-name": (["e7"], "lists the models by name and not by how soon they retire"),
+        "wrong-level-boundary": (["e7"], "calls a model with exactly fourteen days left merely something to migrate"),
+        "wrong-migrate-keeps-sampling": (["e8"], "leaves the sampling settings in the migrated request"),
+        "wrong-migrate-keeps-forced-tool": (["e8"], "leaves a forced tool choice in the migrated request"),
+    },
+}
 # --- PRACTICES ABOVE ---
 
 

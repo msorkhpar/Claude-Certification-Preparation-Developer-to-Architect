@@ -1,0 +1,138 @@
+{
+  "module": "89-migration-and-model-upgrades-at-scale",
+  "quizzes": [
+    {
+      "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q1",
+      "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
+      "scope": "page",
+      "stem": "A deprecation table lists one of a company's models with a retirement of \"not sooner than\" a date nine weeks away. How should the team treat that entry?",
+      "options": {
+        "a": "Plan against it as the earliest cut-off and begin early, since it slips later, not earlier",
+        "b": "Wait for the vendor to confirm a final cut-off before spending any effort on the move",
+        "c": "Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day",
+        "d": "Ignore it until the status changes to retired, because nothing breaks before that point"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The table can say \"not sooner than\" for a model that is still active, which marks a date that may move later.",
+        "b": "Ruled out because \"is never a date to wait for\".",
+        "c": "Ruled out because \"marks a date that may move later\".",
+        "d": "Ruled out because \"Sixty days is the shortest warning, and a migration of forty applications can take longer than that\"."
+      }
+    },
+    {
+      "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q2",
+      "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
+      "scope": "page",
+      "stem": "A model's entry in the documentation carries the status legacy. What does that status say?",
+      "options": {
+        "a": "It has a retirement date and will fail on that day, so requests must already be moved",
+        "b": "It is the recommended choice for new work, since only deprecated models are withdrawn",
+        "c": "It stops receiving updates and heads toward deprecation, so plan the move before any date is set",
+        "d": "It has been retired already, so every request that names it comes back as a failure"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Legacy means \"The model will no longer receive updates and may be deprecated in the future.\"",
+        "a": "Ruled out because deprecated is the state where Anthropic \"provides a recommended replacement and assigns a retirement date\".",
+        "b": "Ruled out because active is the state where \"The model is fully supported and recommended for use\".",
+        "d": "Ruled out because \"Requests to retired models will fail\" describes the retired state, not legacy."
+      }
+    },
+    {
+      "id": "02-the-gate-the-roll-out-and-the-way-back#q1",
+      "page": "02-the-gate-the-roll-out-and-the-way-back.md",
+      "scope": "page",
+      "stem": "A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?",
+      "options": {
+        "a": "Advance to 25 percent, since a clean record needs no further evidence",
+        "b": "Hold where it is until enough volume has arrived to say anything",
+        "c": "Roll back to zero, since too few requests counts as a failed stage",
+        "d": "Declare the roll-out complete, since no error has been seen so far"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage.",
+        "a": "Ruled out because \"A stage with fewer requests than the minimum (1,000 in the example) says nothing yet\".",
+        "c": "Ruled out because the share goes back to zero only when errors pass the limit: \"Over it, the share goes back to zero\".",
+        "d": "Ruled out because a roll-out ends with \"One stage up, and `complete` at 100 percent\"."
+      }
+    },
+    {
+      "id": "02-the-gate-the-roll-out-and-the-way-back#q2",
+      "page": "02-the-gate-the-roll-out-and-the-way-back.md",
+      "scope": "page",
+      "stem": "A staged roll-out is at 25 percent of requests when the error rate passes its limit. What happens next?",
+      "options": {
+        "a": "Drop to 5 percent and keep the roll-out running, to gather more evidence from a smaller share",
+        "b": "Hold at 25 percent and investigate, leaving those customers on the new model while the errors continue to arrive",
+        "c": "Advance to 100 percent so that the failure shows up clearly in the data of the whole base",
+        "d": "Send all traffic back to the previous model, which stays available until its own retirement"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The limit is passed, so the share goes back to zero and the previous model, still configured, takes the traffic.",
+        "b": "Ruled out because \"Holding at the stage while errors continue leaves the share of customers who see them where it is\".",
+        "c": "Ruled out because \"Advancing to 100 percent to see the failure in the full data makes every customer the sample\".",
+        "a": "Ruled out because \"Reducing to a smaller share keeps part of the damage on the path\"."
+      }
+    },
+    {
+      "id": "02-the-gate-the-roll-out-and-the-way-back#m1",
+      "page": "02-the-gate-the-roll-out-and-the-way-back.md",
+      "scope": "module",
+      "stem": "The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?",
+      "options": {
+        "a": "Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change",
+        "b": "Recommend the move, because the newer model is the one that the vendor has recommended as the replacement",
+        "c": "State the trade: what improves, what the rise takes from the budget, and the date that forces the choice",
+        "d": "Defer the decision until the old model retires, so that the choice is made by the calendar instead"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The decision is a trade, and the architect states it with its date.",
+        "b": "Ruled out because \"A recommended replacement is a starting point, not a decision\".",
+        "a": "Ruled out because \"A rise in cost is a number to put before the owner, not a verdict\".",
+        "d": "Ruled out because \"Waiting for the retirement date hands the decision to the calendar, and gives up the rollback\"."
+      }
+    },
+    {
+      "id": "02-the-gate-the-roll-out-and-the-way-back#m2",
+      "page": "02-the-gate-the-roll-out-and-the-way-back.md",
+      "scope": "module",
+      "stem": "After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?",
+      "options": {
+        "a": "Lowering max_tokens so that the thinking is cut off before the text of the reply begins",
+        "b": "Choosing the part of the response by its declared type and not by its position in the list",
+        "c": "Turning thinking off by sending the disabled setting, which the new model accepts as before",
+        "d": "Dropping the first block of every reply before parsing, since it always holds only thinking"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A reply may begin with thinking blocks, so the parser reads by type.",
+        "a": "Ruled out because \"`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens\".",
+        "c": "Ruled out because the guide lists `thinking: {\"type\": \"disabled\"}` among the \"five settings that return a 400 error\".",
+        "d": "Ruled out because \"A reply need not begin with thinking text either, so a rule that always drops the first block loses real text\"."
+      }
+    },
+    {
+      "id": "02-the-gate-the-roll-out-and-the-way-back#m3",
+      "page": "02-the-gate-the-roll-out-and-the-way-back.md",
+      "scope": "module",
+      "stem": "On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?",
+      "options": {
+        "a": "Nothing, since the gate already approved the new model and a rollback is no longer needed",
+        "b": "The record of which key called which model, since only the configuration holds it",
+        "c": "The new cost baseline, which can only be computed while the old id stays configured",
+        "d": "The way back, which needs the previous one kept in place and tested until its own retirement"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"the old model is the rollback, and it stays so until its own retirement date\".",
+        "a": "Ruled out because \"Passing a suite is a prediction about traffic, and traffic is where it is tested\".",
+        "b": "Ruled out because the Console export gives \"usage broken down by API key and model\", so the record does not live in the configuration.",
+        "c": "Ruled out because the baseline is reset by the rule \"Recount tokens and re-baseline cost\" on the replacement, which needs no old id."
+      }
+    }
+  ]
+}

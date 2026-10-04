@@ -1,0 +1,147 @@
+{
+  "practice": "89-migration-and-model-upgrades-at-scale/unit-01/practice-1",
+  "name": "rollout",
+  "tests": {
+    "java": "RolloutTest",
+    "kotlin": "RolloutTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_change_that_regresses_nothing_and_stays_inside_its_limits_gets_a_go_with_no_reasons",
+      "typescript": "m1 a change that regresses nothing and stays inside its limits gets a go with no reasons",
+      "java": "m1_aChangeThatRegressesNothingAndStaysInsideItsLimitsGetsAGoWithNoReasons",
+      "kotlin": "m1_aChangeThatRegressesNothingAndStaysInsideItsLimitsGetsAGoWithNoReasons"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_must_pass_case_that_fails_blocks_the_change_and_the_ids_are_listed_in_order",
+      "typescript": "e1 a must pass case that fails blocks the change and the ids are listed in order",
+      "java": "e1_aMustPassCaseThatFailsBlocksTheChangeAndTheIdsAreListedInOrder",
+      "kotlin": "e1_aMustPassCaseThatFailsBlocksTheChangeAndTheIdsAreListedInOrder"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_protected_segment_that_lost_answers_blocks_the_change_even_when_gains_elsewhere_match_the_losses",
+      "typescript": "e2 a protected segment that lost answers blocks the change even when gains elsewhere match the losses",
+      "java": "e2_aProtectedSegmentThatLostAnswersBlocksTheChangeEvenWhenGainsElsewhereMatchTheLosses",
+      "kotlin": "e2_aProtectedSegmentThatLostAnswersBlocksTheChangeEvenWhenGainsElsewhereMatchTheLosses"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_more_losses_than_gains_blocks_the_change_and_both_counts_are_named",
+      "typescript": "e3 more losses than gains blocks the change and both counts are named",
+      "java": "e3_moreLossesThanGainsBlocksTheChangeAndBothCountsAreNamed",
+      "kotlin": "e3_moreLossesThanGainsBlocksTheChangeAndBothCountsAreNamed"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_cost_rise_over_the_limit_blocks_the_change_and_a_rise_exactly_at_the_limit_does_not",
+      "typescript": "e4 a cost rise over the limit blocks the change and a rise exactly at the limit does not",
+      "java": "e4_aCostRiseOverTheLimitBlocksTheChangeAndARiseExactlyAtTheLimitDoesNot",
+      "kotlin": "e4_aCostRiseOverTheLimitBlocksTheChangeAndARiseExactlyAtTheLimitDoesNot"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_tail_is_the_nearest_rank_95th_percentile_and_a_single_slow_case_does_not_block",
+      "typescript": "e5 the tail is the nearest rank 95th percentile and a single slow case does not block",
+      "java": "e5_theTailIsTheNearestRank95thPercentileAndASingleSlowCaseDoesNotBlock",
+      "kotlin": "e5_theTailIsTheNearestRank95thPercentileAndASingleSlowCaseDoesNotBlock"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_roll_out_advances_when_healthy_holds_with_too_few_requests_and_rolls_back_to_zero_when_errors_pass_the_limit",
+      "typescript": "e6 a roll out advances when healthy holds with too few requests and rolls back to zero when errors pass the limit",
+      "java": "e6_aRollOutAdvancesWhenHealthyHoldsWithTooFewRequestsAndRollsBackToZeroWhenErrorsPassTheLimit",
+      "kotlin": "e6_aRollOutAdvancesWhenHealthyHoldsWithTooFewRequestsAndRollsBackToZeroWhenErrorsPassTheLimit"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_retirement_calendar_counts_days_ranks_the_nearest_first_and_names_the_level",
+      "typescript": "e7 the retirement calendar counts days ranks the nearest first and names the level",
+      "java": "e7_theRetirementCalendarCountsDaysRanksTheNearestFirstAndNamesTheLevel",
+      "kotlin": "e7_theRetirementCalendarCountsDaysRanksTheNearestFirstAndNamesTheLevel"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_migration_removes_the_settings_the_new_model_refuses_and_names_each_change",
+      "typescript": "e8 migration removes the settings the new model refuses and names each change",
+      "java": "e8_migrationRemovesTheSettingsTheNewModelRefusesAndNamesEachChange",
+      "kotlin": "e8_migrationRemovesTheSettingsTheNewModelRefusesAndNamesEachChange"
+    }
+  },
+  "plants": {
+    "wrong-must-pass-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "lets a change through although a case that must pass now fails"
+    },
+    "wrong-protected-ignored": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "ignores a loss in a protected segment when the totals are equal"
+    },
+    "wrong-net-loss-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "does not block a change that loses more answers than it gains"
+    },
+    "wrong-cost-at-limit": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "blocks a cost rise that equals the limit"
+    },
+    "wrong-cost-rounded": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "rounds the cost rise up to the next whole percent instead of down"
+    },
+    "wrong-p95-max": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "judges the tail by the slowest single case"
+    },
+    "wrong-rollout-min-ignored": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "moves a stage on before it has seen enough requests"
+    },
+    "wrong-rollout-no-rollback": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps advancing a roll-out whose errors passed the limit"
+    },
+    "wrong-days-by-name": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "lists the models by name and not by how soon they retire"
+    },
+    "wrong-level-boundary": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "calls a model with exactly fourteen days left merely something to migrate"
+    },
+    "wrong-migrate-keeps-sampling": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "leaves the sampling settings in the migrated request"
+    },
+    "wrong-migrate-keeps-forced-tool": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "leaves a forced tool choice in the migrated request"
+    }
+  }
+}

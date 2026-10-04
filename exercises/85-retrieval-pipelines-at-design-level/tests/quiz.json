@@ -1,0 +1,138 @@
+{
+  "module": "85-retrieval-pipelines-at-design-level",
+  "quizzes": [
+    {
+      "id": "01-where-to-cut-what-to-carry-and-which-index#q1",
+      "page": "01-where-to-cut-what-to-carry-and-which-index.md",
+      "scope": "page",
+      "stem": "A returns policy states a rule and, two lines later, its exception. The pipeline indexes windows of fixed length, and the assistant gives the rule without the exception. Which change addresses the cause?",
+      "options": {
+        "a": "Break the text at section boundaries so related sentences stay together",
+        "b": "Shrink each window so that every single sentence is indexed entirely on its own",
+        "c": "Return more windows for each question so that both halves can arrive together",
+        "d": "Swap the keyword index for an embedding index to match the meaning of the text"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The cut ignored the structure of the data, and a heading is a joint at which a rule and its exception stay together.",
+        "b": "Ruled out because \"A smaller window cuts in more places and separates more sentences from their neighbours\".",
+        "c": "Ruled out because returning more chunks \"does not help either, because no chunk holds the whole rule\".",
+        "d": "Ruled out because changing the index \"changes how the pieces are scored, not where they were cut\"."
+      }
+    },
+    {
+      "id": "01-where-to-cut-what-to-carry-and-which-index#q2",
+      "page": "01-where-to-cut-what-to-carry-and-which-index.md",
+      "scope": "page",
+      "stem": "A platform serves several customers from one index. An employee of one customer, cleared for two contracts, asks a question that matches fifty passages across all customers, yet the application returns a single result. Which fault explains the single result?",
+      "options": {
+        "a": "It keeps one index for every customer instead of one index for each",
+        "b": "It lets the system prompt ask the model to ignore the other tenants",
+        "c": "It trims the list to the person's rights after taking the best few",
+        "d": "It stores each contract twice, so that duplicate passages fill the list"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The filter ran after the cut, so passages the person may not see took the top places and were removed afterwards.",
+        "a": "Ruled out because \"Chunks carry metadata: the document, its owner or tenant, its version, its date\" and that is how one index serves many customers.",
+        "b": "Ruled out because the shortfall arises \"because the top places went to chunks that were then removed\", and a prompt instruction has no part in it.",
+        "d": "Ruled out because a reader gets \"fewer than k results although many visible chunks matched\", which is the signature of a late filter and not of duplicates."
+      }
+    },
+    {
+      "id": "02-freshness-measurement-and-the-practice#q1",
+      "page": "02-freshness-measurement-and-the-practice.md",
+      "scope": "page",
+      "stem": "A team reports 90 percent retrieval recall. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?",
+      "options": {
+        "a": "90 percent, since only questions that returned something can be judged",
+        "b": "27 of 40, about two thirds, because a blank query still belongs in the denominator",
+        "c": "100 percent, since every result that was returned held the relevant chunk",
+        "d": "75 percent, since 30 of the 40 labelled questions were answered"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"the denominator is every labelled question\".",
+        "a": "Ruled out because \"A question with no results counts as a miss in recall over the labelled set\".",
+        "c": "Ruled out because \"the denominator is every labelled question\", not the questions that returned results.",
+        "d": "Ruled out because \"and so does a question that was never answered\": answered questions are not the denominator."
+      }
+    },
+    {
+      "id": "02-freshness-measurement-and-the-practice#q2",
+      "page": "02-freshness-measurement-and-the-practice.md",
+      "scope": "page",
+      "stem": "In a test of 8 questions, the evidence was retrieved for 5 and the answers were right for 5. One answer was wrong although its evidence was retrieved, and one was right although its evidence was not. How many of the questions have no retrieved evidence and a wrong answer?",
+      "options": {
+        "a": "Five",
+        "b": "One",
+        "c": "Three",
+        "d": "Two"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The outcomes are 4 ok, 1 generation, 2 retrieval and 1 unsupported, so two questions had no evidence and a wrong answer.",
+        "b": "Ruled out because the wrong answer that had its evidence is one where \"The evidence was retrieved and the answer is wrong\", a generation failure.",
+        "c": "Ruled out because the right answer without evidence is one where \"The answer is right although the evidence was not retrieved\", a defect but not a retrieval failure by definition.",
+        "a": "Ruled out because five is the number of questions for which \"the evidence was retrieved for 5 and 5 answers were right\" is said of, the opposite count."
+      }
+    },
+    {
+      "id": "02-freshness-measurement-and-the-practice#m1",
+      "page": "02-freshness-measurement-and-the-practice.md",
+      "scope": "module",
+      "stem": "A legal-tech firm's assistant must answer from 3,000 agreements that are revised weekly, and every answer must cite its source. Clients may open only their own agreements. An engineer proposes fine-tuning a model on the agreements each month. Which design fits?",
+      "options": {
+        "a": "A model fine-tuned each month on the newest texts of the agreements, used with a short prompt",
+        "b": "The whole set of agreements placed in a single cached prompt that is shared by the clients",
+        "c": "Section chunks in a permission-filtered index, replaced when their document changes",
+        "d": "A keyword index over each whole agreement, rebuilt from scratch each quarter by a batch job"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Frequent changes, citations and per-client access are retrieval's case, and a changed document must lose its old chunks.",
+        "a": "Ruled out because in the table the weights are weak when \"Facts change, a source must be shown or a reader's access must be respected\", which describes this firm.",
+        "b": "Ruled out because the prompt suits a corpus that is \"small, shared by every request and edited rarely\", and these agreements are revised weekly and read under access rules.",
+        "d": "Ruled out because \"A re-index that runs less often than the documents change leaves old text in the index between runs\", and a quarterly rebuild leaves it for months."
+      }
+    },
+    {
+      "id": "02-freshness-measurement-and-the-practice#m2",
+      "page": "02-freshness-measurement-and-the-practice.md",
+      "scope": "module",
+      "stem": "On a labelled set of 8 questions, a pipeline scores 4 ok, 1 generation, 2 retrieval and 1 unsupported. Where should the next week of work go?",
+      "options": {
+        "a": "The prompt alone, since one answer was wrong although its evidence was retrieved",
+        "b": "The cut, the index and the freshness, since three problem cases lack evidence",
+        "c": "Nowhere in particular, since five of the eight answers are right",
+        "d": "The unsupported case first, since a right answer needs no work at all"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The table sends retrieval outcomes to \"The cut, the context, the index, the freshness\".",
+        "a": "Ruled out because \"the pipeline has two retrieval failures and one generation failure\".",
+        "c": "Ruled out because \"Counting only correct answers hides all three\".",
+        "d": "Ruled out because the table sends it to \"Retrieval, because the answer rests on the model's memory or on luck\"."
+      }
+    },
+    {
+      "id": "02-freshness-measurement-and-the-practice#m3",
+      "page": "02-freshness-measurement-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team re-indexes by adding the chunks of every changed document. Recall on its labelled questions stays high, yet users keep reporting outdated answers. What does the team's measurement miss?",
+      "options": {
+        "a": "Whether the keyword index outweighs the embedding index when the query holds a code",
+        "b": "Whether the model follows the prompt when the evidence is present in its context",
+        "c": "Whether the labelled set holds enough questions about each topic of the support area",
+        "d": "Whether the passage that was returned still matches what its source says now"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Recall by chunk id counts an old chunk with the right id as a hit, so staleness needs a check against the source.",
+        "b": "Ruled out because \"the only thing that changed is what retrieval can return\", so the old text is already in the evidence before the prompt is read.",
+        "c": "Ruled out because the problem is what the metric counts, as \"an old chunk with the right id still counts as a hit\", and more questions would count the same way.",
+        "a": "Ruled out because the weighting of codes decides ranking among current chunks, since \"a question that names an identifier is the case where the keyword index is right\", and it does not decide whether an old chunk is returned."
+      }
+    }
+  ]
+}
