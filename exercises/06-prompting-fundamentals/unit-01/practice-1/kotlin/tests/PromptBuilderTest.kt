@@ -57,8 +57,8 @@ Classify the message about delivery.
 
     @Test fun e1_absentOptionalSectionsAreOmittedNotEmpty() {
         val out = buildPrompt(Spec(task = "Say hi.", role = "  "))
-        assertEquals("<task>\nSay hi.\n</task>", out)
         assertFalse("<role>" in out || "<documents>" in out || "<constraints>" in out)
+        assertEquals("<task>\nSay hi.\n</task>", out)
     }
 
     @Test fun e2_variablesFillOnceAndAMissingOneIsNamed() {
