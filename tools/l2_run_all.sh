@@ -26,3 +26,9 @@ for spec in ${L2_EXAMPLE_SPECS:-examples/*/example.json}; do
     echo "example $d $lang run rc=$?"
   done
 done
+# the JVM editions of the examples (Gradle, offline; the libraries are cached by one online warm-up): tests, then printed output
+if [ -n "${L2_JVM_EXAMPLES:-}" ]; then
+  tools/l2_prepare_jvm_examples.sh "$IMG" || exit 2
+  tools/l2_run_jvm_examples.sh "$IMG" test runExample
+  echo "jvm examples (java and kotlin) rc=$?"
+fi
