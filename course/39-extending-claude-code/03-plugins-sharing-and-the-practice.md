@@ -1,6 +1,6 @@
 # Plugins, dependencies, sharing and the practice
 
-**Level:** Developer · **Module 39:** Extending Claude Code · **Page 3 of 3**
+**Level:** Developer · **Module 39:** Extending Claude Code · **Page 3 of 4**
 **Exams:** DV1, DV7; A3.2
 
 **After this page you can** package skills, agents and hooks as a plugin, declare a dependency with a version range, share a plugin with a team through the repository's settings, say what a plugin may and may not configure, and finish the module's practice.
@@ -84,43 +84,5 @@ The practice builds a plugin called `release-kit` and the team settings that ena
 1. **a**. The page says with `~2.1.0` "users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`." *b* is ruled out because a pinned range does not follow the newest release: "Without a version constraint, a dependency moves to each new release its marketplace publishes". *c* is ruled out because the dependency "installs at the highest git tag that satisfies this range", which is 2.1.4 and not the first match. *d* is ruled out because "resolution is by git tag" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained.
 2. **a**. The page says to set two keys in the repository's `.claude/settings.json`, so that the marketplace and the enabled plugin reach every contributor. *b* is ruled out because hand copying is what the shared file replaces, and the page gives the repository's file as the way "to give a repository's contributors a plugin without each of them installing it". *c* is ruled out because the manifest is "a `plugin.json` file, called the manifest, that names the plugin", and it lists dependencies and not people. *d* is ruled out because the page says to "set two keys in the repository's `.claude/settings.json`", which is configuration and not a sentence in a memory file.
 3. **c**. The page says "These fields are ignored when loading agents from a plugin." *b* is ruled out because the fields are "ignored when loading agents from a plugin", so the agent keeps its normal prompts. *a* is ruled out because "These fields are ignored when loading agents from a plugin", so the file still loads. *d* is ruled out because no remembered approval is described, and the page names the fix: "Ship the guard in `hooks/hooks.json`."
-
-</details>
-
-## Module quiz
-
-This quiz covers all three pages of the module.
-
-1. A team needs one rule enforced for every command, with an explanation given to Claude, and the rule must hold in every project that installs their tooling. Which design fits?
-   - **a**: A skill in each repository that tells Claude to avoid the action
-   - **b**: A hook in a plugin that blocks with exit code 2 and a reason
-   - **c**: A subagent in the plugin that reviews each command before it runs
-   - **d**: A line in each memory file that forbids the action by its name
-
-2. One skill drafts release summaries and another tags and ships a release. Which pair of settings fits?
-   - **a**: The first for a person alone, the second on automatic loading
-   - **b**: Both on automatic loading, so that Claude can finish unaided
-   - **c**: The first on automatic loading, the second for a person alone
-   - **d**: Both for a person alone, so that neither is ever loaded at all
-
-3. A repository's `.claude/settings.json` registers a marketplace and enables a plugin, but a new contributor has not yet approved the folder. What happens?
-   - **a**: The entries apply only to managed settings, never to a repository
-   - **b**: The plugin installs at once, because the file is in the repository
-   - **c**: A prompt appears for each plugin, listing its hooks and its scripts
-   - **d**: Claude Code ignores the entries without a message until trust is given
-
-4. A subagent should review code and remember wording the team prefers, with that knowledge committed with the code. Which fields fit?
-   - **a**: Every tool and the user memory scope
-   - **b**: Read-only tools and the project memory scope
-   - **c**: Read-only tools and the local memory scope
-   - **d**: Every tool and no memory field at all
-
-<details>
-<summary>Answer key</summary>
-
-1. **b**. The hooks section gives "deterministic control: certain actions always happen rather than relying on the LLM to choose to run them", exit 2 blocks and "Write a reason to stderr", and a plugin carries the hook to every project that enables it. *a* is ruled out because "a skill is instructions Claude may follow", and not a rule that holds. *c* is ruled out because a subagent is "An isolated context that returns summarised results" and is not a gate for every command. *d* is ruled out because a memory file holds "Persistent context loaded every conversation", which is guidance and not enforcement.
-2. **c**. The page says "A skill that writes release notes is harmless and Claude can start it when asked", while a skill with side effects needs `disable-model-invocation: true`. *b* is ruled out because for a skill with side effects "a person should start it". *a* is ruled out because it reverses the safety, and the first sentence of the page's reasoning is "A skill that writes release notes is harmless and Claude can start it when asked". *d* is ruled out because "Claude loads it by itself when your request matches its description", and the harmless skill gains from that.
-3. **d**. The page says the entries "apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message." *b* is ruled out because trust comes first: "A repository cannot install code on a machine that has not trusted it." *c* is ruled out because the page says "Claude Code ignores them without a message", which describes no prompt. *a* is ruled out because the page says "the same two keys go in managed settings" for a whole organisation, and the repository's file covers its own contributors.
-4. **b**. The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is "shareable via version control". *a* is ruled out because "Omit it and the subagent inherits every tool", and the `user` scope lives in the home directory and is not committed. *c* is ruled out because the `local` scope is for knowledge that "should not be checked in". *d* is ruled out because "Omit it and the subagent inherits every tool", and without `memory` the subagent keeps no knowledge across conversations.
 
 </details>

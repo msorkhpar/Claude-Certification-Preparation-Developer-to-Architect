@@ -1,0 +1,171 @@
+{
+  "practice": "39-extending-claude-code/unit-02/practice-1",
+  "name": "marketplace_setup",
+  "tests": {
+    "java": "MarketplaceSetupTest",
+    "kotlin": "MarketplaceSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_marketplace_file_names_an_owner_and_lists_each_plugin_by_a_source_that_resolves",
+      "typescript": "m1 the marketplace file names an owner and lists each plugin by a source that resolves",
+      "java": "m1_theMarketplaceFileNamesAnOwnerAndListsEachPluginByASourceThatResolves",
+      "kotlin": "m1_theMarketplaceFileNamesAnOwnerAndListsEachPluginByASourceThatResolves"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_names_are_valid_in_a_plugin_id_and_are_not_reserved_or_mistaken_for_official_ones",
+      "typescript": "e1 names are valid in a plugin id and are not reserved or mistaken for official ones",
+      "java": "e1_namesAreValidInAPluginIdAndAreNotReservedOrMistakenForOfficialOnes",
+      "kotlin": "e1_namesAreValidInAPluginIdAndAreNotReservedOrMistakenForOfficialOnes"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_plugin_keeps_only_its_manifest_in_the_manifest_folder_and_finds_its_files_through_the_plugin_root",
+      "typescript": "e2 the plugin keeps only its manifest in the manifest folder and finds its files through the plugin root",
+      "java": "e2_thePluginKeepsOnlyItsManifestInTheManifestFolderAndFindsItsFilesThroughThePluginRoot",
+      "kotlin": "e2_thePluginKeepsOnlyItsManifestInTheManifestFolderAndFindsItsFilesThroughThePluginRoot"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_version_lives_in_the_manifest_alone_and_is_semantic",
+      "typescript": "e3 the version lives in the manifest alone and is semantic",
+      "java": "e3_theVersionLivesInTheManifestAloneAndIsSemantic",
+      "kotlin": "e3_theVersionLivesInTheManifestAloneAndIsSemantic"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_each_source_kind_is_written_in_its_own_form_and_pinned_to_a_tag_and_a_commit",
+      "typescript": "e4 each source kind is written in its own form and pinned to a tag and a commit",
+      "java": "e4_eachSourceKindIsWrittenInItsOwnFormAndPinnedToATagAndACommit",
+      "kotlin": "e4_eachSourceKindIsWrittenInItsOwnFormAndPinnedToATagAndACommit"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_dependency_carries_a_range_and_one_from_another_marketplace_is_allowed_by_name",
+      "typescript": "e5 a dependency carries a range and one from another marketplace is allowed by name",
+      "java": "e5_aDependencyCarriesARangeAndOneFromAnotherMarketplaceIsAllowedByName",
+      "kotlin": "e5_aDependencyCarriesARangeAndOneFromAnotherMarketplaceIsAllowedByName"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_team_settings_register_the_marketplace_and_enable_only_what_installs_from_it",
+      "typescript": "e6 the team settings register the marketplace and enable only what installs from it",
+      "java": "e6_theTeamSettingsRegisterTheMarketplaceAndEnableOnlyWhatInstallsFromIt",
+      "kotlin": "e6_theTeamSettingsRegisterTheMarketplaceAndEnableOnlyWhatInstallsFromIt"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_renames_lead_every_former_name_to_a_current_plugin_or_to_null",
+      "typescript": "e7 renames lead every former name to a current plugin or to null",
+      "java": "e7_renamesLeadEveryFormerNameToACurrentPluginOrToNull",
+      "kotlin": "e7_renamesLeadEveryFormerNameToACurrentPluginOrToNull"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_no_file_is_left_unfinished_or_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e8 no file is left unfinished or holds a personal path an address or a key",
+      "java": "e8_noFileIsLeftUnfinishedOrHoldsAPersonalPathAnAddressOrAKey",
+      "kotlin": "e8_noFileIsLeftUnfinishedOrHoldsAPersonalPathAnAddressOrAKey"
+    }
+  },
+  "plants": {
+    "wrong-entry-name-mismatch": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "lists the plugin under a name that differs from the name in its own manifest"
+    },
+    "wrong-dotdot-source": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "writes the relative source with .. so that it leaves the marketplace"
+    },
+    "wrong-reserved-marketplace-name": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "calls the marketplace by an official Anthropic marketplace name"
+    },
+    "wrong-hooks-without-wrapper": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "writes the event map without the top-level hooks key, so the file fails to load"
+    },
+    "wrong-hook-script-path": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "finds the guard script by a path relative to the working directory instead of the plugin root"
+    },
+    "wrong-version-in-both": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "sets the version in the manifest and again in the marketplace entry"
+    },
+    "wrong-version-not-semver": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "gives the plugin a two-part version"
+    },
+    "wrong-short-sha": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "pins a github source to an abbreviated commit"
+    },
+    "wrong-url-shorthand": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "writes a url source with the owner/repo shorthand that only a github source takes"
+    },
+    "wrong-no-pin": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves a git-subdir source without a commit pin"
+    },
+    "wrong-dependency-unconstrained": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "depends on lint-helper with no version range"
+    },
+    "wrong-cross-marketplace-no-allowlist": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "depends on a plugin of another marketplace without allowing that marketplace"
+    },
+    "wrong-settings-key-mismatch": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "registers the marketplace in the team settings under a name that its file does not carry"
+    },
+    "wrong-enable-external-plugin": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "enables a plugin from an external source, which the repository settings alone do not install"
+    },
+    "wrong-rename-dangling": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "renames a former plugin to a name that no entry has"
+    },
+    "wrong-personal-path": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "puts a home-folder path in the marketplace description"
+    }
+  }
+}

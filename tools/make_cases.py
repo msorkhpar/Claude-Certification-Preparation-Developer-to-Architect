@@ -22,6 +22,32 @@ X = "exercises"
 # practice dir -> {"name", "tests": {java, kotlin suite names}, "langs", "cases": [(id, kind, title)], "plants": {name: (caught_by, defect)}}
 PRACTICES = {}
 
+# ===== Level 2: module 27 =====
+PRACTICES[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
+    "name": "extension_choice", "suite": "ExtensionChoiceTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "every situation of the bank gets its mechanism and its reason"),
+        ("e1", "edge", "a rule that must hold goes to a hook whatever else is true"),
+        ("e2", "edge", "an outside system needs a server and noisy work alone needs a subagent"),
+        ("e3", "edge", "knowledge goes to the file or skill that loads it at the right time"),
+        ("e4", "edge", "a plugin carries a skill hook subagent or server to a second repository and nothing else"),
+        ("e5", "edge", "in an application the platform may supply the schema and only a remote server replaces your own tool"),
+        ("e6", "edge", "an unknown value is an error and a missing key takes its default"),
+    ],
+    "plants": {
+        "wrong-guarantee-needs-no-knowledge": (["e1", "m1"], "treats a rule as a hook only when no instruction text goes with it, so a rule with a convention is left to a sentence"),
+        "wrong-server-skipped-when-noisy": (["e2"], "sends an outside system to a subagent when the work is also noisy"),
+        "wrong-scope-ignored": (["e3", "m1"], "puts a path-scoped convention in the always-loaded file"),
+        "wrong-one-reason-for-skills": (["e3", "m1"], "gives a repeatable procedure the reason code of a reference"),
+        "wrong-plugin-at-one-repo": (["e4"], "makes a plugin even when only one repository needs the setup"),
+        "wrong-plugin-for-conventions": (["e4", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
+        "wrong-api-provided-schema-ignored": (["e5", "m1"], "writes your own tool in an application even when the platform supplies the schema"),
+        "wrong-api-server-without-remote": (["e5"], "uses the connector in an application when no remote server exists"),
+        "wrong-no-validation": (["e6"], "accepts a knowledge kind it does not know"),
+        "wrong-fallthrough-skill": (["m1", "e3", "e6"], "answers a situation that needs nothing special with a skill"),
+    },
+}
+
 # ===== Level 2: modules 30 to 35 =====
 PRACTICES[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
     "name": "vision", "suite": "VisionTest", "langs": ["python", "typescript", "java", "kotlin"], "pyfile": "test_vision.py", "tsfile": "vision.test.ts",
@@ -222,6 +248,39 @@ PRACTICES[f"{X}/39-extending-claude-code/unit-01/practice-1"] = {
         "wrong-agent-bypass": (["e5"], "sets a permission mode that a plugin agent ignores"),
         "wrong-dependency-unpinned": (["e6"], "depends on secrets-vault with no version range"),
         "wrong-marketplace-mismatch": (["e7"], "enables the plugin from a marketplace that the file does not register"),
+    },
+}
+
+PRACTICES[f"{X}/39-extending-claude-code/unit-02/practice-1"] = {
+    "name": "marketplace_setup", "suite": "MarketplaceSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "the marketplace file names an owner and lists each plugin by a source that resolves"),
+        ("e1", "edge", "names are valid in a plugin id and are not reserved or mistaken for official ones"),
+        ("e2", "edge", "the plugin keeps only its manifest in the manifest folder and finds its files through the plugin root"),
+        ("e3", "edge", "the version lives in the manifest alone and is semantic"),
+        ("e4", "edge", "each source kind is written in its own form and pinned to a tag and a commit"),
+        ("e5", "edge", "a dependency carries a range and one from another marketplace is allowed by name"),
+        ("e6", "edge", "the team settings register the marketplace and enable only what installs from it"),
+        ("e7", "edge", "renames lead every former name to a current plugin or to null"),
+        ("e8", "edge", "no file is left unfinished or holds a personal path an address or a key"),
+    ],
+    "plants": {
+        "wrong-entry-name-mismatch": (["m1"], "lists the plugin under a name that differs from the name in its own manifest"),
+        "wrong-dotdot-source": (["m1"], "writes the relative source with .. so that it leaves the marketplace"),
+        "wrong-reserved-marketplace-name": (["e1"], "calls the marketplace by an official Anthropic marketplace name"),
+        "wrong-hooks-without-wrapper": (["e2"], "writes the event map without the top-level hooks key, so the file fails to load"),
+        "wrong-hook-script-path": (["e2"], "finds the guard script by a path relative to the working directory instead of the plugin root"),
+        "wrong-version-in-both": (["e3"], "sets the version in the manifest and again in the marketplace entry"),
+        "wrong-version-not-semver": (["e3"], "gives the plugin a two-part version"),
+        "wrong-short-sha": (["e4"], "pins a github source to an abbreviated commit"),
+        "wrong-url-shorthand": (["e4"], "writes a url source with the owner/repo shorthand that only a github source takes"),
+        "wrong-no-pin": (["e4"], "leaves a git-subdir source without a commit pin"),
+        "wrong-dependency-unconstrained": (["e5"], "depends on lint-helper with no version range"),
+        "wrong-cross-marketplace-no-allowlist": (["e5"], "depends on a plugin of another marketplace without allowing that marketplace"),
+        "wrong-settings-key-mismatch": (["e6"], "registers the marketplace in the team settings under a name that its file does not carry"),
+        "wrong-enable-external-plugin": (["e6"], "enables a plugin from an external source, which the repository settings alone do not install"),
+        "wrong-rename-dangling": (["e7"], "renames a former plugin to a name that no entry has"),
+        "wrong-personal-path": (["e8"], "puts a home-folder path in the marketplace description"),
     },
 }
 

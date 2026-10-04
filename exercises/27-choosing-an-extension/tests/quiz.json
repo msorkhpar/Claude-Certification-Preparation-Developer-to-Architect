@@ -116,8 +116,65 @@
       }
     },
     {
-      "id": "02-choosing-between-similar-features-and-combining-them#m1",
-      "page": "02-choosing-between-similar-features-and-combining-them.md",
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#q1",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
+      "scope": "page",
+      "stem": "A team runs ESLint through a skill that asks Claude to lint after each change, and a review shows several edits that were never linted. What fits better?",
+      "options": {
+        "a": "A hook attached to the write event that executes the style check directly",
+        "b": "A longer skill description with many more trigger words added to it",
+        "c": "A line in the instruction file that repeats the same request again",
+        "d": "A subagent that reviews the whole diff once at the end of each day"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says \"Anything written in text, CLAUDE.md, a skill or an output style, is followed as an instruction\", and the documentation's answer is that a hook \"Always fires on its event\".",
+        "b": "Ruled out because \"If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help\", and a longer description is still a request.",
+        "c": "Ruled out because the memory page says Claude \"treats them as context, not enforced configuration\".",
+        "d": "Ruled out because a subagent \"does the reading in its own window and returns a summary\", and a daily review does not run the linter after each edit."
+      }
+    },
+    {
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#q2",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
+      "scope": "page",
+      "stem": "Six repositories need the same commit-message style. What does the page choose?",
+      "options": {
+        "a": "A plugin that carries the style to every project",
+        "b": "An instruction file kept in each project",
+        "c": "A hook that rewrites each message after the commit exists",
+        "d": "A skill that each engineer starts before committing"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"A `CLAUDE.md` at the plugin root isn't loaded as context\", so a plugin cannot deliver a convention.",
+        "a": "Ruled out because \"a plugin cannot carry it, since its instruction file is not loaded as context\", so the style would never reach Claude.",
+        "c": "Ruled out because a hook \"Always fires on its event\", and a message rewritten afterwards does not tell Claude the style while it writes.",
+        "d": "Ruled out because a skill is chosen by its description, and \"If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help\"."
+      }
+    },
+    {
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#q3",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
+      "scope": "page",
+      "stem": "A tool must let Claude read a vendor's hosted calendar from an application that calls the Messages API. Which choice does the page give?",
+      "options": {
+        "a": "A skill describing the vendor's endpoints",
+        "b": "A tool the team defines, with its own schema and code",
+        "c": "The remote server, reached through the connector",
+        "d": "A hook that calls the vendor before each request"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says that in an application a hosted server \"can be reached through the connector\", with the reason `remote-server`.",
+        "a": "Ruled out because \"a skill is knowledge and cannot make the connection\", and the vendor's endpoints are not the connection.",
+        "b": "Ruled out because rebuilding it as your own tool \"repeats work and owns its login\".",
+        "d": "Ruled out because \"no Claude Code extension exists in an API call\", and a hook is one."
+      }
+    },
+    {
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m1",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
       "stem": "A team wants a linter to run after every file edit, with no reliance on Claude remembering. Which feature fits, and why?",
       "options": {
@@ -135,8 +192,8 @@
       }
     },
     {
-      "id": "02-choosing-between-similar-features-and-combining-them#m2",
-      "page": "02-choosing-between-similar-features-and-combining-them.md",
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m2",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
       "stem": "A team uses the same set of skills, hooks and MCP servers in six repositories. What does the documentation suggest?",
       "options": {
@@ -154,8 +211,8 @@
       }
     },
     {
-      "id": "02-choosing-between-similar-features-and-combining-them#m3",
-      "page": "02-choosing-between-similar-features-and-combining-them.md",
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m3",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
       "stem": "A workflow that deploys to production must never start unless a person types its name. Which setting does the page give?",
       "options": {
@@ -173,8 +230,8 @@
       }
     },
     {
-      "id": "02-choosing-between-similar-features-and-combining-them#m4",
-      "page": "02-choosing-between-similar-features-and-combining-them.md",
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m4",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
       "stem": "A project has an API style guide of 3,000 lines that matters only when endpoints are written. Where does it belong?",
       "options": {
@@ -189,6 +246,25 @@
         "a": "Ruled out because \"CLAUDE.md is paid for on every request\", and \"Keep CLAUDE.md under 200 lines.\"",
         "b": "Ruled out because an output style is \"a voice, length or format wanted in every response\", not a library of facts.",
         "d": "Ruled out because MCP \"connects Claude to external services\", and a local guide is knowledge, not a service: \"MCP for knowledge.\""
+      }
+    },
+    {
+      "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m5",
+      "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
+      "scope": "module",
+      "stem": "A platform team wants a note posted to the team chat whenever any Claude Code session closes, in forty repositories. Which design follows the order of questions?",
+      "options": {
+        "a": "A server for the chat service, which Claude may choose to call",
+        "b": "An event-triggered script, delivered through one bundle",
+        "c": "A skill with the posting steps, copied into each project",
+        "d": "A line in each instruction file that asks Claude to write the note"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page's table says \"an MCP server only offers tools that Claude may or may not call; nothing fires at the end\", so the event needs a hook, and \"A hook triggers external actions through MCP\". A plugin is how the same hook reaches many repositories: \"A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit\".",
+        "a": "Ruled out because \"an MCP server only offers tools that Claude may or may not call; nothing fires at the end\".",
+        "c": "Ruled out because \"a skill that says \"lint after editing\" is interpreted, and the outcome can vary\", and a copy in each project drifts.",
+        "d": "Ruled out because \"a line in the instruction file is a request, not a guarantee\"."
       }
     }
   ]

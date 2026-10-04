@@ -173,8 +173,65 @@
       }
     },
     {
-      "id": "03-plugins-sharing-and-the-practice#m1",
-      "page": "03-plugins-sharing-and-the-practice.md",
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#q1",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
+      "scope": "page",
+      "stem": "A team pushes fresh commits to a plugin whose manifest still says `\"version\": \"1.0.0\"`. What reaches installed users?",
+      "options": {
+        "a": "The copy they already hold, until the number is raised",
+        "b": "The fresh commits at the next launch, since a push always counts",
+        "c": "The fresh commits once the marketplace entry repeats that number",
+        "d": "A validator error that disables every installed copy of the plugin"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page says users stay on their cached copy until the string changes, and that if the version is not changed, \"users don't receive them\".",
+        "b": "Ruled out because \"users don't receive them\" when new commits are pushed without changing the version.",
+        "c": "Ruled out because \"Don't set `version` in both `plugin.json` and the marketplace entry\", and Claude Code \"uses the manifest value without warning\".",
+        "d": "Ruled out because Claude Code \"then uses the manifest value without warning\", so an unchanged version is not an error that disables anything."
+      }
+    },
+    {
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#q2",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
+      "scope": "page",
+      "stem": "A catalog entry calls a bundle `reviewer-kit`, while the bundle's own manifest says `review-kit`. What happens when someone installs it under the manifest's name?",
+      "options": {
+        "a": "It succeeds, using the manifest name as the install id",
+        "b": "It fails with a not-found message",
+        "c": "It succeeds, and every skill takes the entry name as its prefix",
+        "d": "It succeeds after one more approval prompt for the person"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page says \"When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin \"<manifest-name>\" not found in marketplace \"<marketplace>\"`.\"",
+        "a": "Ruled out because the entry name is \"the key Claude Code writes under `enabledPlugins`\", so it is the install id.",
+        "c": "Ruled out because \"the manifest name is the prefix of its skills\", and the entry name never replaces it.",
+        "d": "Ruled out because \"Two names appear for one plugin, and they must agree\", and no approval step is described for a mismatch."
+      }
+    },
+    {
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#q3",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
+      "scope": "page",
+      "stem": "A repository's settings turn on a bundle whose catalog entry points at a repository of its own. A contributor trusts the folder and starts a session. What do they see?",
+      "options": {
+        "a": "The bundle loaded, since trust is the only condition that applies",
+        "b": "A prompt that lists the hooks of the bundle before it installs",
+        "c": "A notice that it is enabled but not installed, until they install it",
+        "d": "The bundle loaded once the marketplace is added to managed settings"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says \"Each contributor sees `Plugin \"<name>\" is enabled in project settings but isn't installed` until they run `claude plugin install <name>@<marketplace> --scope project`.\"",
+        "a": "Ruled out because \"Only a relative-path plugin installs from the file alone\".",
+        "b": "Ruled out because the notice stays \"until they run `claude plugin install <name>@<marketplace> --scope project`\", which is a manual step and not a prompt.",
+        "d": "Ruled out because \"A repository's own settings reach only the contributors who trust the folder\", which is a different channel from managed settings."
+      }
+    },
+    {
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#m1",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
       "scope": "module",
       "stem": "A team needs one rule enforced for every command, with an explanation given to Claude, and the rule must hold in every project that installs their tooling. Which design fits?",
       "options": {
@@ -192,8 +249,8 @@
       }
     },
     {
-      "id": "03-plugins-sharing-and-the-practice#m2",
-      "page": "03-plugins-sharing-and-the-practice.md",
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#m2",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
       "scope": "module",
       "stem": "One skill drafts release summaries and another tags and ships a release. Which pair of settings fits?",
       "options": {
@@ -211,8 +268,8 @@
       }
     },
     {
-      "id": "03-plugins-sharing-and-the-practice#m3",
-      "page": "03-plugins-sharing-and-the-practice.md",
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#m3",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
       "scope": "module",
       "stem": "A repository's `.claude/settings.json` registers a marketplace and enables a plugin, but a new contributor has not yet approved the folder. What happens?",
       "options": {
@@ -230,8 +287,8 @@
       }
     },
     {
-      "id": "03-plugins-sharing-and-the-practice#m4",
-      "page": "03-plugins-sharing-and-the-practice.md",
+      "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#m4",
+      "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
       "scope": "module",
       "stem": "A subagent should review code and remember wording the team prefers, with that knowledge committed with the code. Which fields fit?",
       "options": {
