@@ -55,7 +55,179 @@ The semantic checks of the example are small: the line items add up to the calcu
 
 <!-- example: m62-extraction-checks tabs: python,typescript -->
 ```python
-"""What a schema does not give an extraction pipeline."""
+"""What a schema does not give an extraction pipeline: a field the document may lack, checks of meaning, a retry that carries feedback, and an accuracy figure that does not hide the failures.
+
+The rules are the exam guide's for tasks 4.3 and 4.4 and the Claude documentation read on 2026-10-03 (structured outputs, "Define tools"): a schema guarantees syntax and not meaning; a field that may be missing from the source is
+nullable so the model is not pushed to invent a value; a retry helps with format and structure and cannot supply what the source does not hold; a request that forces a tool is rejected by the current models, which use
+`auto` with strict tool use. The "model" below is a script of fixed replies: it shows the pipeline's decisions, not what a real model would answer.
+"""
+import json
+
+DOC = "Invoice from Acme Tools.\nItems: 100.00 + 20.50\nTotal due: 130.00 EUR"
+NO_FORCING = {"claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"}
+
+
+def scripted_value(document, nullable):
+    """What a model under pressure does with a purchase order number the document does not contain: a required string gets filled, a nullable one stays null."""
+    marker = "PO "
+    if marker in document:
+        return document.split(marker)[1].split()[0]
+    return None if nullable else "PO-0000"
+
+
+def check(record, document):
+    """Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document."""
+    problems = []
+    if abs(sum(record["items"]) - record["total"]) > 0.005:
+        problems.append(f"total: the items add up to {sum(record['items'])}, not {record['total']}")
+    if record["evidence"] not in document:
+        problems.append("evidence: this quotation is not in the document")
+    return problems
+
+
+def extract(document, replies, max_retries=1):
+    """Ask, check, and ask again with the document, the failed answer and the problems; give up after max_retries."""
+    messages = []
+    for attempt, reply in enumerate(replies[: max_retries + 1], 1):
+        problems = check(reply, document)
+        if not problems:
+            return {"status": "valid", "attempts": attempt, "feedback": messages}
+        messages.append(f"Document:\n{document}\nYour answer:\n{json.dumps(reply)}\nProblems:\n" + "\n".join(f"- {p}" for p in problems))
+    return {"status": "failed", "attempts": min(len(replies), max_retries + 1), "feedback": messages}
+
+
+def accuracy(outcomes):
+    """outcomes: (status, correct) per document. The figure on validated records alone leaves out every document that failed."""
+    valid = [correct for status, correct in outcomes if status == "valid"]
+    return {"validated_only": round(sum(valid) / len(valid), 2) if valid else 0.0, "all_documents": round(sum(valid) / len(outcomes), 2) if outcomes else 0.0}
+
+
+def request_choice(model, tools):
+    """The tool_choice of an extraction request: any when several schemas fit, the one tool otherwise, auto with strict tool use where forcing is rejected."""
+    if model in NO_FORCING:
+        return {"tool_choice": "auto", "check_reply": True}
+    return {"tool_choice": "any" if len(tools) > 1 else f"tool:{tools[0]}", "check_reply": False}
+
+
+def main():
+    no_po = "Invoice from Acme Tools. Total due: 130.00 EUR"
+    print("purchase order, document without one: required ->", scripted_value(no_po, False), "| nullable ->", scripted_value(no_po, True))
+    wrong = {"items": [100.0, 20.5], "total": 130.0, "evidence": "Total due: 130.00 EUR"}
+    right = {"items": [100.0, 20.5, 9.5], "total": 130.0, "evidence": "Total due: 130.00 EUR"}
+    fabricated = {**right, "evidence": "Total due: 130.00 USD"}
+    result = extract(DOC, [wrong, right])
+    print("answer 1 wrong, answer 2 right:", result["status"], "after", result["attempts"], "attempts")
+    print(result["feedback"][0])
+    print("two answers that stay wrong:", extract(DOC, [wrong, fabricated])["status"])
+    print("accuracy of 10 documents (6 valid, 5 of them right):", accuracy([("valid", True)] * 5 + [("valid", False)] + [("failed", False)] * 4))
+    for model in ("claude-haiku-4-5", "claude-sonnet-5-5"):
+        print(f"{model}, two extraction tools:", request_choice(model, ["extract_invoice", "extract_receipt"]))
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+purchase order, document without one: required -> PO-0000 | nullable -> None
+answer 1 wrong, answer 2 right: valid after 2 attempts
+Document:
+Invoice from Acme Tools.
+Items: 100.00 + 20.50
+Total due: 130.00 EUR
+Your answer:
+{"items": [100.0, 20.5], "total": 130.0, "evidence": "Total due: 130.00 EUR"}
+Problems:
+- total: the items add up to 120.5, not 130.0
+two answers that stay wrong: failed
+accuracy of 10 documents (6 valid, 5 of them right): {'validated_only': 0.83, 'all_documents': 0.5}
+claude-haiku-4-5, two extraction tools: {'tool_choice': 'any', 'check_reply': False}
+claude-sonnet-5-5, two extraction tools: {'tool_choice': 'auto', 'check_reply': True}
+```
+```typescript
+/**
+ * What a schema does not give an extraction pipeline: a field the document may lack, checks of meaning, a retry that carries feedback, and an accuracy figure that does not hide the failures.
+ *
+ * The rules are the exam guide's for tasks 4.3 and 4.4 and the Claude documentation read on 2026-10-03 (structured outputs, "Define tools"): a schema guarantees syntax and not meaning; a field that may be missing from the source is
+ * nullable so the model is not pushed to invent a value; a retry helps with format and structure and cannot supply what the source does not hold; a request that forces a tool is rejected by the current models, which use
+ * `auto` with strict tool use. The "model" below is a script of fixed replies: it shows the pipeline's decisions, not what a real model would answer.
+ */
+export const DOC = "Invoice from Acme Tools.\nItems: 100.00 + 20.50\nTotal due: 130.00 EUR";
+const NO_FORCING = new Set(["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"]);
+export type Answer = { items: number[]; total: number; evidence: string };
+
+/** What a model under pressure does with a purchase order number the document does not contain: a required string gets filled, a nullable one stays null. */
+export function scriptedValue(document: string, nullable: boolean): string | null {
+  const marker = "PO ";
+  if (document.includes(marker)) return document.split(marker)[1].split(/\s+/)[0];
+  return nullable ? null : "PO-0000";
+}
+
+/** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
+export function check(record: Answer, document: string): string[] {
+  const problems: string[] = [];
+  const sum = record.items.reduce((a, b) => a + b, 0);
+  if (Math.abs(sum - record.total) > 0.005) problems.push(`total: the items add up to ${sum}, not ${record.total}`);
+  if (!document.includes(record.evidence)) problems.push("evidence: this quotation is not in the document");
+  return problems;
+}
+
+/** Ask, check, and ask again with the document, the failed answer and the problems; give up after maxRetries. */
+export function extract(document: string, replies: Answer[], maxRetries = 1): { status: string; attempts: number; feedback: string[] } {
+  const feedback: string[] = [];
+  const tried = replies.slice(0, maxRetries + 1);
+  for (const [i, reply] of tried.entries()) {
+    const problems = check(reply, document);
+    if (problems.length === 0) return { status: "valid", attempts: i + 1, feedback };
+    feedback.push(`Document:\n${document}\nYour answer:\n${JSON.stringify(reply)}\nProblems:\n` + problems.map((p) => `- ${p}`).join("\n"));
+  }
+  return { status: "failed", attempts: tried.length, feedback };
+}
+
+/** outcomes: [status, correct] per document. The figure on validated records alone leaves out every document that failed. */
+export function accuracy(outcomes: Array<[string, boolean]>): { validated_only: number; all_documents: number } {
+  const valid = outcomes.filter(([status]) => status === "valid").map(([, correct]) => (correct ? 1 : 0) as number);
+  const right = valid.reduce((a, b) => a + b, 0);
+  return { validated_only: valid.length ? Math.round((right / valid.length) * 100) / 100 : 0, all_documents: outcomes.length ? Math.round((right / outcomes.length) * 100) / 100 : 0 };
+}
+
+/** The tool_choice of an extraction request: any when several schemas fit, the one tool otherwise, auto with strict tool use where forcing is rejected. */
+export function requestChoice(model: string, tools: string[]): { tool_choice: string; check_reply: boolean } {
+  if (NO_FORCING.has(model)) return { tool_choice: "auto", check_reply: true };
+  return { tool_choice: tools.length > 1 ? "any" : `tool:${tools[0]}`, check_reply: false };
+}
+
+function main() {
+  const noPo = "Invoice from Acme Tools. Total due: 130.00 EUR";
+  console.log("purchase order, document without one: required ->", scriptedValue(noPo, false), "| nullable ->", scriptedValue(noPo, true));
+  const wrong: Answer = { items: [100.0, 20.5], total: 130.0, evidence: "Total due: 130.00 EUR" };
+  const right: Answer = { items: [100.0, 20.5, 9.5], total: 130.0, evidence: "Total due: 130.00 EUR" };
+  const fabricated: Answer = { ...right, evidence: "Total due: 130.00 USD" };
+  const result = extract(DOC, [wrong, right]);
+  console.log("answer 1 wrong, answer 2 right:", result.status, "after", result.attempts, "attempts");
+  console.log(result.feedback[0]);
+  console.log("two answers that stay wrong:", extract(DOC, [wrong, fabricated]).status);
+  const outcomes: Array<[string, boolean]> = [...Array(5).fill(["valid", true]), ["valid", false], ...Array(4).fill(["failed", false])];
+  console.log("accuracy of 10 documents (6 valid, 5 of them right):", JSON.stringify(accuracy(outcomes)));
+  for (const model of ["claude-haiku-4-5", "claude-sonnet-5-5"]) console.log(`${model}, two extraction tools:`, JSON.stringify(requestChoice(model, ["extract_invoice", "extract_receipt"])));
+}
+
+if (import.meta.main) main();
+```
+```text
+purchase order, document without one: required -> PO-0000 | nullable -> null
+answer 1 wrong, answer 2 right: valid after 2 attempts
+Document:
+Invoice from Acme Tools.
+Items: 100.00 + 20.50
+Total due: 130.00 EUR
+Your answer:
+{"items":[100,20.5],"total":130,"evidence":"Total due: 130.00 EUR"}
+Problems:
+- total: the items add up to 120.5, not 130
+two answers that stay wrong: failed
+accuracy of 10 documents (6 valid, 5 of them right): {"validated_only":0.83,"all_documents":0.5}
+claude-haiku-4-5, two extraction tools: {"tool_choice":"any","check_reply":false}
+claude-sonnet-5-5, two extraction tools: {"tool_choice":"auto","check_reply":true}
 ```
 <!-- /example -->
 
