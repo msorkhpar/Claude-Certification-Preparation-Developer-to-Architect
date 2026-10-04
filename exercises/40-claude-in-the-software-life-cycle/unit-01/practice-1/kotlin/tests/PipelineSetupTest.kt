@@ -15,7 +15,7 @@ class PipelineSetupTest {
     }
 
     /** A workflow's text and its parsed map; it needs a jobs map. */
-    class Workflow(val text: String, val map: Map<String, Any?>) {
+    inner class Workflow(val text: String, val map: Map<String, Any?>) {
         val jobs: Map<String, Any?> get() = asMap(map["jobs"])
     }
 

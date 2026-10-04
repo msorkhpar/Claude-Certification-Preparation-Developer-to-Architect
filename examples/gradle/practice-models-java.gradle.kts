@@ -13,6 +13,10 @@ subprojects {
     dependencies {
         if (name == "harness") "api"("com.anthropic:anthropic-java:2.68.0") else "implementation"(project(":harness"))
     }
+    if (name == "harness") {
+        // the harness's own tests are not part of a practice build
+        extensions.configure<SourceSetContainer> { named("test") { java.setSrcDirs(emptyList<File>()) } }
+    }
     if (name != "harness") {
         extensions.configure<SourceSetContainer> {
             named("main") {

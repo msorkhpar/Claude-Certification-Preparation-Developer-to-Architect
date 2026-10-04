@@ -2,21 +2,17 @@
 // library modules, the same source layout and versions as examples/build.gradle.kts. The practice's own build file applies the Kotlin plugin
 // and adds `testImplementation(project(":<example folder>"))` for each model it uses. The modules are built once, into ../.build-kotlin/models,
 // whichever solution is under test.
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 subprojects {
     apply(plugin = if (name == "harness") "java-library" else "org.jetbrains.kotlin.jvm")
     repositories { mavenCentral() }
     layout.buildDirectory.set(rootProject.file("../.build-kotlin/models/$name"))
-    extensions.configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    tasks.withType<KotlinCompile>().configureEach { compilerOptions.jvmTarget.set(JvmTarget.JVM_21) }
+    // Java and Kotlin both compile for the JDK that runs the build, so their targets agree
     dependencies {
         if (name == "harness") "api"("com.anthropic:anthropic-java:2.68.0") else "implementation"(project(":harness"))
+    }
+    if (name == "harness") {
+        // the harness's own tests are not part of a practice build
+        extensions.configure<SourceSetContainer> { named("test") { java.setSrcDirs(emptyList<File>()) } }
     }
     if (name != "harness") {
         extensions.configure<SourceSetContainer> {
@@ -25,8 +21,10 @@ subprojects {
                 resources.setSrcDirs(emptyList<File>())
             }
         }
-        extensions.configure<KotlinJvmProjectExtension> {
-            sourceSets.getByName("main").kotlin.setSrcDirs(listOf(projectDir)).also { sourceSets.getByName("main").kotlin.exclude("**/*Test.kt", "**/home/**", "**/.gradle/**", "**/*.gradle.kts") }
-        }
+        // the Kotlin plugin adds a `kotlin` source directory set to each source set; it is reached by its Gradle core type
+        val kotlinMain = (extensions.getByType<SourceSetContainer>().getByName("main") as org.gradle.api.plugins.ExtensionAware)
+            .extensions.getByName("kotlin") as org.gradle.api.file.SourceDirectorySet
+        kotlinMain.setSrcDirs(listOf(projectDir))
+        kotlinMain.exclude("**/*Test.kt", "**/home/**", "**/.gradle/**", "**/*.gradle.kts")
     }
 }
