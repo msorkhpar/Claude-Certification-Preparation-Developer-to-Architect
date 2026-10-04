@@ -87,7 +87,7 @@ A plugin's `name` is its identifier, and "changing it breaks every existing inst
 Host the marketplace in a git repository. Teammates run `claude plugin marketplace add example-org/team-marketplace`, or the repository carries the registration. Running the add command once with `--scope project` and committing the `.claude/settings.json` it writes registers the marketplace for everyone who works in the repository, and `enabledPlugins` there turns plugins on. Two details decide whether it works:
 
 - Registration waits for trust. "The `extraKnownMarketplaces` entries apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message."
-- Only a relative-path plugin installs from the file alone. "A plugin whose marketplace entry points at an external source instead, such as the plugin's own GitHub repository, doesn't install from the repository's settings alone." Each contributor sees `Plugin "<name>" is enabled in project settings but isn't installed` until they run `claude plugin install <name>@<marketplace> --scope project`. This is why the practice enables only the plugin whose source is a relative path.
+- Only a relative-path plugin installs from the file alone. "A plugin whose marketplace entry points at an external source instead, such as the plugin's own GitHub repository, doesn't install from the repository's settings alone." Each contributor sees `Plugin "<name>" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`. Nothing installs, and nothing prompts, until each contributor runs the install. (A seed directory that already holds the plugin is the other exception.) This is why the practice enables only the plugin whose source is a relative path.
 
 A private marketplace needs no field for credentials: "Claude Code has no git token of its own, and `marketplace.json` has no field for one." It clones with the git credentials the user's machine already holds. Background auto-update is "off for your marketplace until a user or admin turns it on", so without it users receive changes when they run `/plugin marketplace update` or `claude plugin update`.
 
@@ -111,13 +111,13 @@ The practice is in [`exercises/39-extending-claude-code`](../../exercises/39-ext
    - **a**: The copy they already hold, until the number is raised
    - **b**: The fresh commits at the next launch, since a push always counts
    - **c**: The fresh commits once the marketplace entry repeats that number
-   - **d**: A validator error that disables every installed copy of the plugin
+   - **d**: The fresh commits, since the commit hash is the version
 
 2. A catalog entry calls a bundle `reviewer-kit`, while the bundle's own manifest says `review-kit`. What happens when someone installs it under the manifest's name?
-   - **a**: It succeeds, using the manifest name as the install id
-   - **b**: It fails with a not-found message
-   - **c**: It succeeds, and every skill takes the entry name as its prefix
-   - **d**: It succeeds after one more approval prompt for the person
+   - **a**: An ambiguity message asks which of the two names was meant
+   - **b**: A not-found message naming what was typed
+   - **c**: A success message, with the entry name as the skill prefix
+   - **d**: A success message, once the catalog has been added again
 
 3. A repository's settings turn on a bundle whose catalog entry points at a repository of its own. A contributor trusts the folder and starts a session. What do they see?
    - **a**: The bundle loaded, since trust is the only condition that applies
@@ -128,9 +128,9 @@ The practice is in [`exercises/39-extending-claude-code`](../../exercises/39-ext
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says users stay on their cached copy until the string changes, and that if the version is not changed, "users don't receive them". *b* is ruled out because "users don't receive them" when new commits are pushed without changing the version. *c* is ruled out because "Don't set `version` in both `plugin.json` and the marketplace entry", and Claude Code "uses the manifest value without warning". *d* is ruled out because Claude Code "then uses the manifest value without warning", so an unchanged version is not an error that disables anything.
-2. **b**. The page says "When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin "<manifest-name>" not found in marketplace "<marketplace>"`." *a* is ruled out because the entry name is "the key Claude Code writes under `enabledPlugins`", so it is the install id. *c* is ruled out because "the manifest name is the prefix of its skills", and the entry name never replaces it. *d* is ruled out because "Two names appear for one plugin, and they must agree", and no approval step is described for a mismatch.
-3. **c**. The page says "Each contributor sees `Plugin "<name>" is enabled in project settings but isn't installed` until they run `claude plugin install <name>@<marketplace> --scope project`." *a* is ruled out because "Only a relative-path plugin installs from the file alone". *b* is ruled out because the notice stays "until they run `claude plugin install <name>@<marketplace> --scope project`", which is a manual step and not a prompt. *d* is ruled out because "A repository's own settings reach only the contributors who trust the folder", which is a different channel from managed settings.
+1. **a**. The page says users stay on their cached copy until the string changes. *b* is ruled out because if the version is not changed, "users don't receive them". *c* is ruled out because "Don't set `version` in both `plugin.json` and the marketplace entry", and Claude Code "then uses the manifest value without warning". *d* is ruled out because the commit hash counts only when neither place sets a version: "When neither is set", the commit SHA of the source.
+2. **b**. The page says "When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin "<manifest-name>" not found in marketplace "<marketplace>"`." *a* is ruled out because the entry name is "the key Claude Code writes under `enabledPlugins`", and nothing offers a choice between the two names. *c* is ruled out because "the manifest name is the prefix of its skills", and the entry name never replaces it. *d* is ruled out because "When the two names differ and someone installs by the manifest name, Claude Code reports" a failure, and re-adding the catalog changes neither name.
+3. **c**. The page says "Each contributor sees `Plugin "<name>" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`." *a* is ruled out because "Only a relative-path plugin installs from the file alone". *b* is ruled out because "Nothing installs, and nothing prompts, until each contributor runs the install." *d* is ruled out because "A repository's own settings reach only the contributors who trust the folder", which is a different channel from managed settings.
 
 </details>
 

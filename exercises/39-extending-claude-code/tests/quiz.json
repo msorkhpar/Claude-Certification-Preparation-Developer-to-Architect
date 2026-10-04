@@ -181,14 +181,14 @@
         "a": "The copy they already hold, until the number is raised",
         "b": "The fresh commits at the next launch, since a push always counts",
         "c": "The fresh commits once the marketplace entry repeats that number",
-        "d": "A validator error that disables every installed copy of the plugin"
+        "d": "The fresh commits, since the commit hash is the version"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says users stay on their cached copy until the string changes, and that if the version is not changed, \"users don't receive them\".",
-        "b": "Ruled out because \"users don't receive them\" when new commits are pushed without changing the version.",
-        "c": "Ruled out because \"Don't set `version` in both `plugin.json` and the marketplace entry\", and Claude Code \"uses the manifest value without warning\".",
-        "d": "Ruled out because Claude Code \"then uses the manifest value without warning\", so an unchanged version is not an error that disables anything."
+        "a": "The page says users stay on their cached copy until the string changes.",
+        "b": "Ruled out because if the version is not changed, \"users don't receive them\".",
+        "c": "Ruled out because \"Don't set `version` in both `plugin.json` and the marketplace entry\", and Claude Code \"then uses the manifest value without warning\".",
+        "d": "Ruled out because the commit hash counts only when neither place sets a version: \"When neither is set\", the commit SHA of the source."
       }
     },
     {
@@ -197,17 +197,17 @@
       "scope": "page",
       "stem": "A catalog entry calls a bundle `reviewer-kit`, while the bundle's own manifest says `review-kit`. What happens when someone installs it under the manifest's name?",
       "options": {
-        "a": "It succeeds, using the manifest name as the install id",
-        "b": "It fails with a not-found message",
-        "c": "It succeeds, and every skill takes the entry name as its prefix",
-        "d": "It succeeds after one more approval prompt for the person"
+        "a": "An ambiguity message asks which of the two names was meant",
+        "b": "A not-found message naming what was typed",
+        "c": "A success message, with the entry name as the skill prefix",
+        "d": "A success message, once the catalog has been added again"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin \"<manifest-name>\" not found in marketplace \"<marketplace>\"`.\"",
-        "a": "Ruled out because the entry name is \"the key Claude Code writes under `enabledPlugins`\", so it is the install id.",
+        "a": "Ruled out because the entry name is \"the key Claude Code writes under `enabledPlugins`\", and nothing offers a choice between the two names.",
         "c": "Ruled out because \"the manifest name is the prefix of its skills\", and the entry name never replaces it.",
-        "d": "Ruled out because \"Two names appear for one plugin, and they must agree\", and no approval step is described for a mismatch."
+        "d": "Ruled out because \"When the two names differ and someone installs by the manifest name, Claude Code reports\" a failure, and re-adding the catalog changes neither name."
       }
     },
     {
@@ -223,9 +223,9 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The page says \"Each contributor sees `Plugin \"<name>\" is enabled in project settings but isn't installed` until they run `claude plugin install <name>@<marketplace> --scope project`.\"",
+        "c": "The page says \"Each contributor sees `Plugin \"<name>\" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`.\"",
         "a": "Ruled out because \"Only a relative-path plugin installs from the file alone\".",
-        "b": "Ruled out because the notice stays \"until they run `claude plugin install <name>@<marketplace> --scope project`\", which is a manual step and not a prompt.",
+        "b": "Ruled out because \"Nothing installs, and nothing prompts, until each contributor runs the install.\"",
         "d": "Ruled out because \"A repository's own settings reach only the contributors who trust the folder\", which is a different channel from managed settings."
       }
     },

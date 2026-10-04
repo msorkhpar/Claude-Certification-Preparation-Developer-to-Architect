@@ -33,7 +33,7 @@ remaining modules are being written:
 | `24-prompt-engineering-for-applications/` | Prompt engineering for applications | 2 |
 | `25-structured-output-and-defensive-parsing/` | Structured output and defensive parsing | 2 |
 | `26-tool-use/` | Tool use | 3 |
-| `27-choosing-an-extension/` | Choosing an extension | 2 |
+| `27-choosing-an-extension/` | Choosing an extension | 3 |
 | `28-retrieval/` | Retrieval | 2 |
 | `29-context-engineering/` | Context engineering | 3 |
 | `30-vision-and-documents/` | Vision and documents | 2 |
@@ -45,7 +45,7 @@ remaining modules are being written:
 | `36-managed-and-self-hosted-agents/` | Managed and self-hosted agents | 2 |
 | `37-agent-frameworks-compared/` | Agent frameworks compared | 2 |
 | `38-claude-code-for-developers/` | Claude Code for developers | 3 |
-| `39-extending-claude-code/` | Extending Claude Code | 3 |
+| `39-extending-claude-code/` | Extending Claude Code | 4 |
 | `40-claude-in-the-software-life-cycle/` | Claude in the software life cycle | 2 |
 | `41-security-and-safety/` | Security and safety | 3 |
 | `42-evaluation/` | Evaluation | 3 |
