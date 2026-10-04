@@ -76,7 +76,7 @@ This quiz covers both pages of the module.
 1. Scenario S6, structured data extraction. On a validation set with its right answers known, extractions scored 80 are right 62% of the time, and the goal for automatic acceptance is 90%. What follows?
    - **a**: Lower the cut-off until the share of accepted items reaches the whole validation set
    - **b**: Keep 80 as the cut-off, because the model itself reported that score with a great deal of certainty
-   - **c**: Accept from the lowest score at which the accepted items reach the target on that evidence
+   - **c**: Place the cut-off at the lowest level whose admitted items reach that bar in these records
    - **d**: Replace the scores by an average over the document types, then reapply them
 
 2. Scenario S6, structured data extraction. One kind of form has only a dozen checked samples, all of them extracted correctly, while every other kind has hundreds. May that kind be automated?
