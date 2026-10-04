@@ -2,6 +2,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ContextBuilderTest {
+    private fun <T : Any> got(value: T?): T {
+        assertNotNull(value, "the function returned nothing")
+        return value!!
+    }
+
     private fun order() = linkedMapOf("order_id" to "A-1042", "purchase_date" to "2026-09-02", "items" to "2 x kettle", "return_window" to "30 days", "warehouse_bin" to "R7-22", "carrier_hash" to "9f3c", "refund_amount" to "$129.50")
 
     private fun fact(customer: String, name: String, value: String) = FactEntry(customer, name, value, "2026-09-02")
@@ -10,8 +15,8 @@ class ContextBuilderTest {
 
     @Test
     fun m1_trimmingKeepsOnlyTheNamedFieldsWithTheirExactValuesInTheNamedOrder() {
-        assertEquals(listOf("refund_amount=$129.50", "order_id=A-1042"), trimRecord(order(), listOf("refund_amount", "order_id"))!!.map { "${it.key}=${it.value}" })
-        assertFalse("warehouse_bin" in trimRecord(order(), listOf("order_id", "items"))!!)
+        assertEquals(listOf("refund_amount=$129.50", "order_id=A-1042"), got(trimRecord(order(), listOf("refund_amount", "order_id"))).map { "${it.key}=${it.value}" })
+        assertFalse("warehouse_bin" in got(trimRecord(order(), listOf("order_id", "items"))))
     }
 
     @Test
@@ -22,25 +27,25 @@ class ContextBuilderTest {
 
     @Test
     fun e2_aNewerFactReplacesTheOldOneAndTheOldValueIsKeptAsHistory() {
-        val start = updateFacts(emptyMap(), "address", "12 Oak St", "2026-08-01")!!
+        val start = got(updateFacts(emptyMap(), "address", "12 Oak St", "2026-08-01"))
         assertEquals(mapOf("address" to Fact("12 Oak St", "2026-08-01", emptyList())), start)
-        val later = updateFacts(start, "address", "9 Elm Rd", "2026-09-10")!!
+        val later = got(updateFacts(start, "address", "9 Elm Rd", "2026-09-10"))
         assertEquals(Fact("9 Elm Rd", "2026-09-10", listOf("12 Oak St@2026-08-01")), later["address"])
         assertEquals(Fact("12 Oak St", "2026-08-01", emptyList()), start["address"])
     }
 
     @Test
     fun e3_anOlderFactThatArrivesLateDoesNotReplaceTheCurrentOne() {
-        val current = updateFacts(emptyMap(), "address", "9 Elm Rd", "2026-09-10")!!
-        val after = updateFacts(current, "address", "12 Oak St", "2026-08-01")!!
+        val current = got(updateFacts(emptyMap(), "address", "9 Elm Rd", "2026-09-10"))
+        val after = got(updateFacts(current, "address", "12 Oak St", "2026-08-01"))
         assertEquals(Fact("9 Elm Rd", "2026-09-10", listOf("12 Oak St@2026-08-01")), after["address"])
     }
 
     @Test
     fun e4_theCaseFactsOfAnotherCustomerNeverEnterTheContext() {
-        val text = buildContext("c1", listOf(fact("c1", "refund", "$129.50"), fact("c2", "refund", "$20.00")), "summary", emptyList())!!
+        val text = got(buildContext("c1", listOf(fact("c1", "refund", "$129.50"), fact("c2", "refund", "$20.00")), "summary", emptyList()))
         assertTrue("$129.50" in text && "$20.00" !in text)
-        assertFalse("## Case facts" in buildContext("c3", listOf(fact("c1", "refund", "$129.50")), "summary", emptyList())!!)
+        assertFalse("## Case facts" in got(buildContext("c3", listOf(fact("c1", "refund", "$129.50")), "summary", emptyList())))
     }
 
     @Test
@@ -59,9 +64,9 @@ class ContextBuilderTest {
     @Test
     fun e7_theWindowDropsTheOldestMessagesAndKeepsAToolCallWithItsResult() {
         val messages = listOf(msg("user", "text", "", "x".repeat(40)), msg("assistant", "tool_use", "t1", "y".repeat(40)), msg("user", "tool_result", "t1", "z".repeat(40)), msg("assistant", "text", "", "done....."))
-        assertEquals(listOf("d"), window(messages, 14)!!.map { it.text.substring(0, 1) })
-        assertEquals(listOf("tool_use", "tool_result", "text"), window(messages, 23)!!.map { it.kind })
-        assertEquals(4, window(messages, 1000)!!.size)
+        assertEquals(listOf("d"), got(window(messages, 14)).map { it.text.substring(0, 1) })
+        assertEquals(listOf("tool_use", "tool_result", "text"), got(window(messages, 23)).map { it.kind })
+        assertEquals(4, got(window(messages, 1000)).size)
         assertEquals(emptyList<Message>(), window(messages, 0))
     }
 }

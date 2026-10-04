@@ -6,6 +6,11 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class EscalationTest {
+    private static <T> T got(T value) {
+        assertNotNull(value, "the method returned nothing");
+        return value;
+    }
+
     private static Escalation.Case kase(boolean asked, int matches, boolean covers, int stalled, String sentiment, int confidence) {
         return new Escalation.Case(asked, matches, covers, stalled, sentiment, confidence);
     }
@@ -15,7 +20,7 @@ class EscalationTest {
     }
 
     private static String action(Escalation.Case c) {
-        return Escalation.decide(c).action();
+        return got(Escalation.decide(c)).action();
     }
 
     private static Map<String, String> rec(String... kv) {
@@ -32,7 +37,7 @@ class EscalationTest {
     @Test
     void e1_frustrationAloneDoesNotEscalateAndTheReplyAcknowledgesIt() {
         assertEquals(new Escalation.Decision("resolve", "within capability", true), Escalation.decide(kase(false, 1, true, 0, "frustrated", 50)));
-        assertFalse(Escalation.decide(plain()).acknowledge());
+        assertFalse(got(Escalation.decide(plain())).acknowledge());
     }
 
     @Test
@@ -58,7 +63,7 @@ class EscalationTest {
     void e5_noProgressAfterTheAttemptLimitEscalatesAndBelowItDoesNot() {
         assertEquals(new Escalation.Decision("escalate", "no progress", false), Escalation.decide(kase(false, 1, true, 2, "calm", 50)));
         assertEquals("resolve", action(kase(false, 1, true, 1, "calm", 50)));
-        assertEquals("resolve", Escalation.decide(kase(false, 1, true, 3, "calm", 50), 4).action());
+        assertEquals("resolve", got(Escalation.decide(kase(false, 1, true, 3, "calm", 50), 4)).action());
     }
 
     @Test
@@ -80,7 +85,7 @@ class EscalationTest {
     void e8_theHandOffCarriesTheStructuredFactsAndNoTranscriptAndRefusesACaseWithoutAnId() {
         Escalation.HandoffCase c = new Escalation.HandoffCase("C-77", "refund over the limit", "duplicate charge", "$129.50", List.of("verified identity", "checked order"), "approve the refund", "user: hello ... 40 turns ...");
         assertEquals("Customer: C-77\nIssue: refund over the limit\nRoot cause: duplicate charge\nAmount: $129.50\nActions taken: verified identity; checked order\nRecommended action: approve the refund", Escalation.handoffText(c));
-        assertFalse(Escalation.handoffText(c).contains("40 turns"));
+        assertFalse(got(Escalation.handoffText(c)).contains("40 turns"));
         assertEquals("Customer: C-1\nIssue: late parcel\nRoot cause: unknown\nAmount: unknown\nActions taken: none\nRecommended action: review the case", Escalation.handoffText(new Escalation.HandoffCase("C-1", "late parcel", null, null, null, null, null)));
         assertThrows(IllegalArgumentException.class, () -> Escalation.handoffText(new Escalation.HandoffCase(null, "late parcel", null, null, null, null, null)));
     }

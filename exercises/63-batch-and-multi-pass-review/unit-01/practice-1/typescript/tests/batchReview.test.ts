@@ -7,6 +7,10 @@ import { pathToFileURL } from "node:url";
 const dir = resolve(process.env.SOLUTION_DIR ?? "starter");
 const { chooseApi, mergePasses, resubmissionPlan, reviewPlan, submissionInterval } = await import(pathToFileURL(resolve(dir, "batchReview.ts")).href);
 
+const got = (v: any) => {
+  assert.ok(v !== null && v !== undefined, "the function returned nothing");
+  return v;
+};
 const finding = (over: Record<string, unknown> = {}): any => ({ file: "a.py", line: 10, severity: "medium", issue: "unchecked input", confidence: 90, ...over });
 
 test("m1 the interval between submissions leaves room for the window and the handling", () => {
@@ -38,15 +42,15 @@ test("e4 an item over the limit is chunked and a rejected request is fixed first
 });
 
 test("e5 a multi file review gets a local pass per file and one integration pass", () => {
-  const plan = reviewPlan(["a.py", "b.py", "c.py"]);
+  const plan = got(reviewPlan(["a.py", "b.py", "c.py"]));
   assert.deepEqual(plan.map((p: any) => p.name), ["local:a.py", "local:b.py", "local:c.py", "integration"]);
   assert.deepEqual(plan[0].files, ["a.py"]);
   assert.deepEqual(plan[3].files, ["a.py", "b.py", "c.py"]);
-  assert.deepEqual(reviewPlan(["a.py"]).map((p: any) => p.name), ["local:a.py"]);
+  assert.deepEqual(got(reviewPlan(["a.py"])).map((p: any) => p.name), ["local:a.py"]);
 });
 
 test("e6 the same finding from two passes is one finding with the highest severity and the lowest confidence", () => {
-  const merged = mergePasses([[finding({ severity: "low", confidence: 95 })], [finding({ severity: "high", confidence: 85 }), finding({ file: "b.py", line: 3, issue: "race" })]]);
+  const merged = got(mergePasses([[finding({ severity: "low", confidence: 95 })], [finding({ severity: "high", confidence: 85 }), finding({ file: "b.py", line: 3, issue: "race" })]]));
   assert.equal(merged.length, 2);
   const first = merged[0];
   assert.deepEqual([first.file, first.line, first.severity, first.passes, first.confidence], ["a.py", 10, "high", 2, 85]);
@@ -54,9 +58,9 @@ test("e6 the same finding from two passes is one finding with the highest severi
 });
 
 test("e7 a finding is accepted only when two independent passes agree with confidence", () => {
-  const twiceSamePass = mergePasses([[finding(), finding()], []]);
+  const twiceSamePass = got(mergePasses([[finding(), finding()], []]));
   assert.ok(twiceSamePass[0].passes === 1 && twiceSamePass[0].route === "verify");
-  assert.equal(mergePasses([[finding({ confidence: 99 })]])[0].route, "verify");
-  assert.equal(mergePasses([[finding({ confidence: 60 })], [finding({ confidence: 90 })]])[0].route, "verify");
-  assert.equal(mergePasses([[finding({ confidence: 80 })], [finding({ confidence: 90 })]])[0].route, "accept");
+  assert.equal(got(mergePasses([[finding({ confidence: 99 })]]))[0].route, "verify");
+  assert.equal(got(mergePasses([[finding({ confidence: 60 })], [finding({ confidence: 90 })]]))[0].route, "verify");
+  assert.equal(got(mergePasses([[finding({ confidence: 80 })], [finding({ confidence: 90 })]]))[0].route, "accept");
 });

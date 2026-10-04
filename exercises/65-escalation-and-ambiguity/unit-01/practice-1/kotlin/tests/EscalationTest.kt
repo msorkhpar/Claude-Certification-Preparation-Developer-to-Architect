@@ -2,7 +2,12 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class EscalationTest {
-    private fun action(c: Case, maxAttempts: Int = 2) = decide(c, maxAttempts)!!.action
+    private fun <T : Any> got(value: T?): T {
+        assertNotNull(value, "the function returned nothing")
+        return value!!
+    }
+
+    private fun action(c: Case, maxAttempts: Int = 2) = got(decide(c, maxAttempts)).action
 
     private fun rec(vararg kv: Pair<String, String>): Map<String, String> = linkedMapOf(*kv)
 
@@ -14,7 +19,7 @@ class EscalationTest {
     @Test
     fun e1_frustrationAloneDoesNotEscalateAndTheReplyAcknowledgesIt() {
         assertEquals(Decision("resolve", "within capability", true), decide(Case(sentiment = "frustrated")))
-        assertFalse(decide(Case())!!.acknowledge)
+        assertFalse(got(decide(Case())).acknowledge)
     }
 
     @Test
@@ -60,7 +65,7 @@ class EscalationTest {
     fun e8_theHandOffCarriesTheStructuredFactsAndNoTranscriptAndRefusesACaseWithoutAnId() {
         val c = HandoffCase("C-77", "refund over the limit", "duplicate charge", "$129.50", listOf("verified identity", "checked order"), "approve the refund", "user: hello ... 40 turns ...")
         assertEquals("Customer: C-77\nIssue: refund over the limit\nRoot cause: duplicate charge\nAmount: $129.50\nActions taken: verified identity; checked order\nRecommended action: approve the refund", handoffText(c))
-        assertFalse("40 turns" in handoffText(c)!!)
+        assertFalse("40 turns" in got(handoffText(c)))
         assertEquals("Customer: C-1\nIssue: late parcel\nRoot cause: unknown\nAmount: unknown\nActions taken: none\nRecommended action: review the case", handoffText(HandoffCase("C-1", "late parcel")))
         assertThrows(IllegalArgumentException::class.java) { handoffText(HandoffCase(null, "late parcel")) }
     }

@@ -5,9 +5,15 @@ import { pathToFileURL } from "node:url";
 
 // SOLUTION_DIR selects starter, reference or a planted wrong solution.
 const dir = resolve(process.env.SOLUTION_DIR ?? "starter");
-const { clarifyingFields, decide, handoffText } = await import(pathToFileURL(resolve(dir, "escalation.ts")).href);
+const solution = await import(pathToFileURL(resolve(dir, "escalation.ts")).href);
+const got = (fn: (...args: any[]) => any) => (...args: any[]) => {
+  const value = fn(...args);
+  assert.ok(value !== null && value !== undefined, `${fn.name} returned nothing`);
+  return value;
+};
+const [clarifyingFields, decide, handoffText] = [solution.clarifyingFields, solution.decide, solution.handoffText].map(got);
 
-const action = (c: object, maxAttempts?: number) => decide(c, maxAttempts)?.action;
+const action = (c: object, maxAttempts?: number) => decide(c, maxAttempts).action;
 
 test("m1 a customer who asks for a person is escalated at once even when the agent could resolve it", () => {
   const result = decide({ asked_for_person: true, matches: 1, policy_covers: true, attempts_without_progress: 0, sentiment: "calm", confidence: 95 });

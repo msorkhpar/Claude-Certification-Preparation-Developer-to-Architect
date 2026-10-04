@@ -5,7 +5,13 @@ import { pathToFileURL } from "node:url";
 
 // SOLUTION_DIR selects starter, reference or a planted wrong solution.
 const dir = resolve(process.env.SOLUTION_DIR ?? "starter");
-const { buildContext, missingFromSummary, trimRecord, updateFacts, window } = await import(pathToFileURL(resolve(dir, "contextBuilder.ts")).href);
+const solution = await import(pathToFileURL(resolve(dir, "contextBuilder.ts")).href);
+const got = (fn: (...args: any[]) => any) => (...args: any[]) => {
+  const value = fn(...args);
+  assert.ok(value !== null && value !== undefined, `${fn.name} returned nothing`);
+  return value;
+};
+const [buildContext, missingFromSummary, trimRecord, updateFacts, window] = [solution.buildContext, solution.missingFromSummary, solution.trimRecord, solution.updateFacts, solution.window].map(got);
 
 const ORDER = { order_id: "A-1042", purchase_date: "2026-09-02", items: "2 x kettle", return_window: "30 days", warehouse_bin: "R7-22", carrier_hash: "9f3c", refund_amount: "$129.50" };
 const fact = (customer = "c1", name = "refund", value = "$129.50", as_of = "2026-09-02") => ({ customer, name, value, as_of });

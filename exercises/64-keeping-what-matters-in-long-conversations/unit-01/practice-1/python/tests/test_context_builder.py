@@ -4,7 +4,19 @@ from pathlib import Path
 
 # SOLUTION_DIR selects starter, reference or a planted wrong solution.
 sys.path.insert(0, os.environ.get("SOLUTION_DIR", str(Path(__file__).resolve().parent.parent / "starter")))
-from context_builder import build_context, missing_from_summary, trim_record, update_facts, window
+import context_builder as _solution
+
+
+def _got(fn):
+    def call(*args, **kwargs):
+        value = fn(*args, **kwargs)
+        assert value is not None, f"{fn.__name__} returned nothing"
+        return value
+
+    return call
+
+
+build_context, missing_from_summary, trim_record, update_facts, window = (_got(getattr(_solution, n)) for n in ("build_context", "missing_from_summary", "trim_record", "update_facts", "window"))
 
 ORDER = {"order_id": "A-1042", "purchase_date": "2026-09-02", "items": "2 x kettle", "return_window": "30 days", "warehouse_bin": "R7-22", "carrier_hash": "9f3c", "refund_amount": "$129.50"}
 

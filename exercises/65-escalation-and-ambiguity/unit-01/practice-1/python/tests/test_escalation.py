@@ -2,17 +2,33 @@ import os
 import sys
 from pathlib import Path
 
-import pytest
-
 # SOLUTION_DIR selects starter, reference or a planted wrong solution.
 sys.path.insert(0, os.environ.get("SOLUTION_DIR", str(Path(__file__).resolve().parent.parent / "starter")))
-from escalation import clarifying_fields, decide, handoff_text
+import escalation as _solution
+
+
+def _got(fn):
+    def call(*args, **kwargs):
+        value = fn(*args, **kwargs)
+        assert value is not None, f"{fn.__name__} returned nothing"
+        return value
+
+    return call
+
+
+clarifying_fields, decide, handoff_text = (_got(getattr(_solution, n)) for n in ("clarifying_fields", "decide", "handoff_text"))
+
+
+def refused(fn, *args):
+    try:
+        fn(*args)
+    except ValueError:
+        return True
+    return False
 
 
 def action(case, **kw):
-    result = decide(case, **kw)
-    assert isinstance(result, dict), "decide returned nothing"
-    return result["action"]
+    return decide(case, **kw)["action"]
 
 
 def test_m1_a_customer_who_asks_for_a_person_is_escalated_at_once_even_when_the_agent_could_resolve_it():
@@ -66,5 +82,4 @@ def test_e8_the_hand_off_carries_the_structured_facts_and_no_transcript_and_refu
     assert handoff_text(case) == "Customer: C-77\nIssue: refund over the limit\nRoot cause: duplicate charge\nAmount: $129.50\nActions taken: verified identity; checked order\nRecommended action: approve the refund"
     assert "40 turns" not in handoff_text(case)
     assert handoff_text({"customer_id": "C-1", "issue": "late parcel"}) == "Customer: C-1\nIssue: late parcel\nRoot cause: unknown\nAmount: unknown\nActions taken: none\nRecommended action: review the case"
-    with pytest.raises(ValueError):
-        handoff_text({"issue": "late parcel"})
+    assert refused(handoff_text, {"issue": "late parcel"})

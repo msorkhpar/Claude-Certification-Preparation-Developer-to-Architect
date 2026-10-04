@@ -5,6 +5,11 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class BatchReviewTest {
+    private static <T> T got(T value) {
+        assertNotNull(value, "the method returned nothing");
+        return value;
+    }
+
     private static BatchReview.Finding finding(String file, int line, String severity, String issue, int confidence) {
         return new BatchReview.Finding(file, line, severity, issue, confidence);
     }
@@ -56,16 +61,16 @@ class BatchReviewTest {
 
     @Test
     void e5_aMultiFileReviewGetsALocalPassPerFileAndOneIntegrationPass() {
-        List<BatchReview.Pass> plan = BatchReview.reviewPlan(List.of("a.py", "b.py", "c.py"));
+        List<BatchReview.Pass> plan = got(BatchReview.reviewPlan(List.of("a.py", "b.py", "c.py")));
         assertEquals(List.of("local:a.py", "local:b.py", "local:c.py", "integration"), plan.stream().map(BatchReview.Pass::name).toList());
         assertEquals(List.of("a.py"), plan.get(0).files());
         assertEquals(List.of("a.py", "b.py", "c.py"), plan.get(3).files());
-        assertEquals(List.of("local:a.py"), BatchReview.reviewPlan(List.of("a.py")).stream().map(BatchReview.Pass::name).toList());
+        assertEquals(List.of("local:a.py"), got(BatchReview.reviewPlan(List.of("a.py"))).stream().map(BatchReview.Pass::name).toList());
     }
 
     @Test
     void e6_theSameFindingFromTwoPassesIsOneFindingWithTheHighestSeverityAndTheLowestConfidence() {
-        List<BatchReview.Merged> merged = BatchReview.mergePasses(List.of(List.of(finding("low", 95)), List.of(finding("high", 85), finding("b.py", 3, "medium", "race", 90))));
+        List<BatchReview.Merged> merged = got(BatchReview.mergePasses(List.of(List.of(finding("low", 95)), List.of(finding("high", 85), finding("b.py", 3, "medium", "race", 90)))));
         assertEquals(2, merged.size());
         BatchReview.Merged first = merged.get(0);
         assertEquals(List.of("a.py", 10, "high", 2, 85), List.of(first.file(), first.line(), first.severity(), first.passes(), first.confidence()));
@@ -74,11 +79,11 @@ class BatchReviewTest {
 
     @Test
     void e7_aFindingIsAcceptedOnlyWhenTwoIndependentPassesAgreeWithConfidence() {
-        List<BatchReview.Merged> samePass = BatchReview.mergePasses(List.of(List.of(finding("medium", 90), finding("medium", 90)), List.of()));
+        List<BatchReview.Merged> samePass = got(BatchReview.mergePasses(List.of(List.of(finding("medium", 90), finding("medium", 90)), List.of())));
         assertEquals(1, samePass.get(0).passes());
         assertEquals("verify", samePass.get(0).route());
-        assertEquals("verify", BatchReview.mergePasses(List.of(List.of(finding("medium", 99)))).get(0).route());
-        assertEquals("verify", BatchReview.mergePasses(List.of(List.of(finding("medium", 60)), List.of(finding("medium", 90)))).get(0).route());
-        assertEquals("accept", BatchReview.mergePasses(List.of(List.of(finding("medium", 80)), List.of(finding("medium", 90)))).get(0).route());
+        assertEquals("verify", got(BatchReview.mergePasses(List.of(List.of(finding("medium", 99))))).get(0).route());
+        assertEquals("verify", got(BatchReview.mergePasses(List.of(List.of(finding("medium", 60)), List.of(finding("medium", 90))))).get(0).route());
+        assertEquals("accept", got(BatchReview.mergePasses(List.of(List.of(finding("medium", 80)), List.of(finding("medium", 90))))).get(0).route());
     }
 }

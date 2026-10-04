@@ -2,6 +2,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class BatchReviewTest {
+    private fun <T : Any> got(value: T?): T {
+        assertNotNull(value, "the function returned nothing")
+        return value!!
+    }
+
     private fun finding(severity: String, confidence: Int) = Finding("a.py", 10, severity, "unchecked input", confidence)
 
     @Test
@@ -39,16 +44,16 @@ class BatchReviewTest {
 
     @Test
     fun e5_aMultiFileReviewGetsALocalPassPerFileAndOneIntegrationPass() {
-        val plan = reviewPlan(listOf("a.py", "b.py", "c.py"))!!
+        val plan = got(reviewPlan(listOf("a.py", "b.py", "c.py")))
         assertEquals(listOf("local:a.py", "local:b.py", "local:c.py", "integration"), plan.map { it.name })
         assertEquals(listOf("a.py"), plan[0].files)
         assertEquals(listOf("a.py", "b.py", "c.py"), plan[3].files)
-        assertEquals(listOf("local:a.py"), reviewPlan(listOf("a.py"))!!.map { it.name })
+        assertEquals(listOf("local:a.py"), got(reviewPlan(listOf("a.py"))).map { it.name })
     }
 
     @Test
     fun e6_theSameFindingFromTwoPassesIsOneFindingWithTheHighestSeverityAndTheLowestConfidence() {
-        val merged = mergePasses(listOf(listOf(finding("low", 95)), listOf(finding("high", 85), Finding("b.py", 3, "medium", "race", 90))))!!
+        val merged = got(mergePasses(listOf(listOf(finding("low", 95)), listOf(finding("high", 85), Finding("b.py", 3, "medium", "race", 90)))))
         assertEquals(2, merged.size)
         val first = merged[0]
         assertEquals(listOf<Any>("a.py", 10, "high", 2, 85), listOf(first.file, first.line, first.severity, first.passes, first.confidence))
@@ -57,11 +62,11 @@ class BatchReviewTest {
 
     @Test
     fun e7_aFindingIsAcceptedOnlyWhenTwoIndependentPassesAgreeWithConfidence() {
-        val samePass = mergePasses(listOf(listOf(finding("medium", 90), finding("medium", 90)), emptyList()))!!
+        val samePass = got(mergePasses(listOf(listOf(finding("medium", 90), finding("medium", 90)), emptyList())))
         assertEquals(1, samePass[0].passes)
         assertEquals("verify", samePass[0].route)
-        assertEquals("verify", mergePasses(listOf(listOf(finding("medium", 99))))!![0].route)
-        assertEquals("verify", mergePasses(listOf(listOf(finding("medium", 60)), listOf(finding("medium", 90))))!![0].route)
-        assertEquals("accept", mergePasses(listOf(listOf(finding("medium", 80)), listOf(finding("medium", 90))))!![0].route)
+        assertEquals("verify", got(mergePasses(listOf(listOf(finding("medium", 99)))))[0].route)
+        assertEquals("verify", got(mergePasses(listOf(listOf(finding("medium", 60)), listOf(finding("medium", 90)))))[0].route)
+        assertEquals("accept", got(mergePasses(listOf(listOf(finding("medium", 80)), listOf(finding("medium", 90)))))[0].route)
     }
 }
