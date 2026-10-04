@@ -68,6 +68,13 @@ modules 12 to 44, which is the whole of Level 2, and the first modules of Level 
 | `60-claude-code-in-ci/` | Claude Code in CI | 2 |
 | `61-criteria-and-examples/` | Criteria and examples | 2 |
 | `62-structured-output-at-the-architect-level/` | Structured output at the architect level | 2 |
+| `85-retrieval-pipelines-at-design-level/` | Retrieval pipelines at design level | 2 |
+| `86-integration-choices-access-and-capability-bloat/` | Integration choices, access and capability bloat | 2 |
+| `87-observability-at-scale/` | Observability at scale | 2 |
+| `88-evaluation-and-optimisation/` | Evaluation and optimisation | 2 |
+| `89-migration-and-model-upgrades-at-scale/` | Migration and model upgrades at scale | 2 |
+
+Modules 85 to 89 belong to Level 4 (Architect Professional); their pages open with `**Level:** Architect Professional` and the exam codes P3, P4 or P6.
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
