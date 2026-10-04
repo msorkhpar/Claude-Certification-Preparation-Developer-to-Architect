@@ -1,0 +1,195 @@
+{
+  "module": "73-scenario-developer-productivity",
+  "quizzes": [
+    {
+      "id": "01-two-subagents-and-the-tools-each-one-gets#q1",
+      "page": "01-two-subagents-and-the-tools-each-one-gets.md",
+      "scope": "page",
+      "stem": "A team wants an agent that studies a legacy system and cannot change a file. What goes in its definition?",
+      "options": {
+        "a": "The shell tool, with a rule that blocks redirections",
+        "b": "A prompt sentence that tells it never to modify a file",
+        "c": "No tools line, as leaving it out gives the smallest set",
+        "d": "A tools line that lists only reading and searching tools"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The tools line is the limit.",
+        "b": "Ruled out because a prompt does not limit tools: \"A sentence in the prompt is a request that the model weighs\".",
+        "c": "Ruled out because the omission is the widest list: \"leaving the line out grants the most, not the least\".",
+        "a": "Ruled out because the shell is a way to write: \"The shell tool can write files through redirections and commands\"."
+      }
+    },
+    {
+      "id": "01-two-subagents-and-the-tools-each-one-gets#q2",
+      "page": "01-two-subagents-and-the-tools-each-one-gets.md",
+      "scope": "page",
+      "stem": "A boilerplate agent may change files only in `src/generated`. Which settings give that?",
+      "options": {
+        "a": "An allow rule for the Edit tool, limited to that folder",
+        "b": "An allow rule for the Write tool, limited to that folder",
+        "c": "An allow rule for the whole Edit tool, plus a prompt naming the folder",
+        "d": "A deny rule for the shell tool, since only commands can write"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "An Edit rule covers every built-in file-editing tool and a path keeps it to one folder.",
+        "b": "Ruled out because a Write path rule is never read: \"A path rule written for the Write tool is accepted and never consulted\".",
+        "c": "Ruled out because a bare rule has no path: \"A bare `Edit` rule has no path and approves every edit.\"",
+        "d": "Ruled out because the file tools have rules of their own: \"Denying the shell does not limit the file tools\"."
+      }
+    },
+    {
+      "id": "01-two-subagents-and-the-tools-each-one-gets#q3",
+      "page": "01-two-subagents-and-the-tools-each-one-gets.md",
+      "scope": "page",
+      "stem": "A ticket server lets a caller fetch, add and remove tickets, and agents may only look at them. Which settings give that?",
+      "options": {
+        "a": "Deny the delete tool with a rule that matches on the ticket number",
+        "b": "Allow every tool of the server, and tell the agents to read only",
+        "c": "Allow the get tool by name, and deny the create and delete tools by name",
+        "d": "Deny the whole server, then allow its get tool by name"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Allow by name and deny the others by name.",
+        "b": "Ruled out because a sentence is no limit: \"A sentence in the prompt is a request that the model weighs\".",
+        "a": "Ruled out because the rule is skipped: \"A rule for an MCP tool that carries parentheses is skipped, so it matches nothing\".",
+        "d": "Ruled out because a deny rule beats every allow: \"A matching deny rule wins over any allow rule, whatever the specificity.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#q1",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "page",
+      "stem": "Yesterday's work studied a module, and overnight a refactor rewrote it. What is the next step?",
+      "options": {
+        "a": "Reopen yesterday's session and trust the results it holds",
+        "b": "Open a new session and give it a short summary of what still holds",
+        "c": "Fork yesterday's session and ask it to look again at the module",
+        "d": "Continue the previous session and tell it that the code changed"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Tool results in an old session describe files as they were.",
+        "a": "Ruled out because nothing marks stale results: \"the old tool results are stale and nothing marks them so\".",
+        "c": "Ruled out because a fork copies the history, stale results included: \"copies the history into a new session\".",
+        "d": "Ruled out because a notice does not refresh the results: \"the model has no way to notice\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#q2",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "page",
+      "stem": "A developer wants two migration designs, both starting from one study of a module. Which approach fits?",
+      "options": {
+        "a": "Keep one session and ask for the designs one after the other",
+        "b": "Resume the one session twice and have both designs added to it",
+        "c": "Start two sessions from nothing and repeat the analysis in each",
+        "d": "Fork the session after the analysis, one branch for each option"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A fork gives each design its own history and keeps the analysis.",
+        "b": "Ruled out because a resume appends to the original: \"reopens a saved conversation under the same session id\".",
+        "c": "Ruled out because it repeats the analysis: \"A fork keeps them independent without repeating the analysis.\"",
+        "a": "Ruled out because one history mixes the designs, which is what a fork avoids: \"Each branch has its own history\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#q3",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "page",
+      "stem": "A new colleague clones the repository, and the ticket tools answer with an authorization error. The shared configuration is committed. What should the repository hold to prevent this?",
+      "options": {
+        "a": "A default for the token, written into the shared project file",
+        "b": "A team note that names every variable that the servers need to start",
+        "c": "A private copy of the project file with a working token",
+        "d": "A line in the root memory file that holds a shared token"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A note makes the missing variables visible.",
+        "a": "Ruled out because a default for a token is a credential in the file: \"a default for a token would be a credential in the file\".",
+        "c": "Ruled out because a second copy defeats the shared file: \"The file exists to be shared\".",
+        "d": "Ruled out because the memory file is committed context, not a place for a secret: \"A committed `.mcp.json` refers to variables and cannot hold their values.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m1",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A check reports `unknown-server: wiki (explorer)`. What does the finding mean?",
+      "options": {
+        "a": "A header holds a credential that was typed in by hand",
+        "b": "A reference points at an entry that the project file never defines",
+        "c": "A subagent has no tools line and so inherits whatever is available",
+        "d": "A permission rule approves the whole tool and not a path"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The finding is about a name that is not configured.",
+        "a": "Ruled out because that is another finding: \"`literal-secret`: a header or environment entry whose name says token, key, secret or authorization\".",
+        "c": "is ruled out for the same reason: \"`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it\".",
+        "d": "Ruled out because that is a third: \"`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m2",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A project definition file has a description and a prompt but omits its list of permitted tools. What can it call?",
+      "options": {
+        "a": "Everything that is available to subagents",
+        "b": "Only the reading tools, as the minimum set",
+        "c": "No tool at all until a rule approves one",
+        "d": "The tools of the parent that were listed first"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The omission is the widest list.",
+        "b": "Ruled out because the widest list is what omission gives: \"leaving the line out grants the most, not the least\".",
+        "c": "Ruled out because the subagent inherits tools and does not start empty: \"A subagent that omits `tools` inherits every tool that is available to subagents\".",
+        "d": "Ruled out because the line names tools and not an order: \"the `tools` line is the allowlist\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m3",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Exploring a big module would fill the main conversation with file contents. What keeps the main context small?",
+      "options": {
+        "a": "A read-only subagent does the reading and hands back its result",
+        "b": "A longer root memory file that summarises the module in advance",
+        "c": "A forked session that begins with the history of the main one",
+        "d": "A rule that denies the shell tool during every exploration"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A subagent keeps what it reads in its own context.",
+        "b": "Ruled out because a memory file does not move the reading: \"the root file loads in every session and costs context each time\".",
+        "c": "Ruled out because a fork copies the history: \"copies the history into a new session\".",
+        "d": "Ruled out because denying a tool does not move any reading elsewhere: \"Denying the shell does not limit the file tools\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m4",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A team writes the header as `Bearer ${TICKETS_TOKEN:-dev-token}` so the tools work on a fresh clone. What is wrong with it?",
+      "options": {
+        "a": "A default is applied to the address and never to a header",
+        "b": "Expansion in headers handles only the plain form of a reference",
+        "c": "The default puts a usable credential into a committed file",
+        "d": "A file that carries a default cannot be shared through version control"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A default for a token is a credential in the file.",
+        "b": "Ruled out because expansion has both forms: \"Expansion of `${VAR}` and `${VAR:-default}` works in a server's `command`, `args`, `env`, `url` and `headers`\".",
+        "a": "Ruled out because a header is one of the places where it works: \"`${VAR:-default}` expands to the variable if it is set and to the default otherwise\".",
+        "d": "Ruled out because sharing is the file's purpose: \"The `.mcp.json` of a project is committed so that the team shares its servers.\""
+      }
+    }
+  ]
+}

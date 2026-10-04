@@ -1,0 +1,195 @@
+{
+  "module": "74-scenario-claude-code-in-ci",
+  "quizzes": [
+    {
+      "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q1",
+      "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "scope": "page",
+      "stem": "A pipeline step runs `claude \"Analyze this pull request\"` and hangs. What fixes it?",
+      "options": {
+        "a": "Point its input at an empty file so it cannot wait",
+        "b": "Export an environment variable that selects headless mode",
+        "c": "Add a batch flag so the call is queued",
+        "d": "Add the print flag so that the run answers and exits"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "`-p` is the documented way to run without a person.",
+        "b": "Ruled out because no such variable exists: \"There is no headless environment variable and no `--batch` flag on the command line\".",
+        "c": "is ruled out for the same reason: \"There is no headless environment variable and no `--batch` flag on the command line\".",
+        "a": "Ruled out because it is a workaround: \"Redirecting standard input from an empty file is a Unix workaround that does not change how Claude Code runs.\""
+      }
+    },
+    {
+      "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q2",
+      "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "scope": "page",
+      "stem": "A pipeline has a gate that stops merges until it passes and a dependency digest that people read on Monday. Which calls move to batch?",
+      "options": {
+        "a": "Just the one nobody waits on, while the other stays in real time",
+        "b": "Both of them, with polling to find out when the gate is ready",
+        "c": "Neither of them, since the results of a batch arrive in any order",
+        "d": "Both of them, with a fallback to real time when a batch is slow"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Nobody waits for the digest and a developer waits for the gate.",
+        "b": "Ruled out because waiting is the problem: \"Polling a batch does not make it finish sooner.\"",
+        "c": "Ruled out because matching exists: \"Results of a batch come back matched by `custom_id`, so their order is no reason to avoid it.\"",
+        "d": "Ruled out because it adds a path: \"A fallback to real time when a batch is slow adds a second path and a second bill\"."
+      }
+    },
+    {
+      "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q3",
+      "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "scope": "page",
+      "stem": "What makes a run that nobody watches end by itself?",
+      "options": {
+        "a": "A longer timeout on the job that contains it",
+        "b": "A prompt that asks it to finish as quickly as it can",
+        "c": "A turn limit and a list of permitted tools in the command",
+        "d": "Running it again whenever it fails to produce an answer"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A limit and a tool list are set in the command.",
+        "b": "Ruled out because a sentence is no limit: \"A prompt that asks the run to be quick is a request, not a limit.\"",
+        "a": "Ruled out because time does not stop a loop: \"A longer job timeout only lets a loop run longer.\"",
+        "d": "Ruled out because repeating the run changes nothing: \"re-running it repeats the cost with no reason to expect a different result\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#q1",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "page",
+      "stem": "A review of nine changed modules gives deep notes on some and shallow ones on others, and flags a pattern in one while approving it in another. How should it be restructured?",
+      "options": {
+        "a": "A model with a larger context window, for the same single pass",
+        "b": "A pass for each file, then one pass on how the files fit together",
+        "c": "Three full runs, keeping only the issues that two of them report",
+        "d": "A rule that pull requests may not change more than four files"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Dividing the work answers the cause, thinning attention.",
+        "a": "Ruled out because room is not attention: \"A larger context window does not fix attention quality.\"",
+        "c": "Ruled out because agreement hides rare finds: \"Keeping only the issues that three runs agree on would hide real bugs that are found only now and then.\"",
+        "d": "Ruled out because it shifts the work: \"Asking authors to split their pull requests moves the work to people and does not improve the review.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#q2",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "page",
+      "stem": "The same conversation that wrote a change is asked to judge it and approves it, though a colleague spots a flaw at once. What improves the check?",
+      "options": {
+        "a": "Giving the same conversation a longer turn limit for the judging",
+        "b": "Asking the same conversation to read its own change more carefully",
+        "c": "Adding a sentence that tells the judge in that conversation to be critical",
+        "d": "A new session that is given the criteria and the earlier findings"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A fresh session has no bias toward the change, and the earlier findings stop repeats.",
+        "b": "Ruled out because the bias stays: \"A fresh context improves code review since Claude won't be biased toward code it just wrote.\"",
+        "c": "Ruled out because a sentence is a request: \"A sentence that asks for more care is a request; the criteria are the case list.\"",
+        "a": "Ruled out because time does not remove bias: \"A reviewer should not be the author.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#q3",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "page",
+      "stem": "A generator often writes cases that duplicate ones the project already has. What should the prompt change?",
+      "options": {
+        "a": "Ask for fewer tests in every run of the generator",
+        "b": "Carry the existing tests and say what makes a test useful",
+        "c": "Ask for tests of every function the change touches",
+        "d": "Ask the generator to explain each test it decides to write"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The generator needs to know what exists and what is worth writing.",
+        "a": "Ruled out because fewer is not better: \"A prompt that asks for fewer tests says nothing about which tests are worth writing.\"",
+        "c": "Ruled out because more coverage adds repeats: \"Without the existing tests in the prompt, the generator has no way to avoid repeating them.\"",
+        "d": "Ruled out because an explanation changes neither: \"A test generator that is only told to \\\"write tests\\\" writes the obvious ones, and some of them are copies of tests that exist.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m1",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. A job must decide whether to fail, but the seriousness of each comment is free text. What fixes that?",
+      "options": {
+        "a": "Ask the model to put the word critical at the very start of any serious comment it makes",
+        "b": "Ask for JSON that follows a schema where severity is one of a few fixed values",
+        "c": "Count the comments and fail the job once they pass a fixed number chosen by the team",
+        "d": "Search the prose of every comment for the words that usually go with a bad finding"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A closed list can be compared with a floor.",
+        "a": "Ruled out because a word in prose is a convention: \"A sentence that asks for more care is a request; the criteria are the case list.\"",
+        "c": "Ruled out because a count says nothing about how bad a finding is: \"what each severity means, with one example for each\".",
+        "d": "Ruled out because the severity belongs in the schema: \"The severity then belongs in the schema as a closed list, so a script can compare it with a floor.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m2",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The command reports success although the run stopped at its turn limit, and the job is green. What is the remedy?",
+      "options": {
+        "a": "Read the exit status and the JSON, and fail whenever no valid answer exists",
+        "b": "Raise the turn limit until the run always finishes well before it reaches that limit",
+        "c": "Run the command again whenever the output that comes back looks a little too short",
+        "d": "Remove the turn limit so that a run stops only when all of its work is finished"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The gate fails the job whenever no valid answer exists.",
+        "b": "Ruled out because the limit exists to stop a loop: \"`--max-turns` stops a loop\".",
+        "c": "Ruled out because a rerun changes nothing: \"re-running it repeats the cost with no reason to expect a different result\".",
+        "d": "Ruled out because the limit is what ends the run by itself: \"A run with no person must end by itself\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m3",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. After more commits arrive, the second run repeats comments that the author has already fixed. What should the run be given?",
+      "options": {
+        "a": "The earlier findings, with an instruction to report only what is new or still open",
+        "b": "A larger number of turns, so that it reads the whole history of the change before it starts",
+        "c": "The previous run's complete session, resumed with the latest commits added at the end of it",
+        "d": "A stricter list of severities, so that fewer of the comments will ever reach the author"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The run needs its own earlier output.",
+        "b": "Ruled out because turns do not supply memory: \"without the earlier findings it repeats every comment that the author has already fixed or answered\".",
+        "c": "Ruled out because a reviewer should start fresh: \"the review runs as its own session and not as a continuation of the one that generated the change\".",
+        "d": "Ruled out because severity does not remove repeats: \"Giving the run the earlier findings, and asking it to report only what is new or still open, keeps the comments useful.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m4",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The job that only looks at code has been given the right to run whatever it likes on the machine. What is the problem?",
+      "options": {
+        "a": "Shell access output is not valid JSON, so the schema of the answer cannot be applied to it",
+        "b": "Shell access slows every run down, and a turn limit would then end that run far too soon",
+        "c": "Shell access changes things, so the list should hold reading and searching tools only",
+        "d": "Shell access needs a person to approve each call, and nobody is there to give that approval"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A review changes nothing, so it needs only reading tools.",
+        "b": "Ruled out because the issue is what the tool can do: \"A shell tool is a way to change things\".",
+        "a": "Ruled out because the schema applies to the answer and not to the commands: \"The severity then belongs in the schema as a closed list\".",
+        "d": "Ruled out because the command's approval is listed in advance: \"`--allowedTools` lists what runs without asking, because nobody can approve a prompt\"."
+      }
+    }
+  ]
+}

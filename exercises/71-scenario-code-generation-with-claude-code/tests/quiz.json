@@ -1,0 +1,195 @@
+{
+  "module": "71-scenario-code-generation-with-claude-code",
+  "quizzes": [
+    {
+      "id": "01-the-team-setup-where-each-instruction-lives#q1",
+      "page": "01-the-team-setup-where-each-instruction-lives.md",
+      "scope": "page",
+      "stem": "A team wants a review command that every developer has after cloning the repository. Where does the file go?",
+      "options": {
+        "a": "In a settings file that holds a list of commands for Claude Code",
+        "b": "In a commands folder in each developer's home directory, created by hand",
+        "c": "In the root instructions file, under a heading that names the review checklist",
+        "d": "In the project's own configuration folder, committed with the sources"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A command file in the project's own folder is committed and reaches every clone.",
+        "b": "Ruled out because a home folder is personal: \"commands in the home folder are personal\".",
+        "c": "Ruled out because the memory file holds instructions and not definitions: \"the memory file is for instructions and context\".",
+        "a": "Ruled out because no such mechanism exists: \"A `commands` array in a config file is a mechanism that does not exist\"."
+      }
+    },
+    {
+      "id": "01-the-team-setup-where-each-instruction-lives#q2",
+      "page": "01-the-team-setup-where-each-instruction-lives.md",
+      "scope": "page",
+      "stem": "React components use hooks, handlers use async/await, models follow a repository pattern, and test files sit beside the code they test in every folder. Which setup applies the right conventions automatically, test files included?",
+      "options": {
+        "a": "A rule per concern, each scoped by a glob that matches names",
+        "b": "One root file with a section for each area, left for Claude to apply as it sees fit",
+        "c": "A skill for each area, which developers start with a slash command",
+        "d": "A memory file in each folder that holds the conventions of that folder"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Rules with globs reach files by their names, wherever they sit.",
+        "b": "Ruled out because the model would have to infer the section: \"One root file with a section per area leaves Claude to infer which section applies.\"",
+        "c": "Ruled out because a path match starts nothing in a skill: \"a skill is invoked, or chosen by the model from its description, and a path match does not start it\".",
+        "d": "Ruled out because a file is bound to its directory: \"each file is bound to its directory, and test files next to their sources are in all of them\"."
+      }
+    },
+    {
+      "id": "01-the-team-setup-where-each-instruction-lives#q3",
+      "page": "01-the-team-setup-where-each-instruction-lives.md",
+      "scope": "page",
+      "stem": "A 400-line root memory file is split into five files that the root file imports. What happens to the context cost?",
+      "options": {
+        "a": "It falls to a fifth, since each piece loads when needed",
+        "b": "It doubles, as every piece is read once by the root and once again",
+        "c": "It does not change, since everything referenced is read at the start",
+        "d": "It falls in any session that never touches the files the pieces describe"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Imports organise a file and do not cut its cost.",
+        "a": "Ruled out because the load is at launch: \"imported files also load at launch\".",
+        "b": "Ruled out because nothing is read twice; the page says only that they \"don't reduce its context cost\".",
+        "d": "Ruled out because an import is not conditional on touched files; only a rule with a `paths` list is: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#q1",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "page",
+      "stem": "A developer must turn a monolith into services: dozens of files change and the service boundaries are undecided. Which approach fits?",
+      "options": {
+        "a": "Begin with direct edits, and let the boundaries show as work proceeds",
+        "b": "Explore in plan mode first, and settle the design before any edit",
+        "c": "Write complete instructions for each service, then execute them directly",
+        "d": "Execute directly, and switch to plan mode only if the work turns complicated"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Many files, open boundaries and design decisions point to planning first.",
+        "a": "Ruled out because the boundaries are what to find first: \"risks rework when a dependency turns up late\".",
+        "c": "Ruled out because instructions would assume the structure: \"the instructions would assume the structure, and the structure is what has to be found by exploring\".",
+        "d": "Ruled out because the stem already holds the complexity: \"ignores that the complexity is in the stem already\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#q2",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "page",
+      "stem": "A developer asks for a function that validates e-mail addresses and has no way yet to tell whether the first version is right. What should be added to the request?",
+      "options": {
+        "a": "A longer description of what a valid address looks like, in prose",
+        "b": "A request to explain the function after writing it, line by line",
+        "c": "A reminder to be careful and to check the work before it finishes",
+        "d": "A few input and expected-result pairs, with an instruction to run them"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A pair of input and expected result is a check that Claude can run.",
+        "a": "Ruled out because prose leaves cases open: \"Two or three cases with their expected results say what a paragraph of description leaves open.\"",
+        "c": "Ruled out because a reminder is not a signal: \"'looks done' is the only signal available\".",
+        "b": "Ruled out because an explanation checks nothing: \"Give Claude a check it can run: tests, a build, a screenshot to compare.\""
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#q3",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "page",
+      "stem": "A developer has corrected the same mistake three times in one long session, and the fourth attempt is wrong again. What is the next step?",
+      "options": {
+        "a": "Add a fourth correction with the same wording but in capital letters",
+        "b": "Clear the conversation, then restart with a prompt that holds what was learned",
+        "c": "Keep the session, since the earlier history helps Claude see the pattern",
+        "d": "Switch to plan mode for the rest of the session so that nothing is edited at all"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "After two failed corrections the context holds failed approaches, so a clean start with a better prompt works better.",
+        "a": "Ruled out because emphasis does not clear the context: \"the context is now full of failed approaches\".",
+        "c": "Ruled out because the history is the problem: \"the history is now failed approaches, and a clean session with a better prompt does better\".",
+        "d": "Ruled out because the mode does not remove the clutter: \"A clean session with a better prompt almost always outperforms a long session with accumulated corrections.\""
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m1",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. A rule file for the handlers lists `paths: src/api` and never seems to apply when handlers are edited. What is the cause?",
+      "options": {
+        "a": "Rule files are read only when a session is first started",
+        "b": "A bare folder name is no glob, so nothing is matched",
+        "c": "Handlers are covered by the command folder, which takes priority",
+        "d": "The path needs the word handlers in it for the rule to be found"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A bare folder name is not a glob.",
+        "a": "Ruled out because path-scoped rules load when a matching file is read: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\".",
+        "c": "Ruled out because the command folder holds commands and not conventions: \"A command file in the project, `.claude/commands/review.md`, committed to the repository\".",
+        "d": "Ruled out because the match is by glob on file paths and not by a word: \"`**` crosses folders and `*` stays inside one\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m2",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. A developer's habit of replying in short sentences is added to the shared root memory file, and colleagues object. Where should it go?",
+      "options": {
+        "a": "In a personal instructions document kept out of version control",
+        "b": "In the review command, which each person runs in their own way",
+        "c": "In a rule scoped by glob to the developer's own commits",
+        "d": "In the settings as a permission rule that the others can override"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A preference of one person belongs in a personal file.",
+        "c": "Ruled out because a glob cannot select one developer's commits: \"A preference of one developer\".",
+        "b": "Ruled out because the command is shared by all: \"A command file in the project, `.claude/commands/review.md`, committed to the repository\".",
+        "d": "Ruled out because permission rules are for what Claude may do and not for style: \"A permission rule or a hook\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m3",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. The team wants to be sure that no session ever reads the environment file, whatever the model decides. Which control gives that?",
+      "options": {
+        "a": "A deny rule in the permission settings, or a hook that blocks the call",
+        "b": "A scoped instruction that repeats the prohibition for that file",
+        "c": "An entry in the modes table that sends such requests to plan mode",
+        "d": "A line in the root memory that forbids reading the environment file"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Code that runs holds whatever the model decides.",
+        "d": "Ruled out because a sentence is a request: \"treats them as context, not enforced configuration\".",
+        "b": "Ruled out because a rule is the same kind of text: \"To block an action regardless of what Claude decides, use a PreToolUse hook instead.\"",
+        "c": "Ruled out because the table advises on mode and enforces nothing: \"Plan mode tells Claude to research and propose changes without making them.\""
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m4",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. A large feature has unclear requirements, and the developer is unsure what to ask for. Which start fits?",
+      "options": {
+        "a": "Ask for the most likely reading to be built, then fix it after a careful review",
+        "b": "Ask for three complete versions, and choose the one that looks best",
+        "c": "Have the assistant interview the user, write a spec, run it in a clean session",
+        "d": "Ask for the tests to be written last, so that they match what was built"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The missing piece is a decision only the people can make, so the questions come first.",
+        "a": "Ruled out because a guess builds on the wrong reading: \"the missing piece is not a design that Claude could find in the code, it is a decision only the people can make\".",
+        "b": "Ruled out because three versions do not settle what is wanted: \"Claude stops when the work looks done\".",
+        "d": "Ruled out because tests that follow the code are no target: \"A failing test that describes the behaviour is a target.\""
+      }
+    }
+  ]
+}

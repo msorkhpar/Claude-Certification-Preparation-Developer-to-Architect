@@ -1,0 +1,182 @@
+{
+  "practice": "74-scenario-claude-code-in-ci/unit-01/practice-1",
+  "name": "ci_setup",
+  "tests": {
+    "java": "CiSetupTest",
+    "kotlin": "CiSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_who_waits_decides_between_real_time_and_batch",
+      "typescript": "m1 who waits decides between real time and batch",
+      "java": "m1_whoWaitsDecidesBetweenRealTimeAndBatch",
+      "kotlin": "m1_whoWaitsDecidesBetweenRealTimeAndBatch"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_review_has_a_pass_for_each_file_and_then_an_integration_pass",
+      "typescript": "e1 a review has a pass for each file and then an integration pass",
+      "java": "e1_aReviewHasAPassForEachFileAndThenAnIntegrationPass",
+      "kotlin": "e1_aReviewHasAPassForEachFileAndThenAnIntegrationPass"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_review_runs_in_a_fresh_session_and_is_given_the_earlier_findings",
+      "typescript": "e2 a review runs in a fresh session and is given the earlier findings",
+      "java": "e2_aReviewRunsInAFreshSessionAndIsGivenTheEarlierFindings",
+      "kotlin": "e2_aReviewRunsInAFreshSessionAndIsGivenTheEarlierFindings"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_every_claude_command_is_headless_json_and_bounded",
+      "typescript": "e3 every claude command is headless json and bounded",
+      "java": "e3_everyClaudeCommandIsHeadlessJsonAndBounded",
+      "kotlin": "e3_everyClaudeCommandIsHeadlessJsonAndBounded"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_review_can_only_read",
+      "typescript": "e4 the review can only read",
+      "java": "e4_theReviewCanOnlyRead",
+      "kotlin": "e4_theReviewCanOnlyRead"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_criteria_name_what_to_report_what_to_skip_and_an_example_for_each_severity",
+      "typescript": "e5 the criteria name what to report what to skip and an example for each severity",
+      "java": "e5_theCriteriaNameWhatToReportWhatToSkipAndAnExampleForEachSeverity",
+      "kotlin": "e5_theCriteriaNameWhatToReportWhatToSkipAndAnExampleForEachSeverity"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_test_prompt_passes_the_existing_tests_and_says_what_a_useful_test_is",
+      "typescript": "e6 the test prompt passes the existing tests and says what a useful test is",
+      "java": "e6_theTestPromptPassesTheExistingTestsAndSaysWhatAUsefulTestIs",
+      "kotlin": "e6_theTestPromptPassesTheExistingTestsAndSaysWhatAUsefulTestIs"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e7 no file holds a personal path an address or a key",
+      "java": "e7_noFileHoldsAPersonalPathAnAddressOrAKey",
+      "kotlin": "e7_noFileHoldsAPersonalPathAnAddressOrAKey"
+    }
+  },
+  "plants": {
+    "wrong-review-batch": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "runs the blocking merge check as a batch"
+    },
+    "wrong-debt-realtime": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "runs the overnight report in real time"
+    },
+    "wrong-single-pass": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "reviews all files in one pass with no integration pass"
+    },
+    "wrong-integration-first": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "puts the integration pass before the per-file passes"
+    },
+    "wrong-shared-session": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "runs the review in the session that wrote the code"
+    },
+    "wrong-no-prior-findings": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "gives a re-run no earlier findings"
+    },
+    "wrong-no-print-flag": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the -p flag out of the review command"
+    },
+    "wrong-no-schema": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the schema out of the review command"
+    },
+    "wrong-unbounded": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the turn limit out of the review command"
+    },
+    "wrong-review-bash": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "gives the review the Bash tool"
+    },
+    "wrong-allowed-edit": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "approves the Edit tool in the review command"
+    },
+    "wrong-severity-free-text": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "makes severity free text in the schema"
+    },
+    "wrong-no-suggestion": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "stops requiring a suggestion in a finding"
+    },
+    "wrong-no-skip-list": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves out the list of what to skip"
+    },
+    "wrong-no-example": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the high severity without an example"
+    },
+    "wrong-vague-criteria": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "adds a vague instruction to be conservative"
+    },
+    "wrong-prompt-no-existing": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "does not pass the existing tests to the test prompt"
+    },
+    "wrong-prompt-no-useful": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "does not say what a useful test is"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes a personal home path into the criteria"
+    }
+  }
+}

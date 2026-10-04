@@ -893,6 +893,152 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
     },
 }
 
+# ===== Level 3: modules 70 to 74 (the scenario capstones) =====
+PRACTICES[f"{X}/70-scenario-customer-support-agent/unit-01/practice-1"] = {
+    "name": "audit", "suite": "AuditTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a mixed set of sessions gets every rate and the first fix"),
+        ("e1", "edge", "no sessions give zero rates and no diagnosis"),
+        ("e2", "edge", "a protected call before a successful identity check is a skipped prerequisite"),
+        ("e3", "edge", "a refund over the limit counts only when it was made"),
+        ("e4", "edge", "money first then tool descriptions then escalation criteria"),
+        ("e5", "edge", "the target boundary and rounding of the first contact rate"),
+        ("e6", "edge", "a wrong tool counts sessions and ignores steps with no known right tool"),
+    ],
+    "plants": {
+        "wrong-prereq-ignores-order": (["m1", "e2"], "counts every protected call as a skipped prerequisite, even after the customer was identified"),
+        "wrong-failed-identity-opens": (["e2"], "treats a failed identity check as an identification"),
+        "wrong-over-limit-any-outcome": (["e3"], "counts a refund over the limit in a session where it was refused and escalated"),
+        "wrong-diagnosis-criteria-first": (["e4"], "puts the escalation criteria before the tool descriptions in the order of fixes"),
+        "wrong-target-strict": (["e5"], "requires the rate to be above the target and not at it"),
+        "wrong-wrong-tool-steps": (["e6"], "counts wrong steps and not the sessions that have one"),
+        "wrong-no-rounding": (["m1", "e5"], "leaves the first contact rate unrounded"),
+        "wrong-over-counts-needs-human": (["m1"], "counts every escalation as an over-escalation, even one that needed a person"),
+    },
+}
+
+PRACTICES[f"{X}/71-scenario-code-generation-with-claude-code/unit-01/practice-1"] = {
+    "name": "team_setup", "suite": "TeamSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "each convention loads for exactly the files of its area"),
+        ("e1", "edge", "the root file is short and holds only what every task needs"),
+        ("e2", "edge", "the review command is shared read only and says what it does"),
+        ("e3", "edge", "the settings protect the environment file and approve no whole tool"),
+        ("e4", "edge", "the modes table sends open design work to plan mode and clear small work to direct"),
+        ("e5", "edge", "every rule scopes itself with a glob that matches a file"),
+        ("e6", "edge", "no file holds a personal path an address or a key"),
+    ],
+    "plants": {
+        "wrong-components-unscoped": (["m1", "e5"], "leaves the components rule without paths, so it loads in every session"),
+        "wrong-handlers-wide": (["m1"], "scopes the handlers rule to every ts file, so it also loads for the database files"),
+        "wrong-tests-folder": (["m1"], "scopes the testing rule to one folder, so test files elsewhere miss it"),
+        "wrong-tests-ts-only": (["m1"], "scopes the testing rule to the ts files and leaves the tsx files out"),
+        "wrong-database-bare-folder": (["m1", "e5"], "scopes the database rule with a bare folder name, which is not a glob and matches no file"),
+        "wrong-root-keeps-hooks": (["e1"], "leaves one component convention in the root file"),
+        "wrong-root-long": (["e1"], "pads the root file past twenty-five lines"),
+        "wrong-review-bare-bash": (["e2"], "pre approves the whole Bash tool in the review command"),
+        "wrong-review-no-description": (["e2"], "leaves the description out of the review command"),
+        "wrong-no-env-deny": (["e3"], "leaves the environment file readable"),
+        "wrong-bash-allow": (["e3"], "approves the whole Bash tool in the settings"),
+        "wrong-monolith-direct": (["e4"], "sends the restructuring of the monolith to direct execution"),
+        "wrong-typo-plan": (["e4"], "sends a one-line typo fix through plan mode"),
+        "wrong-home-path": (["e6"], "writes a personal home path into the root file"),
+    },
+}
+
+PRACTICES[f"{X}/72-scenario-multi-agent-research-system/unit-01/practice-1"] = {
+    "name": "synthesis", "suite": "SynthesisTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a full run with agreement returns claims with every source and a complete status"),
+        ("e1", "edge", "no results leave every scope a gap and say not researched"),
+        ("e2", "edge", "a scope the plan never covered and a scope whose search failed read differently in the note"),
+        ("e3", "edge", "two values for one claim are a conflict that names both sources and no claim"),
+        ("e4", "edge", "partial results are kept and flagged but do not cover the scope and a retry that worked clears the error"),
+        ("e5", "edge", "a result with no findings does not cover its scope"),
+        ("e6", "edge", "claims sources and scopes come out in a fixed order without duplicates"),
+    ],
+    "plants": {
+        "wrong-complete-by-errors": (["e1", "e5"], "calls the run complete when there are no errors, although a scope was never researched"),
+        "wrong-conflict-first-wins": (["e3"], "keeps the first value of a claim and drops the other source"),
+        "wrong-partial-covers": (["e4"], "counts a scope with only partial results as covered"),
+        "wrong-empty-covers": (["e5"], "counts a scope whose result holds no findings as covered"),
+        "wrong-partial-dropped": (["e4"], "drops the partial findings of a failed search"),
+        "wrong-resolved-error-kept": (["e4"], "keeps the error of a scope that a later result covered"),
+        "wrong-sources-duplicated": (["e6"], "lists the same source twice for one claim"),
+        "wrong-claims-unsorted": (["e6"], "returns the claims in the order they arrived"),
+        "wrong-note-silent": (["e1", "e2", "e5"], "writes an all-clear note whatever is missing"),
+        "wrong-partial-flag-any": (["e4"], "flags a claim as partial when any of its findings was partial"),
+    },
+}
+
+PRACTICES[f"{X}/73-scenario-developer-productivity/unit-01/practice-1"] = {
+    "name": "mcp_setup", "suite": "McpSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "every mcp tool reference belongs to a configured server"),
+        ("e1", "edge", "credentials come from the environment and the token has no default"),
+        ("e2", "edge", "the explorer is read only and says when to use it"),
+        ("e3", "edge", "the scaffolder writes only in the generated folder"),
+        ("e4", "edge", "the tickets server is read only for agents"),
+        ("e5", "edge", "the environment file is denied and no whole tool is approved"),
+        ("e6", "edge", "the team note lists every variable and says which session to start"),
+        ("e7", "edge", "no file holds a personal path an address or a key"),
+    ],
+    "plants": {
+        "wrong-unknown-server": (["m1", "e2"], "gives the explorer a tool of a server that is not configured"),
+        "wrong-settings-ghost": (["m1"], "allows a ticket tool under a server name that is not configured"),
+        "wrong-literal-token": (["e1"], "writes the token into the header"),
+        "wrong-token-default": (["e1"], "gives the token variable a default value"),
+        "wrong-explorer-bash": (["e2"], "gives the explorer the Bash tool"),
+        "wrong-explorer-inherits": (["e2"], "leaves the tools line out, so the explorer inherits every tool"),
+        "wrong-explorer-description": (["e2"], "describes the explorer without saying when to use it"),
+        "wrong-scaffolder-bash": (["e3"], "gives the scaffolder the Bash tool"),
+        "wrong-edit-bare": (["e3", "e5"], "allows the Edit tool for every path"),
+        "wrong-write-wide": (["e3"], "adds a Write path rule for the source folder, which Claude Code never consults"),
+        "wrong-tickets-wildcard": (["e4"], "allows every ticket tool, creating and deleting included"),
+        "wrong-no-delete-deny": (["e4"], "leaves deleting a ticket open"),
+        "wrong-no-env-deny": (["e5"], "leaves the environment file readable"),
+        "wrong-bash-allow": (["e5"], "approves the whole Bash tool"),
+        "wrong-note-missing-variable": (["e6"], "leaves one variable out of the team note"),
+        "wrong-rewritten-resumes": (["e6"], "tells the team to resume a session after the code was rewritten"),
+        "wrong-home-path": (["e7"], "writes a personal home path into the team note"),
+    },
+}
+
+PRACTICES[f"{X}/74-scenario-claude-code-in-ci/unit-01/practice-1"] = {
+    "name": "ci_setup", "suite": "CiSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "who waits decides between real time and batch"),
+        ("e1", "edge", "a review has a pass for each file and then an integration pass"),
+        ("e2", "edge", "a review runs in a fresh session and is given the earlier findings"),
+        ("e3", "edge", "every claude command is headless json and bounded"),
+        ("e4", "edge", "the review can only read"),
+        ("e5", "edge", "the criteria name what to report what to skip and an example for each severity"),
+        ("e6", "edge", "the test prompt passes the existing tests and says what a useful test is"),
+        ("e7", "edge", "no file holds a personal path an address or a key"),
+    ],
+    "plants": {
+        "wrong-review-batch": (["m1"], "runs the blocking merge check as a batch"),
+        "wrong-debt-realtime": (["m1"], "runs the overnight report in real time"),
+        "wrong-single-pass": (["e1"], "reviews all files in one pass with no integration pass"),
+        "wrong-integration-first": (["e1"], "puts the integration pass before the per-file passes"),
+        "wrong-shared-session": (["e2"], "runs the review in the session that wrote the code"),
+        "wrong-no-prior-findings": (["e2"], "gives a re-run no earlier findings"),
+        "wrong-no-print-flag": (["e3"], "leaves the -p flag out of the review command"),
+        "wrong-no-schema": (["e3"], "leaves the schema out of the review command"),
+        "wrong-unbounded": (["e3"], "leaves the turn limit out of the review command"),
+        "wrong-review-bash": (["e4"], "gives the review the Bash tool"),
+        "wrong-allowed-edit": (["e4"], "approves the Edit tool in the review command"),
+        "wrong-severity-free-text": (["e3"], "makes severity free text in the schema"),
+        "wrong-no-suggestion": (["e3"], "stops requiring a suggestion in a finding"),
+        "wrong-no-skip-list": (["e5"], "leaves out the list of what to skip"),
+        "wrong-no-example": (["e5"], "leaves the high severity without an example"),
+        "wrong-vague-criteria": (["e5"], "adds a vague instruction to be conservative"),
+        "wrong-prompt-no-existing": (["e6"], "does not pass the existing tests to the test prompt"),
+        "wrong-prompt-no-useful": (["e6"], "does not say what a useful test is"),
+        "wrong-home-path": (["e7"], "writes a personal home path into the criteria"),
+    },
+}
+
 # --- PRACTICES ABOVE ---
 
 

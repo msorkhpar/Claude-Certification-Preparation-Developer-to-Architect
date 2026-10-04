@@ -1,0 +1,195 @@
+{
+  "module": "72-scenario-multi-agent-research-system",
+  "quizzes": [
+    {
+      "id": "01-the-research-system-who-owns-coverage#q1",
+      "page": "01-the-research-system-who-owns-coverage.md",
+      "scope": "page",
+      "stem": "A report on AI in the creative industries covers only visual arts, with nothing on music, writing or film. Every subagent finished its task, and the log shows three subtasks: digital art, graphic design and photography. Which change fixes the cause?",
+      "options": {
+        "a": "Loosen the relevance filter of the analysis agent so that fewer documents are dropped",
+        "b": "Instruct the synthesis agent to look for missing coverage in everything it receives",
+        "c": "Widen the queries of the search agent so that it returns more kinds of source",
+        "d": "Check the coordinator's plan against the question's scopes, ahead of any delegation"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The subagents did what they were assigned, so the plan is what to check, and it can be checked against the question.",
+        "b": "Ruled out because it is a late substitute: \"A downstream agent that is asked to notice gaps is a late and unreliable substitute for a check that costs one comparison.\"",
+        "c": "Ruled out because the search agent worked within its scope: \"each agent worked correctly within its scope, so widening it does not reach the scope that was never assigned\".",
+        "a": "is ruled out for the same reason: \"the subagents did what they were assigned, and the fault is the assignment\"."
+      }
+    },
+    {
+      "id": "01-the-research-system-who-owns-coverage#q2",
+      "page": "01-the-research-system-who-owns-coverage.md",
+      "scope": "page",
+      "stem": "A run ends with a report marked complete. The film search timed out, nobody retried it, and the report holds nothing on film. Where is the defect?",
+      "options": {
+        "a": "The status is computed from errors seen and not from scopes covered",
+        "b": "The report agent should have written a longer summary of the other scopes",
+        "c": "The search agent should have returned an empty list instead of an error",
+        "d": "The timeout was set too short, so the search never had time to finish"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A status must come from coverage.",
+        "b": "Ruled out because more prose does not repair the claim: \"A run is complete when every scope is covered.\"",
+        "c": "Ruled out because an empty success hides the gap: \"A failure with no context, or a failure turned into a success\".",
+        "d": "Ruled out because the defect is in what the report claims and not in how long the search waited: \"It is partial otherwise, whatever the reason, and the report says which scopes are missing and why.\""
+      }
+    },
+    {
+      "id": "01-the-research-system-who-owns-coverage#q3",
+      "page": "01-the-research-system-who-owns-coverage.md",
+      "scope": "page",
+      "stem": "Each of four subagents returns about forty pages of raw text, and the coordinator's context is nearly full before synthesis starts. What does the research article suggest?",
+      "options": {
+        "a": "Move the synthesis into the coordinator so that nothing has to be sent to it",
+        "b": "Ask the coordinator to summarise each result in its own words as soon as it arrives",
+        "c": "Have each one store its work outside the conversation and send back a reference",
+        "d": "Cap the length of every search result so that no single one can be long"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Work stored outside the conversation travels as a reference.",
+        "b": "Ruled out because the coordinator would still receive all the text first: \"Large results passed through the hub\".",
+        "a": "Ruled out because it puts the synthesis in the context that is already full: \"The coordinator owns everything that is about the whole question\".",
+        "d": "Ruled out because the article's remedy is the reference and not a cap: \"Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator.\""
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#q1",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "page",
+      "stem": "A search subagent times out, and its error offers an alternative query. What should the coordinator do?",
+      "options": {
+        "a": "Retry the same query until it succeeds, however many attempts that takes in total",
+        "b": "Retry with the suggested substitute once, then report the scope as not covered",
+        "c": "Stop the whole run and return the error to the caller, who will decide",
+        "d": "Mark the scope as covered and let the synthesis agent fill the gap"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "One retry through the alternative, then an honest gap.",
+        "a": "Ruled out because the retry is bounded: \"The coordinator retries once through an alternative and then stops.\"",
+        "c": "Ruled out because one failed scope does not end the run: \"A failure of one subagent does not end the run: the other scopes are still worth reporting.\"",
+        "d": "Ruled out because a scope without findings is not covered: \"A scope that is marked covered without findings is a claim that nothing supports.\""
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#q2",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "page",
+      "stem": "Two publications report 12 and 14 for the same statistic, a year apart. How should the report treat them?",
+      "options": {
+        "a": "Report the value that more of the other documents seem to support, whichever it is",
+        "b": "Report the newer value alone, since a more recent figure replaces an older one",
+        "c": "Report the average of the two figures, since each is probably close to the truth",
+        "d": "Show both values with their sources and dates, and give neither as the answer"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A conflict is shown with both values, both sources and both dates.",
+        "b": "Ruled out because the newer value is not picked in silence: \"A conflict is two different values for one claim, not two sources for the same value\".",
+        "c": "Ruled out because the values are not blended: \"the report does not average them and does not pick the newer one in silence\".",
+        "a": "Ruled out because the date is often the explanation: \"a figure measured in one year and a figure measured in the next can both be right\"."
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#q3",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "page",
+      "stem": "A search failed after it had already returned two usable results for its topic. How should the report record that topic?",
+      "options": {
+        "a": "As covered, because some usable results were returned for it",
+        "b": "As uncovered, keeping what arrived but marking it incomplete",
+        "c": "As covered once the synthesis agent has accepted the results",
+        "d": "As missing, with the two results dropped so that they cannot mislead"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Partial findings are kept and flagged, and the topic is still a gap.",
+        "a": "Ruled out because partial is not coverage: \"A partial result is information, and it is not coverage\".",
+        "c": "Ruled out because acceptance is not the test: \"coverage is a property of the question and not of what happened to arrive\".",
+        "d": "Ruled out because the findings are worth keeping: \"Partial findings stay in the claims, flagged, so a reader can use them and can see that they are incomplete.\""
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#m1",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. A run ends with three of four scopes covered, one unresolved error and one conflict between two sources. Which status does the report carry?",
+      "options": {
+        "a": "Complete, since a conflict is information and the scopes were mostly covered anyway",
+        "b": "Partial, since one topic is missing, and the disagreement is listed beside it",
+        "c": "Complete, since the unresolved error was only a timeout and nothing was lost",
+        "d": "Failed, because an unresolved error invalidates the whole report"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A missing scope makes the run partial, and a conflict is reported next to it.",
+        "a": "Ruled out because completeness is about coverage: \"A run is complete when every scope is covered.\"",
+        "c": "Ruled out because the reason for a gap does not matter: \"It is partial otherwise, whatever the reason, and the report says which scopes are missing and why.\"",
+        "d": "Ruled out because the report is still useful: \"A report that did not cover film is still a useful report\"."
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#m2",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. The synthesis agent's verification tool is asked to confirm a market-share figure that it cannot check locally. What should it return?",
+      "options": {
+        "a": "A verdict that a lookup is needed, which the hub routes onward",
+        "b": "A confirmation, since the tool must leave no claim unchecked",
+        "c": "An error that ends the synthesis step for the whole run",
+        "d": "A guess at the figure based on the other claims in the report"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Anything the tool cannot check goes back to be delegated.",
+        "d": "Ruled out because the tool does not guess: \"In the example, the tool answers for a date it can check, and returns `needs_search` for anything else.\"",
+        "b": "Ruled out because a deep check stays where it was: \"leaves the deep verification where it was: with the coordinator\".",
+        "c": "Ruled out because the tool exists to remove the round trip for the common case: \"A scoped tool of this kind removes the round trip for the common case\"."
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#m3",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. After the alternative query failed too, a stakeholder asks why the report does not try a third. Which answer fits the design?",
+      "options": {
+        "a": "Retries are bounded, so the note names both queries and the topic stays open",
+        "b": "A third query is skipped only because each extra search costs a little money",
+        "c": "A third query would likely succeed, so the limit should simply be raised by one",
+        "d": "The topic should be marked as covered, since two queries were tried"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Retries are bounded and the report says what was tried.",
+        "c": "Ruled out because the limit is a design choice: \"The coordinator retries once through an alternative and then stops.\"",
+        "b": "Ruled out because cost is not the reason given: \"a second suggests that the source or the service has a problem a third query will not fix\".",
+        "d": "Ruled out because tried is not covered: \"A scope that is marked covered without findings is a claim that nothing supports.\""
+      }
+    },
+    {
+      "id": "02-failures-conflicts-the-coverage-note-and-the-practice#m4",
+      "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. A claim rests on two findings: one that arrived before a subagent failed and one from a subagent that finished. Both agree. How is the claim flagged?",
+      "options": {
+        "a": "As incomplete, because one of its findings arrived from a run that failed",
+        "b": "As conflicting, since the two findings came from two different runs",
+        "c": "Without the incomplete mark, because a completed run backs it as well",
+        "d": "As missing, because partial evidence cannot support a claim"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "One finished source is enough to remove the flag.",
+        "a": "Ruled out because the flag needs every finding to be partial: \"A claim is marked partial only when every finding behind it was partial\".",
+        "b": "Ruled out because the findings agree: \"A conflict is two different values for one claim, not two sources for the same value\".",
+        "d": "Ruled out because partial findings stay as claims: \"Partial findings stay in the claims, flagged, so a reader can use them and can see that they are incomplete.\""
+      }
+    }
+  ]
+}

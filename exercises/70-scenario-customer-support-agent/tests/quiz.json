@@ -1,0 +1,195 @@
+{
+  "module": "70-scenario-customer-support-agent",
+  "quizzes": [
+    {
+      "id": "01-the-scenario-the-layers-and-the-first-fix#q1",
+      "page": "01-the-scenario-the-layers-and-the-first-fix.md",
+      "scope": "page",
+      "stem": "A month of support-agent sessions shows two problems: in 3 percent an order lookup ran before the customer was identified, and in 9 percent the agent escalated cases that policy lets it settle. Which fix is made first?",
+      "options": {
+        "a": "Train a separate model on past tickets first, so it can decide which cases need a person",
+        "b": "Write escalation criteria first, because that problem touches the larger share of sessions",
+        "c": "Rewrite the descriptions of the tools first, since both problems start with tool choice",
+        "d": "Enforce the call sequence in the dispatcher, because moved money cannot be recalled"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Money that moved wrongly cannot be called back, so its cause is fixed first.",
+        "b": "Ruled out because the size of a count does not set the order: \"The first fix goes to what cannot be undone.\"",
+        "c": "Ruled out because descriptions are not the shape that the logs show for the skipped step: \"A refund that moved without a check cannot be called back\".",
+        "a": "Ruled out because a trained model comes before words were tried: \"machinery for a problem nobody has tried to fix with words\"."
+      }
+    },
+    {
+      "id": "01-the-scenario-the-layers-and-the-first-fix#q2",
+      "page": "01-the-scenario-the-layers-and-the-first-fix.md",
+      "scope": "page",
+      "stem": "A customer writes \"I want to speak to someone\" as the first message, before giving any identification. How should the dispatcher handle the model's call to hand over the case?",
+      "options": {
+        "a": "Run it at once, because reaching a human has no prerequisite",
+        "b": "Refuse it until the lookup tool has identified the customer",
+        "c": "Hold it back until the stall guard has counted three repeated calls",
+        "d": "Accept it only after the model has summarised the case in its own words"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The way to a person never waits for a prerequisite.",
+        "b": "Ruled out because the page puts the way out first: \"A person must be reachable even when identity cannot be established.\"",
+        "c": "Ruled out because the guard counts repeated calls and has no say over this one: \"If the same call, with the same arguments, has been made three times in a row\".",
+        "d": "Ruled out because the request is honoured as it stands: \"the agent honours it, and does not first investigate or argue\"."
+      }
+    },
+    {
+      "id": "01-the-scenario-the-layers-and-the-first-fix#q3",
+      "page": "01-the-scenario-the-layers-and-the-first-fix.md",
+      "scope": "page",
+      "stem": "Two customers share a name, the lookup tool returns both, and the agent proceeds with the first. What should the dispatcher have done?",
+      "options": {
+        "a": "Choose the customer with the most recent order, as that is the likelier one",
+        "b": "Verify both customers, so that either can be served once the agent knows more",
+        "c": "Set nobody as verified, and tell the model to ask for something that tells them apart",
+        "d": "Raise the retry count of the lookup, since a second try may return one match"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Several matches are a question for the customer, and nothing is set.",
+        "a": "Ruled out because the dispatcher does not pick: \"Several matches set nothing and return the refusal\".",
+        "b": "Ruled out because the desk holds one verified customer, set only by a single match: \"One match sets the verified customer.\"",
+        "d": "Ruled out because the refusal is not a fault that a retry can clear: \"A permanent error is never retried.\""
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#q1",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "page",
+      "stem": "After a change that made the agent escalate less, first-contact resolution rose from 0.60 to 0.75 and the team reports success. What does the audit still have to show?",
+      "options": {
+        "a": "That tokens per conversation fell by the same proportion as the escalation rate",
+        "b": "That sessions settled alone although a human was needed did not increase",
+        "c": "That the prompt now holds fewer words than before the change was made",
+        "d": "That the confidence scores of the model moved up together with the rate"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A lower escalation rate is a success only if no case that needed a person was settled alone.",
+        "a": "Ruled out because tokens are not what the change risked: \"Both are visible only against labels.\"",
+        "c": "Ruled out because the length of a prompt is not the risk: \"A rate alone is a bad objective\".",
+        "d": "Ruled out because a number the model reports is unmeasured: \"The course treats the number as a claim that has to be measured against labelled outcomes before anything is routed on it\"."
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#q2",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "page",
+      "stem": "One session holds eleven calls to the wrong tool, and the audit reports a count of one for the wrong-tool shape. A manager asks why not eleven. What is the answer?",
+      "options": {
+        "a": "The audit keeps only the first mistake of each session to save space in the report",
+        "b": "Counts are capped at one by default so that no single case can dominate",
+        "c": "Repeated mistakes within a session are usually copies of the first mistake",
+        "d": "The target is a share of conversations, and a conversation fails once however often it errs"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The unit of the target is the conversation.",
+        "a": "Ruled out because the audit does not drop later mistakes for space: \"The count of steps is still a useful diagnostic for a single session.\"",
+        "b": "Ruled out because nothing in the audit caps a count: \"The audit counts each failure shape once per session.\"",
+        "c": "Ruled out because the reason is the unit and not a guess about copies: \"Counting steps lets one confused session look like eleven problems\"."
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#q3",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "page",
+      "stem": "The audit needs two fields for each session: whether a human was needed, and which tool each step should have used. Which source supplies them?",
+      "options": {
+        "a": "The tool logs, since every call is recorded with its arguments and its result",
+        "b": "Reviewers who label a sample, because they are judgements that logs do not hold",
+        "c": "The model, which can be asked after each conversation to mark its own errors",
+        "d": "The customer, through a short survey sent at the end of each conversation"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A judgement about need and about the right tool is made by a person, on a sample.",
+        "a": "Ruled out because the logs hold the calls and not the judgements: \"Two fields are not.\"",
+        "c": "Ruled out because the audit exists to check the agent against something other than itself: \"a number computed only on what is easy to read is flattering\".",
+        "d": "Ruled out because a survey does not say which tool was right: \"Whether a case needed a person is a judgement, and so is which tool a step should have used.\""
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#m1",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A worker process keeps one state object for every conversation it serves, and a customer is shown a note that belongs to someone else's order. Which change addresses the cause?",
+      "options": {
+        "a": "Clear the shared object once an hour, which limits how long a note can stay",
+        "b": "Create a new instance for each ticket, so that nothing outlives it",
+        "c": "Instruct the model never to repeat what another person has written",
+        "d": "Encrypt the stored notes so that only their owner can read them later"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A state that belongs to one case cannot reach another.",
+        "a": "Ruled out because an hourly clear still lets a note travel between cases: \"so a customer's identity, the orders looked up and the refunds made cannot reach another case\".",
+        "c": "Ruled out because a request in a prompt is not a guarantee: \"a long-lived shared state is a defect\".",
+        "d": "Ruled out because the fault is that one object serves every conversation, and encryption leaves it shared: \"the example builds a new desk for each conversation\"."
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#m2",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A refund above the limit is refused, and the model asks for the same refund again, and again. What does the dispatcher need so that the run ends in a useful way?",
+      "options": {
+        "a": "A check for identical consecutive calls that stops the loop and transfers to staff",
+        "b": "A line in the prompt telling the model to stop once a refund is refused",
+        "c": "A silent retry of the refund until the backend finally accepts it",
+        "d": "A larger turn limit, since the model needs room to find another approach"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A guard on identical calls turns a loop into a hand-off.",
+        "d": "Ruled out because more turns only prolong the loop: \"the cap only ends a run, and the guard ends it with a hand-off\".",
+        "b": "Ruled out because a sentence of the prompt does not stop a loop: \"If the same call, with the same arguments, has been made three times in a row\".",
+        "c": "Ruled out because a refused refund is a permanent refusal: \"A permanent error is never retried.\""
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#m3",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. An audit finds no skipped identity step and no refund over the limit, wrong tools in 14 sessions, and escalation errors in 9. Which fix comes first?",
+      "options": {
+        "a": "Reword the descriptions of the confusable pair, giving formats and examples",
+        "b": "Write criteria and worked examples for when the agent should hand over a case",
+        "c": "Add a prerequisite gate in the dispatcher in front of the order tools",
+        "d": "Move the whole policy into a retrieval index that the agent can search"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "With nothing about money, the wrong tool in more sessions than escalation errors goes to the descriptions.",
+        "b": "Ruled out because the wrong-tool count is the larger: \"A wrong tool in at least as many sessions as escalation errors\".",
+        "c": "Ruled out because no session skipped a step and no refund went over the limit: \"A protected call before a successful identity check, or a refund over the limit that was made\".",
+        "d": "Ruled out because the cause is in how the tools are described and not in a missing source: \"the model chose by what the descriptions said\"."
+      }
+    },
+    {
+      "id": "02-audit-the-sessions-and-the-practice#m4",
+      "page": "02-audit-the-sessions-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team adds a rule that hands a case to a person whenever the message holds three exclamation marks. Which audit count is likely to rise?",
+      "options": {
+        "a": "Sessions settled by the agent although a person was needed",
+        "b": "Sessions with a refund made over the limit",
+        "c": "Sessions passed upward that never required a human decision",
+        "d": "Sessions that ran an order call before the customer was identified"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Mood is not need, so handovers that needed no person rise.",
+        "a": "Ruled out because the rule only adds handovers: \"the agent resolved the case, and a person was needed\".",
+        "b": "Ruled out because the rule does not touch refunds: \"A refund over the limit that was refused and handed to a person is not a failure.\"",
+        "d": "Ruled out because the rule does not change the order of the calls: \"A protected call before a successful identity check\"."
+      }
+    }
+  ]
+}

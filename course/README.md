@@ -68,6 +68,11 @@ modules 12 to 44, which is the whole of Level 2, and the first modules of Level 
 | `60-claude-code-in-ci/` | Claude Code in CI | 2 |
 | `61-criteria-and-examples/` | Criteria and examples | 2 |
 | `62-structured-output-at-the-architect-level/` | Structured output at the architect level | 2 |
+| `70-scenario-customer-support-agent/` | Scenario: customer support agent | 2 |
+| `71-scenario-code-generation-with-claude-code/` | Scenario: code generation with Claude Code | 2 |
+| `72-scenario-multi-agent-research-system/` | Scenario: multi-agent research system | 2 |
+| `73-scenario-developer-productivity/` | Scenario: developer productivity | 2 |
+| `74-scenario-claude-code-in-ci/` | Scenario: Claude Code in CI | 2 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
