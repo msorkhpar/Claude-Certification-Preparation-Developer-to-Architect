@@ -64,6 +64,348 @@ The second half of this module needs a way to run a review that does not share t
 ### The example
 
 <!-- example: m63-batch-and-review tabs: python,typescript,java,kotlin -->
+```python
+"""What a batch asks of its caller, and what an independent review is given.
+
+Read on 2026-10-04 in the Claude API documentation ("Batch processing"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,
+a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for
+task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.
+"""
+import re
+
+CUSTOM_ID = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+
+
+def worst_case_wait(interval_hours, window_hours=24, handling_hours=2):
+    """An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling."""
+    return interval_hours + window_hours + handling_hours
+
+
+def batch_entry(custom_id, params):
+    """One entry of a batch request, refused for the same reasons the API refuses it."""
+    if not CUSTOM_ID.match(custom_id):
+        raise ValueError(f"custom_id '{custom_id}' must be 1 to 64 letters, digits, hyphens or underscores")
+    if params.get("stream") is True:
+        raise ValueError("stream is not supported in a batch")
+    if "speed" in params:
+        raise ValueError("speed is not supported in a batch")
+    if params.get("max_tokens") == 0:
+        raise ValueError("a max_tokens of 0 is not supported in a batch")
+    return {"custom_id": custom_id, "params": params}
+
+
+def match_results(requests, results):
+    """Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for."""
+    by_id = dict(results)
+    asked = set(requests)
+    return [(r, by_id.get(r, "missing")) for r in requests], [i for i, _ in results if i not in asked]
+
+
+def review_request(code, reasoning, independent):
+    """What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it."""
+    parts = ["Review this code for defects.", f"<code>{code}</code>"]
+    if not independent:
+        parts.append(f"<your_earlier_reasoning>{reasoning}</your_earlier_reasoning>")
+    return "\n".join(parts)
+
+
+def main():
+    for interval in (4, 6):
+        print(f"worst-case wait with a {interval} hour interval: {worst_case_wait(interval)} hours (SLA 30 hours)")
+    for custom_id in ("invoice-0042", "invoice 0042"):
+        try:
+            batch_entry(custom_id, {"max_tokens": 1024})
+            print(f"custom_id {custom_id}: accepted")
+        except ValueError as e:
+            print(f"custom_id {custom_id}: refused, {e}")
+    for params in ({"stream": True}, {"speed": "fast"}, {"max_tokens": 0}):
+        try:
+            batch_entry("a1", params)
+        except ValueError as e:
+            print(f"refused: {e}")
+    matched, orphans = match_results(["a1", "a2", "a3"], [("a2", "expired"), ("z9", "succeeded"), ("a1", "succeeded")])
+    print("matched: " + ", ".join(f"{i}={kind}" for i, kind in matched) + "; unrequested: " + ", ".join(orphans))
+    code, reasoning = "total = price * qty", "qty is always positive, so no check"
+    for independent in (False, True):
+        request = review_request(code, reasoning, independent)
+        print(f"independent={'yes' if independent else 'no'}: carries the reasoning: {'yes' if reasoning in request else 'no'}")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)
+worst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)
+custom_id invoice-0042: accepted
+custom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores
+refused: stream is not supported in a batch
+refused: speed is not supported in a batch
+refused: a max_tokens of 0 is not supported in a batch
+matched: a1=succeeded, a2=expired, a3=missing; unrequested: z9
+independent=no: carries the reasoning: yes
+independent=yes: carries the reasoning: no
+```
+```typescript
+/**
+ * What a batch asks of its caller, and what an independent review is given.
+ *
+ * Read on 2026-10-04 in the Claude API documentation ("Batch processing"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,
+ * a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for
+ * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.
+ */
+const CUSTOM_ID = /^[a-zA-Z0-9_-]{1,64}$/;
+
+/** An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling. */
+export function worstCaseWait(intervalHours: number, windowHours = 24, handlingHours = 2): number {
+  return intervalHours + windowHours + handlingHours;
+}
+
+/** One entry of a batch request, refused for the same reasons the API refuses it. */
+export function batchEntry(customId: string, params: Record<string, unknown>): { custom_id: string; params: Record<string, unknown> } {
+  if (!CUSTOM_ID.test(customId)) throw new Error(`custom_id '${customId}' must be 1 to 64 letters, digits, hyphens or underscores`);
+  if (params.stream === true) throw new Error("stream is not supported in a batch");
+  if ("speed" in params) throw new Error("speed is not supported in a batch");
+  if (params.max_tokens === 0) throw new Error("a max_tokens of 0 is not supported in a batch");
+  return { custom_id: customId, params };
+}
+
+/** Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for. */
+export function matchResults(requests: string[], results: Array<[string, string]>): [Array<[string, string]>, string[]] {
+  const byId = new Map(results);
+  const asked = new Set(requests);
+  return [requests.map((r): [string, string] => [r, byId.get(r) ?? "missing"]), results.map(([i]) => i).filter((i) => !asked.has(i))];
+}
+
+/** What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it. */
+export function reviewRequest(code: string, reasoning: string, independent: boolean): string {
+  const parts = ["Review this code for defects.", `<code>${code}</code>`];
+  if (!independent) parts.push(`<your_earlier_reasoning>${reasoning}</your_earlier_reasoning>`);
+  return parts.join("\n");
+}
+
+function main() {
+  for (const interval of [4, 6]) console.log(`worst-case wait with a ${interval} hour interval: ${worstCaseWait(interval)} hours (SLA 30 hours)`);
+  for (const customId of ["invoice-0042", "invoice 0042"]) {
+    try {
+      batchEntry(customId, { max_tokens: 1024 });
+      console.log(`custom_id ${customId}: accepted`);
+    } catch (e) {
+      console.log(`custom_id ${customId}: refused, ${(e as Error).message}`);
+    }
+  }
+  for (const params of [{ stream: true }, { speed: "fast" }, { max_tokens: 0 }]) {
+    try {
+      batchEntry("a1", params);
+    } catch (e) {
+      console.log(`refused: ${(e as Error).message}`);
+    }
+  }
+  const [matched, orphans] = matchResults(["a1", "a2", "a3"], [["a2", "expired"], ["z9", "succeeded"], ["a1", "succeeded"]]);
+  console.log("matched: " + matched.map(([i, kind]) => `${i}=${kind}`).join(", ") + "; unrequested: " + orphans.join(", "));
+  const code = "total = price * qty";
+  const reasoning = "qty is always positive, so no check";
+  for (const independent of [false, true]) {
+    const request = reviewRequest(code, reasoning, independent);
+    console.log(`independent=${independent ? "yes" : "no"}: carries the reasoning: ${request.includes(reasoning) ? "yes" : "no"}`);
+  }
+}
+
+if (import.meta.main) main();
+```
+```text
+worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)
+worst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)
+custom_id invoice-0042: accepted
+custom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores
+refused: stream is not supported in a batch
+refused: speed is not supported in a batch
+refused: a max_tokens of 0 is not supported in a batch
+matched: a1=succeeded, a2=expired, a3=missing; unrequested: z9
+independent=no: carries the reasoning: yes
+independent=yes: carries the reasoning: no
+```
+```java
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+/**
+ * What a batch asks of its caller, and what an independent review is given.
+ *
+ * <p>Read on 2026-10-04 in the Claude API documentation ("Batch processing"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,
+ * a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for
+ * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the methods below make visible. Nothing here calls a model.
+ */
+public final class BatchAndReview {
+    private static final Pattern CUSTOM_ID = Pattern.compile("^[a-zA-Z0-9_-]{1,64}$");
+
+    record Matched(String customId, String kind) {}
+
+    record Entry(String customId, Map<String, Object> params) {}
+
+    record Pairing(List<Matched> matched, List<String> unrequested) {}
+
+    /** An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling. */
+    static int worstCaseWait(int intervalHours, int windowHours, int handlingHours) {
+        return intervalHours + windowHours + handlingHours;
+    }
+
+    /** One entry of a batch request, refused for the same reasons the API refuses it. */
+    static Entry batchEntry(String customId, Map<String, Object> params) {
+        if (!CUSTOM_ID.matcher(customId).matches()) throw new IllegalArgumentException("custom_id '" + customId + "' must be 1 to 64 letters, digits, hyphens or underscores");
+        if (Boolean.TRUE.equals(params.get("stream"))) throw new IllegalArgumentException("stream is not supported in a batch");
+        if (params.containsKey("speed")) throw new IllegalArgumentException("speed is not supported in a batch");
+        if (Integer.valueOf(0).equals(params.get("max_tokens"))) throw new IllegalArgumentException("a max_tokens of 0 is not supported in a batch");
+        return new Entry(customId, params);
+    }
+
+    /** Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for. */
+    static Pairing matchResults(List<String> requests, List<Matched> results) {
+        Map<String, String> byId = new HashMap<>();
+        for (Matched r : results) byId.put(r.customId(), r.kind());
+        Set<String> asked = new HashSet<>(requests);
+        List<Matched> matched = new ArrayList<>();
+        for (String r : requests) matched.add(new Matched(r, byId.getOrDefault(r, "missing")));
+        List<String> unrequested = new ArrayList<>();
+        for (Matched r : results) if (!asked.contains(r.customId())) unrequested.add(r.customId());
+        return new Pairing(matched, unrequested);
+    }
+
+    /** What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it. */
+    static String reviewRequest(String code, String reasoning, boolean independent) {
+        List<String> parts = new ArrayList<>(List.of("Review this code for defects.", "<code>" + code + "</code>"));
+        if (!independent) parts.add("<your_earlier_reasoning>" + reasoning + "</your_earlier_reasoning>");
+        return String.join("\n", parts);
+    }
+
+    public static void main(String[] args) {
+        for (int interval : new int[] {4, 6}) System.out.println("worst-case wait with a " + interval + " hour interval: " + worstCaseWait(interval, 24, 2) + " hours (SLA 30 hours)");
+        for (String customId : new String[] {"invoice-0042", "invoice 0042"}) {
+            try {
+                batchEntry(customId, Map.of("max_tokens", 1024));
+                System.out.println("custom_id " + customId + ": accepted");
+            } catch (IllegalArgumentException e) {
+                System.out.println("custom_id " + customId + ": refused, " + e.getMessage());
+            }
+        }
+        for (Map<String, Object> params : List.<Map<String, Object>>of(Map.of("stream", true), Map.of("speed", "fast"), Map.of("max_tokens", 0))) {
+            try {
+                batchEntry("a1", params);
+            } catch (IllegalArgumentException e) {
+                System.out.println("refused: " + e.getMessage());
+            }
+        }
+        Pairing p = matchResults(List.of("a1", "a2", "a3"), List.of(new Matched("a2", "expired"), new Matched("z9", "succeeded"), new Matched("a1", "succeeded")));
+        List<String> pairs = new ArrayList<>();
+        for (Matched m : p.matched()) pairs.add(m.customId() + "=" + m.kind());
+        System.out.println("matched: " + String.join(", ", pairs) + "; unrequested: " + String.join(", ", p.unrequested()));
+        String code = "total = price * qty";
+        String reasoning = "qty is always positive, so no check";
+        for (boolean independent : new boolean[] {false, true}) {
+            String request = reviewRequest(code, reasoning, independent);
+            System.out.println("independent=" + (independent ? "yes" : "no") + ": carries the reasoning: " + (request.contains(reasoning) ? "yes" : "no"));
+        }
+    }
+}
+```
+```text
+worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)
+worst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)
+custom_id invoice-0042: accepted
+custom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores
+refused: stream is not supported in a batch
+refused: speed is not supported in a batch
+refused: a max_tokens of 0 is not supported in a batch
+matched: a1=succeeded, a2=expired, a3=missing; unrequested: z9
+independent=no: carries the reasoning: yes
+independent=yes: carries the reasoning: no
+```
+```kotlin
+/**
+ * What a batch asks of its caller, and what an independent review is given.
+ *
+ * Read on 2026-10-04 in the Claude API documentation ("Batch processing"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,
+ * a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for
+ * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.
+ */
+private val CUSTOM_ID = Regex("^[a-zA-Z0-9_-]{1,64}$")
+
+data class Matched(val customId: String, val kind: String)
+
+data class Entry(val customId: String, val params: Map<String, Any>)
+
+data class Pairing(val matched: List<Matched>, val unrequested: List<String>)
+
+/** An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling. */
+fun worstCaseWait(intervalHours: Int, windowHours: Int = 24, handlingHours: Int = 2): Int = intervalHours + windowHours + handlingHours
+
+/** One entry of a batch request, refused for the same reasons the API refuses it. */
+fun batchEntry(customId: String, params: Map<String, Any>): Entry {
+    require(CUSTOM_ID.matches(customId)) { "custom_id '$customId' must be 1 to 64 letters, digits, hyphens or underscores" }
+    require(params["stream"] != true) { "stream is not supported in a batch" }
+    require("speed" !in params) { "speed is not supported in a batch" }
+    require(params["max_tokens"] != 0) { "a max_tokens of 0 is not supported in a batch" }
+    return Entry(customId, params)
+}
+
+/** Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for. */
+fun matchResults(requests: List<String>, results: List<Matched>): Pairing {
+    val byId = results.associate { it.customId to it.kind }
+    val asked = requests.toSet()
+    return Pairing(requests.map { Matched(it, byId[it] ?: "missing") }, results.map { it.customId }.filter { it !in asked })
+}
+
+/** What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it. */
+fun reviewRequest(code: String, reasoning: String, independent: Boolean): String {
+    val parts = mutableListOf("Review this code for defects.", "<code>$code</code>")
+    if (!independent) parts += "<your_earlier_reasoning>$reasoning</your_earlier_reasoning>"
+    return parts.joinToString("\n")
+}
+
+fun main() {
+    for (interval in listOf(4, 6)) println("worst-case wait with a $interval hour interval: ${worstCaseWait(interval)} hours (SLA 30 hours)")
+    for (customId in listOf("invoice-0042", "invoice 0042")) {
+        try {
+            batchEntry(customId, mapOf("max_tokens" to 1024))
+            println("custom_id $customId: accepted")
+        } catch (e: IllegalArgumentException) {
+            println("custom_id $customId: refused, ${e.message}")
+        }
+    }
+    for (params in listOf(mapOf<String, Any>("stream" to true), mapOf("speed" to "fast"), mapOf("max_tokens" to 0))) {
+        try {
+            batchEntry("a1", params)
+        } catch (e: IllegalArgumentException) {
+            println("refused: ${e.message}")
+        }
+    }
+    val p = matchResults(listOf("a1", "a2", "a3"), listOf(Matched("a2", "expired"), Matched("z9", "succeeded"), Matched("a1", "succeeded")))
+    println("matched: " + p.matched.joinToString(", ") { "${it.customId}=${it.kind}" } + "; unrequested: " + p.unrequested.joinToString(", "))
+    val code = "total = price * qty"
+    val reasoning = "qty is always positive, so no check"
+    for (independent in listOf(false, true)) {
+        val request = reviewRequest(code, reasoning, independent)
+        println("independent=${if (independent) "yes" else "no"}: carries the reasoning: ${if (reasoning in request) "yes" else "no"}")
+    }
+}
+```
+```text
+worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)
+worst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)
+custom_id invoice-0042: accepted
+custom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores
+refused: stream is not supported in a batch
+refused: speed is not supported in a batch
+refused: a max_tokens of 0 is not supported in a batch
+matched: a1=succeeded, a2=expired, a3=missing; unrequested: z9
+independent=no: carries the reasoning: yes
+independent=yes: carries the reasoning: no
+```
 <!-- /example -->
 
 ## Traps

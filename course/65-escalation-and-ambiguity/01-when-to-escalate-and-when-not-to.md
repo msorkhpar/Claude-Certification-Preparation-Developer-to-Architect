@@ -44,6 +44,343 @@ Keep the decision in code where it can be code. The triggers that are facts (the
 ### The example
 
 <!-- example: m65-escalation-rules tabs: python,typescript,java,kotlin -->
+```python
+"""Why escalation is decided by criteria, and what to ask when a lookup finds several people.
+
+The exam guide (task 5.2) names the triggers (a customer asks for a person, the policy is silent or makes an exception, the agent cannot make progress) and says that sentiment and a model's own confidence score are
+unreliable proxies for how hard a case is. It also says that when a lookup returns several customers the agent asks for more identifiers and does not choose by a heuristic. Below, six hand-written cases
+(illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
+"""
+# name, sentiment, asked for a person, policy silent, what a careful person would do
+CASES = [
+    ("price match with another shop", "calm", False, True, "escalate"),
+    ("wrong colour, standard exchange", "angry", False, False, "resolve"),
+    ("calm request to speak to a person", "calm", True, False, "escalate"),
+    ("password reset", "frustrated", False, False, "resolve"),
+    ("refund for an item bought elsewhere", "calm", False, True, "escalate"),
+    ("angry, wants a person now", "angry", True, False, "escalate"),
+]
+
+
+def by_sentiment(case):
+    return "resolve" if case[1] == "calm" else "escalate"
+
+
+def by_criteria(case):
+    return "escalate" if case[2] or case[3] else "resolve"
+
+
+def errors(rule):
+    return [i for i, case in enumerate(CASES, 1) if rule(case) != case[4]]
+
+
+def pick_most_recent(matches):
+    """The heuristic the guide rejects: choose the account with the latest order."""
+    return max(matches, key=lambda m: m["last_order"])["id"]
+
+
+def ask_for_identifier(matches, fields):
+    """What the guide asks for: no choice, a request for something that tells the matches apart."""
+    return f"I found {len(matches)} accounts for that name. Please give me one of: " + ", ".join(fields) + "."
+
+
+def escalation_section(criteria, examples):
+    """Explicit criteria and examples for the system prompt: when to escalate, and when not to."""
+    lines = ["Escalate to a person when:"] + [f"- {c}" for c in criteria] + ["", "Examples:"]
+    lines += [f'Customer: "{text}" -> {decision} ({why})' for text, decision, why in examples]
+    return "\n".join(lines)
+
+
+def main():
+    for i, case in enumerate(CASES, 1):
+        print(f"case {i} ({case[0]}): sentiment rule {by_sentiment(case)}, criteria {by_criteria(case)}, careful person {case[4]}")
+    print(f"sentiment rule routed {len(errors(by_sentiment))} of {len(CASES)} wrongly: cases " + ", ".join(map(str, errors(by_sentiment))))
+    print(f"criteria routed {len(errors(by_criteria))} of {len(CASES)} wrongly")
+    matches = [{"id": "c1", "last_order": 20260901}, {"id": "c2", "last_order": 20260915}]
+    print(f"heuristic: the agent acts on {pick_most_recent(matches)} although the customer may be c1")
+    print(ask_for_identifier(matches, ["the email on the account", "the postcode"]))
+    print(escalation_section(["the customer asks for a person", "the policy does not cover the request", "two attempts made no progress"],
+                             [("Can you match the price on another site?", "escalate", "the policy only covers our own prices"), ("This is the third time my parcel is late!", "resolve", "a late parcel is within the agent's tools; acknowledge the frustration")]))
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+case 1 (price match with another shop): sentiment rule resolve, criteria escalate, careful person escalate
+case 2 (wrong colour, standard exchange): sentiment rule escalate, criteria resolve, careful person resolve
+case 3 (calm request to speak to a person): sentiment rule resolve, criteria escalate, careful person escalate
+case 4 (password reset): sentiment rule escalate, criteria resolve, careful person resolve
+case 5 (refund for an item bought elsewhere): sentiment rule resolve, criteria escalate, careful person escalate
+case 6 (angry, wants a person now): sentiment rule escalate, criteria escalate, careful person escalate
+sentiment rule routed 5 of 6 wrongly: cases 1, 2, 3, 4, 5
+criteria routed 0 of 6 wrongly
+heuristic: the agent acts on c2 although the customer may be c1
+I found 2 accounts for that name. Please give me one of: the email on the account, the postcode.
+Escalate to a person when:
+- the customer asks for a person
+- the policy does not cover the request
+- two attempts made no progress
+
+Examples:
+Customer: "Can you match the price on another site?" -> escalate (the policy only covers our own prices)
+Customer: "This is the third time my parcel is late!" -> resolve (a late parcel is within the agent's tools; acknowledge the frustration)
+```
+```typescript
+/**
+ * Why escalation is decided by criteria, and what to ask when a lookup finds several people.
+ *
+ * The exam guide (task 5.2) names the triggers (a customer asks for a person, the policy is silent or makes an exception, the agent cannot make progress) and says that sentiment and a model's own confidence score are
+ * unreliable proxies for how hard a case is. It also says that when a lookup returns several customers the agent asks for more identifiers and does not choose by a heuristic. Below, six hand-written cases
+ * (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
+ */
+// name, sentiment, asked for a person, policy silent, what a careful person would do
+export type Case = [string, string, boolean, boolean, string];
+export const CASES: Case[] = [
+  ["price match with another shop", "calm", false, true, "escalate"],
+  ["wrong colour, standard exchange", "angry", false, false, "resolve"],
+  ["calm request to speak to a person", "calm", true, false, "escalate"],
+  ["password reset", "frustrated", false, false, "resolve"],
+  ["refund for an item bought elsewhere", "calm", false, true, "escalate"],
+  ["angry, wants a person now", "angry", true, false, "escalate"],
+];
+
+export const bySentiment = (c: Case): string => (c[1] === "calm" ? "resolve" : "escalate");
+export const byCriteria = (c: Case): string => (c[2] || c[3] ? "escalate" : "resolve");
+
+export function errors(rule: (c: Case) => string): number[] {
+  return CASES.flatMap((c, i) => (rule(c) !== c[4] ? [i + 1] : []));
+}
+
+/** The heuristic the guide rejects: choose the account with the latest order. */
+export function pickMostRecent(matches: Array<{ id: string; last_order: number }>): string {
+  return matches.reduce((best, m) => (m.last_order > best.last_order ? m : best)).id;
+}
+
+/** What the guide asks for: no choice, a request for something that tells the matches apart. */
+export function askForIdentifier(matches: unknown[], fields: string[]): string {
+  return `I found ${matches.length} accounts for that name. Please give me one of: ` + fields.join(", ") + ".";
+}
+
+/** Explicit criteria and examples for the system prompt: when to escalate, and when not to. */
+export function escalationSection(criteria: string[], examples: Array<[string, string, string]>): string {
+  const lines = ["Escalate to a person when:", ...criteria.map((c) => `- ${c}`), "", "Examples:"];
+  lines.push(...examples.map(([text, decision, why]) => `Customer: "${text}" -> ${decision} (${why})`));
+  return lines.join("\n");
+}
+
+function main() {
+  CASES.forEach((c, i) => console.log(`case ${i + 1} (${c[0]}): sentiment rule ${bySentiment(c)}, criteria ${byCriteria(c)}, careful person ${c[4]}`));
+  console.log(`sentiment rule routed ${errors(bySentiment).length} of ${CASES.length} wrongly: cases ` + errors(bySentiment).join(", "));
+  console.log(`criteria routed ${errors(byCriteria).length} of ${CASES.length} wrongly`);
+  const matches = [{ id: "c1", last_order: 20260901 }, { id: "c2", last_order: 20260915 }];
+  console.log(`heuristic: the agent acts on ${pickMostRecent(matches)} although the customer may be c1`);
+  console.log(askForIdentifier(matches, ["the email on the account", "the postcode"]));
+  console.log(escalationSection(["the customer asks for a person", "the policy does not cover the request", "two attempts made no progress"],
+    [["Can you match the price on another site?", "escalate", "the policy only covers our own prices"], ["This is the third time my parcel is late!", "resolve", "a late parcel is within the agent's tools; acknowledge the frustration"]]));
+}
+
+if (import.meta.main) main();
+```
+```text
+case 1 (price match with another shop): sentiment rule resolve, criteria escalate, careful person escalate
+case 2 (wrong colour, standard exchange): sentiment rule escalate, criteria resolve, careful person resolve
+case 3 (calm request to speak to a person): sentiment rule resolve, criteria escalate, careful person escalate
+case 4 (password reset): sentiment rule escalate, criteria resolve, careful person resolve
+case 5 (refund for an item bought elsewhere): sentiment rule resolve, criteria escalate, careful person escalate
+case 6 (angry, wants a person now): sentiment rule escalate, criteria escalate, careful person escalate
+sentiment rule routed 5 of 6 wrongly: cases 1, 2, 3, 4, 5
+criteria routed 0 of 6 wrongly
+heuristic: the agent acts on c2 although the customer may be c1
+I found 2 accounts for that name. Please give me one of: the email on the account, the postcode.
+Escalate to a person when:
+- the customer asks for a person
+- the policy does not cover the request
+- two attempts made no progress
+
+Examples:
+Customer: "Can you match the price on another site?" -> escalate (the policy only covers our own prices)
+Customer: "This is the third time my parcel is late!" -> resolve (a late parcel is within the agent's tools; acknowledge the frustration)
+```
+```java
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+/**
+ * Why escalation is decided by criteria, and what to ask when a lookup finds several people.
+ *
+ * <p>The exam guide (task 5.2) names the triggers (a customer asks for a person, the policy is silent or makes an exception, the agent cannot make progress) and says that sentiment and a model's own confidence score are
+ * unreliable proxies for how hard a case is. It also says that when a lookup returns several customers the agent asks for more identifiers and does not choose by a heuristic. Below, six hand-written cases
+ * (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
+ */
+public final class EscalationRules {
+    /** name, sentiment, asked for a person, policy silent, what a careful person would do */
+    record Case(String name, String sentiment, boolean asked, boolean policySilent, String truth) {}
+
+    record Account(String id, int lastOrder) {}
+
+    record Example(String text, String decision, String why) {}
+
+    static final List<Case> CASES = List.of(
+        new Case("price match with another shop", "calm", false, true, "escalate"),
+        new Case("wrong colour, standard exchange", "angry", false, false, "resolve"),
+        new Case("calm request to speak to a person", "calm", true, false, "escalate"),
+        new Case("password reset", "frustrated", false, false, "resolve"),
+        new Case("refund for an item bought elsewhere", "calm", false, true, "escalate"),
+        new Case("angry, wants a person now", "angry", true, false, "escalate"));
+
+    static String bySentiment(Case c) {
+        return c.sentiment().equals("calm") ? "resolve" : "escalate";
+    }
+
+    static String byCriteria(Case c) {
+        return c.asked() || c.policySilent() ? "escalate" : "resolve";
+    }
+
+    static List<Integer> errors(Function<Case, String> rule) {
+        List<Integer> wrong = new ArrayList<>();
+        for (int i = 0; i < CASES.size(); i++) if (!rule.apply(CASES.get(i)).equals(CASES.get(i).truth())) wrong.add(i + 1);
+        return wrong;
+    }
+
+    /** The heuristic the guide rejects: choose the account with the latest order. */
+    static String pickMostRecent(List<Account> matches) {
+        return matches.stream().max(Comparator.comparingInt(Account::lastOrder)).orElseThrow().id();
+    }
+
+    /** What the guide asks for: no choice, a request for something that tells the matches apart. */
+    static String askForIdentifier(int matches, List<String> fields) {
+        return "I found " + matches + " accounts for that name. Please give me one of: " + String.join(", ", fields) + ".";
+    }
+
+    /** Explicit criteria and examples for the system prompt: when to escalate, and when not to. */
+    static String escalationSection(List<String> criteria, List<Example> examples) {
+        List<String> lines = new ArrayList<>(List.of("Escalate to a person when:"));
+        for (String c : criteria) lines.add("- " + c);
+        lines.add("");
+        lines.add("Examples:");
+        for (Example e : examples) lines.add("Customer: \"" + e.text() + "\" -> " + e.decision() + " (" + e.why() + ")");
+        return String.join("\n", lines);
+    }
+
+    private static String join(List<Integer> numbers) {
+        List<String> parts = new ArrayList<>();
+        for (int n : numbers) parts.add(String.valueOf(n));
+        return String.join(", ", parts);
+    }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < CASES.size(); i++) {
+            Case c = CASES.get(i);
+            System.out.println("case " + (i + 1) + " (" + c.name() + "): sentiment rule " + bySentiment(c) + ", criteria " + byCriteria(c) + ", careful person " + c.truth());
+        }
+        System.out.println("sentiment rule routed " + errors(EscalationRules::bySentiment).size() + " of " + CASES.size() + " wrongly: cases " + join(errors(EscalationRules::bySentiment)));
+        System.out.println("criteria routed " + errors(EscalationRules::byCriteria).size() + " of " + CASES.size() + " wrongly");
+        List<Account> matches = List.of(new Account("c1", 20260901), new Account("c2", 20260915));
+        System.out.println("heuristic: the agent acts on " + pickMostRecent(matches) + " although the customer may be c1");
+        System.out.println(askForIdentifier(matches.size(), List.of("the email on the account", "the postcode")));
+        System.out.println(escalationSection(List.of("the customer asks for a person", "the policy does not cover the request", "two attempts made no progress"),
+            List.of(new Example("Can you match the price on another site?", "escalate", "the policy only covers our own prices"),
+                new Example("This is the third time my parcel is late!", "resolve", "a late parcel is within the agent's tools; acknowledge the frustration"))));
+    }
+}
+```
+```text
+case 1 (price match with another shop): sentiment rule resolve, criteria escalate, careful person escalate
+case 2 (wrong colour, standard exchange): sentiment rule escalate, criteria resolve, careful person resolve
+case 3 (calm request to speak to a person): sentiment rule resolve, criteria escalate, careful person escalate
+case 4 (password reset): sentiment rule escalate, criteria resolve, careful person resolve
+case 5 (refund for an item bought elsewhere): sentiment rule resolve, criteria escalate, careful person escalate
+case 6 (angry, wants a person now): sentiment rule escalate, criteria escalate, careful person escalate
+sentiment rule routed 5 of 6 wrongly: cases 1, 2, 3, 4, 5
+criteria routed 0 of 6 wrongly
+heuristic: the agent acts on c2 although the customer may be c1
+I found 2 accounts for that name. Please give me one of: the email on the account, the postcode.
+Escalate to a person when:
+- the customer asks for a person
+- the policy does not cover the request
+- two attempts made no progress
+
+Examples:
+Customer: "Can you match the price on another site?" -> escalate (the policy only covers our own prices)
+Customer: "This is the third time my parcel is late!" -> resolve (a late parcel is within the agent's tools; acknowledge the frustration)
+```
+```kotlin
+/**
+ * Why escalation is decided by criteria, and what to ask when a lookup finds several people.
+ *
+ * The exam guide (task 5.2) names the triggers (a customer asks for a person, the policy is silent or makes an exception, the agent cannot make progress) and says that sentiment and a model's own confidence score are
+ * unreliable proxies for how hard a case is. It also says that when a lookup returns several customers the agent asks for more identifiers and does not choose by a heuristic. Below, six hand-written cases
+ * (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
+ */
+/** name, sentiment, asked for a person, policy silent, what a careful person would do */
+data class Case(val name: String, val sentiment: String, val asked: Boolean, val policySilent: Boolean, val truth: String)
+
+data class Account(val id: String, val lastOrder: Int)
+
+data class Example(val text: String, val decision: String, val why: String)
+
+val CASES = listOf(
+    Case("price match with another shop", "calm", false, true, "escalate"),
+    Case("wrong colour, standard exchange", "angry", false, false, "resolve"),
+    Case("calm request to speak to a person", "calm", true, false, "escalate"),
+    Case("password reset", "frustrated", false, false, "resolve"),
+    Case("refund for an item bought elsewhere", "calm", false, true, "escalate"),
+    Case("angry, wants a person now", "angry", true, false, "escalate"),
+)
+
+fun bySentiment(c: Case): String = if (c.sentiment == "calm") "resolve" else "escalate"
+
+fun byCriteria(c: Case): String = if (c.asked || c.policySilent) "escalate" else "resolve"
+
+fun errors(rule: (Case) -> String): List<Int> = CASES.withIndex().filter { rule(it.value) != it.value.truth }.map { it.index + 1 }
+
+/** The heuristic the guide rejects: choose the account with the latest order. */
+fun pickMostRecent(matches: List<Account>): String = matches.maxByOrNull { it.lastOrder }!!.id
+
+/** What the guide asks for: no choice, a request for something that tells the matches apart. */
+fun askForIdentifier(matches: Int, fields: List<String>): String = "I found $matches accounts for that name. Please give me one of: " + fields.joinToString(", ") + "."
+
+/** Explicit criteria and examples for the system prompt: when to escalate, and when not to. */
+fun escalationSection(criteria: List<String>, examples: List<Example>): String {
+    val lines = mutableListOf("Escalate to a person when:") + criteria.map { "- $it" } + listOf("", "Examples:") + examples.map { "Customer: \"${it.text}\" -> ${it.decision} (${it.why})" }
+    return lines.joinToString("\n")
+}
+
+fun main() {
+    CASES.forEachIndexed { i, c -> println("case ${i + 1} (${c.name}): sentiment rule ${bySentiment(c)}, criteria ${byCriteria(c)}, careful person ${c.truth}") }
+    println("sentiment rule routed ${errors(::bySentiment).size} of ${CASES.size} wrongly: cases " + errors(::bySentiment).joinToString(", "))
+    println("criteria routed ${errors(::byCriteria).size} of ${CASES.size} wrongly")
+    val matches = listOf(Account("c1", 20260901), Account("c2", 20260915))
+    println("heuristic: the agent acts on ${pickMostRecent(matches)} although the customer may be c1")
+    println(askForIdentifier(matches.size, listOf("the email on the account", "the postcode")))
+    println(escalationSection(listOf("the customer asks for a person", "the policy does not cover the request", "two attempts made no progress"),
+        listOf(Example("Can you match the price on another site?", "escalate", "the policy only covers our own prices"), Example("This is the third time my parcel is late!", "resolve", "a late parcel is within the agent's tools; acknowledge the frustration"))))
+}
+```
+```text
+case 1 (price match with another shop): sentiment rule resolve, criteria escalate, careful person escalate
+case 2 (wrong colour, standard exchange): sentiment rule escalate, criteria resolve, careful person resolve
+case 3 (calm request to speak to a person): sentiment rule resolve, criteria escalate, careful person escalate
+case 4 (password reset): sentiment rule escalate, criteria resolve, careful person resolve
+case 5 (refund for an item bought elsewhere): sentiment rule resolve, criteria escalate, careful person escalate
+case 6 (angry, wants a person now): sentiment rule escalate, criteria escalate, careful person escalate
+sentiment rule routed 5 of 6 wrongly: cases 1, 2, 3, 4, 5
+criteria routed 0 of 6 wrongly
+heuristic: the agent acts on c2 although the customer may be c1
+I found 2 accounts for that name. Please give me one of: the email on the account, the postcode.
+Escalate to a person when:
+- the customer asks for a person
+- the policy does not cover the request
+- two attempts made no progress
+
+Examples:
+Customer: "Can you match the price on another site?" -> escalate (the policy only covers our own prices)
+Customer: "This is the third time my parcel is late!" -> resolve (a late parcel is within the agent's tools; acknowledge the frustration)
+```
 <!-- /example -->
 
 ## Traps

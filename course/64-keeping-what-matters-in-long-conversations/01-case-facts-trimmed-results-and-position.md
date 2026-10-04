@@ -50,6 +50,309 @@ The same discipline applies between agents. When a subagent's output feeds an ag
 ### The example
 
 <!-- example: m64-case-facts tabs: python,typescript,java,kotlin -->
+```python
+"""What a long support conversation should keep, and where it should sit.
+
+The exam guide (task 5.1) names four risks: a progressive summary turns numbers, dates and the customer's stated expectations into vague prose; models attend well to the start and the end of a long input and may miss the middle;
+tool results pile up in the context out of proportion to their use (40 fields in an order lookup, five of them wanted); and the whole history must be sent on each request. The Claude documentation on long-context prompts
+(read 2026-10-04) says to put long documents at the top and the question at the end, which can improve quality in tests by up to 30 percent, and to structure documents with tags. The functions below show the bookkeeping;
+nothing here calls a model, and the numbers come from the sample data, not from a measurement.
+"""
+TOOL_FIELDS = {
+    "lookup_order": ["order_id", "purchase_date", "items", "return_window", "refund_amount"],
+    "lookup_customer": ["customer_id", "tier"],
+}
+
+
+def tokens(text):
+    return -(-len(text) // 4)
+
+
+def render(record):
+    return ";".join(f"{k}={v}" for k, v in record.items())
+
+
+def shrink(tool, result):
+    """Keep what the next decision needs from a tool result, with its exact values."""
+    return {k: result[k] for k in TOOL_FIELDS[tool] if k in result}
+
+
+def case_facts_block(facts):
+    """Facts the conversation must not lose, as a block that goes into every request outside the summarised history."""
+    return "## Case facts\n" + "\n".join(f"{name}: {value} (as of day {day})" for name, value, day in facts)
+
+
+def assemble(block, findings, documents, question):
+    """Key facts first, a short findings summary, the long documents under headers, the question last."""
+    parts = [block, "## Key findings\n" + "\n".join(f"- {f}" for f in findings), "## Documents\n" + "\n".join(f"### {title}\n{text}" for title, text in documents), "## Question\n" + question]
+    return "\n\n".join(parts)
+
+
+def stale(seen_day, today, max_age_days):
+    """A value read days ago is re-read before it is acted on."""
+    return today - seen_day > max_age_days
+
+
+def main():
+    order = {"order_id": "A-1042", "purchase_date": "2026-09-02", "items": "2 x kettle", "return_window": "30 days", "refund_amount": "$129.50"}
+    for n in range(1, 36):
+        order[f"internal_{n:02d}"] = f"backend-value-{n:02d}"
+    small = shrink("lookup_order", order)
+    print(f"lookup_order result: {len(order)} fields, {len(render(order))} characters, about {tokens(render(order))} tokens")
+    print(f"after shrinking: {len(small)} fields, {len(render(small))} characters, about {tokens(render(small))} tokens")
+    print(f"twenty lookups kept whole: {20 * tokens(render(order))} tokens; shrunk: {20 * tokens(render(small))} tokens")
+    block = case_facts_block([("refund_amount", "$129.50", 118), ("return_deadline", "2026-09-30", 118)])
+    print(block)
+    prompt = assemble(block, ["The order qualifies for a refund", "The deadline is the binding fact"], [("Policy", "..."), ("Order history", "...")], "What should the customer be told?")
+    print("section order: " + " | ".join(line for line in prompt.splitlines() if line.startswith("#")))
+    for seen in (118, 124):
+        print(f"refund_amount seen on day {seen}, today day 125, limit 3 days: " + ("read it again before acting" if stale(seen, 125, 3) else "still fresh"))
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+lookup_order result: 40 fields, 1116 characters, about 279 tokens
+after shrinking: 5 fields, 101 characters, about 26 tokens
+twenty lookups kept whole: 5580 tokens; shrunk: 520 tokens
+## Case facts
+refund_amount: $129.50 (as of day 118)
+return_deadline: 2026-09-30 (as of day 118)
+section order: ## Case facts | ## Key findings | ## Documents | ### Policy | ### Order history | ## Question
+refund_amount seen on day 118, today day 125, limit 3 days: read it again before acting
+refund_amount seen on day 124, today day 125, limit 3 days: still fresh
+```
+```typescript
+/**
+ * What a long support conversation should keep, and where it should sit.
+ *
+ * The exam guide (task 5.1) names four risks: a progressive summary turns numbers, dates and the customer's stated expectations into vague prose; models attend well to the start and the end of a long input and may miss the middle;
+ * tool results pile up in the context out of proportion to their use (40 fields in an order lookup, five of them wanted); and the whole history must be sent on each request. The Claude documentation on long-context prompts
+ * (read 2026-10-04) says to put long documents at the top and the question at the end, which can improve quality in tests by up to 30 percent, and to structure documents with tags. The functions below show the bookkeeping;
+ * nothing here calls a model, and the numbers come from the sample data, not from a measurement.
+ */
+const TOOL_FIELDS: Record<string, string[]> = {
+  lookup_order: ["order_id", "purchase_date", "items", "return_window", "refund_amount"],
+  lookup_customer: ["customer_id", "tier"],
+};
+
+export function tokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+export function render(record: Record<string, string>): string {
+  return Object.entries(record).map(([k, v]) => `${k}=${v}`).join(";");
+}
+
+/** Keep what the next decision needs from a tool result, with its exact values. */
+export function shrink(tool: string, result: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of TOOL_FIELDS[tool]) if (k in result) out[k] = result[k];
+  return out;
+}
+
+/** Facts the conversation must not lose, as a block that goes into every request outside the summarised history. */
+export function caseFactsBlock(facts: Array<[string, string, number]>): string {
+  return "## Case facts\n" + facts.map(([name, value, day]) => `${name}: ${value} (as of day ${day})`).join("\n");
+}
+
+/** Key facts first, a short findings summary, the long documents under headers, the question last. */
+export function assemble(block: string, findings: string[], documents: Array<[string, string]>, question: string): string {
+  const parts = [block, "## Key findings\n" + findings.map((f) => `- ${f}`).join("\n"), "## Documents\n" + documents.map(([title, text]) => `### ${title}\n${text}`).join("\n"), "## Question\n" + question];
+  return parts.join("\n\n");
+}
+
+/** A value read days ago is re-read before it is acted on. */
+export function stale(seenDay: number, today: number, maxAgeDays: number): boolean {
+  return today - seenDay > maxAgeDays;
+}
+
+function main() {
+  const order: Record<string, string> = { order_id: "A-1042", purchase_date: "2026-09-02", items: "2 x kettle", return_window: "30 days", refund_amount: "$129.50" };
+  for (let n = 1; n < 36; n++) order[`internal_${String(n).padStart(2, "0")}`] = `backend-value-${String(n).padStart(2, "0")}`;
+  const small = shrink("lookup_order", order);
+  console.log(`lookup_order result: ${Object.keys(order).length} fields, ${render(order).length} characters, about ${tokens(render(order))} tokens`);
+  console.log(`after shrinking: ${Object.keys(small).length} fields, ${render(small).length} characters, about ${tokens(render(small))} tokens`);
+  console.log(`twenty lookups kept whole: ${20 * tokens(render(order))} tokens; shrunk: ${20 * tokens(render(small))} tokens`);
+  const block = caseFactsBlock([["refund_amount", "$129.50", 118], ["return_deadline", "2026-09-30", 118]]);
+  console.log(block);
+  const prompt = assemble(block, ["The order qualifies for a refund", "The deadline is the binding fact"], [["Policy", "..."], ["Order history", "..."]], "What should the customer be told?");
+  console.log("section order: " + prompt.split("\n").filter((line) => line.startsWith("#")).join(" | "));
+  for (const seen of [118, 124]) console.log(`refund_amount seen on day ${seen}, today day 125, limit 3 days: ` + (stale(seen, 125, 3) ? "read it again before acting" : "still fresh"));
+}
+
+if (import.meta.main) main();
+```
+```text
+lookup_order result: 40 fields, 1116 characters, about 279 tokens
+after shrinking: 5 fields, 101 characters, about 26 tokens
+twenty lookups kept whole: 5580 tokens; shrunk: 520 tokens
+## Case facts
+refund_amount: $129.50 (as of day 118)
+return_deadline: 2026-09-30 (as of day 118)
+section order: ## Case facts | ## Key findings | ## Documents | ### Policy | ### Order history | ## Question
+refund_amount seen on day 118, today day 125, limit 3 days: read it again before acting
+refund_amount seen on day 124, today day 125, limit 3 days: still fresh
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * What a long support conversation should keep, and where it should sit.
+ *
+ * <p>The exam guide (task 5.1) names four risks: a progressive summary turns numbers, dates and the customer's stated expectations into vague prose; models attend well to the start and the end of a long input and may miss the middle;
+ * tool results pile up in the context out of proportion to their use (40 fields in an order lookup, five of them wanted); and the whole history must be sent on each request. The Claude documentation on long-context prompts
+ * (read 2026-10-04) says to put long documents at the top and the question at the end, which can improve quality in tests by up to 30 percent, and to structure documents with tags. The methods below show the bookkeeping;
+ * nothing here calls a model, and the numbers come from the sample data, not from a measurement.
+ */
+public final class CaseFacts {
+    static final Map<String, List<String>> TOOL_FIELDS = Map.of(
+        "lookup_order", List.of("order_id", "purchase_date", "items", "return_window", "refund_amount"),
+        "lookup_customer", List.of("customer_id", "tier"));
+
+    record Fact(String name, String value, int day) {}
+
+    record Document(String title, String text) {}
+
+    static int tokens(String text) {
+        return (text.length() + 3) / 4;
+    }
+
+    static String render(Map<String, String> record) {
+        List<String> parts = new ArrayList<>();
+        for (Map.Entry<String, String> e : record.entrySet()) parts.add(e.getKey() + "=" + e.getValue());
+        return String.join(";", parts);
+    }
+
+    /** Keep what the next decision needs from a tool result, with its exact values. */
+    static Map<String, String> shrink(String tool, Map<String, String> result) {
+        Map<String, String> out = new LinkedHashMap<>();
+        for (String k : TOOL_FIELDS.get(tool)) if (result.containsKey(k)) out.put(k, result.get(k));
+        return out;
+    }
+
+    /** Facts the conversation must not lose, as a block that goes into every request outside the summarised history. */
+    static String caseFactsBlock(List<Fact> facts) {
+        List<String> lines = new ArrayList<>();
+        for (Fact f : facts) lines.add(f.name() + ": " + f.value() + " (as of day " + f.day() + ")");
+        return "## Case facts\n" + String.join("\n", lines);
+    }
+
+    /** Key facts first, a short findings summary, the long documents under headers, the question last. */
+    static String assemble(String block, List<String> findings, List<Document> documents, String question) {
+        List<String> bullets = new ArrayList<>();
+        for (String f : findings) bullets.add("- " + f);
+        List<String> docs = new ArrayList<>();
+        for (Document d : documents) docs.add("### " + d.title() + "\n" + d.text());
+        return String.join("\n\n", block, "## Key findings\n" + String.join("\n", bullets), "## Documents\n" + String.join("\n", docs), "## Question\n" + question);
+    }
+
+    /** A value read days ago is re-read before it is acted on. */
+    static boolean stale(int seenDay, int today, int maxAgeDays) {
+        return today - seenDay > maxAgeDays;
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> order = new LinkedHashMap<>();
+        order.put("order_id", "A-1042");
+        order.put("purchase_date", "2026-09-02");
+        order.put("items", "2 x kettle");
+        order.put("return_window", "30 days");
+        order.put("refund_amount", "$129.50");
+        for (int n = 1; n < 36; n++) order.put(String.format("internal_%02d", n), String.format("backend-value-%02d", n));
+        Map<String, String> small = shrink("lookup_order", order);
+        System.out.println("lookup_order result: " + order.size() + " fields, " + render(order).length() + " characters, about " + tokens(render(order)) + " tokens");
+        System.out.println("after shrinking: " + small.size() + " fields, " + render(small).length() + " characters, about " + tokens(render(small)) + " tokens");
+        System.out.println("twenty lookups kept whole: " + 20 * tokens(render(order)) + " tokens; shrunk: " + 20 * tokens(render(small)) + " tokens");
+        String block = caseFactsBlock(List.of(new Fact("refund_amount", "$129.50", 118), new Fact("return_deadline", "2026-09-30", 118)));
+        System.out.println(block);
+        String prompt = assemble(block, List.of("The order qualifies for a refund", "The deadline is the binding fact"), List.of(new Document("Policy", "..."), new Document("Order history", "...")), "What should the customer be told?");
+        List<String> headings = new ArrayList<>();
+        for (String line : prompt.split("\n")) if (line.startsWith("#")) headings.add(line);
+        System.out.println("section order: " + String.join(" | ", headings));
+        for (int seen : new int[] {118, 124}) System.out.println("refund_amount seen on day " + seen + ", today day 125, limit 3 days: " + (stale(seen, 125, 3) ? "read it again before acting" : "still fresh"));
+    }
+}
+```
+```text
+lookup_order result: 40 fields, 1116 characters, about 279 tokens
+after shrinking: 5 fields, 101 characters, about 26 tokens
+twenty lookups kept whole: 5580 tokens; shrunk: 520 tokens
+## Case facts
+refund_amount: $129.50 (as of day 118)
+return_deadline: 2026-09-30 (as of day 118)
+section order: ## Case facts | ## Key findings | ## Documents | ### Policy | ### Order history | ## Question
+refund_amount seen on day 118, today day 125, limit 3 days: read it again before acting
+refund_amount seen on day 124, today day 125, limit 3 days: still fresh
+```
+```kotlin
+/**
+ * What a long support conversation should keep, and where it should sit.
+ *
+ * The exam guide (task 5.1) names four risks: a progressive summary turns numbers, dates and the customer's stated expectations into vague prose; models attend well to the start and the end of a long input and may miss the middle;
+ * tool results pile up in the context out of proportion to their use (40 fields in an order lookup, five of them wanted); and the whole history must be sent on each request. The Claude documentation on long-context prompts
+ * (read 2026-10-04) says to put long documents at the top and the question at the end, which can improve quality in tests by up to 30 percent, and to structure documents with tags. The functions below show the bookkeeping;
+ * nothing here calls a model, and the numbers come from the sample data, not from a measurement.
+ */
+val TOOL_FIELDS = mapOf(
+    "lookup_order" to listOf("order_id", "purchase_date", "items", "return_window", "refund_amount"),
+    "lookup_customer" to listOf("customer_id", "tier"),
+)
+
+data class Fact(val name: String, val value: String, val day: Int)
+
+data class Document(val title: String, val text: String)
+
+fun tokens(text: String): Int = (text.length + 3) / 4
+
+fun render(record: Map<String, String>): String = record.entries.joinToString(";") { "${it.key}=${it.value}" }
+
+/** Keep what the next decision needs from a tool result, with its exact values. */
+fun shrink(tool: String, result: Map<String, String>): Map<String, String> {
+    val out = linkedMapOf<String, String>()
+    for (k in TOOL_FIELDS.getValue(tool)) if (k in result) out[k] = result.getValue(k)
+    return out
+}
+
+/** Facts the conversation must not lose, as a block that goes into every request outside the summarised history. */
+fun caseFactsBlock(facts: List<Fact>): String = "## Case facts\n" + facts.joinToString("\n") { "${it.name}: ${it.value} (as of day ${it.day})" }
+
+/** Key facts first, a short findings summary, the long documents under headers, the question last. */
+fun assemble(block: String, findings: List<String>, documents: List<Document>, question: String): String =
+    listOf(block, "## Key findings\n" + findings.joinToString("\n") { "- $it" }, "## Documents\n" + documents.joinToString("\n") { "### ${it.title}\n${it.text}" }, "## Question\n$question").joinToString("\n\n")
+
+/** A value read days ago is re-read before it is acted on. */
+fun stale(seenDay: Int, today: Int, maxAgeDays: Int): Boolean = today - seenDay > maxAgeDays
+
+fun main() {
+    val order = linkedMapOf("order_id" to "A-1042", "purchase_date" to "2026-09-02", "items" to "2 x kettle", "return_window" to "30 days", "refund_amount" to "$129.50")
+    for (n in 1..35) order["internal_%02d".format(n)] = "backend-value-%02d".format(n)
+    val small = shrink("lookup_order", order)
+    println("lookup_order result: ${order.size} fields, ${render(order).length} characters, about ${tokens(render(order))} tokens")
+    println("after shrinking: ${small.size} fields, ${render(small).length} characters, about ${tokens(render(small))} tokens")
+    println("twenty lookups kept whole: ${20 * tokens(render(order))} tokens; shrunk: ${20 * tokens(render(small))} tokens")
+    val block = caseFactsBlock(listOf(Fact("refund_amount", "$129.50", 118), Fact("return_deadline", "2026-09-30", 118)))
+    println(block)
+    val prompt = assemble(block, listOf("The order qualifies for a refund", "The deadline is the binding fact"), listOf(Document("Policy", "..."), Document("Order history", "...")), "What should the customer be told?")
+    println("section order: " + prompt.lines().filter { it.startsWith("#") }.joinToString(" | "))
+    for (seen in listOf(118, 124)) println("refund_amount seen on day $seen, today day 125, limit 3 days: " + if (stale(seen, 125, 3)) "read it again before acting" else "still fresh")
+}
+```
+```text
+lookup_order result: 40 fields, 1116 characters, about 279 tokens
+after shrinking: 5 fields, 101 characters, about 26 tokens
+twenty lookups kept whole: 5580 tokens; shrunk: 520 tokens
+## Case facts
+refund_amount: $129.50 (as of day 118)
+return_deadline: 2026-09-30 (as of day 118)
+section order: ## Case facts | ## Key findings | ## Documents | ### Policy | ### Order history | ## Question
+refund_amount seen on day 118, today day 125, limit 3 days: read it again before acting
+refund_amount seen on day 124, today day 125, limit 3 days: still fresh
+```
 <!-- /example -->
 
 ## Traps

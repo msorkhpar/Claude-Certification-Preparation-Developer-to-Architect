@@ -1,0 +1,123 @@
+{
+  "practice": "67-exploring-a-large-codebase/unit-01/practice-1",
+  "name": "recovery",
+  "tests": {
+    "java": "RecoveryTest",
+    "kotlin": "RecoveryTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_finding_is_recorded_once_per_area_and_fact_in_first_seen_order",
+      "typescript": "m1 a finding is recorded once per area and fact in first seen order",
+      "java": "m1_aFindingIsRecordedOncePerAreaAndFactInFirstSeenOrder",
+      "kotlin": "m1_aFindingIsRecordedOncePerAreaAndFactInFirstSeenOrder"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_scratchpad_groups_findings_under_their_area",
+      "typescript": "e1 the scratchpad groups findings under their area",
+      "java": "e1_theScratchpadGroupsFindingsUnderTheirArea",
+      "kotlin": "e1_theScratchpadGroupsFindingsUnderTheirArea"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_manifest_lists_every_agent_with_its_state_file_and_status_and_refuses_bad_input",
+      "typescript": "e2 the manifest lists every agent with its state file and status and refuses bad input",
+      "java": "e2_theManifestListsEveryAgentWithItsStateFileAndStatusAndRefusesBadInput",
+      "kotlin": "e2_theManifestListsEveryAgentWithItsStateFileAndStatusAndRefusesBadInput"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_finished_agent_with_its_state_file_is_reused_and_not_run_again",
+      "typescript": "e3 a finished agent with its state file is reused and not run again",
+      "java": "e3_aFinishedAgentWithItsStateFileIsReusedAndNotRunAgain",
+      "kotlin": "e3_aFinishedAgentWithItsStateFileIsReusedAndNotRunAgain"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_running_or_failed_agent_with_a_state_file_is_resumed_from_it",
+      "typescript": "e4 a running or failed agent with a state file is resumed from it",
+      "java": "e4_aRunningOrFailedAgentWithAStateFileIsResumedFromIt",
+      "kotlin": "e4_aRunningOrFailedAgentWithAStateFileIsResumedFromIt"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_an_agent_whose_state_file_is_missing_is_restarted_from_scratch",
+      "typescript": "e5 an agent whose state file is missing is restarted from scratch",
+      "java": "e5_anAgentWhoseStateFileIsMissingIsRestartedFromScratch",
+      "kotlin": "e5_anAgentWhoseStateFileIsMissingIsRestartedFromScratch"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_resume_prompt_carries_the_task_and_the_state_lines_and_nothing_else",
+      "typescript": "e6 the resume prompt carries the task and the state lines and nothing else",
+      "java": "e6_theResumePromptCarriesTheTaskAndTheStateLinesAndNothingElse",
+      "kotlin": "e6_theResumePromptCarriesTheTaskAndTheStateLinesAndNothingElse"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_compact_command_names_what_to_keep",
+      "typescript": "e7 the compact command names what to keep",
+      "java": "e7_theCompactCommandNamesWhatToKeep",
+      "kotlin": "e7_theCompactCommandNamesWhatToKeep"
+    }
+  },
+  "plants": {
+    "wrong-duplicate-findings": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "records the same fact twice for one area"
+    },
+    "wrong-ungrouped-scratchpad": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "repeats an area heading for every finding"
+    },
+    "wrong-manifest-unsorted": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lists the agents in the order they were given"
+    },
+    "wrong-manifest-unvalidated": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts a status the manifest does not know"
+    },
+    "wrong-rerun-done": {
+      "caught_by": [
+        "e3",
+        "e5"
+      ],
+      "defect": "resumes an agent that already finished"
+    },
+    "wrong-restart-running": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "restarts an agent that has a state file to resume from"
+    },
+    "wrong-ignore-missing-file": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "trusts the manifest without checking that the state file exists"
+    },
+    "wrong-no-continue-line": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves the instruction to continue out of the prompt"
+    },
+    "wrong-compact-without-focus": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "compacts without telling the command what to keep"
+    }
+  }
+}
