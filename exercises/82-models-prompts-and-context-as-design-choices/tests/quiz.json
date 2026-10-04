@@ -10,7 +10,7 @@
         "a": "Truncates the end of the rules until the whole request fits within the budget",
         "b": "Drops the conversation history first, because it is the largest block of the three",
         "c": "Refuses the request at once, since it is over budget by any amount at all",
-        "d": "Sheds the promotional lines first, then climbs only while it is still over"
+        "d": "Sheds the least important block first, stopping as soon as it fits"
       },
       "key": "d",
       "explanation": {
@@ -100,19 +100,19 @@
       "id": "02-choosing-a-model-and-shaping-the-context#m2",
       "page": "02-choosing-a-model-and-shaping-the-context.md",
       "scope": "module",
-      "stem": "Scenario: Sandpiper Bank's fixed instructions and policy alone come to 900 tokens, and the budget for a request is 800. What should the assembler do?",
+      "stem": "Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?",
       "options": {
-        "a": "Cut the last hundred tokens from the policy and send the rest as it stands",
-        "b": "Decline to build it, since the unchangeable parts are never cut",
-        "c": "Drop the customer's question to save the difference instead",
-        "d": "Send it anyway, since the model will simply ignore the excess tokens"
+        "a": "Take the largest model for safety, and place the long text last in the request",
+        "b": "Take the cheapest model of any tier, and place the long text in the final message",
+        "c": "Take the model that was used last time, and cache the whole request as one piece",
+        "d": "Take the cheapest that is capable and quick enough, and put the bulky constant passage first"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The static parts alone exceed the budget, so nothing droppable is left and the assembler refuses.",
-        "a": "Ruled out because \"A silent truncation would be worse than a refusal\".",
-        "c": "Ruled out because the shortfall is in the static part, and \"The static modules are never dropped, since they hold the rules\".",
-        "d": "Ruled out because \"the assembler refuses the request and does not send a truncated policy\"."
+        "d": "The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached.",
+        "a": "Ruled out because the page says \"static modules first, in the order given, then the dynamic ones\".",
+        "b": "Ruled out because \"A model below the tier fails the task\", whatever its price.",
+        "c": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", so the whole request, which includes the changing part, cannot be cached as one piece."
       }
     },
     {

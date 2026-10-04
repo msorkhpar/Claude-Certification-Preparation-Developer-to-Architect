@@ -24,19 +24,19 @@
       "id": "01-sizing-a-workload-limits-tiers-and-the-bill#q2",
       "page": "01-sizing-a-workload-limits-tiers-and-the-bill.md",
       "scope": "page",
-      "stem": "Scenario: Quay Logistics sizes its assistant on the daily average of 200 requests a minute, but every Monday at nine the rate reaches 600. On the first Monday after launch the assistant meets 429 errors. What was the sizing mistake?",
+      "stem": "Scenario: Fjord Media's support assistant costs $38,800.00 a month without caching and $17,400.00 with it, on 2 million requests. About what share of the uncached bill does caching remove?",
       "options": {
-        "a": "It set the retry count of the SDK too low for a rate limit that comes in bursts",
-        "b": "It picked a tier by the price paid, as though the limits followed the price",
-        "c": "It sized on the mean and not on the peak with headroom added to it",
-        "d": "It treated the output limit as the only limit that could be reached first"
+        "a": "About 15 percent",
+        "b": "About 30 percent",
+        "c": "About 55 percent",
+        "d": "About 85 percent"
       },
       "key": "c",
       "explanation": {
-        "c": "A limit is reached at the peak, so the need is \"The peak rate, plus headroom\".",
-        "a": "Ruled out because \"The SDKs retry twice by default, which absorbs a brief limit and does nothing against a sustained one\".",
-        "b": "Ruled out because the method is to \"Compare each number with the tier's limits\", and price does not enter it.",
-        "d": "Ruled out because \"the limit that fails first\" is the binding one, and which that is depends on the mix."
+        "c": "The difference is $21,400.00, which is about 55 percent of $38,800.00.",
+        "a": "Ruled out because 15 percent is the batching figure: \"takes a further 15 percent off by moving the share of work that can wait\".",
+        "b": "Ruled out because 30 percent is the share sent through the Batch API: \"30 percent of requests through the Batch API\".",
+        "d": "Ruled out because caching removes about half, \"because the long stable prefix is read at a tenth of the input price\" and the output and the first writes are still billed."
       }
     },
     {
@@ -64,10 +64,10 @@
       "scope": "page",
       "stem": "Scenario: Pylon Software's four teams each hold a separate key, and finance cannot say which team spent what. The platform team proposes an internal gateway. What will the gateway achieve by itself?",
       "options": {
-        "a": "A lower token bill for the teams, since requests now pass through a central point",
-        "b": "A single control point for credentials, routing, budgets and the record of spend",
-        "c": "Faster answers for the teams, since the gateway adds capacity to the shared model",
-        "d": "Better quality for the teams, because the gateway improves the prompts it forwards"
+        "a": "A lower token bill for the teams, since requests now pass through a central point, and less waste",
+        "b": "One shared point for credentials, routing, budgets and the record of spend",
+        "c": "Faster answers for the teams, since the gateway adds capacity to the shared model, and fewer errors",
+        "d": "Better quality for the teams, because the gateway improves the prompts it forwards, and fewer refusals"
       },
       "key": "b",
       "explanation": {

@@ -29,7 +29,7 @@
         "a": "The statement is correct, since every platform shares one retention arrangement with the model maker",
         "b": "The statement holds only once a second approval has been given by the cloud provider's own sales team",
         "c": "The arrangement belongs to the model maker, and on that platform the cloud provider does the processing",
-        "d": "The statement is correct, but it must be repeated for each separate model that the company uses"
+        "d": "The statement is correct, but it must be repeated for each separate model that the company uses in production"
       },
       "key": "c",
       "explanation": {
@@ -46,16 +46,16 @@
       "stem": "Scenario: Fennel Health's drafting assistant receives claim notes with patient names, contact details and policy numbers. Which design best keeps these away from the model provider?",
       "options": {
         "a": "A system prompt that instructs the model to ignore any personal details it comes across",
-        "b": "A layer that swaps identifiers for tokens before the call and restores them afterwards",
+        "b": "A review step that checks the model's reply for personal details after it has been returned",
         "c": "A larger model that is better at noticing which parts of a note are sensitive ones",
-        "d": "A review step that checks the model's reply for personal details after it has been returned"
+        "d": "A layer that swaps identifiers for placeholders before the call and restores them afterwards"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "A layer before the call means the provider sees tokens and never the values, and the layer can be tested.",
+        "d": "A layer before the call means the provider sees tokens and never the values, and the layer can be tested.",
         "a": "Ruled out because \"the data has already crossed the boundary\".",
         "c": "Ruled out because the model would still receive the data, and the point is to keep the identifier out of the request: \"It cannot leak what it never had\".",
-        "d": "Ruled out because a check on the reply, like an instruction, \"acts after the data has already crossed the boundary\"."
+        "b": "Ruled out because a check on the reply, like an instruction, \"acts after the data has already crossed the boundary\"."
       }
     },
     {
@@ -64,15 +64,15 @@
       "scope": "page",
       "stem": "Scenario: Rook Mutual's auditors ask for proof of each model call. The team proposes logging every full prompt and reply for ten years. What should the architect say?",
       "options": {
-        "a": "Accept the proposal, since a complete record is the strongest evidence that a regulator can ask to see",
-        "b": "Log request identifiers, sizes and outcomes, and keep content in the system of record",
+        "a": "Log request identifiers, sizes and outcomes, and keep content in the system of record",
+        "b": "Accept the proposal, since a complete record is the strongest evidence that a regulator can ask to see",
         "c": "Log full content, but encrypt the log, which removes the obligations that a data store has",
         "d": "Log nothing from the calls, since any stored record of a call becomes a risk in itself"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The log proves what happened without becoming a second copy of the data.",
-        "a": "Ruled out because \"the log becomes a second store of sensitive data with its own obligations\".",
+        "a": "The log proves what happened without becoming a second copy of the data.",
+        "b": "Ruled out because \"the log becomes a second store of sensitive data with its own obligations\".",
         "c": "Ruled out because encryption protects a store and does not remove it: the log would still be \"a store of health or personal data, with all the obligations of one\".",
         "d": "Ruled out because an audit log must record \"who, when, which request and what size\"."
       }
@@ -119,19 +119,19 @@
       "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#m3",
       "page": "02-the-identifier-boundary-the-audit-log-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario: Wren Logistics must keep audit entries for at least 90 days and at most 365. An entry is exactly 365 days old and is not under a legal hold. What does the purge rule do?",
+      "stem": "Scenario: Wren Logistics must keep audit entries for at least 90 days and at most 365. An entry is 400 days old, and counsel has placed it under a legal hold. What does the purge rule do?",
       "options": {
-        "a": "Retains it, since removal needs the age to exceed the limit",
-        "b": "Purges it, because an entry at the limit has used up its whole allowance",
-        "c": "Keeps it for a further 90 days, so that the floor and the ceiling are both respected",
-        "d": "Purges it only if no auditor has opened the entry within the last month"
+        "a": "Purges it, because the ceiling applies to every entry whatever its status may be",
+        "b": "Purges the entry but keeps a copy of it for a further ninety days afterwards",
+        "c": "Retains it, because that order outranks the time limits",
+        "d": "Retains it only until the next audit closes, and then purges it for good under the usual rules"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The rule purges an entry only when it is more than the ceiling old, and an entry at exactly the limit is kept.",
-        "b": "Ruled out because purging \"follows the same precision: an entry is removed only when it is **more than** the ceiling old\".",
-        "c": "Ruled out because \"data must not be kept longer than the purpose needs\", and nothing in the rule extends an entry past the ceiling.",
-        "d": "Ruled out because the only exception is a legal hold, and \"an entry under a **legal hold** is never removed\"."
+        "c": "A legal hold keeps an entry whatever its age.",
+        "a": "Ruled out because an entry under a hold \"is never removed, whatever its age\".",
+        "b": "Ruled out because the same rule forbids removal: \"is never removed, whatever its age\".",
+        "d": "Ruled out because the hold, not an audit date, decides: \"is never removed, whatever its age\"."
       }
     }
   ]
