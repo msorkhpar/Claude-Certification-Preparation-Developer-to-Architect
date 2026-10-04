@@ -2,7 +2,8 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the modules of Level 2 (Developer),
-modules 12 to 44, which is the whole of Level 2, and the first modules of Level 3 (Architect), modules 45 to 62:
+modules 12 to 44, which is the whole of Level 2, modules 45 to 74 of Level 3 (Architect), and modules 79 to 89 of Level 4 (Architect Professional); the
+remaining modules are being written:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -80,6 +81,12 @@ modules 12 to 44, which is the whole of Level 2, and the first modules of Level 
 | `72-scenario-multi-agent-research-system/` | Scenario: multi-agent research system | 2 |
 | `73-scenario-developer-productivity/` | Scenario: developer productivity | 2 |
 | `74-scenario-claude-code-in-ci/` | Scenario: Claude Code in CI | 2 |
+| `79-from-business-problem-to-solution/` | From business problem to solution | 2 |
+| `80-end-to-end-and-multi-agent-architecture/` | End-to-end and multi-agent architecture | 2 |
+| `81-reliability-of-multi-agent-systems/` | Reliability of multi-agent systems | 2 |
+| `82-models-prompts-and-context-as-design-choices/` | Models, prompts and context as design choices | 2 |
+| `83-deployment-architecture-and-data-handling/` | Deployment architecture and data handling | 2 |
+| `84-cost-and-capacity-engineering/` | Cost and capacity engineering | 2 |
 | `85-retrieval-pipelines-at-design-level/` | Retrieval pipelines at design level | 2 |
 | `86-integration-choices-access-and-capability-bloat/` | Integration choices, access and capability bloat | 2 |
 | `87-observability-at-scale/` | Observability at scale | 2 |
