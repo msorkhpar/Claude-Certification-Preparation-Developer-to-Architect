@@ -68,6 +68,13 @@ modules 12 to 44, which is the whole of Level 2, and the first modules of Level 
 | `60-claude-code-in-ci/` | Claude Code in CI | 2 |
 | `61-criteria-and-examples/` | Criteria and examples | 2 |
 | `62-structured-output-at-the-architect-level/` | Structured output at the architect level | 2 |
+| `63-batch-and-multi-pass-review/` | Batch processing and multi-pass review | 2 |
+| `64-keeping-what-matters-in-long-conversations/` | Keeping what matters in long conversations | 2 |
+| `65-escalation-and-ambiguity/` | Escalation and ambiguity | 2 |
+| `66-errors-across-agents/` | Errors across agents | 2 |
+| `67-exploring-a-large-codebase/` | Exploring a large codebase | 2 |
+| `68-human-review-and-calibrated-confidence/` | Human review and calibrated confidence | 2 |
+| `69-provenance-and-uncertainty/` | Provenance and uncertainty | 2 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names
