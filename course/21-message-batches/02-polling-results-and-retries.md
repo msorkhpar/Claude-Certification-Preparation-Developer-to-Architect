@@ -87,7 +87,7 @@ The example submits four requests, polls twice, and reads a result file in which
 on an invalid request and one expired. It matches every line to its request and sorts the failures into those to fix and those to send
 again.
 
-<!-- example: m21-batch-round-trip tabs: python,typescript -->
+<!-- example: m21-batch-round-trip tabs: python,typescript,java,kotlin -->
 ```python
 """A Message Batch from submission to results, against a scripted server.
 
@@ -262,6 +262,274 @@ result: t-4 errored invalid_request_error
 result: t-2 expired
 in request order: [["t-1","succeeded"],["t-2","expired"],["t-3","succeeded"],["t-4","errored"]]
 fix before resubmitting: ["t-4"] | resubmit unchanged: ["t-2"]
+```
+```java
+import static harness.Scripted.map;
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+import static harness.Show.py;
+
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.core.ObjectMappers;
+import com.anthropic.core.http.StreamResponse;
+import com.anthropic.models.messages.batches.BatchCreateParams;
+import com.anthropic.models.messages.batches.MessageBatch;
+import com.anthropic.models.messages.batches.MessageBatchIndividualResponse;
+import com.anthropic.models.messages.batches.MessageBatchResult;
+import com.fasterxml.jackson.databind.JsonNode;
+import harness.Reply;
+import harness.Scripted;
+import harness.ScriptedHttp;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * A Message Batch from submission to results, against a scripted server.
+ *
+ * <p>The replies are illustrative, hand-written bodies in the shapes of the batch processing page (claude-haiku-4-5), not
+ * captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in
+ * them. Waiting between polls is recorded, not slept. The Java SDK asks for `/results` directly, so the script has no
+ * batch look-up before the results (the Python SDK makes one).
+ */
+public final class BatchRoundTrip {
+    static final String MODEL = "claude-haiku-4-5-20251001";
+    static final Map<String, String> TICKETS = new LinkedHashMap<>();
+
+    static {
+        TICKETS.put("t-1", "My parcel never arrived.");
+        TICKETS.put("t-2", "How do I change my address?");
+        TICKETS.put("t-3", "Charge me twice? Refund please.");
+        TICKETS.put("t-4", "x".repeat(10));
+    }
+
+    static Map<String, Object> batch(String status, Map<String, Object> counts, String resultsUrl) {
+        return map("id", "msgbatch_illustrative", "type", "message_batch", "processing_status", status, "request_counts", counts,
+            "ended_at", status.equals("ended") ? "2026-10-02T10:40:00Z" : null, "created_at", "2026-10-02T10:00:00Z",
+            "expires_at", "2026-10-03T10:00:00Z", "cancel_initiated_at", null, "results_url", resultsUrl);
+    }
+
+    static Map<String, Object> counts(int processing, int succeeded, int errored, int canceled, int expired) {
+        return map("processing", processing, "succeeded", succeeded, "errored", errored, "canceled", canceled, "expired", expired);
+    }
+
+    static String resultLine(String customId, Map<String, Object> result) {
+        try {
+            return ObjectMappers.jsonMapper().writeValueAsString(map("custom_id", customId, "result", result));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    static Map<String, Object> succeeded(String label) {
+        return map("type", "succeeded", "message", message(List.of(text(label)), "end_turn", MODEL, map("input_tokens", 30, "output_tokens", 3), null));
+    }
+
+    static final String RESULTS = String.join("\n",
+        resultLine("t-3", succeeded("billing")),
+        resultLine("t-1", succeeded("shipping")),
+        resultLine("t-4", map("type", "errored", "error", map("type", "error", "error", map("type", "invalid_request_error", "message", "messages: at least one message is required")))),
+        resultLine("t-2", map("type", "expired"))) + "\n";
+
+    static final String RESULTS_URL = "https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results";
+
+    static List<Object> script() {
+        return List.of(
+            Reply.json(200, batch("in_progress", counts(4, 0, 0, 0, 0), null)),
+            Reply.json(200, batch("in_progress", counts(2, 2, 0, 0, 0), null)),
+            Reply.json(200, batch("ended", counts(0, 2, 1, 0, 1), RESULTS_URL)),
+            Reply.text(200, "application/x-jsonl", RESULTS));
+    }
+
+    static BatchCreateParams requests() {
+        BatchCreateParams.Builder builder = BatchCreateParams.builder();
+        TICKETS.forEach((cid, body) -> builder.addRequest(BatchCreateParams.Request.builder().customId(cid)
+            .params(BatchCreateParams.Request.Params.builder().model(MODEL).maxTokens(50).addUserMessage("Label this ticket: " + body).build()).build()));
+        return builder.build();
+    }
+
+    /** What came back for one request: its kind (succeeded, errored, expired, canceled) and a detail. */
+    record Outcome(String kind, String detail) {}
+
+    static Outcome outcomeOf(MessageBatchResult result) {
+        if (result.succeeded().isPresent()) return new Outcome("succeeded", result.succeeded().get().message().content().get(0).asText().text());
+        if (result.errored().isPresent()) {
+            JsonNode error = ObjectMappers.jsonMapper().valueToTree(result.errored().get().error());
+            return new Outcome("errored", error.at("/error/type").asText());
+        }
+        return new Outcome(result.canceled().isPresent() ? "canceled" : "expired", "");
+    }
+
+    /** The results in the order they arrived. */
+    static Map<String, Outcome> results(AnthropicClient client, String batchId) {
+        Map<String, Outcome> outcomes = new LinkedHashMap<>();
+        try (StreamResponse<MessageBatchIndividualResponse> stream = client.messages().batches().resultsStreaming(batchId)) {
+            stream.stream().forEach(item -> outcomes.put(item.customId(), outcomeOf(item.result())));
+        }
+        return outcomes;
+    }
+
+    private static String counts(MessageBatch status) {
+        var c = status.requestCounts();
+        return "{'canceled': " + c.canceled() + ", 'errored': " + c.errored() + ", 'expired': " + c.expired() + ", 'processing': " + c.processing() + ", 'succeeded': " + c.succeeded() + "}";
+    }
+
+    public static void main(String[] args) {
+        ScriptedHttp transport = Scripted.http(script().toArray());
+        AnthropicClient client = Scripted.clientOn(transport, 0);
+        MessageBatch created = client.messages().batches().create(requests());
+        List<String> sentIds = new ArrayList<>();
+        transport.requests.get(0).get("requests").forEach(r -> sentIds.add(r.get("custom_id").asText()));
+        System.out.println("created: " + created.id() + " " + created.processingStatus().asString() + " | request ids sent: " + py(sentIds));
+        List<Integer> waits = new ArrayList<>();
+        MessageBatch status = created;
+        while (!status.processingStatus().asString().equals("ended")) {
+            status = client.messages().batches().retrieve(created.id());
+            waits.add(60);
+            System.out.println("poll: " + status.processingStatus().asString() + " " + counts(status));
+        }
+        System.out.println("waited between polls (recorded, not slept): " + waits + " seconds");
+        Map<String, Outcome> outcomes = results(client, created.id());
+        outcomes.forEach((cid, o) -> System.out.println("result: " + cid + " " + o.kind() + " " + o.detail()));
+        System.out.println("in request order: [" + TICKETS.keySet().stream().map(cid -> "('" + cid + "', '" + outcomes.get(cid).kind() + "')").collect(Collectors.joining(", ")) + "]");
+        List<String> fix = outcomes.entrySet().stream().filter(e -> e.getValue().kind().equals("errored") && e.getValue().detail().equals("invalid_request_error")).map(Map.Entry::getKey).toList();
+        List<String> retry = outcomes.entrySet().stream().filter(e -> List.of("expired", "canceled").contains(e.getValue().kind())
+            || (e.getValue().kind().equals("errored") && !fix.contains(e.getKey()))).map(Map.Entry::getKey).toList();
+        System.out.println("fix before resubmitting: " + py(fix) + " | resubmit unchanged: " + py(retry));
+    }
+}
+```
+```text
+created: msgbatch_illustrative in_progress | request ids sent: ['t-1', 't-2', 't-3', 't-4']
+poll: in_progress {'canceled': 0, 'errored': 0, 'expired': 0, 'processing': 2, 'succeeded': 2}
+poll: ended {'canceled': 0, 'errored': 1, 'expired': 1, 'processing': 0, 'succeeded': 2}
+waited between polls (recorded, not slept): [60, 60] seconds
+result: t-3 succeeded billing
+result: t-1 succeeded shipping
+result: t-4 errored invalid_request_error
+result: t-2 expired 
+in request order: [('t-1', 'succeeded'), ('t-2', 'expired'), ('t-3', 'succeeded'), ('t-4', 'errored')]
+fix before resubmitting: ['t-4'] | resubmit unchanged: ['t-2']
+```
+```kotlin
+import com.anthropic.client.AnthropicClient
+import com.anthropic.core.jsonMapper
+import com.anthropic.models.messages.batches.BatchCreateParams
+import com.anthropic.models.messages.batches.MessageBatch
+import com.anthropic.models.messages.batches.MessageBatchResult
+import harness.Reply
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+import harness.Show.py
+
+/**
+ * A Message Batch from submission to results, against a scripted server.
+ *
+ * The replies are illustrative, hand-written bodies in the shapes of the batch processing page (claude-haiku-4-5), not
+ * captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in
+ * them. Waiting between polls is recorded, not slept. The Java SDK (used from Kotlin) asks for `/results` directly, so the
+ * script has no batch look-up before the results (the Python SDK makes one).
+ */
+const val MODEL = "claude-haiku-4-5-20251001"
+val TICKETS = linkedMapOf("t-1" to "My parcel never arrived.", "t-2" to "How do I change my address?", "t-3" to "Charge me twice? Refund please.", "t-4" to "x".repeat(10))
+
+fun batch(status: String, counts: Map<String, Any>, resultsUrl: String? = null) = map(
+    "id", "msgbatch_illustrative", "type", "message_batch", "processing_status", status, "request_counts", counts,
+    "ended_at", if (status == "ended") "2026-10-02T10:40:00Z" else null, "created_at", "2026-10-02T10:00:00Z",
+    "expires_at", "2026-10-03T10:00:00Z", "cancel_initiated_at", null, "results_url", resultsUrl,
+)
+
+fun counts(processing: Int = 0, succeeded: Int = 0, errored: Int = 0, canceled: Int = 0, expired: Int = 0) =
+    map("processing", processing, "succeeded", succeeded, "errored", errored, "canceled", canceled, "expired", expired)
+
+fun resultLine(customId: String, result: Map<String, Any?>): String = jsonMapper().writeValueAsString(map("custom_id", customId, "result", result))
+
+fun succeeded(label: String) = map("type", "succeeded", "message", message(listOf(text(label)), "end_turn", MODEL, map("input_tokens", 30, "output_tokens", 3), null))
+
+val RESULTS = listOf(
+    resultLine("t-3", succeeded("billing")),
+    resultLine("t-1", succeeded("shipping")),
+    resultLine("t-4", map("type", "errored", "error", map("type", "error", "error", map("type", "invalid_request_error", "message", "messages: at least one message is required")))),
+    resultLine("t-2", map("type", "expired")),
+).joinToString("\n") + "\n"
+
+const val RESULTS_URL = "https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results"
+
+fun script(): List<Any> = listOf(
+    Reply.json(200, batch("in_progress", counts(processing = 4))),
+    Reply.json(200, batch("in_progress", counts(processing = 2, succeeded = 2))),
+    Reply.json(200, batch("ended", counts(succeeded = 2, errored = 1, expired = 1), RESULTS_URL)),
+    Reply.text(200, "application/x-jsonl", RESULTS),
+)
+
+fun requests(): BatchCreateParams {
+    val builder = BatchCreateParams.builder()
+    TICKETS.forEach { (cid, body) ->
+        builder.addRequest(
+            BatchCreateParams.Request.builder().customId(cid)
+                .params(BatchCreateParams.Request.Params.builder().model(MODEL).maxTokens(50).addUserMessage("Label this ticket: $body").build()).build(),
+        )
+    }
+    return builder.build()
+}
+
+/** What came back for one request: its kind (succeeded, errored, expired, canceled) and a detail. */
+data class Outcome(val kind: String, val detail: String)
+
+fun outcomeOf(result: MessageBatchResult): Outcome = when {
+    result.succeeded().isPresent -> Outcome("succeeded", result.succeeded().get().message().content()[0].asText().text())
+    result.errored().isPresent -> Outcome("errored", jsonMapper().valueToTree<com.fasterxml.jackson.databind.JsonNode>(result.errored().get().error()).at("/error/type").asText())
+    result.canceled().isPresent -> Outcome("canceled", "")
+    else -> Outcome("expired", "")
+}
+
+/** The results in the order they arrived. */
+fun results(client: AnthropicClient, batchId: String): Map<String, Outcome> {
+    val outcomes = linkedMapOf<String, Outcome>()
+    client.messages().batches().resultsStreaming(batchId).use { stream -> stream.stream().forEach { outcomes[it.customId()] = outcomeOf(it.result()) } }
+    return outcomes
+}
+
+private fun counts(status: MessageBatch): String = status.requestCounts().let {
+    "{'canceled': ${it.canceled()}, 'errored': ${it.errored()}, 'expired': ${it.expired()}, 'processing': ${it.processing()}, 'succeeded': ${it.succeeded()}}"
+}
+
+fun main() {
+    val transport = Scripted.http(*script().toTypedArray())
+    val client = Scripted.clientOn(transport, 0)
+    val created = client.messages().batches().create(requests())
+    println("created: ${created.id()} ${created.processingStatus().asString()} | request ids sent: ${py(transport.requests[0]["requests"].map { it["custom_id"].asText() })}")
+    val waits = mutableListOf<Int>()
+    var status = created
+    while (status.processingStatus().asString() != "ended") {
+        status = client.messages().batches().retrieve(created.id())
+        waits += 60
+        println("poll: ${status.processingStatus().asString()} ${counts(status)}")
+    }
+    println("waited between polls (recorded, not slept): $waits seconds")
+    val outcomes = results(client, created.id())
+    for ((cid, o) in outcomes) println("result: $cid ${o.kind} ${o.detail}")
+    println("in request order: ${TICKETS.keys.joinToString(", ", "[", "]") { "('$it', '${outcomes.getValue(it).kind}')" }}")
+    val fix = outcomes.filter { it.value.kind == "errored" && it.value.detail == "invalid_request_error" }.keys.toList()
+    val retry = outcomes.filter { it.value.kind in listOf("expired", "canceled") || (it.value.kind == "errored" && it.key !in fix) }.keys.toList()
+    println("fix before resubmitting: ${py(fix)} | resubmit unchanged: ${py(retry)}")
+}
+```
+```text
+created: msgbatch_illustrative in_progress | request ids sent: ['t-1', 't-2', 't-3', 't-4']
+poll: in_progress {'canceled': 0, 'errored': 0, 'expired': 0, 'processing': 2, 'succeeded': 2}
+poll: ended {'canceled': 0, 'errored': 1, 'expired': 1, 'processing': 0, 'succeeded': 2}
+waited between polls (recorded, not slept): [60, 60] seconds
+result: t-3 succeeded billing
+result: t-1 succeeded shipping
+result: t-4 errored invalid_request_error
+result: t-2 expired 
+in request order: [('t-1', 'succeeded'), ('t-2', 'expired'), ('t-3', 'succeeded'), ('t-4', 'errored')]
+fix before resubmitting: ['t-4'] | resubmit unchanged: ['t-2']
 ```
 <!-- /example -->
 
