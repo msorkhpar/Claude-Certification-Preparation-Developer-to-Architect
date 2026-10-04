@@ -88,10 +88,10 @@ fun mergeChunks(records: List<Map<String, Any?>>): Map<String, Any?>? {
                 provenance[field] = (record["provenance"] as Map<String, Any?>)[field]
                 if (field == "currency") merged["currency_detail"] = record["currency_detail"]
             } else if (current != value && field !in conflicts) {
-                conflicts += field
+                conflicts.add(field)
             }
         }
-        (record["line_items"] as List<Any?>?)?.let { lineItems += it }
+        (record["line_items"] as List<Any?>?)?.let { lineItems.addAll(it) }
         if (record["conflict_detected"] == true) merged["conflict_detected"] = true
     }
     merged["calculated_total"] = round2(lineItems.sumOf { (it as Number).toDouble() })
