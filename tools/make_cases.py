@@ -169,7 +169,7 @@ PRACTICES[f"{X}/32-mcp-fundamentals/unit-01/practice-1"] = {
 
 # ===== Level 2: modules 38 to 41 =====
 PRACTICES[f"{X}/38-claude-code-for-developers/unit-01/practice-1"] = {
-    "name": "project_setup", "suite": "", "langs": ["python", "typescript"],
+    "name": "project_setup", "suite": "ProjectSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the memory file is short concrete and pulls in the architecture notes"),
         ("e1", "edge", "the permission rules allow the daily commands ask before commits and deny secrets and pushes"),
@@ -196,7 +196,7 @@ PRACTICES[f"{X}/38-claude-code-for-developers/unit-01/practice-1"] = {
 }
 
 PRACTICES[f"{X}/39-extending-claude-code/unit-01/practice-1"] = {
-    "name": "plugin_setup", "suite": "", "langs": ["python", "typescript"],
+    "name": "plugin_setup", "suite": "PluginSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the hook script blocks pushes deletes and piped downloads in any spelling"),
         ("e1", "edge", "edits to protected paths stop with exit two and a reason"),
@@ -226,7 +226,7 @@ PRACTICES[f"{X}/39-extending-claude-code/unit-01/practice-1"] = {
 }
 
 PRACTICES[f"{X}/40-claude-in-the-software-life-cycle/unit-01/practice-1"] = {
-    "name": "pipeline_setup", "suite": "", "langs": ["python", "typescript"],
+    "name": "pipeline_setup", "suite": "PipelineSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the mention workflow answers only claude comments and holds no key"),
         ("e1", "edge", "the review workflow reads the code and posts the review"),
@@ -563,7 +563,7 @@ PRACTICES[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
 }
 
 PRACTICES[f"{X}/55-mcp-in-claude-code/unit-01/practice-1"] = {
-    "name": "mcp_setup", "suite": "McpSetupTest", "langs": ["python", "typescript"],
+    "name": "mcp_setup", "suite": "McpSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the shared file declares the four team servers with the right shape"),
         ("e1", "edge", "credentials are read from the environment and never written in the file"),
@@ -600,7 +600,7 @@ PRACTICES[f"{X}/55-mcp-in-claude-code/unit-01/practice-1"] = {
 }
 
 PRACTICES[f"{X}/56-the-built-in-tools/unit-01/practice-1"] = {
-    "name": "explorer_setup", "suite": "ExplorerSetupTest", "langs": ["python", "typescript"],
+    "name": "explorer_setup", "suite": "ExplorerSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the permission rules let an explorer read search and take notes but not change the source"),
         ("e1", "edge", "a read rule protects secrets from reading searching and writing"),
@@ -707,7 +707,7 @@ PRACTICES[f"{X}/52-designing-tool-interfaces/unit-01/practice-1"] = {
 
 # ===== Level 3: modules 57 to 62 =====
 PRACTICES[f"{X}/57-memory-files-and-rules/unit-01/practice-1"] = {
-    "name": "memory_setup", "suite": "", "langs": ["python", "typescript"],
+    "name": "memory_setup", "suite": "MemorySetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the conventions of each area load for exactly the files that area governs"),
         ("e1", "edge", "the root file is short and holds only what every task needs"),
@@ -737,7 +737,7 @@ PRACTICES[f"{X}/57-memory-files-and-rules/unit-01/practice-1"] = {
 }
 
 PRACTICES[f"{X}/58-commands-and-skills/unit-01/practice-1"] = {
-    "name": "skill_setup", "suite": "", "langs": ["python", "typescript"],
+    "name": "skill_setup", "suite": "SkillSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "the review skill is a forked skill with an explicit task and an argument"),
         ("e1", "edge", "the release skill is started only by a person and pre approves patterns"),
@@ -846,7 +846,7 @@ PRACTICES[f"{X}/62-structured-output-at-the-architect-level/unit-01/practice-1"]
 }
 
 PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
-    "name": "ci_review", "suite": "", "langs": ["python", "typescript"],
+    "name": "ci_review", "suite": "CiReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "a valid run posts the findings above the floor and outside the disabled categories"),
         ("e1", "edge", "a failed run fails the job instead of passing it silently"),

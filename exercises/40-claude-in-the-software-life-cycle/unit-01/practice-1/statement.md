@@ -5,9 +5,9 @@ every pull request, its prompts are versioned like code, and every run is bounde
 this practice you write them for a small service, the invoice API, and tests read the project, using the course's own model of the
 documented rules (`examples/40-workflow-lint`).
 
-Pick your language folder (`python` or `typescript`), open `starter/` and edit the files there. The tests are the same in both languages.
-The files are YAML and Markdown, so there is no Java or Kotlin edition: no YAML library is available offline for those two here, and
-a second edition would test the same files. Nothing here calls GitHub or the network.
+Pick your language folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the files there. The tests are the same in all four
+languages. The files are YAML and Markdown, and the Java and Kotlin tests read the YAML with Jackson's YAML module and apply the same linter
+(`examples/40-workflow-lint`, in your language). Nothing here calls GitHub or the network.
 
 ## The project
 

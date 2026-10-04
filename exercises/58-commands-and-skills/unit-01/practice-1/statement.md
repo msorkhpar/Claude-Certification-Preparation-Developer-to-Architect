@@ -3,10 +3,10 @@
 A team wants three reusable procedures for Claude Code and keeps getting them wrong. A pull request review should run in isolation and report
 findings. A release tag should only ever be started by a person and may run only two kinds of shell command without asking. A standup summary is an old
 command file that takes an argument. A developer also wants a personal variant of the review that must not hide the team's version. In this practice you
-write those files and say where five other pieces of guidance belong. Pick your language folder (`python` or `typescript`), open `starter/` and edit the
-files there. The tests are the same in both languages and read only the files: they are configuration and notes, not code in a language, so there is no
-Java or Kotlin edition (a second edition would test the same files, and no YAML reader is available offline for those two here). The checks run on the
-course's own model of the documented rules (`examples/58-skill-model`). Nothing here starts Claude Code or touches the network.
+write those files and say where five other pieces of guidance belong. Pick your language folder (`python`, `typescript`, `java` or `kotlin`), open `starter/`
+and edit the files there. The tests are the same in all four languages and read only the files: they are configuration and notes, not code in a language,
+and the Java and Kotlin tests read the YAML front matter with Jackson's YAML module. The checks run on the course's own model of the documented rules
+(`examples/58-skill-model`, in your language). Nothing here starts Claude Code or touches the network.
 
 ## What to write
 

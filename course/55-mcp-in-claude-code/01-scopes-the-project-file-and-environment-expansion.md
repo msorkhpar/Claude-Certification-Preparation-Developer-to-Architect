@@ -64,7 +64,7 @@ A server that came with a repository is code from somebody else. "Claude Code pr
 
 ### The example
 
-The example is a model of these rules in Python and TypeScript: `expand` for `${VAR}`, `${VAR:-default}` and the covered credential names, `expand_server` for the five fields, `resolve_servers` for the order of scopes, `lint` for the shape of a shared file and for a literal secret, and `mcp_decision` for the permission rules of page 2. It prints the expanded entries of a shared file, a conflict between scopes, and the lint findings of a file that holds a literal key.
+The example is a model of these rules in Python, TypeScript, Java and Kotlin: `expand` for `${VAR}`, `${VAR:-default}` and the covered credential names, `expand_server` for the five fields, `resolve_servers` for the order of scopes, `lint` for the shape of a shared file and for a literal secret, and `mcp_decision` for the permission rules of page 2. It prints the expanded entries of a shared file, a conflict between scopes, and the lint findings of a file that holds a literal key.
 
 <!-- example: m55-mcp-config tabs: python,typescript -->
 ```python

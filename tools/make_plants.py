@@ -27,8 +27,8 @@ PLANTS = {}
 
 
 def both(file, plants):
-    """The same edits for the Python and the TypeScript folder: a project set-up is the same files in both."""
-    return {"python": (file, plants), "typescript": (file, plants)}
+    """The same edits for the Python, TypeScript, Java and Kotlin folders: a project set-up is the same files in all four."""
+    return {lang: (file, plants) for lang in ("python", "typescript", "java", "kotlin")}
 
 
 # ===== Level 1: module 6 =====
@@ -1416,7 +1416,7 @@ _P55 = {
     "wrong-scope-user": {"docs/mcp-servers.md": [("| `github` | project |", "| `github` | user |")]},
     "wrong-home-path": {"docs/mcp-servers.md": [("and `DOCS_API_KEY`). A personal", "and `DOCS_API_KEY`, kept in /home/dev/.profile). A personal")]},
 }
-PLANTS[f"{X}/55-mcp-in-claude-code/unit-01/practice-1"] = {"python": (".mcp.json", _P55), "typescript": (".mcp.json", _P55)}
+PLANTS[f"{X}/55-mcp-in-claude-code/unit-01/practice-1"] = both(".mcp.json", _P55)
 
 _P56 = {
     "wrong-no-src-deny": {".claude/settings.json": [('"deny": ["Read(./.env)", "Read(secrets/**)", "Edit(src/**)"]', '"deny": ["Read(./.env)", "Read(secrets/**)"]')]},
@@ -1439,7 +1439,7 @@ _P56 = {
     "wrong-fallback-no-replace-all": {"docs/exploration-plan.md": [("2. If every occurrence should change, use replace_all.", "2. If every occurrence should change, run the edit once for each of them.")]},
     "wrong-home-path": {"docs/exploration-plan.md": [("Do not read every file first.", "Do not read every file first (the clone is in /home/dev/inventory).")]},
 }
-PLANTS[f"{X}/56-the-built-in-tools/unit-01/practice-1"] = {"python": (".claude/settings.json", _P56), "typescript": (".claude/settings.json", _P56)}
+PLANTS[f"{X}/56-the-built-in-tools/unit-01/practice-1"] = both(".claude/settings.json", _P56)
 
 PLANTS[f"{X}/54-distributing-tools-across-agents/unit-01/practice-1"] = {
     "python": ("distribute.py", {
@@ -1636,7 +1636,7 @@ _P57 = {
     "wrong-write-rule": {".claude/settings.json": [("Edit(db/migrations/**)", "Write(db/migrations/**)")]},
     "wrong-home-path": {"CLAUDE.md": [("## Where things are\n", "## Where things are\n- My notes are in /home/dev/notes.\n")]},
 }
-PLANTS[f"{X}/57-memory-files-and-rules/unit-01/practice-1"] = {"python": ("CLAUDE.md", _P57), "typescript": ("CLAUDE.md", _P57)}
+PLANTS[f"{X}/57-memory-files-and-rules/unit-01/practice-1"] = both("CLAUDE.md", _P57)
 
 
 _RV, _TG, _SU, _MI, _PL = ".claude/skills/review-pr/SKILL.md", ".claude/skills/release-tag/SKILL.md", ".claude/commands/standup.md", "personal/review-pr-mine/SKILL.md", "docs/placement.md"
@@ -1661,7 +1661,7 @@ _P58 = {
     "wrong-long-description": {_TG: [("cut a release of a given version.", "cut a release of a given version." + " Extra text." * 150)]},
     "wrong-home-path": {_PL: [("# Where each piece of guidance lives\n", "# Where each piece of guidance lives\n\nNotes kept in /home/dev/notes.\n")]},
 }
-PLANTS[f"{X}/58-commands-and-skills/unit-01/practice-1"] = {"python": (_RV, _P58), "typescript": (_RV, _P58)}
+PLANTS[f"{X}/58-commands-and-skills/unit-01/practice-1"] = both(_RV, _P58)
 
 
 PLANTS[f"{X}/61-criteria-and-examples/unit-01/practice-1"] = {
@@ -1900,7 +1900,36 @@ _TS60 = {
     "wrong-prompt-no-tests": {"reviewGate.ts": [('if (existingTests.length > 0) lines.push("<existing_tests>", ', 'if (false) lines.push("<existing_tests>", ')]},
     "wrong-prompt-diff-first": {"reviewGate.ts": [('lines.push("<diff>", diff, "</diff>");', 'lines.unshift("<diff>", diff, "</diff>");')]},
 }
-PLANTS[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {"python": ("review_gate.py", {**_CFG60, **_PY60}), "typescript": ("reviewGate.ts", {**_CFG60, **_TS60})}
+_JAVA60 = {
+    "wrong-gate-nonzero-ignored": {"ReviewGate.java": [("if (exitCode != 0) problems.add(", "if (false) problems.add(")]},
+    "wrong-gate-error-ignored": {"ReviewGate.java": [('if (envelope.path("is_error").asBoolean(false) || subtype == null || !subtype.isTextual() || !subtype.asText().equals("success")) {', "if (false) {")]},
+    "wrong-gate-no-output-ok": {"ReviewGate.java": [('JsonNode output = envelope.get("structured_output");\n', 'JsonNode output = envelope.get("structured_output");\n        if (output == null || output.isNull()) output = JSON.createObjectNode().set("findings", JSON.createArrayNode());\n')]},
+    "wrong-gate-no-schema": {"ReviewGate.java": [('else for (String e : SchemaCheck.schemaCheck(output, schema)) problems.add("schema " + e);', "else { }")]},
+    "wrong-gate-floor-ignored": {"ReviewGate.java": [('if (disabled.contains(f.get("category").asText()) || SEVERITIES.indexOf(f.get("severity").asText()) < floor) continue;', 'if (disabled.contains(f.get("category").asText())) continue;')]},
+    "wrong-gate-disabled-ignored": {"ReviewGate.java": [('if (disabled.contains(f.get("category").asText()) || SEVERITIES.indexOf(f.get("severity").asText()) < floor) continue;', 'if (SEVERITIES.indexOf(f.get("severity").asText()) < floor) continue;')]},
+    "wrong-gate-never-blocks": {"ReviewGate.java": [('boolean blocked = comments.stream().anyMatch(c -> failOn.contains((String) c.get("severity")));', "boolean blocked = false;")]},
+    "wrong-gate-blocks-on-any": {"ReviewGate.java": [('boolean blocked = comments.stream().anyMatch(c -> failOn.contains((String) c.get("severity")));', "boolean blocked = !comments.isEmpty();")]},
+    "wrong-prompt-no-new-only": {"ReviewGate.java": [(', "Report only findings that are new or still unaddressed."));', "));")]},
+    "wrong-prompt-no-prior": {"ReviewGate.java": [('        if (!prior.isEmpty()) {\n            lines.add("<already_reported>");', '        if (false) {\n            lines.add("<already_reported>");')]},
+    "wrong-prompt-no-tests": {"ReviewGate.java": [('        if (!existingTests.isEmpty()) {\n            lines.add("<existing_tests>");', '        if (false) {\n            lines.add("<existing_tests>");')]},
+    "wrong-prompt-diff-first": {"ReviewGate.java": [('lines.addAll(List.of("<diff>", diff, "</diff>"));', 'lines.addAll(0, List.of("<diff>", diff, "</diff>"));')]},
+}
+_KT60 = {
+    "wrong-gate-nonzero-ignored": {"ReviewGate.kt": [("if (exitCode != 0) problems += ", "if (false) problems += ")]},
+    "wrong-gate-error-ignored": {"ReviewGate.kt": [('if (envelope.path("is_error").asBoolean(false) || subtype == null || !subtype.isTextual || subtype.asText() != "success") {', "if (false) {")]},
+    "wrong-gate-no-output-ok": {"ReviewGate.kt": [('val output = envelope.get("structured_output")\n', 'val output = envelope.get("structured_output")?.takeUnless { it.isNull } ?: json.readTree("{\\"findings\\": []}")\n')]},
+    "wrong-gate-no-schema": {"ReviewGate.kt": [('else problems += SchemaCheck.schemaCheck(output, schema).map { "schema $it" }', "else Unit")]},
+    "wrong-gate-floor-ignored": {"ReviewGate.kt": [(' && SEVERITIES.indexOf(it.get("severity").asText()) >= floor }', " }")]},
+    "wrong-gate-disabled-ignored": {"ReviewGate.kt": [('.filter { it.get("category").asText() !in disabled && SEVERITIES', ".filter { SEVERITIES")]},
+    "wrong-gate-never-blocks": {"ReviewGate.kt": [('return decision(if (comments.any { it["severity"] in failOn }) 1 else 0, comments, emptyList())', "return decision(0, comments, emptyList())")]},
+    "wrong-gate-blocks-on-any": {"ReviewGate.kt": [('return decision(if (comments.any { it["severity"] in failOn }) 1 else 0, comments, emptyList())', "return decision(if (comments.isNotEmpty()) 1 else 0, comments, emptyList())")]},
+    "wrong-prompt-no-new-only": {"ReviewGate.kt": [(', "Report only findings that are new or still unaddressed.")', ")")]},
+    "wrong-prompt-no-prior": {"ReviewGate.kt": [('if (prior.isNotEmpty()) lines += listOf("<already_reported>")', 'if (false) lines += listOf("<already_reported>")')]},
+    "wrong-prompt-no-tests": {"ReviewGate.kt": [('if (existingTests.isNotEmpty()) lines += listOf("<existing_tests>")', 'if (false) lines += listOf("<existing_tests>")')]},
+    "wrong-prompt-diff-first": {"ReviewGate.kt": [('lines += listOf("<diff>", diff, "</diff>")', 'lines.addAll(0, listOf("<diff>", diff, "</diff>"))')]},
+}
+PLANTS[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {"python": ("review_gate.py", {**_CFG60, **_PY60}), "typescript": ("reviewGate.ts", {**_CFG60, **_TS60}),
+                                                          "java": ("ReviewGate.java", {**_CFG60, **_JAVA60}), "kotlin": ("ReviewGate.kt", {**_CFG60, **_KT60})}
 
 
 # ===== Survey practice: the tiny agent loop (no module; not part of any batch gate) =====

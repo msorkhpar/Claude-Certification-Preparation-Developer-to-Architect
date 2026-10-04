@@ -5,7 +5,7 @@
 
 **After this page you can** write a project memory file that Claude follows, say in which order memory files and settings files apply, decide which layer a setting belongs in, write permission rules that do what you mean, and predict the outcome of a call against merged rules.
 
-Checked on 2026-10-03 against the Claude Code documentation (memory, settings and precedence, permissions and permission modes), which mention behaviour up to Claude Code v2.1.286. The example is the course's own model of the documented rules, written to be tested offline in Python and TypeScript. It is not Claude Code's code, and it covers the rules this page states and no others.
+Checked on 2026-10-03 against the Claude Code documentation (memory, settings and precedence, permissions and permission modes), which mention behaviour up to Claude Code v2.1.286. The example is the course's own model of the documented rules, written to be tested offline in Python, TypeScript, Java and Kotlin. It is not Claude Code's code, and it covers the rules this page states and no others.
 
 ## Why it matters
 
@@ -841,7 +841,7 @@ memory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CL
 ```
 <!-- /example -->
 
-The example merges layers and decides calls. It starts with a user file that allows `Bash(npm run *)` and a project file that adds `git push` and `curl` rules, and the first line shows the winning `model`. A call to `npm run build` is allowed. The compound command with `git push` asks, and `curl` is denied. A read of `.env` is denied, and so is an edit of it, because the read deny covers both. When the project is not yet trusted, even `npm run build` falls back to asking. The last line prints the memory order for a service folder: the managed file, the user file, the repository `CLAUDE.md`, an imported note, the service's own `CLAUDE.md` and last its `CLAUDE.local.md`. Python and TypeScript print the same text.
+The example merges layers and decides calls. It starts with a user file that allows `Bash(npm run *)` and a project file that adds `git push` and `curl` rules, and the first line shows the winning `model`. A call to `npm run build` is allowed. The compound command with `git push` asks, and `curl` is denied. A read of `.env` is denied, and so is an edit of it, because the read deny covers both. When the project is not yet trusted, even `npm run build` falls back to asking. The last line prints the memory order for a service folder: the managed file, the user file, the repository `CLAUDE.md`, an imported note, the service's own `CLAUDE.md` and last its `CLAUDE.local.md`. All four languages print the same text.
 
 ## Traps
 

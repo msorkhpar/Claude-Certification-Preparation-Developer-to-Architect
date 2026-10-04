@@ -3,9 +3,10 @@
 A repository is ready for Claude Code when the right instructions load every session, the permission rules say what runs freely,
 what asks and what never runs, the personal settings stay on one machine, and the unattended runs are bounded. All of that is plain
 files. In this practice you write them for a small service, the invoice API, and tests read the project the way Claude Code would.
-Pick your language folder (`python` or `typescript`), open `starter/` and edit the files there. The tests are the same in both
-languages and read only the project: the files are not code, so there is no Java or Kotlin edition, and the checks run on the
-course's own models of the documented rules (`examples/38-settings-layers`). Nothing here starts Claude Code or touches the network.
+Pick your language folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the files there. The tests are the same in all four
+languages and read only the project: the files are not code, and the checks run on the course's own models of the documented rules (`examples/38-settings-layers`
+and `examples/39-hook-gate`, in your language). The Java and Kotlin tests read JSON with Jackson and YAML front matter with its YAML module. Nothing here starts
+Claude Code or touches the network.
 
 ## The project
 

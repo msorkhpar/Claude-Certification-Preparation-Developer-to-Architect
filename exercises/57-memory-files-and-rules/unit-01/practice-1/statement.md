@@ -3,10 +3,10 @@
 A team keeps all of its instructions for Claude Code in one long `CLAUDE.md`: universal rules, testing, API and Terraform conventions, a rule that must never
 be broken, and some lines that are only one engineer's preferences. Claude reads that file in every session, so the conventions for Terraform sit in
 the context while someone fixes a button, and the rule that matters most is one line among sixty. In this practice you split it. Pick your language
-folder (`python` or `typescript`), open `starter/` and edit the files there. The tests are the same in both languages and read only the files: they are
-configuration and notes, not code in a language, so there is no Java or Kotlin edition (no YAML or JSON reader is available offline for those two here,
-and a second edition would test the same files). The checks run on the course's own model of the documented loading rules (`examples/57-memory-loading`,
-with `examples/38-settings-layers` for permission rules). Nothing here starts Claude Code or touches the network.
+folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the files there. The tests are the same in all four languages and read only
+the files: they are configuration and notes, not code in a language, and the Java and Kotlin tests read the JSON with Jackson and the rules' YAML front
+matter with its YAML module. The checks run on the course's own model of the documented loading rules (`examples/57-memory-loading`, with
+`examples/38-settings-layers` for permission rules, in your language). Nothing here starts Claude Code or touches the network.
 
 ## What to write
 

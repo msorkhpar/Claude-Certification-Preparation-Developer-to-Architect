@@ -14,12 +14,12 @@ case "$LANGX" in
   java)
     mkdir -p "$W/$PD/.build-java"
     docker --context desktop-linux run --rm $NET --user 1000:1000 -e HOME=/work/home -e GRADLE_USER_HOME=/g/home \
-      -v "$W/.survey-out/gradle:/g" -v "$W/$PD/java:/work" -v "$W/$PD/.build-java:/work/../.build-java" -w /work --entrypoint sh "$IMG" \
+      -v "$W:/w:ro" -v "$W/.survey-out/gradle:/g" -v "$W/$PD/java:/work" -v "$W/$PD/.build-java:/work/../.build-java" -w /work --entrypoint sh "$IMG" \
       -c "mkdir -p /work/home; /g/gradle-9.8.0/bin/gradle $GFLAG --no-daemon --console=plain -Psolution=$V cleanTest test" > "$OUT" 2>&1 ;;
   kotlin)
     mkdir -p "$W/$PD/.build-kotlin"
     docker --context desktop-linux run --rm $NET --user 1000:1000 -e HOME=/work/home -e GRADLE_USER_HOME=/g/home \
-      -v "$W/.survey-out/gradle:/g" -v "$W/$PD/kotlin:/work" -v "$W/$PD/.build-kotlin:/work/../.build-kotlin" -w /work --entrypoint sh "$IMG" \
+      -v "$W:/w:ro" -v "$W/.survey-out/gradle:/g" -v "$W/$PD/kotlin:/work" -v "$W/$PD/.build-kotlin:/work/../.build-kotlin" -w /work --entrypoint sh "$IMG" \
       -c "mkdir -p /work/home; /g/gradle-9.8.0/bin/gradle $GFLAG --no-daemon --console=plain -Psolution=$V cleanTest test" > "$OUT" 2>&1 ;;
 esac
 exit $?

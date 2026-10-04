@@ -13,11 +13,11 @@ case "$LANGX" in
   java)
     mkdir -p "$W/$PD/.build-java"
     docker --context desktop-linux run --rm --network none --user 1000:1000 -e HOME=/work/home -e GRADLE_USER_HOME=/g/home \
-      -v "$W/.survey-out/gradle:/g" -v "$W/$PD/java:/work" -v "$W/$PD/.build-java:/work/../.build-java" -v "$W/.survey-out:/o" -w /work --entrypoint sh "$IMG" -c \
+      -v "$W:/w:ro" -v "$W/.survey-out/gradle:/g" -v "$W/$PD/java:/work" -v "$W/$PD/.build-java:/work/../.build-java" -v "$W/.survey-out:/o" -w /work --entrypoint sh "$IMG" -c \
       "mkdir -p /work/home; for v in $VARS; do /g/gradle-9.8.0/bin/gradle --offline --console=plain -Psolution=\$v cleanTest test > /o/$NAME-java-\$v.txt 2>&1; echo rc=\$? >> /o/$NAME-java-\$v.txt; done; /g/gradle-9.8.0/bin/gradle --stop >/dev/null 2>&1" ;;
   kotlin)
     mkdir -p "$W/$PD/.build-kotlin"
     docker --context desktop-linux run --rm --network none --user 1000:1000 -e HOME=/work/home -e GRADLE_USER_HOME=/g/home \
-      -v "$W/.survey-out/gradle:/g" -v "$W/$PD/kotlin:/work" -v "$W/$PD/.build-kotlin:/work/../.build-kotlin" -v "$W/.survey-out:/o" -w /work --entrypoint sh "$IMG" -c \
+      -v "$W:/w:ro" -v "$W/.survey-out/gradle:/g" -v "$W/$PD/kotlin:/work" -v "$W/$PD/.build-kotlin:/work/../.build-kotlin" -v "$W/.survey-out:/o" -w /work --entrypoint sh "$IMG" -c \
       "mkdir -p /work/home; for v in $VARS; do /g/gradle-9.8.0/bin/gradle --offline --console=plain -Psolution=\$v cleanTest test > /o/$NAME-kotlin-\$v.txt 2>&1; echo rc=\$? >> /o/$NAME-kotlin-\$v.txt; done; /g/gradle-9.8.0/bin/gradle --stop >/dev/null 2>&1" ;;
 esac
