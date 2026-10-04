@@ -52,6 +52,265 @@ The example runs five invented sources through four reports:
 ### The example
 
 <!-- example: m66-error-context tabs: python,typescript,java,kotlin -->
+```python
+"""What a coordinator is told when one of five sources fails, under four ways of reporting it.
+
+The exam guide (task 5.3) calls structured error context (failure type, the query attempted, partial results, alternatives) what lets a coordinator recover intelligently. It names two anti-patterns: a generic status
+such as "search unavailable", which hides the context, and silent suppression, which reports an empty result as a success; terminating the whole workflow on one failure is the third. The five sources below and
+their outcomes are invented for the illustration; nothing here calls a model or a search tool.
+"""
+# source -> (kind, items); kind is ok, timeout or permission
+OUTCOMES = {"news": ("ok", ["n1", "n2"]), "papers": ("timeout", ["p1"]), "patents": ("ok", []), "filings": ("permission", []), "blogs": ("ok", ["b1"])}
+TRY = {"timeout": "retry later", "permission": "request access"}
+
+
+def found(outcomes):
+    return [item for kind, items in outcomes.values() if kind == "ok" for item in items]
+
+
+def generic(outcomes):
+    down = [source for source, (kind, _) in outcomes.items() if kind != "ok"]
+    return f"found {', '.join(found(outcomes))}; sources unavailable: {', '.join(down)}"
+
+
+def suppress(outcomes):
+    nothing = [source for source, (kind, items) in outcomes.items() if kind != "ok" or not items]
+    return f"found {', '.join(found(outcomes))}; nothing found in: {', '.join(nothing)}"
+
+
+def terminate(outcomes):
+    kept = []
+    for source, (kind, items) in outcomes.items():
+        if kind != "ok":
+            return f"aborted at {source}; found {', '.join(kept)}"
+        kept += items
+    return f"found {', '.join(kept)}"
+
+
+def structured(outcomes):
+    good = [s for s, (kind, items) in outcomes.items() if kind == "ok" and items]
+    partial = [f"{s} ({kind}, kept {', '.join(items)})" for s, (kind, items) in outcomes.items() if kind != "ok" and items]
+    empty = [s for s, (kind, items) in outcomes.items() if kind == "ok" and not items]
+    gaps = [f"{s} ({kind}, try: {TRY[kind]})" for s, (kind, items) in outcomes.items() if kind != "ok" and not items]
+    parts = [("well supported", good), ("partial", partial), ("no findings", empty), ("gaps", gaps)]
+    return "; ".join(f"{name}: {', '.join(items)}" for name, items in parts if items)
+
+
+def main():
+    for name, report in (("generic status", generic), ("silent empty", suppress), ("abort on failure", terminate), ("structured context", structured)):
+        print(f"{name}: {report(OUTCOMES)}")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+generic status: found n1, n2, b1; sources unavailable: papers, filings
+silent empty: found n1, n2, b1; nothing found in: papers, patents, filings
+abort on failure: aborted at papers; found n1, n2
+structured context: well supported: news, blogs; partial: papers (timeout, kept p1); no findings: patents; gaps: filings (permission, try: request access)
+```
+```typescript
+/**
+ * What a coordinator is told when one of five sources fails, under four ways of reporting it.
+ *
+ * The exam guide (task 5.3) calls structured error context (failure type, the query attempted, partial results, alternatives) what lets a coordinator recover intelligently. It names two anti-patterns: a generic status
+ * such as "search unavailable", which hides the context, and silent suppression, which reports an empty result as a success; terminating the whole workflow on one failure is the third. The five sources below and
+ * their outcomes are invented for the illustration; nothing here calls a model or a search tool.
+ */
+// source -> [kind, items]; kind is ok, timeout or permission
+export type Outcomes = Record<string, [string, string[]]>;
+export const OUTCOMES: Outcomes = { news: ["ok", ["n1", "n2"]], papers: ["timeout", ["p1"]], patents: ["ok", []], filings: ["permission", []], blogs: ["ok", ["b1"]] };
+const TRY: Record<string, string> = { timeout: "retry later", permission: "request access" };
+
+const found = (outcomes: Outcomes): string[] => Object.values(outcomes).filter(([kind]) => kind === "ok").flatMap(([, items]) => items);
+
+export function generic(outcomes: Outcomes): string {
+  const down = Object.entries(outcomes).filter(([, [kind]]) => kind !== "ok").map(([source]) => source);
+  return `found ${found(outcomes).join(", ")}; sources unavailable: ${down.join(", ")}`;
+}
+
+export function suppress(outcomes: Outcomes): string {
+  const nothing = Object.entries(outcomes).filter(([, [kind, items]]) => kind !== "ok" || items.length === 0).map(([source]) => source);
+  return `found ${found(outcomes).join(", ")}; nothing found in: ${nothing.join(", ")}`;
+}
+
+export function terminate(outcomes: Outcomes): string {
+  const kept: string[] = [];
+  for (const [source, [kind, items]] of Object.entries(outcomes)) {
+    if (kind !== "ok") return `aborted at ${source}; found ${kept.join(", ")}`;
+    kept.push(...items);
+  }
+  return `found ${kept.join(", ")}`;
+}
+
+export function structured(outcomes: Outcomes): string {
+  const entries = Object.entries(outcomes);
+  const good = entries.filter(([, [kind, items]]) => kind === "ok" && items.length > 0).map(([s]) => s);
+  const partial = entries.filter(([, [kind, items]]) => kind !== "ok" && items.length > 0).map(([s, [kind, items]]) => `${s} (${kind}, kept ${items.join(", ")})`);
+  const empty = entries.filter(([, [kind, items]]) => kind === "ok" && items.length === 0).map(([s]) => s);
+  const gaps = entries.filter(([, [kind, items]]) => kind !== "ok" && items.length === 0).map(([s, [kind]]) => `${s} (${kind}, try: ${TRY[kind]})`);
+  const parts: Array<[string, string[]]> = [["well supported", good], ["partial", partial], ["no findings", empty], ["gaps", gaps]];
+  return parts.filter(([, items]) => items.length > 0).map(([name, items]) => `${name}: ${items.join(", ")}`).join("; ");
+}
+
+function main() {
+  for (const [name, report] of [["generic status", generic], ["silent empty", suppress], ["abort on failure", terminate], ["structured context", structured]] as const) console.log(`${name}: ${report(OUTCOMES)}`);
+}
+
+if (import.meta.main) main();
+```
+```text
+generic status: found n1, n2, b1; sources unavailable: papers, filings
+silent empty: found n1, n2, b1; nothing found in: papers, patents, filings
+abort on failure: aborted at papers; found n1, n2
+structured context: well supported: news, blogs; partial: papers (timeout, kept p1); no findings: patents; gaps: filings (permission, try: request access)
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * What a coordinator is told when one of five sources fails, under four ways of reporting it.
+ *
+ * <p>The exam guide (task 5.3) calls structured error context (failure type, the query attempted, partial results, alternatives) what lets a coordinator recover intelligently. It names two anti-patterns: a generic status
+ * such as "search unavailable", which hides the context, and silent suppression, which reports an empty result as a success; terminating the whole workflow on one failure is the third. The five sources below and
+ * their outcomes are invented for the illustration; nothing here calls a model or a search tool.
+ */
+public final class ErrorContext {
+    /** kind is ok, timeout or permission */
+    record Outcome(String kind, List<String> items) {}
+
+    static final Map<String, Outcome> OUTCOMES = new LinkedHashMap<>();
+    static final Map<String, String> TRY = Map.of("timeout", "retry later", "permission", "request access");
+
+    static {
+        OUTCOMES.put("news", new Outcome("ok", List.of("n1", "n2")));
+        OUTCOMES.put("papers", new Outcome("timeout", List.of("p1")));
+        OUTCOMES.put("patents", new Outcome("ok", List.of()));
+        OUTCOMES.put("filings", new Outcome("permission", List.of()));
+        OUTCOMES.put("blogs", new Outcome("ok", List.of("b1")));
+    }
+
+    private static boolean ok(Outcome o) {
+        return o.kind().equals("ok");
+    }
+
+    private static List<String> found(Map<String, Outcome> outcomes) {
+        List<String> out = new ArrayList<>();
+        for (Outcome o : outcomes.values()) if (ok(o)) out.addAll(o.items());
+        return out;
+    }
+
+    static String generic(Map<String, Outcome> outcomes) {
+        List<String> down = new ArrayList<>();
+        for (Map.Entry<String, Outcome> e : outcomes.entrySet()) if (!ok(e.getValue())) down.add(e.getKey());
+        return "found " + String.join(", ", found(outcomes)) + "; sources unavailable: " + String.join(", ", down);
+    }
+
+    static String suppress(Map<String, Outcome> outcomes) {
+        List<String> nothing = new ArrayList<>();
+        for (Map.Entry<String, Outcome> e : outcomes.entrySet()) if (!ok(e.getValue()) || e.getValue().items().isEmpty()) nothing.add(e.getKey());
+        return "found " + String.join(", ", found(outcomes)) + "; nothing found in: " + String.join(", ", nothing);
+    }
+
+    static String terminate(Map<String, Outcome> outcomes) {
+        List<String> kept = new ArrayList<>();
+        for (Map.Entry<String, Outcome> e : outcomes.entrySet()) {
+            if (!ok(e.getValue())) return "aborted at " + e.getKey() + "; found " + String.join(", ", kept);
+            kept.addAll(e.getValue().items());
+        }
+        return "found " + String.join(", ", kept);
+    }
+
+    static String structured(Map<String, Outcome> outcomes) {
+        List<String> good = new ArrayList<>();
+        List<String> partial = new ArrayList<>();
+        List<String> empty = new ArrayList<>();
+        List<String> gaps = new ArrayList<>();
+        for (Map.Entry<String, Outcome> e : outcomes.entrySet()) {
+            Outcome o = e.getValue();
+            if (ok(o) && !o.items().isEmpty()) good.add(e.getKey());
+            else if (!ok(o) && !o.items().isEmpty()) partial.add(e.getKey() + " (" + o.kind() + ", kept " + String.join(", ", o.items()) + ")");
+            else if (ok(o)) empty.add(e.getKey());
+            else gaps.add(e.getKey() + " (" + o.kind() + ", try: " + TRY.get(o.kind()) + ")");
+        }
+        Map<String, List<String>> parts = new LinkedHashMap<>();
+        parts.put("well supported", good);
+        parts.put("partial", partial);
+        parts.put("no findings", empty);
+        parts.put("gaps", gaps);
+        List<String> lines = new ArrayList<>();
+        for (Map.Entry<String, List<String>> p : parts.entrySet()) if (!p.getValue().isEmpty()) lines.add(p.getKey() + ": " + String.join(", ", p.getValue()));
+        return String.join("; ", lines);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("generic status: " + generic(OUTCOMES));
+        System.out.println("silent empty: " + suppress(OUTCOMES));
+        System.out.println("abort on failure: " + terminate(OUTCOMES));
+        System.out.println("structured context: " + structured(OUTCOMES));
+    }
+}
+```
+```text
+generic status: found n1, n2, b1; sources unavailable: papers, filings
+silent empty: found n1, n2, b1; nothing found in: papers, patents, filings
+abort on failure: aborted at papers; found n1, n2
+structured context: well supported: news, blogs; partial: papers (timeout, kept p1); no findings: patents; gaps: filings (permission, try: request access)
+```
+```kotlin
+/**
+ * What a coordinator is told when one of five sources fails, under four ways of reporting it.
+ *
+ * The exam guide (task 5.3) calls structured error context (failure type, the query attempted, partial results, alternatives) what lets a coordinator recover intelligently. It names two anti-patterns: a generic status
+ * such as "search unavailable", which hides the context, and silent suppression, which reports an empty result as a success; terminating the whole workflow on one failure is the third. The five sources below and
+ * their outcomes are invented for the illustration; nothing here calls a model or a search tool.
+ */
+/** kind is ok, timeout or permission */
+data class Outcome(val kind: String, val items: List<String>)
+
+val OUTCOMES = linkedMapOf("news" to Outcome("ok", listOf("n1", "n2")), "papers" to Outcome("timeout", listOf("p1")), "patents" to Outcome("ok", emptyList()), "filings" to Outcome("permission", emptyList()), "blogs" to Outcome("ok", listOf("b1")))
+private val TRY = mapOf("timeout" to "retry later", "permission" to "request access")
+
+private fun found(outcomes: Map<String, Outcome>): List<String> = outcomes.values.filter { it.kind == "ok" }.flatMap { it.items }
+
+fun generic(outcomes: Map<String, Outcome>): String = "found ${found(outcomes).joinToString(", ")}; sources unavailable: " + outcomes.filter { it.value.kind != "ok" }.keys.joinToString(", ")
+
+fun suppress(outcomes: Map<String, Outcome>): String = "found ${found(outcomes).joinToString(", ")}; nothing found in: " + outcomes.filter { it.value.kind != "ok" || it.value.items.isEmpty() }.keys.joinToString(", ")
+
+fun terminate(outcomes: Map<String, Outcome>): String {
+    val kept = mutableListOf<String>()
+    for ((source, o) in outcomes) {
+        if (o.kind != "ok") return "aborted at $source; found ${kept.joinToString(", ")}"
+        kept += o.items
+    }
+    return "found ${kept.joinToString(", ")}"
+}
+
+fun structured(outcomes: Map<String, Outcome>): String {
+    val good = outcomes.filter { it.value.kind == "ok" && it.value.items.isNotEmpty() }.keys.toList()
+    val partial = outcomes.filter { it.value.kind != "ok" && it.value.items.isNotEmpty() }.map { "${it.key} (${it.value.kind}, kept ${it.value.items.joinToString(", ")})" }
+    val empty = outcomes.filter { it.value.kind == "ok" && it.value.items.isEmpty() }.keys.toList()
+    val gaps = outcomes.filter { it.value.kind != "ok" && it.value.items.isEmpty() }.map { "${it.key} (${it.value.kind}, try: ${TRY[it.value.kind]})" }
+    return listOf("well supported" to good, "partial" to partial, "no findings" to empty, "gaps" to gaps).filter { it.second.isNotEmpty() }.joinToString("; ") { "${it.first}: ${it.second.joinToString(", ")}" }
+}
+
+fun main() {
+    println("generic status: ${generic(OUTCOMES)}")
+    println("silent empty: ${suppress(OUTCOMES)}")
+    println("abort on failure: ${terminate(OUTCOMES)}")
+    println("structured context: ${structured(OUTCOMES)}")
+}
+```
+```text
+generic status: found n1, n2, b1; sources unavailable: papers, filings
+silent empty: found n1, n2, b1; nothing found in: papers, patents, filings
+abort on failure: aborted at papers; found n1, n2
+structured context: well supported: news, blogs; partial: papers (timeout, kept p1); no findings: patents; gaps: filings (permission, try: request access)
+```
 <!-- /example -->
 
 ## Traps

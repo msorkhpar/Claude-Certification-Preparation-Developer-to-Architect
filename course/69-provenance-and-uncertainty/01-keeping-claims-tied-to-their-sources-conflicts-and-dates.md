@@ -48,6 +48,325 @@ The merged claims are a ledger, and each entry has one of three statuses:
 ### The example
 
 <!-- example: m69-provenance-loss tabs: python,typescript,java,kotlin -->
+```python
+"""What a summary loses, and what a ledger keeps: sources, dates and disagreement.
+
+The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not
+settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into
+a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
+"""
+FINDINGS = [
+    ("market growth 2024", "12%", "Firm A report", "2024-05-01"),
+    ("market growth 2024", "9%", "Firm B survey", "2024-05-01"),
+    ("growth forecast", "7%", "Firm C yearbook", "2022-04-01"),
+    ("growth forecast", "9%", "Firm B survey", "2024-05-01"),
+    ("inflation 2023", "4%", "Firm A report", "2024-05-01"),
+    ("inflation 2023", "4%", "Trade paper", "2024-06-10"),
+    ("headcount", "910", "Press release", "2024-03-01"),
+]
+
+
+def claims_in_order(findings):
+    return list(dict.fromkeys(claim for claim, _, _, _ in findings))
+
+
+def status(rows):
+    """agreed: one value; conflict: different values on the same date; changed: different values on different dates."""
+    if len({value for _, value, _, _ in rows}) == 1:
+        return "agreed"
+    if any(a[1] != b[1] and a[3] == b[3] for a in rows for b in rows):
+        return "conflict"
+    return "changed"
+
+
+def plain_summary(findings):
+    """One line per claim with the first value seen: short, and the sources are gone."""
+    return "\n".join(f"{claim}: {next(v for c, v, _, _ in findings if c == claim)}" for claim in claims_in_order(findings))
+
+
+def ledger_lines(findings):
+    """One line per claim: its status, then every value with its source and date, the oldest date first for a change."""
+    lines = []
+    for claim in claims_in_order(findings):
+        rows = [f for f in findings if f[0] == claim]
+        if status(rows) == "changed":
+            rows = sorted(rows, key=lambda r: r[3])
+        lines.append(f"{claim} [{status(rows)}]: " + "; ".join(f"{value} ({source}, {date})" for _, value, source, date in rows))
+    return "\n".join(lines)
+
+
+def sources_named(text, findings):
+    return len({source for _, _, source, _ in findings if source in text})
+
+
+def main():
+    total = len({source for _, _, source, _ in FINDINGS})
+    print(f"findings: {len(FINDINGS)} from {total} sources")
+    summary = plain_summary(FINDINGS)
+    print("plain summary:")
+    print(summary)
+    print(f"sources named by the plain summary: {sources_named(summary, FINDINGS)} of {total}")
+    ledger = ledger_lines(FINDINGS)
+    print("ledger:")
+    print(ledger)
+    print(f"sources named by the ledger: {sources_named(ledger, FINDINGS)} of {total}")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+findings: 7 from 5 sources
+plain summary:
+market growth 2024: 12%
+growth forecast: 7%
+inflation 2023: 4%
+headcount: 910
+sources named by the plain summary: 0 of 5
+ledger:
+market growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)
+growth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)
+inflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)
+headcount [agreed]: 910 (Press release, 2024-03-01)
+sources named by the ledger: 5 of 5
+```
+```typescript
+/**
+ * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
+ *
+ * The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not
+ * settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into
+ * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
+ */
+export type Row = [string, string, string, string];
+
+export const FINDINGS: Row[] = [
+  ["market growth 2024", "12%", "Firm A report", "2024-05-01"],
+  ["market growth 2024", "9%", "Firm B survey", "2024-05-01"],
+  ["growth forecast", "7%", "Firm C yearbook", "2022-04-01"],
+  ["growth forecast", "9%", "Firm B survey", "2024-05-01"],
+  ["inflation 2023", "4%", "Firm A report", "2024-05-01"],
+  ["inflation 2023", "4%", "Trade paper", "2024-06-10"],
+  ["headcount", "910", "Press release", "2024-03-01"],
+];
+
+const claimsInOrder = (findings: Row[]): string[] => [...new Set(findings.map((f) => f[0]))];
+
+/** agreed: one value; conflict: different values on the same date; changed: different values on different dates. */
+export function status(rows: Row[]): string {
+  if (new Set(rows.map((r) => r[1])).size === 1) return "agreed";
+  if (rows.some((a) => rows.some((b) => a[1] !== b[1] && a[3] === b[3]))) return "conflict";
+  return "changed";
+}
+
+/** One line per claim with the first value seen: short, and the sources are gone. */
+export function plainSummary(findings: Row[]): string {
+  return claimsInOrder(findings).map((claim) => `${claim}: ${findings.find((f) => f[0] === claim)![1]}`).join("\n");
+}
+
+/** One line per claim: its status, then every value with its source and date, the oldest date first for a change. */
+export function ledgerLines(findings: Row[]): string {
+  return claimsInOrder(findings).map((claim) => {
+    let rows = findings.filter((f) => f[0] === claim);
+    if (status(rows) === "changed") rows = [...rows].sort((a, b) => (a[3] < b[3] ? -1 : a[3] > b[3] ? 1 : 0));
+    return `${claim} [${status(rows)}]: ` + rows.map(([, value, source, date]) => `${value} (${source}, ${date})`).join("; ");
+  }).join("\n");
+}
+
+export function sourcesNamed(text: string, findings: Row[]): number {
+  return new Set(findings.filter((f) => text.includes(f[2])).map((f) => f[2])).size;
+}
+
+export function main(): void {
+  const total = new Set(FINDINGS.map((f) => f[2])).size;
+  console.log(`findings: ${FINDINGS.length} from ${total} sources`);
+  const summary = plainSummary(FINDINGS);
+  console.log("plain summary:");
+  console.log(summary);
+  console.log(`sources named by the plain summary: ${sourcesNamed(summary, FINDINGS)} of ${total}`);
+  const ledger = ledgerLines(FINDINGS);
+  console.log("ledger:");
+  console.log(ledger);
+  console.log(`sources named by the ledger: ${sourcesNamed(ledger, FINDINGS)} of ${total}`);
+}
+
+if (import.meta.main) main();
+```
+```text
+findings: 7 from 5 sources
+plain summary:
+market growth 2024: 12%
+growth forecast: 7%
+inflation 2023: 4%
+headcount: 910
+sources named by the plain summary: 0 of 5
+ledger:
+market growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)
+growth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)
+inflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)
+headcount [agreed]: 910 (Press release, 2024-03-01)
+sources named by the ledger: 5 of 5
+```
+```java
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
+ *
+ * <p>The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not
+ * settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into
+ * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
+ */
+public final class ProvenanceLoss {
+    record Row(String claim, String value, String source, String date) {}
+
+    static final List<Row> FINDINGS = List.of(
+        new Row("market growth 2024", "12%", "Firm A report", "2024-05-01"),
+        new Row("market growth 2024", "9%", "Firm B survey", "2024-05-01"),
+        new Row("growth forecast", "7%", "Firm C yearbook", "2022-04-01"),
+        new Row("growth forecast", "9%", "Firm B survey", "2024-05-01"),
+        new Row("inflation 2023", "4%", "Firm A report", "2024-05-01"),
+        new Row("inflation 2023", "4%", "Trade paper", "2024-06-10"),
+        new Row("headcount", "910", "Press release", "2024-03-01"));
+
+    private static List<String> claimsInOrder(List<Row> findings) {
+        Set<String> claims = new LinkedHashSet<>();
+        for (Row r : findings) claims.add(r.claim());
+        return new ArrayList<>(claims);
+    }
+
+    /** agreed: one value; conflict: different values on the same date; changed: different values on different dates. */
+    static String status(List<Row> rows) {
+        if (rows.stream().map(Row::value).distinct().count() == 1) return "agreed";
+        if (rows.stream().anyMatch(a -> rows.stream().anyMatch(b -> !a.value().equals(b.value()) && a.date().equals(b.date())))) return "conflict";
+        return "changed";
+    }
+
+    /** One line per claim with the first value seen: short, and the sources are gone. */
+    static String plainSummary(List<Row> findings) {
+        List<String> lines = new ArrayList<>();
+        for (String claim : claimsInOrder(findings)) lines.add(claim + ": " + findings.stream().filter(f -> f.claim().equals(claim)).findFirst().orElseThrow().value());
+        return String.join("\n", lines);
+    }
+
+    /** One line per claim: its status, then every value with its source and date, the oldest date first for a change. */
+    static String ledgerLines(List<Row> findings) {
+        List<String> lines = new ArrayList<>();
+        for (String claim : claimsInOrder(findings)) {
+            List<Row> rows = new ArrayList<>(findings.stream().filter(f -> f.claim().equals(claim)).toList());
+            String status = status(rows);
+            if (status.equals("changed")) rows.sort(Comparator.comparing(Row::date));
+            List<String> parts = new ArrayList<>();
+            for (Row r : rows) parts.add(r.value() + " (" + r.source() + ", " + r.date() + ")");
+            lines.add(claim + " [" + status + "]: " + String.join("; ", parts));
+        }
+        return String.join("\n", lines);
+    }
+
+    static int sourcesNamed(String text, List<Row> findings) {
+        return (int) findings.stream().filter(f -> text.contains(f.source())).map(Row::source).distinct().count();
+    }
+
+    public static void main(String[] args) {
+        int total = (int) FINDINGS.stream().map(Row::source).distinct().count();
+        System.out.println("findings: " + FINDINGS.size() + " from " + total + " sources");
+        String summary = plainSummary(FINDINGS);
+        System.out.println("plain summary:");
+        System.out.println(summary);
+        System.out.println("sources named by the plain summary: " + sourcesNamed(summary, FINDINGS) + " of " + total);
+        String ledger = ledgerLines(FINDINGS);
+        System.out.println("ledger:");
+        System.out.println(ledger);
+        System.out.println("sources named by the ledger: " + sourcesNamed(ledger, FINDINGS) + " of " + total);
+    }
+}
+```
+```text
+findings: 7 from 5 sources
+plain summary:
+market growth 2024: 12%
+growth forecast: 7%
+inflation 2023: 4%
+headcount: 910
+sources named by the plain summary: 0 of 5
+ledger:
+market growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)
+growth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)
+inflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)
+headcount [agreed]: 910 (Press release, 2024-03-01)
+sources named by the ledger: 5 of 5
+```
+```kotlin
+/**
+ * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
+ *
+ * The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not
+ * settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into
+ * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
+ */
+data class Row(val claim: String, val value: String, val source: String, val date: String)
+
+val FINDINGS = listOf(
+    Row("market growth 2024", "12%", "Firm A report", "2024-05-01"),
+    Row("market growth 2024", "9%", "Firm B survey", "2024-05-01"),
+    Row("growth forecast", "7%", "Firm C yearbook", "2022-04-01"),
+    Row("growth forecast", "9%", "Firm B survey", "2024-05-01"),
+    Row("inflation 2023", "4%", "Firm A report", "2024-05-01"),
+    Row("inflation 2023", "4%", "Trade paper", "2024-06-10"),
+    Row("headcount", "910", "Press release", "2024-03-01"),
+)
+
+/** agreed: one value; conflict: different values on the same date; changed: different values on different dates. */
+fun status(rows: List<Row>): String = when {
+    rows.map { it.value }.distinct().size == 1 -> "agreed"
+    rows.any { a -> rows.any { b -> a.value != b.value && a.date == b.date } } -> "conflict"
+    else -> "changed"
+}
+
+/** One line per claim with the first value seen: short, and the sources are gone. */
+fun plainSummary(findings: List<Row>): String = findings.map { it.claim }.distinct().joinToString("\n") { claim -> "$claim: ${findings.first { it.claim == claim }.value}" }
+
+/** One line per claim: its status, then every value with its source and date, the oldest date first for a change. */
+fun ledgerLines(findings: List<Row>): String = findings.map { it.claim }.distinct().joinToString("\n") { claim ->
+    val group = findings.filter { it.claim == claim }
+    val rows = if (status(group) == "changed") group.sortedBy { it.date } else group
+    "$claim [${status(rows)}]: " + rows.joinToString("; ") { "${it.value} (${it.source}, ${it.date})" }
+}
+
+fun sourcesNamed(text: String, findings: List<Row>): Int = findings.filter { text.contains(it.source) }.map { it.source }.distinct().size
+
+fun main() {
+    val total = FINDINGS.map { it.source }.distinct().size
+    println("findings: ${FINDINGS.size} from $total sources")
+    val summary = plainSummary(FINDINGS)
+    println("plain summary:")
+    println(summary)
+    println("sources named by the plain summary: ${sourcesNamed(summary, FINDINGS)} of $total")
+    val ledger = ledgerLines(FINDINGS)
+    println("ledger:")
+    println(ledger)
+    println("sources named by the ledger: ${sourcesNamed(ledger, FINDINGS)} of $total")
+}
+```
+```text
+findings: 7 from 5 sources
+plain summary:
+market growth 2024: 12%
+growth forecast: 7%
+inflation 2023: 4%
+headcount: 910
+sources named by the plain summary: 0 of 5
+ledger:
+market growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)
+growth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)
+inflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)
+headcount [agreed]: 910 (Press release, 2024-03-01)
+sources named by the ledger: 5 of 5
+```
 <!-- /example -->
 
 The example compresses seven findings from five invented sources twice. The plain summary keeps the first value of each claim: it is shorter, it hides the second source of the conflict entirely, and it names none of the five sources. The ledger lines keep every value with its source and date, flag the conflict, put the changed claim's older value first and name all five sources. The figures are invented for the illustration, and the count of sources named is the measurement the example is about.

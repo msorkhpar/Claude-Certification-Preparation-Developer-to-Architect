@@ -1028,7 +1028,7 @@ PRACTICES[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] =
         ("e8", "edge", "an irreversible action needs a person whatever the confidence"),
     ],
     "plants": {
-        "wrong-overall-only": (["m1", "e1"], "reports only the overall accuracy"),
+        "wrong-overall-percent": (["m1", "e1"], "gives every segment the overall percentage"),
         "wrong-ignores-undersampled": (["e2"], "approves automation for a segment with too few samples"),
         "wrong-highest-confidence": (["e3"], "picks the highest qualifying confidence instead of the lowest"),
         "wrong-strict-target": (["e4"], "demands more than the target precision"),

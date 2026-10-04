@@ -2098,7 +2098,7 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
         "wrong-duplicate-findings": [('    if any(f["area"] == area and f["fact"] == fact for f in findings):\n        return list(findings)\n', "")],
         "wrong-ungrouped-scratchpad": [('        if f["area"] not in areas:\n            areas.append(f["area"])', '        areas.append(f["area"])')],
         "wrong-manifest-unsorted": [('for a in sorted(agents, key=lambda a: a["name"])', "for a in agents")],
-        "wrong-manifest-unvalidated": [("        if a[\"status\"] not in STATUSES:\n            raise ValueError(f\"unknown status {a['status']}\")\n", "")],
+        "wrong-manifest-unvalidated": [("    for a in agents:\n        if a[\"status\"] not in STATUSES:\n            raise ValueError(f\"unknown status {a['status']}\")\n", "")],
         "wrong-rerun-done": [('        elif a["status"] == "done":\n            action = "reuse"', '        elif False:\n            action = "reuse"')],
         "wrong-restart-running": [('        else:\n            action = "resume"', '        else:\n            action = "restart"')],
         "wrong-ignore-missing-file": [('        if a["state_file"] not in existing_files:\n            action = "restart"\n        elif', '        if False:\n            action = "restart"\n        elif')],
@@ -2144,7 +2144,7 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
 # ===== Level 3: module 68 =====
 PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
     "python": ("review_routing.py", {
-        "wrong-overall-only": [("    for name in sorted(groups):", "    for name in []:")],
+        "wrong-overall-percent": [('"segment": name, "correct": c, "total": t, "percent": _percent(c, t)}', '"segment": name, "correct": c, "total": t, "percent": _percent(correct, total)}')],
         "wrong-ignores-undersampled": [('        if s["total"] < min_n:\n            undersampled.append(s["segment"])\n        elif s["percent"] < threshold:', '        if s["percent"] < threshold:')],
         "wrong-highest-confidence": [("for t in sorted({c for c, _ in labeled}):", "for t in sorted({c for c, _ in labeled}, reverse=True):")],
         "wrong-strict-target": [("if 100 * sum(1 for ok in kept if ok) >= target * len(kept):", "if 100 * sum(1 for ok in kept if ok) > target * len(kept):")],
@@ -2155,7 +2155,7 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-irreversible-by-amount": [('"human" if action in IRREVERSIBLE or amount > limit else "auto"', '"human" if amount > limit else "auto"')],
     }),
     "typescript": ("reviewRouting.ts", {
-        "wrong-overall-only": [("for (const name of [...groups.keys()].sort()) {", "for (const name of [] as string[]) {")],
+        "wrong-overall-percent": [("segment: name, correct: c, total: t, percent: percent(c, t) }", "segment: name, correct: c, total: t, percent: percent(correct, total) }")],
         "wrong-ignores-undersampled": [("    if (s.total < minN) undersampled.push(s.segment);\n    else if (s.percent < threshold) failing.push(s.segment);", "    if (s.percent < threshold) failing.push(s.segment);")],
         "wrong-highest-confidence": [("].sort((a, b) => a - b)) {", "].sort((a, b) => b - a)) {")],
         "wrong-strict-target": [("if (100 * right >= target * kept.length)", "if (100 * right > target * kept.length)")],
@@ -2166,7 +2166,7 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-irreversible-by-amount": [("return IRREVERSIBLE.includes(action) || amount > limit ?", "return amount > limit ?")],
     }),
     "java": ("ReviewRouting.java", {
-        "wrong-overall-only": [("for (Map.Entry<String, int[]> e : groups.entrySet()) out.add(", "for (Map.Entry<String, int[]> e : new TreeMap<String, int[]>().entrySet()) out.add(")],
+        "wrong-overall-percent": [("e.getValue()[1], percent(e.getValue()[0], e.getValue()[1])));", "e.getValue()[1], percent(correct, total)));")],
         "wrong-ignores-undersampled": [("            if (s.total() < minN) undersampled.add(s.segment());\n            else if (s.percent() < threshold) failing.add(s.segment());", "            if (s.percent() < threshold) failing.add(s.segment());")],
         "wrong-highest-confidence": [("Set<Integer> levels = new java.util.TreeSet<>();", "Set<Integer> levels = new java.util.TreeSet<>(java.util.Comparator.reverseOrder());")],
         "wrong-strict-target": [("if (100 * right >= target * kept) return t;", "if (100 * right > target * kept) return t;")],
@@ -2177,7 +2177,7 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-irreversible-by-amount": [("return IRREVERSIBLE.contains(action) || amount > limit ?", "return amount > limit ?")],
     }),
     "kotlin": ("ReviewRouting.kt", {
-        "wrong-overall-only": [("        groups.map { (name, rs) ->", "        groups.filter { false }.map { (name, rs) ->")],
+        "wrong-overall-percent": [("rs.size, percent(rs.count { it.correct }, rs.size)) }", "rs.size, percent(correct, total)) }")],
         "wrong-ignores-undersampled": [("val undersampled = segments.filter { it.total < minN }.map { it.segment }", "val undersampled = emptyList<String>()")],
         "wrong-highest-confidence": [(".toSortedSet()) {", ".toSortedSet(compareByDescending { it })) {")],
         "wrong-strict-target": [("if (100 * kept.count { it.correct } >= target * kept.size)", "if (100 * kept.count { it.correct } > target * kept.size)")],
