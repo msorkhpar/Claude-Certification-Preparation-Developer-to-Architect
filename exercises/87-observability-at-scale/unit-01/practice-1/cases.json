@@ -1,0 +1,128 @@
+{
+  "practice": "87-observability-at-scale/unit-01/practice-1",
+  "name": "triage",
+  "tests": {
+    "java": "TriageTest",
+    "kotlin": "TriageTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_every_trace_gets_one_reason_and_a_healthy_trace_is_kept_by_its_id",
+      "typescript": "m1 every trace gets one reason and a healthy trace is kept by its id",
+      "java": "m1_everyTraceGetsOneReasonAndAHealthyTraceIsKeptByItsId",
+      "kotlin": "m1_everyTraceGetsOneReasonAndAHealthyTraceIsKeptByItsId"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_an_error_outranks_a_slow_root_which_outranks_retries_which_outrank_a_flag",
+      "typescript": "e1 an error outranks a slow root which outranks retries which outrank a flag",
+      "java": "e1_anErrorOutranksASlowRootWhichOutranksRetriesWhichOutrankAFlag",
+      "kotlin": "e1_anErrorOutranksASlowRootWhichOutranksRetriesWhichOutrankAFlag"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_root_cause_is_the_deepest_failing_span_and_its_path_starts_at_the_root",
+      "typescript": "e2 the root cause is the deepest failing span and its path starts at the root",
+      "java": "e2_theRootCauseIsTheDeepestFailingSpanAndItsPathStartsAtTheRoot",
+      "kotlin": "e2_theRootCauseIsTheDeepestFailingSpanAndItsPathStartsAtTheRoot"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_stale_or_empty_retrieval_is_blamed_only_when_no_span_failed",
+      "typescript": "e3 a stale or empty retrieval is blamed only when no span failed",
+      "java": "e3_aStaleOrEmptyRetrievalIsBlamedOnlyWhenNoSpanFailed",
+      "kotlin": "e3_aStaleOrEmptyRetrievalIsBlamedOnlyWhenNoSpanFailed"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_drift_reports_a_move_in_either_direction_over_the_tolerance_and_never_divides_by_zero",
+      "typescript": "e4 drift reports a move in either direction over the tolerance and never divides by zero",
+      "java": "e4_driftReportsAMoveInEitherDirectionOverTheToleranceAndNeverDividesByZero",
+      "kotlin": "e4_driftReportsAMoveInEitherDirectionOverTheToleranceAndNeverDividesByZero"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_an_alert_needs_consecutive_windows_over_the_threshold_and_a_dip_starts_the_count_again",
+      "typescript": "e5 an alert needs consecutive windows over the threshold and a dip starts the count again",
+      "java": "e5_anAlertNeedsConsecutiveWindowsOverTheThresholdAndADipStartsTheCountAgain",
+      "kotlin": "e5_anAlertNeedsConsecutiveWindowsOverTheThresholdAndADipStartsTheCountAgain"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_log_record_drops_the_content_fields_unless_they_are_allowed_by_name",
+      "typescript": "e6 a log record drops the content fields unless they are allowed by name",
+      "java": "e6_aLogRecordDropsTheContentFieldsUnlessTheyAreAllowedByName",
+      "kotlin": "e6_aLogRecordDropsTheContentFieldsUnlessTheyAreAllowedByName"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_requests_trail_joins_the_events_of_every_component_in_time_order",
+      "typescript": "e7 a requests trail joins the events of every component in time order",
+      "java": "e7_aRequestsTrailJoinsTheEventsOfEveryComponentInTimeOrder",
+      "kotlin": "e7_aRequestsTrailJoinsTheEventsOfEveryComponentInTimeOrder"
+    }
+  },
+  "plants": {
+    "wrong-error-after-slow": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "labels a trace that failed and was slow as slow"
+    },
+    "wrong-no-feedback": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "drops a trace the user flagged as a bad answer"
+    },
+    "wrong-retries-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "does not keep a trace in which one tool was called three times"
+    },
+    "wrong-root-reporter": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "blames the first failing span, which only reported its child's error"
+    },
+    "wrong-stale-first": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "blames a stale retrieval even when another span failed"
+    },
+    "wrong-drift-up-only": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "misses a metric that fell"
+    },
+    "wrong-alert-no-reset": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "keeps counting windows across a window that was under the threshold"
+    },
+    "wrong-redact-keeps-content": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps prompts and tool inputs in the log record"
+    },
+    "wrong-redact-ignores-allowed": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "drops a content field even when it is allowed by name"
+    },
+    "wrong-trail-unsorted": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "lists a request's events in the order they were received"
+    }
+  }
+}
