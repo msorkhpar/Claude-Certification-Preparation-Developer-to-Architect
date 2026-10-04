@@ -33,10 +33,12 @@ outside the worktree. Web requests carry no personal data; nothing is signed int
   what the product does now, with the date and version checked. Questions are keyed to the guide and their
   explanation notes the difference. Traps are written as the exam's tempting wrong answers and why the exam
   rejects them. Architect questions sit inside a named scenario of two or three sentences.
-- **Examples:** projects under `examples/` that run offline against `harness/`, in Python and
-  TypeScript at least and in Java and Kotlin where the topic exists in them; the output on the page is
-  the container's output.
-- **Practices:** in Python, TypeScript, Java and Kotlin (Python and TypeScript only where the Agent SDK
+- **Examples:** projects under `examples/` that run offline against `harness/`, in Python, TypeScript,
+  Java and Kotlin (board D3). Only an example that needs the Agent SDK is Python and TypeScript alone, and
+  the page says why. A configuration example has a Java and a Kotlin edition too: the JVM editions read
+  JSON, YAML or Markdown with a library pinned in the Gradle cache. The output on the page is the
+  container's output, in every language.
+- **Practices:** in Python, TypeScript, Java and Kotlin, configuration practices included (Python and TypeScript only where the Agent SDK
   is needed): statement, starter, tests mapped to case ids for the main ask and the edge cases, a
   reference solution, at least two planted wrong solutions per language. Proved offline in the runner
   image with the network off: the reference passes, the starter fails, every plant fails on an
