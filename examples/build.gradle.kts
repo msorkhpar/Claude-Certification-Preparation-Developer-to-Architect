@@ -46,14 +46,22 @@ subprojects {
         useJUnitPlatform()
         timeout.set(java.time.Duration.ofMinutes(5))                          // a hung test must not hold the run
         systemProperty("junit.jupiter.execution.timeout.default", "2m")
-        testLogging { events("failed"); showExceptions = true; exceptionFormat = TestExceptionFormat.FULL }
+        // each test's name and verdict, and a summary line, as pytest and node --test print them; at the QUIET level
+        // too, so a `gradle -q` run (a served Run) shows them
+        testLogging {
+            events("passed", "failed", "skipped"); showExceptions = true; exceptionFormat = TestExceptionFormat.SHORT
+            quiet { events("passed", "failed", "skipped"); showExceptions = true; exceptionFormat = TestExceptionFormat.SHORT }
+        }
         val summary = file("$exOut/ex-$projName-test.txt")
         addTestListener(object : TestListener {
             override fun beforeSuite(s: TestDescriptor) {}
             override fun beforeTest(t: TestDescriptor) {}
             override fun afterTest(t: TestDescriptor, r: TestResult) {}
             override fun afterSuite(s: TestDescriptor, r: TestResult) {
-                if (s.parent == null) { summary.parentFile.mkdirs(); summary.writeText("tests ${r.testCount}, passed ${r.successfulTestCount}, failed ${r.failedTestCount}\n") }
+                if (s.parent == null) {
+                    summary.parentFile.mkdirs(); summary.writeText("tests ${r.testCount}, passed ${r.successfulTestCount}, failed ${r.failedTestCount}\n")
+                    println("${r.testCount} tests: ${r.successfulTestCount} passed, ${r.failedTestCount} failed, ${r.skippedTestCount} skipped")
+                }
             }
         })
     }
