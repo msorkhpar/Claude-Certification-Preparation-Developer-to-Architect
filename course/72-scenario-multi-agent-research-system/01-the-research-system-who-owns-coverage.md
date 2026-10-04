@@ -130,7 +130,7 @@ def main():
     print(f"search '{e['query']}': {first['status']} {e['type']}, {len(e['partial'])} partial, alternative '{e['alternatives'][0]}'")
     results = research(plan)
     recovered = next(r for r in results if "recovered_from" in r)
-    print(f"recovered: '{recovered['recovered_from']}' -> '{recovered['query']}' scope {recovered['scope']}, {len(recovered['findings'])} finding")
+    print(f"recovered: '{recovered['recovered_from']}' -> '{ALTERNATIVES[recovered['recovered_from']][0]}' scope {recovered['scope']}, {len(recovered['findings'])} finding")
     checks = [("date", "survey-a", "2025-02-01"), ("date", "report-d", "2025-01-15"), ("statistic", "survey-a", "60%")]
     verdicts = [verify_fact(*c) for c in checks]
     print(f"verify_fact: {verdicts.count('confirmed')} confirmed here, {verdicts.count('needs_search')} sent back to the coordinator")
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film
 plan 2: 6 subtasks, scopes covered 4 of 4, gaps: none
 search 'AI in film': error timeout, 0 partial, alternative 'AI in film production'
-recovered: 'AI in film' -> 'AI in film' scope film, 1 finding
+recovered: 'AI in film' -> 'AI in film production' scope film, 1 finding
 verify_fact: 2 confirmed here, 1 sent back to the coordinator
 report (all sources up): status=complete, covered=4/4, findings=6, errors=0
   note: nothing left uncovered
@@ -233,7 +233,7 @@ function main() {
   const e = first.error!;
   console.log(`search '${e.query}': ${first.status} ${e.type}, ${e.partial.length} partial, alternative '${e.alternatives[0]}'`);
   const recovered = research(plan).find((r) => r.recovered_from)!;
-  console.log(`recovered: '${recovered.recovered_from}' -> '${recovered.query}' scope ${recovered.scope}, ${recovered.findings!.length} finding`);
+  console.log(`recovered: '${recovered.recovered_from}' -> '${ALTERNATIVES[recovered.recovered_from!][0]}' scope ${recovered.scope}, ${recovered.findings!.length} finding`);
   const checks: [string, string, string][] = [["date", "survey-a", "2025-02-01"], ["date", "report-d", "2025-01-15"], ["statistic", "survey-a", "60%"]];
   const verdicts = checks.map((c) => verifyFact(...c));
   console.log(`verify_fact: ${verdicts.filter((v) => v === "confirmed").length} confirmed here, ${verdicts.filter((v) => v === "needs_search").length} sent back to the coordinator`);
@@ -250,7 +250,7 @@ if (import.meta.main) main();
 plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film
 plan 2: 6 subtasks, scopes covered 4 of 4, gaps: none
 search 'AI in film': error timeout, 0 partial, alternative 'AI in film production'
-recovered: 'AI in film' -> 'AI in film' scope film, 1 finding
+recovered: 'AI in film' -> 'AI in film production' scope film, 1 finding
 verify_fact: 2 confirmed here, 1 sent back to the coordinator
 report (all sources up): status=complete, covered=4/4, findings=6, errors=0
   note: nothing left uncovered
@@ -367,7 +367,7 @@ public final class ResearchRun {
         SearchError e = first.error();
         System.out.println("search '" + e.query() + "': " + first.status() + " " + e.type() + ", " + e.partial().size() + " partial, alternative '" + e.alternatives().get(0) + "'");
         Done recovered = research(plan, List.of()).stream().filter(r -> r.result().recoveredFrom() != null).findFirst().orElseThrow();
-        System.out.println("recovered: '" + recovered.result().recoveredFrom() + "' -> '" + recovered.task().query() + "' scope " + recovered.task().scope() + ", " + recovered.result().findings().size() + " finding");
+        System.out.println("recovered: '" + recovered.result().recoveredFrom() + "' -> '" + ALTERNATIVES.get(recovered.result().recoveredFrom()).get(0) + "' scope " + recovered.task().scope() + ", " + recovered.result().findings().size() + " finding");
         List<String> verdicts = List.of(verifyFact("date", "survey-a", "2025-02-01"), verifyFact("date", "report-d", "2025-01-15"), verifyFact("statistic", "survey-a", "60%"));
         System.out.println("verify_fact: " + verdicts.stream().filter(v -> v.equals("confirmed")).count() + " confirmed here, " + verdicts.stream().filter(v -> v.equals("needs_search")).count() + " sent back to the coordinator");
         Map<String, List<String>> runs = new LinkedHashMap<>();
@@ -385,7 +385,7 @@ public final class ResearchRun {
 plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film
 plan 2: 6 subtasks, scopes covered 4 of 4, gaps: none
 search 'AI in film': error timeout, 0 partial, alternative 'AI in film production'
-recovered: 'AI in film' -> 'AI in film' scope film, 1 finding
+recovered: 'AI in film' -> 'AI in film production' scope film, 1 finding
 verify_fact: 2 confirmed here, 1 sent back to the coordinator
 report (all sources up): status=complete, covered=4/4, findings=6, errors=0
   note: nothing left uncovered
@@ -476,7 +476,7 @@ fun main() {
     val e = first.error!!
     println("search '${e.query}': ${first.status} ${e.type}, ${e.partial.size} partial, alternative '${e.alternatives[0]}'")
     val recovered = research(plan).first { it.result.recoveredFrom != null }
-    println("recovered: '${recovered.result.recoveredFrom}' -> '${recovered.task.query}' scope ${recovered.task.scope}, ${recovered.result.findings.size} finding")
+    println("recovered: '${recovered.result.recoveredFrom}' -> '${ALTERNATIVES.getValue(recovered.result.recoveredFrom!!)[0]}' scope ${recovered.task.scope}, ${recovered.result.findings.size} finding")
     val verdicts = listOf(verifyFact("date", "survey-a", "2025-02-01"), verifyFact("date", "report-d", "2025-01-15"), verifyFact("statistic", "survey-a", "60%"))
     println("verify_fact: ${verdicts.count { it == "confirmed" }} confirmed here, ${verdicts.count { it == "needs_search" }} sent back to the coordinator")
     for ((label, down) in listOf("all sources up" to listOf<String>(), "film search down for good" to listOf("AI in film", "AI in film production"))) {
@@ -490,7 +490,7 @@ fun main() {
 plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film
 plan 2: 6 subtasks, scopes covered 4 of 4, gaps: none
 search 'AI in film': error timeout, 0 partial, alternative 'AI in film production'
-recovered: 'AI in film' -> 'AI in film' scope film, 1 finding
+recovered: 'AI in film' -> 'AI in film production' scope film, 1 finding
 verify_fact: 2 confirmed here, 1 sent back to the coordinator
 report (all sources up): status=complete, covered=4/4, findings=6, errors=0
   note: nothing left uncovered
