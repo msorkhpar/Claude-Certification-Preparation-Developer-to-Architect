@@ -70,7 +70,7 @@ Read `docs/GOAL.md`, `docs/IDEA.md`, `docs/SETUP.md` and `docs/EXAM-MAP.md` firs
   write lessons.
 - Heavy work goes to background offices on their own branch and worktree, in a directory beside
   the project under the same parent folder (not `/tmp`).
-- **One authoring office at a time** for prose and practices; quiz readers stay separate.
+- **Authoring batches run in parallel**, each on its own branch and worktree, over disjoint module ranges; heavy runs still queue through the one slot. A batch never edits the board (the register does), inserts its sections into the shared tools in module order, and lists new JVM libraries for the register instead of regenerating the checksum file. A batch whose questions must draw on a whole level (the exam-readiness modules with mock exams) runs after the rest of that level has merged. Quiz readers stay separate.
 - **Models:** the register runs on Opus 5.5 and picks the office's model by the task's weight:
   Sonnet for ordinary work (authoring, examples, framework changes, surveys), Haiku for very light
   tasks (a scan, a rename, a board edit). A task that turns out harder than its model is

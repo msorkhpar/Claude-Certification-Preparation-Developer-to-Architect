@@ -74,11 +74,11 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 | L3-A | Level 3 batch: modules 45 to 50, agent architecture (A1.1 to A1.6) | **done:** merged |
 | L3-B | Level 3 batch: modules 51 to 56, session state, tool design and tools in Claude Code (A1.7, A2) | **done:** merged |
 | L3-C | Level 3 batch: modules 57 to 62, Claude Code configuration, CI, criteria and structured output (A3, A4.1 to A4.4) | **done:** merged; gate clean in all four languages, the planted test defect caught |
-| L3-D | Level 3 batch: modules 63 to 69, review passes and reliability (A4.5, A4.6, A5) | todo, after L3-C |
-| L3-E | Level 3 batch: modules 70 to 74, scenarios S1 to S5 with capstones | todo, after L3-D |
-| L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | todo, after L3-E |
+| L3-D | Level 3 batch: modules 63 to 69, review passes and reliability (A4.5, A4.6, A5) | doing (parallel) |
+| L3-E | Level 3 batch: modules 70 to 74, scenarios S1 to S5 with capstones | doing (parallel) |
+| L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | todo, after L3-D and L3-E merge |
 | S-3 | Rebuild the site with Level 3 (M7b) | todo, after L3-F |
-| L4 | Level 4 batches: modules 79 to 94, Architect Professional | todo, after L3-F |
+| L4 | Level 4 batches: L4-A modules 79 to 84 and L4-B 85 to 89 (doing, parallel); L4-C 90 to 94 with the Professional capstone and Exam readiness 4, after L4-A and L4-B merge | doing |
 | S-4 | Rebuild the site with Level 4 (M7b), then narration of all four levels (M8), then release checks (M9) | todo, after L4 |
 
 ## Framework work
