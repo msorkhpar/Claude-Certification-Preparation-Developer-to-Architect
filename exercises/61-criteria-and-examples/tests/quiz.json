@@ -1,0 +1,138 @@
+{
+  "module": "61-criteria-and-examples",
+  "quizzes": [
+    {
+      "id": "01-explicit-criteria-and-the-trust-in-a-category#q1",
+      "page": "01-explicit-criteria-and-the-trust-in-a-category.md",
+      "scope": "page",
+      "stem": "A review prompt says 'only report high-confidence issues', yet developers still dismiss most remarks about naming and layout. What fixes it?",
+      "options": {
+        "a": "Phrase the confidence threshold in stricter words",
+        "b": "Ask the reviewer to explain each remark at much greater length",
+        "c": "Send fewer files to each review run",
+        "d": "Spell out which patterns to flag and which to leave alone"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Naming the patterns to report and to skip is what changes the output.",
+        "a": "Ruled out because stricter wording of the same attitude still names no pattern, and such instructions \"fail to improve precision\".",
+        "b": "Ruled out because a longer explanation leaves the categories unmentioned: \"Most false positives are in the categories the prompt never mentioned\".",
+        "c": "Ruled out because a smaller review changes the volume only, while a pattern is something \"a reviewer can check a line against it\"."
+      }
+    },
+    {
+      "id": "01-explicit-criteria-and-the-trust-in-a-category#q2",
+      "page": "01-explicit-criteria-and-the-trust-in-a-category.md",
+      "scope": "page",
+      "stem": "One category of findings was dismissed in two thirds of its first twenty reviews, and developers have begun skipping the other remarks too. What does the guide recommend for that category?",
+      "options": {
+        "a": "Switch it off for now while its prompt and examples improve",
+        "b": "Delete it from the criteria for good",
+        "c": "Keep it and mark every one of its findings as low severity at once",
+        "d": "Keep it and attach a confidence score to each finding"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Disabling a high false-positive category while its prompt is improved restores trust in the rest.",
+        "b": "Ruled out because \"Deleting the category from the criteria loses the examples that the next attempt needs\".",
+        "c": "Ruled out because the remarks would still be posted and dismissed, since \"each dismissed comment lowers trust in the accepted ones\".",
+        "d": "Ruled out because \"self-reported confidence is another vague instruction\"."
+      }
+    },
+    {
+      "id": "02-examples-asking-and-the-practice#q1",
+      "page": "02-examples-asking-and-the-practice.md",
+      "scope": "page",
+      "stem": "A review prompt handles clear bugs well but keeps marking a null access that is already protected as risky. What should be added?",
+      "options": {
+        "a": "Ten more samples of obvious bugs to reinforce the pattern",
+        "b": "A line asking the reviewer to be more careful with null values",
+        "c": "A flagged sample and a skipped sample side by side, each with its reason",
+        "d": "A second pass in which the reviewer rates its own confidence in every remark"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "An acceptable pattern shown next to a finding, with reasons, settles the borderline case.",
+        "a": "Ruled out because \"examples earn their place on the ambiguous ones\", and obvious bugs are already handled.",
+        "b": "Ruled out because \"Rules do not settle a case that looks like two rules at once\", and an instruction to be careful names no pattern.",
+        "d": "Ruled out because a rating of its own confidence adds no case to learn from, and examples \"are chosen where the reviewer is unsure\"."
+      }
+    },
+    {
+      "id": "02-examples-asking-and-the-practice#q2",
+      "page": "02-examples-asking-and-the-practice.md",
+      "scope": "page",
+      "stem": "A review job in CI receives a request with no reviewer named, and the project holds no default reviewer. What should the run do?",
+      "options": {
+        "a": "Ask the author who the reviewer should be, and wait",
+        "b": "Stop with a plain failure that lists the absent field",
+        "c": "Pick a reviewer at random and say nothing about it",
+        "d": "Carry on without a reviewer and omit it from the output"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "An unattended run cannot ask, and a required field with no default cannot be assumed.",
+        "a": "Ruled out because \"Asking in CI produces a job that waits for a person who is not there\".",
+        "c": "Ruled out because a guess is allowed only as a stated assumption where a default exists: \"it proceeds on stated assumptions where a default exists\".",
+        "d": "Ruled out because a run with nothing to assume \"stops with a clear failure where a required field has none\", and dropping the field hides the problem."
+      }
+    },
+    {
+      "id": "02-examples-asking-and-the-practice#m1",
+      "page": "02-examples-asking-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. The labels for how bad a finding is are free text, and the gate cannot compare them with its floor. Which change fixes it?",
+      "options": {
+        "a": "Ask the reviewer to use stronger adjectives for urgent findings",
+        "b": "Let the gate guess the level from words in the issue text",
+        "c": "Give each level a worked sample and close the field to a fixed list",
+        "d": "Drop the floor so that every label is accepted as it is"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A level with a code sample has a boundary, and a closed list can be compared with a floor.",
+        "a": "Ruled out because \"A definition with a code example gives the reviewer a case to compare with\", and adjectives give none.",
+        "b": "Ruled out because the gate needs a value it can compute with: \"an open, free-text severity cannot be computed with\".",
+        "d": "Ruled out because the gate \"drops findings below a floor and fails the job at a severity\", and without a floor it has no policy."
+      }
+    },
+    {
+      "id": "02-examples-asking-and-the-practice#m2",
+      "page": "02-examples-asking-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. One group of findings has 40 percent precision. Its dismissals all trace to line-length remarks, while its other remarks are always accepted. What fits?",
+      "options": {
+        "a": "Disable the whole group until every remark in it improves",
+        "b": "Fix the criteria for that one source of noise and keep the rest enabled",
+        "c": "Delete the group's criteria and start over with none",
+        "d": "Accept the noise because the precision is above a third"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The recorded pattern shows where the dismissals come from, so only that part is adjusted.",
+        "a": "Ruled out because \"The fix is then to adjust the criteria for the one pattern and not to disable the category\".",
+        "c": "Ruled out because \"Deleting the category from the criteria loses the examples that the next attempt needs\".",
+        "d": "Ruled out because the noise has a cost, since \"each dismissed comment lowers trust in the accepted ones\"."
+      }
+    },
+    {
+      "id": "02-examples-asking-and-the-practice#m3",
+      "page": "02-examples-asking-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. A review run starts from a request whose branch name is blank, and the project defines `main` as the default. What should it do?",
+      "options": {
+        "a": "Ask the author which branch is meant and wait for an answer",
+        "b": "Stop with a failure, since a required field is missing",
+        "c": "Proceed on `main` and state that assumption in its output",
+        "d": "Choose a branch at random and leave it unmentioned"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A run that cannot ask proceeds on a stated assumption where a default exists.",
+        "a": "Ruled out because \"Asking in CI produces a job that waits for a person who is not there\".",
+        "b": "Ruled out because it stops only without a default: \"it proceeds on stated assumptions where a default exists\".",
+        "d": "Ruled out because a silent guess omits the step the page requires, which is \"to state the assumptions made for the rest\"."
+      }
+    }
+  ]
+}
