@@ -10,6 +10,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from grade_practices import jvm_failures, junit_results  # noqa: E402  (one reader for Gradle failures: the JUnit XML report)
+
 ROOT = Path(__file__).resolve().parent.parent
 PD = "exercises/06-prompting-fundamentals/unit-01/practice-1"
 OUT = ROOT / ".survey-out"
@@ -22,7 +25,7 @@ def out_path(lang, variant):
     return OUT / f"{PD.replace('/', '_')}-{lang}-{variant}.txt"
 
 
-def analyse(lang, text):
+def analyse(lang, text, variant=None):
     """Return (passed_ids, failed_ids, other_problems) for one run's output."""
     names = {lang_name: cid for cid, c in CASES["cases"].items() for lang_name in [c[lang]]}
     failed, problems = set(), []
@@ -46,19 +49,13 @@ def analyse(lang, text):
     elif lang == "java":  # Gradle output, read like Kotlin's
         if re.search(r"error: |Execution failed for task ':compile(Test)?Java'", text):
             problems.append("compilation error")
-        for m in re.finditer(r"PromptBuilderTest > (\w+)\(\) FAILED\n\s+(\S+)", text):
-            failed.add(names.get(m.group(1), m.group(1)))
-            if "AssertionFailedError" not in m.group(2):
-                problems.append(f"{m.group(1)}: {m.group(2)}")
+        jvm_failures(text, "PromptBuilderTest", names, junit_results(PD, lang, variant), failed, problems)
         if "BUILD FAILED" in text and not failed and not problems:
             problems.append("the build failed without a failing test")
     else:
         if re.search(r"^e: ", text, re.M):
             problems.append("compilation error")
-        for m in re.finditer(r"PromptBuilderTest > (\w+)\(\) FAILED\n\s+(\S+)", text):
-            failed.add(names.get(m.group(1), m.group(1)))
-            if "AssertionFailedError" not in m.group(2):
-                problems.append(f"{m.group(1)}: {m.group(2)}")
+        jvm_failures(text, "PromptBuilderTest", names, junit_results(PD, lang, variant), failed, problems)
     return set(ALL) - failed, failed, problems
 
 
@@ -72,7 +69,7 @@ def main():
                 print(f"{lang} {variant}: no output at {p.name}")
                 findings += 1
                 continue
-            passed, failed, problems = analyse(lang, p.read_text())
+            passed, failed, problems = analyse(lang, p.read_text(), variant)
             if variant == "reference":
                 ok = failed == set() and not problems and len(passed) == len(ALL)
                 want = "all pass"
