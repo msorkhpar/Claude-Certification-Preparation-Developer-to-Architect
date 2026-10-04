@@ -679,11 +679,11 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 
 ## Quiz
 
-1. The regression suite shows the new model with a higher overall pass rate, but one case that must pass now fails. What should the gate do?
-   - **a**: Accept the change, because the overall pass rate is higher and the average is what counts
-   - **b**: Refuse the change, because a single broken requirement blocks it whatever the mean says
-   - **c**: Refuse the change only when the failed case sits in a protected segment, and accept it otherwise
-   - **d**: Accept it and keep a close watch on that case once the change is running in production
+1. A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?
+   - **a**: Advance to 25 percent, since a clean record needs no further evidence
+   - **b**: Hold where it is until enough volume has arrived to say anything
+   - **c**: Roll back to zero, since too few requests counts as a failed stage
+   - **d**: Declare the roll-out complete, since no error has been seen so far
 
 2. A staged roll-out is at 25 percent of requests when the error rate passes its limit. What happens next?
    - **a**: Drop to 5 percent and keep the roll-out running, to gather more evidence from a smaller share
@@ -694,7 +694,7 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A must-pass case is a rule, so one failure refuses the change. *a* is ruled out because "An average can rise while a case that must pass breaks". *c* is ruled out because of the rule "If any fails, the change is refused", whatever the segment. *d* is ruled out because "watching a known failure in production makes customers the test".
+1. **b**. A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage. *a* is ruled out because "A stage with fewer requests than the minimum (1,000 in the example) says nothing yet". *c* is ruled out because the share goes back to zero only when errors pass the limit: "Over it, the share goes back to zero". *d* is ruled out because a roll-out ends with "One stage up, and `complete` at 100 percent".
 2. **d**. The limit is passed, so the share goes back to zero and the previous model, still configured, takes the traffic. *b* is ruled out because "Holding at the stage while errors continue leaves the share of customers who see them where it is". *c* is ruled out because "Advancing to 100 percent to see the failure in the full data makes every customer the sample". *a* is ruled out because "Reducing to a smaller share keeps part of the damage on the path".
 
 </details>
@@ -715,17 +715,17 @@ This quiz covers both pages of the module.
    - **c**: Turning thinking off by sending the disabled setting, which the new model accepts as before
    - **d**: Dropping the first block of every reply before parsing, since it always holds only thinking
 
-3. Cost per answer rose after the migration although traffic is unchanged, and the budget was set from the old model's token counts. What does the migration guidance imply?
-   - **a**: Return to the old model, because the budget is fixed and cannot be allowed to change
-   - **b**: Treat the rise as a billing error and ask the provider to correct the charges
-   - **c**: Shorten every prompt until the old budget fits again, whatever happens to quality
-   - **d**: Measure usage again on the replacement, reset the spending plan to it, and report the difference
+3. On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?
+   - **a**: Nothing, since the gate already approved the new model and a rollback is no longer needed
+   - **b**: The record of which key called which model, since only the configuration holds it
+   - **c**: The new cost baseline, which can only be computed while the old id stays configured
+   - **d**: The way back, which needs the previous one kept in place and tested until its own retirement
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The decision is a trade, and the architect states it with its date. *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
 2. **b**. A reply may begin with thinking blocks, so the parser reads by type. *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens". *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
-3. **d**. The price and the token counts both changed, so the baseline is reset. *b* is ruled out because "A rise in cost per answer after a migration is therefore not a billing error". *c* is ruled out because "Shortening every prompt until the old budget fits again trades quality for a number that no longer applies". *a* is ruled out because "a budget that cannot change is a decision to stay on a model whose date is fixed".
+3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "Passing a suite is a prediction about traffic, and traffic is where it is tested". *b* is ruled out because the Console export gives "usage broken down by API key and model", so the record does not live in the configuration. *c* is ruled out because the baseline is reset by the rule "Recount tokens and re-baseline cost" on the replacement, which needs no old id.
 
 </details>

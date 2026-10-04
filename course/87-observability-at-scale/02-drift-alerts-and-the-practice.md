@@ -594,11 +594,11 @@ The practice is in [`exercises/87-observability-at-scale`](../../exercises/87-ob
 
 This quiz covers both pages of the module.
 
-1. An incident review finds that the platform's log records hold the whole prompt and every tool output, so reading them exposes customer text. The team wants the logs to stay useful. Which change fits?
-   - **a**: Cut every record to its first 200 characters so that a smaller amount of text is stored
-   - **b**: Leave the records exactly as they are and restrict the small group of people who are allowed to open the log store
-   - **c**: Write ids, counts, timings and statuses by default, and open one content field by name for a stated purpose
-   - **d**: Encrypt the log store and hold its contents for ten years in case an auditor asks for them
+1. A project commits a settings file in its repository that turns on prompt logging for telemetry, so that a reviewer can read developers' prompts. What does Claude Code do with it?
+   - **a**: It captures the prompts of everyone who clones the repository, starting with the first session
+   - **b**: It captures the prompts only in sessions where each developer has also enabled tracing
+   - **c**: It ignores the exporter variables found there, so they come from managed or per-user configuration
+   - **d**: It applies the setting but redacts the prompts anyway, because redaction cannot be changed
 
 2. A complaint must be followed through the gateway, the orchestrator, two subagents and a tool, each logging in its own format. The records cannot be joined into one story. What was missing?
    - **a**: A common timestamp format across the services, so that the records can be sorted into a single list
@@ -615,7 +615,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Ids, counts and timings keep the logs useful, and a content field opened by name for a stated purpose limits what is exposed. *b* is ruled out because "Restricting who may open the log store narrows the audience and leaves the copy". *a* is ruled out because "Truncating a record cuts its volume and not its exposure". *d* is ruled out because "Encryption protects the store and does nothing about what the store holds, or about how long it is held".
+1. **c**. Claude Code ignores the exporter variables in a repository's settings. *a* is ruled out because "a repository can't use them to turn telemetry on". *b* is ruled out because the sentence continues "choose where it goes, or capture content". *d* is ruled out because "each is opened by a separate variable", so redaction can be changed, just not from a repository.
 2. **b**. A shared identifier, taken at the edge and written everywhere, joins the records. *a* is ruled out because "Time alone cannot join records: two requests at the same millisecond look the same". *c* is ruled out because "keeping records longer keeps the same unjoinable records longer". *d* is ruled out because "A central store collects the records and still does not say which belong together".
 3. **d**. The id is high-cardinality, so it belongs on the traces and events, which are meant for single occurrences. *a* is ruled out because "Moving to a larger store pays for the series and leaves their count growing". *c* is ruled out because "a random sample of metric points gives a wrong rate: metrics are counts, and a missing count is a wrong count". *b* is ruled out because "Dropping the id from everything gives up the ability to look at one conversation, which the traces exist for".
 

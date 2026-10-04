@@ -643,11 +643,11 @@ This quiz covers both pages of the module.
    - **c**: Send every definition and mark the infrequent ones as deferred
    - **d**: Send every definition with a cache breakpoint on each deferred one
 
-2. A company wants its developers to use Claude without handing them the model provider's credentials, with a limit per team and a record of every call. Which design fits?
-   - **a**: One provider credential shared in a settings file that every developer receives
-   - **b**: A gateway that holds the vendor secret and gives each engineer a personal login
-   - **c**: A separate provider credential for each developer, each with a spend limit
-   - **d**: A proxy in each developer's editor that forwards calls without any check
+2. A gateway receives a request whose credential has been revoked and which also names a model that the team may not use. What does it answer, and what does it record?
+   - **a**: A refusal for the model, recorded under the team that owned the revoked credential
+   - **b**: A refusal as unauthenticated, logged under unknown with the verdict but no prompt text
+   - **c**: An approval with a warning in the log, since a revoked credential is the provider's concern
+   - **d**: A refusal that keeps the full prompt in the record, so that an attack can be studied later
 
 3. A partner company's autonomous research system, built on another framework, must hand sub-tasks to your own autonomous system and collect the results. Which mechanism does the integration use?
    - **a**: An MCP server that exposes your system as one tool of the partner's system
@@ -659,7 +659,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The search runs on the full set, so every definition is sent and the infrequent ones are marked as deferred. *b* is ruled out because "You still send every tool's full definition in the `tools` array on every request". *a* is ruled out because deferral changes "what enters the context window", and text in the prompt would load them all every time. *d* is ruled out because deferred tools are kept out of the prefix, and "A deferred tool cannot itself carry a cache breakpoint".
-2. **b**. A gateway keeps the provider key on the server, gives each developer a credential and enforces limits and records in one place. *a* is ruled out because "the provider key stays server-side; developers hold gateway credentials instead". *c* is ruled out because the gateway is where "enforce budgets and rate limits in one place" and a record of every request are kept, and separate keys leave them in each client. *d* is ruled out because "who is calling comes first, because every later rule is a rule about a team", and a proxy that forwards without a check decides nothing.
+2. **b**. Who is calling comes first, and the record keeps "the team (or "unknown"), the model and the verdict, and no prompt text". *a* is ruled out because "A request with no credential is refused as unauthenticated even when it also asks for a model it may not have". *c* is ruled out because "every decision, the refusals included, leaves a record". *d* is ruled out because "a log of content is its own data-protection problem".
 3. **d**. The counterpart is an independent agent with its own owner, which is the agent-to-agent case. *a* is ruled out because "MCP is for agent-to-tool communication", and the partner's agent is a peer and not a tool. *b* is ruled out because a direct call suits "The path is known: the same steps in the same order", and a delegation between two agents is not that. *c* is ruled out because A2A is "Not a sub-agent or tool-call protocol", and a subagent is how an agent delegates inside its own framework, not across two.
 
 </details>

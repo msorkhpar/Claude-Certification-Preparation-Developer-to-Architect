@@ -679,22 +679,22 @@ roll-out at 100% with 50000 requests and 10 errors: complete
 
 ## Quiz
 
-1. A team's product still calls a model that the documentation lists as deprecated, with a retirement date seven weeks away. Which action fits best?
-   - **a**: Audit usage by API key, then try the recommended replacement on your own cases long before the deadline
-   - **b**: Wait for the day that the model retires, since requests continue to be answered until then without a problem
-   - **c**: Move the workload to a cloud partner, whose retirement schedule will be the same as the vendor's own
-   - **d**: Swap the model id in the configuration and ship at once, because the replacement is the documented one
+1. A deprecation table lists one of a company's models with a retirement of "not sooner than" a date nine weeks away. How should the team treat that entry?
+   - **a**: Plan against it as the earliest cut-off and begin early, since it slips later, not earlier
+   - **b**: Wait for the vendor to confirm a final cut-off before spending any effort on the move
+   - **c**: Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day
+   - **d**: Ignore it until the status changes to retired, because nothing breaks before that point
 
-2. After a team swaps the model id in its code, every request that sets a non-default temperature comes back with a 400 error. What explains it?
-   - **a**: The old id is still held in a cache, and the cache must be flushed before the request works
-   - **b**: The new model needs a longer timeout than the old one did for the very same request
-   - **c**: The replacement refuses sampling parameters, so they have to stop being sent altogether
-   - **d**: The temperature must now be below a lower ceiling, so the value alone needs to change
+2. A model's entry in the documentation carries the status legacy. What does that status say?
+   - **a**: It has a retirement date and will fail on that day, so requests must already be moved
+   - **b**: It is the recommended choice for new work, since only deprecated models are withdrawn
+   - **c**: It stops receiving updates and heads toward deprecation, so plan the move before any date is set
+   - **d**: It has been retired already, so every request that names it comes back as a failure
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The audit finds every use, and the replacement is tested on the team's own tasks before the date. *b* is ruled out because "Requests to retired models will fail" and "Deprecated models are likely to be less reliable than active models". *c* is ruled out because "Partner-operated platforms (Amazon Bedrock and Google Cloud) set their own retirement schedules". *d* is ruled out because the new model "refuses settings the old one accepted, changes defaults without an error, and costs more per answer".
-2. **c**. A 400 on a sampling setting means the model no longer accepts it, and the fix is to remove it. *a* is ruled out because "It is not a timeout, a cache that holds the old model, or a value out of range". *b* is ruled out because "A 400 on one of these is a refusal of the shape of the request", and a longer timeout does not change a refusal. *d* is ruled out because "The fix is to stop sending it, not to change its value".
+1. **a**. The table can say "not sooner than" for a model that is still active, which marks a date that may move later. *b* is ruled out because "is never a date to wait for". *c* is ruled out because "marks a date that may move later". *d* is ruled out because "Sixty days is the shortest warning, and a migration of forty applications can take longer than that".
+2. **c**. Legacy means "The model will no longer receive updates and may be deprecated in the future." *a* is ruled out because deprecated is the state where Anthropic "provides a recommended replacement and assigns a retirement date". *b* is ruled out because active is the state where "The model is fully supported and recommended for use". *d* is ruled out because "Requests to retired models will fail" describes the retired state, not legacy.
 
 </details>

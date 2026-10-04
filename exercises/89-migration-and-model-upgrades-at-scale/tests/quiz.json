@@ -5,57 +5,57 @@
       "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q1",
       "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
       "scope": "page",
-      "stem": "A team's product still calls a model that the documentation lists as deprecated, with a retirement date seven weeks away. Which action fits best?",
+      "stem": "A deprecation table lists one of a company's models with a retirement of \"not sooner than\" a date nine weeks away. How should the team treat that entry?",
       "options": {
-        "a": "Audit usage by API key, then try the recommended replacement on your own cases long before the deadline",
-        "b": "Wait for the day that the model retires, since requests continue to be answered until then without a problem",
-        "c": "Move the workload to a cloud partner, whose retirement schedule will be the same as the vendor's own",
-        "d": "Swap the model id in the configuration and ship at once, because the replacement is the documented one"
+        "a": "Plan against it as the earliest cut-off and begin early, since it slips later, not earlier",
+        "b": "Wait for the vendor to confirm a final cut-off before spending any effort on the move",
+        "c": "Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day",
+        "d": "Ignore it until the status changes to retired, because nothing breaks before that point"
       },
       "key": "a",
       "explanation": {
-        "a": "The audit finds every use, and the replacement is tested on the team's own tasks before the date.",
-        "b": "Ruled out because \"Requests to retired models will fail\" and \"Deprecated models are likely to be less reliable than active models\".",
-        "c": "Ruled out because \"Partner-operated platforms (Amazon Bedrock and Google Cloud) set their own retirement schedules\".",
-        "d": "Ruled out because the new model \"refuses settings the old one accepted, changes defaults without an error, and costs more per answer\"."
+        "a": "The table can say \"not sooner than\" for a model that is still active, which marks a date that may move later.",
+        "b": "Ruled out because \"is never a date to wait for\".",
+        "c": "Ruled out because \"marks a date that may move later\".",
+        "d": "Ruled out because \"Sixty days is the shortest warning, and a migration of forty applications can take longer than that\"."
       }
     },
     {
       "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q2",
       "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
       "scope": "page",
-      "stem": "After a team swaps the model id in its code, every request that sets a non-default temperature comes back with a 400 error. What explains it?",
+      "stem": "A model's entry in the documentation carries the status legacy. What does that status say?",
       "options": {
-        "a": "The old id is still held in a cache, and the cache must be flushed before the request works",
-        "b": "The new model needs a longer timeout than the old one did for the very same request",
-        "c": "The replacement refuses sampling parameters, so they have to stop being sent altogether",
-        "d": "The temperature must now be below a lower ceiling, so the value alone needs to change"
+        "a": "It has a retirement date and will fail on that day, so requests must already be moved",
+        "b": "It is the recommended choice for new work, since only deprecated models are withdrawn",
+        "c": "It stops receiving updates and heads toward deprecation, so plan the move before any date is set",
+        "d": "It has been retired already, so every request that names it comes back as a failure"
       },
       "key": "c",
       "explanation": {
-        "c": "A 400 on a sampling setting means the model no longer accepts it, and the fix is to remove it.",
-        "a": "Ruled out because \"It is not a timeout, a cache that holds the old model, or a value out of range\".",
-        "b": "Ruled out because \"A 400 on one of these is a refusal of the shape of the request\", and a longer timeout does not change a refusal.",
-        "d": "Ruled out because \"The fix is to stop sending it, not to change its value\"."
+        "c": "Legacy means \"The model will no longer receive updates and may be deprecated in the future.\"",
+        "a": "Ruled out because deprecated is the state where Anthropic \"provides a recommended replacement and assigns a retirement date\".",
+        "b": "Ruled out because active is the state where \"The model is fully supported and recommended for use\".",
+        "d": "Ruled out because \"Requests to retired models will fail\" describes the retired state, not legacy."
       }
     },
     {
       "id": "02-the-gate-the-roll-out-and-the-way-back#q1",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "page",
-      "stem": "The regression suite shows the new model with a higher overall pass rate, but one case that must pass now fails. What should the gate do?",
+      "stem": "A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?",
       "options": {
-        "a": "Accept the change, because the overall pass rate is higher and the average is what counts",
-        "b": "Refuse the change, because a single broken requirement blocks it whatever the mean says",
-        "c": "Refuse the change only when the failed case sits in a protected segment, and accept it otherwise",
-        "d": "Accept it and keep a close watch on that case once the change is running in production"
+        "a": "Advance to 25 percent, since a clean record needs no further evidence",
+        "b": "Hold where it is until enough volume has arrived to say anything",
+        "c": "Roll back to zero, since too few requests counts as a failed stage",
+        "d": "Declare the roll-out complete, since no error has been seen so far"
       },
       "key": "b",
       "explanation": {
-        "b": "A must-pass case is a rule, so one failure refuses the change.",
-        "a": "Ruled out because \"An average can rise while a case that must pass breaks\".",
-        "c": "Ruled out because of the rule \"If any fails, the change is refused\", whatever the segment.",
-        "d": "Ruled out because \"watching a known failure in production makes customers the test\"."
+        "b": "A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage.",
+        "a": "Ruled out because \"A stage with fewer requests than the minimum (1,000 in the example) says nothing yet\".",
+        "c": "Ruled out because the share goes back to zero only when errors pass the limit: \"Over it, the share goes back to zero\".",
+        "d": "Ruled out because a roll-out ends with \"One stage up, and `complete` at 100 percent\"."
       }
     },
     {
@@ -119,19 +119,19 @@
       "id": "02-the-gate-the-roll-out-and-the-way-back#m3",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "module",
-      "stem": "Cost per answer rose after the migration although traffic is unchanged, and the budget was set from the old model's token counts. What does the migration guidance imply?",
+      "stem": "On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?",
       "options": {
-        "a": "Return to the old model, because the budget is fixed and cannot be allowed to change",
-        "b": "Treat the rise as a billing error and ask the provider to correct the charges",
-        "c": "Shorten every prompt until the old budget fits again, whatever happens to quality",
-        "d": "Measure usage again on the replacement, reset the spending plan to it, and report the difference"
+        "a": "Nothing, since the gate already approved the new model and a rollback is no longer needed",
+        "b": "The record of which key called which model, since only the configuration holds it",
+        "c": "The new cost baseline, which can only be computed while the old id stays configured",
+        "d": "The way back, which needs the previous one kept in place and tested until its own retirement"
       },
       "key": "d",
       "explanation": {
-        "d": "The price and the token counts both changed, so the baseline is reset.",
-        "b": "Ruled out because \"A rise in cost per answer after a migration is therefore not a billing error\".",
-        "c": "Ruled out because \"Shortening every prompt until the old budget fits again trades quality for a number that no longer applies\".",
-        "a": "Ruled out because \"a budget that cannot change is a decision to stay on a model whose date is fixed\"."
+        "d": "The page says \"the old model is the rollback, and it stays so until its own retirement date\".",
+        "a": "Ruled out because \"Passing a suite is a prediction about traffic, and traffic is where it is tested\".",
+        "b": "Ruled out because the Console export gives \"usage broken down by API key and model\", so the record does not live in the configuration.",
+        "c": "Ruled out because the baseline is reset by the rule \"Recount tokens and re-baseline cost\" on the replacement, which needs no old id."
       }
     }
   ]

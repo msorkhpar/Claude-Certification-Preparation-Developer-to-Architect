@@ -678,11 +678,11 @@ This quiz covers both pages of the module.
    - **c**: Inspect the index and the splitting of documents upstream of the generation stage, because the evidence never arrived
    - **d**: Add more examples of confident replies to the prompt, so that the style is consistent
 
-2. A feature must answer within two seconds at its slowest five percent and reach 90 percent accuracy. Three candidate models have been measured. Which rule picks one?
-   - **a**: The most accurate candidate, since quality is the first thing that users will notice about the feature once it ships
-   - **b**: The least expensive option that clears the quality floor and whose tail latency stays inside the limit
-   - **c**: The candidate with the best average latency, since users notice a fast reply most
-   - **d**: The cheapest candidate overall, then lengthen its prompt until it reaches the floor
+2. A team's check for its research agent demands exactly three searches in a fixed order, and it fails runs that reach the right answer by another route. What should the check judge instead?
+   - **a**: Whether the runs repeated the same steps, because identical steps prove reliability
+   - **b**: Whether the outcome is correct, and then whether the process behind it was sensible
+   - **c**: The number of tool calls, since fewer calls mean a better agent
+   - **d**: The final text, without any look at how it was reached
 
 3. A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. What does the research team's experience suggest?
    - **a**: Test on the examples that sit in the prompt, since those are already written down
@@ -694,7 +694,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The evidence was never retrieved, so the index and chunking are the cheapest place to look. *b* is ruled out because "A larger model does not know a document it was never shown". *a* is ruled out because "Sampling settings change how an answer is worded and not what evidence it was given". *d* is ruled out because "Examples teach a format; they do not supply a missing fact".
-2. **b**. Both limits come first and the price decides among those that pass. *a* is ruled out because "Choosing the most accurate model pays for accuracy that the floor does not ask for". *c* is ruled out because "A mean hides the tail: the slowest five in a hundred requests are the ones users complain about". *d* is ruled out because "Cheapest first ignores the two limits, and the limits come before the price".
+2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the rule is "Check that the result is right, then check that the process was reasonable". *a* is ruled out because "an eval that checks for a prescribed sequence of steps fails correct runs". *c* is ruled out because tool efficiency is one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)". *d* is ruled out because the rule is to "check that the process was reasonable" after the result.
 3. **d**. Early changes are large, so a small set shows them. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because "every week without an eval is a week of judging by feel". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
 
 </details>

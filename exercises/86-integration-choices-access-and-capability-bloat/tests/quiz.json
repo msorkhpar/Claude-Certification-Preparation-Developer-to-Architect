@@ -100,19 +100,19 @@
       "id": "02-capability-bloat-progressive-discovery-and-the-practice#m2",
       "page": "02-capability-bloat-progressive-discovery-and-the-practice.md",
       "scope": "module",
-      "stem": "A company wants its developers to use Claude without handing them the model provider's credentials, with a limit per team and a record of every call. Which design fits?",
+      "stem": "A gateway receives a request whose credential has been revoked and which also names a model that the team may not use. What does it answer, and what does it record?",
       "options": {
-        "a": "One provider credential shared in a settings file that every developer receives",
-        "b": "A gateway that holds the vendor secret and gives each engineer a personal login",
-        "c": "A separate provider credential for each developer, each with a spend limit",
-        "d": "A proxy in each developer's editor that forwards calls without any check"
+        "a": "A refusal for the model, recorded under the team that owned the revoked credential",
+        "b": "A refusal as unauthenticated, logged under unknown with the verdict but no prompt text",
+        "c": "An approval with a warning in the log, since a revoked credential is the provider's concern",
+        "d": "A refusal that keeps the full prompt in the record, so that an attack can be studied later"
       },
       "key": "b",
       "explanation": {
-        "b": "A gateway keeps the provider key on the server, gives each developer a credential and enforces limits and records in one place.",
-        "a": "Ruled out because \"the provider key stays server-side; developers hold gateway credentials instead\".",
-        "c": "Ruled out because the gateway is where \"enforce budgets and rate limits in one place\" and a record of every request are kept, and separate keys leave them in each client.",
-        "d": "Ruled out because \"who is calling comes first, because every later rule is a rule about a team\", and a proxy that forwards without a check decides nothing."
+        "b": "Who is calling comes first, and the record keeps \"the team (or \"unknown\"), the model and the verdict, and no prompt text\".",
+        "a": "Ruled out because \"A request with no credential is refused as unauthenticated even when it also asks for a model it may not have\".",
+        "c": "Ruled out because \"every decision, the refusals included, leaves a record\".",
+        "d": "Ruled out because \"a log of content is its own data-protection problem\"."
       }
     },
     {

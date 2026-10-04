@@ -795,11 +795,11 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 
 ## Quiz
 
-1. A RAG assistant starts giving confident wrong answers right after a nightly document refresh. The model version, the prompt and the latency are unchanged. Where should the investigation begin?
-   - **a**: The model weights, which may have changed overnight without anyone noticing
-   - **b**: The index update, which may have left outdated chunks beside new ones
-   - **c**: The sampling temperature, which may have been set too low for the new data
-   - **d**: The context window, which may have shrunk after the refresh ran last night
+1. A team reports 90 percent retrieval recall. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
+   - **a**: 90 percent, since only questions that returned something can be judged
+   - **b**: 27 of 40, about two thirds, because a blank query still belongs in the denominator
+   - **c**: 100 percent, since every result that was returned held the relevant chunk
+   - **d**: 75 percent, since 30 of the 40 labelled questions were answered
 
 2. In a test of 8 questions, the evidence was retrieved for 5 and the answers were right for 5. One answer was wrong although its evidence was retrieved, and one was right although its evidence was not. How many of the questions have no retrieved evidence and a wrong answer?
    - **a**: Five
@@ -810,7 +810,7 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A refresh changes only what retrieval can return, and a re-index that adds without removing leaves old text in the index. *a* is ruled out because "Nothing in a document refresh touches the model, its sampling settings or the size of its window". *c* is ruled out because the same passage says the refresh does not touch "its sampling settings or the size of its window". *d* is ruled out because the same passage names "the size of its window" among the things a refresh does not touch, and the guide adds "model and latency unchanged".
+1. **b**. The page says "the denominator is every labelled question". *a* is ruled out because "A question with no results counts as a miss in recall over the labelled set". *c* is ruled out because "the denominator is every labelled question", not the questions that returned results. *d* is ruled out because "and so does a question that was never answered": answered questions are not the denominator.
 2. **d**. The outcomes are 4 ok, 1 generation, 2 retrieval and 1 unsupported, so two questions had no evidence and a wrong answer. *b* is ruled out because the wrong answer that had its evidence is one where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because the right answer without evidence is one where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure by definition. *a* is ruled out because five is the number of questions for which "the evidence was retrieved for 5 and 5 answers were right" is said of, the opposite count.
 
 </details>
@@ -825,11 +825,11 @@ This quiz covers both pages of the module.
    - **c**: Section chunks in a permission-filtered index, replaced when their document changes
    - **d**: A keyword index over each whole agreement, rebuilt from scratch each quarter by a batch job
 
-2. A finance team asks the assistant for the total of refunds by region for the last quarter, from a ledger of six million rows. Answers drift from one run to the next. Which mechanism fits?
-   - **a**: A larger embedding index over chunks that were cut from each row of the ledger table
-   - **b**: A database query executed by a tool, with the model describing the figures returned
-   - **c**: A prompt that holds the first thousand rows and asks the model for a rough estimate
-   - **d**: A keyword index over the region names, with the best chunks added up by hand afterwards
+2. On a labelled set of 8 questions, a pipeline scores 4 ok, 1 generation, 2 retrieval and 1 unsupported. Where should the next week of work go?
+   - **a**: The prompt alone, since one answer was wrong although its evidence was retrieved
+   - **b**: The cut, the index and the freshness, since three problem cases lack evidence
+   - **c**: Nowhere in particular, since five of the eight answers are right
+   - **d**: The unsupported case first, since a right answer needs no work at all
 
 3. A team re-indexes by adding the chunks of every changed document. Recall on its labelled questions stays high, yet users keep reporting outdated answers. What does the team's measurement miss?
    - **a**: Whether the keyword index outweighs the embedding index when the query holds a code
@@ -841,7 +841,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. Frequent changes, citations and per-client access are retrieval's case, and a changed document must lose its old chunks. *a* is ruled out because in the table the weights are weak when "Facts change, a source must be shown or a reader's access must be respected", which describes this firm. *b* is ruled out because the prompt suits a corpus that is "small, shared by every request and edited rarely", and these agreements are revised weekly and read under access rules. *d* is ruled out because "A re-index that runs less often than the documents change leaves old text in the index between runs", and a quarterly rebuild leaves it for months.
-2. **b**. The answer lives in a table and needs a total, so a tool runs a query and the model reports the result. *a* is ruled out because for data in a table the mechanism is "A structured query run by a tool", and chunks of rows cannot be totalled reliably. *c* is ruled out because the prompt needs "The whole corpus is under about 200,000 tokens", and six million rows do not fit. *d* is ruled out because the keyword index is for a question that "names an identifier such as an error code", and not for a total over rows.
+2. **b**. The table sends retrieval outcomes to "The cut, the context, the index, the freshness". *a* is ruled out because "the pipeline has two retrieval failures and one generation failure". *c* is ruled out because "Counting only correct answers hides all three". *d* is ruled out because the table sends it to "Retrieval, because the answer rests on the model's memory or on luck".
 3. **d**. Recall by chunk id counts an old chunk with the right id as a hit, so staleness needs a check against the source. *b* is ruled out because "the only thing that changed is what retrieval can return", so the old text is already in the evidence before the prompt is read. *c* is ruled out because the problem is what the metric counts, as "an old chunk with the right id still counts as a hit", and more questions would count the same way. *a* is ruled out because the weighting of codes decides ranking among current chunks, since "a question that names an identifier is the case where the keyword index is right", and it does not decide whether an old chunk is returned.
 
 </details>
