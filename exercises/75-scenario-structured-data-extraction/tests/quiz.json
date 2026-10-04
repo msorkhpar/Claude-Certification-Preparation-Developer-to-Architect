@@ -1,0 +1,195 @@
+{
+  "module": "75-scenario-structured-data-extraction",
+  "quizzes": [
+    {
+      "id": "01-the-extraction-system-where-the-pipeline-can-lie#q1",
+      "page": "01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "scope": "page",
+      "stem": "In the example run, a scanned invoice names its vendor but holds no total anywhere in its text, and the model returns the total as null. What does the pipeline do with that document?",
+      "options": {
+        "a": "Retry it once with the error attached, since a second look may still find a figure there",
+        "b": "Send it to a person after one attempt, as no retry supplies what the page lacks",
+        "c": "Compute the figure from the line items instead and mark the record as valid",
+        "d": "Fail it at once and discard the vendor that the scan did manage to read"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A missing value is routed, not retried.",
+        "a": "Ruled out because the retry covers only what a second look can fix: \"A value that the document does not contain stays absent however often it is asked for.\"",
+        "c": "Ruled out because the status comes from the checks and not from a guess: \"The status is derived from the checks, and the model's own opinion plays no part.\"",
+        "d": "Ruled out because a missing value is not a failure of the document: \"It is `needs_review` when the only open matters are a value the page lacks or a conflict that the model flagged, and neither is retried.\""
+      }
+    },
+    {
+      "id": "01-the-extraction-system-where-the-pipeline-can-lie#q2",
+      "page": "01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "scope": "page",
+      "stem": "The example run reports three valid documents, all correct, out of six that were sent. Which pair of figures does an honest report give?",
+      "options": {
+        "a": "Everything delivered was right, so the run scores a full hundred, and nothing more is reported",
+        "b": "Half of everything received and all of the accepted ones, with the difference stated",
+        "c": "Half of everything received, with the accepted-only figure left out as beside the point",
+        "d": "Three quarters, as the mean of the two figures, so that both are treated fairly"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The two figures and the gap are the report.",
+        "a": "Ruled out because the denominator is every document: \"A document that failed is a document the customer sent.\"",
+        "c": "Ruled out because the validated figure is a different figure and not an irrelevant one: \"The figure on the validated ones alone is a different figure and is always at least as high.\"",
+        "d": "Ruled out because the figures are not blended: \"The accuracy of a run is the share of all documents whose delivered record is correct.\""
+      }
+    },
+    {
+      "id": "01-the-extraction-system-where-the-pipeline-can-lie#q3",
+      "page": "01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "scope": "page",
+      "stem": "A pipeline on Claude Sonnet 5.5 must make sure that an extraction tool is used on every request, and it forces the tool through `tool_choice`. What happens, and what does the documentation recommend instead?",
+      "options": {
+        "a": "The call works, but the cached message blocks are then processed again from the start of the prompt",
+        "b": "The tool is used and the text before it is dropped, which does no harm in a pipeline that only extracts",
+        "c": "The call fails with a 400 error, and `auto` with strict schemas is the published replacement",
+        "d": "The setting is ignored, and the model goes on to choose whichever tool it likes best"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "On the models in the documentation's table, forcing is refused and the replacement is named.",
+        "a": "Ruled out because the request does not get as far as the cache: \"Not every model and setting supports forced tool use.\"",
+        "b": "Ruled out because the request does not run: \"On Claude Opus 5.5, Sonnet 5.5 and Fable 5.1, `any` and `tool` return a 400 error\".",
+        "d": "Ruled out because a setting that the API cannot honour is rejected and not ignored: \"the documented replacement is `auto` with strict tool use or structured outputs\"."
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#q1",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "page",
+      "stem": "A kind of document has exactly the minimum number of documents that the policy sets, and every one of them is correct. What does the audit decide about it?",
+      "options": {
+        "a": "Keep a person on it, since the minimum has to be passed and not only met",
+        "b": "Automate it, as the evidence needed is reached and not exceeded",
+        "c": "Wait for the run to meet the target before looking at this kind again",
+        "d": "Automate it only after an independent instance has rated each of the records"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Both comparisons are inclusive.",
+        "a": "Ruled out because reaching the minimum is enough: \"A kind with exactly the minimum number is enough, and a kind exactly at the target is ready.\"",
+        "c": "Ruled out because the overall figure takes no part: \"The overall figure plays no part in this decision\".",
+        "d": "Ruled out because the decision rests on the two conditions and not on a further review: \"A kind of document may go without a person only when two things hold\"."
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#q2",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "page",
+      "stem": "The validated accuracy is 100 percent, the all-document accuracy is 95, and the policy sets a gap of five points. Does the audit call the figure overstated?",
+      "options": {
+        "a": "Yes, because any distance between the two figures is a warning in itself",
+        "b": "Yes, since the validated figure is the one that matters to the customer",
+        "c": "No, since the difference only reaches the limit and does not pass it",
+        "d": "No, because the all-document figure alone is a fair measure of the run"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A difference that reaches the gap is not overstated.",
+        "a": "Ruled out because small differences are normal: \"A small difference is the ordinary cost of doing business.\"",
+        "b": "Ruled out because the test is a size and not a viewpoint: \"The audit calls the figure overstated only when the difference is greater than a gap that the policy sets\".",
+        "d": "Ruled out because the two figures are reported together: \"The validated figure is above the all-document figure whenever anything failed.\""
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#q3",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "page",
+      "stem": "An audit finds invented values, wasted retries and unchecked totals in one run. Which fix does it name first, and why?",
+      "options": {
+        "a": "Add semantic checks, since they catch the largest number of defects in a run",
+        "b": "Stop retrying absent values, since that wastes the most money of the three",
+        "c": "Let fields be null, since a wrong record that looks right travels on unseen",
+        "d": "Measure every document, since the figures cannot be trusted until then"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The order follows the damage downstream.",
+        "a": "Ruled out because a missing check comes third: \"An unchecked total is a missing check, third.\"",
+        "b": "Ruled out because a wasted retry does little harm: \"A wasted retry costs money and time and corrupts nothing, so it comes second.\"",
+        "d": "Ruled out because the measurement fault comes fourth: \"An overstated figure is a measurement fault, fourth.\""
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#m1",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. Typed forms are right 38 times in 40 and handwritten forms 12 times in 20. The policy asks for 90 percent and at least 30 documents. What does the audit conclude?",
+      "options": {
+        "a": "Both kinds are ready, since the overall figure of the whole set is above the target",
+        "b": "Neither kind is ready, since the weaker kind drags the figure of the stronger one down",
+        "c": "The smaller kind is ready and the larger is not, since fewer forms mean fewer errors",
+        "d": "The larger kind qualifies, while the smaller lacks both sample size and accuracy"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Both conditions are checked per kind.",
+        "a": "Ruled out because the average is not the test: \"The overall figure plays no part in this decision\".",
+        "b": "Ruled out because a kind is judged on its own documents: \"A kind of document may go without a person only when two things hold\".",
+        "c": "Ruled out because a small sample is no evidence: \"The minimum matters because ten correct documents are a small sample, and the target is a floor and not a ceiling.\""
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#m2",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. A colleague asks why the audit counts an unchecked total only in documents accepted as valid. What is the answer?",
+      "options": {
+        "a": "A reviewed case was seen by someone, and a failed one never went out",
+        "b": "Failed documents hold no total at all, so there would be nothing in them to count",
+        "c": "Documents sent to a person are counted elsewhere, in the figure for wasted retries",
+        "d": "The count would otherwise be larger than the number of documents that the run held"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Only an accepted record can carry an unchecked total.",
+        "b": "Ruled out because the reason is who looked and not whether a total exists: \"A document that went to a person was looked at, and a document that failed was never delivered\".",
+        "c": "Ruled out because the wasted-retry count is a different shape: \"A wasted retry costs money and time and corrupts nothing, so it comes second.\"",
+        "d": "Ruled out because the counts are per shape and not capped by the run: \"The audit counts an unchecked total only among documents accepted as valid.\""
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#m3",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. The example's by-kind line reads typed 2/2, scanned 1/2 and handwritten 0/2. Why is only the typed kind listed for automation?",
+      "options": {
+        "a": "It is the only kind that has a total printed in every one of its documents",
+        "b": "It has enough documents and no misses, unlike the others",
+        "c": "It was the first kind to appear in the run, and the list stops after the first",
+        "d": "It is the only kind that needed no retry at any point in the whole run"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The kind needs documents and accuracy.",
+        "a": "Ruled out because totals are not the test: \"A kind of document may go without a person only when two things hold\".",
+        "c": "Ruled out because the order of kinds plays no part and the list is built per kind: \"Only typed documents have earned automation.\"",
+        "d": "Ruled out because retries are not part of the test: \"The overall figure plays no part in this decision\"."
+      }
+    },
+    {
+      "id": "02-segments-gaps-and-the-practice#m4",
+      "page": "02-segments-gaps-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. A run shows a few invented vendor names and a long list of wasted retries. The team wants to begin with the retries, because they are far more frequent. What does the order of fixes say?",
+      "options": {
+        "a": "Begin with the retries, since frequency is the best guide to what a defect costs overall",
+        "b": "Fields come first, as a wrong entry that looks fine goes unseen downstream",
+        "c": "Fix both at once, as the two shapes share one cause that sits in the schema",
+        "d": "Begin with the measurement, because both of the counts could be wrong in the first place"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Damage downstream sets the order.",
+        "a": "Ruled out because frequency does not set it: \"The order follows the damage a shape does downstream.\"",
+        "c": "Ruled out because the audit names one fix first: \"A run often shows several failure shapes at once, and the audit names one fix first.\"",
+        "d": "Ruled out because the measurement fault comes fourth: \"An overstated figure is a measurement fault, fourth.\""
+      }
+    }
+  ]
+}
