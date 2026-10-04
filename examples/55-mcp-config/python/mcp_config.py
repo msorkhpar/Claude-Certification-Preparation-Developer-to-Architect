@@ -109,7 +109,7 @@ def show(value):
 
 
 def main():
-    env = {"GITHUB_TOKEN": "demo-github", "NPM_TOKEN": "demo-npm"}
+    env = {"GITHUB_TOKEN": "demo-gh", "NPM_TOKEN": "demo-npm"}
     shared = {"mcpServers": {
         "github": {"type": "http", "url": "${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}", "headers": {"Authorization": "Bearer ${GITHUB_TOKEN}"}},
         "registry": {"type": "http", "url": "https://registry-mcp.example.com/mcp", "headers": {"Authorization": "Bearer ${NPM_TOKEN}"}},

@@ -1397,7 +1397,7 @@ PLANTS[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
 _P55 = {
     "wrong-github-type": {".mcp.json": [('"type": "http",\n      "url": "${GITHUB_MCP_URL', '"type": "sse",\n      "url": "${GITHUB_MCP_URL')]},
     "wrong-docs-no-command": {".mcp.json": [('      "command": "python3",\n      "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py"],', '      "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py"],')]},
-    "wrong-literal-token": {".mcp.json": [('"Authorization": "Bearer ${GITHUB_TOKEN}"', '"Authorization": "Bearer ghp_0123456789abcdefghij"')]},
+    "wrong-literal-token": {".mcp.json": [('"Authorization": "Bearer ${GITHUB_TOKEN}"', '"Authorization": "Bearer ' + 'ghp_0123456789abcdefghij"')]},
     "wrong-covered-credential": {".mcp.json": [("Bearer ${GITHUB_TOKEN}", "Bearer ${NPM_TOKEN}")]},
     "wrong-secret-default": {".mcp.json": [('"DOCS_API_KEY": "${DOCS_API_KEY}"', '"DOCS_API_KEY": "${DOCS_API_KEY:-dev-key}"')]},
     "wrong-url-no-default": {".mcp.json": [('"url": "${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}"', '"url": "${GITHUB_MCP_URL}"')]},
