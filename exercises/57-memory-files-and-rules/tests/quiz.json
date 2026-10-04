@@ -1,0 +1,138 @@
+{
+  "module": "57-memory-files-and-rules",
+  "quizzes": [
+    {
+      "id": "01-where-instructions-live-and-what-loads-when#q1",
+      "page": "01-where-instructions-live-and-what-loads-when.md",
+      "scope": "page",
+      "stem": "An engineer wants a reminder about a private test server to guide Claude in one repository on their own machine, and never to reach teammates. Where does it go?",
+      "options": {
+        "a": "The committed instruction file, under a heading for personal items",
+        "b": "A git-ignored local note beside the root instruction file",
+        "c": "The personal file in the home folder, applying to every project",
+        "d": "The organisation policy file, which only that engineer edits"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The local file is personal to one project and is kept out of version control.",
+        "a": "Ruled out because \"A personal note about one project, such as a sandbox address, belongs in the local file\", and a committed file would share it.",
+        "c": "Ruled out because that file reaches \"You, in every project\", and the reminder concerns one repository.",
+        "d": "Ruled out because that layer reaches \"Everyone on the machine, and individual settings cannot exclude it\", so it is not a private note."
+      }
+    },
+    {
+      "id": "01-where-instructions-live-and-what-loads-when#q2",
+      "page": "01-where-instructions-live-and-what-loads-when.md",
+      "scope": "page",
+      "stem": "A session starts at the top of a project, and an instruction file sits two levels down in `web/ui/`. When do its lines reach the model?",
+      "options": {
+        "a": "At launch, together with the root file",
+        "b": "Only after a restart that begins inside that directory",
+        "c": "When the user runs the memory command",
+        "d": "Once Claude opens something beneath that directory"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A file below the starting directory loads on demand.",
+        "a": "Ruled out because the files that load first are the ones \"above the working directory are loaded at launch\", and this one is below it.",
+        "b": "Ruled out because a lower file loads \"on demand when Claude reads files in those directories\", with no restart.",
+        "c": "Ruled out because the memory command \"lists your CLAUDE.md, CLAUDE.local.md, and other memory file locations\" and loads nothing."
+      }
+    },
+    {
+      "id": "02-path-scoped-rules-size-and-the-practice#q1",
+      "page": "02-path-scoped-rules-size-and-the-practice.md",
+      "scope": "page",
+      "stem": "Testing conventions must govern spec files that live in dozens of different folders, and no other file. What delivers that?",
+      "options": {
+        "a": "A scoped rule whose glob matches by extension anywhere",
+        "b": "A separate memory file placed in every one of those folders",
+        "c": "An import of the conventions from the project root file",
+        "d": "A section for each project in the personal memory file"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "One glob follows the type across folders, and the rule loads when a matching file is read or edited.",
+        "b": "Ruled out because the guide's reason for the glob is \"test files spread throughout a codebase\", and a copy in each folder would have to be kept in step.",
+        "c": "Ruled out because an import \"moves text to another file and loads it at launch\", so the conventions would reach every task.",
+        "d": "Ruled out because personal rules \"apply to every project on your machine\", so they neither scope to test files nor reach the team."
+      }
+    },
+    {
+      "id": "02-path-scoped-rules-size-and-the-practice#q2",
+      "page": "02-path-scoped-rules-size-and-the-practice.md",
+      "scope": "page",
+      "stem": "A rule meant for infrastructure code loads in every session instead. What is the most likely cause?",
+      "options": {
+        "a": "The rules folder sits below the working directory",
+        "b": "Infrastructure files are always opened at the start of a session",
+        "c": "Its frontmatter is invalid YAML, so the scoping is dropped",
+        "d": "The rule's file name does not match the folder it governs"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "When the frontmatter does not parse, the rule is treated as unscoped.",
+        "a": "Ruled out because \"Every Markdown file under .claude/rules/ is a rule\", wherever the session starts.",
+        "b": "Ruled out because a scoped rule loads when Claude uses Read, Write or Edit on a matching file, \"not on every tool use\".",
+        "d": "Ruled out because the file name plays no part, since `paths` \"is the only field Claude Code reads in a rule\"."
+      }
+    },
+    {
+      "id": "02-path-scoped-rules-size-and-the-practice#m1",
+      "page": "02-path-scoped-rules-size-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A project holds `AGENTS.md` for other tools and nothing named `CLAUDE.md`, and Claude follows it. An engineer adds `CLAUDE.local.md` with a sandbox address, and Claude stops following `AGENTS.md`. What explains it?",
+      "options": {
+        "a": "The sandbox address contradicts a rule in the team's shared notes",
+        "b": "Local notes load first and replace everything that follows them",
+        "c": "The local note counts as an instruction file, so the fallback no longer applies",
+        "d": "Ignored files are read in place of the ones kept in version control"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file is one.",
+        "a": "Ruled out because presence decides, not content: \"A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts\".",
+        "b": "Ruled out because \"All discovered files are concatenated into context rather than overriding each other\", and \"In each folder the local file comes after the shared one\".",
+        "d": "Ruled out because the file is ignored by git only so that it stays personal, \"which is why that file is ignored by git\", and the ignore setting plays no part in what Claude reads."
+      }
+    },
+    {
+      "id": "02-path-scoped-rules-size-and-the-practice#m2",
+      "page": "02-path-scoped-rules-size-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Its single `CLAUDE.md` has grown to four hundred lines, and a developer splits it into five files that the root pulls in with `@` references, expecting sessions to start lighter. What results?",
+      "options": {
+        "a": "The loaded text is unchanged, since imported material still arrives at launch",
+        "b": "Context shrinks by four fifths, because each part loads only on demand",
+        "c": "Context shrinks for any session that never touches the split-out areas",
+        "d": "Claude loads the root alone and fetches the others when it needs them"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "An import changes where text is kept and not how much of it is loaded.",
+        "b": "Ruled out because imported files \"are expanded and loaded into context at launch alongside the CLAUDE.md that references them\".",
+        "c": "Ruled out because that describes a scoped rule, since \"A path-scoped rule loads on a match, wherever the matching files are\", while an import \"moves text to another file and loads it at launch\".",
+        "d": "Ruled out because an import \"moves text to another file and loads it at launch, so the cost is unchanged\"."
+      }
+    },
+    {
+      "id": "02-path-scoped-rules-size-and-the-practice#m3",
+      "page": "02-path-scoped-rules-size-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule for component files should apply to `.tsx` sources anywhere in the project and to nothing else. Which `paths` entry does it?",
+      "options": {
+        "a": "`*.tsx`",
+        "b": "`src/components`",
+        "c": "`components/**`",
+        "d": "`**/*.tsx`"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The leading `**/` makes the pattern match the file type at any depth.",
+        "a": "Ruled out because without it the pattern behaves like \"`*.md` matches Markdown files in the project root\", so only files at the top of the project match.",
+        "b": "Ruled out because a bare folder name matches nothing: \"matches no file, so the rule never loads\".",
+        "c": "Ruled out because it names a folder and not a type, while \"a glob follows the file's type wherever it sits\"."
+      }
+    }
+  ]
+}
