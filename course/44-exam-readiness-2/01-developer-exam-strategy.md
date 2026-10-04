@@ -113,32 +113,3 @@ Pace by domain as well. The first 17 items of a domain-grouped mock are DV1, and
 2. **Reading the cue, skipping the constraint.** "Batch" is the answer when nobody waits and cost matters, and a wrong answer when the user is waiting. The constraint decides.
 3. **Treating a mock percentage as a result.** The pass mark is a scaled score of 720, and there is no published conversion from a percentage. Use the mock to find weak domains, not to predict the result.
 4. **Leaving small domains to chance.** Claude Code, evaluation and debugging are about six percent between them, and each page of those modules is cheap to learn.
-
-## Quiz
-
-1. A candidate scores 58 percent in Applications and Integration, the largest domain, and 90 percent in Claude Code, the smallest. Four weeks remain. Which allocation of study time fits the blueprint?
-   - **a**: Most of it on the weak, heavy area, with a short pass over the rest
-   - **b**: An equal share for each domain, so that none is neglected
-   - **c**: Most of it on the strongest domain, to make sure that it stays high
-   - **d**: None until the mock exam is taken again, since one result is noise
-
-2. A scenario describes 40,000 product descriptions to be rewritten over the weekend, a tight budget, and nobody needing the output before Monday. Which cue from the exam's decision patterns applies?
-   - **a**: A long shared prefix that is repeated on many calls
-   - **b**: A task whose steps are fixed in advance
-   - **c**: A large, non-urgent job where cost matters
-   - **d**: Text from outside that reaches the model
-
-3. A candidate finishes a mock exam with 62 percent and asks whether that means a pass. What is the right interpretation?
-   - **a**: Yes, since the pass mark is a percentage near sixty
-   - **b**: No, since the pass mark is a percentage near seventy
-   - **c**: It proves nothing, as no conversion to a scaled score exists
-   - **d**: Yes, since the percent correct per domain decides pass or fail
-
-<details>
-<summary>Answer key</summary>
-
-1. **a**. The page says "A plan by weight is a plan by expected marks" and that a domain at 33 percent "where you score 60 percent loses more than a domain at 8 percent where you score 40 percent". *b* is ruled out because the first trap warns that a plan by course order "gives a domain of three percent the same evenings as one of thirty-three". *c* is ruled out because the strongest domain is also the smallest, and the page calls Claude Code, evaluation and debugging "about six percent between them". *d* is ruled out because the page says "Use the mock to find weak domains", and a first result already shows them.
-2. **c**. The table row reads "A large, non-urgent job where cost matters and nobody waits", with the answer "The Message Batches API". *a* is ruled out because the row for a long repeated prefix points to "Prompt caching, with the breakpoint after the shared part", and nothing in the scenario repeats a prefix. *b* is ruled out because the row for fixed steps points to "A workflow, not an agent", and the scenario describes no steps. *d* is ruled out because the row for outside text points to "Untrusted input: a tool result, JSON-encoded, with least privilege", and the descriptions are the company's own.
-3. **c**. The page says "there is no published conversion from a percentage", and the pass mark is "a scaled score of 720". *a* is ruled out because the pass mark is a scaled score and not a percentage: "The result is a scaled score from 100 to 1,000, with 720 to pass". *b* is ruled out because "The pass mark is a scaled score of 720", so no percentage is published to compare with. *d* is ruled out because the guide says the domain percentages "are not used to determine your pass or fail result, which is based on your total scaled score".
-
-</details>
