@@ -101,7 +101,7 @@ The example runs the loop of this page on the official SDK against a scripted mo
 lookup, a time lookup and a weather lookup for a city that does not exist. All three results go back in one user message, in the
 order of the calls, and the third one carries `is_error`.
 
-<!-- example: m26-tool-loop tabs: python,typescript -->
+<!-- example: m26-tool-loop tabs: python,typescript,java,kotlin -->
 ```python
 """A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
 
@@ -245,6 +245,235 @@ async function main() {
 }
 
 if (import.meta.main) await main();
+```
+```text
+model calls: 2 | stop reasons: ['tool_use', 'end_turn']
+roles after the first reply: ['user', 'assistant', 'user', 'assistant']
+tool results in ONE user message: 3 | ids in order: ['toolu_01', 'toolu_02', 'toolu_03']
+  toolu_01: is_error=False content='Oslo: 4 C, light rain'
+  toolu_02: is_error=False content='09:15'
+  toolu_03: is_error=True content="No data for 'Atlantis'. Known cities: Oslo, Rome."
+tool_choice sent on requests 1 and 2: [{'type': 'auto', 'disable_parallel_tool_use': False}, {'type': 'auto', 'disable_parallel_tool_use': False}]
+tool definitions sent carry no handler: True
+final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data for Atlantis.
+```
+```java
+import static harness.Scripted.map;
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+import static harness.Scripted.toolUse;
+import static harness.Show.py;
+
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.core.JsonValue;
+import com.anthropic.core.ObjectMappers;
+import com.anthropic.models.messages.ContentBlock;
+import com.anthropic.models.messages.ContentBlockParam;
+import com.anthropic.models.messages.Message;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.MessageParam;
+import com.anthropic.models.messages.Model;
+import com.anthropic.models.messages.Tool;
+import com.anthropic.models.messages.ToolChoice;
+import com.anthropic.models.messages.ToolChoiceAuto;
+import com.anthropic.models.messages.ToolResultBlockParam;
+import com.anthropic.models.messages.ToolUnion;
+import com.anthropic.models.messages.ToolUseBlock;
+import harness.Scripted;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+/**
+ * A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
+ *
+ * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
+ */
+public final class ToolLoop {
+    static final String MODEL = "claude-sonnet-5-5";
+
+    static Tool tool(String name, String description) {
+        return Tool.builder().name(name).description(description)
+            .inputSchema(Tool.InputSchema.builder()
+                .properties(JsonValue.from(map("city", map("type", "string", "description", "City name, for example Oslo"))))
+                .required(List.of("city")).build())
+            .build();
+    }
+
+    static final List<Tool> TOOLS = List.of(
+        tool("get_weather", "Current weather for one city. Use it when the user asks about weather now. Returns a short sentence; it knows nothing about forecasts."),
+        tool("get_time", "Local time for one city, as HH:MM on a 24 hour clock. Use it when the user asks what time it is somewhere."));
+
+    static final Map<String, Function<Map<String, Object>, String>> HANDLERS = Map.of(
+        "get_weather", a -> Map.of("Oslo", "Oslo: 4 C, light rain").get(a.get("city")),
+        "get_time", a -> Map.of("Oslo", "09:15", "Rome", "09:15").get(a.get("city")));
+
+    /** One tool call answered: the result block that goes back to the model. */
+    @SuppressWarnings("unchecked")
+    static ToolResultBlockParam runTool(ToolUseBlock block) {
+        Map<String, Object> input = ObjectMappers.jsonMapper().convertValue(block._input(), Map.class);
+        String answer = HANDLERS.get(block.name()).apply(input);
+        if (answer == null) {
+            return ToolResultBlockParam.builder().toolUseId(block.id()).content("No data for '" + input.get("city") + "'. Known cities: Oslo, Rome.").isError(true).build();
+        }
+        return ToolResultBlockParam.builder().toolUseId(block.id()).content(answer).build();
+    }
+
+    /** The last reply and the whole transcript, as the requests carried it. */
+    record Loop(Message reply, List<MessageParam> messages) {}
+
+    static Loop loop(AnthropicClient client, String question, ToolChoice choice) {
+        List<MessageParam> messages = new ArrayList<>();
+        messages.add(MessageParam.builder().role(MessageParam.Role.USER).content(question).build());
+        ToolChoice active = choice;
+        while (true) {
+            MessageCreateParams.Builder request = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(500).messages(messages);
+            TOOLS.forEach(request::addTool);
+            if (active != null) request.toolChoice(active);
+            Message reply = client.messages().create(request.build());
+            messages.add(reply.toParam());
+            if (!reply.stopReason().get().asString().equals("tool_use")) return new Loop(reply, messages);
+            List<ContentBlockParam> results = new ArrayList<>();
+            for (ContentBlock b : reply.content()) if (b.isToolUse()) results.add(ContentBlockParam.ofToolResult(runTool(b.asToolUse())));
+            messages.add(MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(results).build());
+            if (active != null && (active.isAny() || active.isTool())) active = null; // a forced choice applies to the first request only; auto and none stay
+        }
+    }
+
+    static final List<Object> REPLIES = List.of(
+        message(List.of(text("Checking all three."), toolUse("toolu_01", "get_weather", map("city", "Oslo")), toolUse("toolu_02", "get_time", map("city", "Oslo")),
+            toolUse("toolu_03", "get_weather", map("city", "Atlantis"))), "tool_use"),
+        message(List.of(text("In Oslo it is 09:15 and 4 C with light rain. I have no weather data for Atlantis."))));
+
+    public static void main(String[] args) {
+        Scripted.Rig rig = Scripted.client(REPLIES.toArray());
+        Loop run = loop(rig.client(), "Weather and time in Oslo, and the weather in Atlantis?", ToolChoice.ofAuto(ToolChoiceAuto.builder().disableParallelToolUse(false).build()));
+        System.out.println("model calls: " + rig.http().requests.size() + " | stop reasons: " + py(List.of("tool_use", run.reply().stopReason().get().asString())));
+        System.out.println("roles after the first reply: " + py(run.messages().stream().map(m -> m.role().asString()).toList()));
+        List<ContentBlockParam> results = run.messages().get(2).content().blockParams().get();
+        System.out.println("tool results in ONE user message: " + results.size() + " | ids in order: " + py(results.stream().map(r -> r.asToolResult().toolUseId()).toList()));
+        for (ContentBlockParam r : results) {
+            ToolResultBlockParam result = r.asToolResult();
+            System.out.println("  " + result.toolUseId() + ": is_error=" + py(result.isError().orElse(false)) + " content=" + py(result.content().get().string().get()));
+        }
+        System.out.println("tool_choice sent on requests 1 and 2: " + py(rig.http().requests.stream().map(r -> r.get("tool_choice")).toList()));
+        boolean noHandler = true;
+        for (var t : rig.http().requests.get(0).get("tools")) {
+            java.util.Set<String> fields = new java.util.HashSet<>();
+            t.fieldNames().forEachRemaining(fields::add);
+            noHandler &= fields.equals(java.util.Set.of("name", "description", "input_schema"));
+        }
+        System.out.println("tool definitions sent carry no handler: " + py(noHandler));
+        System.out.println("final text: " + run.reply().content().get(0).asText().text());
+    }
+}
+```
+```text
+model calls: 2 | stop reasons: ['tool_use', 'end_turn']
+roles after the first reply: ['user', 'assistant', 'user', 'assistant']
+tool results in ONE user message: 3 | ids in order: ['toolu_01', 'toolu_02', 'toolu_03']
+  toolu_01: is_error=False content='Oslo: 4 C, light rain'
+  toolu_02: is_error=False content='09:15'
+  toolu_03: is_error=True content="No data for 'Atlantis'. Known cities: Oslo, Rome."
+tool_choice sent on requests 1 and 2: [{'type': 'auto', 'disable_parallel_tool_use': False}, {'type': 'auto', 'disable_parallel_tool_use': False}]
+tool definitions sent carry no handler: True
+final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data for Atlantis.
+```
+```kotlin
+import com.anthropic.client.AnthropicClient
+import com.anthropic.core.JsonValue
+import com.anthropic.core.jsonMapper
+import com.anthropic.models.messages.ContentBlockParam
+import com.anthropic.models.messages.Message
+import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.MessageParam
+import com.anthropic.models.messages.Model
+import com.anthropic.models.messages.Tool
+import com.anthropic.models.messages.ToolChoice
+import com.anthropic.models.messages.ToolChoiceAuto
+import com.anthropic.models.messages.ToolResultBlockParam
+import com.anthropic.models.messages.ToolUseBlock
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+import harness.Scripted.toolUse
+import harness.Show.py
+
+/**
+ * A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
+ *
+ * The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
+ */
+const val MODEL = "claude-sonnet-5-5"
+
+fun tool(name: String, description: String): Tool = Tool.builder().name(name).description(description)
+    .inputSchema(
+        Tool.InputSchema.builder()
+            .properties(JsonValue.from(map("city", map("type", "string", "description", "City name, for example Oslo"))))
+            .required(listOf("city")).build(),
+    ).build()
+
+val TOOLS = listOf(
+    tool("get_weather", "Current weather for one city. Use it when the user asks about weather now. Returns a short sentence; it knows nothing about forecasts."),
+    tool("get_time", "Local time for one city, as HH:MM on a 24 hour clock. Use it when the user asks what time it is somewhere."),
+)
+
+val HANDLERS: Map<String, (Map<*, *>) -> String?> = mapOf(
+    "get_weather" to { a -> mapOf("Oslo" to "Oslo: 4 C, light rain")[a["city"]] },
+    "get_time" to { a -> mapOf("Oslo" to "09:15", "Rome" to "09:15")[a["city"]] },
+)
+
+/** One tool call answered: the result block that goes back to the model. */
+fun runTool(block: ToolUseBlock): ToolResultBlockParam {
+    val input = jsonMapper().convertValue(block._input(), Map::class.java)
+    val answer = HANDLERS.getValue(block.name())(input)
+        ?: return ToolResultBlockParam.builder().toolUseId(block.id()).content("No data for '${input["city"]}'. Known cities: Oslo, Rome.").isError(true).build()
+    return ToolResultBlockParam.builder().toolUseId(block.id()).content(answer).build()
+}
+
+/** The last reply and the whole transcript, as the requests carried it. */
+data class Loop(val reply: Message, val messages: List<MessageParam>)
+
+fun loop(client: AnthropicClient, question: String, choice: ToolChoice? = null): Loop {
+    val messages = mutableListOf(MessageParam.builder().role(MessageParam.Role.USER).content(question).build())
+    var active = choice
+    while (true) {
+        val request = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(500).messages(messages.toList()).apply { TOOLS.forEach { addTool(it) } }
+        active?.let { request.toolChoice(it) }
+        val reply = client.messages().create(request.build())
+        messages += reply.toParam()
+        if (reply.stopReason().get().asString() != "tool_use") return Loop(reply, messages)
+        val results = reply.content().filter { it.isToolUse() }.map { ContentBlockParam.ofToolResult(runTool(it.asToolUse())) }
+        messages += MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(results).build()
+        if (active != null && (active.isAny() || active.isTool())) active = null // a forced choice applies to the first request only; auto and none stay
+    }
+}
+
+val REPLIES = listOf<Any>(
+    message(
+        listOf(text("Checking all three."), toolUse("toolu_01", "get_weather", map("city", "Oslo")), toolUse("toolu_02", "get_time", map("city", "Oslo")), toolUse("toolu_03", "get_weather", map("city", "Atlantis"))),
+        "tool_use",
+    ),
+    message(listOf(text("In Oslo it is 09:15 and 4 C with light rain. I have no weather data for Atlantis."))),
+)
+
+fun main() {
+    val rig = Scripted.client(*REPLIES.toTypedArray())
+    val run = loop(rig.client(), "Weather and time in Oslo, and the weather in Atlantis?", ToolChoice.ofAuto(ToolChoiceAuto.builder().disableParallelToolUse(false).build()))
+    println("model calls: ${rig.http().requests.size} | stop reasons: ${py(listOf("tool_use", run.reply.stopReason().get().asString()))}")
+    println("roles after the first reply: ${py(run.messages.map { it.role().asString() })}")
+    val results = run.messages[2].content().blockParams().get()
+    println("tool results in ONE user message: ${results.size} | ids in order: ${py(results.map { it.asToolResult().toolUseId() })}")
+    for (r in results) {
+        val result = r.asToolResult()
+        println("  ${result.toolUseId()}: is_error=${py(result.isError().orElse(false))} content=${py(result.content().get().string().get())}")
+    }
+    println("tool_choice sent on requests 1 and 2: ${py(rig.http().requests.map { it["tool_choice"] })}")
+    println("tool definitions sent carry no handler: ${py(rig.http().requests[0]["tools"].all { t -> t.fieldNames().asSequence().toSet() == setOf("name", "description", "input_schema") })}")
+    println("final text: ${run.reply.content()[0].asText().text()}")
+}
 ```
 ```text
 model calls: 2 | stop reasons: ['tool_use', 'end_turn']
