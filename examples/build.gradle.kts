@@ -1,7 +1,10 @@
 // The shared build rules of every JVM example edition: one place for versions, source layout, tests and the run task.
 //   gradle --offline test            run the tests of every edition
 //   gradle --offline runExample      print each edition's output to <exOut>/ex-<dir>-<java|kotlin>-out.txt
+//   gradle --offline :38-settings-layers:java:test     the tests of one edition
 // Flags: -PbuildRoot=<dir> (where build output goes), -PexOut=<dir> (where printed output goes).
+// The libraries one edition uses beyond the harness (the MCP SDKs, the YAML reader) are in that edition's own build.gradle.kts.
+// Every file Gradle downloads is checked against gradle/verification-metadata.xml.
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
@@ -10,24 +13,15 @@ plugins { kotlin("jvm") version "2.4.20" apply false }
 val buildRoot = (findProperty("buildRoot") ?: "$rootDir/.build-jvm") as String
 val exOut = (findProperty("exOut") ?: "$buildRoot/out") as String
 
-// Libraries only some examples use (the MCP SDKs, the YAML reader); everything else comes from the harness.
-val extras = mapOf(
-    "32-java" to listOf("io.modelcontextprotocol.sdk:mcp:2.0.1"),
-    "33-java" to listOf("io.modelcontextprotocol.sdk:mcp:2.0.1", "org.apache.tomcat.embed:tomcat-embed-core:11.0.10"),
-    "32-kotlin" to listOf("io.modelcontextprotocol:kotlin-sdk-server:0.15.0", "io.modelcontextprotocol:kotlin-sdk-client:0.15.0"),
-    "33-kotlin" to listOf("io.modelcontextprotocol:kotlin-sdk-server:0.15.0", "io.modelcontextprotocol:kotlin-sdk-client:0.15.0", "io.ktor:ktor-server-cio:3.5.1", "io.ktor:ktor-client-cio:3.5.1"),
-    "38" to listOf("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2"),
-    "39" to listOf("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2"),
-    "40" to listOf("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2"),
-)
-
 subprojects {
-    val projName = name
     val isHarness = path == ":harness"
-    val isKotlin = name.endsWith("-kotlin")
+    // an edition is :<example dir>:<java|kotlin>; the example folder's own project (:<example dir>) holds nothing to build
+    if (!isHarness && (parent?.parent != rootProject || name !in listOf("java", "kotlin"))) return@subprojects
+    val projName = if (isHarness) name else "${parent!!.name}-$name"
+    val isKotlin = name == "kotlin"
     apply(plugin = if (isKotlin) "org.jetbrains.kotlin.jvm" else "java-library")
     repositories { mavenCentral() }
-    layout.buildDirectory.set(file("$buildRoot/${if (isHarness) "harness" else name}"))
+    layout.buildDirectory.set(file("$buildRoot/$projName"))
     extensions.configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -46,7 +40,6 @@ subprojects {
             "api"("com.anthropic:anthropic-java:2.68.0")
         } else {
             "implementation"(project(":harness"))
-            (extras["${projName.take(2)}-${if (isKotlin) "kotlin" else "java"}"] ?: extras[projName.take(2)])?.forEach { "implementation"(it) }
         }
     }
     tasks.withType<Test>().configureEach {
@@ -67,7 +60,7 @@ subprojects {
     if (!isHarness) {
         // the editions are flat folders: Name.java or Name.kt next to NameTest.java or NameTest.kt
         val ext = if (isKotlin) "kt" else "java"
-        val skip = listOf("**/home/**", "**/.gradle/**")
+        val skip = listOf("**/home/**", "**/.gradle/**", "**/*.gradle.kts")
         extensions.configure<SourceSetContainer> {
             named("main") { java.setSrcDirs(if (isKotlin) emptyList<File>() else listOf(projectDir)); java.exclude("**/*Test.java", *skip.toTypedArray()); resources.setSrcDirs(emptyList<File>()) }
             named("test") { java.setSrcDirs(if (isKotlin) emptyList<File>() else listOf(projectDir)); java.include("**/*Test.java"); resources.setSrcDirs(emptyList<File>()) }
