@@ -65,7 +65,7 @@ The program classifies twelve tickets with the async client. The transport is sc
 inside it, the reply is a label built from the ticket in the request, and ticket 7 is answered with a 429. It runs the
 twelve twice, once unbounded and once behind a semaphore (a pool of workers in TypeScript) of four.
 
-<!-- example: m16-bounded-concurrency tabs: python,typescript -->
+<!-- example: m16-bounded-concurrency tabs: python,typescript,java,kotlin -->
 ```python
 """Twelve classification calls with the async SDK: unbounded, then bounded by a semaphore.
 
@@ -183,6 +183,178 @@ unbounded: peak in flight 12, 11 answered, failed tickets [7]
 bounded by 4: peak in flight 4, 11 answered, failed tickets [7]
 results keep input order: label for ticket 1 | label for ticket 6 | RateLimitError | label for ticket 8
 ```
+```java
+import static harness.Scripted.map;
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+
+import com.anthropic.client.AnthropicClientAsync;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import com.fasterxml.jackson.databind.JsonNode;
+import harness.Reply;
+import harness.Scripted;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
+/**
+ * Twelve classification calls with the async SDK: unbounded, then bounded by a semaphore.
+ *
+ * <p>The transport is scripted: every request takes 50 ms inside it, the reply is a label built from
+ * the ticket in the request, and ticket 7 is answered with a 429. The labels are illustrative.
+ * Each ticket runs on its own virtual thread; the semaphore is what bounds them (the Java counterpart of asyncio.Semaphore).
+ */
+public final class Bounded {
+    static final String MODEL = "claude-sonnet-5-5";
+    static final List<String> TICKETS = IntStream.rangeClosed(1, 12).mapToObj(n -> "ticket " + n).toList();
+
+    /** A scripted reply computed from the request body. */
+    static final Function<JsonNode, Object> RESPONDER = body -> {
+        String ticket = body.at("/messages/0/content").asText();
+        if (ticket.equals("ticket 7")) return Reply.json(429, map("type", "error", "error", map("type", "rate_limit_error", "message", "slow down")));
+        return message(List.of(text("label for " + ticket)));
+    };
+
+    /** One ticket's outcome: a label or the error that ended it (a failure does not cancel the others). */
+    record Outcome(String label, Throwable error) {}
+
+    static CompletableFuture<String> classify(AnthropicClientAsync client, String ticket) {
+        MessageCreateParams params = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(16).addUserMessage(ticket).build();
+        return client.messages().create(params).thenApply(reply -> reply.content().get(0).asText().text());
+    }
+
+    /** The outcomes in input order, and the most requests that were inside the transport at once. */
+    record Run(List<Outcome> results, int peak) {}
+
+    static Run runAll(Integer limit) {
+        Scripted.AsyncRig rig = Scripted.asyncClient(Duration.ofMillis(50), 0, TICKETS.stream().map(t -> (Object) RESPONDER).toArray());
+        Semaphore gate = limit == null ? null : new Semaphore(limit);
+        try (ExecutorService virtual = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<CompletableFuture<Outcome>> tasks = new ArrayList<>();
+            for (String ticket : TICKETS) {
+                tasks.add(CompletableFuture.supplyAsync(() -> {
+                    if (gate != null) gate.acquireUninterruptibly();
+                    try {
+                        return new Outcome(classify(rig.client(), ticket).join(), null);
+                    } catch (CompletionException e) {
+                        return new Outcome(null, e.getCause());
+                    } finally {
+                        if (gate != null) gate.release();
+                    }
+                }, virtual));
+            }
+            return new Run(tasks.stream().map(CompletableFuture::join).toList(), rig.http().maxInFlight());
+        }
+    }
+
+    public static void main(String[] args) {
+        Run last = null;
+        for (Object[] mode : new Object[][] {{"unbounded", null}, {"bounded by 4", 4}}) {
+            last = runAll((Integer) mode[1]);
+            List<Integer> failed = new ArrayList<>();
+            for (int i = 0; i < last.results().size(); i++) if (last.results().get(i).error() != null) failed.add(i + 1);
+            System.out.println(mode[0] + ": peak in flight " + last.peak() + ", " + (last.results().size() - failed.size()) + " answered, failed tickets " + failed);
+        }
+        List<Outcome> r = last.results();
+        System.out.println("results keep input order: " + r.get(0).label() + " | " + r.get(5).label() + " | " + r.get(6).error().getClass().getSimpleName() + " | " + r.get(7).label());
+    }
+}
+```
+```text
+unbounded: peak in flight 12, 11 answered, failed tickets [7]
+bounded by 4: peak in flight 4, 11 answered, failed tickets [7]
+results keep input order: label for ticket 1 | label for ticket 6 | RateLimitException | label for ticket 8
+```
+```kotlin
+import com.anthropic.client.AnthropicClientAsync
+import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.Model
+import com.fasterxml.jackson.databind.JsonNode
+import harness.Reply
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+import java.time.Duration
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
+import java.util.function.Function
+
+/**
+ * Twelve classification calls with the async SDK: unbounded, then bounded by a semaphore.
+ *
+ * The transport is scripted: every request takes 50 ms inside it, the reply is a label built from
+ * the ticket in the request, and ticket 7 is answered with a 429. The labels are illustrative.
+ * Each ticket runs on its own virtual thread; the semaphore is what bounds them (the Kotlin/JVM counterpart of asyncio.Semaphore).
+ */
+const val MODEL = "claude-sonnet-5-5"
+val TICKETS = (1..12).map { "ticket $it" }
+
+/** A scripted reply computed from the request body. */
+val RESPONDER = Function<JsonNode, Any> { body ->
+    val ticket = body.at("/messages/0/content").asText()
+    if (ticket == "ticket 7") Reply.json(429, map("type", "error", "error", map("type", "rate_limit_error", "message", "slow down")))
+    else message(listOf(text("label for $ticket")))
+}
+
+/** One ticket's outcome: a label or the error that ended it (a failure does not cancel the others). */
+data class Outcome(val label: String?, val error: Throwable?)
+
+fun classify(client: AnthropicClientAsync, ticket: String): CompletableFuture<String> {
+    val params = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(16).addUserMessage(ticket).build()
+    return client.messages().create(params).thenApply { it.content()[0].asText().text() }
+}
+
+/** The outcomes in input order, and the most requests that were inside the transport at once. */
+data class Run(val results: List<Outcome>, val peak: Int)
+
+fun runAll(limit: Int?): Run {
+    val rig = Scripted.asyncClient(Duration.ofMillis(50), 0, *TICKETS.map { RESPONDER as Any }.toTypedArray())
+    val gate = limit?.let { Semaphore(it) }
+    Executors.newVirtualThreadPerTaskExecutor().use { virtual ->
+        val tasks = TICKETS.map { ticket ->
+            CompletableFuture.supplyAsync({
+                gate?.acquireUninterruptibly()
+                try {
+                    Outcome(classify(rig.client(), ticket).join(), null)
+                } catch (e: CompletionException) {
+                    Outcome(null, e.cause)
+                } finally {
+                    gate?.release()
+                }
+            }, virtual)
+        }
+        return Run(tasks.map { it.join() }, rig.http().maxInFlight())
+    }
+}
+
+fun main() {
+    var last: Run? = null
+    for ((label, limit) in listOf("unbounded" to null, "bounded by 4" to 4)) {
+        val run = runAll(limit)
+        last = run
+        val failed = run.results.withIndex().filter { it.value.error != null }.map { it.index + 1 }
+        println("$label: peak in flight ${run.peak}, ${run.results.size - failed.size} answered, failed tickets $failed")
+    }
+    val r = last!!.results
+    println("results keep input order: ${r[0].label} | ${r[5].label} | ${r[6].error!!.javaClass.simpleName} | ${r[7].label}")
+}
+```
+```text
+unbounded: peak in flight 12, 11 answered, failed tickets [7]
+bounded by 4: peak in flight 4, 11 answered, failed tickets [7]
+results keep input order: label for ticket 1 | label for ticket 6 | RateLimitException | label for ticket 8
+```
 <!-- /example -->
 
 Read the output for three facts:
@@ -194,8 +366,9 @@ Read the output for three facts:
 3. **A failure kept its place.** Ticket 7 came back as a `RateLimitError`, the eleven others as labels, and the results
    stayed in the order of the tickets. Nobody lost an answer because of a neighbour's failure.
 
-Java and Kotlin have no example tab on this page. The Java SDK's `client.async()` gives `CompletableFuture<Message>`
-for the same pattern, and the practice on the next page runs in all four languages with worker threads.
+The Java and Kotlin tabs use the Java SDK's asynchronous client, which returns `CompletableFuture<Message>`, with each ticket on a
+virtual thread and a semaphore as the bound (the counterpart of `asyncio.Semaphore`). The numbers are the same; the failed ticket
+shows the Java class name, `RateLimitException`. The practice on the next page runs in all four languages with worker threads.
 
 ### Choosing the bound
 
