@@ -2141,6 +2141,55 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
 }
 
 
+# ===== Level 3: module 68 =====
+PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
+    "python": ("review_routing.py", {
+        "wrong-overall-only": [("    for name in sorted(groups):", "    for name in []:")],
+        "wrong-ignores-undersampled": [('        if s["total"] < min_n:\n            undersampled.append(s["segment"])\n        elif s["percent"] < threshold:', '        if s["percent"] < threshold:')],
+        "wrong-highest-confidence": [("for t in sorted({c for c, _ in labeled}):", "for t in sorted({c for c, _ in labeled}, reverse=True):")],
+        "wrong-strict-target": [("if 100 * sum(1 for ok in kept if ok) >= target * len(kept):", "if 100 * sum(1 for ok in kept if ok) > target * len(kept):")],
+        "wrong-first-n-sample": [('key=lambda i: (i["rank"], i["id"])', 'key=lambda i: i["id"]')],
+        "wrong-conflict-auto": [('e["conflict"] or e["confidence"] < threshold]', 'e["confidence"] < threshold]')],
+        "wrong-id-order": [('key=lambda e: (0 if e["conflict"] else e["confidence"], e["id"])', 'key=lambda e: e["id"]')],
+        "wrong-ignores-capacity": [('"review": queue[:capacity], "backlog": queue[capacity:]', '"review": queue, "backlog": []')],
+        "wrong-irreversible-by-amount": [('"human" if action in IRREVERSIBLE or amount > limit else "auto"', '"human" if amount > limit else "auto"')],
+    }),
+    "typescript": ("reviewRouting.ts", {
+        "wrong-overall-only": [("for (const name of [...groups.keys()].sort()) {", "for (const name of [] as string[]) {")],
+        "wrong-ignores-undersampled": [("    if (s.total < minN) undersampled.push(s.segment);\n    else if (s.percent < threshold) failing.push(s.segment);", "    if (s.percent < threshold) failing.push(s.segment);")],
+        "wrong-highest-confidence": [("].sort((a, b) => a - b)) {", "].sort((a, b) => b - a)) {")],
+        "wrong-strict-target": [("if (100 * right >= target * kept.length)", "if (100 * right > target * kept.length)")],
+        "wrong-first-n-sample": [(".sort((a, b) => a.rank - b.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    chosen.push", ".sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    chosen.push")],
+        "wrong-conflict-auto": [("filter((e) => e.conflict || e.confidence < threshold)", "filter((e) => e.confidence < threshold)")],
+        "wrong-id-order": [(".sort((a, b) => priority(a) - priority(b) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));", ".sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));")],
+        "wrong-ignores-capacity": [("review: queue.slice(0, capacity), backlog: queue.slice(capacity),", "review: queue, backlog: [],")],
+        "wrong-irreversible-by-amount": [("return IRREVERSIBLE.includes(action) || amount > limit ?", "return amount > limit ?")],
+    }),
+    "java": ("ReviewRouting.java", {
+        "wrong-overall-only": [("for (Map.Entry<String, int[]> e : groups.entrySet()) out.add(", "for (Map.Entry<String, int[]> e : new TreeMap<String, int[]>().entrySet()) out.add(")],
+        "wrong-ignores-undersampled": [("            if (s.total() < minN) undersampled.add(s.segment());\n            else if (s.percent() < threshold) failing.add(s.segment());", "            if (s.percent() < threshold) failing.add(s.segment());")],
+        "wrong-highest-confidence": [("Set<Integer> levels = new java.util.TreeSet<>();", "Set<Integer> levels = new java.util.TreeSet<>(java.util.Comparator.reverseOrder());")],
+        "wrong-strict-target": [("if (100 * right >= target * kept) return t;", "if (100 * right > target * kept) return t;")],
+        "wrong-first-n-sample": [("members.sort(Comparator.comparingInt(Item::rank).thenComparing(Item::id));", "members.sort(Comparator.comparing(Item::id));")],
+        "wrong-conflict-auto": [("if (e.conflict() || e.confidence() < threshold) candidates.add(e);", "if (e.confidence() < threshold) candidates.add(e);")],
+        "wrong-id-order": [("candidates.sort(Comparator.<Extraction>comparingInt(e -> e.conflict() ? 0 : e.confidence()).thenComparing(Extraction::id));", "candidates.sort(Comparator.comparing(Extraction::id));")],
+        "wrong-ignores-capacity": [("int cut = Math.min(capacity, queue.size());", "int cut = queue.size();")],
+        "wrong-irreversible-by-amount": [("return IRREVERSIBLE.contains(action) || amount > limit ?", "return amount > limit ?")],
+    }),
+    "kotlin": ("ReviewRouting.kt", {
+        "wrong-overall-only": [("        groups.map { (name, rs) ->", "        groups.filter { false }.map { (name, rs) ->")],
+        "wrong-ignores-undersampled": [("val undersampled = segments.filter { it.total < minN }.map { it.segment }", "val undersampled = emptyList<String>()")],
+        "wrong-highest-confidence": [(".toSortedSet()) {", ".toSortedSet(compareByDescending { it })) {")],
+        "wrong-strict-target": [("if (100 * kept.count { it.correct } >= target * kept.size)", "if (100 * kept.count { it.correct } > target * kept.size)")],
+        "wrong-first-n-sample": [(".sortedWith(compareBy({ it.rank }, { it.id }))", ".sortedBy { it.id }")],
+        "wrong-conflict-auto": [("filter { it.conflict || it.confidence < threshold }", "filter { it.confidence < threshold }")],
+        "wrong-id-order": [(".sortedWith(compareBy({ if (it.conflict) 0 else it.confidence }, { it.id }))", ".sortedBy { it.id }")],
+        "wrong-ignores-capacity": [("Routing(queue.take(capacity), queue.drop(capacity),", "Routing(queue, emptyList(),")],
+        "wrong-irreversible-by-amount": [('= if (action in IRREVERSIBLE || amount > limit) "human"', '= if (amount > limit) "human"')],
+    }),
+}
+
+
 # ===== Survey practice: the tiny agent loop (no module; not part of any batch gate) =====
 PLANTS[f"{X}/agent-loop"] = {
     "python": ("agent.py", {
