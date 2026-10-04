@@ -893,6 +893,153 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
     },
 }
 
+# ===== Level 4: modules 79 to 84 =====
+PRACTICES[f"{X}/80-end-to-end-and-multi-agent-architecture/unit-01/practice-1"] = {
+    "name": "architecture_review", "suite": "ArchitectureReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a sound design passes review with no findings"),
+        ("e1", "edge", "a design without a feedback loop or a stage is rejected"),
+        ("e2", "edge", "autonomy is flagged only when the path is known"),
+        ("e3", "edge", "several agents need independent parts and no shared context"),
+        ("e4", "edge", "an unapproved write is a finding only when an audit is needed"),
+        ("e5", "edge", "output that nobody validates is flagged"),
+        ("e6", "edge", "findings are ordered by severity then rule and the verdict follows the worst"),
+        ("e7", "edge", "the cheapest design that is not rejected wins and ties go by name"),
+    ],
+    "plants": {
+        "wrong-no-feedback-check": (["e1"], "never reports a design without a feedback loop"),
+        "wrong-input-stage-skipped": (["e1"], "does not require an input stage"),
+        "wrong-autonomy-always": (["e2"], "flags every agent design, whether or not the path is known"),
+        "wrong-team-shared-only": (["e3"], "flags a team only for a shared context and not for parts that depend on each other"),
+        "wrong-team-single-agent": (["e3"], "applies the team rule to a design with one agent"),
+        "wrong-write-without-audit": (["e4"], "flags an unapproved write even when no audit is needed"),
+        "wrong-validate-inverted": (["e5"], "flags output that has a validation step and not output that lacks one"),
+        "wrong-order-by-rule": (["e6"], "orders the findings by rule name and ignores severity"),
+        "wrong-any-finding-rejects": (["e6"], "rejects a design for a medium finding"),
+        "wrong-rejected-allowed": (["e7"], "lets a rejected design win on price"),
+        "wrong-tie-by-position": (["e7"], "breaks a price tie by list position and not by name"),
+    },
+}
+
+PRACTICES[f"{X}/81-reliability-of-multi-agent-systems/unit-01/practice-1"] = {
+    "name": "reliable_agents", "suite": "ReliableAgentsTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "tasks run in order and receive the results of the tasks they need"),
+        ("e1", "edge", "every retry of a task carries the same idempotency key"),
+        ("e2", "edge", "retries stop at the limit and a fatal failure is not retried"),
+        ("e3", "edge", "a failure stays inside its branch and dependents are skipped"),
+        ("e4", "edge", "a breaker stops calls to an agent that keeps failing and a success resets it"),
+        ("e5", "edge", "a fallback degrades one task with its own key and is not checkpointed"),
+        ("e6", "edge", "a second run resumes from the checkpoint and retries only what failed"),
+        ("e7", "edge", "an unexpected crash is not swallowed and keeps the work already checkpointed"),
+    ],
+    "plants": {
+        "wrong-retry-new-key": (["e1"], "sends a new idempotency key with every retry"),
+        "wrong-fatal-retried": (["e2"], "retries a failure that cannot be fixed by retrying"),
+        "wrong-attempts-off-by-one": (["e2"], "makes one attempt fewer than the limit"),
+        "wrong-dependents-still-run": (["e3"], "runs a task whose dependency failed"),
+        "wrong-failure-stops-run": (["e3"], "stops the whole run at the first failed task"),
+        "wrong-breaker-total": (["e4"], "counts every failure of an agent and never resets on a success"),
+        "wrong-breaker-never-opens": (["e4"], "keeps calling an agent that has failed past the threshold"),
+        "wrong-fallback-same-key": (["e5"], "sends the primary's idempotency key to the fallback agent"),
+        "wrong-fallback-checkpointed": (["e5"], "checkpoints a degraded result as if it were final"),
+        "wrong-resume-reruns": (["e6"], "runs the tasks that the checkpoint already holds"),
+        "wrong-crash-swallowed": (["e7"], "turns an unexpected crash into a failed task"),
+        "wrong-checkpoint-late": (["e7"], "writes the checkpoint only when the whole run ends"),
+    },
+}
+
+PRACTICES[f"{X}/82-models-prompts-and-context-as-design-choices/unit-01/practice-1"] = {
+    "name": "prompt_plan", "suite": "PromptPlanTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "static modules come first and the breakpoint follows the last one"),
+        ("e1", "edge", "a variable in a static module is refused"),
+        ("e2", "edge", "dynamic variables are filled and a missing one is refused"),
+        ("e3", "edge", "the lowest priority dynamic module is dropped first and a tie drops the later one"),
+        ("e4", "edge", "static modules are never dropped and a budget they exceed is refused"),
+        ("e5", "edge", "a prefix under the minimum gets no breakpoint"),
+        ("e6", "edge", "the cheapest model that meets the tier and the latency wins and ties go by name"),
+        ("e7", "edge", "only an identical static prefix can be reused"),
+    ],
+    "plants": {
+        "wrong-static-reversed": (["m1"], "puts the static modules in reverse order"),
+        "wrong-breakpoint-after-all": (["m1"], "marks the breakpoint after the last block, dynamic ones included"),
+        "wrong-variable-in-static-allowed": (["e1"], "accepts a variable inside a static module"),
+        "wrong-missing-variable-blank": (["e2"], "replaces a missing variable with nothing"),
+        "wrong-drop-highest-priority": (["e3"], "drops the module with the highest priority first"),
+        "wrong-drop-tie-earlier": (["e3"], "drops the earlier of two modules with the same priority"),
+        "wrong-over-budget-ignored": (["e4"], "returns a prompt over the budget when only static modules are left"),
+        "wrong-minimum-exclusive": (["e5"], "needs more than the minimum for a breakpoint"),
+        "wrong-model-tier-ignored": (["e6"], "ignores the capability tier the workload needs"),
+        "wrong-model-latency-ignored": (["e6"], "ignores the latency limit"),
+        "wrong-model-tie-by-position": (["e6"], "breaks a price tie by list position and not by name"),
+        "wrong-reuse-first-block-only": (["e7"], "compares only the first block of the prefix"),
+        "wrong-reuse-needs-whole-prompt": (["e7"], "reuses nothing unless the whole prompt, dynamic blocks included, is identical"),
+    },
+}
+
+PRACTICES[f"{X}/83-deployment-architecture-and-data-handling/unit-01/practice-1"] = {
+    "name": "data_policy", "suite": "DataPolicyTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a compliant deployment has no findings"),
+        ("e1", "edge", "residency is pinned by the request or by the region the platform allows"),
+        ("e2", "edge", "zero data retention is an arrangement of the providers own platforms and not of every model"),
+        ("e3", "edge", "protected health information needs a covered platform an agreement and deidentified input"),
+        ("e4", "edge", "a multi tenant service needs a workspace for each tenant"),
+        ("e5", "edge", "an audit log must not store prompts that hold sensitive data"),
+        ("e6", "edge", "audit retention stays between the minimum and the maximum"),
+        ("e7", "edge", "purge only what is past the retention limit and not on hold"),
+        ("e8", "edge", "a request is served only by a deployment that keeps its data in the region"),
+    ],
+    "plants": {
+        "wrong-geo-unset-passes": (["e1"], "treats a request with no inference geo as pinned to the US"),
+        "wrong-eu-pin-allowed": (["e1"], "accepts a European residency requirement on the first-party API"),
+        "wrong-any-region-for-us": (["e1"], "accepts any cloud region for a US residency requirement"),
+        "wrong-cloud-zdr-ok": (["e2"], "treats the zero data retention flag as valid on a cloud provider's platform"),
+        "wrong-fable-zdr-ok": (["e2"], "ignores that the top-tier model needs 30-day retention"),
+        "wrong-baa-optional": (["e3"], "does not ask for a signed agreement for protected health information on the API"),
+        "wrong-aws-hipaa-ok": (["e3"], "accepts protected health information on a platform without HIPAA readiness"),
+        "wrong-redact-not-safe": (["e3"], "accepts only tokenising and rejects redaction as de-identification"),
+        "wrong-tenancy-ignored": (["e4"], "does not check the isolation of tenants"),
+        "wrong-audit-phi-only": (["e5"], "flags stored prompts only when health data is in scope and not for other identifiers"),
+        "wrong-retention-long-inclusive": (["e6"], "flags a retention equal to the maximum as too long"),
+        "wrong-retention-short-inclusive": (["e6"], "flags a retention equal to the minimum as too short"),
+        "wrong-purge-held": (["e7"], "purges an entry that is on legal hold"),
+        "wrong-purge-boundary": (["e7"], "purges an entry that is exactly at the limit"),
+        "wrong-global-fallback": (["e8"], "serves a request from a global deployment when the regional one is missing"),
+        "wrong-pick-first-listed": (["e8"], "picks the first listed deployment and not the first by name"),
+    },
+}
+
+PRACTICES[f"{X}/84-cost-and-capacity-engineering/unit-01/practice-1"] = {
+    "name": "gateway_budget", "suite": "GatewayBudgetTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a request follows the route table of the gateway"),
+        ("e1", "edge", "a team near its budget is moved to a cheaper model and a team over it is refused"),
+        ("e2", "edge", "a request is admitted warned or blocked against the budget"),
+        ("e3", "edge", "showback adds each teams tokens at the price of the model and refuses an unknown model"),
+        ("e4", "edge", "showback rounds each teams total to a cent once"),
+        ("e5", "edge", "a caller with a hard latency limit gets accept and poll when the slow case does not fit"),
+        ("e6", "edge", "a model pinned by a team is honoured only when the policy allows it"),
+    ],
+    "plants": {
+        "wrong-route-ignores-table": (["m1"], "sends every task to the default model"),
+        "wrong-warn-keeps-model": (["e1"], "keeps the expensive model for a team that is near its budget"),
+        "wrong-block-still-routes": (["e1"], "routes a request of a team that is over its budget"),
+        "wrong-warn-strict": (["e2"], "warns only above 80 percent and not at it"),
+        "wrong-block-at-budget": (["e2"], "blocks a request that lands exactly on the budget"),
+        "wrong-zero-budget-open": (["e2"], "lets a team with no budget through"),
+        "wrong-showback-unknown-free": (["e3"], "prices an unknown model at nothing"),
+        "wrong-showback-by-name": (["e3"], "lists teams by name and not by cost"),
+        "wrong-showback-row-rounding": (["e4"], "rounds every row to a cent before adding them"),
+        "wrong-showback-floors": (["e4"], "rounds a team's total down and not to the nearest cent"),
+        "wrong-delivery-strict": (["e5"], "chooses accept and poll when the slow case exactly fits"),
+        "wrong-delivery-no-margin": (["e5"], "leaves the safety margin out of the comparison"),
+        "wrong-pin-always-honoured": (["e6"], "honours any model a team pins"),
+    },
+}
+# --- L4 79-84 END ---
+
 # --- PRACTICES ABOVE ---
 
 

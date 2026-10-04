@@ -1,0 +1,138 @@
+{
+  "module": "83-deployment-architecture-and-data-handling",
+  "quizzes": [
+    {
+      "id": "01-where-the-data-goes-platform-region-and-retention#q1",
+      "page": "01-where-the-data-goes-platform-region-and-retention.md",
+      "scope": "page",
+      "stem": "Scenario: Linden Clinics asks a vendor to serve its patients from Europe and offers the Claude API with `inference_geo` set to `us` as the compliant option. Which assessment is right?",
+      "options": {
+        "a": "It meets the need, as long as the audit log itself is kept in a data store located in Europe",
+        "b": "It fails the need, because the pin sends the processing to the United States",
+        "c": "It meets the need, since the geography of the workspace can still be set to Europe separately",
+        "d": "It fails the need only if the clinics have not yet signed the business associate agreement in full"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The `us` pin is a United States geography, and the API has no European one.",
+        "a": "Ruled out because the audit log is separate from where inference runs: \"A requirement that cannot be met on a platform is reported\".",
+        "c": "Ruled out because \"The workspace geography is set per workspace\" and the page says it is `us` only.",
+        "d": "Ruled out because the agreement concerns health data and does not move the processing: \"there is no European pin\"."
+      }
+    },
+    {
+      "id": "01-where-the-data-goes-platform-region-and-retention#q2",
+      "page": "01-where-the-data-goes-platform-region-and-retention.md",
+      "scope": "page",
+      "stem": "Scenario: Harrow Insurance runs Claude on Amazon Bedrock and writes in its design that \"zero data retention is enabled with Anthropic\". What is the problem?",
+      "options": {
+        "a": "The statement is correct, since every platform shares one retention arrangement with the model maker",
+        "b": "The statement holds only once a second approval has been given by the cloud provider's own sales team",
+        "c": "The arrangement belongs to the model maker, and on that platform the cloud provider does the processing",
+        "d": "The statement is correct, but it must be repeated for each separate model that the company uses"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Zero data retention is an arrangement with Anthropic, and on Bedrock the cloud provider is the processor.",
+        "a": "Ruled out because \"Their retention, compliance and region rules are the provider's\", so no arrangement is shared.",
+        "b": "Ruled out because the page gives no such approval, and says the provider's rules are \"the provider's own documentation\".",
+        "d": "Ruled out because the model is a separate rule (\"A model that requires 30-day retention cannot satisfy a zero-retention requirement\") and does not change who the processor is."
+      }
+    },
+    {
+      "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#q1",
+      "page": "02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+      "scope": "page",
+      "stem": "Scenario: Fennel Health's drafting assistant receives claim notes with patient names, contact details and policy numbers. Which design best keeps these away from the model provider?",
+      "options": {
+        "a": "A system prompt that instructs the model to ignore any personal details it comes across",
+        "b": "A layer that swaps identifiers for tokens before the call and restores them afterwards",
+        "c": "A larger model that is better at noticing which parts of a note are sensitive ones",
+        "d": "A review step that checks the model's reply for personal details after it has been returned"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A layer before the call means the provider sees tokens and never the values, and the layer can be tested.",
+        "a": "Ruled out because \"the data has already crossed the boundary\".",
+        "c": "Ruled out because the model would still receive the data, and the point is to keep the identifier out of the request: \"It cannot leak what it never had\".",
+        "d": "Ruled out because a check on the reply, like an instruction, \"acts after the data has already crossed the boundary\"."
+      }
+    },
+    {
+      "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#q2",
+      "page": "02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+      "scope": "page",
+      "stem": "Scenario: Rook Mutual's auditors ask for proof of each model call. The team proposes logging every full prompt and reply for ten years. What should the architect say?",
+      "options": {
+        "a": "Accept the proposal, since a complete record is the strongest evidence that a regulator can ask to see",
+        "b": "Log request identifiers, sizes and outcomes, and keep content in the system of record",
+        "c": "Log full content, but encrypt the log, which removes the obligations that a data store has",
+        "d": "Log nothing from the calls, since any stored record of a call becomes a risk in itself"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The log proves what happened without becoming a second copy of the data.",
+        "a": "Ruled out because \"the log becomes a second store of sensitive data with its own obligations\".",
+        "c": "Ruled out because encryption protects a store and does not remove it: the log would still be \"a store of health or personal data, with all the obligations of one\".",
+        "d": "Ruled out because an audit log must record \"who, when, which request and what size\"."
+      }
+    },
+    {
+      "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#m1",
+      "page": "02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: Marlow Care's service holds data of patients in the United States and in the European Union. It runs a deployment in each region. A European patient's request arrives while the European deployment is down for maintenance. What should the router do?",
+      "options": {
+        "a": "Decline to answer, and let the caller retry once the local site is back",
+        "b": "Send it to the United States deployment, since being available matters more than where the data sits",
+        "c": "Send it to the European deployment that belongs to a different tenant, since the location still matches",
+        "d": "Send it to whichever deployment answers the fastest, and record the exception in the audit log"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none.",
+        "b": "Ruled out because \"serving a European user from a United States deployment because it was available is the failure the router exists to prevent\".",
+        "c": "Ruled out because another tenant's deployment breaks the tenant boundary: \"one workspace per tenant\".",
+        "d": "Ruled out because speed is not a criterion, and the router sends a user's data \"only to a deployment that keeps it in that region\"."
+      }
+    },
+    {
+      "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#m2",
+      "page": "02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?",
+      "options": {
+        "a": "None, because the arrangement is organisation-wide and covers the models that are in use",
+        "b": "That choice cannot meet the target, so only a different one or another arrangement will do",
+        "c": "A warning only, since thirty days is short enough to be treated as nothing kept",
+        "d": "None, provided the deployment's audit log is set to expire after thirty days"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A model that requires 30-day retention cannot meet a zero-retention requirement.",
+        "a": "Ruled out because the arrangement \"excludes models that need 30-day retention\" so it does not cover every model.",
+        "c": "Ruled out because the requirement is zero, and the page says the model \"is part of the check\".",
+        "d": "Ruled out because \"the model is part of the check and not only the platform\", and the audit log does not change what the provider retains."
+      }
+    },
+    {
+      "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#m3",
+      "page": "02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: Wren Logistics must keep audit entries for at least 90 days and at most 365. An entry is exactly 365 days old and is not under a legal hold. What does the purge rule do?",
+      "options": {
+        "a": "Retains it, since removal needs the age to exceed the limit",
+        "b": "Purges it, because an entry at the limit has used up its whole allowance",
+        "c": "Keeps it for a further 90 days, so that the floor and the ceiling are both respected",
+        "d": "Purges it only if no auditor has opened the entry within the last month"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The rule purges an entry only when it is more than the ceiling old, and an entry at exactly the limit is kept.",
+        "b": "Ruled out because purging \"follows the same precision: an entry is removed only when it is **more than** the ceiling old\".",
+        "c": "Ruled out because \"data must not be kept longer than the purpose needs\", and nothing in the rule extends an entry past the ceiling.",
+        "d": "Ruled out because the only exception is a legal hold, and \"an entry under a **legal hold** is never removed\"."
+      }
+    }
+  ]
+}

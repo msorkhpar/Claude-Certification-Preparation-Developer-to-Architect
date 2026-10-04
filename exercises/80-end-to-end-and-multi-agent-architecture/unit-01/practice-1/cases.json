@@ -1,0 +1,134 @@
+{
+  "practice": "80-end-to-end-and-multi-agent-architecture/unit-01/practice-1",
+  "name": "architecture_review",
+  "tests": {
+    "java": "ArchitectureReviewTest",
+    "kotlin": "ArchitectureReviewTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_sound_design_passes_review_with_no_findings",
+      "typescript": "m1 a sound design passes review with no findings",
+      "java": "m1_aSoundDesignPassesReviewWithNoFindings",
+      "kotlin": "m1_aSoundDesignPassesReviewWithNoFindings"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_design_without_a_feedback_loop_or_a_stage_is_rejected",
+      "typescript": "e1 a design without a feedback loop or a stage is rejected",
+      "java": "e1_aDesignWithoutAFeedbackLoopOrAStageIsRejected",
+      "kotlin": "e1_aDesignWithoutAFeedbackLoopOrAStageIsRejected"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_autonomy_is_flagged_only_when_the_path_is_known",
+      "typescript": "e2 autonomy is flagged only when the path is known",
+      "java": "e2_autonomyIsFlaggedOnlyWhenThePathIsKnown",
+      "kotlin": "e2_autonomyIsFlaggedOnlyWhenThePathIsKnown"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_several_agents_need_independent_parts_and_no_shared_context",
+      "typescript": "e3 several agents need independent parts and no shared context",
+      "java": "e3_severalAgentsNeedIndependentPartsAndNoSharedContext",
+      "kotlin": "e3_severalAgentsNeedIndependentPartsAndNoSharedContext"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_an_unapproved_write_is_a_finding_only_when_an_audit_is_needed",
+      "typescript": "e4 an unapproved write is a finding only when an audit is needed",
+      "java": "e4_anUnapprovedWriteIsAFindingOnlyWhenAnAuditIsNeeded",
+      "kotlin": "e4_anUnapprovedWriteIsAFindingOnlyWhenAnAuditIsNeeded"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_output_that_nobody_validates_is_flagged",
+      "typescript": "e5 output that nobody validates is flagged",
+      "java": "e5_outputThatNobodyValidatesIsFlagged",
+      "kotlin": "e5_outputThatNobodyValidatesIsFlagged"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_findings_are_ordered_by_severity_then_rule_and_the_verdict_follows_the_worst",
+      "typescript": "e6 findings are ordered by severity then rule and the verdict follows the worst",
+      "java": "e6_findingsAreOrderedBySeverityThenRuleAndTheVerdictFollowsTheWorst",
+      "kotlin": "e6_findingsAreOrderedBySeverityThenRuleAndTheVerdictFollowsTheWorst"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_cheapest_design_that_is_not_rejected_wins_and_ties_go_by_name",
+      "typescript": "e7 the cheapest design that is not rejected wins and ties go by name",
+      "java": "e7_theCheapestDesignThatIsNotRejectedWinsAndTiesGoByName",
+      "kotlin": "e7_theCheapestDesignThatIsNotRejectedWinsAndTiesGoByName"
+    }
+  },
+  "plants": {
+    "wrong-no-feedback-check": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "never reports a design without a feedback loop"
+    },
+    "wrong-input-stage-skipped": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "does not require an input stage"
+    },
+    "wrong-autonomy-always": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "flags every agent design, whether or not the path is known"
+    },
+    "wrong-team-shared-only": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "flags a team only for a shared context and not for parts that depend on each other"
+    },
+    "wrong-team-single-agent": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "applies the team rule to a design with one agent"
+    },
+    "wrong-write-without-audit": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags an unapproved write even when no audit is needed"
+    },
+    "wrong-validate-inverted": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "flags output that has a validation step and not output that lacks one"
+    },
+    "wrong-order-by-rule": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "orders the findings by rule name and ignores severity"
+    },
+    "wrong-any-finding-rejects": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "rejects a design for a medium finding"
+    },
+    "wrong-rejected-allowed": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "lets a rejected design win on price"
+    },
+    "wrong-tie-by-position": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "breaks a price tie by list position and not by name"
+    }
+  }
+}
