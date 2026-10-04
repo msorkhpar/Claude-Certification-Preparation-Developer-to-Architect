@@ -1,0 +1,104 @@
+{
+  "practice": "66-errors-across-agents/unit-01/practice-1",
+  "name": "error_flow",
+  "tests": {
+    "java": "ErrorFlowTest",
+    "kotlin": "ErrorFlowTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_transient_failure_is_retried_locally_and_the_success_is_reported_with_its_attempts",
+      "typescript": "m1 a transient failure is retried locally and the success is reported with its attempts",
+      "java": "m1_aTransientFailureIsRetriedLocallyAndTheSuccessIsReportedWithItsAttempts",
+      "kotlin": "m1_aTransientFailureIsRetriedLocallyAndTheSuccessIsReportedWithItsAttempts"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_valid_empty_result_is_a_success_with_no_findings_and_never_an_error",
+      "typescript": "e1 a valid empty result is a success with no findings and never an error",
+      "java": "e1_aValidEmptyResultIsASuccessWithNoFindingsAndNeverAnError",
+      "kotlin": "e1_aValidEmptyResultIsASuccessWithNoFindingsAndNeverAnError"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_permission_or_invalid_query_error_is_not_retried_and_carries_what_was_attempted_and_its_alternatives",
+      "typescript": "e2 a permission or invalid query error is not retried and carries what was attempted and its alternatives",
+      "java": "e2_aPermissionOrInvalidQueryErrorIsNotRetriedAndCarriesWhatWasAttemptedAndItsAlternatives",
+      "kotlin": "e2_aPermissionOrInvalidQueryErrorIsNotRetriedAndCarriesWhatWasAttemptedAndItsAlternatives"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_failure_that_survives_the_retries_carries_the_partial_results_of_the_last_attempt",
+      "typescript": "e3 a failure that survives the retries carries the partial results of the last attempt",
+      "java": "e3_aFailureThatSurvivesTheRetriesCarriesThePartialResultsOfTheLastAttempt",
+      "kotlin": "e3_aFailureThatSurvivesTheRetriesCarriesThePartialResultsOfTheLastAttempt"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_coordinator_uses_partial_results_tries_an_alternative_or_flags_a_gap_and_never_stops_the_run",
+      "typescript": "e4 the coordinator uses partial results tries an alternative or flags a gap and never stops the run",
+      "java": "e4_theCoordinatorUsesPartialResultsTriesAnAlternativeOrFlagsAGapAndNeverStopsTheRun",
+      "kotlin": "e4_theCoordinatorUsesPartialResultsTriesAnAlternativeOrFlagsAGapAndNeverStopsTheRun"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_coverage_note_separates_supported_topics_from_gaps_and_names_the_cause",
+      "typescript": "e5 the coverage note separates supported topics from gaps and names the cause",
+      "java": "e5_theCoverageNoteSeparatesSupportedTopicsFromGapsAndNamesTheCause",
+      "kotlin": "e5_theCoverageNoteSeparatesSupportedTopicsFromGapsAndNamesTheCause"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_topic_with_no_result_is_a_gap_that_was_not_searched",
+      "typescript": "e6 a topic with no result is a gap that was not searched",
+      "java": "e6_aTopicWithNoResultIsAGapThatWasNotSearched",
+      "kotlin": "e6_aTopicWithNoResultIsAGapThatWasNotSearched"
+    }
+  },
+  "plants": {
+    "wrong-empty-is-error": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "reports a search with no matches as a failure"
+    },
+    "wrong-retry-permission": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "retries a permission error as if it were transient"
+    },
+    "wrong-drop-partial": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "throws away the partial results of a failed search"
+    },
+    "wrong-generic-error": {
+      "caught_by": [
+        "e2",
+        "e3"
+      ],
+      "defect": "reports only that the search failed, without its type and the query attempted"
+    },
+    "wrong-stop-on-failure": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "abandons the whole run when one topic failed"
+    },
+    "wrong-gap-as-supported": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lists a failed topic among the well-supported ones"
+    },
+    "wrong-missing-topic-skipped": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves a topic that was never searched out of the note"
+    }
+  }
+}
