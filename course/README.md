@@ -2,7 +2,7 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the modules of Level 2 (Developer),
-modules 12 to 44, which is the whole of Level 2, modules 45 to 74 of Level 3 (Architect), and modules 79 to 89 of Level 4 (Architect Professional); the
+modules 12 to 44, which is the whole of Level 2, modules 45 to 74 of Level 3 (Architect), and modules 79 to 94 of Level 4, which is the whole of Level 4 (Architect Professional); the
 remaining modules are being written:
 
 | Folder | Module | Pages |
@@ -92,6 +92,11 @@ remaining modules are being written:
 | `87-observability-at-scale/` | Observability at scale | 2 |
 | `88-evaluation-and-optimisation/` | Evaluation and optimisation | 2 |
 | `89-migration-and-model-upgrades-at-scale/` | Migration and model upgrades at scale | 2 |
+| `90-governance-safety-and-risk/` | Governance, safety and risk | 2 |
+| `91-stakeholders-and-the-project-lifecycle/` | Stakeholders and the project lifecycle | 2 |
+| `92-enabling-teams-and-operations/` | Enabling teams and operations | 2 |
+| `93-professional-capstone/` | Professional capstone | 2 |
+| `94-exam-readiness-4/` | Exam readiness 4 | 3 |
 
 Modules 85 to 89 belong to Level 4 (Architect Professional); their pages open with `**Level:** Architect Professional` and the exam codes P3, P4 or P6.
 
