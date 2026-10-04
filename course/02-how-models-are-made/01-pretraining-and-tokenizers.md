@@ -74,7 +74,7 @@ tokens are "not words".
 The example trains a toy version on ten words and shows the effect. It is a teaching sketch with six
 merges, not Claude's tokenizer.
 
-<!-- example: m2-toy-bpe tabs: python,typescript -->
+<!-- example: m2-toy-bpe tabs: python,typescript,java,kotlin -->
 ```python
 """A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words."""
 from collections import Counter
@@ -207,9 +207,139 @@ newer   -> n | e | w | e | r
 widest  -> w | i | d | est
 lowish  -> low | i | s | h
 ```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/** A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words. */
+public final class Bpe {
+    record Rule(String left, String right) {}
+
+    /** Learn merge rules: repeatedly join the most frequent adjacent pair (ties: first seen). */
+    static List<Rule> train(String corpus, int merges) {
+        List<List<String>> words = new ArrayList<>();
+        for (String w : corpus.trim().split("\\s+")) {
+            List<String> letters = new ArrayList<>();
+            for (char c : w.toCharArray()) letters.add(String.valueOf(c));
+            words.add(letters);
+        }
+        List<Rule> rules = new ArrayList<>();
+        for (int round = 0; round < merges; round++) {
+            Map<Rule, Integer> pairs = new LinkedHashMap<>();
+            for (List<String> w : words) {
+                for (int i = 0; i + 1 < w.size(); i++) pairs.merge(new Rule(w.get(i), w.get(i + 1)), 1, Integer::sum);
+            }
+            if (pairs.isEmpty()) break;
+            Rule best = null;
+            for (Map.Entry<Rule, Integer> e : pairs.entrySet()) {
+                if (best == null || e.getValue() > pairs.get(best)) best = e.getKey();
+            }
+            rules.add(best);
+            List<List<String>> merged = new ArrayList<>();
+            for (List<String> w : words) merged.add(merge(w, best));
+            words = merged;
+        }
+        return rules;
+    }
+
+    static List<String> merge(List<String> word, Rule pair) {
+        List<String> out = new ArrayList<>();
+        int i = 0;
+        while (i < word.size()) {
+            if (i + 1 < word.size() && word.get(i).equals(pair.left()) && word.get(i + 1).equals(pair.right())) {
+                out.add(word.get(i) + word.get(i + 1));
+                i += 2;
+            } else {
+                out.add(word.get(i));
+                i += 1;
+            }
+        }
+        return out;
+    }
+
+    static List<String> encode(String word, List<Rule> rules) {
+        List<String> pieces = new ArrayList<>();
+        for (char c : word.toCharArray()) pieces.add(String.valueOf(c));
+        for (Rule rule : rules) pieces = merge(pieces, rule);
+        return pieces;
+    }
+
+    public static void main(String[] args) {
+        String corpus = "low low low lower lower lowest newest newest widest widest";
+        List<Rule> rules = train(corpus, 6);
+        System.out.println("merges: " + String.join(" ", rules.stream().map(r -> r.left() + "+" + r.right()).toList()));
+        for (String word : List.of("low", "lowest", "newer", "widest", "lowish")) {
+            System.out.println(String.format("%-7s", word) + " -> " + String.join(" | ", encode(word, rules)));
+        }
+    }
+}
+```
+```text
+merges: l+o lo+w e+s es+t low+e lowe+r
+low     -> low
+lowest  -> low | est
+newer   -> n | e | w | e | r
+widest  -> w | i | d | est
+lowish  -> low | i | s | h
+```
+```kotlin
+/** A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words. */
+data class Rule(val left: String, val right: String)
+
+/** Learn merge rules: repeatedly join the most frequent adjacent pair (ties: first seen). */
+fun train(corpus: String, merges: Int): List<Rule> {
+    var words = corpus.trim().split(Regex("\\s+")).map { w -> w.map { it.toString() } }
+    val rules = mutableListOf<Rule>()
+    repeat(merges) {
+        val pairs = LinkedHashMap<Rule, Int>()
+        for (w in words) for (i in 0 until w.size - 1) pairs.merge(Rule(w[i], w[i + 1]), 1, Int::plus)
+        if (pairs.isEmpty()) return rules
+        val best = pairs.entries.fold(null as Map.Entry<Rule, Int>?) { top, e -> if (top == null || e.value > top.value) e else top }!!.key
+        rules += best
+        words = words.map { merge(it, best) }
+    }
+    return rules
+}
+
+fun merge(word: List<String>, pair: Rule): List<String> {
+    val out = mutableListOf<String>()
+    var i = 0
+    while (i < word.size) {
+        if (i + 1 < word.size && word[i] == pair.left && word[i + 1] == pair.right) {
+            out += word[i] + word[i + 1]
+            i += 2
+        } else {
+            out += word[i]
+            i += 1
+        }
+    }
+    return out
+}
+
+fun encode(word: String, rules: List<Rule>): List<String> = rules.fold(word.map { it.toString() }) { pieces, rule -> merge(pieces, rule) }
+
+fun main() {
+    val corpus = "low low low lower lower lowest newest newest widest widest"
+    val rules = train(corpus, 6)
+    println("merges: " + rules.joinToString(" ") { "${it.left}+${it.right}" })
+    for (word in listOf("low", "lowest", "newer", "widest", "lowish")) {
+        println("${word.padEnd(7)} -> ${encode(word, rules).joinToString(" | ")}")
+    }
+}
+```
+```text
+merges: l+o lo+w e+s es+t low+e lowe+r
+low     -> low
+lowest  -> low | est
+newer   -> n | e | w | e | r
+widest  -> w | i | d | est
+lowish  -> low | i | s | h
+```
 <!-- /example -->
 
-(Java and Kotlin readers: the logic is a loop over a list of strings and ports directly.)
+(The Java and Kotlin tabs run the same loop over a list of strings and print the same tokens.)
 
 Read the output: the frequent word `low` became a single token, `lowest` is two, and `lowish`, a word the
 corpus never contained, still encodes, from smaller pieces. Real tokenizers behave the same way at a much

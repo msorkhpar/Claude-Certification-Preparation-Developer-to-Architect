@@ -3,7 +3,7 @@
 # every variant of every Level 2 practice in four languages, then the Level 2 examples (tests and output).
 # usage: tools/l2_run_all.sh <runner image id>        (cwd = repository root)
 IMG=$1; W=$(pwd)
-python3 tools/make_plants.py --modules "${L2_MODULES:-.*}" || exit 2   # the wrong-* folders are generated, never committed
+[ "${L2_MODULES:-}" = '^$' ] || python3 tools/make_plants.py --modules "${L2_MODULES:-.*}" || exit 2   # the wrong-* folders are generated, never committed; L2_MODULES='^$' runs the examples only
 mkdir -p "$W/.survey-out"
 tools/l2_prepare_caches.sh "$IMG" || exit 2
 tools/l2_prepare_gradle.sh "$IMG" || exit 2
@@ -26,3 +26,9 @@ for spec in ${L2_EXAMPLE_SPECS:-examples/*/example.json}; do
     echo "example $d $lang run rc=$?"
   done
 done
+# the JVM editions of the examples (Gradle, offline; the libraries are cached by one online warm-up): tests, then printed output
+if [ -n "${L2_JVM_EXAMPLES:-}" ]; then
+  tools/l2_prepare_jvm_examples.sh "$IMG" || exit 2
+  tools/l2_run_jvm_examples.sh "$IMG" test runExample
+  echo "jvm examples (java and kotlin) rc=$?"
+fi

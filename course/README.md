@@ -99,7 +99,7 @@ language-neutral and are shown once, untagged.
 An example that exists in several languages is one block with a tab per language:
 
 ````text
-<!-- example: <id> tabs: python,typescript -->
+<!-- example: <id> tabs: python,typescript,java,kotlin -->
 ```python
 ...the source file, exactly as in examples/...
 ```
@@ -112,13 +112,18 @@ An example that exists in several languages is one block with a tab per language
 ```text
 ...the output that program printed...
 ```
+```java
+...and the same for java and kotlin...
+```
 <!-- /example -->
 ````
 
 - Each language's code fence is followed by a `text` fence with that program's real output. The build's
   tests assert that the outputs are the same, or state the difference.
-- `tabs:` lists the languages the example exists in. A page says in one line what a reader of a missing
-  language does instead (the logic is the same; the example needs only the standard library).
+- `tabs:` lists the languages the example exists in; it follows the `files` map of the example's
+  `example.json`, and `tools/check_examples.py --fill` writes the block from the sources and the recorded outputs.
+  Where a language is missing (the Agent SDK has no Java or Kotlin edition), the page says in one line what a
+  reader of that language does instead.
 - A block that is a library file, not a program, has no output fence.
 
 ### Illustrative exchanges and quotations

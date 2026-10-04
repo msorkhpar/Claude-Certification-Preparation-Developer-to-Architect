@@ -59,7 +59,7 @@ A trace often holds several failures. A 529 is retried and succeeds, so the appl
 
 The example reads three hand-written traces, each a list of events. Trace A is a tool loop that ends in an empty reply, and the last user message had text after the tool result. Trace B is a 529 followed by a retry that succeeded. Trace C is a parse failure on JSON inside a code fence. The function that reads them is a small version of the practice's: it returns the first failure, its origin and the next action. The source of both languages is shown, and under each is what it printed in the container.
 
-<!-- example: m43-read-a-trace tabs: python,typescript -->
+<!-- example: m43-read-a-trace tabs: python,typescript,java,kotlin -->
 ```python
 """Reading a trace: where did it fail, in the integration or in the model, and what should happen next?
 
@@ -213,6 +213,224 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+A: a tool loop that ends in silence
+  first failure: event 3, empty reply; origin: integration; next: send the tool result alone, with no text after it; recovered later: False
+B: a busy service and a retry
+  first failure: event 1, overloaded_error; origin: service; next: retry with back-off; recovered later: True
+C: JSON in a code fence
+  first failure: event 2, parse failure; origin: integration; next: extract the JSON object before parsing; recovered later: False
+```
+```java
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * Reading a trace: where did it fail, in the integration or in the model, and what should happen next?
+ *
+ * <p>The Claude documentation on API errors and on stop reasons (read on 2026-10-03) lists the error types and says that a stop reason is part of
+ * a successful response ("Response contains valid content") while an error is a 4xx or 5xx status. It also says that adding text right after
+ * a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names
+ * the first failure, its origin and the next action. The traces are scripted and carry no live output.
+ */
+public final class ReadATrace {
+    sealed interface Event permits Request, Response, ApiError, Parse {}
+
+    /** A request; only the kinds of block in its last user message matter here. */
+    record Request(List<String> lastUserBlocks) implements Event {}
+
+    /** A successful reply; `content` holds the kinds of its blocks. */
+    record Response(int status, String stopReason, List<String> content) implements Event {}
+
+    record ApiError(int status, String errorType) implements Event {}
+
+    record Parse(boolean ok, String text) implements Event {}
+
+    record Failure(int index, String what, String origin, String next) {}
+
+    static final Map<String, String> ORIGIN = Map.of(
+        "invalid_request_error", "integration", "authentication_error", "account", "rate_limit_error", "service",
+        "api_error", "service", "overloaded_error", "service", "timeout_error", "service");
+    static final Map<String, String> NEXT = Map.of(
+        "invalid_request_error", "fix the request, do not retry", "authentication_error", "fix the credential",
+        "rate_limit_error", "wait, then retry", "api_error", "retry with back-off", "overloaded_error", "retry with back-off",
+        "timeout_error", "stream the request");
+
+    static final Map<String, List<Event>> TRACES = new LinkedHashMap<>();
+
+    static {
+        TRACES.put("A: a tool loop that ends in silence", List.of(
+            new Request(List.of("text")),
+            new Response(200, "tool_use", List.of("tool_use")),
+            new Request(List.of("tool_result", "text")),
+            new Response(200, "end_turn", List.of())));
+        TRACES.put("B: a busy service and a retry", List.of(
+            new Request(List.of("text")),
+            new ApiError(529, "overloaded_error"),
+            new Request(List.of("text")),
+            new Response(200, "end_turn", List.of("text"))));
+        TRACES.put("C: JSON in a code fence", List.of(
+            new Request(List.of("text")),
+            new Response(200, "end_turn", List.of("text")),
+            new Parse(false, "```json\n{\"label\": \"spam\"}\n```")));
+    }
+
+    private static final ObjectMapper JSON = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+
+    private static boolean isJson(String text) {
+        try {
+            JSON.readValue(text, Object.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** The first failing event with its origin and next action, or empty. */
+    static Optional<Failure> firstFailure(List<Event> trace) {
+        List<String> lastBlocks = List.of();
+        for (int i = 0; i < trace.size(); i++) {
+            Event e = trace.get(i);
+            if (e instanceof Request r) {
+                lastBlocks = r.lastUserBlocks();
+            } else if (e instanceof ApiError err) {
+                return Optional.of(new Failure(i, err.errorType(), ORIGIN.get(err.errorType()), NEXT.get(err.errorType())));
+            } else if (e instanceof Response r && r.stopReason().equals("end_turn") && r.content().isEmpty()) {
+                int at = lastBlocks.indexOf("tool_result");
+                if (at >= 0 && lastBlocks.subList(at, lastBlocks.size()).contains("text")) {
+                    return Optional.of(new Failure(i, "empty reply", "integration", "send the tool result alone, with no text after it"));
+                }
+                return Optional.of(new Failure(i, "empty reply", "model", "add a new user message that asks it to continue"));
+            } else if (e instanceof Parse p && !p.ok()) {
+                int start = p.text().indexOf('{');
+                int end = p.text().lastIndexOf('}');
+                String candidate = start >= 0 && end >= start ? p.text().substring(start, end + 1) : "";
+                return Optional.of(isJson(candidate)
+                    ? new Failure(i, "parse failure", "integration", "extract the JSON object before parsing")
+                    : new Failure(i, "parse failure", "model", "validate the output and retry"));
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static void main(String[] args) {
+        for (Map.Entry<String, List<Event>> entry : TRACES.entrySet()) {
+            List<Event> trace = entry.getValue();
+            Failure found = firstFailure(trace).orElseThrow();
+            boolean recovered = trace.subList(found.index() + 1, trace.size()).stream()
+                .anyMatch(e -> e instanceof Response r && r.stopReason().equals("end_turn") && !r.content().isEmpty());
+            System.out.println(entry.getKey());
+            System.out.println("  first failure: event " + found.index() + ", " + found.what() + "; origin: " + found.origin()
+                + "; next: " + found.next() + "; recovered later: " + (recovered ? "True" : "False"));
+        }
+    }
+}
+```
+```text
+A: a tool loop that ends in silence
+  first failure: event 3, empty reply; origin: integration; next: send the tool result alone, with no text after it; recovered later: False
+B: a busy service and a retry
+  first failure: event 1, overloaded_error; origin: service; next: retry with back-off; recovered later: True
+C: JSON in a code fence
+  first failure: event 2, parse failure; origin: integration; next: extract the JSON object before parsing; recovered later: False
+```
+```kotlin
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+
+/**
+ * Reading a trace: where did it fail, in the integration or in the model, and what should happen next?
+ *
+ * The Claude documentation on API errors and on stop reasons (read on 2026-10-03) lists the error types and says that a stop reason is part of
+ * a successful response ("Response contains valid content") while an error is a 4xx or 5xx status. It also says that adding text right after
+ * a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names
+ * the first failure, its origin and the next action. The traces are scripted and carry no live output.
+ */
+sealed interface Event
+
+/** A request; only the kinds of block in its last user message matter here. */
+data class Request(val lastUserBlocks: List<String>) : Event
+
+/** A successful reply; `content` holds the kinds of its blocks. */
+data class Response(val status: Int, val stopReason: String, val content: List<String>) : Event
+
+data class ApiError(val status: Int, val errorType: String) : Event
+
+data class Parse(val ok: Boolean, val text: String) : Event
+
+data class Failure(val index: Int, val what: String, val origin: String, val next: String)
+
+val ORIGIN = mapOf(
+    "invalid_request_error" to "integration", "authentication_error" to "account", "rate_limit_error" to "service",
+    "api_error" to "service", "overloaded_error" to "service", "timeout_error" to "service",
+)
+val NEXT = mapOf(
+    "invalid_request_error" to "fix the request, do not retry", "authentication_error" to "fix the credential",
+    "rate_limit_error" to "wait, then retry", "api_error" to "retry with back-off", "overloaded_error" to "retry with back-off",
+    "timeout_error" to "stream the request",
+)
+
+val TRACES: Map<String, List<Event>> = linkedMapOf(
+    "A: a tool loop that ends in silence" to listOf(
+        Request(listOf("text")),
+        Response(200, "tool_use", listOf("tool_use")),
+        Request(listOf("tool_result", "text")),
+        Response(200, "end_turn", emptyList()),
+    ),
+    "B: a busy service and a retry" to listOf(
+        Request(listOf("text")),
+        ApiError(529, "overloaded_error"),
+        Request(listOf("text")),
+        Response(200, "end_turn", listOf("text")),
+    ),
+    "C: JSON in a code fence" to listOf(
+        Request(listOf("text")),
+        Response(200, "end_turn", listOf("text")),
+        Parse(false, "```json\n{\"label\": \"spam\"}\n```"),
+    ),
+)
+
+private val JSON = ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+
+private fun isJson(text: String) = runCatching { JSON.readValue(text, Any::class.java) }.isSuccess
+
+/** The first failing event with its origin and next action, or null. */
+fun firstFailure(trace: List<Event>): Failure? {
+    var lastBlocks = emptyList<String>()
+    for ((i, e) in trace.withIndex()) {
+        when {
+            e is Request -> lastBlocks = e.lastUserBlocks
+            e is ApiError -> return Failure(i, e.errorType, ORIGIN.getValue(e.errorType), NEXT.getValue(e.errorType))
+            e is Response && e.stopReason == "end_turn" && e.content.isEmpty() -> {
+                val at = lastBlocks.indexOf("tool_result")
+                return if (at >= 0 && "text" in lastBlocks.drop(at)) Failure(i, "empty reply", "integration", "send the tool result alone, with no text after it")
+                else Failure(i, "empty reply", "model", "add a new user message that asks it to continue")
+            }
+            e is Parse && !e.ok -> {
+                val start = e.text.indexOf('{')
+                val end = e.text.lastIndexOf('}')
+                val candidate = if (start >= 0 && end >= start) e.text.substring(start, end + 1) else ""
+                return if (isJson(candidate)) Failure(i, "parse failure", "integration", "extract the JSON object before parsing")
+                else Failure(i, "parse failure", "model", "validate the output and retry")
+            }
+        }
+    }
+    return null
+}
+
+fun main() {
+    for ((name, trace) in TRACES) {
+        val found = firstFailure(trace)!!
+        val recovered = trace.drop(found.index + 1).any { it is Response && it.stopReason == "end_turn" && it.content.isNotEmpty() }
+        println(name)
+        println("  first failure: event ${found.index}, ${found.what}; origin: ${found.origin}; next: ${found.next}; recovered later: ${if (recovered) "True" else "False"}")
+    }
+}
 ```
 ```text
 A: a tool loop that ends in silence

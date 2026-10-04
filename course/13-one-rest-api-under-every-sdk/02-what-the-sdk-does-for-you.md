@@ -27,7 +27,7 @@ The example makes one Messages call by hand and then through the SDK. Both go to
 program can record exactly what each one put on the wire, and nothing leaves the container. The first reply is a
 200; the second is a 429 with a `retry-after` header and a request id.
 
-<!-- example: m13-raw-vs-sdk tabs: python,typescript -->
+<!-- example: m13-raw-vs-sdk tabs: python,typescript,java,kotlin -->
 ```python
 """One Messages call written by hand with httpx2, then the same call through the SDK.
 
@@ -159,6 +159,163 @@ headers only the SDK adds: accept, user-agent, x-stainless-arch, x-stainless-lan
 raw 429 : 429 rate_limit_error retry-after 7
 sdk 429 : RateLimitError 429 request id req_illustrative_0001
 ```
+```java
+import static harness.Scripted.map;
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.errors.RateLimitException;
+import com.anthropic.models.messages.Message;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import com.fasterxml.jackson.databind.JsonNode;
+import harness.Reply;
+import harness.Scripted;
+import harness.ScriptedHttp;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+/**
+ * One Messages call written by hand, then the same call through the SDK.
+ *
+ * <p>Both go through the same kind of scripted transport, so nothing leaves the container. The reply is an
+ * illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.
+ * (`harness` is the course's stand-in: a scripted transport plugged into the SDK's own HttpClient hook.)
+ */
+public final class RawVsSdk {
+    static final String MODEL = "claude-sonnet-5-5";
+    static final String URL = "https://api.anthropic.com/v1/messages";
+    static final Map<String, Object> PAYLOAD = map("model", MODEL, "max_tokens", 64, "messages", List.of(map("role", "user", "content", "Capital of France?")));
+    static final Map<String, Object> OK = message(List.of(text("Paris.")));
+    static final Reply LIMITED = Reply.json(429, map("type", "error", "error", map("type", "rate_limit_error", "message", "Rate limited"), "request_id", "req_illustrative_0001"),
+        "retry-after", "7", "request-id", "req_illustrative_0001");
+
+    /** The HTTP request the SDK would build, written out: three headers and a JSON body. */
+    static Reply rawCall(ScriptedHttp transport) {
+        Map<String, String> headers = Map.of("x-api-key", "placeholder", "anthropic-version", "2023-06-01", "content-type", "application/json");
+        return transport.send("POST", URL, headers, PAYLOAD);
+    }
+
+    static Message sdkCall(ScriptedHttp transport) {
+        AnthropicClient client = Scripted.clientOn(transport, 0);
+        return client.messages().create(MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(64).addUserMessage("Capital of France?").build());
+    }
+
+    private static String repr(String s) {
+        return "'" + s + "'";
+    }
+
+    public static void main(String[] args) {
+        ScriptedHttp raw = Scripted.http(OK, LIMITED);
+        ScriptedHttp sdk = Scripted.http(OK, LIMITED);
+
+        Reply reply = rawCall(raw);
+        System.out.println("raw : " + raw.methods.get(0) + " " + raw.urls.get(0) + " -> " + reply.status() + " " + repr(reply.json().at("/content/0/text").asText()));
+        Message message = sdkCall(sdk);
+        System.out.println("sdk : POST " + sdk.urls.get(0) + " -> 200 " + repr(message.content().get(0).asText().text()));
+        System.out.println("same URL: " + py(raw.urls.get(0).equals(sdk.urls.get(0))) + " | same body: " + py(raw.requests.get(0).equals(sdk.requests.get(0))));
+        for (String name : List.of("anthropic-version", "content-type")) {
+            System.out.println(name + ": raw " + raw.headers.get(0).get(name) + " | sdk " + sdk.headers.get(0).get(name));
+        }
+        TreeSet<String> onlySdk = new TreeSet<>(sdk.headers.get(0).keySet());
+        onlySdk.removeAll(raw.headers.get(0).keySet());
+        System.out.println("headers only the SDK adds: " + String.join(", ", onlySdk));
+
+        Reply limited = rawCall(raw);
+        JsonNode body = limited.json();
+        System.out.println("raw 429 : " + limited.status() + " " + body.at("/error/type").asText() + " retry-after " + limited.headers().get("retry-after"));
+        try {
+            sdkCall(sdk);
+        } catch (RateLimitException err) {
+            System.out.println("sdk 429 : " + err.getClass().getSimpleName() + " " + err.statusCode() + " request id " + err.headers().values("request-id").get(0));
+        }
+    }
+
+    private static String py(boolean value) {
+        return value ? "True" : "False";
+    }
+}
+```
+```text
+raw : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'
+sdk : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'
+same URL: True | same body: True
+anthropic-version: raw 2023-06-01 | sdk 2023-06-01
+content-type: raw application/json | sdk application/json
+headers only the SDK adds: accept, user-agent, x-stainless-arch, x-stainless-kotlin-version, x-stainless-lang, x-stainless-os, x-stainless-os-version, x-stainless-package-version, x-stainless-retry-count, x-stainless-runtime, x-stainless-runtime-version
+raw 429 : 429 rate_limit_error retry-after 7
+sdk 429 : RateLimitException 429 request id req_illustrative_0001
+```
+```kotlin
+import com.anthropic.errors.RateLimitException
+import com.anthropic.models.messages.Message
+import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.Model
+import harness.Reply
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+import harness.ScriptedHttp
+
+/**
+ * One Messages call written by hand, then the same call through the SDK.
+ *
+ * Both go through the same kind of scripted transport, so nothing leaves the container. The reply is an
+ * illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.
+ * (`harness` is the course's stand-in: a scripted transport plugged into the SDK's own HttpClient hook.)
+ */
+const val MODEL = "claude-sonnet-5-5"
+const val URL = "https://api.anthropic.com/v1/messages"
+val PAYLOAD = map("model", MODEL, "max_tokens", 64, "messages", listOf(map("role", "user", "content", "Capital of France?")))
+val OK = message(listOf(text("Paris.")))
+val LIMITED = Reply.json(
+    429, map("type", "error", "error", map("type", "rate_limit_error", "message", "Rate limited"), "request_id", "req_illustrative_0001"),
+    "retry-after", "7", "request-id", "req_illustrative_0001",
+)
+
+/** The HTTP request the SDK would build, written out: three headers and a JSON body. */
+fun rawCall(transport: ScriptedHttp): Reply =
+    transport.send("POST", URL, mapOf("x-api-key" to "placeholder", "anthropic-version" to "2023-06-01", "content-type" to "application/json"), PAYLOAD)
+
+fun sdkCall(transport: ScriptedHttp): Message =
+    Scripted.clientOn(transport, 0).messages().create(MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(64).addUserMessage("Capital of France?").build())
+
+private fun py(value: Boolean) = if (value) "True" else "False"
+
+fun main() {
+    val raw = Scripted.http(OK, LIMITED)
+    val sdk = Scripted.http(OK, LIMITED)
+
+    val reply = rawCall(raw)
+    println("raw : ${raw.methods[0]} ${raw.urls[0]} -> ${reply.status()} '${reply.json().at("/content/0/text").asText()}'")
+    val message = sdkCall(sdk)
+    println("sdk : POST ${sdk.urls[0]} -> 200 '${message.content()[0].asText().text()}'")
+    println("same URL: ${py(raw.urls[0] == sdk.urls[0])} | same body: ${py(raw.requests[0] == sdk.requests[0])}")
+    for (name in listOf("anthropic-version", "content-type")) println("$name: raw ${raw.headers[0][name]} | sdk ${sdk.headers[0][name]}")
+    println("headers only the SDK adds: " + (sdk.headers[0].keys - raw.headers[0].keys).sorted().joinToString(", "))
+
+    val limited = rawCall(raw)
+    println("raw 429 : ${limited.status()} ${limited.json().at("/error/type").asText()} retry-after ${limited.headers()["retry-after"]}")
+    try {
+        sdkCall(sdk)
+    } catch (err: RateLimitException) {
+        println("sdk 429 : ${err.javaClass.simpleName} ${err.statusCode()} request id ${err.headers().values("request-id")[0]}")
+    }
+}
+```
+```text
+raw : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'
+sdk : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'
+same URL: True | same body: True
+anthropic-version: raw 2023-06-01 | sdk 2023-06-01
+content-type: raw application/json | sdk application/json
+headers only the SDK adds: accept, user-agent, x-stainless-arch, x-stainless-kotlin-version, x-stainless-lang, x-stainless-os, x-stainless-os-version, x-stainless-package-version, x-stainless-retry-count, x-stainless-runtime, x-stainless-runtime-version
+raw 429 : 429 rate_limit_error retry-after 7
+sdk 429 : RateLimitException 429 request id req_illustrative_0001
+```
 <!-- /example -->
 
 Read the output as a list:
@@ -172,10 +329,12 @@ Read the output as a list:
   Java and Kotlin: the Java SDK page maps a 429 to `RateLimitException` and offers `withRawResponse()` for the
   headers and `requestId()`.
 
-Java and Kotlin have no example tab on this page. The Java SDK (`com.anthropic:anthropic-java`, pinned 2.68.0; Kotlin
-uses the same artifact) builds the same request from `MessageCreateParams` and sends it with
-`client.messages().create(params)` on a client from `AnthropicOkHttpClient.fromEnv()`. The practice below runs in
-all four languages.
+The Java and Kotlin tabs use the Java SDK (`com.anthropic:anthropic-java`, pinned 2.68.0; Kotlin uses the same artifact). It
+builds the same request from `MessageCreateParams` and sends it with `client.messages().create(params)`; in a program that talks to
+the real API the client comes from `AnthropicOkHttpClient.fromEnv()`, and here it runs on the scripted transport. Two lines of the
+output name things that belong to the SDK and so read differently in these tabs: the headers only the SDK adds (the Java SDK adds
+`accept` and `user-agent`, and reports its Kotlin version) and the class of the rate-limit error (`RateLimitException`, where the
+Python SDK has `RateLimitError`). The rest of the output is the same text. The practice below runs in all four languages.
 
 ### What the SDK does for you
 

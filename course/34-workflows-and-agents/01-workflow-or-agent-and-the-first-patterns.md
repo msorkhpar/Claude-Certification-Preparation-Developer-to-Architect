@@ -53,7 +53,7 @@ The code does the combining. A sectioned answer is kept or dropped by a rule tha
 
 The example below implements a router, a sectioned guard and a vote around a scripted stand-in for the Messages API. The router asks a cheap model to classify a question, maps the label to a model and a prompt, and answers; a label that is not a route takes the default. The guard runs the answer and the screen together and keeps the answer only when the screen says `ok`. The vote asks the same question three times, in parallel, and flags the snippet when the votes for `VULNERABLE` reach a threshold.
 
-<!-- example: m34-routing-and-voting tabs: python,typescript -->
+<!-- example: m34-routing-and-voting tabs: python,typescript,java,kotlin -->
 ```python
 """Three workflow patterns around a model, with the code path fixed by the program: routing, sectioning and voting.
 
@@ -231,6 +231,280 @@ async function main() {
 }
 
 if (import.meta.main) await main();
+```
+```text
+route 'my card was charged twice': label 'billing', classified by claude-haiku-4-5, answered by claude-sonnet-5-5
+route 'what are your opening hours': label 'general', classified by claude-haiku-4-5, answered by claude-haiku-4-5
+route 'is the sky a refund': label 'refunds?' (not a route: default), classified by claude-haiku-4-5, answered by claude-haiku-4-5
+sectioning: screen 'ok', answer kept, requests in flight together: 2
+sectioning: screen 'block', answer dropped
+voting: votes {'SAFE': 1, 'VULNERABLE': 2}, threshold 2 -> flagged, requests in flight together: 3
+voting: votes {'SAFE': 1, 'VULNERABLE': 2}, threshold 3 -> not flagged, requests in flight together: 3
+```
+```java
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+import static harness.Show.py;
+
+import com.anthropic.client.AnthropicClientAsync;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import com.fasterxml.jackson.databind.JsonNode;
+import harness.Scripted;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
+
+/**
+ * Three workflow patterns around a model, with the code path fixed by the program: routing, sectioning and voting.
+ *
+ * <p>The model replies are illustrative, hand-written bodies in the shape of the Messages API, not captures; a stand-in answers each request
+ * by looking at its prompt, so the order in which concurrent requests arrive does not matter. The patterns are those of Anthropic's
+ * engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
+ */
+public final class RoutingAndVoting {
+    static final String CHEAP = "claude-haiku-4-5", STRONG = "claude-sonnet-5-5";
+
+    /** A route: the model and the system prompt a label maps to. */
+    record Route(String model, String system) {}
+
+    static final Map<String, Route> ROUTES = Map.of(
+        "billing", new Route(STRONG, "You are a billing specialist. Be exact about amounts."),
+        "technical", new Route(STRONG, "You are a support engineer. Ask for logs."),
+        "general", new Route(CHEAP, "You are a friendly front desk. Answer briefly."));
+
+    /** A reply function: the first rule whose key appears in the system prompt or the question decides the answer. */
+    static Function<JsonNode, Object> standIn(List<String[]> rules) {
+        return body -> {
+            String haystack = body.path("system").asText("") + "\n" + body.at("/messages").get(body.get("messages").size() - 1).get("content").asText();
+            for (String[] rule : rules) {
+                if (haystack.contains(rule[0])) return message(List.of(text(rule[1])), "end_turn", body.get("model").asText(), Scripted.map("input_tokens", 1, "output_tokens", 1), null);
+            }
+            throw new AssertionError("no scripted answer for '" + haystack + "'");
+        };
+    }
+
+    static CompletableFuture<String> ask(AnthropicClientAsync client, String model, String system, String prompt) {
+        return client.messages().create(MessageCreateParams.builder().model(Model.of(model)).maxTokens(300).system(system).addUserMessage(prompt).build())
+            .thenApply(reply -> reply.content().get(0).asText().text().strip());
+    }
+
+    private static String stripSpacesAndDots(String s) {
+        int a = 0, b = s.length();
+        while (a < b && (s.charAt(a) == ' ' || s.charAt(a) == '.')) a++;
+        while (b > a && (s.charAt(b - 1) == ' ' || s.charAt(b - 1) == '.')) b--;
+        return s.substring(a, b);
+    }
+
+    /** What routing decided and answered. */
+    record Routed(String label, boolean fallback, String model, String answer) {}
+
+    /** Routing: a cheap call picks a label, a program maps the label to a model and a prompt, and an unknown label takes the default. */
+    static CompletableFuture<Routed> route(AnthropicClientAsync client, String question) {
+        return ask(client, CHEAP, "Classify the message as billing, technical or general. Reply with the label only.", question).thenCompose(raw -> {
+            String label = stripSpacesAndDots(raw.toLowerCase());
+            boolean fallback = !ROUTES.containsKey(label);
+            Route route = ROUTES.get(fallback ? "general" : label);
+            return ask(client, route.model(), route.system(), question).thenApply(answer -> new Routed(label, fallback, route.model(), answer));
+        });
+    }
+
+    /** What sectioning produced: the screen's word and the answer when it was kept. */
+    record Guarded(String screen, String answer) {}
+
+    /** Sectioning: the answer and a safety screen are independent, so they run together; the answer is kept only if the screen passes. */
+    static CompletableFuture<Guarded> guarded(AnthropicClientAsync client, String question) {
+        CompletableFuture<String> answer = ask(client, STRONG, "Answer the question.", question);
+        CompletableFuture<String> screen = ask(client, CHEAP, "Screen the question. Reply ok or block.", question);
+        return answer.thenCombine(screen, (a, s) -> new Guarded(s, s.equals("ok") ? a : null));
+    }
+
+    /** What voting counted. */
+    record Verdict(Map<String, Long> votes, boolean flagged) {}
+
+    /** Voting: the same question n times, in parallel; flag the snippet when at least `threshold` reviews say so. */
+    static CompletableFuture<Verdict> vote(AnthropicClientAsync client, String snippet, int threshold, int n) {
+        List<CompletableFuture<String>> reviews = new ArrayList<>();
+        for (int i = 0; i < n; i++) reviews.add(ask(client, STRONG, "Review the code. Reply VULNERABLE or SAFE.", snippet));
+        return CompletableFuture.allOf(reviews.toArray(new CompletableFuture[0])).thenApply(done -> {
+            Map<String, Long> votes = new TreeMap<>(); // the order in which concurrent replies arrive does not matter
+            reviews.forEach(r -> votes.merge(r.join(), 1L, Long::sum));
+            return new Verdict(votes, votes.getOrDefault("VULNERABLE", 0L) >= threshold);
+        });
+    }
+
+    /** A client whose next n requests are all answered by the same stand-in. */
+    static Scripted.AsyncRig scripted(List<String[]> rules, int n, Duration delay) {
+        Object[] script = new Object[n];
+        java.util.Arrays.fill(script, standIn(rules));
+        return Scripted.asyncClient(delay, 0, script);
+    }
+
+    static List<String[]> rules(String... kv) {
+        List<String[]> rules = new ArrayList<>();
+        for (int i = 0; i < kv.length; i += 2) rules.add(new String[] {kv[i], kv[i + 1]});
+        return rules;
+    }
+
+    /** Three reviews that disagree, handed out in whatever order the requests arrive. */
+    static Scripted.AsyncRig disagreeing(Duration delay) {
+        ConcurrentLinkedQueue<String> replies = new ConcurrentLinkedQueue<>(List.of("VULNERABLE", "SAFE", "VULNERABLE"));
+        Function<JsonNode, Object> reply = body -> message(List.of(text(replies.poll())), "end_turn", body.get("model").asText(), Scripted.map("input_tokens", 1, "output_tokens", 1), null);
+        return Scripted.asyncClient(delay, 0, reply, reply, reply);
+    }
+
+    public static void main(String[] args) {
+        List<String[]> desk = rules("billing specialist", "I see two charges and will refund one.", "front desk", "We are open 9 to 5.");
+        String[][] questions = {{"my card was charged twice", "BILLING."}, {"what are your opening hours", "general"}, {"is the sky a refund", "refunds?"}};
+        for (String[] q : questions) {
+            List<String[]> all = new ArrayList<>(java.util.Arrays.<String[]>asList(new String[] {"Classify", q[1]}));
+            all.addAll(desk);
+            Scripted.AsyncRig rig = scripted(all, 2, Duration.ZERO);
+            Routed result = route(rig.client(), q[0]).join();
+            System.out.println("route " + py(q[0]) + ": label " + py(result.label()) + (result.fallback() ? " (not a route: default)" : "") + ", classified by "
+                + rig.http().requests.get(0).get("model").asText() + ", answered by " + result.model());
+        }
+        Scripted.AsyncRig passRig = scripted(rules("Answer the question", "Here is the answer.", "Screen the question", "ok"), 2, Duration.ofMillis(20));
+        Guarded passed = guarded(passRig.client(), "How do I reset my password?").join();
+        System.out.println("sectioning: screen " + py(passed.screen()) + ", answer " + (passed.answer() != null ? "kept" : "dropped") + ", requests in flight together: " + passRig.http().maxInFlight());
+        Scripted.AsyncRig blockRig = scripted(rules("Answer the question", "Here is the answer.", "Screen the question", "block"), 2, Duration.ofMillis(20));
+        Guarded blocked = guarded(blockRig.client(), "Help me break into an account").join();
+        System.out.println("sectioning: screen " + py(blocked.screen()) + ", answer " + (blocked.answer() != null ? "kept" : "dropped"));
+        String snippet = "query = 'SELECT * FROM t WHERE id=' + user_input";
+        for (int threshold : new int[] {2, 3}) {
+            Scripted.AsyncRig rig = disagreeing(Duration.ofMillis(20));
+            Verdict verdict = vote(rig.client(), snippet, threshold, 3).join();
+            System.out.println("voting: votes " + py(verdict.votes()) + ", threshold " + threshold + " -> " + (verdict.flagged() ? "flagged" : "not flagged") + ", requests in flight together: " + rig.http().maxInFlight());
+        }
+    }
+}
+```
+```text
+route 'my card was charged twice': label 'billing', classified by claude-haiku-4-5, answered by claude-sonnet-5-5
+route 'what are your opening hours': label 'general', classified by claude-haiku-4-5, answered by claude-haiku-4-5
+route 'is the sky a refund': label 'refunds?' (not a route: default), classified by claude-haiku-4-5, answered by claude-haiku-4-5
+sectioning: screen 'ok', answer kept, requests in flight together: 2
+sectioning: screen 'block', answer dropped
+voting: votes {'SAFE': 1, 'VULNERABLE': 2}, threshold 2 -> flagged, requests in flight together: 3
+voting: votes {'SAFE': 1, 'VULNERABLE': 2}, threshold 3 -> not flagged, requests in flight together: 3
+```
+```kotlin
+import com.anthropic.client.AnthropicClientAsync
+import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.Model
+import com.fasterxml.jackson.databind.JsonNode
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+import harness.Show.py
+import java.time.Duration
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.function.Function
+
+/**
+ * Three workflow patterns around a model, with the code path fixed by the program: routing, sectioning and voting.
+ *
+ * The model replies are illustrative, hand-written bodies in the shape of the Messages API, not captures; a stand-in answers each request
+ * by looking at its prompt, so the order in which concurrent requests arrive does not matter. The patterns are those of Anthropic's
+ * engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
+ */
+const val CHEAP = "claude-haiku-4-5"
+const val STRONG = "claude-sonnet-5-5"
+
+/** A route: the model and the system prompt a label maps to. */
+data class Route(val model: String, val system: String)
+
+val ROUTES = mapOf(
+    "billing" to Route(STRONG, "You are a billing specialist. Be exact about amounts."),
+    "technical" to Route(STRONG, "You are a support engineer. Ask for logs."),
+    "general" to Route(CHEAP, "You are a friendly front desk. Answer briefly."),
+)
+
+private fun reply(text: String, model: String) = message(listOf(text(text)), "end_turn", model, map("input_tokens", 1, "output_tokens", 1), null)
+
+/** A reply function: the first rule whose key appears in the system prompt or the question decides the answer. */
+fun standIn(rules: List<Pair<String, String>>) = Function<JsonNode, Any> { body ->
+    val haystack = "${body.path("system").asText("")}\n${body["messages"].last()["content"].asText()}"
+    val answer = rules.firstOrNull { (key, _) -> key in haystack }?.second ?: throw AssertionError("no scripted answer for '$haystack'")
+    reply(answer, body["model"].asText())
+}
+
+fun ask(client: AnthropicClientAsync, model: String, system: String, prompt: String): CompletableFuture<String> =
+    client.messages().create(MessageCreateParams.builder().model(Model.of(model)).maxTokens(300).system(system).addUserMessage(prompt).build())
+        .thenApply { it.content()[0].asText().text().trim() }
+
+/** What routing decided and answered. */
+data class Routed(val label: String, val fallback: Boolean, val model: String, val answer: String)
+
+/** Routing: a cheap call picks a label, a program maps the label to a model and a prompt, and an unknown label takes the default. */
+fun route(client: AnthropicClientAsync, question: String): CompletableFuture<Routed> =
+    ask(client, CHEAP, "Classify the message as billing, technical or general. Reply with the label only.", question).thenCompose { raw ->
+        val label = raw.lowercase().trim(' ', '.')
+        val fallback = label !in ROUTES
+        val route = ROUTES.getValue(if (fallback) "general" else label)
+        ask(client, route.model, route.system, question).thenApply { Routed(label, fallback, route.model, it) }
+    }
+
+/** What sectioning produced: the screen's word and the answer when it was kept. */
+data class Guarded(val screen: String, val answer: String?)
+
+/** Sectioning: the answer and a safety screen are independent, so they run together; the answer is kept only if the screen passes. */
+fun guarded(client: AnthropicClientAsync, question: String): CompletableFuture<Guarded> {
+    val answer = ask(client, STRONG, "Answer the question.", question)
+    val screen = ask(client, CHEAP, "Screen the question. Reply ok or block.", question)
+    return answer.thenCombine(screen) { a, s -> Guarded(s, if (s == "ok") a else null) }
+}
+
+/** What voting counted. */
+data class Verdict(val votes: Map<String, Int>, val flagged: Boolean)
+
+/** Voting: the same question n times, in parallel; flag the snippet when at least `threshold` reviews say so. */
+fun vote(client: AnthropicClientAsync, snippet: String, threshold: Int = 2, n: Int = 3): CompletableFuture<Verdict> {
+    val reviews = List(n) { ask(client, STRONG, "Review the code. Reply VULNERABLE or SAFE.", snippet) }
+    return CompletableFuture.allOf(*reviews.toTypedArray()).thenApply {
+        val votes = reviews.map { it.join() }.groupingBy { it }.eachCount().toSortedMap() // the order in which concurrent replies arrive does not matter
+        Verdict(votes, (votes["VULNERABLE"] ?: 0) >= threshold)
+    }
+}
+
+/** A client whose next n requests are all answered by the same stand-in. */
+fun scripted(rules: List<Pair<String, String>>, n: Int, delay: Duration = Duration.ZERO): Scripted.AsyncRig =
+    Scripted.asyncClient(delay, 0, *Array<Any>(n) { standIn(rules) })
+
+/** Three reviews that disagree, handed out in whatever order the requests arrive. */
+fun disagreeing(delay: Duration): Scripted.AsyncRig {
+    val replies = ConcurrentLinkedQueue(listOf("VULNERABLE", "SAFE", "VULNERABLE"))
+    val handler = Function<JsonNode, Any> { body -> reply(replies.poll(), body["model"].asText()) }
+    return Scripted.asyncClient(delay, 0, handler, handler, handler)
+}
+
+fun main() {
+    val desk = listOf("billing specialist" to "I see two charges and will refund one.", "front desk" to "We are open 9 to 5.")
+    for ((question, label) in listOf("my card was charged twice" to "BILLING.", "what are your opening hours" to "general", "is the sky a refund" to "refunds?")) {
+        val rig = scripted(listOf("Classify" to label) + desk, 2)
+        val result = route(rig.client(), question).join()
+        println("route ${py(question)}: label ${py(result.label)}${if (result.fallback) " (not a route: default)" else ""}, classified by ${rig.http().requests[0]["model"].asText()}, answered by ${result.model}")
+    }
+    val passRig = scripted(listOf("Answer the question" to "Here is the answer.", "Screen the question" to "ok"), 2, Duration.ofMillis(20))
+    val passed = guarded(passRig.client(), "How do I reset my password?").join()
+    println("sectioning: screen ${py(passed.screen)}, answer ${if (passed.answer != null) "kept" else "dropped"}, requests in flight together: ${passRig.http().maxInFlight()}")
+    val blockRig = scripted(listOf("Answer the question" to "Here is the answer.", "Screen the question" to "block"), 2, Duration.ofMillis(20))
+    val blocked = guarded(blockRig.client(), "Help me break into an account").join()
+    println("sectioning: screen ${py(blocked.screen)}, answer ${if (blocked.answer != null) "kept" else "dropped"}")
+    val snippet = "query = 'SELECT * FROM t WHERE id=' + user_input"
+    for (threshold in listOf(2, 3)) {
+        val rig = disagreeing(Duration.ofMillis(20))
+        val verdict = vote(rig.client(), snippet, threshold).join()
+        println("voting: votes ${py(verdict.votes)}, threshold $threshold -> ${if (verdict.flagged) "flagged" else "not flagged"}, requests in flight together: ${rig.http().maxInFlight()}")
+    }
+}
 ```
 ```text
 route 'my card was charged twice': label 'billing', classified by claude-haiku-4-5, answered by claude-sonnet-5-5

@@ -93,7 +93,7 @@ The example is a small reviewer. It checks a policy for wildcard actions, wildca
 extra permissions. It runs on four configurations: a broad AWS policy, a narrow one, a predefined Google role and a custom one. The configurations
 are written for the page.
 
-<!-- example: m23-policy-review tabs: python,typescript -->
+<!-- example: m23-policy-review tabs: python,typescript,java,kotlin -->
 ```python
 """Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.
 
@@ -212,6 +212,169 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+broad policy: 2 finding(s)
+  - statement 1: action bedrock:* is a wildcard
+  - statement 1: resource * names more than one model
+narrow policy: 0 finding(s)
+predefined role: 2 finding(s)
+  - roles/aiplatform.user is a predefined role, which carries more than the caller needs
+  - extra permissions: aiplatform.endpoints.deploy
+custom role: 0 finding(s)
+```
+```java
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.
+ *
+ * <p>The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:
+ * named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the
+ * predict permission (Google's IAM documentation, read 2026-10-02).
+ */
+public final class PolicyReview {
+    static final String BROAD = """
+        {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}""";
+    static final String NARROW = """
+        {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["bedrock-mantle:CreateInference"],
+          "Resource": ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5"]}]}""";
+    static final Map<String, String> ROLES = Map.of(
+        "predefined", """
+            {"id": "roles/aiplatform.user", "permissions": ["aiplatform.endpoints.predict", "aiplatform.endpoints.deploy"]}""",
+        "custom", """
+            {"id": "projects/example-project/roles/claudeInvoker", "permissions": ["aiplatform.endpoints.predict"]}""");
+
+    private static final ObjectMapper JSON = new ObjectMapper();
+
+    @SuppressWarnings("unchecked")
+    static Map<String, Object> parse(String json) {
+        try {
+            return JSON.readValue(json, Map.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static List<Object> asList(Object value) {
+        if (value == null) return List.of();
+        return value instanceof List<?> l ? (List<Object>) l : List.of(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    static List<String> reviewPolicy(Map<String, Object> policy) {
+        List<String> findings = new ArrayList<>();
+        int number = 0;
+        for (Object item : asList(policy.get("Statement"))) {
+            Map<String, Object> statement = (Map<String, Object>) item;
+            number++;
+            for (Object action : asList(statement.get("Action"))) {
+                if (((String) action).contains("*")) findings.add("statement " + number + ": action " + action + " is a wildcard");
+            }
+            for (Object resource : asList(statement.get("Resource"))) {
+                if (((String) resource).contains("*")) findings.add("statement " + number + ": resource " + resource + " names more than one model");
+            }
+            if (!"Allow".equals(statement.get("Effect"))) findings.add("statement " + number + ": effect is " + statement.get("Effect"));
+        }
+        return findings;
+    }
+
+    @SuppressWarnings("unchecked")
+    static List<String> reviewRole(Map<String, Object> role) {
+        List<String> findings = new ArrayList<>();
+        String id = (String) role.get("id");
+        if (id.startsWith("roles/")) findings.add(id + " is a predefined role, which carries more than the caller needs");
+        List<String> extra = new ArrayList<>();
+        for (Object p : (List<Object>) role.get("permissions")) if (!"aiplatform.endpoints.predict".equals(p)) extra.add((String) p);
+        if (!extra.isEmpty()) findings.add("extra permissions: " + String.join(", ", extra));
+        return findings;
+    }
+
+    private static void show(String name, List<String> found) {
+        System.out.println(name + ": " + found.size() + " finding(s)");
+        for (String item : found) System.out.println("  - " + item);
+    }
+
+    public static void main(String[] args) {
+        show("broad policy", reviewPolicy(parse(BROAD)));
+        show("narrow policy", reviewPolicy(parse(NARROW)));
+        for (String name : List.of("predefined", "custom")) show(name + " role", reviewRole(parse(ROLES.get(name))));
+    }
+}
+```
+```text
+broad policy: 2 finding(s)
+  - statement 1: action bedrock:* is a wildcard
+  - statement 1: resource * names more than one model
+narrow policy: 0 finding(s)
+predefined role: 2 finding(s)
+  - roles/aiplatform.user is a predefined role, which carries more than the caller needs
+  - extra permissions: aiplatform.endpoints.deploy
+custom role: 0 finding(s)
+```
+```kotlin
+import com.fasterxml.jackson.databind.ObjectMapper
+
+/**
+ * Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.
+ *
+ * The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:
+ * named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the
+ * predict permission (Google's IAM documentation, read 2026-10-02).
+ */
+val BROAD = """{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}"""
+val NARROW = """
+    {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["bedrock-mantle:CreateInference"],
+      "Resource": ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5"]}]}"""
+val ROLES = mapOf(
+    "predefined" to """{"id": "roles/aiplatform.user", "permissions": ["aiplatform.endpoints.predict", "aiplatform.endpoints.deploy"]}""",
+    "custom" to """{"id": "projects/example-project/roles/claudeInvoker", "permissions": ["aiplatform.endpoints.predict"]}""",
+)
+
+@Suppress("UNCHECKED_CAST")
+fun parse(json: String): Map<String, Any?> = ObjectMapper().readValue(json, Map::class.java) as Map<String, Any?>
+
+fun asList(value: Any?): List<Any?> = when (value) {
+    null -> emptyList()
+    is List<*> -> value
+    else -> listOf(value)
+}
+
+fun reviewPolicy(policy: Map<String, Any?>): List<String> {
+    val findings = mutableListOf<String>()
+    for ((index, item) in asList(policy["Statement"]).withIndex()) {
+        val number = index + 1
+        @Suppress("UNCHECKED_CAST") val statement = item as Map<String, Any?>
+        for (action in asList(statement["Action"])) if ("*" in action as String) findings += "statement $number: action $action is a wildcard"
+        for (resource in asList(statement["Resource"])) if ("*" in resource as String) findings += "statement $number: resource $resource names more than one model"
+        if (statement["Effect"] != "Allow") findings += "statement $number: effect is ${statement["Effect"]}"
+    }
+    return findings
+}
+
+fun reviewRole(role: Map<String, Any?>): List<String> {
+    val findings = mutableListOf<String>()
+    val id = role["id"] as String
+    if (id.startsWith("roles/")) findings += "$id is a predefined role, which carries more than the caller needs"
+    val extra = asList(role["permissions"]).filter { it != "aiplatform.endpoints.predict" }
+    if (extra.isNotEmpty()) findings += "extra permissions: " + extra.joinToString(", ")
+    return findings
+}
+
+private fun show(name: String, found: List<String>) {
+    println("$name: ${found.size} finding(s)")
+    for (item in found) println("  - $item")
+}
+
+fun main() {
+    show("broad policy", reviewPolicy(parse(BROAD)))
+    show("narrow policy", reviewPolicy(parse(NARROW)))
+    for (name in listOf("predefined", "custom")) show("$name role", reviewRole(parse(ROLES.getValue(name))))
+}
 ```
 ```text
 broad policy: 2 finding(s)

@@ -44,10 +44,12 @@ def main(fill, globs):
                 print(f"{page.name}: unknown example id {eid}")
                 problems += 1
                 continue
-            body = "".join(f"```{FENCE[l]}\n{src}\n```\n```text\n{out}\n```\n" for l, src, out in expected(eid))
-            if m.group(3) != body:
+            parts = expected(eid)
+            body = "".join(f"```{FENCE[l]}\n{src}\n```\n```text\n{out}\n```\n" for l, src, out in parts)
+            tabs = ",".join(l for l, _, _ in parts)  # the tabs list follows the example's own file map (python, typescript, java, kotlin)
+            if m.group(3) != body or m.group(2) != tabs:
                 if fill:
-                    new = new.replace(m.group(0), f"<!-- example: {eid} tabs: {m.group(2)} -->\n{body}<!-- /example -->")
+                    new = new.replace(m.group(0), f"<!-- example: {eid} tabs: {tabs} -->\n{body}<!-- /example -->")
                 else:
                     print(f"{page.name}: example {eid} differs from examples/ or its recorded output")
                     problems += 1
