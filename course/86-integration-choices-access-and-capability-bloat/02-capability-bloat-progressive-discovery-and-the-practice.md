@@ -36,7 +36,7 @@ The tool search tool lets Claude "work with hundreds or thousands of tools by di
 - **Everything is still sent.** "You still send every tool's full definition in the `tools` array on every request", including the deferred ones, because the API needs them to run the search. Deferring changes what enters the context window, and it does not shrink the request.
 - **Caching survives.** The deferred tools are kept out of the prefix, so "The prefix is untouched, so prompt caching is preserved". A deferred tool cannot itself carry a cache breakpoint.
 
-For tools that come from MCP servers, deferral is set once for the whole server on its toolset entry and not on each tool. The example's four servers go from 12,120 tokens to 2,320 up front, which includes a search tool of 350 tokens that the example assumes: 81 percent fewer in this example's arithmetic. Anthropic's page says tool search "typically reduces this by over 85 percent" for a load of three to five tools out of a larger set; the two figures are different measurements of different sets, and your own is the one to use.
+For tools that come from MCP servers, deferral can be set once for the whole server on its toolset entry. The example's four servers go from 12,120 tokens to 2,320 up front, which includes a search tool of 350 tokens that the example assumes: 81 percent fewer in this example's arithmetic. Anthropic's page says tool search "typically reduces this by over 85 percent" for a load of three to five tools out of a larger set; the two figures are different measurements of different sets, and your own is the one to use.
 
 ### An accuracy against latency trade
 
@@ -629,7 +629,7 @@ The practice is in [`exercises/86-integration-choices-access-and-capability-bloa
 <summary>Answer key</summary>
 
 1. **b**. The role never needs those capabilities, so removing them from the configuration removes the risk. *a* is ruled out because "Logging and confirmation prompts are compensating controls", acting after the privilege exists. *c* is ruled out for the same reason, since a confirmation means "they ask a person to carry the risk of a capability the role never needed". *d* is ruled out because "A larger model does not change what the agent is allowed to do".
-2. **d**. With 10 or more tools and large definitions, the search tool loads on demand and the most used tools stay loaded. *a* is ruled out because shortening trades selection quality for tokens, and "Too many tools or overlapping tools can also distract agents from pursuing efficient strategies". *b* is ruled out because merging "hides the behaviours from the model's own choice and leaves the number of capabilities the same". *c* is ruled out because a larger window does not cure it: "Claude's ability to pick the right tool degrades once you exceed 30–50 available tools".
+2. **d**. With 10 or more tools and large definitions, the search tool loads on demand and the most used tools stay loaded. *a* is ruled out because "it trades selection quality for tokens" and leaves the tool count where it was. *b* is ruled out because merging "hides the behaviours from the model's own choice and leaves the number of capabilities the same". *c* is ruled out because a larger window does not cure it: "Claude's ability to pick the right tool degrades once you exceed 30–50 available tools".
 
 </details>
 

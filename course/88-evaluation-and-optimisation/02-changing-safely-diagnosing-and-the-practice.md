@@ -686,7 +686,7 @@ This quiz covers both pages of the module.
 
 3. A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. What does the research team's experience suggest?
    - **a**: Test on the examples that sit in the prompt, since those are already written down
-   - **b**: Wait until the full set is built, because a small set of examples cannot show a change at all, however large
+   - **b**: Wait until the full set has been built and checked, because a small set of examples cannot show a change at all
    - **c**: Keep judging by feel until launch, and begin to measure once real users arrive
    - **d**: Start now with a small set of real queries, since big first-round effects show up in just a few
 
@@ -695,6 +695,6 @@ This quiz covers both pages of the module.
 
 1. **c**. The evidence was never retrieved, so the index and chunking are the cheapest place to look. *b* is ruled out because "A larger model does not know a document it was never shown". *a* is ruled out because "Sampling settings change how an answer is worded and not what evidence it was given". *d* is ruled out because "Examples teach a format; they do not supply a missing fact".
 2. **b**. Both limits come first and the price decides among those that pass. *a* is ruled out because "Choosing the most accurate model pays for accuracy that the floor does not ask for". *c* is ruled out because "A mean hides the tail: the slowest five in a hundred requests are the ones users complain about". *d* is ruled out because "Cheapest first ignores the two limits, and the limits come before the price".
-3. **d**. Early changes are large, so a small set shows them. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because "every week without an eval is a week of judging by feel". *a* is ruled out because the set should "mirror your real-world task distribution", and the examples in a prompt are not that.
+3. **d**. Early changes are large, so a small set shows them. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because "every week without an eval is a week of judging by feel". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
 
 </details>

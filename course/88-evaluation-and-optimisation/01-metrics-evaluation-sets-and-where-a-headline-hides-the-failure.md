@@ -29,7 +29,7 @@ A criterion must be one you can fail. The documentation's own example: "Specific
 
 ### An evaluation set that looks like the traffic
 
-The set decides what the score means, so it is built from the traffic and not from the developers' imagination. The documentation's first principle: "Design evals that mirror your real-world task distribution. Don't forget to factor in edge cases!" Three habits follow.
+The set decides what the score means, so it is built from the traffic and not from the developers' imagination. The documentation's first principle: "Design evals that mirror your real-world task distribution. Don't forget to factor in edge cases!" The examples written into a prompt are not that distribution: they were picked to teach a format, so a score on them says how well the prompt repeats itself. Three habits follow.
 
 - **Sample real usage.** Take cases from logs, with privacy rules applied (page 1 of module 87), and keep their proportions: if half of the traffic asks about order status, half the set does.
 - **Add the awkward cases on purpose.** Typos, empty messages, pasted logs, an angry customer, a question outside the product. Tag them, so that the report can show them apart.
@@ -39,7 +39,7 @@ Start before the set is big. Anthropic's research team reports that "A prompt tw
 
 ### Mixed methods: one grader per kind of output
 
-No single grader fits every output, and the exam asks which fits which. The documentation lists the three with their trade-offs: code-based grading is "Fastest and most reliable, extremely scalable, but also lacks nuance"; human grading is "Most flexible and high quality, but slow and expensive"; model-based grading is "Fast and flexible, scalable and suitable for complex judgment. Test to ensure reliability first then scale."
+No single grader fits every output, and the exam asks which fits which. The documentation lists the three with their trade-offs: code-based grading is "Fastest and most reliable, extremely scalable, but also lacks nuance"; human grading is "Most flexible and high quality, but slow and expensive. Avoid if possible."; model-based grading is "Fast and flexible, scalable and suitable for complex judgment. Test to ensure reliability first then scale."
 
 - **Code grading** for outputs with one correct form: a label, a number, a field of a structure, a command that must be run. Exact match suits answers with one correct form and rejects a correct report that is worded differently.
 - **A model grader** for free-form text with a rubric. Anthropic's team graded each research report against five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency) with one grader call and one prompt, and found it "the most consistent and aligned with human judgements". Check that agreement before you trust the grader.

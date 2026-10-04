@@ -5,12 +5,12 @@
       "id": "01-what-to-keep-where-it-failed-and-what-must-not-be-logged#q1",
       "page": "01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
       "scope": "page",
-      "stem": "A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show, and a random share of the traces rarely holds one. Which rule fits best?",
+      "stem": "A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show. Which rule fits best?",
       "options": {
         "a": "Retain every request that errored, ran slowly or drew a complaint, and pick the others by a hash of the id",
         "b": "Raise the random share from one percent to five, and have an engineer review what that larger share holds at the end of each week",
         "c": "Retain only the requests of the largest customers, because their heavy usage accounts for the greatest part of all conversations",
-        "d": "Drop the stored requests entirely and rely on the daily error count to show what went wrong"
+        "d": "Store metrics only, and rely on the daily error count to show what went wrong, since that costs almost nothing"
       },
       "key": "a",
       "explanation": {
@@ -28,15 +28,15 @@
       "options": {
         "a": "In the orchestrator, because it is the first component the user's request reached",
         "b": "In the researcher, because it is the first agent below the orchestrator to show an error",
-        "c": "In the deepest span that broke, the call at the bottom, since the two above only relayed what it reported",
-        "d": "In the model, because every decision of every agent is finally produced by the model"
+        "c": "In the deepest span that broke, the call at the bottom of the chain",
+        "d": "In the planning model call, because a poor plan would send the researcher to a bad source"
       },
       "key": "c",
       "explanation": {
         "c": "The deepest failing span is the origin, and the spans above it only relay its error.",
         "a": "Ruled out because \"the first span to turn red is not the origin\".",
         "b": "is ruled out for the same reason: \"The span that reports an error is often only passing on the error of the span below it\".",
-        "d": "Ruled out because the example reports the layer of the origin, and a failing tool is the tool layer, not the model: it \"returns that span's layer (agent, model, tool or retrieval)\"."
+        "d": "Ruled out because the fix is to \"Read the trace to the deepest failure\", and the deepest failure here is the tool, not a model call."
       }
     },
     {
@@ -91,7 +91,7 @@
       "key": "c",
       "explanation": {
         "c": "Ids, counts and timings keep the logs useful, and a content field opened by name for a stated purpose limits what is exposed.",
-        "b": "Ruled out because the log \"becomes a second copy of customer data, with a wider audience\", and restricting access does not shrink the copy.",
+        "b": "Ruled out because \"Restricting who may open the log store narrows the audience and leaves the copy\".",
         "a": "Ruled out because \"Truncating a record cuts its volume and not its exposure\".",
         "d": "Ruled out because \"Encryption protects the store and does nothing about what the store holds, or about how long it is held\"."
       }

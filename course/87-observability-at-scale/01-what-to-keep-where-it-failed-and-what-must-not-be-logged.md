@@ -53,7 +53,7 @@ Take the same shape for your own records. Keep ids, counts, timings, names of mo
 
 ### Tying one request together
 
-A request crosses an API gateway, an orchestrator, subagents, a model and tools, and each writes its own log. Without a shared identifier the logs cannot be joined. Time alone cannot join records: two requests at the same millisecond look the same. A central store collects the records and still does not say which belong together, and keeping records longer keeps the same unjoinable records longer. Two identifiers do it. Every API response carries a unique `request-id` header, and "The same identifier appears as the `request_id` field in error response bodies", which is what support asks for. And the W3C trace context ties spans together: when tracing is active Claude Code puts a `traceparent` header on its model requests and on outbound HTTP MCP requests, and subprocesses inherit a `TRACEPARENT` variable, so a script that reads it can parent its own spans under the same trace. Your own services do the same: take the id at the edge, pass it on, write it in every record. The example's `request_trail` is the reading side: given an id, the events of every component in time order.
+A request crosses an API gateway, an orchestrator, subagents, a model and tools, and each writes its own log. Without a shared identifier the logs cannot be joined. Time alone cannot join records: two requests at the same millisecond look the same. A central store collects the records and still does not say which belong together, and keeping records longer keeps the same unjoinable records longer. Two identifiers do it. Every API response carries a unique `request-id` header, and "The same identifier appears as the `request_id` field in error response bodies", which is what support asks for. And the W3C trace context ties spans together: when tracing is active Claude Code puts a `traceparent` header on its model requests and on outbound HTTP MCP requests (by default only when `ANTHROPIC_BASE_URL` is unset or points at the Anthropic API), and subprocesses inherit a `TRACEPARENT` variable, so a script that reads it can parent its own spans under the same trace. Your own services do the same: take the id at the edge, pass it on, write it in every record. The example's `request_trail` is the reading side: given an id, the events of every component in time order.
 
 ### The example
 
@@ -577,22 +577,22 @@ log record keeps: input_tokens, model, output_tokens, status, tool, trace; with 
 
 ## Quiz
 
-1. A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show, and a random share of the traces rarely holds one. Which rule fits best?
+1. A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show. Which rule fits best?
    - **a**: Retain every request that errored, ran slowly or drew a complaint, and pick the others by a hash of the id
    - **b**: Raise the random share from one percent to five, and have an engineer review what that larger share holds at the end of each week
    - **c**: Retain only the requests of the largest customers, because their heavy usage accounts for the greatest part of all conversations
-   - **d**: Drop the stored requests entirely and rely on the daily error count to show what went wrong
+   - **d**: Store metrics only, and rely on the daily error count to show what went wrong, since that costs almost nothing
 
 2. In one trace, the orchestrator, a researcher agent and a download tool all show an error. The orchestrator's message says the research step failed. Where does the failure originate?
    - **a**: In the orchestrator, because it is the first component the user's request reached
    - **b**: In the researcher, because it is the first agent below the orchestrator to show an error
-   - **c**: In the deepest span that broke, the call at the bottom, since the two above only relayed what it reported
-   - **d**: In the model, because every decision of every agent is finally produced by the model
+   - **c**: In the deepest span that broke, the call at the bottom of the chain
+   - **d**: In the planning model call, because a poor plan would send the researcher to a bad source
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Tail-based sampling can look at the outcome, so it retains what failed, what was slow and what a user flagged, and takes a share of the rest by id. *b* is ruled out because "a random share of one percent holds almost none of them, and five percent holds few more". *c* is ruled out because "Sampling by customer size covers heavy use and says nothing about which requests failed". *d* is ruled out because a metric "says that something changed. It never says where or why".
-2. **c**. The deepest failing span is the origin, and the spans above it only relay its error. *a* is ruled out because "the first span to turn red is not the origin". *b* is ruled out for the same reason: "The span that reports an error is often only passing on the error of the span below it". *d* is ruled out because the example reports the layer of the origin, and a failing tool is the tool layer, not the model: it "returns that span's layer (agent, model, tool or retrieval)".
+2. **c**. The deepest failing span is the origin, and the spans above it only relay its error. *a* is ruled out because "the first span to turn red is not the origin". *b* is ruled out for the same reason: "The span that reports an error is often only passing on the error of the span below it". *d* is ruled out because the fix is to "Read the trace to the deepest failure", and the deepest failure here is the tool, not a model call.
 
 </details>
