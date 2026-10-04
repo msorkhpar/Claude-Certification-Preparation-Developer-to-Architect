@@ -72,8 +72,8 @@ code.
 
 ## Quiz
 
-1. A client prints text as it arrives. Midway, an `error` event with `overloaded_error` appears although the HTTP status was
-   200. What is the right handling?
+1. A client prints text as it arrives. Midway, an `error` event with `overloaded_error` appears although the HTTP status
+   was 200. What is the right handling?
    - **a**: Keep the partial text as the final answer and finish the turn without more work
    - **b**: Treat the call as failed, drop the partial output and send the whole request again
    - **c**: Ignore the event, since the status line already reported that the call went well
