@@ -3,11 +3,10 @@
 The orders platform team wants four MCP servers in Claude Code: a GitHub server, a documentation search server, a small server that
 holds the tools used on every turn, and a server that serves the database schemas. Each developer has their own tokens and a few
 experiments of their own. In this practice you write the files that make that work for everyone without a secret in the repository,
-and the tests read the project the way Claude Code does. Pick your language folder (`python` or `typescript`), open `starter/` and
-edit the files there. The tests are the same in both languages and read only the files: they are configuration, not code in a
-language, so there is no Java or Kotlin edition (no JSON reader is available offline for those two here, and a second edition would
-test the same files). The checks run on the course's own model of the documented rules (`examples/55-mcp-config`). Nothing here
-starts Claude Code, starts a server or touches the network.
+and the tests read the project the way Claude Code does. Pick your language folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and
+edit the files there. The tests are the same in all four languages and read only the files: they are configuration, not code in a
+language, and the Java and Kotlin tests read the JSON with Jackson. The checks run on the course's own model of the documented rules
+(`examples/55-mcp-config`, in your language). Nothing here starts Claude Code, starts a server or touches the network.
 
 ## What to write
 

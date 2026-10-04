@@ -3,11 +3,11 @@
 A developer-productivity agent has to explore a service nobody on the team knows: find where things start, follow imports, trace a function
 through wrapper modules and write down what it learns. It may read and search anything except the secrets, it may write notes, and it must not
 change the source or run commands that change anything. All of that is plain files. In this practice you write them for a small service, the
-inventory service, and the tests read the project the way Claude Code would. Pick your language folder (`python` or `typescript`), open `starter/`
-and edit the files there. The tests are the same in both languages and read only the files: they are configuration and notes, not code in a
-language, so there is no Java or Kotlin edition (no JSON reader is available offline for those two here, and a second edition would test the
-same files). The checks run on the course's own models of the documented rules (`examples/38-settings-layers` for permission rules and
-`examples/56-builtin-tools` for the tools). Nothing here starts Claude Code or touches the network.
+inventory service, and the tests read the project the way Claude Code would. Pick your language folder (`python`, `typescript`, `java` or `kotlin`),
+open `starter/` and edit the files there. The tests are the same in all four languages and read only the files: they are configuration and notes, not
+code in a language, and the Java and Kotlin tests read the JSON with Jackson and the agent's YAML front matter with its YAML module. The checks run on
+the course's own models of the documented rules (`examples/38-settings-layers` for permission rules and `examples/56-builtin-tools` for the tools,
+in your language). Nothing here starts Claude Code or touches the network.
 
 ## What to write
 

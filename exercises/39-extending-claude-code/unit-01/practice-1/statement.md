@@ -5,11 +5,11 @@ the changelog, and a hook that stops destructive commands. Claude Code packages 
 plugin's files for a plugin called `release-kit`, and the team's settings that install it. Tests read the files, and run your hook
 script the way Claude Code does, as a process that reads one JSON event on standard input.
 
-Pick your language folder (`python` or `typescript`), open `starter/` and edit the files there. The tests are the same in both languages,
-and the hook script is a Python file in both: a hook is a separate program, and Python is the one runtime every editor has here. The
-files are not code in your language, so there is no Java or Kotlin edition: no YAML or JSON library is available offline for those two
-here, and a second edition would test the same files. The checks use the course's own models of the documented rules
-(`examples/39-hook-gate`). Nothing here starts Claude Code or touches the network.
+Pick your language folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the files there. The tests are the same in all
+four languages, and the hook script is a Python file in all of them: a hook is a separate program, and Python is the one runtime every editor has
+here, so the Java and Kotlin tests start it as a process too. The rest are files, not code in your language. The checks use the course's own models
+of the documented rules (`examples/39-hook-gate`, in your language); the Java and Kotlin tests read JSON with Jackson and the YAML front matter with
+its YAML module. Nothing here starts Claude Code or touches the network.
 
 ## What to write
 

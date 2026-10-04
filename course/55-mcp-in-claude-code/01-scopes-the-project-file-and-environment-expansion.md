@@ -64,9 +64,9 @@ A server that came with a repository is code from somebody else. "Claude Code pr
 
 ### The example
 
-The example is a model of these rules in Python and TypeScript: `expand` for `${VAR}`, `${VAR:-default}` and the covered credential names, `expand_server` for the five fields, `resolve_servers` for the order of scopes, `lint` for the shape of a shared file and for a literal secret, and `mcp_decision` for the permission rules of page 2. It prints the expanded entries of a shared file, a conflict between scopes, and the lint findings of a file that holds a literal key.
+The example is a model of these rules in Python, TypeScript, Java and Kotlin: `expand` for `${VAR}`, `${VAR:-default}` and the covered credential names, `expand_server` for the five fields, `resolve_servers` for the order of scopes, `lint` for the shape of a shared file and for a literal secret, and `mcp_decision` for the permission rules of page 2. It prints the expanded entries of a shared file, a conflict between scopes, and the lint findings of a file that holds a literal key.
 
-<!-- example: m55-mcp-config tabs: python,typescript -->
+<!-- example: m55-mcp-config tabs: python,typescript,java,kotlin -->
 ```python
 """MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.
 
@@ -353,6 +353,464 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+expanded entries:
+  github: {"type":"http","url":"https://github-mcp.example.com/mcp","headers":{"Authorization":"Bearer demo-gh"}}
+  registry: {"type":"http","url":"https://registry-mcp.example.com/mcp","headers":{"Authorization":"Bearer "}}
+  docs: {"command":"python3","args":["./tools/docs_server.py","${DOCS_INDEX}"],"env":{"DOCS_API_KEY":"${DOCS_API_KEY}"}}
+    warning: DOCS_INDEX is not set
+    warning: DOCS_API_KEY is not set
+resolved servers: github from project, registry from project, docs from project, scratch from user
+  warning: github is defined in project and user with different settings: project wins
+lint of a shared file with literal secrets:
+  api: a http server needs a url
+  api: headers.X-Api-Key holds a literal value, reference an environment variable
+  tool: a stdio server needs a command
+lint of the file above: no findings
+mcp__docs__search_docs -> allow
+mcp__github__list_prs -> ask
+mcp__github__delete_repository -> deny
+a description of 3000 characters keeps 2048 of them
+```
+```java
+import static harness.Show.py;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.
+ *
+ * <p>A teaching model of what the Claude Code documentation says (page "Connect Claude Code to tools via MCP", read on 2026-10-03): three scopes with
+ * the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`
+ * expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential
+ * variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.
+ * The configuration is JSON, read with Jackson.
+ */
+public final class McpConfig {
+    static final List<String> SCOPES = List.of("local", "project", "user"); // highest precedence first
+    static final Set<String> COVERED = Set.of("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN");
+    static final Set<String> REMOTE = Set.of("http", "sse", "ws");
+    static final Pattern VAR = Pattern.compile("\\$\\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\\}");
+    static final Pattern SECRET_KEY = Pattern.compile("token|key|secret|authorization|password", Pattern.CASE_INSENSITIVE);
+    static final int DESCRIPTION_LIMIT = 2048; // characters kept of a tool description and of a server's instructions
+    private static final ObjectMapper JSON = new ObjectMapper();
+
+    /** The text after expansion and the names that were unset and had no default. */
+    record Expanded(String text, List<String> missing) {}
+
+    /** A server entry after expansion, and the warnings it raised. */
+    record ExpandedServer(Map<String, Object> entry, List<String> warnings) {}
+
+    /** A server's winning scope and entry. */
+    record Source(String scope, Map<String, Object> entry) {}
+
+    /** The servers in use, and the warnings about conflicts. */
+    record Resolved(Map<String, Source> servers, List<String> warnings) {}
+
+    static Map<String, Object> parse(String json) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> m = JSON.readValue(json, LinkedHashMap.class);
+            return m;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /** Expand ${VAR} and ${VAR:-default}. Returns the text and the names that were unset and had no default. */
+    static Expanded expand(String text, Map<String, String> env, boolean remote) {
+        List<String> missing = new ArrayList<>();
+        Matcher m = VAR.matcher(text);
+        StringBuilder out = new StringBuilder();
+        while (m.find()) {
+            String name = m.group(1), dflt = m.group(2);
+            String value;
+            if (remote && COVERED.contains(name)) value = ""; // never sent toward a remote server, whether or not it is set, and a default is ignored
+            else if (env.containsKey(name)) value = env.get(name);
+            else if (dflt != null) value = dflt;
+            else {
+                missing.add(name);
+                value = m.group(0); // the unexpanded text is used as written
+            }
+            m.appendReplacement(out, Matcher.quoteReplacement(value));
+        }
+        m.appendTail(out);
+        return new Expanded(out.toString(), missing);
+    }
+
+    static Expanded expand(String text, Map<String, String> env) {
+        return expand(text, env, false);
+    }
+
+    private static void warn(List<String> warnings, List<String> missing) {
+        for (String n : missing) warnings.add(n + " is not set");
+    }
+
+    /** Expand the five fields where expansion applies. Returns the entry and the warnings. */
+    @SuppressWarnings("unchecked")
+    static ExpandedServer expandServer(Map<String, Object> entry, Map<String, String> env) {
+        boolean remote = entry.get("type") != null && REMOTE.contains(entry.get("type"));
+        List<String> warnings = new ArrayList<>();
+        Map<String, Object> out = new LinkedHashMap<>(entry);
+        for (String field : List.of("command", "url")) {
+            if (!out.containsKey(field)) continue;
+            Expanded e = expand((String) out.get(field), env, remote);
+            out.put(field, e.text());
+            warn(warnings, e.missing());
+        }
+        if (out.containsKey("args")) {
+            List<String> args = new ArrayList<>();
+            for (Object arg : (List<Object>) entry.get("args")) {
+                Expanded e = expand((String) arg, env, remote);
+                args.add(e.text());
+                warn(warnings, e.missing());
+            }
+            out.put("args", args);
+        }
+        for (String field : List.of("env", "headers")) {
+            if (!out.containsKey(field)) continue;
+            Map<String, Object> values = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> kv : ((Map<String, Object>) entry.get(field)).entrySet()) {
+                Expanded e = expand((String) kv.getValue(), env, remote);
+                values.put(kv.getKey(), e.text());
+                warn(warnings, e.missing());
+            }
+            out.put(field, values);
+        }
+        return new ExpandedServer(out, warnings);
+    }
+
+    /** scopes maps a scope name to {server name: entry}. A name defined in several scopes is used once, from the highest scope, whole. */
+    static Resolved resolveServers(Map<String, Map<String, Map<String, Object>>> scopes) {
+        Map<String, Source> servers = new LinkedHashMap<>();
+        List<String> warnings = new ArrayList<>();
+        for (String scope : SCOPES) {
+            for (Map.Entry<String, Map<String, Object>> e : scopes.getOrDefault(scope, Map.of()).entrySet()) {
+                String name = e.getKey();
+                if (!servers.containsKey(name)) servers.put(name, new Source(scope, e.getValue()));
+                else if (!servers.get(name).entry().equals(e.getValue())) {
+                    warnings.add(name + " is defined in " + servers.get(name).scope() + " and " + scope + " with different settings: " + servers.get(name).scope() + " wins");
+                }
+            }
+        }
+        return new Resolved(servers, warnings);
+    }
+
+    /** Findings for a shared `.mcp.json`: a server's shape and any credential written out instead of referenced. */
+    @SuppressWarnings("unchecked")
+    static List<String> lint(Map<String, Object> config) {
+        List<String> findings = new ArrayList<>();
+        Map<String, Object> servers = (Map<String, Object>) config.getOrDefault("mcpServers", Map.of());
+        for (Map.Entry<String, Object> s : servers.entrySet()) {
+            String name = s.getKey();
+            Map<String, Object> entry = (Map<String, Object>) s.getValue();
+            String kind = (String) entry.getOrDefault("type", "stdio");
+            if (REMOTE.contains(kind) && !entry.containsKey("url")) findings.add(name + ": a " + kind + " server needs a url");
+            if (kind.equals("stdio") && !entry.containsKey("command")) findings.add(name + ": a stdio server needs a command");
+            for (String field : List.of("env", "headers")) {
+                for (Map.Entry<String, Object> kv : ((Map<String, Object>) entry.getOrDefault(field, Map.of())).entrySet()) {
+                    if (SECRET_KEY.matcher(kv.getKey()).find() && !((String) kv.getValue()).contains("${")) {
+                        findings.add(name + ": " + field + "." + kv.getKey() + " holds a literal value, reference an environment variable");
+                    }
+                }
+            }
+        }
+        return findings;
+    }
+
+    /** Python's fnmatch.fnmatchcase: `*` any run, `?` one character, `[...]` a set. */
+    static boolean fnmatch(String name, String pattern) {
+        StringBuilder re = new StringBuilder();
+        for (int i = 0; i < pattern.length(); i++) {
+            char c = pattern.charAt(i);
+            if (c == '*') re.append(".*");
+            else if (c == '?') re.append('.');
+            else if (c == '[') {
+                int j = pattern.indexOf(']', i + 2);
+                if (j < 0) re.append("\\[");
+                else {
+                    String set = pattern.substring(i + 1, j);
+                    re.append('[').append(set.startsWith("!") ? "^" + set.substring(1) : set).append(']');
+                    i = j;
+                }
+            } else re.append(Pattern.quote(String.valueOf(c)));
+        }
+        return Pattern.compile(re.toString(), Pattern.DOTALL).matcher(name).matches();
+    }
+
+    /**
+     * allow, ask or deny for an MCP tool named mcp__&lt;server&gt;__&lt;tool&gt;. Deny rules may use globs; an allow rule counts only when the
+     * server part is written out and glob-free (mcp__docs__* is honoured, mcp__* and * are ignored). Deny wins, then allow, else ask.
+     */
+    @SuppressWarnings("unchecked")
+    static String mcpDecision(Map<String, Object> settings, String tool) {
+        Map<String, Object> perms = (Map<String, Object>) settings.getOrDefault("permissions", Map.of());
+        for (Object rule : (List<Object>) perms.getOrDefault("deny", List.of())) if (fnmatch(tool, (String) rule)) return "deny";
+        for (Object r : (List<Object>) perms.getOrDefault("allow", List.of())) {
+            String rule = (String) r;
+            String[] parts = rule.split("__", -1);
+            if (parts.length >= 3 && parts[0].equals("mcp") && !parts[1].isEmpty() && !parts[1].contains("*") && fnmatch(tool, rule)) return "allow";
+        }
+        return "ask";
+    }
+
+    static String truncate(String text, int limit) {
+        return text.length() <= limit ? text : text.substring(0, limit);
+    }
+
+    static String truncate(String text) {
+        return truncate(text, DESCRIPTION_LIMIT);
+    }
+
+    static String show(Object value) {
+        try {
+            return JSON.writeValueAsString(value);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void main(String[] args) {
+        Map<String, String> env = Map.of("GITHUB_TOKEN", "demo-gh", "NPM_TOKEN", "demo-npm");
+        Map<String, Object> shared = parse("""
+            {"mcpServers": {
+              "github": {"type": "http", "url": "${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}", "headers": {"Authorization": "Bearer ${GITHUB_TOKEN}"}},
+              "registry": {"type": "http", "url": "https://registry-mcp.example.com/mcp", "headers": {"Authorization": "Bearer ${NPM_TOKEN}"}},
+              "docs": {"command": "python3", "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py", "${DOCS_INDEX}"], "env": {"DOCS_API_KEY": "${DOCS_API_KEY}"}}
+            }}""");
+        Map<String, Map<String, Object>> sharedServers = (Map<String, Map<String, Object>>) (Object) shared.get("mcpServers");
+        System.out.println("expanded entries:");
+        for (Map.Entry<String, Map<String, Object>> s : sharedServers.entrySet()) {
+            ExpandedServer out = expandServer(s.getValue(), env);
+            System.out.println("  " + s.getKey() + ": " + show(out.entry()));
+            for (String w : out.warnings()) System.out.println("    warning: " + w);
+        }
+        Map<String, Map<String, Object>> user = (Map<String, Map<String, Object>>) (Object) parse("""
+            {"github": {"type": "http", "url": "https://other.example.com/mcp"}, "scratch": {"command": "python3", "args": ["scratch.py"]}}""");
+        Resolved resolved = resolveServers(Map.of("project", sharedServers, "user", user));
+        List<String> parts = new ArrayList<>();
+        resolved.servers().forEach((n, s) -> parts.add(n + " from " + s.scope()));
+        System.out.println("resolved servers: " + String.join(", ", parts));
+        for (String w : resolved.warnings()) System.out.println("  warning: " + w);
+        Map<String, Object> bad = parse("""
+            {"mcpServers": {"api": {"type": "http", "headers": {"X-Api-Key": "abc123"}}, "tool": {"args": ["x"]}}}""");
+        System.out.println("lint of a shared file with literal secrets:");
+        for (String f : lint(bad)) System.out.println("  " + f);
+        List<String> clean = lint(shared);
+        System.out.println("lint of the file above: " + (clean.isEmpty() ? "no findings" : py(clean)));
+        Map<String, Object> settings = parse("""
+            {"permissions": {"allow": ["mcp__docs__*", "mcp__*"], "deny": ["mcp__github__delete_*"]}}""");
+        for (String tool : List.of("mcp__docs__search_docs", "mcp__github__list_prs", "mcp__github__delete_repository")) {
+            System.out.println(tool + " -> " + mcpDecision(settings, tool));
+        }
+        System.out.println("a description of 3000 characters keeps " + truncate("x".repeat(3000)).length() + " of them");
+    }
+}
+```
+```text
+expanded entries:
+  github: {"type":"http","url":"https://github-mcp.example.com/mcp","headers":{"Authorization":"Bearer demo-gh"}}
+  registry: {"type":"http","url":"https://registry-mcp.example.com/mcp","headers":{"Authorization":"Bearer "}}
+  docs: {"command":"python3","args":["./tools/docs_server.py","${DOCS_INDEX}"],"env":{"DOCS_API_KEY":"${DOCS_API_KEY}"}}
+    warning: DOCS_INDEX is not set
+    warning: DOCS_API_KEY is not set
+resolved servers: github from project, registry from project, docs from project, scratch from user
+  warning: github is defined in project and user with different settings: project wins
+lint of a shared file with literal secrets:
+  api: a http server needs a url
+  api: headers.X-Api-Key holds a literal value, reference an environment variable
+  tool: a stdio server needs a command
+lint of the file above: no findings
+mcp__docs__search_docs -> allow
+mcp__github__list_prs -> ask
+mcp__github__delete_repository -> deny
+a description of 3000 characters keeps 2048 of them
+```
+```kotlin
+import com.fasterxml.jackson.databind.ObjectMapper
+import harness.Show.py
+
+/**
+ * MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.
+ *
+ * A teaching model of what the Claude Code documentation says (page "Connect Claude Code to tools via MCP", read on 2026-10-03): three scopes with
+ * the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`
+ * expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential
+ * variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.
+ * The configuration is JSON, read with Jackson.
+ */
+val SCOPES = listOf("local", "project", "user") // highest precedence first
+val COVERED = setOf("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN")
+val REMOTE = setOf("http", "sse", "ws")
+val VAR = Regex("""\$\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}""")
+val SECRET_KEY = Regex("token|key|secret|authorization|password", RegexOption.IGNORE_CASE)
+const val DESCRIPTION_LIMIT = 2048 // characters kept of a tool description and of a server's instructions
+private val JSON = ObjectMapper()
+
+typealias Entry = Map<String, Any?>
+
+/** The text after expansion and the names that were unset and had no default. */
+data class Expanded(val text: String, val missing: List<String>)
+
+/** A server entry after expansion, and the warnings it raised. */
+data class ExpandedServer(val entry: Entry, val warnings: List<String>)
+
+/** A server's winning scope and entry. */
+data class Source(val scope: String, val entry: Entry)
+
+/** The servers in use, and the warnings about conflicts. */
+data class Resolved(val servers: Map<String, Source>, val warnings: List<String>)
+
+@Suppress("UNCHECKED_CAST")
+fun parse(json: String): Map<String, Any?> = JSON.readValue(json, LinkedHashMap::class.java) as Map<String, Any?>
+
+/** Expand ${VAR} and ${VAR:-default}. Returns the text and the names that were unset and had no default. */
+fun expand(text: String, env: Map<String, String>, remote: Boolean = false): Expanded {
+    val missing = mutableListOf<String>()
+    val out = VAR.replace(text) { m ->
+        val name = m.groupValues[1]
+        val default = m.groups[2]?.value
+        when {
+            remote && name in COVERED -> "" // never sent toward a remote server, whether or not it is set, and a default is ignored
+            name in env -> env.getValue(name)
+            default != null -> default
+            else -> {
+                missing += name
+                m.value // the unexpanded text is used as written
+            }
+        }
+    }
+    return Expanded(out, missing)
+}
+
+/** Expand the five fields where expansion applies. Returns the entry and the warnings. */
+fun expandServer(entry: Entry, env: Map<String, String>): ExpandedServer {
+    val remote = entry["type"] in REMOTE
+    val warnings = mutableListOf<String>()
+    val out = LinkedHashMap(entry)
+    fun one(value: Any?): String {
+        val e = expand(value as String, env, remote)
+        e.missing.forEach { warnings += "$it is not set" }
+        return e.text
+    }
+    for (field in listOf("command", "url")) if (field in out) out[field] = one(out[field])
+    if ("args" in out) out["args"] = (entry["args"] as List<*>).map { one(it) }
+    for (field in listOf("env", "headers")) if (field in out) out[field] = (entry[field] as Map<*, *>).entries.associate { (k, v) -> k as String to one(v) }
+    return ExpandedServer(out, warnings)
+}
+
+/** scopes maps a scope name to {server name: entry}. A name defined in several scopes is used once, from the highest scope, whole. */
+fun resolveServers(scopes: Map<String, Map<String, Entry>>): Resolved {
+    val servers = linkedMapOf<String, Source>()
+    val warnings = mutableListOf<String>()
+    for (scope in SCOPES) {
+        for ((name, entry) in scopes[scope] ?: emptyMap()) {
+            val seen = servers[name]
+            if (seen == null) servers[name] = Source(scope, entry)
+            else if (seen.entry != entry) warnings += "$name is defined in ${seen.scope} and $scope with different settings: ${seen.scope} wins"
+        }
+    }
+    return Resolved(servers, warnings)
+}
+
+/** Findings for a shared `.mcp.json`: a server's shape and any credential written out instead of referenced. */
+fun lint(config: Entry): List<String> {
+    val findings = mutableListOf<String>()
+    for ((name, e) in (config["mcpServers"] as Map<*, *>? ?: emptyMap<String, Any?>())) {
+        val entry = e as Map<*, *>
+        val kind = entry["type"] as String? ?: "stdio"
+        if (kind in REMOTE && "url" !in entry) findings += "$name: a $kind server needs a url"
+        if (kind == "stdio" && "command" !in entry) findings += "$name: a stdio server needs a command"
+        for (field in listOf("env", "headers")) {
+            for ((key, value) in (entry[field] as Map<*, *>? ?: emptyMap<String, Any?>())) {
+                if (SECRET_KEY.containsMatchIn(key as String) && "\${" !in (value as String)) findings += "$name: $field.$key holds a literal value, reference an environment variable"
+            }
+        }
+    }
+    return findings
+}
+
+/** Python's fnmatch.fnmatchcase: `*` any run, `?` one character, `[...]` a set. */
+fun fnmatch(name: String, pattern: String): Boolean {
+    val re = StringBuilder()
+    var i = 0
+    while (i < pattern.length) {
+        val c = pattern[i]
+        when {
+            c == '*' -> re.append(".*")
+            c == '?' -> re.append('.')
+            c == '[' && pattern.indexOf(']', i + 2) >= 0 -> {
+                val j = pattern.indexOf(']', i + 2)
+                val set = pattern.substring(i + 1, j)
+                re.append('[').append(if (set.startsWith("!")) "^" + set.substring(1) else set).append(']')
+                i = j
+            }
+            else -> re.append(Regex.escape(c.toString()))
+        }
+        i++
+    }
+    return Regex(re.toString(), RegexOption.DOT_MATCHES_ALL).matches(name)
+}
+
+/**
+ * allow, ask or deny for an MCP tool named mcp__<server>__<tool>. Deny rules may use globs; an allow rule counts only when the
+ * server part is written out and glob-free (mcp__docs__* is honoured, mcp__* and * are ignored). Deny wins, then allow, else ask.
+ */
+fun mcpDecision(settings: Entry, tool: String): String {
+    val perms = settings["permissions"] as Map<*, *>? ?: emptyMap<String, Any?>()
+    if ((perms["deny"] as List<*>? ?: emptyList<String>()).any { fnmatch(tool, it as String) }) return "deny"
+    for (rule in (perms["allow"] as List<*>? ?: emptyList<String>())) {
+        val parts = (rule as String).split("__")
+        if (parts.size >= 3 && parts[0] == "mcp" && parts[1].isNotEmpty() && "*" !in parts[1] && fnmatch(tool, rule)) return "allow"
+    }
+    return "ask"
+}
+
+fun truncate(text: String, limit: Int = DESCRIPTION_LIMIT): String = text.take(limit)
+
+fun show(value: Any?): String = JSON.writeValueAsString(value)
+
+@Suppress("UNCHECKED_CAST")
+fun main() {
+    val env = mapOf("GITHUB_TOKEN" to "demo-gh", "NPM_TOKEN" to "demo-npm")
+    val shared = parse(
+        """
+        {"mcpServers": {
+          "github": {"type": "http", "url": "${'$'}{GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}", "headers": {"Authorization": "Bearer ${'$'}{GITHUB_TOKEN}"}},
+          "registry": {"type": "http", "url": "https://registry-mcp.example.com/mcp", "headers": {"Authorization": "Bearer ${'$'}{NPM_TOKEN}"}},
+          "docs": {"command": "python3", "args": ["${'$'}{CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py", "${'$'}{DOCS_INDEX}"], "env": {"DOCS_API_KEY": "${'$'}{DOCS_API_KEY}"}}
+        }}
+        """,
+    )
+    val sharedServers = shared["mcpServers"] as Map<String, Entry>
+    println("expanded entries:")
+    for ((name, entry) in sharedServers) {
+        val out = expandServer(entry, env)
+        println("  $name: ${show(out.entry)}")
+        out.warnings.forEach { println("    warning: $it") }
+    }
+    val user = parse("""{"github": {"type": "http", "url": "https://other.example.com/mcp"}, "scratch": {"command": "python3", "args": ["scratch.py"]}}""") as Map<String, Entry>
+    val resolved = resolveServers(mapOf("project" to sharedServers, "user" to user))
+    println("resolved servers: " + resolved.servers.entries.joinToString(", ") { (n, s) -> "$n from ${s.scope}" })
+    resolved.warnings.forEach { println("  warning: $it") }
+    val bad = parse("""{"mcpServers": {"api": {"type": "http", "headers": {"X-Api-Key": "abc123"}}, "tool": {"args": ["x"]}}}""")
+    println("lint of a shared file with literal secrets:")
+    lint(bad).forEach { println("  $it") }
+    val clean = lint(shared)
+    println("lint of the file above: ${if (clean.isEmpty()) "no findings" else py(clean)}")
+    val settings = parse("""{"permissions": {"allow": ["mcp__docs__*", "mcp__*"], "deny": ["mcp__github__delete_*"]}}""")
+    for (tool in listOf("mcp__docs__search_docs", "mcp__github__list_prs", "mcp__github__delete_repository")) println("$tool -> ${mcpDecision(settings, tool)}")
+    println("a description of 3000 characters keeps ${truncate("x".repeat(3000)).length} of them")
+}
 ```
 ```text
 expanded entries:

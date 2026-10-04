@@ -81,7 +81,7 @@ Nothing differs: a tool definition is data, and the graded practice of this modu
 
 The example lints the guide's confusing pair, shows the repaired set of four tools that each have one contract, and pages a long result (page 2).
 
-<!-- example: m52-tool-set-lint tabs: python,typescript -->
+<!-- example: m52-tool-set-lint tabs: python,typescript,java,kotlin -->
 ```python
 """Tool interfaces graded on rules, offline: a set that confuses a model, the same job split into tools with one contract each, and a long result paged.
 
@@ -267,6 +267,267 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+the set as first written
+  analyze_content: no-boundary, no-use-when, short-description
+  analyze_document: no-boundary, no-use-when, param-undescribed, short-description
+  overlap: analyze_content and analyze_document (0.71)
+
+the same job, one contract per tool
+  extract_web_results: clean
+  extract_data_points: clean
+  summarize_content: clean
+  verify_claim_against_source: clean
+
+a long result, paged four rows at a time
+  page 1: row-00 row-01 row-02 row-03
+    note: Showing 4 of 25 results; pass next_cursor to continue, or narrow the query with a filter.
+  page 2: row-04 row-05 row-06 row-07
+    note: Showing 4 of 25 results; pass next_cursor to continue, or narrow the query with a filter.
+  the cursor is opaque: b2Zmc2V0Ojg=
+```
+```java
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Tool interfaces graded on rules, offline: a set that confuses a model, the same job split into tools with one contract each, and a long result paged.
+ *
+ * <p>No model is called. The rules are the course's own and small: a description of three sentences or more, a when-to-use phrase, a boundary against the
+ * neighbouring tool, a description on every parameter, and a pair of descriptions that overlap too much. Checked on 2026-10-03 against the "Define tools"
+ * page of the Claude API documentation and the "Writing tools for agents" article.
+ */
+public final class ToolLint {
+    static final double OVERLAP = 0.6;
+
+    /** A tool as the lint sees it: a name, a description and the description of each parameter. */
+    record Tool(String name, String description, Map<String, String> params) {}
+
+    /** One page of a long result: the rows, the opaque cursor of the next page (null on the last) and a note for the model. */
+    record Page(List<String> rows, String cursor, String note) {}
+
+    static List<String> lint(Tool tool) {
+        String text = tool.description().toLowerCase();
+        List<String> found = new ArrayList<>();
+        if (!(text.contains("do not use") || text.contains("not for") || text.contains("instead of"))) found.add("no-boundary");
+        if (!text.contains("use when")) found.add("no-use-when");
+        if (tool.params().values().stream().anyMatch(d -> d.strip().isEmpty())) found.add("param-undescribed");
+        Matcher m = Pattern.compile("[.!?](?:\\s|$)").matcher(tool.description());
+        int sentences = 0;
+        while (m.find()) sentences++;
+        if (sentences < 3) found.add("short-description");
+        return found;
+    }
+
+    private static Set<String> words(Tool t) {
+        Set<String> out = new HashSet<>();
+        Matcher m = Pattern.compile("[a-z]{3,}").matcher(t.description().toLowerCase());
+        while (m.find()) out.add(m.group());
+        return out;
+    }
+
+    static double overlap(Tool a, Tool b) {
+        Set<String> wa = words(a), wb = words(b);
+        Set<String> both = new HashSet<>(wa);
+        both.retainAll(wb);
+        Set<String> either = new HashSet<>(wa);
+        either.addAll(wb);
+        return (double) both.size() / either.size();
+    }
+
+    static void report(String title, List<Tool> tools) {
+        System.out.println(title);
+        for (Tool tool : tools) {
+            List<String> found = lint(tool);
+            System.out.println("  " + tool.name() + ": " + (found.isEmpty() ? "clean" : String.join(", ", found)));
+        }
+        for (int i = 0; i < tools.size(); i++) {
+            for (Tool b : tools.subList(i + 1, tools.size())) {
+                double score = overlap(tools.get(i), b);
+                if (score >= OVERLAP) System.out.println("  overlap: " + tools.get(i).name() + " and " + b.name() + " (" + String.format(Locale.ROOT, "%.2f", score) + ")");
+            }
+        }
+    }
+
+    static Page page(List<String> items, String cursor, int limit) {
+        int offset = cursor == null ? 0 : Integer.parseInt(new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8).split(":")[1]);
+        List<String> chunk = items.subList(Math.min(offset, items.size()), Math.min(offset + limit, items.size()));
+        boolean more = offset + chunk.size() < items.size();
+        String token = more ? Base64.getEncoder().encodeToString(("offset:" + (offset + chunk.size())).getBytes(StandardCharsets.UTF_8)) : null;
+        String note = more ? "Showing " + chunk.size() + " of " + items.size() + " results; pass next_cursor to continue, or narrow the query with a filter." : null;
+        return new Page(chunk, token, note);
+    }
+
+    static Map<String, String> params(String... kv) {
+        Map<String, String> m = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < kv.length; i += 2) m.put(kv[i], kv[i + 1]);
+        return m;
+    }
+
+    static final List<Tool> POOR = List.of(
+        new Tool("analyze_content", "Analyzes content and returns the result.", params("content", "The content.")),
+        new Tool("analyze_document", "Analyzes a document and returns the result.", params("document", "")));
+
+    static final List<Tool> SPLIT = List.of(
+        new Tool("extract_web_results",
+            "Pulls the title, date and main claims from one web page. Use when a search result needs to be read. Do not use it for uploaded files; use extract_data_points instead of this tool for those.",
+            params("url", "The page address.")),
+        new Tool("extract_data_points",
+            "Lists every figure and date in one uploaded document, each with its page. Use when a report or table must be mined for numbers. Not for web pages; call extract_web_results for those.",
+            params("document_id", "The id of an uploaded document.")),
+        new Tool("summarize_content",
+            "Writes a short summary of text you already hold. Use when a long passage must fit in a brief. Do not use it to check a claim; verify_claim_against_source does that.",
+            params("text", "The text to shorten.", "max_words", "The longest summary, in words.")),
+        new Tool("verify_claim_against_source",
+            "Says whether one claim is supported by one named source and quotes the passage. Use when a figure or statement needs a check. Not for finding new sources; use extract_web_results instead of this tool for that.",
+            params("claim", "One sentence to test.", "source_id", "The id of the source to test it against.")));
+
+    public static void main(String[] args) {
+        report("the set as first written", POOR);
+        System.out.println();
+        report("the same job, one contract per tool", SPLIT);
+        List<String> rows = new ArrayList<>();
+        for (int i = 0; i < 25; i++) rows.add(String.format("row-%02d", i));
+        System.out.println("\na long result, paged four rows at a time");
+        String cursor = null;
+        for (int number = 1; number <= 2; number++) {
+            Page p = page(rows, cursor, 4);
+            cursor = p.cursor();
+            System.out.println("  page " + number + ": " + String.join(" ", p.rows()));
+            System.out.println("    note: " + (p.note() == null ? "None" : p.note()));
+        }
+        System.out.println("  the cursor is opaque: " + (cursor == null ? "None" : cursor));
+    }
+}
+```
+```text
+the set as first written
+  analyze_content: no-boundary, no-use-when, short-description
+  analyze_document: no-boundary, no-use-when, param-undescribed, short-description
+  overlap: analyze_content and analyze_document (0.71)
+
+the same job, one contract per tool
+  extract_web_results: clean
+  extract_data_points: clean
+  summarize_content: clean
+  verify_claim_against_source: clean
+
+a long result, paged four rows at a time
+  page 1: row-00 row-01 row-02 row-03
+    note: Showing 4 of 25 results; pass next_cursor to continue, or narrow the query with a filter.
+  page 2: row-04 row-05 row-06 row-07
+    note: Showing 4 of 25 results; pass next_cursor to continue, or narrow the query with a filter.
+  the cursor is opaque: b2Zmc2V0Ojg=
+```
+```kotlin
+import java.util.Base64
+
+/**
+ * Tool interfaces graded on rules, offline: a set that confuses a model, the same job split into tools with one contract each, and a long result paged.
+ *
+ * No model is called. The rules are the course's own and small: a description of three sentences or more, a when-to-use phrase, a boundary against the
+ * neighbouring tool, a description on every parameter, and a pair of descriptions that overlap too much. Checked on 2026-10-03 against the "Define tools"
+ * page of the Claude API documentation and the "Writing tools for agents" article.
+ */
+const val OVERLAP = 0.6
+
+/** A tool as the lint sees it: a name, a description and the description of each parameter. */
+data class Tool(val name: String, val description: String, val params: Map<String, String>)
+
+/** One page of a long result: the rows, the opaque cursor of the next page (null on the last) and a note for the model. */
+data class Page(val rows: List<String>, val cursor: String?, val note: String?)
+
+fun lint(tool: Tool): List<String> {
+    val text = tool.description.lowercase()
+    val found = mutableListOf<String>()
+    if (listOf("do not use", "not for", "instead of").none { it in text }) found += "no-boundary"
+    if ("use when" !in text) found += "no-use-when"
+    if (tool.params.values.any { it.isBlank() }) found += "param-undescribed"
+    if (Regex("""[.!?](?:\s|$)""").findAll(tool.description).count() < 3) found += "short-description"
+    return found
+}
+
+private fun words(t: Tool): Set<String> = Regex("[a-z]{3,}").findAll(t.description.lowercase()).map { it.value }.toSet()
+
+fun overlap(a: Tool, b: Tool): Double {
+    val wa = words(a)
+    val wb = words(b)
+    return (wa intersect wb).size.toDouble() / (wa union wb).size
+}
+
+fun report(title: String, tools: List<Tool>) {
+    println(title)
+    for (tool in tools) println("  ${tool.name}: ${lint(tool).joinToString(", ").ifEmpty { "clean" }}")
+    for ((i, a) in tools.withIndex()) {
+        for (b in tools.drop(i + 1)) {
+            val score = overlap(a, b)
+            if (score >= OVERLAP) println("  overlap: ${a.name} and ${b.name} (${"%.2f".format(java.util.Locale.ROOT, score)})")
+        }
+    }
+}
+
+fun page(items: List<String>, cursor: String? = null, limit: Int = 4): Page {
+    val offset = if (cursor == null) 0 else String(Base64.getDecoder().decode(cursor)).split(":")[1].toInt()
+    val chunk = items.drop(offset).take(limit)
+    val more = offset + chunk.size < items.size
+    val token = if (more) Base64.getEncoder().encodeToString("offset:${offset + chunk.size}".toByteArray()) else null
+    val note = if (more) "Showing ${chunk.size} of ${items.size} results; pass next_cursor to continue, or narrow the query with a filter." else null
+    return Page(chunk, token, note)
+}
+
+val POOR = listOf(
+    Tool("analyze_content", "Analyzes content and returns the result.", mapOf("content" to "The content.")),
+    Tool("analyze_document", "Analyzes a document and returns the result.", mapOf("document" to "")),
+)
+
+val SPLIT = listOf(
+    Tool(
+        "extract_web_results",
+        "Pulls the title, date and main claims from one web page. Use when a search result needs to be read. Do not use it for uploaded files; use extract_data_points instead of this tool for those.",
+        mapOf("url" to "The page address."),
+    ),
+    Tool(
+        "extract_data_points",
+        "Lists every figure and date in one uploaded document, each with its page. Use when a report or table must be mined for numbers. Not for web pages; call extract_web_results for those.",
+        mapOf("document_id" to "The id of an uploaded document."),
+    ),
+    Tool(
+        "summarize_content",
+        "Writes a short summary of text you already hold. Use when a long passage must fit in a brief. Do not use it to check a claim; verify_claim_against_source does that.",
+        mapOf("text" to "The text to shorten.", "max_words" to "The longest summary, in words."),
+    ),
+    Tool(
+        "verify_claim_against_source",
+        "Says whether one claim is supported by one named source and quotes the passage. Use when a figure or statement needs a check. Not for finding new sources; use extract_web_results instead of this tool for that.",
+        mapOf("claim" to "One sentence to test.", "source_id" to "The id of the source to test it against."),
+    ),
+)
+
+fun main() {
+    report("the set as first written", POOR)
+    println()
+    report("the same job, one contract per tool", SPLIT)
+    val rows = (0 until 25).map { "row-%02d".format(it) }
+    println("\na long result, paged four rows at a time")
+    var cursor: String? = null
+    for (number in 1..2) {
+        val p = page(rows, cursor)
+        cursor = p.cursor
+        println("  page $number: ${p.rows.joinToString(" ")}")
+        println("    note: ${p.note ?: "None"}")
+    }
+    println("  the cursor is opaque: ${cursor ?: "None"}")
+}
 ```
 ```text
 the set as first written

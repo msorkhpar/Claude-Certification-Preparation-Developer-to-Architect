@@ -4,10 +4,12 @@ A team wants every pull request reviewed by Claude Code in CI. The first workflo
 into a file: nobody can tell from the job's status whether the review ran, the key is typed into the file, the tool list lets the run edit the checkout, and
 the review criteria are the sentence "be conservative". In this practice you write the job so that it is safe and its result can be trusted: the workflow, the schema
 of the answer, the criteria file, the prompt, and the function that turns what Claude printed into a job status and a list of comments. Pick your language
-folder (`python` or `typescript`), open `starter/` and edit the files there. Both editions test the same behaviour. The logic is plain data work on text and
-JSON, and the course checks it with a model of the documented command-line behaviour: nothing here starts Claude Code, needs a key or touches the network. The
-configuration files have no Java or Kotlin edition (no YAML reader is available offline for those two here); the decision function is the code part and is
-written in Python and TypeScript.
+folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the files there. All four editions test the same behaviour. The logic is plain
+data work on text and JSON, and the course checks it with a model of the documented command-line behaviour (`examples/60-ci-gate`, in your language): nothing
+here starts Claude Code, needs a key or touches the network. The configuration files are the same in every language; the decision function is the code
+part, `review_gate.py`, `reviewGate.ts`, `ReviewGate.java` (the class `ReviewGate`) or `ReviewGate.kt` (the object `ReviewGate`), with `reviewPrompt` and
+`gate` as methods in Java and Kotlin and a provided `SchemaCheck` that you do not edit. The Java and Kotlin tests read the JSON with Jackson and the workflow
+with its YAML module.
 
 ## What to write
 
@@ -30,6 +32,9 @@ written in Python and TypeScript.
     `structured_output`, or an answer that breaks the schema (name the path of the problem). It never passes by saying nothing.
   - For a valid answer, keep the findings at or above `min_severity` and outside `disabled_categories` as comments; the job fails when a kept comment has a severity
     in `fail_on`, and only comments otherwise.
+- In Java and Kotlin the same two are the methods `ReviewGate.reviewPrompt(diff, prior, existingTests)` and `ReviewGate.gate(stdout, exitCode, schema, policy)`:
+  `prior` is a list of maps, `policy` is a map with the same three keys, `schema` is a Jackson `JsonNode`, and `gate` returns a map with `exit`, `comments` and
+  `problems`.
 - No file holds a personal path, an email address or a key.
 
 ## Why each part is there, and what you should see

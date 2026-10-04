@@ -5,7 +5,7 @@
 
 **After this page you can** define a subagent with a bounded toolset, choose a memory scope for it, say which of its fields a plugin ignores, write a hook that blocks a destructive command or an edit to a protected file, and read a hook's exit codes and JSON answer correctly.
 
-Checked on 2026-10-03 against the Claude Code documentation (subagents, the hooks guide and the features overview), which mention behaviour up to Claude Code v2.1.286. The example is a hook written as a process and a linter for skill and subagent files, in Python and TypeScript. It is the course's own model of the documented rules. It was run offline and it sends nothing anywhere.
+Checked on 2026-10-03 against the Claude Code documentation (subagents, the hooks guide and the features overview), which mention behaviour up to Claude Code v2.1.286. The example is a hook written as a process and a linter for skill and subagent files, in Python, TypeScript, Java and Kotlin. It is the course's own model of the documented rules. It was run offline and it sends nothing anywhere.
 
 ## Why it matters
 

@@ -5,7 +5,7 @@
 
 **After this page you can** choose between Read, Write, Edit, Bash, Grep and Glob for a job, say what each one does and does not do, explain why an Edit fails and which remedy to try first, and say which of the search tools a session actually has on your platform.
 
-Checked on 2026-10-03 against the Claude Code documentation page "Tools reference" (the tool behaviour sections for Read, Write, Edit, Bash, Grep and Glob) and the Agent SDK pages "Give Claude custom tools" and "Configure permissions", with `claude-agent-sdk` 0.2.163 and `@anthropic-ai/claude-agent-sdk` 0.3.287. The example is the course's own model of the documented rules, run offline in Python and TypeScript; no tool was run by Claude Code. This page deepens module 38 (the working loop and the permission rules) and module 35 (tools and permissions in the SDK), and it does not repeat them. Page 2 covers the permissions that bound these tools and the order in which to explore a codebase.
+Checked on 2026-10-03 against the Claude Code documentation page "Tools reference" (the tool behaviour sections for Read, Write, Edit, Bash, Grep and Glob) and the Agent SDK pages "Give Claude custom tools" and "Configure permissions", with `claude-agent-sdk` 0.2.163 and `@anthropic-ai/claude-agent-sdk` 0.3.287. The example is the course's own model of the documented rules, run offline in Python, TypeScript, Java and Kotlin; no tool was run by Claude Code. This page deepens module 38 (the working loop and the permission rules) and module 35 (tools and permissions in the SDK), and it does not repeat them. Page 2 covers the permissions that bound these tools and the order in which to explore a codebase.
 
 > **Exam guide and current product.** *What the guide states, and so what the exam keys:* Grep searches file contents (function names, error messages, import statements) and Glob matches file paths by name pattern such as `**/*.test.tsx`; Read and Write handle whole files and Edit makes targeted changes by unique text matching; when Edit fails because the text is not unique, use Read plus Write as the fallback; and scenario S4 lists the built-in tools as Read, Write, Bash, Grep and Glob. *What the current product does (documentation checked 2026-10-03):* Grep and Glob are two of the tools, with the roles the guide gives them, but on macOS, Linux and WSL Claude Code "leaves Glob and Grep out of the default tool set, and Claude searches with `find` and `grep` through the Bash tool instead"; they are on by default on Windows, and you get them back by naming them in `--tools`, `--allowedTools` or the equivalent SDK options, when `Bash` is removed, or in a subagent's `tools` list that leaves `Bash` out. For a failed Edit the documentation's first remedies are narrower than a rewrite: "Claude either supplies a longer string with enough surrounding context to pin down one occurrence, or sets `replace_all: true`". Read plus Write remains the answer when no unique text exists. On the exam, choose Grep for content, Glob for names and Read plus Write for a non-unique Edit; in your own code, give a search agent `Grep` and `Glob` by name and try a longer anchor first.
 
@@ -56,9 +56,9 @@ The order of remedies is the order of risk. A longer anchor changes only the occ
 
 ### The example
 
-The example models three of these facts in Python and TypeScript. `edit` is the exact replacement with its three outcomes (replaced, not found, appears more than once). `plan_edit` chooses the remedy in the documented order. `tool_set` shows which of the six a session has on each platform and how the options bring Grep and Glob back. `covered_by` and `rule_tool` give the tools that a permission rule covers, which page 2 uses.
+The example models three of these facts in all four languages. `edit` is the exact replacement with its three outcomes (replaced, not found, appears more than once). `plan_edit` chooses the remedy in the documented order. `tool_set` shows which of the six a session has on each platform and how the options bring Grep and Glob back. `covered_by` and `rule_tool` give the tools that a permission rule covers, which page 2 uses.
 
-<!-- example: m56-builtin-tools tabs: python,typescript -->
+<!-- example: m56-builtin-tools tabs: python,typescript,java,kotlin -->
 ```python
 """The built-in file tools of Claude Code, modelled offline: Edit's exact match, the way out when it cannot apply, which search tools exist
 on which platform, and which permission rule covers which tool.
@@ -244,6 +244,264 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+edit unique: replaced 1
+edit twice: old_string appears 2 times
+edit twice, every: replaced 2
+edit absent: old_string not found
+plan, unique: ('edit', 'def a():')
+plan, twice with an anchor: ('edit', 'def b():\n    return 1')
+plan, twice, every one: ('replace_all', '    return 1')
+plan, twice, no unique anchor: ('read_write', None)
+linux, default: Read, Write, Edit, Bash
+windows, default: Read, Write, Edit, Bash, Grep, Glob
+linux, allowedTools Grep: Read, Write, Edit, Bash, Grep, Glob
+linux, tools Read Grep Glob: Read, Grep, Glob
+linux, Bash removed: Read, Write, Edit, Grep, Glob
+rules are written under: Grep as Read, Glob as Read, Write as Edit, Bash as Bash
+Read(secrets/**) covers: Read, Grep, Glob
+Edit(src/**) covers: Edit, Write
+Write(src/**) covers: nothing
+Bash(git log *) covers: Bash
+```
+```java
+import static harness.Show.py;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * The built-in file tools of Claude Code, modelled offline: Edit's exact match, the way out when it cannot apply, which search tools exist
+ * on which platform, and which permission rule covers which tool.
+ *
+ * <p>A teaching model of the "Tools reference" page of the Claude Code documentation (read on 2026-10-03), not the product's code. It covers six tools:
+ * Read, Write, Edit, Bash, Grep and Glob.
+ */
+public final class BuiltinTools {
+    static final List<String> SEARCH_TOOLS = List.of("Grep", "Glob");
+    static final List<String> BASE_TOOLS = List.of("Read", "Write", "Edit", "Bash");
+    static final Map<String, List<String>> RULE_COVERS = Map.of("Read", List.of("Read", "Grep", "Glob"), "Edit", List.of("Edit", "Write"), "Bash", List.of("Bash")); // a Write(path) rule is never matched
+    static final List<String> RULE_ORDER = List.of("Read", "Edit", "Bash");
+
+    /** The result of Edit: whether it applied, the new text and the number replaced, or the error. */
+    record EditResult(boolean ok, String text, Integer replaced, String error) {}
+
+    /** What to do for a change: the action and the string to edit with (null when none). */
+    record Plan(String action, String anchor) {
+        @Override
+        public String toString() {
+            return "(" + py(action) + ", " + py(anchor) + ")";
+        }
+    }
+
+    static int count(String text, String part) {
+        int n = 0;
+        for (int i = text.indexOf(part); i >= 0; i = text.indexOf(part, i + part.length())) n++;
+        return n;
+    }
+
+    /** Edit is an exact string replacement: no regex, no fuzzy match. old must be present, and appear once unless replaceAll is set. */
+    static EditResult edit(String text, String old, String replacement, boolean replaceAll) {
+        int count = count(text, old);
+        if (count == 0) return new EditResult(false, null, null, "old_string not found");
+        if (count > 1 && !replaceAll) return new EditResult(false, null, null, "old_string appears " + count + " times");
+        int first = text.indexOf(old);
+        String changed = replaceAll ? text.replace(old, replacement) : text.substring(0, first) + replacement + text.substring(first + old.length());
+        return new EditResult(true, changed, replaceAll ? count : 1, null);
+    }
+
+    static EditResult edit(String text, String old, String replacement) {
+        return edit(text, old, replacement, false);
+    }
+
+    /**
+     * What to do for a change to `old`: Edit as it is, Edit with a longer unique string that holds it, replace_all for every occurrence,
+     * and only when no unique anchor exists, read the file and write it back whole.
+     */
+    static Plan planEdit(String text, String old, boolean every, List<String> anchors) {
+        int count = count(text, old);
+        if (count == 0) return new Plan("read_again", null);
+        if (count == 1) return new Plan("edit", old);
+        if (every) return new Plan("replace_all", old);
+        for (String anchor : anchors) if (anchor.contains(old) && count(text, anchor) == 1) return new Plan("edit", anchor);
+        return new Plan("read_write", null);
+    }
+
+    static Plan planEdit(String text, String old) {
+        return planEdit(text, old, false, List.of());
+    }
+
+    /**
+     * The six tools a session has. Grep and Glob are in the default set on Windows only; elsewhere they return when named in `tools`
+     * or `allowedTools` (naming either in allowedTools restores both), or when Bash is removed.
+     */
+    static List<String> toolSet(String platform, List<String> tools, List<String> allowedTools, List<String> disallowedTools) {
+        List<String> have = new ArrayList<>();
+        if (tools != null) {
+            for (String t : tools) if (BASE_TOOLS.contains(t) || SEARCH_TOOLS.contains(t)) have.add(t);
+        } else {
+            have.addAll(BASE_TOOLS);
+            if (platform.equals("windows") || allowedTools.stream().anyMatch(SEARCH_TOOLS::contains) || disallowedTools.contains("Bash")) have.addAll(SEARCH_TOOLS);
+        }
+        return have.stream().filter(t -> !disallowedTools.contains(t)).toList();
+    }
+
+    static List<String> toolSet(String platform) {
+        return toolSet(platform, null, List.of(), List.of());
+    }
+
+    /** The tools that a permission rule such as Read(secrets/**) applies to. */
+    static List<String> coveredBy(String rule) {
+        return RULE_COVERS.getOrDefault(rule.split("\\(", 2)[0], List.of());
+    }
+
+    /** The tool name that a permission rule is written under: Read(...) covers Read, Grep and Glob; Edit(...) covers Edit and Write. */
+    static String ruleTool(String tool) {
+        for (String name : RULE_ORDER) if (RULE_COVERS.get(name).contains(tool)) return name;
+        return tool;
+    }
+
+    static String join(List<String> items) {
+        return String.join(", ", items);
+    }
+
+    public static void main(String[] args) {
+        String text = "def a():\n    return 1\n\ndef b():\n    return 1\n";
+        Object[][] cases = {{"unique", "def a():", false}, {"twice", "    return 1", false}, {"twice, every", "    return 1", true}, {"absent", "def c():", false}};
+        for (Object[] c : cases) {
+            EditResult r = edit(text, (String) c[1], "X", (Boolean) c[2]);
+            System.out.println("edit " + c[0] + ": " + (!r.ok() ? r.error() : "replaced " + r.replaced()));
+        }
+        List<String> anchors = List.of("def b():\n    return 1");
+        System.out.println("plan, unique: " + planEdit(text, "def a():"));
+        System.out.println("plan, twice with an anchor: " + planEdit(text, "    return 1", false, anchors));
+        System.out.println("plan, twice, every one: " + planEdit(text, "    return 1", true, List.of()));
+        System.out.println("plan, twice, no unique anchor: " + planEdit(text, "    return 1", false, List.of("return 1")));
+        for (String platform : List.of("linux", "windows")) System.out.println(platform + ", default: " + join(toolSet(platform)));
+        System.out.println("linux, allowedTools Grep: " + join(toolSet("linux", null, List.of("Grep"), List.of())));
+        System.out.println("linux, tools Read Grep Glob: " + join(toolSet("linux", List.of("Read", "Grep", "Glob"), List.of(), List.of())));
+        System.out.println("linux, Bash removed: " + join(toolSet("linux", null, List.of(), List.of("Bash"))));
+        List<String> written = new ArrayList<>();
+        for (String t : List.of("Grep", "Glob", "Write", "Bash")) written.add(t + " as " + ruleTool(t));
+        System.out.println("rules are written under: " + join(written));
+        for (String rule : List.of("Read(secrets/**)", "Edit(src/**)", "Write(src/**)", "Bash(git log *)")) {
+            List<String> covered = coveredBy(rule);
+            System.out.println(rule + " covers: " + (covered.isEmpty() ? "nothing" : join(covered)));
+        }
+    }
+}
+```
+```text
+edit unique: replaced 1
+edit twice: old_string appears 2 times
+edit twice, every: replaced 2
+edit absent: old_string not found
+plan, unique: ('edit', 'def a():')
+plan, twice with an anchor: ('edit', 'def b():\n    return 1')
+plan, twice, every one: ('replace_all', '    return 1')
+plan, twice, no unique anchor: ('read_write', None)
+linux, default: Read, Write, Edit, Bash
+windows, default: Read, Write, Edit, Bash, Grep, Glob
+linux, allowedTools Grep: Read, Write, Edit, Bash, Grep, Glob
+linux, tools Read Grep Glob: Read, Grep, Glob
+linux, Bash removed: Read, Write, Edit, Grep, Glob
+rules are written under: Grep as Read, Glob as Read, Write as Edit, Bash as Bash
+Read(secrets/**) covers: Read, Grep, Glob
+Edit(src/**) covers: Edit, Write
+Write(src/**) covers: nothing
+Bash(git log *) covers: Bash
+```
+```kotlin
+import harness.Show.py
+
+/**
+ * The built-in file tools of Claude Code, modelled offline: Edit's exact match, the way out when it cannot apply, which search tools exist
+ * on which platform, and which permission rule covers which tool.
+ *
+ * A teaching model of the "Tools reference" page of the Claude Code documentation (read on 2026-10-03), not the product's code. It covers six tools:
+ * Read, Write, Edit, Bash, Grep and Glob.
+ */
+val SEARCH_TOOLS = listOf("Grep", "Glob")
+val BASE_TOOLS = listOf("Read", "Write", "Edit", "Bash")
+val RULE_COVERS = mapOf("Read" to listOf("Read", "Grep", "Glob"), "Edit" to listOf("Edit", "Write"), "Bash" to listOf("Bash")) // a Write(path) rule is never matched
+
+/** The result of Edit: whether it applied, the new text and the number replaced, or the error. */
+data class EditResult(val ok: Boolean, val text: String? = null, val replaced: Int? = null, val error: String? = null)
+
+/** What to do for a change: the action and the string to edit with (null when none). */
+data class Plan(val action: String, val anchor: String?) {
+    override fun toString() = "(${py(action)}, ${py(anchor)})"
+}
+
+private fun count(text: String, part: String): Int {
+    var n = 0
+    var i = text.indexOf(part)
+    while (i >= 0) {
+        n++
+        i = text.indexOf(part, i + part.length)
+    }
+    return n
+}
+
+/** Edit is an exact string replacement: no regex, no fuzzy match. old must be present, and appear once unless replaceAll is set. */
+fun edit(text: String, old: String, replacement: String, replaceAll: Boolean = false): EditResult {
+    val count = count(text, old)
+    if (count == 0) return EditResult(false, error = "old_string not found")
+    if (count > 1 && !replaceAll) return EditResult(false, error = "old_string appears $count times")
+    val changed = if (replaceAll) text.replace(old, replacement) else text.replaceFirst(old, replacement)
+    return EditResult(true, text = changed, replaced = if (replaceAll) count else 1)
+}
+
+/**
+ * What to do for a change to `old`: Edit as it is, Edit with a longer unique string that holds it, replace_all for every occurrence,
+ * and only when no unique anchor exists, read the file and write it back whole.
+ */
+fun planEdit(text: String, old: String, every: Boolean = false, anchors: List<String> = emptyList()): Plan {
+    val count = count(text, old)
+    if (count == 0) return Plan("read_again", null)
+    if (count == 1) return Plan("edit", old)
+    if (every) return Plan("replace_all", old)
+    for (anchor in anchors) if (old in anchor && count(text, anchor) == 1) return Plan("edit", anchor)
+    return Plan("read_write", null)
+}
+
+/**
+ * The six tools a session has. Grep and Glob are in the default set on Windows only; elsewhere they return when named in `tools`
+ * or `allowedTools` (naming either in allowedTools restores both), or when Bash is removed.
+ */
+fun toolSet(platform: String, tools: List<String>? = null, allowedTools: List<String> = emptyList(), disallowedTools: List<String> = emptyList()): List<String> {
+    val have = if (tools != null) tools.filter { it in BASE_TOOLS + SEARCH_TOOLS } else {
+        BASE_TOOLS + if (platform == "windows" || allowedTools.any { it in SEARCH_TOOLS } || "Bash" in disallowedTools) SEARCH_TOOLS else emptyList()
+    }
+    return have.filter { it !in disallowedTools }
+}
+
+/** The tools that a permission rule such as Read(secrets/...) applies to. */
+fun coveredBy(rule: String): List<String> = RULE_COVERS[rule.substringBefore("(")] ?: emptyList()
+
+/** The tool name that a permission rule is written under: Read(...) covers Read, Grep and Glob; Edit(...) covers Edit and Write. */
+fun ruleTool(tool: String): String = RULE_COVERS.entries.firstOrNull { tool in it.value }?.key ?: tool
+
+fun main() {
+    val text = "def a():\n    return 1\n\ndef b():\n    return 1\n"
+    for ((label, old, every) in listOf(Triple("unique", "def a():", false), Triple("twice", "    return 1", false), Triple("twice, every", "    return 1", true), Triple("absent", "def c():", false))) {
+        val r = edit(text, old, "X", every)
+        println("edit $label: ${if (!r.ok) r.error else "replaced ${r.replaced}"}")
+    }
+    val anchors = listOf("def b():\n    return 1")
+    println("plan, unique: ${planEdit(text, "def a():")}")
+    println("plan, twice with an anchor: ${planEdit(text, "    return 1", anchors = anchors)}")
+    println("plan, twice, every one: ${planEdit(text, "    return 1", every = true)}")
+    println("plan, twice, no unique anchor: ${planEdit(text, "    return 1", anchors = listOf("return 1"))}")
+    for (platform in listOf("linux", "windows")) println("$platform, default: ${toolSet(platform).joinToString(", ")}")
+    println("linux, allowedTools Grep: ${toolSet("linux", allowedTools = listOf("Grep")).joinToString(", ")}")
+    println("linux, tools Read Grep Glob: ${toolSet("linux", tools = listOf("Read", "Grep", "Glob")).joinToString(", ")}")
+    println("linux, Bash removed: ${toolSet("linux", disallowedTools = listOf("Bash")).joinToString(", ")}")
+    println("rules are written under: ${listOf("Grep", "Glob", "Write", "Bash").joinToString(", ") { "$it as ${ruleTool(it)}" }}")
+    for (rule in listOf("Read(secrets/**)", "Edit(src/**)", "Write(src/**)", "Bash(git log *)")) println("$rule covers: ${coveredBy(rule).joinToString(", ").ifEmpty { "nothing" }}")
+}
 ```
 ```text
 edit unique: replaced 1

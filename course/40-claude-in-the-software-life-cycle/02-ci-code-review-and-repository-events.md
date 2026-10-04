@@ -5,7 +5,7 @@
 
 **After this page you can** set up a GitHub Actions workflow that answers `@claude` mentions, write one that reviews pull requests, bound both with turns, time and concurrency, tell the action, Code Review and routines apart, tune a review with `REVIEW.md`, and finish the module's practice.
 
-Checked on 2026-10-03 against the Claude Code documentation (GitHub Actions, Code Review and routines), which mention behaviour up to Claude Code v2.1.286. The action is `anthropics/claude-code-action@v1`. Nothing was run against GitHub: the course has no key and no network. The example reads workflow files offline, in Python and TypeScript, and applies a linter that is the course's own model of the documented advice.
+Checked on 2026-10-03 against the Claude Code documentation (GitHub Actions, Code Review and routines), which mention behaviour up to Claude Code v2.1.286. The action is `anthropics/claude-code-action@v1`. Nothing was run against GitHub: the course has no key and no network. The example reads workflow files offline, in Python, TypeScript, Java and Kotlin, and applies a linter that is the course's own model of the documented advice.
 
 ## Why it matters
 
@@ -594,7 +594,7 @@ The example reads a workflow as data and applies nine rules from this page. The 
 
 ### The practice
 
-The practice puts Claude into a small repository. You fix a mention workflow that holds a key, uses `@beta` and has no limits, write a review workflow, version a prompt with a changelog, write `REVIEW.md` and `CLAUDE.md`, and keep every file free of keys and addresses. Tests parse your YAML and Markdown and apply the course's linter. The files are language-neutral, so the module has Python and TypeScript test suites and no Java or Kotlin edition: no YAML library is available offline for those two here.
+The practice puts Claude into a small repository. You fix a mention workflow that holds a key, uses `@beta` and has no limits, write a review workflow, version a prompt with a changelog, write `REVIEW.md` and `CLAUDE.md`, and keep every file free of keys and addresses. Tests parse your YAML and Markdown and apply the course's linter. The files are language-neutral, so the module has the same test suites in Python, TypeScript, Java and Kotlin; the Java and Kotlin ones read the YAML with Jackson's YAML module.
 
 ## Traps
 
