@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "An extraction schema marks the purchase order number as required, and invoices lacking one come back with believable numbers that appear nowhere in the documents. What fixes it?",
       "options": {
-        "a": "Add a minimum length so that short numbers are refused",
-        "b": "Allow a null for that field when the source gives none",
+        "a": "Allow a null for that field when the source gives none",
+        "b": "Add a minimum length so that short numbers are refused",
         "c": "Tell the model never to leave a required field empty",
         "d": "Set a default of `unknown` in the schema for that field"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value.",
-        "a": "Ruled out because a length limit \"would not tell a real number from an invented one\".",
+        "a": "A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value.",
+        "b": "Ruled out because a length limit \"would not tell a real number from an invented one\".",
         "c": "Ruled out because \"a required field pushes the model to fabricate a value\", and the instruction adds to the pressure.",
         "d": "Ruled out because a default that looks like data is a problem because \"downstream code cannot tell it from a real value\"."
       }
@@ -28,15 +28,15 @@
       "options": {
         "a": "A type check catches it, because a total is just a number in the record",
         "b": "Strict mode catches it as soon as the tool definition sets `strict`",
-        "c": "Required fields must agree with each other, so the validator rejects it",
-        "d": "Nothing in the contract catches it: shape is promised, meaning is not"
+        "c": "Nothing in the contract catches it: shape is promised, meaning is not",
+        "d": "Required fields must agree with each other, so the validator rejects it"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The guide says strict schemas do not prevent semantic errors, and a sum is one.",
+        "c": "The guide says strict schemas do not prevent semantic errors, and a sum is one.",
         "a": "Ruled out because \"A strict schema makes the first kind rare and does nothing about the second\", and both numbers pass a type check.",
         "b": "Ruled out because strict schemas \"do not prevent semantic errors\", and this record already matches its shape.",
-        "c": "Ruled out because \"the guarantee is about shape\", which covers presence of fields and not agreement between them."
+        "d": "Ruled out because \"the guarantee is about shape\", which covers presence of fields and not agreement between them."
       }
     },
     {
@@ -46,15 +46,15 @@
       "stem": "An extraction fails a check because the printed total differs from the sum of the lines, and the record has `conflict_detected` set to true. What should the pipeline do?",
       "options": {
         "a": "Retry with the error message appended to the prompt",
-        "b": "Replace the printed total with the computed one",
-        "c": "Route it to a person with the discrepancy noted",
+        "b": "Route it to a person with the discrepancy noted",
+        "c": "Replace the printed total with the computed one",
         "d": "Mark the document failed once the retry limit is reached"
       },
-      "key": "c",
+      "key": "b",
       "explanation": {
-        "c": "A flagged conflict is information about a bad source, and a second look finds the same difference.",
+        "b": "A flagged conflict is information about a bad source, and a second look finds the same difference.",
         "a": "Ruled out because \"a second look will find the same difference\", so the retry cannot change the outcome.",
-        "b": "Ruled out because \"A record that carries a difference and says so is a correct record of a bad document\", and replacing the printed value hides what it says.",
+        "c": "Ruled out because \"A record that carries a difference and says so is a correct record of a bad document\", and replacing the printed value hides what it says.",
         "d": "Ruled out because this record is not invalid, since \"a document that is still invalid after the last one is marked failed\" applies to errors that are retried."
       }
     },
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?",
       "options": {
-        "a": "It leaves out the failures, so it flatters the system",
+        "a": "It is right, since only passed documents have a verdict",
         "b": "It is too low, because a passed document is always correct",
         "c": "It counts each document twice, once per validation rule",
-        "d": "It is right, since only passed documents have a verdict"
+        "d": "It leaves out the failures, so it flatters the system"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong.",
+        "d": "The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong.",
         "b": "Ruled out because the report \"divides by the documents that passed\", so it overstates and does not understate.",
         "c": "Ruled out because it \"leaves out the documents that went to review or failed\", and nothing is counted twice.",
-        "d": "Ruled out because \"The first number is true and answers a different question\"."
+        "a": "Ruled out because \"The first number is true and answers a different question\"."
       }
     },
     {
@@ -84,15 +84,15 @@
       "stem": "Scenario S6, structured data extraction. A 300-page contract is cut into chunks, and the per-chunk results are merged. Two chunks give different vendor names. Which merge rule fits?",
       "options": {
         "a": "Take the later value, since it was read with more context",
-        "b": "Keep the first value, note the clash and send it to a person",
-        "c": "Take the longer name, since it carries more detail",
+        "b": "Take the longer name, since it carries more detail",
+        "c": "Keep the first value, note the clash and send it to a person",
         "d": "Drop the field from the merged result to avoid a wrong value"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "A disagreement between chunks is a conflict to record and review, and not a choice to make silently.",
+        "c": "A disagreement between chunks is a conflict to record and review, and not a choice to make silently.",
         "a": "Ruled out because \"A merge that always takes the last value or the longest is a guess presented as data\".",
-        "c": "Ruled out because \"A merge that always takes the last value or the longest is a guess presented as data\".",
+        "b": "Ruled out because \"A merge that always takes the last value or the longest is a guess presented as data\".",
         "d": "Ruled out because the rule is to record the clash \"so that the document goes to review\", and dropping the field hides it."
       }
     },
@@ -102,15 +102,15 @@
       "scope": "module",
       "stem": "Scenario S6, structured data extraction. A team extracts invoice fields. Each failed extraction gets two more attempts. One failure is a currency written outside the allowed list, and another is a purchase order number that the document does not contain but downstream needs. Which handling is right?",
       "options": {
-        "a": "Send the first back with its error, and route the second to review untried",
-        "b": "Send both back with their errors until each field has a value",
+        "a": "Send both back with their errors until each field has a value",
+        "b": "Send the first back with its error, and route the second to review untried",
         "c": "Send neither back and mark both documents failed at once",
         "d": "Route the first to review and send the second back with a stricter, firmer prompt"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "The currency error is fixable by a second look and the missing number is absent from the source.",
-        "b": "Ruled out because for an absent value \"No second look will find what is not there\".",
+        "b": "The currency error is fixable by a second look and the missing number is absent from the source.",
+        "a": "Ruled out because for an absent value \"No second look will find what is not there\".",
         "c": "Ruled out because a format error is what feedback is for, since \"The information is in the document; the form was wrong\".",
         "d": "Ruled out because it inverts the two, while \"A required value that the model reports as absent is not retried\"."
       }
@@ -123,15 +123,15 @@
       "options": {
         "a": "Each change also discards the stored tool definitions and the system prompt text",
         "b": "Moving between modes turns off structured output for the next request",
-        "c": "Each change discards stored conversation content, which is processed again",
-        "d": "Requests in automatic mode are billed at a higher rate than the others"
+        "c": "Requests in automatic mode are billed at a higher rate than the others",
+        "d": "Each change discards stored conversation content, which is processed again"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "Changing the mode invalidates cached message blocks, so the content must be reprocessed.",
+        "d": "Changing the mode invalidates cached message blocks, so the content must be reprocessed.",
         "a": "Ruled out because \"Tool definitions and system prompts remain cached\".",
         "b": "Ruled out because the documented effect of a change is on the cache: \"changing tool_choice between requests invalidates cached message blocks\".",
-        "d": "Ruled out because the cost described is reprocessing, since a pipeline that alternates modes \"pays to reprocess the document\"."
+        "c": "Ruled out because the cost described is reprocessing, since a pipeline that alternates modes \"pays to reprocess the document\"."
       }
     }
   ]

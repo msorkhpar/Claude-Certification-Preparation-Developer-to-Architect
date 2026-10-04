@@ -78,7 +78,7 @@ def main():
     print(f"search '{e['query']}': {first['status']} {e['type']}, {len(e['partial'])} partial, alternative '{e['alternatives'][0]}'")
     results = research(plan)
     recovered = next(r for r in results if "recovered_from" in r)
-    print(f"recovered: '{recovered['recovered_from']}' -> '{recovered['query']}' scope {recovered['scope']}, {len(recovered['findings'])} finding")
+    print(f"recovered: '{recovered['recovered_from']}' -> '{ALTERNATIVES[recovered['recovered_from']][0]}' scope {recovered['scope']}, {len(recovered['findings'])} finding")
     checks = [("date", "survey-a", "2025-02-01"), ("date", "report-d", "2025-01-15"), ("statistic", "survey-a", "60%")]
     verdicts = [verify_fact(*c) for c in checks]
     print(f"verify_fact: {verdicts.count('confirmed')} confirmed here, {verdicts.count('needs_search')} sent back to the coordinator")

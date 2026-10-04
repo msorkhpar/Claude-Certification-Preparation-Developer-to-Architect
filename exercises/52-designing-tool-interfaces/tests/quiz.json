@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A `find_documents` tool answers with the sentence \"Found these documents: Maintenance Schedule, Lab Access Plan.\" The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?",
       "options": {
-        "a": "Return each hit with a stable identifier and the fields the following step needs",
+        "a": "Lengthen the sentence, describing each document in more prose",
         "b": "Add a prompt rule that tells the model to derive each id from the title it was shown",
         "c": "Return every stored field of each hit, so that nothing is missing",
-        "d": "Lengthen the sentence, describing each document in more prose"
+        "d": "Return each hit with a stable identifier and the fields the following step needs"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The tool should hand the next step a real identifier, in a result trimmed to what that step needs.",
+        "d": "The tool should hand the next step a real identifier, in a result trimmed to what that step needs.",
         "b": "Ruled out because the documentation asks the tool to \"Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references\", not the model to reconstruct them.",
         "c": "Ruled out because a result should \"include only the fields Claude needs to reason about its next step\".",
-        "d": "Ruled out because more prose adds length and no handle: \"Bloated responses waste context and make it harder for Claude to extract what matters.\""
+        "a": "Ruled out because more prose adds length and no handle: \"Bloated responses waste context and make it harder for Claude to extract what matters.\""
       }
     },
     {
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. It uses one MCP server with eight tools whose schemas take about 3% of the context window, and the team sets `ENABLE_TOOL_SEARCH=auto`. What does the SDK do?",
       "options": {
-        "a": "Loads all of them at the start, as they are under the activation level",
+        "a": "Defers all but the tools that the first prompt happens to name",
         "b": "Defers all eight and loads them on demand, since the mode is enabled",
         "c": "Defers the three least used tools and keeps the rest loaded at the start",
-        "d": "Defers all but the tools that the first prompt happens to name"
+        "d": "Loads all of them at the start, as they are under the activation level"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "Under `auto` the point is 10% of the window, and below it everything loads at the start.",
+        "d": "Under `auto` the point is 10% of the window, and below it everything loads at the start.",
         "b": "Ruled out because \"Below that, the SDK loads every tool definition into context upfront.\"",
         "c": "Ruled out because the rule gives no partial deferral, and \"Below that, the SDK loads every tool definition into context upfront.\"",
-        "d": "Ruled out because the choice turns on the size of the definitions, not on the prompt: \"When the total reaches 10% of the window, tool search activates.\""
+        "a": "Ruled out because the choice turns on the size of the definitions, not on the prompt: \"When the total reaches 10% of the window, tool search activates.\""
       }
     }
   ]

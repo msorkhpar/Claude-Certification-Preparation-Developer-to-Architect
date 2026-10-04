@@ -89,8 +89,8 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 3. A coordinator spawns a subagent when it did not set `run_in_background`, and then writes its answer to the user before the subagent has reported. What explains it?
-   - **a**: Delegated work launches immediately unless the call asks for a foreground wait
-   - **b**: The spend cap was reached, so the subagent never started and nothing was reported
+   - **a**: The spend cap was reached, so the subagent never started and nothing was reported
+   - **b**: Delegated work launches immediately unless the call asks for a foreground wait
    - **c**: Subagents are started one at a time, so the second one was still queued
    - **d**: The concurrency limit refused the spawn without telling the coordinator anything
 
@@ -104,7 +104,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **a**. The documentation's default is a background launch, and a coordinator that needs the result first has to ask for a foreground run. *b* is ruled out because a spent cap is reported, not silent: "spawning another subagent fails with `Budget limit reached`". *c* is ruled out because the SDK runs them together: "Multiple subagents can run concurrently, so independent subtasks finish in the time of the slowest one rather than the sum of all of them." *d* is ruled out because the refusal is a result that the coordinator reads: "the spawn is refused with the tool result `Concurrent subagent limit reached`, and the coordinator reads it like any other result".
+3. **b**. The documentation's default is a background launch, and a coordinator that needs the result first has to ask for a foreground run. *a* is ruled out because a spent cap is reported, not silent: "spawning another subagent fails with `Budget limit reached`". *c* is ruled out because the SDK runs them together: "Multiple subagents can run concurrently, so independent subtasks finish in the time of the slowest one rather than the sum of all of them." *d* is ruled out because the refusal is a result that the coordinator reads: "the spawn is refused with the tool result `Concurrent subagent limit reached`, and the coordinator reads it like any other result".
 
 4. **d**. Content and metadata in separate fields let the merge recognise one claim and keep every source. *b* is ruled out because "attribution is a property of the data, and the synthesis cannot be asked to rebuild it from prose." *c* is ruled out because "The metadata is never written into the claim string, because then the merge could not recognise that two sentences are the same claim." *a* is ruled out because the sources are the evidence: "two subagents that found the same fact independently strengthen it, and the reader sees both sources".
 

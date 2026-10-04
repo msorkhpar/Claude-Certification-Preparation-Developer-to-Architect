@@ -45,7 +45,7 @@
       "scope": "page",
       "stem": "A ticket server lets a caller fetch, add and remove tickets, and agents may only look at them. Which settings give that?",
       "options": {
-        "a": "Deny the delete tool with a rule that matches on the ticket number",
+        "a": "Deny the delete tool in the settings with a rule that matches on the ticket number",
         "b": "Allow every tool of the server, and tell the agents to read only",
         "c": "Allow the get tool by name, and deny the create and delete tools by name",
         "d": "Deny the whole server, then allow its get tool by name"
@@ -54,7 +54,7 @@
       "explanation": {
         "c": "Allow by name and deny the others by name.",
         "b": "Ruled out because a sentence is no limit: \"A sentence in the prompt is a request that the model weighs\".",
-        "a": "Ruled out because the rule is skipped: \"A rule for an MCP tool that carries parentheses is skipped, so it matches nothing\".",
+        "a": "Ruled out because the rule is skipped: \"In a settings file, a rule for an MCP tool that carries parentheses is skipped, so it matches nothing\".",
         "d": "Ruled out because a deny rule beats every allow: \"A matching deny rule wins over any allow rule, whatever the specificity.\""
       }
     },
@@ -62,38 +62,38 @@
       "id": "02-sessions-variables-and-the-practice#q1",
       "page": "02-sessions-variables-and-the-practice.md",
       "scope": "page",
-      "stem": "Yesterday's work studied a module, and overnight a refactor rewrote it. What is the next step?",
+      "stem": "A developer adds a header that reads a new environment name in the shared connection settings and leaves the team write-up alone. What does the practice's grading do?",
       "options": {
-        "a": "Reopen yesterday's session and trust the results it holds",
-        "b": "Open a new session and give it a short summary of what still holds",
-        "c": "Fork yesterday's session and ask it to look again at the module",
-        "d": "Continue the previous session and tell it that the code changed"
+        "a": "The credentials case fails, since each new variable needs a default value",
+        "b": "The documentation case fails, because one of the variables the servers use is unlisted",
+        "c": "Nothing fails, since the write-up is advice that the grading never reads",
+        "d": "The server case fails, since a header may not refer to any variable"
       },
       "key": "b",
       "explanation": {
-        "b": "Tool results in an old session describe files as they were.",
-        "a": "Ruled out because nothing marks stale results: \"the old tool results are stale and nothing marks them so\".",
-        "c": "Ruled out because a fork copies the history, stale results included: \"copies the history into a new session\".",
-        "d": "Ruled out because a notice does not refresh the results: \"the model has no way to notice\"."
+        "b": "The note has to list every variable: \"every variable that appears in `.mcp.json` has to appear in the note.\"",
+        "a": "Ruled out because the token has no default: \"The token has none, because a default for a token would be a credential in the file\".",
+        "c": "Ruled out because the note is checked: \"The check turns a convention into a rule that fails when someone adds a variable and forgets the note.\"",
+        "d": "Ruled out because a shared file does refer to variables: \"A committed `.mcp.json` refers to variables and cannot hold their values.\""
       }
     },
     {
       "id": "02-sessions-variables-and-the-practice#q2",
       "page": "02-sessions-variables-and-the-practice.md",
       "scope": "page",
-      "stem": "A developer wants two migration designs, both starting from one study of a module. Which approach fits?",
+      "stem": "Which allow rules pass the practice's scaffolder case?",
       "options": {
-        "a": "Keep one session and ask for the designs one after the other",
-        "b": "Resume the one session twice and have both designs added to it",
-        "c": "Start two sessions from nothing and repeat the analysis in each",
-        "d": "Fork the session after the analysis, one branch for each option"
+        "a": "`Edit(src/generated/**)` together with `Write(src/generated/**)`",
+        "b": "`Write(src/generated/**)` alone",
+        "c": "`Edit(src/**)` alone",
+        "d": "`Edit(src/generated/**)` alone"
       },
       "key": "d",
       "explanation": {
-        "d": "A fork gives each design its own history and keeps the analysis.",
-        "b": "Ruled out because a resume appends to the original: \"reopens a saved conversation under the same session id\".",
-        "c": "Ruled out because it repeats the analysis: \"A fork keeps them independent without repeating the analysis.\"",
-        "a": "Ruled out because one history mixes the designs, which is what a fork avoids: \"Each branch has its own history\"."
+        "d": "One Edit rule limited to the generated folder: \"every allow rule that edits or writes is an `Edit` rule limited to `src/generated/`\".",
+        "b": "Ruled out because a Write path rule is never read: \"a `Write(...)` path rule fails it, because Claude Code never consults it\".",
+        "c": "Ruled out because the path is wider than the folder: \"an `Edit` rule limited to `src/generated/`\".",
+        "a": "Ruled out because it adds a Write path rule: \"a `Write(...)` path rule fails it, because Claude Code never consults it\"."
       }
     },
     {
@@ -104,7 +104,7 @@
       "options": {
         "a": "A default for the token, written into the shared project file",
         "b": "A team note that names every variable that the servers need to start",
-        "c": "A private copy of the project file with a working token",
+        "c": "A private copy of the project file with a working token in it, kept outside version control",
         "d": "A line in the root memory file that holds a shared token"
       },
       "key": "b",
@@ -112,7 +112,7 @@
         "b": "A note makes the missing variables visible.",
         "a": "Ruled out because a default for a token is a credential in the file: \"a default for a token would be a credential in the file\".",
         "c": "Ruled out because a second copy defeats the shared file: \"The file exists to be shared\".",
-        "d": "Ruled out because the memory file is committed context, not a place for a secret: \"A committed `.mcp.json` refers to variables and cannot hold their values.\""
+        "d": "Ruled out because a committed file cannot hold a value: \"A committed `.mcp.json` refers to variables and cannot hold their values.\""
       }
     },
     {
@@ -121,10 +121,10 @@
       "scope": "module",
       "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A check reports `unknown-server: wiki (explorer)`. What does the finding mean?",
       "options": {
-        "a": "A header holds a credential that was typed in by hand",
+        "a": "A header holds a credential that somebody typed in by hand, in plain text",
         "b": "A reference points at an entry that the project file never defines",
-        "c": "A subagent has no tools line and so inherits whatever is available",
-        "d": "A permission rule approves the whole tool and not a path"
+        "c": "A subagent has no tools line and inherits everything",
+        "d": "A permission rule approves the whole tool rather than one path of it"
       },
       "key": "b",
       "explanation": {
@@ -138,19 +138,19 @@
       "id": "02-sessions-variables-and-the-practice#m2",
       "page": "02-sessions-variables-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A project definition file has a description and a prompt but omits its list of permitted tools. What can it call?",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Which entry does the check for typed-in credentials report?",
       "options": {
-        "a": "Everything that is available to subagents",
-        "b": "Only the reading tools, as the minimum set",
-        "c": "No tool at all until a rule approves one",
-        "d": "The tools of the parent that were listed first"
+        "a": "A header named Authorization whose value is `Bearer example-token-123`",
+        "b": "A header named Authorization whose value is `Bearer ${TICKETS_TOKEN}`",
+        "c": "A header named X-Trace whose value is `abc`, sent with every request",
+        "d": "A variable named REGION whose value is `eu`, passed to the local server"
       },
       "key": "a",
       "explanation": {
-        "a": "The omission is the widest list.",
-        "b": "Ruled out because the widest list is what omission gives: \"leaving the line out grants the most, not the least\".",
-        "c": "Ruled out because the subagent inherits tools and does not start empty: \"A subagent that omits `tools` inherits every tool that is available to subagents\".",
-        "d": "Ruled out because the line names tools and not an order: \"the `tools` line is the allowlist\"."
+        "a": "The check reports a secret-looking name whose value has no reference: \"a header or environment entry whose name says token, key, secret or authorization and whose value has no `${` reference\".",
+        "b": "Ruled out because its value is a reference: \"whose value has no `${` reference\".",
+        "c": "Ruled out because the name says nothing of a secret: \"whose name says token, key, secret or authorization\".",
+        "d": "is ruled out for the same reason: \"whose name says token, key, secret or authorization\"."
       }
     },
     {

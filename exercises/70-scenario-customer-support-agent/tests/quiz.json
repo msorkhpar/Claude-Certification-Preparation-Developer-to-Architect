@@ -5,7 +5,7 @@
       "id": "01-the-scenario-the-layers-and-the-first-fix#q1",
       "page": "01-the-scenario-the-layers-and-the-first-fix.md",
       "scope": "page",
-      "stem": "A month of support-agent sessions shows two problems: in 3 percent an order lookup ran before the customer was identified, and in 9 percent the agent escalated cases that policy lets it settle. Which fix is made first?",
+      "stem": "A month of support-agent sessions shows two problems: in 3 percent a refund was issued before the customer was identified, and in 9 percent the agent escalated cases that policy lets it settle. Which fix is made first?",
       "options": {
         "a": "Train a separate model on past tickets first, so it can decide which cases need a person",
         "b": "Write escalation criteria first, because that problem touches the larger share of sessions",
@@ -16,7 +16,7 @@
       "explanation": {
         "d": "Money that moved wrongly cannot be called back, so its cause is fixed first.",
         "b": "Ruled out because the size of a count does not set the order: \"The first fix goes to what cannot be undone.\"",
-        "c": "Ruled out because descriptions are not the shape that the logs show for the skipped step: \"A refund that moved without a check cannot be called back\".",
+        "c": "Ruled out because the skipped step is a step order and not a tool choice: \"A step order that is only requested\".",
         "a": "Ruled out because a trained model comes before words were tried: \"machinery for a problem nobody has tried to fix with words\"."
       }
     },
@@ -24,19 +24,19 @@
       "id": "01-the-scenario-the-layers-and-the-first-fix#q2",
       "page": "01-the-scenario-the-layers-and-the-first-fix.md",
       "scope": "page",
-      "stem": "A customer writes \"I want to speak to someone\" as the first message, before giving any identification. How should the dispatcher handle the model's call to hand over the case?",
+      "stem": "A person takes over an escalated case. Which source should supply the facts of the hand-off record?",
       "options": {
-        "a": "Run it at once, because reaching a human has no prerequisite",
-        "b": "Refuse it until the lookup tool has identified the customer",
-        "c": "Hold it back until the stall guard has counted three repeated calls",
-        "d": "Accept it only after the model has summarised the case in its own words"
+        "a": "The desk's own state: the customer, the orders checked, the refunds made and the refusals",
+        "b": "A summary that the model writes of the whole conversation just before it hands the case over",
+        "c": "The full transcript of the conversation, attached to the ticket for the person to read",
+        "d": "A state that every conversation of the day shares and writes its facts into"
       },
       "key": "a",
       "explanation": {
-        "a": "The way to a person never waits for a prerequisite.",
-        "b": "Ruled out because the page puts the way out first: \"A person must be reachable even when identity cannot be established.\"",
-        "c": "Ruled out because the guard counts repeated calls and has no say over this one: \"If the same call, with the same arguments, has been made three times in a row\".",
-        "d": "Ruled out because the request is honoured as it stands: \"the agent honours it, and does not first investigate or argue\"."
+        "a": "The record is built from what the code kept: \"the hand-off record is built from the desk's own state\".",
+        "b": "Ruled out because the model supplies one field only: \"the model's reason as one field\".",
+        "c": "Ruled out because reading the transcript is what the record spares: \"so a person does not read the transcript to find out what happened\".",
+        "d": "Ruled out because a shared state leaks between cases: \"a long-lived shared state is a defect\"."
       }
     },
     {
@@ -55,7 +55,7 @@
         "c": "Several matches are a question for the customer, and nothing is set.",
         "a": "Ruled out because the dispatcher does not pick: \"Several matches set nothing and return the refusal\".",
         "b": "Ruled out because the desk holds one verified customer, set only by a single match: \"One match sets the verified customer.\"",
-        "d": "Ruled out because the refusal is not a fault that a retry can clear: \"A permanent error is never retried.\""
+        "d": "Ruled out because the refusal is not a fault that a retry can clear: \"A retryable error (a timeout of the order service) is retried once by the loop, which is the loop's business, not the model's.\""
       }
     },
     {

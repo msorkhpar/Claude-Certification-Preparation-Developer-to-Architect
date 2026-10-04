@@ -352,22 +352,22 @@ wrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required
 ## Quiz
 
 1. A CI step runs Claude Code unattended, and each issue it reports must be posted as an inline note. Which flags make the reply usable for that?
-   - **a**: `--output-format text` with a prompt asking for a bulleted list
+   - **a**: `--output-format json` with `--json-schema`
    - **b**: `--max-turns` with a high limit so that the list is complete
-   - **c**: `--output-format json` with `--json-schema`
+   - **c**: `--output-format text` with a prompt asking for a bulleted list
    - **d**: `--bare` alone, which formats replies for scripts
 
 2. A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?
-   - **a**: Fail, because no valid answer exists
+   - **a**: Retry the same request until a value appears
    - **b**: Pass, since the run reports success
-   - **c**: Retry the same request until a value appears
+   - **c**: Fail, because no valid answer exists
    - **d**: Pass, with a note that nothing was reported
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The schema makes the answer a validated object in `structured_output`. *a* is ruled out because text leaves the entries to be parsed from prose, and "a decision made on prose is a guess". *b* is ruled out because a limit bounds the loop and does not shape the answer: "The run exits with an error at the limit". *d* is ruled out because the flag controls what the run loads, with "no hooks, skills, MCP servers, memory or CLAUDE.md", and formats nothing.
-2. **a**. A run without a valid answer is a failure whatever its subtype says. *b* is ruled out because the documentation says "Treat that case as a failure as well". *c* is ruled out because "Retrying inside the job repeats cost with no reason to expect a different result". *d* is ruled out because "A job never passes by saying nothing", and a silent pass cannot be told from a failed run.
+1. **a**. The schema makes the answer a validated object in `structured_output`. *c* is ruled out because text leaves the entries to be parsed from prose, and "a decision made on prose is a guess". *b* is ruled out because a limit bounds the loop and does not shape the answer: "The run exits with an error at the limit". *d* is ruled out because the flag controls what the run loads, with "no hooks, skills, MCP servers, memory or CLAUDE.md", and formats nothing.
+2. **c**. A run without a valid answer is a failure whatever its subtype says. *b* is ruled out because the documentation says "Treat that case as a failure as well". *a* is ruled out because "Retrying inside the job repeats cost with no reason to expect a different result". *d* is ruled out because "A job never passes by saying nothing", and a silent pass cannot be told from a failed run.
 
 </details>
 

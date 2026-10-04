@@ -120,8 +120,8 @@ This quiz covers both pages of the module.
 
 2. A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?
    - **a**: Ask it to restate the goal more carefully before each next step
-   - **b**: Plan every step up front, so that no drift is possible
-   - **c**: Hand it the output of each action so far, such as a test run or a file listing
+   - **b**: Hand it the output of each action so far, such as a test run or a file listing
+   - **c**: Plan every step up front, so that no drift is possible
    - **d**: Switch to a fixed chain, since a chain cannot drift from the code
 
 
@@ -135,7 +135,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. Known steps and independent items call for the simplest shape. *a* is ruled out because capability has a price: "Agentic systems often trade latency and cost for better task performance." *b* is ruled out because the systems do not interact, so nothing is gained by a shared planner: "A fixed chain, run once for each item". *d* is ruled out because a cross pass is for items that affect each other: "Items that do not (forty services, each given the same checklist) need only the chain, run forty times."
-2. **c**. The planner needs ground truth from each step, not its own earlier guesses. *a* is ruled out because the source of the drift is what it is shown: "a plan that is made from the model's own previous guesses drifts". *b* is ruled out because an up-front plan has no results to use: "the plan is made before any ground truth exists". *d* is ruled out because a chain does not adapt: "If step two finds that step three is pointless, the chain runs step three."
+2. **b**. The planner needs ground truth from each step, not its own earlier guesses. *a* is ruled out because the source of the drift is what it is shown: "a plan that is made from the model's own previous guesses drifts". *c* is ruled out because an up-front plan has no results to use: "the plan is made before any ground truth exists". *d* is ruled out because a chain does not adapt: "If step two finds that step three is pointless, the chain runs step three."
 
 3. **d**. Parts keep each pass small and the summary joins them. *a* is ruled out because the rest of the file would never be reviewed: "A file that does not fit a pass of its own is cut into parts of a fixed number of lines". *b* is ruled out because a sentence does not carry the interfaces: "what the file offers (the functions and types others use, with their parameters)". *c* is ruled out because the whole file brings back the problem of the split: "spends that budget on text before the review begins".
 

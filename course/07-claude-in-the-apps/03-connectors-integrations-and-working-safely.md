@@ -121,9 +121,9 @@ Module 8 teaches both, with Cowork and Claude Tag.
    - **d**: The area is too big for retrieval to cope with in a single request
 
 2. A company connects its helpdesk to Claude. Agents may read tickets and add internal notes freely, but ending a ticket must wait for a person's click, and trainees must not see escalated tickets. Which design meets both rules?
-   - **a**: Require approval to close, and write the group's limit into the connector's instructions
+   - **a**: Require approval to close, and leave the group's limit in the source system itself
    - **b**: Allow every tool without approval and expect the helpdesk to stop the trainees
-   - **c**: Require approval to close, and leave the group's limit in the source system itself
+   - **c**: Require approval to close, and write the group's limit into the connector's instructions
    - **d**: Require approval to close, and give that group wider access through Claude's settings
 
 3. A team lead finds a handy link on a forum that would add a custom connector in seconds. What is the best step?
@@ -136,7 +136,7 @@ Module 8 teaches both, with Cowork and Claude Tag.
 <summary>Answer key</summary>
 
 1. **a**. "Claude inherits each person's permissions from the connected service", so the manager's reach, not the administrator's, decides what appears. *b* is ruled out because the page names permissions as the cause of a missing result ("the connector cannot reach it from Claude for them either") and says nothing about the age of material. *c* is ruled out because "Fixing a connector's reach is done in the source system", not by sharing a workspace. *d* is ruled out because the page ties a missing result to access, as in "the connector cannot reach it from Claude for them either", and never to size.
-2. **c**. Each tool can be set to need approval, and Claude inherits each person's permissions, so a restriction on one group belongs in the source system. *a* is ruled out because "Fixing a connector's reach is done in the source system,
+2. **a**. Each tool can be set to need approval, and Claude inherits each person's permissions, so a restriction on one group belongs in the source system. *c* is ruled out because "Fixing a connector's reach is done in the source system,
    by changing who can open what, not by rewording an instruction". *b* is ruled out because an organisation can
    "let Claude read a system and require a human click before it writes to it", and always allowing every tool gives
    that up. *d* is ruled out because "A connector cannot give anyone more access than they already have".
@@ -174,9 +174,9 @@ This quiz covers every page of the module.
    nothing was found. Both reached the storage through the same custom connector, which the owner enabled. What
    should the owner check first?
    - **a**: Reconnect the storage for the second colleague under the owner's credentials
-   - **b**: Reword the Project instructions to search the whole folder
+   - **b**: Compare what each of them is allowed to see in the source system
    - **c**: Switch the connector to On demand so tools stop crowding the chat
-   - **d**: Compare what each of them is allowed to see in the source system
+   - **d**: Reword the Project instructions to search the whole folder
 
 <details>
 <summary>Answer key</summary>
@@ -189,8 +189,8 @@ This quiz covers every page of the module.
    ruled out because the page says to "review code dependencies and bundled resources first", and a first reply
    cannot show them. *c* is ruled out because "The page names prompt injection and data exfiltration as the most
    significant risks", and the mailbox in danger is the installer's own.
-4. **d**. Claude inherits each person's permissions, so two people can get different answers because they can see
-   different files. *a* is ruled out because a connector "does not bypass the source system's permissions". *b* is
+4. **b**. Claude inherits each person's permissions, so two people can get different answers because they can see
+   different files. *a* is ruled out because a connector "does not bypass the source system's permissions". *d* is
    ruled out because "Fixing a connector's reach is done in the source system, by changing who can open what, not by
    rewording an instruction". *c* is ruled out because On demand is suggested "when you have ten or more connectors,
    so that the conversation is not crowded with tools", which is about loading and not about reach.

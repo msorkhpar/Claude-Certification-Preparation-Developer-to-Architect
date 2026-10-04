@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "A review prompt says 'only report high-confidence issues', yet developers still dismiss most remarks about naming and layout. What fixes it?",
       "options": {
-        "a": "Phrase the confidence threshold in stricter words",
+        "a": "Spell out which patterns to flag and which to leave alone",
         "b": "Ask the reviewer to explain each remark at much greater length",
         "c": "Send fewer files to each review run",
-        "d": "Spell out which patterns to flag and which to leave alone"
+        "d": "Phrase the confidence threshold in stricter words"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "Naming the patterns to report and to skip is what changes the output.",
-        "a": "Ruled out because stricter wording of the same attitude still names no pattern, and such instructions \"fail to improve precision\".",
+        "a": "Naming the patterns to report and to skip is what changes the output.",
+        "d": "Ruled out because stricter wording of the same attitude still names no pattern, and such instructions \"fail to improve precision\".",
         "b": "Ruled out because a longer explanation leaves the categories unmentioned: \"Most false positives are in the categories the prompt never mentioned\".",
         "c": "Ruled out because a smaller review changes the volume only, while a pattern is something \"a reviewer can check a line against it\"."
       }
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "One category of findings was dismissed in two thirds of its first twenty reviews, and developers have begun skipping the other remarks too. What does the guide recommend for that category?",
       "options": {
-        "a": "Switch it off for now while its prompt and examples improve",
+        "a": "Keep it and mark every one of its findings as low severity at once",
         "b": "Delete it from the criteria for good",
-        "c": "Keep it and mark every one of its findings as low severity at once",
+        "c": "Switch it off for now while its prompt and examples improve",
         "d": "Keep it and attach a confidence score to each finding"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "Disabling a high false-positive category while its prompt is improved restores trust in the rest.",
+        "c": "Disabling a high false-positive category while its prompt is improved restores trust in the rest.",
         "b": "Ruled out because \"Deleting the category from the criteria loses the examples that the next attempt needs\".",
-        "c": "Ruled out because the remarks would still be posted and dismissed, since \"each dismissed comment lowers trust in the accepted ones\".",
+        "a": "Ruled out because the remarks would still be posted and dismissed, since \"each dismissed comment lowers trust in the accepted ones\".",
         "d": "Ruled out because \"self-reported confidence is another vague instruction\"."
       }
     },
@@ -46,15 +46,15 @@
       "stem": "A review prompt handles clear bugs well but keeps marking a null access that is already protected as risky. What should be added?",
       "options": {
         "a": "Ten more samples of obvious bugs to reinforce the pattern",
-        "b": "A line asking the reviewer to be more careful with null values",
-        "c": "A flagged sample and a skipped sample side by side, each with its reason",
+        "b": "A flagged sample and a skipped sample side by side, each with its reason",
+        "c": "A line asking the reviewer to be more careful with null values",
         "d": "A second pass in which the reviewer rates its own confidence in every remark"
       },
-      "key": "c",
+      "key": "b",
       "explanation": {
-        "c": "An acceptable pattern shown next to a finding, with reasons, settles the borderline case.",
+        "b": "An acceptable pattern shown next to a finding, with reasons, settles the borderline case.",
         "a": "Ruled out because \"examples earn their place on the ambiguous ones\", and obvious bugs are already handled.",
-        "b": "Ruled out because \"Rules do not settle a case that looks like two rules at once\", and an instruction to be careful names no pattern.",
+        "c": "Ruled out because \"Rules do not settle a case that looks like two rules at once\", and an instruction to be careful names no pattern.",
         "d": "Ruled out because a rating of its own confidence adds no case to learn from, and examples \"are chosen where the reviewer is unsure\"."
       }
     },
@@ -65,16 +65,16 @@
       "stem": "A review job in CI receives a request with no reviewer named, and the project holds no default reviewer. What should the run do?",
       "options": {
         "a": "Ask the author who the reviewer should be, and wait",
-        "b": "Stop with a plain failure that lists the absent field",
+        "b": "Carry on without a reviewer and omit it from the output",
         "c": "Pick a reviewer at random and say nothing about it",
-        "d": "Carry on without a reviewer and omit it from the output"
+        "d": "Stop with a plain failure that lists the absent field"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "An unattended run cannot ask, and a required field with no default cannot be assumed.",
+        "d": "An unattended run cannot ask, and a required field with no default cannot be assumed.",
         "a": "Ruled out because \"Asking in CI produces a job that waits for a person who is not there\".",
         "c": "Ruled out because a guess is allowed only as a stated assumption where a default exists: \"it proceeds on stated assumptions where a default exists\".",
-        "d": "Ruled out because a run with nothing to assume \"stops with a clear failure where a required field has none\", and dropping the field hides the problem."
+        "b": "Ruled out because a run with nothing to assume \"stops with a clear failure where a required field has none\", and dropping the field hides the problem."
       }
     },
     {
@@ -123,15 +123,15 @@
       "options": {
         "a": "Ask the author which branch is meant and wait for an answer",
         "b": "Stop with a failure, since a required field is missing",
-        "c": "Proceed on `main` and state that assumption in its output",
-        "d": "Choose a branch at random and leave it unmentioned"
+        "c": "Choose a branch at random and leave it unmentioned",
+        "d": "Proceed on `main` and state that assumption in its output"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "A run that cannot ask proceeds on a stated assumption where a default exists.",
+        "d": "A run that cannot ask proceeds on a stated assumption where a default exists.",
         "a": "Ruled out because \"Asking in CI produces a job that waits for a person who is not there\".",
         "b": "Ruled out because it stops only without a default: \"it proceeds on stated assumptions where a default exists\".",
-        "d": "Ruled out because a silent guess omits the step the page requires, which is \"to state the assumptions made for the rest\"."
+        "c": "Ruled out because a silent guess omits the step the page requires, which is \"to state the assumptions made for the rest\"."
       }
     }
   ]

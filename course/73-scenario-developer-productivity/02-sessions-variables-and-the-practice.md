@@ -35,6 +35,10 @@ The practice is `exercises/73-scenario-developer-productivity/unit-01/practice-1
 
 The tests grade eight cases: every MCP tool reference names a configured server; credentials come from the environment and the token has no default; the explorer is read only and says when to use it; the scaffolder writes only in the generated folder; the ticket server is read only for agents; the environment file is denied and no whole tool is approved; the note lists every variable and says which session to start; and no file holds a personal path, an address or a key. The starter fails all eight. The reference passes them. Each of seventeen planted wrong solutions per language fails on an assertion of the case it breaks: a tool of a server nobody configured, a literal token, a default for the token, a shell tool in the explorer, a missing tools line, a description that does not say when to use the subagent, a bare edit allow, a Write path rule that Claude Code never consults, a whole-server allow, a delete tool left open, an environment file left readable, a whole-tool allow, a variable missing from the note, a rewritten codebase sent to a resumed session, and a home path.
 
+### What the tests accept
+
+The scaffolder case passes when `Bash` is absent from its tools and every allow rule that edits or writes is an `Edit` rule limited to `src/generated/`; a `Write(...)` path rule fails it, because Claude Code never consults it. The tickets case passes when the create and delete tools are denied and every allowed ticket tool is a get, list or search tool. The credentials case passes when every secret-looking header or variable is a `${VAR}` reference and the token reference has no default.
+
 ## Traps
 
 These are the wrong answers that the exam's options for this scenario offer, each with the reason it is rejected.
@@ -45,30 +49,30 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 ## Quiz
 
-4. Yesterday's work studied a module, and overnight a refactor rewrote it. What is the next step?
-   - **a**: Reopen yesterday's session and trust the results it holds
-   - **b**: Open a new session and give it a short summary of what still holds
-   - **c**: Fork yesterday's session and ask it to look again at the module
-   - **d**: Continue the previous session and tell it that the code changed
+4. A developer adds a header that reads a new environment name in the shared connection settings and leaves the team write-up alone. What does the practice's grading do?
+   - **a**: The credentials case fails, since each new variable needs a default value
+   - **b**: The documentation case fails, because one of the variables the servers use is unlisted
+   - **c**: Nothing fails, since the write-up is advice that the grading never reads
+   - **d**: The server case fails, since a header may not refer to any variable
 
-5. A developer wants two migration designs, both starting from one study of a module. Which approach fits?
-   - **a**: Keep one session and ask for the designs one after the other
-   - **b**: Resume the one session twice and have both designs added to it
-   - **c**: Start two sessions from nothing and repeat the analysis in each
-   - **d**: Fork the session after the analysis, one branch for each option
+5. Which allow rules pass the practice's scaffolder case?
+   - **a**: `Edit(src/generated/**)` together with `Write(src/generated/**)`
+   - **b**: `Write(src/generated/**)` alone
+   - **c**: `Edit(src/**)` alone
+   - **d**: `Edit(src/generated/**)` alone
 
 6. A new colleague clones the repository, and the ticket tools answer with an authorization error. The shared configuration is committed. What should the repository hold to prevent this?
    - **a**: A default for the token, written into the shared project file
    - **b**: A team note that names every variable that the servers need to start
-   - **c**: A private copy of the project file with a working token
+   - **c**: A private copy of the project file with a working token in it, kept outside version control
    - **d**: A line in the root memory file that holds a shared token
 
 <details>
 <summary>Answer key</summary>
 
-4. **b**. Tool results in an old session describe files as they were. *a* is ruled out because nothing marks stale results: "the old tool results are stale and nothing marks them so". *c* is ruled out because a fork copies the history, stale results included: "copies the history into a new session". *d* is ruled out because a notice does not refresh the results: "the model has no way to notice".
-5. **d**. A fork gives each design its own history and keeps the analysis. *b* is ruled out because a resume appends to the original: "reopens a saved conversation under the same session id". *c* is ruled out because it repeats the analysis: "A fork keeps them independent without repeating the analysis." *a* is ruled out because one history mixes the designs, which is what a fork avoids: "Each branch has its own history".
-6. **b**. A note makes the missing variables visible. *a* is ruled out because a default for a token is a credential in the file: "a default for a token would be a credential in the file". *c* is ruled out because a second copy defeats the shared file: "The file exists to be shared". *d* is ruled out because the memory file is committed context, not a place for a secret: "A committed `.mcp.json` refers to variables and cannot hold their values."
+4. **b**. The note has to list every variable: "every variable that appears in `.mcp.json` has to appear in the note." *a* is ruled out because the token has no default: "The token has none, because a default for a token would be a credential in the file". *c* is ruled out because the note is checked: "The check turns a convention into a rule that fails when someone adds a variable and forgets the note." *d* is ruled out because a shared file does refer to variables: "A committed `.mcp.json` refers to variables and cannot hold their values."
+5. **d**. One Edit rule limited to the generated folder: "every allow rule that edits or writes is an `Edit` rule limited to `src/generated/`". *b* is ruled out because a Write path rule is never read: "a `Write(...)` path rule fails it, because Claude Code never consults it". *c* is ruled out because the path is wider than the folder: "an `Edit` rule limited to `src/generated/`". *a* is ruled out because it adds a Write path rule: "a `Write(...)` path rule fails it, because Claude Code never consults it".
+6. **b**. A note makes the missing variables visible. *a* is ruled out because a default for a token is a credential in the file: "a default for a token would be a credential in the file". *c* is ruled out because a second copy defeats the shared file: "The file exists to be shared". *d* is ruled out because a committed file cannot hold a value: "A committed `.mcp.json` refers to variables and cannot hold their values."
 
 </details>
 
@@ -77,16 +81,16 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 This quiz covers both pages of the module.
 
 1. Scenario S4, a helper that explores a legacy system and generates boilerplate. A check reports `unknown-server: wiki (explorer)`. What does the finding mean?
-   - **a**: A header holds a credential that was typed in by hand
+   - **a**: A header holds a credential that somebody typed in by hand, in plain text
    - **b**: A reference points at an entry that the project file never defines
-   - **c**: A subagent has no tools line and so inherits whatever is available
-   - **d**: A permission rule approves the whole tool and not a path
+   - **c**: A subagent has no tools line and inherits everything
+   - **d**: A permission rule approves the whole tool rather than one path of it
 
-2. Scenario S4, a helper that explores a legacy system and generates boilerplate. A project definition file has a description and a prompt but omits its list of permitted tools. What can it call?
-   - **a**: Everything that is available to subagents
-   - **b**: Only the reading tools, as the minimum set
-   - **c**: No tool at all until a rule approves one
-   - **d**: The tools of the parent that were listed first
+2. Scenario S4, a helper that explores a legacy system and generates boilerplate. Which entry does the check for typed-in credentials report?
+   - **a**: A header named Authorization whose value is `Bearer example-token-123`
+   - **b**: A header named Authorization whose value is `Bearer ${TICKETS_TOKEN}`
+   - **c**: A header named X-Trace whose value is `abc`, sent with every request
+   - **d**: A variable named REGION whose value is `eu`, passed to the local server
 
 3. Scenario S4, a helper that explores a legacy system and generates boilerplate. Exploring a big module would fill the main conversation with file contents. What keeps the main context small?
    - **a**: A read-only subagent does the reading and hands back its result
@@ -104,7 +108,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The finding is about a name that is not configured. *a* is ruled out because that is another finding: "`literal-secret`: a header or environment entry whose name says token, key, secret or authorization". *c* is ruled out for the same reason: "`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it". *d* is ruled out because that is a third: "`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool."
-2. **a**. The omission is the widest list. *b* is ruled out because the widest list is what omission gives: "leaving the line out grants the most, not the least". *c* is ruled out because the subagent inherits tools and does not start empty: "A subagent that omits `tools` inherits every tool that is available to subagents". *d* is ruled out because the line names tools and not an order: "the `tools` line is the allowlist".
+2. **a**. The check reports a secret-looking name whose value has no reference: "a header or environment entry whose name says token, key, secret or authorization and whose value has no `${` reference". *b* is ruled out because its value is a reference: "whose value has no `${` reference". *c* is ruled out because the name says nothing of a secret: "whose name says token, key, secret or authorization". *d* is ruled out for the same reason: "whose name says token, key, secret or authorization".
 3. **a**. A subagent keeps what it reads in its own context. *b* is ruled out because a memory file does not move the reading: "the root file loads in every session and costs context each time". *c* is ruled out because a fork copies the history: "copies the history into a new session". *d* is ruled out because denying a tool does not move any reading elsewhere: "Denying the shell does not limit the file tools".
 4. **c**. A default for a token is a credential in the file. *b* is ruled out because expansion has both forms: "Expansion of `${VAR}` and `${VAR:-default}` works in a server's `command`, `args`, `env`, `url` and `headers`". *a* is ruled out because a header is one of the places where it works: "`${VAR:-default}` expands to the variable if it is set and to the default otherwise". *d* is ruled out because sharing is the file's purpose: "The `.mcp.json` of a project is committed so that the team shares its servers."
 

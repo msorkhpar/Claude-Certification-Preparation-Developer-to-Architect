@@ -141,16 +141,16 @@ same thread.
 1. An operations lead runs Claude in Chrome in Automatically approve mode on a supplier portal. A page there holds
    white-on-white text telling the assistant to open a payment form. Which behaviour does the page describe?
    - **a**: Claude follows the text, since the portal is a site the lead chose to visit
-   - **b**: The extension strips hidden text before reading, so it never reaches Claude
+   - **b**: Screening covers each step, and financial transactions stay off limits
    - **c**: Screening switches off in this mode, since the lead has delegated the decisions
-   - **d**: Screening covers each step, and financial transactions stay off limits
+   - **d**: The extension strips hidden text before reading, so it never reaches Claude
 
 2. An Enterprise team with the Compliance API enabled wants one record of the Excel add-in's use, and wants its
    custom data-retention rule to govern it. What does the page support?
-   - **a**: Sessions are included as a public beta, but the deletion schedule does not carry over
+   - **a**: Use shows in the audit logs, and the custom deletion schedule applies to it
    - **b**: Neither the API nor the audit logs cover it, so no central record exists
    - **c**: Chat history sits on Anthropic's servers, so the deletion schedule governs it
-   - **d**: Use shows in the audit logs, and the custom deletion schedule applies to it
+   - **d**: Sessions are included as a public beta, but the deletion schedule does not carry over
 
 3. A manager wants Claude Tag to draft a delicate reply from her saved connectors, hidden from the team, with the
    usage counted against her individual account. Where should she write to it?
@@ -162,13 +162,13 @@ same thread.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page describes classifiers that screen incoming content and each action, and purchases and other
+1. **b**. The page describes classifiers that screen incoming content and each action, and purchases and other
    financial transactions are off limits whatever the mode. *a* is ruled out because the page lists "completing
-   instructions found in emails or web content" among the actions that are off limits. *b* is ruled out because the
+   instructions found in emails or web content" among the actions that are off limits. *d* is ruled out because the
    page reports an attack rate while "saying plainly that the risk is not zero". *c* is ruled out because in this
    mode "Claude keeps working and reviews each action for safety, blocking what it judges unsafe".
-2. **a**. The page says add-in sessions are included in the Compliance API, and that the add-ins "do not inherit
-   your organisation's custom data-retention settings". *d* is ruled out because "their activity is not in the
+2. **d**. The page says add-in sessions are included in the Compliance API, and that the add-ins "do not inherit
+   your organisation's custom data-retention settings". *a* is ruled out because "their activity is not in the
    Enterprise audit logs". *b* is ruled out because "add-in sessions are included in it" for Enterprise
    organisations with the Compliance API enabled. *c* is ruled out because "Chat history is stored in your browser,
    not on Anthropic's servers".

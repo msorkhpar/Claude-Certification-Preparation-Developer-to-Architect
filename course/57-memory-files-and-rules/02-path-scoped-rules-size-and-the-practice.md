@@ -368,22 +368,22 @@ The practice is in [`exercises/57-memory-files-and-rules`](../../exercises/57-me
 ## Quiz
 
 1. Testing conventions must govern spec files that live in dozens of different folders, and no other file. What delivers that?
-   - **a**: A scoped rule whose glob matches by extension anywhere
-   - **b**: A separate memory file placed in every one of those folders
+   - **a**: A separate memory file placed in every one of those folders
+   - **b**: A scoped rule whose glob matches by extension anywhere
    - **c**: An import of the conventions from the project root file
    - **d**: A section for each project in the personal memory file
 
 2. A rule meant for infrastructure code loads in every session instead. What is the most likely cause?
    - **a**: The rules folder sits below the working directory
    - **b**: Infrastructure files are always opened at the start of a session
-   - **c**: Its frontmatter is invalid YAML, so the scoping is dropped
-   - **d**: The rule's file name does not match the folder it governs
+   - **c**: The rule's file name does not match the folder it governs
+   - **d**: Its frontmatter is invalid YAML, so the scoping is dropped
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. One glob follows the type across folders, and the rule loads when a matching file is read or edited. *b* is ruled out because the guide's reason for the glob is "test files spread throughout a codebase", and a copy in each folder would have to be kept in step. *c* is ruled out because an import "moves text to another file and loads it at launch", so the conventions would reach every task. *d* is ruled out because personal rules "apply to every project on your machine", so they neither scope to test files nor reach the team.
-2. **c**. When the frontmatter does not parse, the rule is treated as unscoped. *a* is ruled out because "Every Markdown file under .claude/rules/ is a rule", wherever the session starts. *b* is ruled out because a scoped rule loads when Claude uses Read, Write or Edit on a matching file, "not on every tool use". *d* is ruled out because the file name plays no part, since `paths` "is the only field Claude Code reads in a rule".
+1. **b**. One glob follows the type across folders, and the rule loads when a matching file is read or edited. *a* is ruled out because the guide's reason for the glob is "test files spread throughout a codebase", and a copy in each folder would have to be kept in step. *c* is ruled out because an import "moves text to another file and loads it at launch", so the conventions would reach every task. *d* is ruled out because personal rules "apply to every project on your machine", so they neither scope to test files nor reach the team.
+2. **d**. When the frontmatter does not parse, the rule is treated as unscoped. *a* is ruled out because "Every Markdown file under .claude/rules/ is a rule", wherever the session starts. *b* is ruled out because a scoped rule loads when Claude uses Read, Write or Edit on a matching file, "not on every tool use". *c* is ruled out because the file name plays no part, since `paths` "is the only field Claude Code reads in a rule".
 
 </details>
 
@@ -398,8 +398,8 @@ This quiz covers both pages of the module.
    - **d**: Ignored files are read in place of the ones kept in version control
 
 2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Its single `CLAUDE.md` has grown to four hundred lines, and a developer splits it into five files that the root pulls in with `@` references, expecting sessions to start lighter. What results?
-   - **a**: The loaded text is unchanged, since imported material still arrives at launch
-   - **b**: Context shrinks by four fifths, because each part loads only on demand
+   - **a**: Context shrinks by four fifths, because each part loads only on demand
+   - **b**: The loaded text is unchanged, since imported material still arrives at launch
    - **c**: Context shrinks for any session that never touches the split-out areas
    - **d**: Claude loads the root alone and fetches the others when it needs them
 
@@ -413,7 +413,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file is one. *a* is ruled out because presence decides, not content: "A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts". *b* is ruled out because "All discovered files are concatenated into context rather than overriding each other", and "In each folder the local file comes after the shared one". *d* is ruled out because the file is ignored by git only so that it stays personal, "which is why that file is ignored by git", and the ignore setting plays no part in what Claude reads.
-2. **a**. An import changes where text is kept and not how much of it is loaded. *b* is ruled out because imported files "are expanded and loaded into context at launch alongside the CLAUDE.md that references them". *c* is ruled out because that describes a scoped rule, since "A path-scoped rule loads on a match, wherever the matching files are", while an import "moves text to another file and loads it at launch". *d* is ruled out because an import "moves text to another file and loads it at launch, so the cost is unchanged".
+2. **b**. An import changes where text is kept and not how much of it is loaded. *a* is ruled out because imported files "are expanded and loaded into context at launch alongside the CLAUDE.md that references them". *c* is ruled out because that describes a scoped rule, since "A path-scoped rule loads on a match, wherever the matching files are", while an import "moves text to another file and loads it at launch". *d* is ruled out because an import "moves text to another file and loads it at launch, so the cost is unchanged".
 3. **d**. The leading `**/` makes the pattern match the file type at any depth. *a* is ruled out because without it the pattern behaves like "`*.md` matches Markdown files in the project root", so only files at the top of the project match. *b* is ruled out because a bare folder name matches nothing: "matches no file, so the rule never loads". *c* is ruled out because it names a folder and not a type, while "a glob follows the file's type wherever it sits".
 
 </details>

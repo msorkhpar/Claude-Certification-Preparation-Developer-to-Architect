@@ -26,7 +26,7 @@
       "scope": "page",
       "stem": "A run ends with a report marked complete. The film search timed out, nobody retried it, and the report holds nothing on film. Where is the defect?",
       "options": {
-        "a": "The status is computed from errors seen and not from scopes covered",
+        "a": "The status is not derived from the scopes that were covered",
         "b": "The report agent should have written a longer summary of the other scopes",
         "c": "The search agent should have returned an empty list instead of an error",
         "d": "The timeout was set too short, so the search never had time to finish"
@@ -62,7 +62,7 @@
       "id": "02-failures-conflicts-the-coverage-note-and-the-practice#q1",
       "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
       "scope": "page",
-      "stem": "A search subagent times out, and its error offers an alternative query. What should the coordinator do?",
+      "stem": "Under the module's bounded policy for failures, a search subagent times out and its error offers an alternative query. What should the coordinator do?",
       "options": {
         "a": "Retry the same query until it succeeds, however many attempts that takes in total",
         "b": "Retry with the suggested substitute once, then report the scope as not covered",
@@ -157,19 +157,19 @@
       "id": "02-failures-conflicts-the-coverage-note-and-the-practice#m3",
       "page": "02-failures-conflicts-the-coverage-note-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. After the alternative query failed too, a stakeholder asks why the report does not try a third. Which answer fits the design?",
+      "stem": "Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. A report's note lists `music (not researched)` beside `film (timeout on a query)`. What does the note tell the reader about music?",
       "options": {
-        "a": "Retries are bounded, so the note names both queries and the topic stays open",
-        "b": "A third query is skipped only because each extra search costs a little money",
-        "c": "A third query would likely succeed, so the limit should simply be raised by one",
-        "d": "The topic should be marked as covered, since two queries were tried"
+        "a": "No subtask of the plan named it, so the fault is in the decomposition",
+        "b": "Its search failed on a fault of the tool, with the query recorded",
+        "c": "A source was searched and had nothing to say about it",
+        "d": "A conflict between two sources left the topic incomplete"
       },
       "key": "a",
       "explanation": {
-        "a": "Retries are bounded and the report says what was tried.",
-        "c": "Ruled out because the limit is a design choice: \"The coordinator retries once through an alternative and then stops.\"",
-        "b": "Ruled out because cost is not the reason given: \"a second suggests that the source or the service has a problem a third query will not fix\".",
-        "d": "Ruled out because tried is not covered: \"A scope that is marked covered without findings is a claim that nothing supports.\""
+        "a": "A scope that no result names was never planned: \"A scope that no result names was never researched, which is the decomposition fault of page 1 and is fixed in the plan.\"",
+        "b": "Ruled out because that is the phrasing for a failed search: \"A scope whose search failed names the type and the query.\"",
+        "c": "Ruled out because that is the third phrasing: \"A scope with a result but no findings has no findings.\"",
+        "d": "Ruled out because a conflict is not a gap: \"A conflict does not change the status, because it is information the reader needs and not a missing piece.\""
       }
     },
     {

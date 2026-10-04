@@ -216,22 +216,22 @@ messages: [["sort-order","pagination"],["typo-in-label"],["null-date"]]
 ## Quiz
 
 1. A developer must replace a logging library that appears in forty-five source files, and two target designs would both work. How should the session begin?
-   - **a**: Straight to editing, so that the first files show which design works
-   - **b**: Researching in plan mode, then settling the approach before any edit
+   - **a**: Researching in plan mode, then settling the approach before any edit
+   - **b**: Straight to editing, so that the first files show which design works
    - **c**: Straight to editing, then a plan once ten files are done
    - **d**: In plan mode only if the library touches a security-sensitive area
 
 2. A stack trace points at one function that divides by zero when a list is empty. How should the fix be handled?
    - **a**: In plan mode, because every bug fix needs an approved plan
    - **b**: In plan mode, because dividing is a risky operation
-   - **c**: After an interview about the feature that owns the function
-   - **d**: Directly, then confirm with a test of that edge case
+   - **c**: Directly, then confirm with a test of that edge case
+   - **d**: After an interview about the feature that owns the function
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Many files and several valid approaches both argue for planning first. *a* is ruled out because the table says of a many-file change that "a wrong pattern is repeated everywhere", so the first files would commit the whole codebase. *c* is ruled out because the documented workflow "separates research from implementation so that the work solves the right problem", which a late plan cannot do. *d* is ruled out because "Importance is not a signal", and the signals are scope and the number of approaches.
-2. **d**. One file with a clear trace is the guide's example of direct execution. *a* is ruled out because "Plan mode is useful, but also adds overhead", and a small clear fix does not repay it. *b* is ruled out because "Two signals decide it: the number of files and the number of valid approaches", and risk is neither. *c* is ruled out because an interview suits a large unclear feature, and here "If you could describe the diff in one sentence, skip the plan".
+1. **a**. Many files and several valid approaches both argue for planning first. *b* is ruled out because the table says of a many-file change that "a wrong pattern is repeated everywhere", so the first files would commit the whole codebase. *c* is ruled out because the documented workflow "separates research from implementation so that the work solves the right problem", which a late plan cannot do. *d* is ruled out because "Importance is not a signal", and the signals are scope and the number of approaches.
+2. **c**. One file with a clear trace is the guide's example of direct execution. *a* is ruled out because "Plan mode is useful, but also adds overhead", and a small clear fix does not repay it. *b* is ruled out because "Two signals decide it: the number of files and the number of valid approaches", and risk is neither. *d* is ruled out because an interview suits a large unclear feature, and here "If you could describe the diff in one sentence, skip the plan".
 
 </details>
 

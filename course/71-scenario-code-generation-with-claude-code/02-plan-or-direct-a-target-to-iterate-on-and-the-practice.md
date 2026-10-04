@@ -49,6 +49,10 @@ The practice is `exercises/71-scenario-code-generation-with-claude-code/unit-01/
 
 The tests grade seven cases: each convention loads for exactly the files of its area (read through the globs against sample files), the root file is short and holds none of the area conventions, the review command is shared and read-only, the settings protect the environment file, the modes table sends open design work to plan mode and clear small work to direct, every rule has a glob that matches a file, and no file holds a personal path, an address or a key. The starter fails all seven. The reference passes them. Each of fourteen planted wrong solutions per language fails on an assertion of the case it breaks: a rule with no paths, a rule scoped too widely, test rules scoped to one folder or to one extension, a bare folder name as a path, a convention left in the root file, a root file padded past the limit, a command that approves the whole Bash tool or has no description, an environment file left readable, a whole-tool allow, the monolith sent to direct execution, a typo fix sent through plan mode, and a personal path.
 
+### What the tests accept
+
+The tests read your files with the rules below, so it pays to know them before you start. The review command passes when it has a `description`, an `allowed-tools` line that has `Read` and none of `Bash`, `Edit` or `Write` on its own, and a body that says to use `git diff`; `Bash(git diff *)` is allowed and a bare `Bash` is not. The settings pass when `Read(./.env)` is denied and no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`. The modes table passes when a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`. Every rule passes when its `paths` list has a star in each entry and at least one sample file matches.
+
 ## Traps
 
 These are the wrong answers that the exam's options for this scenario offer, each with the reason it is rejected.
@@ -59,30 +63,30 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 ## Quiz
 
-4. A developer must turn a monolith into services: dozens of files change and the service boundaries are undecided. Which approach fits?
-   - **a**: Begin with direct edits, and let the boundaries show as work proceeds
-   - **b**: Explore in plan mode first, and settle the design before any edit
-   - **c**: Write complete instructions for each service, then execute them directly
-   - **d**: Execute directly, and switch to plan mode only if the work turns complicated
+4. Which allowed-tools line does the practice accept for the shared review command?
+   - **a**: `Read Grep Glob Bash Edit Write`
+   - **b**: `Read Grep Glob Bash(git diff *)`
+   - **c**: `Read Edit Write Bash(git diff *)`
+   - **d**: `Bash(git diff *) Grep Glob`
 
-5. A developer asks for a function that validates e-mail addresses and has no way yet to tell whether the first version is right. What should be added to the request?
-   - **a**: A longer description of what a valid address looks like, in prose
-   - **b**: A request to explain the function after writing it, line by line
-   - **c**: A reminder to be careful and to check the work before it finishes
-   - **d**: A few input and expected-result pairs, with an instruction to run them
+5. Which settings pass the practice's check on permissions?
+   - **a**: Deny `Read(./.env)`, allow `Edit`
+   - **b**: Deny `Read(./.env)`, allow `Bash`
+   - **c**: Deny nothing, allow `Bash(npm test)`
+   - **d**: Deny `Read(./.env)`, allow `Bash(npm test)`
 
-6. A developer has corrected the same mistake three times in one long session, and the fourth attempt is wrong again. What is the next step?
-   - **a**: Add a fourth correction with the same wording but in capital letters
-   - **b**: Clear the conversation, then restart with a prompt that holds what was learned
-   - **c**: Keep the session, since the earlier history helps Claude see the pattern
-   - **d**: Switch to plan mode for the rest of the session so that nothing is edited at all
+6. Which pair of rows does the practice's modes table need?
+   - **a**: A typo fix is plan and the monolith is direct
+   - **b**: A typo fix is direct and the monolith is plan
+   - **c**: A rename is plan and an unclear feature is direct
+   - **d**: A validation function is plan and the auth library is direct
 
 <details>
 <summary>Answer key</summary>
 
-4. **b**. Many files, open boundaries and design decisions point to planning first. *a* is ruled out because the boundaries are what to find first: "risks rework when a dependency turns up late". *c* is ruled out because instructions would assume the structure: "the instructions would assume the structure, and the structure is what has to be found by exploring". *d* is ruled out because the stem already holds the complexity: "ignores that the complexity is in the stem already".
-5. **d**. A pair of input and expected result is a check that Claude can run. *a* is ruled out because prose leaves cases open: "Two or three cases with their expected results say what a paragraph of description leaves open." *c* is ruled out because a reminder is not a signal: "'looks done' is the only signal available". *b* is ruled out because an explanation checks nothing: "Give Claude a check it can run: tests, a build, a screenshot to compare."
-6. **b**. After two failed corrections the context holds failed approaches, so a clean start with a better prompt works better. *a* is ruled out because emphasis does not clear the context: "the context is now full of failed approaches". *c* is ruled out because the history is the problem: "the history is now failed approaches, and a clean session with a better prompt does better". *d* is ruled out because the mode does not remove the clutter: "A clean session with a better prompt almost always outperforms a long session with accumulated corrections."
+4. **b**. A description, `Read`, and a pattern for `git diff`. *a* is ruled out because a bare shell and edit tools are refused: "`Read` and none of `Bash`, `Edit` or `Write` on its own". *c* is ruled out for its edit tools: "`Read` and none of `Bash`, `Edit` or `Write` on its own". *d* is ruled out because the line must hold the reading tool: "an `allowed-tools` line that has `Read`".
+5. **d**. The environment file is denied and no allow rule approves a whole tool: "no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`". *b* is ruled out because a whole-tool allow is refused: "no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`". *c* is ruled out because the deny rule is required: "The settings pass when `Read(./.env)` is denied". *a* is ruled out because an edit allow without a path is a whole-tool allow as well: "no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`".
+6. **b**. Small clear work is direct and open design is plan. *a* is ruled out because the table is the other way round: "a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`". *c* is ruled out by the same sentence: "a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`". *d* is ruled out by it too: "a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`".
 
 </details>
 
@@ -90,17 +94,17 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 This quiz covers both pages of the module.
 
-1. Scenario S2, a team using Claude Code on a shared codebase. A rule file for the handlers lists `paths: src/api` and never seems to apply when handlers are edited. What is the cause?
+1. Scenario S2, a team using Claude Code on a shared codebase. A rule file for the handlers lists `paths: src/api`, and the audit says that it matches none of the project's files. What is the likely cause?
    - **a**: Rule files are read only when a session is first started
-   - **b**: A bare folder name is no glob, so nothing is matched
-   - **c**: Handlers are covered by the command folder, which takes priority
+   - **b**: The entry is a bare folder name and not a glob such as `src/api/**`
+   - **c**: Handlers are covered by the command folder, which takes priority in every session
    - **d**: The path needs the word handlers in it for the rule to be found
 
-2. Scenario S2, a team using Claude Code on a shared codebase. A developer's habit of replying in short sentences is added to the shared root memory file, and colleagues object. Where should it go?
-   - **a**: In a personal instructions document kept out of version control
-   - **b**: In the review command, which each person runs in their own way
-   - **c**: In a rule scoped by glob to the developer's own commits
-   - **d**: In the settings as a permission rule that the others can override
+2. Scenario S2, a team using Claude Code on a shared codebase. The practice caps the root file at 25 lines, and the documentation gives 200 as its target. How does the first page explain the gap?
+   - **a**: The cap is the course's own number, chosen to make the point testable
+   - **b**: The documentation lowered its target in a recent version
+   - **c**: Imported files are not counted, so 25 lines are enough in practice
+   - **d**: Rule files are limited to 25 lines, and the root file inherits that same limit
 
 3. Scenario S2, a team using Claude Code on a shared codebase. The team wants to be sure that no session ever reads the environment file, whatever the model decides. Which control gives that?
    - **a**: A deny rule in the permission settings, or a hook that blocks the call
@@ -108,20 +112,20 @@ This quiz covers both pages of the module.
    - **c**: An entry in the modes table that sends such requests to plan mode
    - **d**: A line in the root memory that forbids reading the environment file
 
-4. Scenario S2, a team using Claude Code on a shared codebase. A large feature has unclear requirements, and the developer is unsure what to ask for. Which start fits?
-   - **a**: Ask for the most likely reading to be built, then fix it after a careful review
-   - **b**: Ask for three complete versions, and choose the one that looks best
-   - **c**: Have the assistant interview the user, write a spec, run it in a clean session
-   - **d**: Ask for the tests to be written last, so that they match what was built
+4. Scenario S2, a team using Claude Code on a shared codebase. The audit of the flawed project prints `env-readable`. What removes that finding?
+   - **a**: A rule file whose glob matches `.env`
+   - **b**: A line in the root file that asks Claude not to read `.env`
+   - **c**: A deny rule for reading `.env` in the settings
+   - **d**: A review command with a read-only list of tools
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A bare folder name is not a glob. *a* is ruled out because path-scoped rules load when a matching file is read: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs". *c* is ruled out because the command folder holds commands and not conventions: "A command file in the project, `.claude/commands/review.md`, committed to the repository". *d* is ruled out because the match is by glob on file paths and not by a word: "`**` crosses folders and `*` stays inside one".
-2. **a**. A preference of one person belongs in a personal file. *c* is ruled out because a glob cannot select one developer's commits: "A preference of one developer". *b* is ruled out because the command is shared by all: "A command file in the project, `.claude/commands/review.md`, committed to the repository". *d* is ruled out because permission rules are for what Claude may do and not for style: "A permission rule or a hook".
-3. **a**. Code that runs holds whatever the model decides. *d* is ruled out because a sentence is a request: "treats them as context, not enforced configuration". *b* is ruled out because a rule is the same kind of text: "To block an action regardless of what Claude decides, use a PreToolUse hook instead." *c* is ruled out because the table advises on mode and enforces nothing: "Plan mode tells Claude to research and propose changes without making them."
-4. **c**. The missing piece is a decision only the people can make, so the questions come first. *a* is ruled out because a guess builds on the wrong reading: "the missing piece is not a design that Claude could find in the code, it is a decision only the people can make". *b* is ruled out because three versions do not settle what is wanted: "Claude stops when the work looks done". *d* is ruled out because tests that follow the code are no target: "A failing test that describes the behaviour is a target."
+1. **b**. A bare folder name is not a glob: "A bare folder name such as `src/api` is not a glob; write `src/api/**`". *a* is ruled out because path-scoped rules load when a matching file is read: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs". *c* is ruled out because the command folder holds commands and not conventions: "A command file in the project, `.claude/commands/review.md`, committed to the repository". *d* is ruled out because the match is by glob on file paths and not by a word: "`**` crosses folders and `*` stays inside one".
+2. **a**. The page says the number is the course's: "That number is the course's, chosen to make the point testable." *b* is ruled out because the target has not moved: "The documented target is 200." *c* is ruled out because imports do not cut the cost: "help you organize a long file but don't reduce its context cost". *d* is ruled out because the limit is for the root file: "The practice of this module uses a stricter limit of 25 lines for the root file of a small project."
+3. **a**. Code that runs holds whatever the model decides: "To block an action regardless of what Claude decides, use a PreToolUse hook instead." *d* is ruled out because a sentence is a request: "treats them as context, not enforced configuration". *b* is ruled out because a scoped instruction is a sentence as well: "a sentence in a memory file is a request that the model weighs". *c* is ruled out because the table advises on mode and enforces nothing: "Plan mode tells Claude to research and propose changes without making them."
+4. **c**. The finding says that the settings do not deny the file: "`env-readable` and `bare-bash-allowed`: the settings do not deny reading `.env`, or allow the whole Bash tool." *b* is ruled out because a sentence in a file is a request: "a sentence in a memory file is a request that the model weighs". *a* is ruled out because a rule loads conventions and denies nothing: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs". *d* is ruled out because the command's tools are another matter: "a shared review command with a description and read-only tools".
 
 </details>
 
-Adapted from the sample questions of the Claude Certified Architect, Foundations exam guide, version 1.0 (Anthropic), with credit; the questions are Anthropic's. The first question of this page follows the guide's sample question on restructuring a monolith, rewritten here.
+Adapted from the sample questions of the Claude Certified Architect, Foundations exam guide, version 1.0 (Anthropic), with credit; the questions are Anthropic's. The account of restructuring a monolith on this page follows the guide's sample question on plan mode, rewritten here.

@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "A refund tool meets a slow card service, and each time it answers with the text \"Operation failed\". The agent tries three more times and then apologises, though a colleague could have settled the case. Which change helps most?",
       "options": {
-        "a": "Raise the number of automatic attempts from three to ten before the agent gives up on the case",
+        "a": "Reply with the kind of problem, whether another try is useful, and the next step",
         "b": "Add a line to the prompt that asks the agent to work out which failures deserve another attempt",
-        "c": "Reply with the kind of problem, whether another try is useful, and the next step",
+        "c": "Raise the number of automatic attempts from three to ten before the agent gives up on the case",
         "d": "Return an empty reply so that the agent moves on to its next step without stopping"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The agent can only choose a recovery if the reply says which one applies.",
-        "a": "Ruled out because more attempts do not help when the reply gives no reason: \"Retry every failed call a few times, whatever the reason\".",
+        "a": "The agent can only choose a recovery if the reply says which one applies.",
+        "c": "Ruled out because more attempts do not help when the reply gives no reason: \"Retry every failed call a few times, whatever the reason\".",
         "b": "Ruled out because a model with nothing to go on can only guess: \"A model that has to guess will retry a request that can never succeed\".",
         "d": "Ruled out because an empty success hides the failure: \"an empty list marked as a success tells the agent that the search found nothing\"."
       }
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "A calendar service gets three requests: one asks for a function that it lacks, one gives a date as \"next Friday\" where a calendar date is needed, and one reaches a backend that answers 503. Which request alone is a protocol error?",
       "options": {
-        "a": "The one that has nowhere to be routed",
+        "a": "The one that met the busy backend",
         "b": "The one whose date has the wrong format",
-        "c": "The one that met the busy backend",
+        "c": "The one that has nowhere to be routed",
         "d": "All three, because each of them ended in a failure"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "Only a request with nothing to run is a protocol error; the other two reached the tool.",
+        "c": "Only a request with nothing to run is a protocol error; the other two reached the tool.",
         "b": "Ruled out because \"an input validation failure\" is a tool execution error, which the model can repair.",
-        "c": "Ruled out because a failed backend call is an \"API failure\" that comes back with the flag and a message that allows \"retry with adjusted parameters\".",
+        "a": "Ruled out because a failed backend call is an \"API failure\" that comes back with the flag and a message that allows \"retry with adjusted parameters\".",
         "d": "Ruled out because the specification wants execution errors passed on: \"Clients SHOULD provide tool execution errors to language models to enable self-correction.\""
       }
     },
@@ -46,15 +46,15 @@
       "stem": "After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?",
       "options": {
         "a": "Issuing a refund that carries no idempotency key at all",
-        "b": "Emailing the customer a confirmation of the refund",
+        "b": "Looking up the order record by its order number",
         "c": "Creating a ticket without any key attached to it",
-        "d": "Looking up the order record by its order number"
+        "d": "Emailing the customer a confirmation of the refund"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "A read changes nothing when it is repeated.",
+        "b": "A read changes nothing when it is repeated.",
         "a": "Ruled out because \"a refund sent twice refunds twice\".",
-        "b": "Ruled out because \"an email that left the outbox cannot be called back\".",
+        "d": "Ruled out because \"an email that left the outbox cannot be called back\".",
         "c": "Ruled out because \"a ticket created twice is two tickets\"."
       }
     },
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A refund call times out, and the tool reports that its outcome is unknown. What should the agent do next?",
       "options": {
-        "a": "Read the records kept for the order, then decide whether any work remains",
+        "a": "Mark the case as resolved, because the service usually processes whatever it receives",
         "b": "Send the payment again under a fresh key straight away so that it surely goes through",
         "c": "Tell the customer that the attempt failed and invite them to begin a new request",
-        "d": "Mark the case as resolved, because the service usually processes whatever it receives"
+        "d": "Read the records kept for the order, then decide whether any work remains"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "A write that may have happened is followed by a read.",
+        "d": "A write that may have happened is followed by a read.",
         "b": "Ruled out because a new key defeats the protection that a key gives: \"The tool sends the same key on every attempt\".",
         "c": "Ruled out because the agent would state something unknown as a fact: \"the money may have moved, and the agent will say the opposite of what happened\".",
-        "d": "Ruled out because a guess is not news: \"it is the absence of news\"."
+        "a": "Ruled out because a guess is not news: \"it is the absence of news\"."
       }
     },
     {
@@ -84,15 +84,15 @@
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The billing system refuses a refund because the amount is above the customer's refundable balance. What should the refund tool return?",
       "options": {
         "a": "A failure marked as transient, with a wait of a few seconds before the next try",
-        "b": "A flagged failure not worth repeating, with a sentence to pass on to the shopper",
-        "c": "A success whose text mentions the balance, so that the model can decide freely",
+        "b": "A success whose text mentions the balance, so that the model can decide freely",
+        "c": "A flagged failure not worth repeating, with a sentence to pass on to the shopper",
         "d": "A failure marked as a validation problem, asking for a smaller number to be tried"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "A business rule is understood and refused, and the shopper can be told why.",
+        "c": "A business rule is understood and refused, and the shopper can be told why.",
         "a": "Ruled out because a rule answers the same way every time: \"a validation, permission or business failure gives the same answer every time\".",
-        "c": "Ruled out because the refusal must come back flagged: \"a business-rule violation comes back with retriable: false\".",
+        "b": "Ruled out because the refusal must come back flagged: \"a business-rule violation comes back with retriable: false\".",
         "d": "Ruled out because the amount was valid and a rule refused it: \"The request is understood and refused by a rule\"."
       }
     },
@@ -103,15 +103,15 @@
       "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. The web search subagent retries a timeout twice and the service stays down. What should it hand the coordinator?",
       "options": {
         "a": "A short note that the lookup service was unavailable, sent once every retry is spent",
-        "b": "An empty set of results marked as a success, so that the run is never interrupted",
-        "c": "The kind of failure, the query that ran, any partial findings and other routes to try",
+        "b": "The kind of failure, the query that ran, any partial findings and other routes to try",
+        "c": "An empty set of results marked as a success, so that the run is never interrupted",
         "d": "The timeout itself, passed up unhandled so that the whole research workflow ends"
       },
-      "key": "c",
+      "key": "b",
       "explanation": {
-        "c": "The coordinator needs the context to choose a recovery.",
+        "b": "The coordinator needs the context to choose a recovery.",
         "a": "Ruled out because a generic status hides what the coordinator needs: \"The two opposite mistakes in the guide's sample are the generic status that hides the context\".",
-        "b": "Ruled out because \"an empty list marked as a success tells the agent that the search found nothing\".",
+        "c": "Ruled out because \"an empty list marked as a success tells the agent that the search found nothing\".",
         "d": "Ruled out because the other subagents can go on: \"a failing subagent must not stop the others\"."
       }
     },

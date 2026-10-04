@@ -43,16 +43,16 @@
       "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q3",
       "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
       "scope": "page",
-      "stem": "What makes a run that nobody watches end by itself?",
+      "stem": "What bounds the number of steps of a run that nobody watches?",
       "options": {
         "a": "A longer timeout on the job that contains it",
         "b": "A prompt that asks it to finish as quickly as it can",
-        "c": "A turn limit and a list of permitted tools in the command",
+        "c": "A turn limit set in the command",
         "d": "Running it again whenever it fails to produce an answer"
       },
       "key": "c",
       "explanation": {
-        "c": "A limit and a tool list are set in the command.",
+        "c": "A limit set in the command stops the loop: \"`--max-turns` stops a loop\".",
         "b": "Ruled out because a sentence is no limit: \"A prompt that asks the run to be quick is a request, not a limit.\"",
         "a": "Ruled out because time does not stop a loop: \"A longer job timeout only lets a loop run longer.\"",
         "d": "Ruled out because repeating the run changes nothing: \"re-running it repeats the cost with no reason to expect a different result\"."
@@ -73,7 +73,7 @@
       "explanation": {
         "b": "Dividing the work answers the cause, thinning attention.",
         "a": "Ruled out because room is not attention: \"A larger context window does not fix attention quality.\"",
-        "c": "Ruled out because agreement hides rare finds: \"Keeping only the issues that three runs agree on would hide real bugs that are found only now and then.\"",
+        "c": "Ruled out because agreement hides rare finds: \"Keeping only the issues that two of three runs agree on would hide real bugs that are found only now and then.\"",
         "d": "Ruled out because it shifts the work: \"Asking authors to split their pull requests moves the work to people and does not improve the review.\""
       }
     },
@@ -81,38 +81,38 @@
       "id": "02-review-passes-criteria-test-generation-and-the-practice#q2",
       "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
       "scope": "page",
-      "stem": "The same conversation that wrote a change is asked to judge it and approves it, though a colleague spots a flaw at once. What improves the check?",
+      "stem": "Which `passes` setting does the practice's review case accept?",
       "options": {
-        "a": "Giving the same conversation a longer turn limit for the judging",
-        "b": "Asking the same conversation to read its own change more carefully",
-        "c": "Adding a sentence that tells the judge in that conversation to be critical",
-        "d": "A new session that is given the criteria and the earlier findings"
+        "a": "`all-files`, then `integration`",
+        "b": "`integration`, then `per-file`",
+        "c": "`per-file` followed by another `per-file`",
+        "d": "`per-file`, then `integration`"
       },
       "key": "d",
       "explanation": {
-        "d": "A fresh session has no bias toward the change, and the earlier findings stop repeats.",
-        "b": "Ruled out because the bias stays: \"A fresh context improves code review since Claude won't be biased toward code it just wrote.\"",
-        "c": "Ruled out because a sentence is a request: \"A sentence that asks for more care is a request; the criteria are the case list.\"",
-        "a": "Ruled out because time does not remove bias: \"A reviewer should not be the author.\""
+        "d": "A pass for each file, then the integration pass.",
+        "b": "Ruled out because the order matters: \"`passes` is `per-file` and then `integration`, in that order\".",
+        "c": "Ruled out because the second pass is not an integration pass: \"`passes` is `per-file` and then `integration`, in that order\".",
+        "a": "Ruled out because the first pass is not per file: \"`passes` is `per-file` and then `integration`, in that order\"."
       }
     },
     {
       "id": "02-review-passes-criteria-test-generation-and-the-practice#q3",
       "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
       "scope": "page",
-      "stem": "A generator often writes cases that duplicate ones the project already has. What should the prompt change?",
+      "stem": "Which command does the practice's commands case accept?",
       "options": {
-        "a": "Ask for fewer tests in every run of the generator",
-        "b": "Carry the existing tests and say what makes a test useful",
-        "c": "Ask for tests of every function the change touches",
-        "d": "Ask the generator to explain each test it decides to write"
+        "a": "`claude \"...\" --output-format json --max-turns 6`",
+        "b": "`claude -p \"...\" --output-format json --max-turns 6`",
+        "c": "`claude -p \"...\" --max-turns 6 --allowedTools Read`",
+        "d": "`claude -p \"...\" --output-format json --allowedTools Read`"
       },
       "key": "b",
       "explanation": {
-        "b": "The generator needs to know what exists and what is worth writing.",
-        "a": "Ruled out because fewer is not better: \"A prompt that asks for fewer tests says nothing about which tests are worth writing.\"",
-        "c": "Ruled out because more coverage adds repeats: \"Without the existing tests in the prompt, the generator has no way to avoid repeating them.\"",
-        "d": "Ruled out because an explanation changes neither: \"A test generator that is only told to \\\"write tests\\\" writes the obvious ones, and some of them are copies of tests that exist.\""
+        "b": "The flag, the JSON format and the turn limit are all present.",
+        "a": "Ruled out because the print flag is missing: \"has `-p` or `--print`, `--output-format json` and `--max-turns` with a number\".",
+        "c": "Ruled out because the JSON format is missing: \"has `-p` or `--print`, `--output-format json` and `--max-turns` with a number\".",
+        "d": "Ruled out because the turn limit is missing: \"has `-p` or `--print`, `--output-format json` and `--max-turns` with a number\"."
       }
     },
     {
@@ -138,7 +138,7 @@
       "id": "02-review-passes-criteria-test-generation-and-the-practice#m2",
       "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The command reports success although the run stopped at its turn limit, and the job is green. What is the remedy?",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The job script ignores how the command ended, and the job is green although the run stopped at its turn limit. What is the remedy?",
       "options": {
         "a": "Read the exit status and the JSON, and fail whenever no valid answer exists",
         "b": "Raise the turn limit until the run always finishes well before it reaches that limit",
@@ -157,19 +157,19 @@
       "id": "02-review-passes-criteria-test-generation-and-the-practice#m3",
       "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. After more commits arrive, the second run repeats comments that the author has already fixed. What should the run be given?",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The audit of the draft prints `batchable: debt-report`. What does that finding report?",
       "options": {
-        "a": "The earlier findings, with an instruction to report only what is new or still open",
-        "b": "A larger number of turns, so that it reads the whole history of the change before it starts",
-        "c": "The previous run's complete session, resumed with the latest commits added at the end of it",
-        "d": "A stricter list of severities, so that fewer of the comments will ever reach the author"
+        "a": "A scheduled job runs in real time and pays full price",
+        "b": "A job that someone waits for runs as a batch",
+        "c": "A command that starts claude lacks the print flag",
+        "d": "A review is made in one pass and in a shared session"
       },
       "key": "a",
       "explanation": {
-        "a": "The run needs its own earlier output.",
-        "b": "Ruled out because turns do not supply memory: \"without the earlier findings it repeats every comment that the author has already fixed or answered\".",
-        "c": "Ruled out because a reviewer should start fresh: \"the review runs as its own session and not as a continuation of the one that generated the change\".",
-        "d": "Ruled out because severity does not remove repeats: \"Giving the run the earlier findings, and asking it to report only what is new or still open, keeps the comments useful.\""
+        "a": "The finding is about a scheduled job: \"`batchable`: a scheduled job that runs in real time and pays full price.\"",
+        "b": "Ruled out because that is the other finding: \"`blocking-batch`: a job someone waits for that runs as a batch.\"",
+        "c": "Ruled out because that is a third: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\"",
+        "d": "Ruled out because the design of a review has its own findings: \"`single-pass-review`, `shared-session`, `no-prior-findings` and `writes`: the design of a review\"."
       }
     },
     {

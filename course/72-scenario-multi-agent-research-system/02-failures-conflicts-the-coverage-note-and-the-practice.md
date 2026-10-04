@@ -51,7 +51,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 ## Quiz
 
-4. A search subagent times out, and its error offers an alternative query. What should the coordinator do?
+4. Under the module's bounded policy for failures, a search subagent times out and its error offers an alternative query. What should the coordinator do?
    - **a**: Retry the same query until it succeeds, however many attempts that takes in total
    - **b**: Retry with the suggested substitute once, then report the scope as not covered
    - **c**: Stop the whole run and return the error to the caller, who will decide
@@ -94,11 +94,11 @@ This quiz covers both pages of the module.
    - **c**: An error that ends the synthesis step for the whole run
    - **d**: A guess at the figure based on the other claims in the report
 
-3. Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. After the alternative query failed too, a stakeholder asks why the report does not try a third. Which answer fits the design?
-   - **a**: Retries are bounded, so the note names both queries and the topic stays open
-   - **b**: A third query is skipped only because each extra search costs a little money
-   - **c**: A third query would likely succeed, so the limit should simply be raised by one
-   - **d**: The topic should be marked as covered, since two queries were tried
+3. Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. A report's note lists `music (not researched)` beside `film (timeout on a query)`. What does the note tell the reader about music?
+   - **a**: No subtask of the plan named it, so the fault is in the decomposition
+   - **b**: Its search failed on a fault of the tool, with the query recorded
+   - **c**: A source was searched and had nothing to say about it
+   - **d**: A conflict between two sources left the topic incomplete
 
 4. Scenario S3, a multi-agent research system in which a coordinator delegates to specialised subagents. A claim rests on two findings: one that arrived before a subagent failed and one from a subagent that finished. Both agree. How is the claim flagged?
    - **a**: As incomplete, because one of its findings arrived from a run that failed
@@ -111,7 +111,7 @@ This quiz covers both pages of the module.
 
 1. **b**. A missing scope makes the run partial, and a conflict is reported next to it. *a* is ruled out because completeness is about coverage: "A run is complete when every scope is covered." *c* is ruled out because the reason for a gap does not matter: "It is partial otherwise, whatever the reason, and the report says which scopes are missing and why." *d* is ruled out because the report is still useful: "A report that did not cover film is still a useful report".
 2. **a**. Anything the tool cannot check goes back to be delegated. *d* is ruled out because the tool does not guess: "In the example, the tool answers for a date it can check, and returns `needs_search` for anything else." *b* is ruled out because a deep check stays where it was: "leaves the deep verification where it was: with the coordinator". *c* is ruled out because the tool exists to remove the round trip for the common case: "A scoped tool of this kind removes the round trip for the common case".
-3. **a**. Retries are bounded and the report says what was tried. *c* is ruled out because the limit is a design choice: "The coordinator retries once through an alternative and then stops." *b* is ruled out because cost is not the reason given: "a second suggests that the source or the service has a problem a third query will not fix". *d* is ruled out because tried is not covered: "A scope that is marked covered without findings is a claim that nothing supports."
+3. **a**. A scope that no result names was never planned: "A scope that no result names was never researched, which is the decomposition fault of page 1 and is fixed in the plan." *b* is ruled out because that is the phrasing for a failed search: "A scope whose search failed names the type and the query." *c* is ruled out because that is the third phrasing: "A scope with a result but no findings has no findings." *d* is ruled out because a conflict is not a gap: "A conflict does not change the status, because it is information the reader needs and not a missing piece."
 4. **c**. One finished source is enough to remove the flag. *a* is ruled out because the flag needs every finding to be partial: "A claim is marked partial only when every finding behind it was partial". *b* is ruled out because the findings agree: "A conflict is two different values for one claim, not two sources for the same value". *d* is ruled out because partial findings stay as claims: "Partial findings stay in the claims, flagged, so a reader can use them and can see that they are incomplete."
 
 </details>

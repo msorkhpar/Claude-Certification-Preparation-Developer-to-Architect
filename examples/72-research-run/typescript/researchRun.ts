@@ -76,7 +76,7 @@ function main() {
   const e = first.error!;
   console.log(`search '${e.query}': ${first.status} ${e.type}, ${e.partial.length} partial, alternative '${e.alternatives[0]}'`);
   const recovered = research(plan).find((r) => r.recovered_from)!;
-  console.log(`recovered: '${recovered.recovered_from}' -> '${recovered.query}' scope ${recovered.scope}, ${recovered.findings!.length} finding`);
+  console.log(`recovered: '${recovered.recovered_from}' -> '${ALTERNATIVES[recovered.recovered_from!][0]}' scope ${recovered.scope}, ${recovered.findings!.length} finding`);
   const checks: [string, string, string][] = [["date", "survey-a", "2025-02-01"], ["date", "report-d", "2025-01-15"], ["statistic", "survey-a", "60%"]];
   const verdicts = checks.map((c) => verifyFact(...c));
   console.log(`verify_fact: ${verdicts.filter((v) => v === "confirmed").length} confirmed here, ${verdicts.filter((v) => v === "needs_search").length} sent back to the coordinator`);

@@ -81,7 +81,7 @@ fun main() {
     val e = first.error!!
     println("search '${e.query}': ${first.status} ${e.type}, ${e.partial.size} partial, alternative '${e.alternatives[0]}'")
     val recovered = research(plan).first { it.result.recoveredFrom != null }
-    println("recovered: '${recovered.result.recoveredFrom}' -> '${recovered.task.query}' scope ${recovered.task.scope}, ${recovered.result.findings.size} finding")
+    println("recovered: '${recovered.result.recoveredFrom}' -> '${ALTERNATIVES.getValue(recovered.result.recoveredFrom!!)[0]}' scope ${recovered.task.scope}, ${recovered.result.findings.size} finding")
     val verdicts = listOf(verifyFact("date", "survey-a", "2025-02-01"), verifyFact("date", "report-d", "2025-01-15"), verifyFact("statistic", "survey-a", "60%"))
     println("verify_fact: ${verdicts.count { it == "confirmed" }} confirmed here, ${verdicts.count { it == "needs_search" }} sent back to the coordinator")
     for ((label, down) in listOf("all sources up" to listOf<String>(), "film search down for good" to listOf("AI in film", "AI in film production"))) {

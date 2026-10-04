@@ -107,7 +107,7 @@ public final class ResearchRun {
         SearchError e = first.error();
         System.out.println("search '" + e.query() + "': " + first.status() + " " + e.type() + ", " + e.partial().size() + " partial, alternative '" + e.alternatives().get(0) + "'");
         Done recovered = research(plan, List.of()).stream().filter(r -> r.result().recoveredFrom() != null).findFirst().orElseThrow();
-        System.out.println("recovered: '" + recovered.result().recoveredFrom() + "' -> '" + recovered.task().query() + "' scope " + recovered.task().scope() + ", " + recovered.result().findings().size() + " finding");
+        System.out.println("recovered: '" + recovered.result().recoveredFrom() + "' -> '" + ALTERNATIVES.get(recovered.result().recoveredFrom()).get(0) + "' scope " + recovered.task().scope() + ", " + recovered.result().findings().size() + " finding");
         List<String> verdicts = List.of(verifyFact("date", "survey-a", "2025-02-01"), verifyFact("date", "report-d", "2025-01-15"), verifyFact("statistic", "survey-a", "60%"));
         System.out.println("verify_fact: " + verdicts.stream().filter(v -> v.equals("confirmed")).count() + " confirmed here, " + verdicts.stream().filter(v -> v.equals("needs_search")).count() + " sent back to the coordinator");
         Map<String, List<String>> runs = new LinkedHashMap<>();

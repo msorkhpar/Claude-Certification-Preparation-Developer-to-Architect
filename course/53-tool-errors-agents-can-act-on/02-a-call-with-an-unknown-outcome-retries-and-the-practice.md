@@ -80,21 +80,21 @@ These are the wrong answers that the exam's options for this task statement offe
 
 1. After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?
    - **a**: Issuing a refund that carries no idempotency key at all
-   - **b**: Emailing the customer a confirmation of the refund
+   - **b**: Looking up the order record by its order number
    - **c**: Creating a ticket without any key attached to it
-   - **d**: Looking up the order record by its order number
+   - **d**: Emailing the customer a confirmation of the refund
 
 2. A refund call times out, and the tool reports that its outcome is unknown. What should the agent do next?
-   - **a**: Read the records kept for the order, then decide whether any work remains
+   - **a**: Mark the case as resolved, because the service usually processes whatever it receives
    - **b**: Send the payment again under a fresh key straight away so that it surely goes through
    - **c**: Tell the customer that the attempt failed and invite them to begin a new request
-   - **d**: Mark the case as resolved, because the service usually processes whatever it receives
+   - **d**: Read the records kept for the order, then decide whether any work remains
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A read changes nothing when it is repeated. *a* is ruled out because "a refund sent twice refunds twice". *b* is ruled out because "an email that left the outbox cannot be called back". *c* is ruled out because "a ticket created twice is two tickets".
-2. **a**. A write that may have happened is followed by a read. *b* is ruled out because a new key defeats the protection that a key gives: "The tool sends the same key on every attempt". *c* is ruled out because the agent would state something unknown as a fact: "the money may have moved, and the agent will say the opposite of what happened". *d* is ruled out because a guess is not news: "it is the absence of news".
+1. **b**. A read changes nothing when it is repeated. *a* is ruled out because "a refund sent twice refunds twice". *d* is ruled out because "an email that left the outbox cannot be called back". *c* is ruled out because "a ticket created twice is two tickets".
+2. **d**. A write that may have happened is followed by a read. *b* is ruled out because a new key defeats the protection that a key gives: "The tool sends the same key on every attempt". *c* is ruled out because the agent would state something unknown as a fact: "the money may have moved, and the agent will say the opposite of what happened". *a* is ruled out because a guess is not news: "it is the absence of news".
 
 </details>
 
@@ -104,14 +104,14 @@ This quiz covers both pages of the module.
 
 1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The billing system refuses a refund because the amount is above the customer's refundable balance. What should the refund tool return?
    - **a**: A failure marked as transient, with a wait of a few seconds before the next try
-   - **b**: A flagged failure not worth repeating, with a sentence to pass on to the shopper
-   - **c**: A success whose text mentions the balance, so that the model can decide freely
+   - **b**: A success whose text mentions the balance, so that the model can decide freely
+   - **c**: A flagged failure not worth repeating, with a sentence to pass on to the shopper
    - **d**: A failure marked as a validation problem, asking for a smaller number to be tried
 
 2. Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. The web search subagent retries a timeout twice and the service stays down. What should it hand the coordinator?
    - **a**: A short note that the lookup service was unavailable, sent once every retry is spent
-   - **b**: An empty set of results marked as a success, so that the run is never interrupted
-   - **c**: The kind of failure, the query that ran, any partial findings and other routes to try
+   - **b**: The kind of failure, the query that ran, any partial findings and other routes to try
+   - **c**: An empty set of results marked as a success, so that the run is never interrupted
    - **d**: The timeout itself, passed up unhandled so that the whole research workflow ends
 
 3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice, and customers are being refunded twice after timeouts. Which change to the wrapper is best?
@@ -123,8 +123,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A business rule is understood and refused, and the shopper can be told why. *a* is ruled out because a rule answers the same way every time: "a validation, permission or business failure gives the same answer every time". *c* is ruled out because the refusal must come back flagged: "a business-rule violation comes back with retriable: false". *d* is ruled out because the amount was valid and a rule refused it: "The request is understood and refused by a rule".
-2. **c**. The coordinator needs the context to choose a recovery. *a* is ruled out because a generic status hides what the coordinator needs: "The two opposite mistakes in the guide's sample are the generic status that hides the context". *b* is ruled out because "an empty list marked as a success tells the agent that the search found nothing". *d* is ruled out because the other subagents can go on: "a failing subagent must not stop the others".
+1. **c**. A business rule is understood and refused, and the shopper can be told why. *a* is ruled out because a rule answers the same way every time: "a validation, permission or business failure gives the same answer every time". *b* is ruled out because the refusal must come back flagged: "a business-rule violation comes back with retriable: false". *d* is ruled out because the amount was valid and a rule refused it: "The request is understood and refused by a rule".
+2. **b**. The coordinator needs the context to choose a recovery. *a* is ruled out because a generic status hides what the coordinator needs: "The two opposite mistakes in the guide's sample are the generic status that hides the context". *c* is ruled out because "an empty list marked as a success tells the agent that the search found nothing". *d* is ruled out because the other subagents can go on: "a failing subagent must not stop the others".
 3. **d**. Only a call known to be harmless is safe to repeat. *a* is ruled out because many failures do pass on their own: "most failures in a network are transient". *b* is ruled out because more attempts multiply the duplicates: "a refund sent twice refunds twice". *c* is ruled out because a pause does not tell whether the first call worked: "A timeout after sending is not a failure of the effect; it is the absence of news".
 
 </details>

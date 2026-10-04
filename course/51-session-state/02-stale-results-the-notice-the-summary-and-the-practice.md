@@ -133,9 +133,9 @@ This quiz covers both pages of the module.
 
 2. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A forked agent rewrote several modules in the shared working copy. The team wants that copy exactly as it stood before the run, and wants to keep the fork's conversation. What provides this?
    - **a**: Resuming the original session, which brings its files back
-   - **b**: Deleting the fork's session so its edits are discarded
+   - **b**: Checkpointing, which snapshots the edits and reverts them
    - **c**: Forking again from the original, so the copy starts clean
-   - **d**: Checkpointing, which snapshots the edits and reverts them
+   - **d**: Deleting the fork's session so its edits are discarded
 
 3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?
    - **a**: Fork the session, so that the stale results stay in the original
@@ -147,7 +147,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The prompt cache expires after a long pause, so the next request reads the history once more. *b* is ruled out because "The session's prompt cache has expired by then, so the next request processes the full history once no matter which of the dialog's options you pick." *a* is ruled out because a resume restores the conversation and does not run tools again: a call that was cut off "doesn't finish or run again when you resume". *d* is ruled out because forking is an option you set, and a fork "creates a new session that starts with a copy of the original's history", not an automatic step of resuming.
-2. **d**. Only a snapshot of the files can return them to an earlier state. *a* is ruled out because "Sessions persist the conversation, not the filesystem", so a resume restores no files. *b* is ruled out because "If a forked agent edits files, those changes are real and visible to any session working in the same directory", and removing the session does not undo them. *c* is ruled out because forking "branches the conversation history, not the filesystem", so the second copy meets the same edited files.
+2. **b**. Only a snapshot of the files can return them to an earlier state. *a* is ruled out because "Sessions persist the conversation, not the filesystem", so a resume restores no files. *d* is ruled out because "If a forked agent edits files, those changes are real and visible to any session working in the same directory", and removing the session does not undo them. *c* is ruled out because forking "branches the conversation history, not the filesystem", so the second copy meets the same edited files.
 3. **d**. Five of twelve is under half, so a resume with a notice naming the paths keeps what is still true. *b* is ruled out because a transcript carries the stale results with it; a summary carries conclusions "never the raw tool output that went stale". *c* is ruled out because continue takes the most recent session, and with no note the session believes the old files: "Sessions persist the conversation, not the filesystem". *a* is ruled out because a fork "creates a new session that starts with a copy of the original's history", stale results included.
 
 </details>

@@ -644,17 +644,17 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 ## Quiz
 
-1. A month of support-agent sessions shows two problems: in 3 percent an order lookup ran before the customer was identified, and in 9 percent the agent escalated cases that policy lets it settle. Which fix is made first?
+1. A month of support-agent sessions shows two problems: in 3 percent a refund was issued before the customer was identified, and in 9 percent the agent escalated cases that policy lets it settle. Which fix is made first?
    - **a**: Train a separate model on past tickets first, so it can decide which cases need a person
    - **b**: Write escalation criteria first, because that problem touches the larger share of sessions
    - **c**: Rewrite the descriptions of the tools first, since both problems start with tool choice
    - **d**: Enforce the call sequence in the dispatcher, because moved money cannot be recalled
 
-2. A customer writes "I want to speak to someone" as the first message, before giving any identification. How should the dispatcher handle the model's call to hand over the case?
-   - **a**: Run it at once, because reaching a human has no prerequisite
-   - **b**: Refuse it until the lookup tool has identified the customer
-   - **c**: Hold it back until the stall guard has counted three repeated calls
-   - **d**: Accept it only after the model has summarised the case in its own words
+2. A person takes over an escalated case. Which source should supply the facts of the hand-off record?
+   - **a**: The desk's own state: the customer, the orders checked, the refunds made and the refusals
+   - **b**: A summary that the model writes of the whole conversation just before it hands the case over
+   - **c**: The full transcript of the conversation, attached to the ticket for the person to read
+   - **d**: A state that every conversation of the day shares and writes its facts into
 
 3. Two customers share a name, the lookup tool returns both, and the agent proceeds with the first. What should the dispatcher have done?
    - **a**: Choose the customer with the most recent order, as that is the likelier one
@@ -665,8 +665,8 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 <details>
 <summary>Answer key</summary>
 
-1. **d**. Money that moved wrongly cannot be called back, so its cause is fixed first. *b* is ruled out because the size of a count does not set the order: "The first fix goes to what cannot be undone." *c* is ruled out because descriptions are not the shape that the logs show for the skipped step: "A refund that moved without a check cannot be called back". *a* is ruled out because a trained model comes before words were tried: "machinery for a problem nobody has tried to fix with words".
-2. **a**. The way to a person never waits for a prerequisite. *b* is ruled out because the page puts the way out first: "A person must be reachable even when identity cannot be established." *c* is ruled out because the guard counts repeated calls and has no say over this one: "If the same call, with the same arguments, has been made three times in a row". *d* is ruled out because the request is honoured as it stands: "the agent honours it, and does not first investigate or argue".
-3. **c**. Several matches are a question for the customer, and nothing is set. *a* is ruled out because the dispatcher does not pick: "Several matches set nothing and return the refusal". *b* is ruled out because the desk holds one verified customer, set only by a single match: "One match sets the verified customer." *d* is ruled out because the refusal is not a fault that a retry can clear: "A permanent error is never retried."
+1. **d**. Money that moved wrongly cannot be called back, so its cause is fixed first. *b* is ruled out because the size of a count does not set the order: "The first fix goes to what cannot be undone." *c* is ruled out because the skipped step is a step order and not a tool choice: "A step order that is only requested". *a* is ruled out because a trained model comes before words were tried: "machinery for a problem nobody has tried to fix with words".
+2. **a**. The record is built from what the code kept: "the hand-off record is built from the desk's own state". *b* is ruled out because the model supplies one field only: "the model's reason as one field". *c* is ruled out because reading the transcript is what the record spares: "so a person does not read the transcript to find out what happened". *d* is ruled out because a shared state leaks between cases: "a long-lived shared state is a defect".
+3. **c**. Several matches are a question for the customer, and nothing is set. *a* is ruled out because the dispatcher does not pick: "Several matches set nothing and return the refusal". *b* is ruled out because the desk holds one verified customer, set only by a single match: "One match sets the verified customer." *d* is ruled out because the refusal is not a fault that a retry can clear: "A retryable error (a timeout of the order service) is retried once by the loop, which is the loop's business, not the model's."
 
 </details>

@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "A CI step runs Claude Code unattended, and each issue it reports must be posted as an inline note. Which flags make the reply usable for that?",
       "options": {
-        "a": "`--output-format text` with a prompt asking for a bulleted list",
+        "a": "`--output-format json` with `--json-schema`",
         "b": "`--max-turns` with a high limit so that the list is complete",
-        "c": "`--output-format json` with `--json-schema`",
+        "c": "`--output-format text` with a prompt asking for a bulleted list",
         "d": "`--bare` alone, which formats replies for scripts"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The schema makes the answer a validated object in `structured_output`.",
-        "a": "Ruled out because text leaves the entries to be parsed from prose, and \"a decision made on prose is a guess\".",
+        "a": "The schema makes the answer a validated object in `structured_output`.",
+        "c": "Ruled out because text leaves the entries to be parsed from prose, and \"a decision made on prose is a guess\".",
         "b": "Ruled out because a limit bounds the loop and does not shape the answer: \"The run exits with an error at the limit\".",
         "d": "Ruled out because the flag controls what the run loads, with \"no hooks, skills, MCP servers, memory or CLAUDE.md\", and formats nothing."
       }
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?",
       "options": {
-        "a": "Fail, because no valid answer exists",
+        "a": "Retry the same request until a value appears",
         "b": "Pass, since the run reports success",
-        "c": "Retry the same request until a value appears",
+        "c": "Fail, because no valid answer exists",
         "d": "Pass, with a note that nothing was reported"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "A run without a valid answer is a failure whatever its subtype says.",
+        "c": "A run without a valid answer is a failure whatever its subtype says.",
         "b": "Ruled out because the documentation says \"Treat that case as a failure as well\".",
-        "c": "Ruled out because \"Retrying inside the job repeats cost with no reason to expect a different result\".",
+        "a": "Ruled out because \"Retrying inside the job repeats cost with no reason to expect a different result\".",
         "d": "Ruled out because \"A job never passes by saying nothing\", and a silent pass cannot be told from a failed run."
       }
     },
@@ -103,15 +103,15 @@
       "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?",
       "options": {
         "a": "The file is too long, so cut it until it fits the prompt",
-        "b": "Headless runs read the file only on the first push of a branch",
+        "b": "That mode skips it, so supply it with `--append-system-prompt-file`",
         "c": "The rules need a `paths` header before a headless run applies them",
-        "d": "That mode skips it, so supply it with `--append-system-prompt-file`"
+        "d": "Headless runs read the file only on the first push of a branch"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand.",
+        "b": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand.",
         "a": "Ruled out because length is not the issue: \"In a bare run the file is passed explicitly\" and otherwise it is not read at all.",
-        "b": "Ruled out because \"A CI run does not remember the last one\", and no first-push behaviour exists.",
+        "d": "Ruled out because \"A CI run does not remember the last one\", and no first-push behaviour exists.",
         "c": "Ruled out because no header is involved, and \"a bare run without it reviews with no criteria at all, and nothing says so\"."
       }
     },
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?",
       "options": {
-        "a": "It passes and posts no comment",
+        "a": "It fails, because a finding in a disabled category counts as an error",
         "b": "It fails, because a high finding exists",
         "c": "It passes and posts the low bug as a comment",
-        "d": "It fails, because a finding in a disabled category counts as an error"
+        "d": "It passes and posts no comment"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The high finding is dropped with its category and the low one falls below the floor, so nothing is kept.",
+        "d": "The high finding is dropped with its category and the low one falls below the floor, so nothing is kept.",
         "b": "Ruled out because \"categories the team disabled are dropped\", so the high style finding cannot fail the job.",
         "c": "Ruled out because \"findings below a floor are dropped\", and a low finding is below a medium floor.",
-        "d": "Ruled out because only \"a kept finding at a failing severity\" fails the job, and a disabled category is dropped before that."
+        "a": "Ruled out because only \"a kept finding at a failing severity\" fails the job, and a disabled category is dropped before that."
       }
     }
   ]

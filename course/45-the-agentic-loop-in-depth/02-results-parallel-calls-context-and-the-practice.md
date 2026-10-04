@@ -69,15 +69,15 @@ These are the wrong answers that the exam's options for this task statement offe
 4. A finance dashboard reads the `usage` field of every result to report what agent runs cost, but the invoices are higher for the runs that delegated to subagents. What explains the gap, and what is the fix?
    - **a**: Add the cost of the helpers by parsing their own messages out of the stream
    - **b**: Treat the figure as complete and look for unlogged retries in the application
-   - **c**: It covers only the lead loop, so consult the per-model accounting for the whole tree
-   - **d**: The figure is zeroed whenever a run is cut off, so leave those runs out
+   - **c**: The figure is zeroed whenever a run is cut off, so leave those runs out
+   - **d**: It covers only the lead loop, so consult the per-model accounting for the whole tree
 
 
 <details>
 <summary>Answer key</summary>
 
 3. **b**. The page says to put a dependency in two turns, because the model decides what to ask for in one turn and the SDK promises no order between the calls it makes together. *a* is ruled out because the documented rule is about conflicts among tools that change state: "Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK does not read names for dependencies: "a dependency belongs in two turns."
-4. **c**. The `usage` figure counts one loop only, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
+4. **d**. The `usage` figure counts one loop only, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *c* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
 
 </details>
 
