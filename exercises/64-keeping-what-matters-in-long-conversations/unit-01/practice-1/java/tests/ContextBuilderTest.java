@@ -50,6 +50,7 @@ class ContextBuilderTest {
         Map<String, ContextBuilder.Fact> later = got(ContextBuilder.updateFacts(start, "address", "9 Elm Rd", "2026-09-10"));
         assertEquals(new ContextBuilder.Fact("9 Elm Rd", "2026-09-10", List.of("12 Oak St@2026-08-01")), later.get("address"));
         assertEquals(new ContextBuilder.Fact("12 Oak St", "2026-08-01", List.of()), start.get("address"));
+        assertEquals(new ContextBuilder.Fact("9 Elm Rd", "2026-08-01", List.of("12 Oak St@2026-08-01")), got(ContextBuilder.updateFacts(start, "address", "9 Elm Rd", "2026-08-01")).get("address"));
     }
 
     @Test

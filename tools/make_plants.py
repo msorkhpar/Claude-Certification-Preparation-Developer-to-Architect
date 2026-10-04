@@ -1969,6 +1969,17 @@ PLANTS[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
 }
 
 
+# boundary plants (a case at exactly the limit)
+_p = PLANTS[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"]
+_p["python"][1]["wrong-chunk-at-limit"] = [("if sizes.get(custom_id, 0) > limit:", "if sizes.get(custom_id, 0) >= limit:")]
+_p["python"][1]["wrong-interval-boundary"] = [("    if interval <= 0:", "    if interval <= 1:")]
+_p["typescript"][1]["wrong-chunk-at-limit"] = [('if ((sizes[customId] ?? 0) > limit) action = "chunk";', 'if ((sizes[customId] ?? 0) >= limit) action = "chunk";')]
+_p["typescript"][1]["wrong-interval-boundary"] = [("if (interval <= 0) throw", "if (interval <= 1) throw")]
+_p["java"][1]["wrong-chunk-at-limit"] = [('if (sizes.getOrDefault(r.customId(), 0) > limit) action = "chunk";', 'if (sizes.getOrDefault(r.customId(), 0) >= limit) action = "chunk";')]
+_p["java"][1]["wrong-interval-boundary"] = [("if (interval <= 0) throw new IllegalArgumentException", "if (interval <= 1) throw new IllegalArgumentException")]
+_p["kotlin"][1]["wrong-chunk-at-limit"] = [("(sizes[r.customId] ?: 0) > limit", "(sizes[r.customId] ?: 0) >= limit")]
+_p["kotlin"][1]["wrong-interval-boundary"] = [("require(interval > 0)", "require(interval > 1)")]
+
 # ===== Level 3: module 64 =====
 PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] = {
     "python": ("context_builder.py", {
@@ -2005,6 +2016,13 @@ PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] 
     }),
 }
 
+
+# boundary plant (a fact dated the same day as the stored one)
+_p = PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"]
+_p["python"][1]["wrong-equal-date-ignored"] = [('elif as_of >= current["as_of"]:', 'elif as_of > current["as_of"]:')]
+_p["typescript"][1]["wrong-equal-date-ignored"] = [("} else if (asOf >= current.as_of) {", "} else if (asOf > current.as_of) {")]
+_p["java"][1]["wrong-equal-date-ignored"] = [("} else if (asOf.compareTo(current.asOf()) >= 0) {", "} else if (asOf.compareTo(current.asOf()) > 0) {")]
+_p["kotlin"][1]["wrong-equal-date-ignored"] = [("} else if (asOf >= current.asOf) {", "} else if (asOf > current.asOf) {")]
 
 # ===== Level 3: module 65 =====
 PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
@@ -2189,6 +2207,21 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
     }),
 }
 
+
+# boundary plants (a segment with exactly min_n records, a segment exactly at the threshold, a confidence exactly at the threshold)
+_p = PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"]
+_p["python"][1]["wrong-minn-boundary"] = [('        elif s["percent"] < threshold:', '        elif s["total"] > min_n and s["percent"] < threshold:')]
+_p["python"][1]["wrong-threshold-boundary"] = [('        elif s["percent"] < threshold:', '        elif s["percent"] <= threshold:')]
+_p["python"][1]["wrong-route-boundary"] = [('e["conflict"] or e["confidence"] < threshold]', 'e["conflict"] or e["confidence"] <= threshold]')]
+_p["typescript"][1]["wrong-minn-boundary"] = [("else if (s.percent < threshold) failing.push(s.segment);", "else if (s.total > minN && s.percent < threshold) failing.push(s.segment);")]
+_p["typescript"][1]["wrong-threshold-boundary"] = [("else if (s.percent < threshold) failing.push(s.segment);", "else if (s.percent <= threshold) failing.push(s.segment);")]
+_p["typescript"][1]["wrong-route-boundary"] = [("e.conflict || e.confidence < threshold", "e.conflict || e.confidence <= threshold")]
+_p["java"][1]["wrong-minn-boundary"] = [("else if (s.percent() < threshold) failing.add(s.segment());", "else if (s.total() > minN && s.percent() < threshold) failing.add(s.segment());")]
+_p["java"][1]["wrong-threshold-boundary"] = [("else if (s.percent() < threshold) failing.add(s.segment());", "else if (s.percent() <= threshold) failing.add(s.segment());")]
+_p["java"][1]["wrong-route-boundary"] = [("e.conflict() || e.confidence() < threshold", "e.conflict() || e.confidence() <= threshold")]
+_p["kotlin"][1]["wrong-minn-boundary"] = [("it.total >= minN && it.percent < threshold", "it.total > minN && it.percent < threshold")]
+_p["kotlin"][1]["wrong-threshold-boundary"] = [("it.total >= minN && it.percent < threshold", "it.total >= minN && it.percent <= threshold")]
+_p["kotlin"][1]["wrong-route-boundary"] = [("it.conflict || it.confidence < threshold", "it.conflict || it.confidence <= threshold")]
 
 # ===== Level 3: module 69 =====
 PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {

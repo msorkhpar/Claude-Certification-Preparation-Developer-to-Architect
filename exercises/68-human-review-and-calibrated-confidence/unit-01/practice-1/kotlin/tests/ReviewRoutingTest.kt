@@ -32,6 +32,8 @@ class ReviewRoutingTest {
         assertEquals(Automation(false, listOf("receipt/date"), emptyList()), canAutomate(recs("invoice", "total", 97, 3) + recs("receipt", "date", 45, 5), 95, 30))
         assertEquals(Automation(true, emptyList(), emptyList()), canAutomate(recs("invoice", "total", 97, 3) + recs("receipt", "date", 50, 0), 95, 30))
         assertFalse(got(canAutomate(emptyList(), 95, 30)).automate)
+        assertEquals(Automation(false, listOf("receipt/date"), emptyList()), canAutomate(recs("invoice", "total", 97, 3) + recs("receipt", "date", 20, 10), 95, 30))
+        assertEquals(Automation(true, emptyList(), emptyList()), canAutomate(recs("invoice", "total", 95, 5), 95, 30))
     }
 
     @Test
@@ -59,8 +61,8 @@ class ReviewRoutingTest {
 
     @Test
     fun e6_lowConfidenceAndConflictsGoToReviewWithTheWeakestFirst() {
-        val rows = listOf(Extraction("x1", 90, false), Extraction("x2", 60, false), Extraction("x3", 99, true), Extraction("x4", 79, false))
-        assertEquals(Routing(listOf("x3", "x2", "x4"), emptyList(), listOf("x1")), route(rows, 80, 10))
+        val rows = listOf(Extraction("x1", 90, false), Extraction("x2", 60, false), Extraction("x3", 99, true), Extraction("x4", 79, false), Extraction("x5", 80, false))
+        assertEquals(Routing(listOf("x3", "x2", "x4"), emptyList(), listOf("x1", "x5")), route(rows, 80, 10))
     }
 
     @Test

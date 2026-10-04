@@ -45,6 +45,8 @@ def test_e2_a_newer_fact_replaces_the_old_one_and_the_old_value_is_kept_as_histo
     later = update_facts(start, "address", "9 Elm Rd", "2026-09-10")
     assert later["address"] == {"value": "9 Elm Rd", "as_of": "2026-09-10", "superseded": ["12 Oak St@2026-08-01"]}
     assert start["address"]["value"] == "12 Oak St" and start["address"]["superseded"] == []
+    same_day = update_facts(start, "address", "9 Elm Rd", "2026-08-01")
+    assert same_day["address"] == {"value": "9 Elm Rd", "as_of": "2026-08-01", "superseded": ["12 Oak St@2026-08-01"]}
 
 
 def test_e3_an_older_fact_that_arrives_late_does_not_replace_the_current_one():

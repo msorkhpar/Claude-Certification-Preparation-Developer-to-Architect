@@ -62,6 +62,8 @@ class ReviewRoutingTest {
         assertEquals(new ReviewRouting.Automation(false, List.of("receipt/date"), List.of()), ReviewRouting.canAutomate(all(recs("invoice", "total", 97, 3), recs("receipt", "date", 45, 5)), 95, 30));
         assertEquals(new ReviewRouting.Automation(true, List.of(), List.of()), ReviewRouting.canAutomate(all(recs("invoice", "total", 97, 3), recs("receipt", "date", 50, 0)), 95, 30));
         assertFalse(got(ReviewRouting.canAutomate(List.of(), 95, 30)).automate());
+        assertEquals(new ReviewRouting.Automation(false, List.of("receipt/date"), List.of()), ReviewRouting.canAutomate(all(recs("invoice", "total", 97, 3), recs("receipt", "date", 20, 10)), 95, 30));
+        assertEquals(new ReviewRouting.Automation(true, List.of(), List.of()), ReviewRouting.canAutomate(recs("invoice", "total", 95, 5), 95, 30));
     }
 
     @Test
@@ -89,8 +91,8 @@ class ReviewRoutingTest {
 
     @Test
     void e6_lowConfidenceAndConflictsGoToReviewWithTheWeakestFirst() {
-        List<ReviewRouting.Extraction> rows = List.of(ex("x1", 90, false), ex("x2", 60, false), ex("x3", 99, true), ex("x4", 79, false));
-        assertEquals(new ReviewRouting.Routing(List.of("x3", "x2", "x4"), List.of(), List.of("x1")), ReviewRouting.route(rows, 80, 10));
+        List<ReviewRouting.Extraction> rows = List.of(ex("x1", 90, false), ex("x2", 60, false), ex("x3", 99, true), ex("x4", 79, false), ex("x5", 80, false));
+        assertEquals(new ReviewRouting.Routing(List.of("x3", "x2", "x4"), List.of(), List.of("x1", "x5")), ReviewRouting.route(rows, 80, 10));
     }
 
     @Test

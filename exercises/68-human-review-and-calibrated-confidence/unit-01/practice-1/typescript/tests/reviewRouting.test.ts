@@ -39,6 +39,8 @@ test("e2 automation needs every segment to pass and enough samples in each", () 
   assert.deepEqual(canAutomate([...recs("invoice", "total", 97, 3), ...recs("receipt", "date", 45, 5)], 95, 30), { automate: false, failing: ["receipt/date"], undersampled: [] });
   assert.deepEqual(canAutomate([...recs("invoice", "total", 97, 3), ...recs("receipt", "date", 50, 0)], 95, 30), { automate: true, failing: [], undersampled: [] });
   assert.equal(canAutomate([], 95, 30).automate, false);
+  assert.deepEqual(canAutomate([...recs("invoice", "total", 97, 3), ...recs("receipt", "date", 20, 10)], 95, 30), { automate: false, failing: ["receipt/date"], undersampled: [] });
+  assert.deepEqual(canAutomate(recs("invoice", "total", 95, 5), 95, 30), { automate: true, failing: [], undersampled: [] });
 });
 
 test("e3 the threshold is the lowest confidence whose accepted items meet the target precision", () => {
@@ -63,8 +65,8 @@ test("e5 the stratified sample takes the best ranked items of every stratum", ()
 });
 
 test("e6 low confidence and conflicts go to review with the weakest first", () => {
-  const rows = [{ id: "x1", confidence: 90, conflict: false }, { id: "x2", confidence: 60, conflict: false }, { id: "x3", confidence: 99, conflict: true }, { id: "x4", confidence: 79, conflict: false }];
-  assert.deepEqual(route(rows, 80, 10), { review: ["x3", "x2", "x4"], backlog: [], auto: ["x1"] });
+  const rows = [{ id: "x1", confidence: 90, conflict: false }, { id: "x2", confidence: 60, conflict: false }, { id: "x3", confidence: 99, conflict: true }, { id: "x4", confidence: 79, conflict: false }, { id: "x5", confidence: 80, conflict: false }];
+  assert.deepEqual(route(rows, 80, 10), { review: ["x3", "x2", "x4"], backlog: [], auto: ["x1", "x5"] });
 });
 
 test("e7 review capacity is respected and the rest wait in a backlog", () => {
