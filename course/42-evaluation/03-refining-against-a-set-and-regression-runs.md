@@ -29,7 +29,7 @@ The prompt engineering overview supplies the guard on step 1: the techniques ass
 
 The example below does the five steps on six sentiment cases. It uses two scripted "versions" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label (the example's grader trims and lower-cases only, a simpler rule than the practice's `exact` check, which also collapses runs of white space), the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of both languages is shown, and under each is what it printed in the container.
 
-<!-- example: m42-eval-run tabs: python,typescript -->
+<!-- example: m42-eval-run tabs: python,typescript,java,kotlin -->
 ```python
 """An eval run, a success gate and a regression comparison, on a scripted classifier.
 
@@ -190,6 +190,215 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']
+prompt v2: pass rate 0.833, edge 2/3, gate failures ['tag:edge']
+v2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']
+average improved: True - safe to ship: False
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * An eval run, a success gate and a regression comparison, on a scripted classifier.
+ *
+ * <p>The Claude documentation on success criteria and evaluations (read on 2026-10-03) says to design evals that mirror the real task, edge
+ * cases included, to automate the grading, and to judge several dimensions at once ("an F1 score of at least 0.85", "99.5% of outputs are
+ * non-toxic"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a
+ * better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
+ */
+public final class EvalRun {
+    record Case(String id, String input, String expect, List<String> tags) {}
+
+    record Result(String id, boolean passed, List<String> tags) {}
+
+    /** pass rate of a run, and per tag {passed, total}. */
+    record Report(List<Result> results, double passRate, Map<String, int[]> byTag) {}
+
+    record Criteria(double minPassRate, Map<String, Double> tags) {}
+
+    record Diff(List<String> regressions, List<String> fixed) {}
+
+    static final List<Case> CASES = List.of(
+        new Case("pos-1", "Love it, works great", "positive", List.of("core")),
+        new Case("neg-1", "Broke after two days", "negative", List.of("core")),
+        new Case("neu-1", "It arrived on Tuesday", "neutral", List.of("core")),
+        new Case("sarcasm-1", "Oh great, another crash", "negative", List.of("edge")),
+        new Case("mixed-1", "Fast shipping but the screen is dim", "neutral", List.of("edge")),
+        new Case("empty-1", "", "neutral", List.of("edge")));
+
+    static final Map<String, String> PROMPT_V1 = Map.of(
+        "Love it, works great", "positive", "Broke after two days", "negative", "It arrived on Tuesday", "neutral",
+        "Oh great, another crash", "positive", "Fast shipping but the screen is dim", "positive", "", "Neutral");
+    static final Map<String, String> PROMPT_V2 = Map.of(
+        "Love it, works great", "positive", "Broke after two days", "negative", "It arrived on Tuesday", "neutral",
+        "Oh great, another crash", "negative", "Fast shipping but the screen is dim", "neutral", "", "positive");
+
+    static final Criteria CRITERIA = new Criteria(0.8, Map.of("edge", 0.75));
+
+    /** Code-graded: the answer must equal the expected label, ignoring case and surrounding white space. */
+    static boolean grade(Case c, String output) {
+        return output.strip().toLowerCase(Locale.ROOT).equals(c.expect());
+    }
+
+    static Report run(List<Case> cases, Map<String, String> model) {
+        List<Result> results = new ArrayList<>();
+        Map<String, int[]> byTag = new LinkedHashMap<>();
+        int passed = 0;
+        for (Case c : cases) {
+            boolean ok = grade(c, model.get(c.input()));
+            results.add(new Result(c.id(), ok, c.tags()));
+            if (ok) passed++;
+            for (String tag : c.tags()) {
+                int[] row = byTag.computeIfAbsent(tag, t -> new int[2]);
+                if (ok) row[0]++;
+                row[1]++;
+            }
+        }
+        return new Report(results, passed / (double) results.size(), byTag);
+    }
+
+    /** Every dimension of the success criteria must hold, not only the average. */
+    static List<String> gate(Report report, Criteria criteria) {
+        List<String> failures = new ArrayList<>();
+        if (report.passRate() < criteria.minPassRate()) failures.add("overall");
+        for (Map.Entry<String, Double> tag : criteria.tags().entrySet()) {
+            int[] row = report.byTag().get(tag.getKey());
+            if (row[0] / (double) row[1] < tag.getValue()) failures.add("tag:" + tag.getKey());
+        }
+        return failures;
+    }
+
+    static Diff compare(Report baseline, Report current) {
+        Map<String, Boolean> before = new LinkedHashMap<>();
+        for (Result r : baseline.results()) before.put(r.id(), r.passed());
+        List<String> regressions = new ArrayList<>();
+        List<String> fixed = new ArrayList<>();
+        for (Result r : current.results()) {
+            if (before.get(r.id()) && !r.passed()) regressions.add(r.id());
+            if (!before.get(r.id()) && r.passed()) fixed.add(r.id());
+        }
+        return new Diff(regressions, fixed);
+    }
+
+    private static String py(List<String> names) {
+        return names.stream().map(n -> "'" + n + "'").collect(Collectors.joining(", ", "[", "]"));
+    }
+
+    private static String py(boolean value) {
+        return value ? "True" : "False";
+    }
+
+    public static void main(String[] args) {
+        Report v1 = run(CASES, PROMPT_V1);
+        Report v2 = run(CASES, PROMPT_V2);
+        for (Map.Entry<String, Report> e : List.of(Map.entry("prompt v1", v1), Map.entry("prompt v2", v2))) {
+            Report report = e.getValue();
+            int[] edge = report.byTag().get("edge");
+            System.out.println(String.format(Locale.ROOT, "%s: pass rate %.3f, edge %d/%d, gate failures %s", e.getKey(), report.passRate(), edge[0], edge[1], py(gate(report, CRITERIA))));
+        }
+        Diff diff = compare(v1, v2);
+        System.out.println("v2 against v1: fixed " + py(diff.fixed()) + " regressions " + py(diff.regressions()));
+        System.out.println("average improved: " + py(v2.passRate() > v1.passRate()) + " - safe to ship: " + py(diff.regressions().isEmpty() && gate(v2, CRITERIA).isEmpty()));
+    }
+}
+```
+```text
+prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']
+prompt v2: pass rate 0.833, edge 2/3, gate failures ['tag:edge']
+v2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']
+average improved: True - safe to ship: False
+```
+```kotlin
+/**
+ * An eval run, a success gate and a regression comparison, on a scripted classifier.
+ *
+ * The Claude documentation on success criteria and evaluations (read on 2026-10-03) says to design evals that mirror the real task, edge
+ * cases included, to automate the grading, and to judge several dimensions at once ("an F1 score of at least 0.85", "99.5% of outputs are
+ * non-toxic"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a
+ * better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
+ */
+data class Case(val id: String, val input: String, val expect: String, val tags: List<String>)
+
+data class Result(val id: String, val passed: Boolean, val tags: List<String>)
+
+/** The pass rate of a run, and per tag (passed, total). */
+data class Report(val results: List<Result>, val passRate: Double, val byTag: Map<String, Pair<Int, Int>>)
+
+data class Criteria(val minPassRate: Double, val tags: Map<String, Double>)
+
+data class Diff(val regressions: List<String>, val fixed: List<String>)
+
+val CASES = listOf(
+    Case("pos-1", "Love it, works great", "positive", listOf("core")),
+    Case("neg-1", "Broke after two days", "negative", listOf("core")),
+    Case("neu-1", "It arrived on Tuesday", "neutral", listOf("core")),
+    Case("sarcasm-1", "Oh great, another crash", "negative", listOf("edge")),
+    Case("mixed-1", "Fast shipping but the screen is dim", "neutral", listOf("edge")),
+    Case("empty-1", "", "neutral", listOf("edge")),
+)
+
+val PROMPT_V1 = mapOf(
+    "Love it, works great" to "positive", "Broke after two days" to "negative", "It arrived on Tuesday" to "neutral",
+    "Oh great, another crash" to "positive", "Fast shipping but the screen is dim" to "positive", "" to "Neutral",
+)
+val PROMPT_V2 = PROMPT_V1 + mapOf("Oh great, another crash" to "negative", "Fast shipping but the screen is dim" to "neutral", "" to "positive")
+
+val CRITERIA = Criteria(0.8, mapOf("edge" to 0.75))
+
+/** Code-graded: the answer must equal the expected label, ignoring case and surrounding white space. */
+fun grade(case: Case, output: String) = output.trim().lowercase() == case.expect
+
+fun run(cases: List<Case>, model: Map<String, String>): Report {
+    val results = cases.map { Result(it.id, grade(it, model.getValue(it.input)), it.tags) }
+    val byTag = linkedMapOf<String, Pair<Int, Int>>()
+    for (r in results) for (tag in r.tags) {
+        val (passed, total) = byTag[tag] ?: (0 to 0)
+        byTag[tag] = (passed + if (r.passed) 1 else 0) to (total + 1)
+    }
+    return Report(results, results.count { it.passed } / results.size.toDouble(), byTag)
+}
+
+/** Every dimension of the success criteria must hold, not only the average. */
+fun gate(report: Report, criteria: Criteria): List<String> {
+    val failures = mutableListOf<String>()
+    if (report.passRate < criteria.minPassRate) failures += "overall"
+    for ((tag, minimum) in criteria.tags) {
+        val (passed, total) = report.byTag.getValue(tag)
+        if (passed / total.toDouble() < minimum) failures += "tag:$tag"
+    }
+    return failures
+}
+
+fun compare(baseline: Report, current: Report): Diff {
+    val before = baseline.results.associate { it.id to it.passed }
+    return Diff(
+        regressions = current.results.filter { before.getValue(it.id) && !it.passed }.map { it.id },
+        fixed = current.results.filter { !before.getValue(it.id) && it.passed }.map { it.id },
+    )
+}
+
+private fun py(names: List<String>) = names.joinToString(", ", "[", "]") { "'$it'" }
+
+private fun py(value: Boolean) = if (value) "True" else "False"
+
+fun main() {
+    val v1 = run(CASES, PROMPT_V1)
+    val v2 = run(CASES, PROMPT_V2)
+    for ((name, report) in listOf("prompt v1" to v1, "prompt v2" to v2)) {
+        val (passed, total) = report.byTag.getValue("edge")
+        println("$name: pass rate ${"%.3f".format(report.passRate)}, edge $passed/$total, gate failures ${py(gate(report, CRITERIA))}")
+    }
+    val diff = compare(v1, v2)
+    println("v2 against v1: fixed ${py(diff.fixed)} regressions ${py(diff.regressions)}")
+    println("average improved: ${py(v2.passRate > v1.passRate)} - safe to ship: ${py(diff.regressions.isEmpty() && gate(v2, CRITERIA).isEmpty())}")
+}
 ```
 ```text
 prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']
