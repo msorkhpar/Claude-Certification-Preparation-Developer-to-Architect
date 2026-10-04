@@ -1,0 +1,240 @@
+{
+  "practice": "60-claude-code-in-ci/unit-01/practice-1",
+  "name": "ci_review",
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_valid_run_posts_the_findings_above_the_floor_and_outside_the_disabled_categories",
+      "typescript": "m1 a valid run posts the findings above the floor and outside the disabled categories"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_failed_run_fails_the_job_instead_of_passing_it_silently",
+      "typescript": "e1 a failed run fails the job instead of passing it silently"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_an_answer_that_breaks_the_schema_fails_the_job_and_names_the_path_of_the_problem",
+      "typescript": "e2 an answer that breaks the schema fails the job and names the path of the problem"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_finding_at_the_failing_severity_blocks_the_merge_and_lower_ones_only_comment",
+      "typescript": "e3 a finding at the failing severity blocks the merge and lower ones only comment"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_prompt_lists_earlier_findings_and_existing_tests_and_asks_for_new_or_unaddressed_issues_only",
+      "typescript": "e4 the prompt lists earlier findings and existing tests and asks for new or unaddressed issues only"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_schema_file_is_valid_draft_07_and_requires_every_field_of_a_finding",
+      "typescript": "e5 the schema file is valid draft 07 and requires every field of a finding"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_workflow_runs_claude_headless_with_json_output_a_schema_a_turn_limit_read_only_tools_and_the_context_file",
+      "typescript": "e6 the workflow runs claude headless with json output a schema a turn limit read only tools and the context file"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_project_file_states_what_to_report_and_what_to_skip_with_a_severity_example_for_each_level",
+      "typescript": "e7 the project file states what to report and what to skip with a severity example for each level"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e8 no file holds a personal path an address or a key"
+    }
+  },
+  "plants": {
+    "wrong-gate-nonzero-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "ignores a non zero exit status when the output looks fine"
+    },
+    "wrong-gate-error-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "ignores an error subtype and posts whatever the output holds"
+    },
+    "wrong-gate-no-output-ok": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "passes a run that succeeded without a structured output"
+    },
+    "wrong-gate-no-schema": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "never checks the answer against the schema"
+    },
+    "wrong-gate-floor-ignored": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "posts findings below the severity floor"
+    },
+    "wrong-gate-disabled-ignored": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "posts findings of a disabled category"
+    },
+    "wrong-gate-never-blocks": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "never fails the job on a high finding"
+    },
+    "wrong-gate-blocks-on-any": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "fails the job on any posted finding"
+    },
+    "wrong-prompt-no-new-only": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves out the instruction to report only new or unaddressed findings"
+    },
+    "wrong-prompt-no-prior": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the earlier findings out of the prompt"
+    },
+    "wrong-prompt-no-tests": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the existing tests out of the prompt"
+    },
+    "wrong-prompt-diff-first": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "puts the diff before the instructions"
+    },
+    "wrong-schema-severity-open": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the severity open to any string"
+    },
+    "wrong-schema-draft-2020": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "declares a newer schema version than the SDK validates"
+    },
+    "wrong-schema-min-length": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "uses a string constraint that structured outputs do not support"
+    },
+    "wrong-schema-pattern-optional": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "makes the detected pattern optional"
+    },
+    "wrong-schema-extra-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets a finding carry extra keys"
+    },
+    "wrong-no-print": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "runs claude without the print flag, which waits for input"
+    },
+    "wrong-no-json": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves the json output format out"
+    },
+    "wrong-no-schema-flag": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves the schema out of the command"
+    },
+    "wrong-no-max-turns": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves the turn limit out"
+    },
+    "wrong-bash-tool": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "pre approves the whole Bash tool in a review"
+    },
+    "wrong-no-bare": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "runs without bare mode, so the host configuration loads"
+    },
+    "wrong-bare-no-context": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "uses bare mode without passing the project file"
+    },
+    "wrong-literal-key": {
+      "caught_by": [
+        "e6",
+        "e8"
+      ],
+      "defect": "writes the API key into the workflow"
+    },
+    "wrong-no-timeout": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves the job without a timeout"
+    },
+    "wrong-write-permission": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "gives the review job write access to the contents"
+    },
+    "wrong-vague-criteria": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes be conservative into the criteria"
+    },
+    "wrong-no-severity-example": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "leaves the high severity without an example"
+    },
+    "wrong-no-fixtures": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "leaves the fixtures folder out of the testing standards"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "writes a personal home path into the project file"
+    }
+  }
+}
