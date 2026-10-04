@@ -36,7 +36,7 @@ class SkillSetupTest {
         assertTrue(str(meta["agent"]).isNotBlank(), "name the subagent type in agent")
         assertTrue(Regex("(?m)^1\\. ").containsMatchIn(body), "a forked skill is given its content as the task: write numbered steps, not guidelines")
         assertTrue(str(meta["argument-hint"]).isNotBlank(), "show what to type with argument-hint")
-        assertTrue(has("""\$0|\$ARGUMENTS""", body), "use the pull request number in the steps with \$0")
+        assertTrue(has("\\\$0|\\\$ARGUMENTS", body), "use the pull request number in the steps with \$0")
     }
 
     @Test
