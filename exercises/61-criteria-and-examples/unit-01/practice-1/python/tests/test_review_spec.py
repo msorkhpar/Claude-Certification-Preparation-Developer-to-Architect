@@ -4,7 +4,14 @@ from pathlib import Path
 
 # SOLUTION_DIR selects starter, reference or a planted wrong solution.
 sys.path.insert(0, os.environ.get("SOLUTION_DIR", str(Path(__file__).resolve().parent.parent / "starter")))
-from review_spec import build_review_prompt, category_report, next_step
+from review_spec import build_review_prompt, next_step
+from review_spec import category_report as _category_report
+
+
+def category_report(*args, **kw):
+    result = _category_report(*args, **kw)
+    assert isinstance(result, dict), "category_report returned nothing"
+    return result
 
 
 def crit(**over):

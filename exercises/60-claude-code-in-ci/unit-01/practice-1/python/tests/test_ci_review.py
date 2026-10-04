@@ -48,7 +48,8 @@ def test_e1_a_failed_run_fails_the_job_instead_of_passing_it_silently():
     for out, code, word in cases:
         result = gate(out, code, REVIEW_SCHEMA, POLICY)
         assert isinstance(result, dict) and result["exit"] == 1 and result["comments"] == [] and any(word in p for p in result["problems"]), (out, result)
-    assert "exited with status 2" in run([], code=2)["problems"][0] and run([], code=2)["exit"] == 1
+    failed = run([], code=2)
+    assert failed["exit"] == 1 and any("exited with status 2" in p for p in failed["problems"]), failed
 
 
 def test_e2_an_answer_that_breaks_the_schema_fails_the_job_and_names_the_path_of_the_problem():

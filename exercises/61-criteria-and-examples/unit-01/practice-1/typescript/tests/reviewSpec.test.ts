@@ -5,7 +5,12 @@ import { pathToFileURL } from "node:url";
 
 // SOLUTION_DIR selects starter, reference or a planted wrong solution.
 const dir = resolve(process.env.SOLUTION_DIR ?? "starter");
-const { buildReviewPrompt, categoryReport, nextStep } = await import(pathToFileURL(resolve(dir, "reviewSpec.ts")).href);
+const { buildReviewPrompt, categoryReport: rawCategoryReport, nextStep } = await import(pathToFileURL(resolve(dir, "reviewSpec.ts")).href);
+const categoryReport = (...args: unknown[]) => {
+  const result = rawCategoryReport(...args);
+  assert.ok(result !== null && typeof result === "object", "categoryReport returned nothing");
+  return result;
+};
 
 const crit = (over: Record<string, unknown> = {}) => ({
   id: "bug", report: "A comment whose claimed behaviour contradicts what the code does.", skip: "Minor style, naming and patterns the codebase already uses.",

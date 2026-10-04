@@ -1671,7 +1671,7 @@ PLANTS[f"{X}/61-criteria-and-examples/unit-01/practice-1"] = {
         "wrong-vague-report-only": [("            phrase = _vague(c[key])\n", '            phrase = _vague(c[key]) if key == "report" else None\n')],
         "wrong-vague-short-list": [('VAGUE = ("be conservative", ', "VAGUE = (")],
         "wrong-skip-blank": [("            if not _present(c.get(key)):", "            if c.get(key) is None:")],
-        "wrong-severity-high-only": [('        for level in ("high", "low"):', '        for level in ("high",):')],
+        "wrong-severity-high-only": [('        for level in ("high", "low"):', '        for level in ("high",):'), ('Severity low: {severity["low"]}', 'Severity low: {severity.get("low", "")}')],
         "wrong-examples-up-to-six": [("if not 2 <= len(examples) <= 4:", "if not 2 <= len(examples) <= 6:")],
         "wrong-all-report-examples": [('if {e.get("verdict") for e in examples} != {"report", "skip"}:', 'if not {e.get("verdict") for e in examples} <= {"report", "skip"}:')],
         "wrong-reason-optional": [('if not _present(e.get("reason")):', 'if e.get("reason") is None:')],

@@ -51,7 +51,8 @@ test("e1 a failed run fails the job instead of passing it silently", () => {
     const result = gate(out, code, REVIEW_SCHEMA, POLICY);
     assert.ok(result && result.exit === 1 && result.comments.length === 0 && result.problems.some((p: string) => p.includes(word)), JSON.stringify([out, result]));
   }
-  assert.ok(run([], 2).problems[0].includes("exited with status 2") && run([], 2).exit === 1);
+  const failed = run([], 2);
+  assert.ok(failed.exit === 1 && failed.problems.some((p: string) => p.includes("exited with status 2")), JSON.stringify(failed));
 });
 
 test("e2 an answer that breaks the schema fails the job and names the path of the problem", () => {
