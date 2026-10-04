@@ -43,38 +43,38 @@
       "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q3",
       "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
       "scope": "page",
-      "stem": "What bounds the number of steps of a run that nobody watches?",
+      "stem": "To which jobs does the audit's `no-print-flag` finding apply?",
       "options": {
-        "a": "A longer timeout on the job that contains it",
-        "b": "A prompt that asks it to finish as quickly as it can",
-        "c": "A turn limit set in the command",
-        "d": "Running it again whenever it fails to produce an answer"
+        "a": "Any job whose api is batch, whatever its command",
+        "b": "A command that starts `python` and submits a script without `-p`",
+        "c": "A command that starts `claude` and has neither `-p` nor `--print`",
+        "d": "Any job that a developer waits for, whatever its command"
       },
       "key": "c",
       "explanation": {
-        "c": "A limit set in the command stops the loop: \"`--max-turns` stops a loop\".",
-        "b": "Ruled out because a sentence is no limit: \"A prompt that asks the run to be quick is a request, not a limit.\"",
-        "a": "Ruled out because time does not stop a loop: \"A longer job timeout only lets a loop run longer.\"",
-        "d": "Ruled out because repeating the run changes nothing: \"re-running it repeats the cost with no reason to expect a different result\"."
+        "c": "The finding is about the command line: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\"",
+        "b": "Ruled out because a script is not covered: \"the `-p` rule applies to commands that start with `claude` and not to a script\".",
+        "a": "is ruled out for the same reason: \"the `-p` rule applies to commands that start with `claude` and not to a script\".",
+        "d": "Ruled out because waiting has its own finding: \"`blocking-batch`: a job someone waits for that runs as a batch.\""
       }
     },
     {
       "id": "02-review-passes-criteria-test-generation-and-the-practice#q1",
       "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
       "scope": "page",
-      "stem": "A review of nine changed modules gives deep notes on some and shallow ones on others, and flags a pattern in one while approving it in another. How should it be restructured?",
+      "stem": "Which criteria file passes the practice's criteria case?",
       "options": {
-        "a": "A model with a larger context window, for the same single pass",
-        "b": "A pass for each file, then one pass on how the files fit together",
-        "c": "Three full runs, keeping only the issues that two of them report",
-        "d": "A rule that pull requests may not change more than four files"
+        "a": "Two items to report, two to skip, and no example for the high severity",
+        "b": "Two items to report, two to skip, and an example for every severity",
+        "c": "Two items to report, two to skip, an example for every severity, and a line that says be conservative",
+        "d": "Two items to report and an example for every severity, with no list of items to skip"
       },
       "key": "b",
       "explanation": {
-        "b": "Dividing the work answers the cause, thinning attention.",
-        "a": "Ruled out because room is not attention: \"A larger context window does not fix attention quality.\"",
-        "c": "Ruled out because agreement hides rare finds: \"Keeping only the issues that two of three runs agree on would hide real bugs that are found only now and then.\"",
-        "d": "Ruled out because it shifts the work: \"Asking authors to split their pull requests moves the work to people and does not improve the review.\""
+        "b": "It has both lists and every example: \"The criteria case passes when the report and skip lists have two items each, every severity has an `Example:` and no vague phrase such as `be conservative` appears.\"",
+        "a": "is ruled out by the examples: \"every severity has an `Example:`\".",
+        "c": "is ruled out by the vague phrase: \"no vague phrase such as `be conservative` appears\".",
+        "d": "is ruled out by the lists: \"the report and skip lists have two items each\"."
       }
     },
     {
@@ -176,19 +176,19 @@
       "id": "02-review-passes-criteria-test-generation-and-the-practice#m4",
       "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The job that only looks at code has been given the right to run whatever it likes on the machine. What is the problem?",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The draft's review lists the tools Read, Grep and Bash. What does the audit report about it?",
       "options": {
-        "a": "Shell access output is not valid JSON, so the schema of the answer cannot be applied to it",
-        "b": "Shell access slows every run down, and a turn limit would then end that run far too soon",
-        "c": "Shell access changes things, so the list should hold reading and searching tools only",
-        "d": "Shell access needs a person to approve each call, and nobody is there to give that approval"
+        "a": "A job that a person waits for runs as a batch with no promise of speed",
+        "b": "A command that starts claude lacks the print flag that makes a run headless",
+        "c": "The job holds a means of changing things although it only looks at code",
+        "d": "A session that wrote the code is also the one that judges that code afterwards"
       },
       "key": "c",
       "explanation": {
-        "c": "A review changes nothing, so it needs only reading tools.",
-        "b": "Ruled out because the issue is what the tool can do: \"A shell tool is a way to change things\".",
-        "a": "Ruled out because the schema applies to the answer and not to the commands: \"The severity then belongs in the schema as a closed list\".",
-        "d": "Ruled out because the command's approval is listed in advance: \"`--allowedTools` lists what runs without asking, because nobody can approve a prompt\"."
+        "c": "A review needs reading tools only: \"A shell tool is a way to change things\".",
+        "b": "Ruled out because that finding is about the command line: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\"",
+        "a": "Ruled out because that finding is about the API: \"`blocking-batch`: a job someone waits for that runs as a batch.\"",
+        "d": "Ruled out because the session is another property: \"the review runs as its own session and not as a continuation of the one that generated the change\"."
       }
     }
   ]

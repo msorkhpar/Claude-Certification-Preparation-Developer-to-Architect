@@ -5,19 +5,19 @@
       "id": "01-two-subagents-and-the-tools-each-one-gets#q1",
       "page": "01-two-subagents-and-the-tools-each-one-gets.md",
       "scope": "page",
-      "stem": "A team wants an agent that studies a legacy system and cannot change a file. What goes in its definition?",
+      "stem": "The audit of the draft prints `bare-write-allowed`. What removes that finding?",
       "options": {
-        "a": "The shell tool, with a rule that blocks redirections",
-        "b": "A prompt sentence that tells it never to modify a file",
-        "c": "No tools line, as leaving it out gives the smallest set",
-        "d": "A tools line that lists only reading and searching tools"
+        "a": "Giving the scaffolding subagent a tools line of its own, with a few names",
+        "b": "Adding the file-writing tool to the tools line of the subagent that generates the code",
+        "c": "Denying `Read(./.env)` in the same settings file as the allow rule",
+        "d": "Replacing the whole-tool allow rule with one limited to `src/generated/`"
       },
       "key": "d",
       "explanation": {
-        "d": "The tools line is the limit.",
-        "b": "Ruled out because a prompt does not limit tools: \"A sentence in the prompt is a request that the model weighs\".",
-        "c": "Ruled out because the omission is the widest list: \"leaving the line out grants the most, not the least\".",
-        "a": "Ruled out because the shell is a way to write: \"The shell tool can write files through redirections and commands\"."
+        "d": "The finding is about an allow rule that covers the whole tool: \"`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool.\"",
+        "b": "Ruled out because a tools line lists tools and approves nothing in settings: \"The `tools` line is the allowlist.\"",
+        "c": "Ruled out because that is another finding: \"`env-readable`: the settings do not deny `Read(./.env)`.\"",
+        "a": "Ruled out because that is a third: \"`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it\"."
       }
     },
     {
@@ -81,19 +81,19 @@
       "id": "02-sessions-variables-and-the-practice#q2",
       "page": "02-sessions-variables-and-the-practice.md",
       "scope": "page",
-      "stem": "Which allow rules pass the practice's scaffolder case?",
+      "stem": "Which allow rule for the tracker passes the practice's read-only case?",
       "options": {
-        "a": "`Edit(src/generated/**)` together with `Write(src/generated/**)`",
-        "b": "`Write(src/generated/**)` alone",
-        "c": "`Edit(src/**)` alone",
-        "d": "`Edit(src/generated/**)` alone"
+        "a": "`mcp__tickets`",
+        "b": "`mcp__tickets__*`",
+        "c": "`mcp__tickets__create_ticket`",
+        "d": "`mcp__tickets__get_ticket`"
       },
       "key": "d",
       "explanation": {
-        "d": "One Edit rule limited to the generated folder: \"every allow rule that edits or writes is an `Edit` rule limited to `src/generated/`\".",
-        "b": "Ruled out because a Write path rule is never read: \"a `Write(...)` path rule fails it, because Claude Code never consults it\".",
-        "c": "Ruled out because the path is wider than the folder: \"an `Edit` rule limited to `src/generated/`\".",
-        "a": "Ruled out because it adds a Write path rule: \"a `Write(...)` path rule fails it, because Claude Code never consults it\"."
+        "d": "A get tool, with the create and delete tools denied.",
+        "b": "Ruled out because a wildcard allows every tool: \"every allowed ticket tool is a get, list or search tool\".",
+        "c": "Ruled out because creating is denied: \"the create and delete tools are denied\".",
+        "a": "is ruled out for the same reason as a wildcard: \"every allowed ticket tool is a get, list or search tool\"."
       }
     },
     {
@@ -157,19 +157,19 @@
       "id": "02-sessions-variables-and-the-practice#m3",
       "page": "02-sessions-variables-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Exploring a big module would fill the main conversation with file contents. What keeps the main context small?",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Which explorer definition passes the practice's explorer case?",
       "options": {
-        "a": "A read-only subagent does the reading and hands back its result",
-        "b": "A longer root memory file that summarises the module in advance",
-        "c": "A forked session that begins with the history of the main one",
-        "d": "A rule that denies the shell tool during every exploration"
+        "a": "A description that starts `Use when`, and a tools line of `Read`, `Grep` and `Glob`",
+        "b": "A description that says `Explores the legacy system`, and the same tools line",
+        "c": "A description that starts `Use when`, and a tools line of `Read`, `Grep` and `Bash`",
+        "d": "A description that starts `Use when`, and no tools line at all"
       },
       "key": "a",
       "explanation": {
-        "a": "A subagent keeps what it reads in its own context.",
-        "b": "Ruled out because a memory file does not move the reading: \"the root file loads in every session and costs context each time\".",
-        "c": "Ruled out because a fork copies the history: \"copies the history into a new session\".",
-        "d": "Ruled out because denying a tool does not move any reading elsewhere: \"Denying the shell does not limit the file tools\"."
+        "a": "The page states the case: \"The explorer case passes when its description starts with `Use when`, its `tools` line exists, and the line lists only `Read`, `Grep`, `Glob` and `mcp__docs__search`.\"",
+        "b": "is ruled out by the first condition: \"its description starts with `Use when`\".",
+        "c": "is ruled out by the last: \"the line lists only `Read`, `Grep`, `Glob` and `mcp__docs__search`\".",
+        "d": "is ruled out by the second: \"its `tools` line exists\"."
       }
     },
     {

@@ -114,7 +114,6 @@ def test_e5_every_rule_scopes_itself_with_a_glob_that_matches_a_file():
     assert found, "write the rule files"
     for name, _, paths in found:
         assert paths, f"{name} has no paths list, so it loads in every session"
-        assert all("*" in g for g in paths), f"{name}: a path without * is not a glob (a bare folder name matches no file)"
         assert any(reaches(paths, f) for f in SAMPLES), f"{name} matches none of the sample files"
 
 

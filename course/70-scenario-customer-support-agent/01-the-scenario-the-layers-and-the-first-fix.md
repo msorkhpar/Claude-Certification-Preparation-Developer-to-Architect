@@ -650,11 +650,11 @@ These are the wrong answers that the exam's options for this scenario offer, eac
    - **c**: Rewrite the descriptions of the tools first, since both problems start with tool choice
    - **d**: Enforce the call sequence in the dispatcher, because moved money cannot be recalled
 
-2. A person takes over an escalated case. Which source should supply the facts of the hand-off record?
-   - **a**: The desk's own state: the customer, the orders checked, the refunds made and the refusals
-   - **b**: A summary that the model writes of the whole conversation just before it hands the case over
-   - **c**: The full transcript of the conversation, attached to the ticket for the person to read
-   - **d**: A state that every conversation of the day shares and writes its facts into
+2. A customer asks about a purchase that belongs to someone else. How does the support example's dispatcher refuse the call?
+   - **a**: As `order_not_owned`, and the message does not name the owner
+   - **b**: As `order_not_owned`, and the message names the owner so the customer can be asked
+   - **c**: As `not_found`, and the message says that the order does not exist
+   - **d**: As `needs_human`, and the message tells the model to escalate
 
 3. Two customers share a name, the lookup tool returns both, and the agent proceeds with the first. What should the dispatcher have done?
    - **a**: Choose the customer with the most recent order, as that is the likelier one
@@ -666,7 +666,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 <summary>Answer key</summary>
 
 1. **d**. Money that moved wrongly cannot be called back, so its cause is fixed first. *b* is ruled out because the size of a count does not set the order: "The first fix goes to what cannot be undone." *c* is ruled out because the skipped step is a step order and not a tool choice: "A step order that is only requested". *a* is ruled out because a trained model comes before words were tried: "machinery for a problem nobody has tried to fix with words".
-2. **a**. The record is built from what the code kept: "the hand-off record is built from the desk's own state". *b* is ruled out because the model supplies one field only: "the model's reason as one field". *c* is ruled out because reading the transcript is what the record spares: "so a person does not read the transcript to find out what happened". *d* is ruled out because a shared state leaks between cases: "a long-lived shared state is a defect".
+2. **a**. The refusal is `order_not_owned` and keeps the owner out of it: "An order that belongs to someone else is refused as `order_not_owned`, and the message does not say whose it is." *b* is ruled out by the same sentence: "the message does not say whose it is". *c* is ruled out because `not_found` is the answer of the identity step: "No match returns `not_found` with the same advice." *d* is ruled out because that refusal belongs to the amount: "above it the refusal is `needs_human`, which tells the model that the next step is to escalate".
 3. **c**. Several matches are a question for the customer, and nothing is set. *a* is ruled out because the dispatcher does not pick: "Several matches set nothing and return the refusal". *b* is ruled out because the desk holds one verified customer, set only by a single match: "One match sets the verified customer." *d* is ruled out because the refusal is not a fault that a retry can clear: "A retryable error (a timeout of the order service) is retried once by the loop, which is the loop's business, not the model's."
 
 </details>

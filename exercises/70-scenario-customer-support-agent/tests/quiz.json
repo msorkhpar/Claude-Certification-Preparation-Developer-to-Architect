@@ -24,19 +24,19 @@
       "id": "01-the-scenario-the-layers-and-the-first-fix#q2",
       "page": "01-the-scenario-the-layers-and-the-first-fix.md",
       "scope": "page",
-      "stem": "A person takes over an escalated case. Which source should supply the facts of the hand-off record?",
+      "stem": "A customer asks about a purchase that belongs to someone else. How does the support example's dispatcher refuse the call?",
       "options": {
-        "a": "The desk's own state: the customer, the orders checked, the refunds made and the refusals",
-        "b": "A summary that the model writes of the whole conversation just before it hands the case over",
-        "c": "The full transcript of the conversation, attached to the ticket for the person to read",
-        "d": "A state that every conversation of the day shares and writes its facts into"
+        "a": "As `order_not_owned`, and the message does not name the owner",
+        "b": "As `order_not_owned`, and the message names the owner so the customer can be asked",
+        "c": "As `not_found`, and the message says that the order does not exist",
+        "d": "As `needs_human`, and the message tells the model to escalate"
       },
       "key": "a",
       "explanation": {
-        "a": "The record is built from what the code kept: \"the hand-off record is built from the desk's own state\".",
-        "b": "Ruled out because the model supplies one field only: \"the model's reason as one field\".",
-        "c": "Ruled out because reading the transcript is what the record spares: \"so a person does not read the transcript to find out what happened\".",
-        "d": "Ruled out because a shared state leaks between cases: \"a long-lived shared state is a defect\"."
+        "a": "The refusal is `order_not_owned` and keeps the owner out of it: \"An order that belongs to someone else is refused as `order_not_owned`, and the message does not say whose it is.\"",
+        "b": "is ruled out by the same sentence: \"the message does not say whose it is\".",
+        "c": "Ruled out because `not_found` is the answer of the identity step: \"No match returns `not_found` with the same advice.\"",
+        "d": "Ruled out because that refusal belongs to the amount: \"above it the refusal is `needs_human`, which tells the model that the next step is to escalate\"."
       }
     },
     {

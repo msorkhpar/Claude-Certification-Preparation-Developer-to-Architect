@@ -157,7 +157,6 @@ class TeamSetupTest {
         assertFalse(found.isEmpty(), "write the rule files");
         for (Rule r : found) {
             assertTrue(r.paths() != null && !r.paths().isEmpty(), r.name() + " has no paths list, so it loads in every session");
-            assertTrue(r.paths().stream().allMatch(g -> g.contains("*")), r.name() + ": a path without * is not a glob (a bare folder name matches no file)");
             assertTrue(SAMPLES.stream().anyMatch(f -> reaches(r.paths(), f)), r.name() + " matches none of the sample files");
         }
     }

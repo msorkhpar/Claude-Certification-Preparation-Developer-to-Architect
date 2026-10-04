@@ -41,7 +41,7 @@ Permission rules are checked in a fixed order. In the documentation's words, "Ru
 
 A server is configured once, in the project's `.mcp.json`, and referred to in two other places by the same name. Its tools are written `mcp__<server>__<tool>`, in a subagent's `tools` line and in a permission rule. A rule can name a whole server (`mcp__tickets`), every tool of it (`mcp__tickets__*`) or one tool (`mcp__tickets__get_ticket`). In a settings file, a rule for an MCP tool that carries parentheses is skipped, so it matches nothing: an argument pattern is not a way to narrow an MCP tool there. To make a server read-only for the agents, allow the reading tools by name and deny the others by name, and remember that a deny rule beats any allow.
 
-The three places must agree. A subagent whose `tools` line names `mcp__wiki__search` when `.mcp.json` has no `wiki` server holds a reference that leads nowhere, and the model never finds out. Nothing in the files complains; a check that reads them does.
+The three places must agree. A subagent whose `tools` line names `mcp__wiki__search` when `.mcp.json` has no `wiki` server holds a reference to something the project never defines. The files do not say so by themselves; a check that reads them does.
 
 ### Credentials come from the environment
 
@@ -476,11 +476,11 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 ## Quiz
 
-1. A team wants an agent that studies a legacy system and cannot change a file. What goes in its definition?
-   - **a**: The shell tool, with a rule that blocks redirections
-   - **b**: A prompt sentence that tells it never to modify a file
-   - **c**: No tools line, as leaving it out gives the smallest set
-   - **d**: A tools line that lists only reading and searching tools
+1. The audit of the draft prints `bare-write-allowed`. What removes that finding?
+   - **a**: Giving the scaffolding subagent a tools line of its own, with a few names
+   - **b**: Adding the file-writing tool to the tools line of the subagent that generates the code
+   - **c**: Denying `Read(./.env)` in the same settings file as the allow rule
+   - **d**: Replacing the whole-tool allow rule with one limited to `src/generated/`
 
 2. A boilerplate agent may change files only in `src/generated`. Which settings give that?
    - **a**: An allow rule for the Edit tool, limited to that folder
@@ -497,7 +497,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The tools line is the limit. *b* is ruled out because a prompt does not limit tools: "A sentence in the prompt is a request that the model weighs". *c* is ruled out because the omission is the widest list: "leaving the line out grants the most, not the least". *a* is ruled out because the shell is a way to write: "The shell tool can write files through redirections and commands".
+1. **d**. The finding is about an allow rule that covers the whole tool: "`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool." *b* is ruled out because a tools line lists tools and approves nothing in settings: "The `tools` line is the allowlist." *c* is ruled out because that is another finding: "`env-readable`: the settings do not deny `Read(./.env)`." *a* is ruled out because that is a third: "`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it".
 2. **a**. An Edit rule covers every built-in file-editing tool and a path keeps it to one folder. *b* is ruled out because a Write path rule is never read: "A path rule written for the Write tool is accepted and never consulted". *c* is ruled out because a bare rule has no path: "A bare `Edit` rule has no path and approves every edit." *d* is ruled out because the file tools have rules of their own: "Denying the shell does not limit the file tools".
 3. **c**. Allow by name and deny the others by name. *b* is ruled out because a sentence is no limit: "A sentence in the prompt is a request that the model weighs". *a* is ruled out because the rule is skipped: "In a settings file, a rule for an MCP tool that carries parentheses is skipped, so it matches nothing". *d* is ruled out because a deny rule beats every allow: "A matching deny rule wins over any allow rule, whatever the specificity."
 

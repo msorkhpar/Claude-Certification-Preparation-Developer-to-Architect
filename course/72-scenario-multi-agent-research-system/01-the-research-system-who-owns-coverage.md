@@ -523,18 +523,18 @@ These are the wrong answers that the exam's options for this scenario offer, eac
    - **c**: The search agent should have returned an empty list instead of an error
    - **d**: The timeout was set too short, so the search never had time to finish
 
-3. Each of four subagents returns about forty pages of raw text, and the coordinator's context is nearly full before synthesis starts. What does the research article suggest?
-   - **a**: Move the synthesis into the coordinator so that nothing has to be sent to it
-   - **b**: Ask the coordinator to summarise each result in its own words as soon as it arrives
-   - **c**: Have each one store its work outside the conversation and send back a reference
-   - **d**: Cap the length of every search result so that no single one can be long
+3. In the example, the film search times out, the alternative query is down as well, and the run goes on. What does the report carry?
+   - **a**: Partial, with a note that names only the first query that failed
+   - **b**: Complete, since the alternative query was tried before the scope was given up
+   - **c**: Partial, with three of four scopes covered and a note that names both failed queries
+   - **d**: Failed, with no report at all because one scope has no findings
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The subagents did what they were assigned, so the plan is what to check, and it can be checked against the question. *b* is ruled out because it is a late substitute: "A downstream agent that is asked to notice gaps is a late and unreliable substitute for a check that costs one comparison." *c* is ruled out because the search agent worked within its scope: "each agent worked correctly within its scope, so widening it does not reach the scope that was never assigned". *a* is ruled out for the same reason: "the subagents did what they were assigned, and the fault is the assignment".
 2. **a**. A status must come from coverage. *b* is ruled out because more prose does not repair the claim: "A run is complete when every scope is covered." *c* is ruled out because an empty success hides the gap: "A failure with no context, or a failure turned into a success". *d* is ruled out because the defect is in what the report claims and not in how long the search waited: "It is partial otherwise, whatever the reason, and the report says which scopes are missing and why."
-3. **c**. Work stored outside the conversation travels as a reference. *b* is ruled out because the coordinator would still receive all the text first: "Large results passed through the hub". *a* is ruled out because it puts the synthesis in the context that is already full: "The coordinator owns everything that is about the whole question". *d* is ruled out because the article's remedy is the reference and not a cap: "Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator."
+3. **c**. The page says what the second run shows: "In that second run the status is `partial`, three of four scopes are covered, and the note names the two queries that failed." *b* is ruled out because trying is not covering: "A run is complete when every scope is covered." *a* is ruled out because the note names both: "the note names the two queries that failed". *d* is ruled out because the report still has value: "A report that did not cover film is still a useful report".
 
 </details>
 

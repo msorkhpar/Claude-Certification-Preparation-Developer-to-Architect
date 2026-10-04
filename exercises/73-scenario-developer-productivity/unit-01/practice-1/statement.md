@@ -30,7 +30,7 @@ Rules the files must follow:
 
 ## Why each part is there, and what you should see
 
-1. **A reference to a tool that is not there does nothing.** A subagent that lists `mcp__wiki__search` when no `wiki` server is configured has a tool that never appears. *You should see* every
+1. **A reference should point at something the project defines.** A subagent that lists `mcp__wiki__search` when no `wiki` server is configured names a server that `.mcp.json` does not have. *You should see* every
    reference resolve to a configured server.
 2. **A credential belongs to the person, not to the repository.** *You should see* the token read from the environment, with no default that would end up in version control.
 3. **A subagent that omits `tools` inherits every tool.** *You should see* both subagents list exactly what they need, the explorer reading only and the scaffolder editing only one folder.

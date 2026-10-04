@@ -15,7 +15,7 @@ Page 1 placed each call in the pipeline. The other half of the scenario is what 
 
 ### One pass over many files does not hold
 
-Attention thins as the number of files in one pass grows: some files get detailed notes and others get a glance, and the same pattern may be flagged in one file and approved in another. The remedy that fits the cause is to divide the work. A pass for each file looks for local issues with the same depth every time. A separate integration pass then looks at what crosses files: the data that flows from one module to another, a function whose callers disagree about it. A larger context window does not fix attention quality. Keeping only the issues that two of three runs agree on would hide real bugs that are found only now and then. Asking authors to split their pull requests moves the work to people and does not improve the review.
+The exam guide's account of the failure is that attention thins as the number of files in one pass grows: some files get detailed notes and others get a glance, and the same pattern may be flagged in one file and approved in another. The remedy that fits the cause is to divide the work. A pass for each file looks for local issues with the same depth every time. A separate integration pass then looks at what crosses files: the data that flows from one module to another, a function whose callers disagree about it. A larger context window does not fix attention quality. Keeping only the issues that two of three runs agree on would hide real bugs that are found only now and then. Asking authors to split their pull requests moves the work to people and does not improve the review.
 
 ### Review in a fresh session, and say what was found
 
@@ -53,11 +53,11 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 ## Quiz
 
-4. A review of nine changed modules gives deep notes on some and shallow ones on others, and flags a pattern in one while approving it in another. How should it be restructured?
-   - **a**: A model with a larger context window, for the same single pass
-   - **b**: A pass for each file, then one pass on how the files fit together
-   - **c**: Three full runs, keeping only the issues that two of them report
-   - **d**: A rule that pull requests may not change more than four files
+4. Which criteria file passes the practice's criteria case?
+   - **a**: Two items to report, two to skip, and no example for the high severity
+   - **b**: Two items to report, two to skip, and an example for every severity
+   - **c**: Two items to report, two to skip, an example for every severity, and a line that says be conservative
+   - **d**: Two items to report and an example for every severity, with no list of items to skip
 
 5. Which `passes` setting does the practice's review case accept?
    - **a**: `all-files`, then `integration`
@@ -74,7 +74,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 <details>
 <summary>Answer key</summary>
 
-4. **b**. Dividing the work answers the cause, thinning attention. *a* is ruled out because room is not attention: "A larger context window does not fix attention quality." *c* is ruled out because agreement hides rare finds: "Keeping only the issues that two of three runs agree on would hide real bugs that are found only now and then." *d* is ruled out because it shifts the work: "Asking authors to split their pull requests moves the work to people and does not improve the review."
+4. **b**. It has both lists and every example: "The criteria case passes when the report and skip lists have two items each, every severity has an `Example:` and no vague phrase such as `be conservative` appears." *a* is ruled out by the examples: "every severity has an `Example:`". *c* is ruled out by the vague phrase: "no vague phrase such as `be conservative` appears". *d* is ruled out by the lists: "the report and skip lists have two items each".
 5. **d**. A pass for each file, then the integration pass. *b* is ruled out because the order matters: "`passes` is `per-file` and then `integration`, in that order". *c* is ruled out because the second pass is not an integration pass: "`passes` is `per-file` and then `integration`, in that order". *a* is ruled out because the first pass is not per file: "`passes` is `per-file` and then `integration`, in that order".
 6. **b**. The flag, the JSON format and the turn limit are all present. *a* is ruled out because the print flag is missing: "has `-p` or `--print`, `--output-format json` and `--max-turns` with a number". *c* is ruled out because the JSON format is missing: "has `-p` or `--print`, `--output-format json` and `--max-turns` with a number". *d* is ruled out because the turn limit is missing: "has `-p` or `--print`, `--output-format json` and `--max-turns` with a number".
 
@@ -102,11 +102,11 @@ This quiz covers both pages of the module.
    - **c**: A command that starts claude lacks the print flag
    - **d**: A review is made in one pass and in a shared session
 
-4. Scenario S5, a pipeline that reviews pull requests and writes tests. The job that only looks at code has been given the right to run whatever it likes on the machine. What is the problem?
-   - **a**: Shell access output is not valid JSON, so the schema of the answer cannot be applied to it
-   - **b**: Shell access slows every run down, and a turn limit would then end that run far too soon
-   - **c**: Shell access changes things, so the list should hold reading and searching tools only
-   - **d**: Shell access needs a person to approve each call, and nobody is there to give that approval
+4. Scenario S5, a pipeline that reviews pull requests and writes tests. The draft's review lists the tools Read, Grep and Bash. What does the audit report about it?
+   - **a**: A job that a person waits for runs as a batch with no promise of speed
+   - **b**: A command that starts claude lacks the print flag that makes a run headless
+   - **c**: The job holds a means of changing things although it only looks at code
+   - **d**: A session that wrote the code is also the one that judges that code afterwards
 
 <details>
 <summary>Answer key</summary>
@@ -114,7 +114,7 @@ This quiz covers both pages of the module.
 1. **b**. A closed list can be compared with a floor. *a* is ruled out because a word in prose is a convention: "A sentence that asks for more care is a request; the criteria are the case list." *c* is ruled out because a count says nothing about how bad a finding is: "what each severity means, with one example for each". *d* is ruled out because the severity belongs in the schema: "The severity then belongs in the schema as a closed list, so a script can compare it with a floor."
 2. **a**. The gate fails the job whenever no valid answer exists. *b* is ruled out because the limit exists to stop a loop: "`--max-turns` stops a loop". *c* is ruled out because a rerun changes nothing: "re-running it repeats the cost with no reason to expect a different result". *d* is ruled out because the limit is what ends the run by itself: "A run with no person must end by itself".
 3. **a**. The finding is about a scheduled job: "`batchable`: a scheduled job that runs in real time and pays full price." *b* is ruled out because that is the other finding: "`blocking-batch`: a job someone waits for that runs as a batch." *c* is ruled out because that is a third: "`no-print-flag`: a command that starts `claude` without `-p` or `--print`." *d* is ruled out because the design of a review has its own findings: "`single-pass-review`, `shared-session`, `no-prior-findings` and `writes`: the design of a review".
-4. **c**. A review changes nothing, so it needs only reading tools. *b* is ruled out because the issue is what the tool can do: "A shell tool is a way to change things". *a* is ruled out because the schema applies to the answer and not to the commands: "The severity then belongs in the schema as a closed list". *d* is ruled out because the command's approval is listed in advance: "`--allowedTools` lists what runs without asking, because nobody can approve a prompt".
+4. **c**. A review needs reading tools only: "A shell tool is a way to change things". *b* is ruled out because that finding is about the command line: "`no-print-flag`: a command that starts `claude` without `-p` or `--print`." *a* is ruled out because that finding is about the API: "`blocking-batch`: a job someone waits for that runs as a batch." *d* is ruled out because the session is another property: "the review runs as its own session and not as a continuation of the one that generated the change".
 
 </details>
 

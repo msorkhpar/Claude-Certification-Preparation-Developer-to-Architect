@@ -933,7 +933,7 @@ PRACTICES[f"{X}/71-scenario-code-generation-with-claude-code/unit-01/practice-1"
         "wrong-handlers-wide": (["m1"], "scopes the handlers rule to every ts file, so it also loads for the database files"),
         "wrong-tests-folder": (["m1"], "scopes the testing rule to one folder, so test files elsewhere miss it"),
         "wrong-tests-ts-only": (["m1"], "scopes the testing rule to the ts files and leaves the tsx files out"),
-        "wrong-database-bare-folder": (["m1", "e5"], "scopes the database rule with a bare folder name, which is not a glob and matches no file"),
+        "wrong-database-bare-folder": (["m1", "e5"], "scopes the database rule with a bare folder name, which reaches none of the sample files"),
         "wrong-root-keeps-hooks": (["e1"], "leaves one component convention in the root file"),
         "wrong-root-long": (["e1"], "pads the root file past twenty-five lines"),
         "wrong-review-bare-bash": (["e2"], "pre approves the whole Bash tool in the review command"),

@@ -130,7 +130,6 @@ class TeamSetupTest {
         assertFalse(found.isEmpty(), "write the rule files")
         for (r in found) {
             assertTrue(!r.paths.isNullOrEmpty(), "${r.name} has no paths list, so it loads in every session")
-            assertTrue(r.paths!!.all { "*" in it }, "${r.name}: a path without * is not a glob (a bare folder name matches no file)")
             assertTrue(samples.any { reaches(r.paths, it) }, "${r.name} matches none of the sample files")
         }
     }

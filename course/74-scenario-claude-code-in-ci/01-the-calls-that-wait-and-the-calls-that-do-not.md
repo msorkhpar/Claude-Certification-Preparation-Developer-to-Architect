@@ -442,18 +442,18 @@ These are the wrong answers that the exam's options for this scenario offer, eac
    - **c**: Neither of them, since the results of a batch arrive in any order
    - **d**: Both of them, with a fallback to real time when a batch is slow
 
-3. What bounds the number of steps of a run that nobody watches?
-   - **a**: A longer timeout on the job that contains it
-   - **b**: A prompt that asks it to finish as quickly as it can
-   - **c**: A turn limit set in the command
-   - **d**: Running it again whenever it fails to produce an answer
+3. To which jobs does the audit's `no-print-flag` finding apply?
+   - **a**: Any job whose api is batch, whatever its command
+   - **b**: A command that starts `python` and submits a script without `-p`
+   - **c**: A command that starts `claude` and has neither `-p` nor `--print`
+   - **d**: Any job that a developer waits for, whatever its command
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. `-p` is the documented way to run without a person. *b* is ruled out because no such variable exists: "There is no headless environment variable and no `--batch` flag on the command line". *c* is ruled out for the same reason: "There is no headless environment variable and no `--batch` flag on the command line". *a* is ruled out because it is a workaround: "Redirecting standard input from an empty file is a Unix workaround that does not change how Claude Code runs."
 2. **a**. Nobody waits for the digest and a developer waits for the gate. *b* is ruled out because waiting is the problem: "Polling a batch does not make it finish sooner." *c* is ruled out because matching exists: "Results of a batch come back matched by `custom_id`, so their order is no reason to avoid it." *d* is ruled out because it adds a path: "A fallback to real time when a batch is slow adds a second path and a second bill".
-3. **c**. A limit set in the command stops the loop: "`--max-turns` stops a loop". *b* is ruled out because a sentence is no limit: "A prompt that asks the run to be quick is a request, not a limit." *a* is ruled out because time does not stop a loop: "A longer job timeout only lets a loop run longer." *d* is ruled out because repeating the run changes nothing: "re-running it repeats the cost with no reason to expect a different result".
+3. **c**. The finding is about the command line: "`no-print-flag`: a command that starts `claude` without `-p` or `--print`." *b* is ruled out because a script is not covered: "the `-p` rule applies to commands that start with `claude` and not to a script". *a* is ruled out for the same reason: "the `-p` rule applies to commands that start with `claude` and not to a script". *d* is ruled out because waiting has its own finding: "`blocking-batch`: a job someone waits for that runs as a batch."
 
 </details>
 

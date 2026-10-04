@@ -100,17 +100,17 @@ This quiz covers both pages of the module.
    - **c**: Handlers are covered by the command folder, which takes priority in every session
    - **d**: The path needs the word handlers in it for the rule to be found
 
-2. Scenario S2, a team using Claude Code on a shared codebase. The practice caps the root file at 25 lines, and the documentation gives 200 as its target. How does the first page explain the gap?
-   - **a**: The cap is the course's own number, chosen to make the point testable
-   - **b**: The documentation lowered its target in a recent version
-   - **c**: Imported files are not counted, so 25 lines are enough in practice
-   - **d**: Rule files are limited to 25 lines, and the root file inherits that same limit
+2. Scenario S2, a team using Claude Code on a shared codebase. Three specs of the flawed project get no conventions at all. What closes the gap?
+   - **a**: A testing rule whose glob, such as `**/*.test.tsx`, reaches test files in any folder
+   - **b**: A longer root file that names each test file under a heading of its own
+   - **c**: A skill for tests that each developer starts by hand before a commit
+   - **d**: A memory file placed in the one folder that holds most of the tests
 
-3. Scenario S2, a team using Claude Code on a shared codebase. The team wants to be sure that no session ever reads the environment file, whatever the model decides. Which control gives that?
-   - **a**: A deny rule in the permission settings, or a hook that blocks the call
-   - **b**: A scoped instruction that repeats the prohibition for that file
-   - **c**: An entry in the modes table that sends such requests to plan mode
-   - **d**: A line in the root memory that forbids reading the environment file
+3. Scenario S2, a team using Claude Code on a shared codebase. In the example's fixed project, `docs/readme.md` is opened. Which conventions load for it?
+   - **a**: Only the root file's, since no rule has a glob that matches it
+   - **b**: The testing rule as well, since a readme is also a kind of test
+   - **c**: The components rule, as the nearest rule by folder
+   - **d**: None at all, since the root file loads only for source files
 
 4. Scenario S2, a team using Claude Code on a shared codebase. The audit of the flawed project prints `env-readable`. What removes that finding?
    - **a**: A rule file whose glob matches `.env`
@@ -121,9 +121,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A bare folder name is not a glob: "A bare folder name such as `src/api` is not a glob; write `src/api/**`". *a* is ruled out because path-scoped rules load when a matching file is read: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs". *c* is ruled out because the command folder holds commands and not conventions: "A command file in the project, `.claude/commands/review.md`, committed to the repository". *d* is ruled out because the match is by glob on file paths and not by a word: "`**` crosses folders and `*` stays inside one".
-2. **a**. The page says the number is the course's: "That number is the course's, chosen to make the point testable." *b* is ruled out because the target has not moved: "The documented target is 200." *c* is ruled out because imports do not cut the cost: "help you organize a long file but don't reduce its context cost". *d* is ruled out because the limit is for the root file: "The practice of this module uses a stricter limit of 25 lines for the root file of a small project."
-3. **a**. Code that runs holds whatever the model decides: "To block an action regardless of what Claude decides, use a PreToolUse hook instead." *d* is ruled out because a sentence is a request: "treats them as context, not enforced configuration". *b* is ruled out because a scoped instruction is a sentence as well: "a sentence in a memory file is a request that the model weighs". *c* is ruled out because the table advises on mode and enforces nothing: "Plan mode tells Claude to research and propose changes without making them."
+1. **b**. A bare folder name is not a glob: "write a folder as `src/api/**`". *a* is ruled out because path-scoped rules load when a matching file is read: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs". *c* is ruled out because the command folder holds commands and not conventions: "A command file in the project, `.claude/commands/review.md`, committed to the repository". *d* is ruled out because the match is by glob on file paths and not by a word: "`**` crosses folders and `*` stays inside one".
+2. **a**. A rule with a glob reaches test files wherever they sit: "`**/*.test.tsx` reaches test files in any folder". *b* is ruled out because the root file leaves the choice to the model: "One root file with a section per area leaves Claude to infer which section applies". *c* is ruled out because a path starts no skill: "a skill is invoked, or chosen by the model from its description, and a path match does not start it". *d* is ruled out because a folder file does not reach the others: "each file is bound to its directory, and test files next to their sources are in all of them".
+3. **a**. The output shows `docs/readme.md <- CLAUDE.md only`: no rule reaches it, and the root file loads in every session. *b* is ruled out because the testing rule has globs for test files: "`**/*.test.tsx` reaches test files in any folder". *c* is ruled out because a match is by glob and not by nearness: "`**` crosses folders and `*` stays inside one". *d* is ruled out because the root file is not conditional: "The root `CLAUDE.md` and the rule files without a `paths` list load at the start of every session".
 4. **c**. The finding says that the settings do not deny the file: "`env-readable` and `bare-bash-allowed`: the settings do not deny reading `.env`, or allow the whole Bash tool." *b* is ruled out because a sentence in a file is a request: "a sentence in a memory file is a request that the model weighs". *a* is ruled out because a rule loads conventions and denies nothing: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs". *d* is ruled out because the command's tools are another matter: "a shared review command with a description and read-only tools".
 
 </details>

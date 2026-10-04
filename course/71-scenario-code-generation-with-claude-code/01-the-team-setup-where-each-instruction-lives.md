@@ -43,7 +43,7 @@ The practice of this module uses a stricter limit of 25 lines for the root file 
 
 ### What a glob matches
 
-A `paths` entry is a glob. `**` crosses folders and `*` stays inside one, so `src/api/**/*.ts` reaches every TypeScript file below `src/api/`, and `**/*.test.tsx` reaches test files in any folder. A bare folder name such as `src/api` is not a glob; write `src/api/**`, because the audit reports a rule whose globs match none of the project's files. The pages of module 57 give the full rules; the example below uses these three forms only.
+A `paths` entry is a glob. `**` crosses folders and `*` stays inside one, so `src/api/**/*.ts` reaches every TypeScript file below `src/api/`, and `**/*.test.tsx` reaches test files in any folder. The documentation's table shows `src/**/*` for all files under `src/`, so write a folder as `src/api/**`. The practice's matcher follows these forms, and the audit reports a rule whose globs match none of the project's files. The pages of module 57 give the full rules; the example below uses these three forms only.
 
 ### The audit: a checklist that reads the files
 
