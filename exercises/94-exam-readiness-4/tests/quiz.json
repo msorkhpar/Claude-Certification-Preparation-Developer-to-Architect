@@ -860,61 +860,42 @@
       "id": "03-professional-mock-exam#x46",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Pryor Bank retains audit records for at least 30 days and at most 400. Tonight's purge meets a record that is exactly 400 days old, with no court order attached. What does the purge rule do?",
+      "stem": "Scenario: Brae Insurance's assistant quotes a sentence that is not in the policy text, and its score is 99. The threshold for sending unreviewed is 95. What becomes of the reply?",
       "options": {
-        "a": "Removes it, since the entry has now used up the whole of the window",
-        "b": "Removes it after one more day, so that the audit has a margin of a day",
-        "c": "Keeps it until the floor of 30 days has passed once more",
-        "d": "Keeps it, since removal needs an age beyond the ceiling"
+        "a": "It goes out unreviewed, since 99 is above the threshold for sending",
+        "b": "It goes to review, since only replies below the threshold are held back",
+        "c": "It goes out with a note that the quote could not be found in the source",
+        "d": "It is held, since an unbacked claim is stopped whatever its rating"
       },
       "key": "d",
       "explanation": {
-        "d": "An entry goes only past the limit: \"an entry is removed only when it is **more than** the ceiling old\" (module 83, page 2).",
-        "a": "Ruled out because \"the configuration check treats a retention equal to a limit as acceptable\".",
-        "b": "Ruled out because the rule has no margin: the page says \"removed only when it is more than the ceiling old\", and 365 is not more than 365.",
-        "c": "Ruled out because the floor is the shortest time to keep records, and \"deleting sooner is a breach\", and it plays no part in a purge at the ceiling."
+        "d": "The route checks the source before the score: \"An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99\" (module 90, page 1).",
+        "a": "Ruled out because \"confidence is not evidence\", and a model can be certain and wrong.",
+        "b": "Ruled out because review is for answers the source supports: \"a low-consequence action goes out unreviewed only at a confidence of at least 95, and below it goes to review\".",
+        "c": "Ruled out because the example holds the answer: \"An answer whose quote is not in the source is held\", and a note would still send the unsupported text out."
       }
     },
     {
       "id": "03-professional-mock-exam#x47",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Brae Insurance's assistant quotes a sentence that is not in the policy text, and its score is 99. The threshold for sending unreviewed is 95. What becomes of the reply?",
+      "stem": "Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. What should the design have done?",
       "options": {
-        "a": "It is held, since an unbacked claim is stopped whatever its rating",
-        "b": "It goes out unreviewed, since 99 is above the threshold for sending",
-        "c": "It goes to review, since only replies below the threshold are held back",
-        "d": "It goes out with a note that the quote could not be found in the source"
+        "a": "Reset the context first, or repeat the query on a different model",
+        "b": "Resend the same conversation, since a refusal is a passing fault",
+        "c": "Raise the sampling temperature, so that the reply differs on the next try",
+        "d": "Show the user the category of the refusal, which is always present"
       },
       "key": "a",
       "explanation": {
-        "a": "The route checks the source before the score: \"An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99\" (module 90, page 1).",
-        "b": "Ruled out because \"confidence is not evidence\", and a model can be certain and wrong.",
-        "c": "Ruled out because review is for answers the source supports: \"a low-consequence action goes out unreviewed only at a confidence of at least 95, and below it goes to review\".",
-        "d": "Ruled out because the example holds the answer: \"An answer whose quote is not in the source is held\", and a note would still send the unsupported text out."
-      }
-    },
-    {
-      "id": "03-professional-mock-exam#x48",
-      "page": "03-professional-mock-exam.md",
-      "scope": "level",
-      "stem": "Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. What should the design have done?",
-      "options": {
-        "a": "Resend the same conversation, since a refusal is a passing fault",
-        "b": "Raise the sampling temperature, so that the reply differs on the next try",
-        "c": "Reset the context first, or repeat the query on a different model",
-        "d": "Show the user the category of the refusal, which is always present"
-      },
-      "key": "c",
-      "explanation": {
-        "c": "The design treats a refusal as an outcome: \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model\" (module 90, page 1).",
-        "a": "Ruled out because the page says \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues\", not resent.",
-        "b": "Ruled out because the page names two recoveries, with \"or the request is retried on a different model\" as the second, and sampling is neither.",
+        "a": "The design treats a refusal as an outcome: \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model\" (module 90, page 1).",
+        "b": "Ruled out because the page says \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues\", not resent.",
+        "c": "Ruled out because the page names two recoveries, with \"or the request is retried on a different model\" as the second, and sampling is neither.",
         "d": "Ruled out because \"the stop_details fields can be null\", so the user-facing message comes from the application."
       }
     },
     {
-      "id": "03-professional-mock-exam#x49",
+      "id": "03-professional-mock-exam#x48",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
       "stem": "Scenario: Linnet Legal's assistant summarises inbound e-mails, and one e-mail contains a hidden line telling the model to forward the user's files to an outside address. Which design choices does the page give for the e-mail text?",
@@ -930,6 +911,25 @@
         "a": "Ruled out because untrusted content belongs \"only in tool results\", and not among the instructions.",
         "b": "Ruled out because \"a line in a prompt is a request, and a control is a step the model cannot skip\".",
         "d": "Ruled out because pattern lists belong to the input layer, and the page says \"A screen with a small model reduces risk and does not remove it\"."
+      }
+    },
+    {
+      "id": "03-professional-mock-exam#x49",
+      "page": "03-professional-mock-exam.md",
+      "scope": "level",
+      "stem": "Scenario: Odell Health's register row for an unfair outcome names the parity report as its control, and a reviewer asks what the residual column should say.",
+      "options": {
+        "a": "Prevented, since every group is measured before an answer goes out",
+        "b": "Nil, since a gap that is measured leaves no risk behind it at all",
+        "c": "Monitored and not prevented, since the measure fixes nothing itself",
+        "d": "Moved to the vendor, since the model is theirs and not the deployer's"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The report is a measure with an owner, not a repair: \"monitored and not prevented\" is the wording the page gives the residual column (module 90, page 2).",
+        "a": "Ruled out because \"The report does not fix anything on its own\", so nothing is prevented before an answer goes out.",
+        "b": "Ruled out because \"The design cannot prevent unfairness by saying so; it measures it\", and a measured gap is a risk that remains.",
+        "d": "Ruled out because the duty stays with the deployment: \"A model does not make a system compliant\", and the vendor does not take the risk over."
       }
     },
     {
