@@ -73,7 +73,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: The key is made before the first call, so the tool cannot tell attempts apart
 
 7. Scenario: A tool call made by Oaken Labs' agent returns a refusal because the service account lacks a permission. The runner retries it five times with growing pauses. What should the runner do instead?
-   - **a**: Retry ten times, since a longer wait is more likely to outlast the fault
+   - **a**: Retry ten times, since a longer wait is more likely to outlast the fault, however long it lasts
    - **b**: Switch to a fresh idempotency key, so the tool treats the call as new
    - **c**: Fail the task at once with a clear reason, since a missing right will not clear itself
    - **d**: Open the breaker of the agent, so every later task skips the tool as well
@@ -87,7 +87,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 9. Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which pattern does the capstone choose?
    - **a**: An augmented call inside a small fixed workflow, since the route is predetermined
    - **b**: A team of agents, since the documents are many and change often
-   - **c**: One agent with every tool, since a single agent is easier to audit
+   - **c**: One agent with every tool, since a single agent is easier to audit by the team over time
    - **d**: One plain call with all the policy text pasted into every prompt
 
 10. Scenario: A claims question at Larch Mutual shares no word with any document that the reader may read, though it does match a contract that only the partnership team may read. What does the chain return?
@@ -130,7 +130,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Synchronously, since the median call fits well inside the limit
    - **b**: Synchronously, since the slow case alone is under the timeout
    - **c**: By accept-and-poll, since the tail figure with its buffer is over the caller's limit
-   - **d**: By accept-and-poll only if the caller asks for the result to be delayed
+   - **d**: By accept-and-poll only if the caller asks for the result to be delayed, which it rarely does
 
 17. Scenario: A new project is onboarded to Larch Telecom's gateway with a budget of zero because finance has not yet set one. Its first request arrives with a small estimate. What does admission return?
    - **a**: Allow, since the estimate is small and the spend so far is zero
@@ -178,7 +178,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: A proxy that holds the master secret itself and issues every person a separate token
    - **b**: A rotation of the shared access string every quarter, announced by e-mail
    - **c**: A prompt rule that tells the agent never to reveal the string it was given
-   - **d**: A separate supplier account for each team, with one shared string inside each
+   - **d**: A separate supplier account for each team, with one shared string inside each of those accounts
 
 25. Scenario: Mallow Cloud's MCP server requests every permission up front when a person connects, so that nobody sees a second consent prompt. A reviewer objects. What does the guidance say instead?
    - **a**: Begin with read access and widen it when a privileged operation is first attempted
@@ -211,7 +211,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Keep the records as they are, and ask users to describe the failing cases
 
 30. Scenario: Sable Cargo changed its model on purpose last Tuesday, and its cost per answer rose by 35 percent against the stored reference. The drift check pages the on-call engineer. What does the page advise?
-   - **a**: Keep the old baseline for a year, so that the rise is never forgotten
+   - **a**: Keep the old baseline for a year, so that the rise is never forgotten, whatever else changes in between
    - **b**: Raise the tolerance until the page stops, since the change was planned
    - **c**: Turn the cost metric off until the next planned change has been decided
    - **d**: Reset the baseline at the switch that was chosen and treat other moves as findings
@@ -220,7 +220,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: As a signal to investigate, since such a collapse often points to a failed safeguard
    - **b**: As a clear improvement, since fewer declines mean happier users
    - **c**: As noise, since a metric that small cannot move in a meaningful way
-   - **d**: As a billing artefact, since declines are counted in a separate system
+   - **d**: As a billing artefact, since declines are counted in a separate system from the one that bills
 
 32. Scenario: Bexley Bank plans to let a language model mark 1,000 free-form write-ups each night against a rubric. No person has yet compared its marks with theirs. What comes first?
    - **a**: Switch the grader on at full volume, since a model grader is fast and scalable
@@ -289,7 +289,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Catch the crash in the runner, so the end of the run is always reached
 
 43. Scenario: Sorrel Cloud serves twelve customers from a single shared pool and separates their data by a filter in its application code. An auditor asks how the data of one customer is kept from another. What does the page say about the design?
-   - **a**: It is sound, since a well-tested filter in code is the stronger separation
+   - **a**: It is sound, since a well-tested filter in code is the stronger separation of the two options
    - **b**: It is sound, as long as each customer is given a key of its own to use
    - **c**: It is a finding only if two of the customers work in the same industry
    - **d**: It is a finding, since the boundary that is enforced for you is a workspace per tenant
@@ -298,13 +298,13 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Schemas are sent after the messages, so the diagnoses reach the model late
    - **b**: Schemas are limited to ten values, so a long list of diagnoses is cut short
    - **c**: Schemas are cached apart from message content, so they lack the protection that a prompt has
-   - **d**: Schemas are read by every tenant, so the names are visible to other customers
+   - **d**: Schemas are read by every tenant, so the names are visible to other customers of the same service
 
 45. Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. What does the page advise?
    - **a**: Accept the gap, since names carry no risk once the addresses are removed
    - **b**: Add a stronger detector for personal details and plant every kind of identifier in the tests
    - **c**: Add a line to the system prompt telling the model to disregard any names
-   - **d**: Switch the layer off, since a pattern that misses names gives a false comfort
+   - **d**: Switch the layer off, since a pattern that misses names gives a false comfort to the whole team
 
 46. Scenario: Pryor Bank retains audit records for at least 30 days and at most 400. Tonight's purge meets a record that is exactly 400 days old, with no court order attached. What does the purge rule do?
    - **a**: Removes it, since the entry has now used up the whole of the window
@@ -351,7 +351,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 53. Scenario: A product manager at Aster Health asks for an option in the assistant's configuration that lets each user hide the notice that AI helped write a reply. What does the page say?
    - **a**: Yes, as long as the notice is shown once at the first login
    - **b**: Yes, since users who know the system well do not need to be told
-   - **c**: No, but only for replies that concern a decision about a person
+   - **c**: No, but only for replies that concern a decision about a person in the service
    - **d**: No, since the duty belongs to the deployment and cannot be toggled
 
 54. Scenario: A sponsor at Cairn Utilities asks that an assistant be "fast and accurate". The architect wants to turn the wish into requirements. When is a requirement complete?
@@ -382,7 +382,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Keep quiet until the date, since the measurement may still improve
    - **b**: Amend it through the same channel that made it, with a reason, ahead of the due day
    - **c**: Report the overall average instead, since it is above the target
-   - **d**: Move the target in the next sprint plan, without telling the sponsor
+   - **d**: Move the target in the next sprint plan, without telling the sponsor or the review board
 
 59. Scenario: Larch Mutual's architect has a finished review: a conclusion, a count per domain and twenty-two itemised flaws, and must present it to the sponsor and the engineers. How should the document be arranged?
    - **a**: The flaws first in domain order, then the conclusion and the count at the end
