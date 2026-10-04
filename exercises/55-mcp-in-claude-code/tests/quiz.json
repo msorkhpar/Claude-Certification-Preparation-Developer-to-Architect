@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "A team commits `.mcp.json` with the header `Bearer ${NPM_TOKEN}` for a hosted package registry. Every developer exports the variable, yet the registry answers 401. What is the cause?",
       "options": {
-        "a": "Claude Code sends nothing for names that carry sign-in secrets of this kind",
+        "a": "The file loads only after an interactive approval that the developers skipped",
         "b": "Header values are expanded only for entries that start a local process",
-        "c": "The file loads only after an interactive approval that the developers skipped",
+        "c": "Claude Code sends nothing for names that carry sign-in secrets of this kind",
         "d": "A variable in a header needs a fallback after the dash and colon before use"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "Credential names such as this one read as empty toward a remote endpoint.",
-        "c": "Ruled out because a server that waits for approval is not connected at all: \"claude mcp list shows it as pending\", and it does not answer with a 401.",
+        "c": "Credential names such as this one read as empty toward a remote endpoint.",
+        "a": "Ruled out because a server that waits for approval is not connected at all: \"claude mcp list shows it as pending\", and it does not answer with a 401.",
         "b": "Ruled out because the documentation lists the places where expansion applies: \"`headers`: for HTTP server authentication\".",
         "d": "Ruled out because a default is optional, and the plain form works: \"expands to the value of environment variable\"."
       }
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Where should it be registered?",
       "options": {
-        "a": "User scope, kept in the home directory file",
+        "a": "Local scope, the default for a newly added server",
         "b": "Project scope, kept in the shared `.mcp.json` file",
-        "c": "Local scope, the default for a newly added server",
+        "c": "User scope, kept in the home directory file",
         "d": "The local settings file, kept inside the repository"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "Local scope is the default and belongs to its owner and that one project. The guide names user-level scope for personal servers, and the product has a third scope between the two, which is the one that fits a single repository.",
+        "a": "Local scope is the default and belongs to its owner and that one project. The guide names user-level scope for personal servers, and the product has a third scope between the two, which is the one that fits a single repository.",
         "b": "Ruled out because \"Selecting the wrong scope for a personal tool can leak credentials into a shared repo\".",
-        "a": "Ruled out because user scope is for \"services you frequently use across different projects\", which is wider than this repository.",
+        "c": "Ruled out because user scope is for \"services you frequently use across different projects\", which is wider than this repository.",
         "d": "Ruled out because that file holds settings and not servers: \"while the general local settings file is `.claude/settings.local.json` in the project\"."
       }
     },
@@ -46,16 +46,16 @@
       "stem": "An agent keeps answering documentation questions with Grep on the checkout, although the team's documentation server has a search tool whose description reads `Searches docs`. What is the best fix?",
       "options": {
         "a": "Make the documentation server load at the start so the definition is visible",
-        "b": "Lengthen the description past the cut-off so that no detail is left out",
+        "b": "Say when it beats pattern matching and what comes back, main point first",
         "c": "Remove the competing tool so that only the documentation tool remains",
-        "d": "Say when it beats pattern matching and what comes back, main point first"
+        "d": "Lengthen the description past the cut-off so that no detail is left out"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The description is what the model chooses by, so it must say when to prefer the tool, with the point first.",
+        "b": "The description is what the model chooses by, so it must say when to prefer the tool, with the point first.",
         "a": "Ruled out because loading at the start only makes the definition visible: \"makes the definition visible and does not say when to prefer it\".",
         "c": "Ruled out because \"Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout\".",
-        "b": "Ruled out because \"Claude Code truncates each tool description and each server's instructions at 2,048 characters by default\"."
+        "d": "Ruled out because \"Claude Code truncates each tool description and each server's instructions at 2,048 characters by default\"."
       }
     },
     {
@@ -64,15 +64,15 @@
       "scope": "page",
       "stem": "A support agent calls three listing tools before each database question, only to learn which tables exist. Which change cuts those calls?",
       "options": {
-        "a": "Raise the output limit so that each listing returns more rows at once",
-        "b": "Attach the schemas as a resource that can be mentioned in the prompt",
+        "a": "Attach the schemas as a resource that can be mentioned in the prompt",
+        "b": "Raise the output limit so that each listing returns more rows at once",
         "c": "Mark the listing tools as read-only so that they can run side by side",
         "d": "Move the database server into the user scope so that it loads everywhere"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "A catalog is wanted before work starts, and a resource can be attached to the prompt so that no discovery calls are needed.",
-        "a": "Ruled out because \"The limit concerns the size of one result and does nothing for the number of calls\".",
+        "a": "A catalog is wanted before work starts, and a resource can be attached to the prompt so that no discovery calls are needed.",
+        "b": "Ruled out because \"The limit concerns the size of one result and does nothing for the number of calls\".",
         "c": "Ruled out because a hint \"does not change this: it describes the tool to a client and does not tell the model what exists\".",
         "d": "Ruled out because \"it decides where a server loads and not what it exposes\"."
       }
@@ -85,15 +85,15 @@
       "options": {
         "a": "A result above the limit is lost, so the agent never sees the rows",
         "b": "The description is cut at the limit, so the agent cannot use it",
-        "c": "Tool search hides the definition until a person asks for it",
-        "d": "Access cannot be narrowed, because one entry point covers every task"
+        "c": "Access cannot be narrowed, because one entry point covers every task",
+        "d": "Tool search hides the definition until a person asks for it"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope.",
+        "c": "A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope.",
         "a": "Ruled out because an oversized result is kept: \"Claude Code saves it to a file and replaces it in the conversation with a message that names the file path\".",
         "b": "Ruled out because truncation is handled by wording: \"put critical details near the start\".",
-        "c": "Ruled out because a definition is found by the model and not by a person: \"a definition is loaded when Claude needs it\"."
+        "d": "Ruled out because a definition is found by the model and not by a person: \"a definition is loaded when Claude needs it\"."
       }
     },
     {
@@ -102,15 +102,15 @@
       "scope": "module",
       "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A team's shared `.mcp.json` starts a documentation server with the argument `${CLAUDE_PROJECT_DIR}/tools/docs_server.py`, and on every machine the server fails to start with that text unexpanded in the path. What should the entry say?",
       "options": {
-        "a": "A fallback after the name, written with a colon and a dash",
+        "a": "The name moved into the `env` map so that the process receives it",
         "b": "An absolute location from the lead developer's own checkout, fixed for all",
         "c": "The same line placed in the user-level file, where the name is set",
-        "d": "The name moved into the `env` map so that the process receives it"
+        "d": "A fallback after the name, written with a colon and a dash"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The variable is set for the server and not for Claude Code, so a path in `command` or `args` needs a fallback.",
-        "d": "Ruled out because the text in `args` would still have nothing to expand from: \"so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from\".",
+        "d": "The variable is set for the server and not for Claude Code, so a path in `command` or `args` needs a fallback.",
+        "a": "Ruled out because the text in `args` would still have nothing to expand from: \"so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from\".",
         "b": "Ruled out because a personal location fails on every other machine: \"A value that is not secret, such as a base URL or a path, should have a default\".",
         "c": "Ruled out because moving the entry does not give the variable a value in Claude Code's own environment, and the documented answer is a default: \"The documentation's answer is a default such as `${CLAUDE_PROJECT_DIR:-.}`\"."
       }

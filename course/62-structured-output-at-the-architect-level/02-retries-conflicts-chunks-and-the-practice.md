@@ -241,21 +241,21 @@ The practice is in [`exercises/62-structured-output-at-the-architect-level`](../
 
 1. An extraction fails a check because the printed total differs from the sum of the lines, and the record has `conflict_detected` set to true. What should the pipeline do?
    - **a**: Retry with the error message appended to the prompt
-   - **b**: Route it to a person with the discrepancy noted
-   - **c**: Replace the printed total with the computed one
+   - **b**: Replace the printed total with the computed one
+   - **c**: Route it to a person with the discrepancy noted
    - **d**: Mark the document failed once the retry limit is reached
 
 2. A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?
-   - **a**: It is right, since only passed documents have a verdict
+   - **a**: It leaves out the failures, so it flatters the system
    - **b**: It is too low, because a passed document is always correct
    - **c**: It counts each document twice, once per validation rule
-   - **d**: It leaves out the failures, so it flatters the system
+   - **d**: It is right, since only passed documents have a verdict
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A flagged conflict is information about a bad source, and a second look finds the same difference. *a* is ruled out because "a second look will find the same difference", so the retry cannot change the outcome. *c* is ruled out because "A record that carries a difference and says so is a correct record of a bad document", and replacing the printed value hides what it says. *d* is ruled out because this record is not invalid, since "a document that is still invalid after the last one is marked failed" applies to errors that are retried.
-2. **d**. The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong. *b* is ruled out because the report "divides by the documents that passed", so it overstates and does not understate. *c* is ruled out because it "leaves out the documents that went to review or failed", and nothing is counted twice. *a* is ruled out because "The first number is true and answers a different question".
+1. **c**. A flagged conflict is information about a bad source, and a second look finds the same difference. *a* is ruled out because "a second look will find the same difference", so the retry cannot change the outcome. *b* is ruled out because "A record that carries a difference and says so is a correct record of a bad document", and replacing the printed value hides what it says. *d* is ruled out because this record is not invalid, since "a document that is still invalid after the last one is marked failed" applies to errors that are retried.
+2. **a**. The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong. *b* is ruled out because the report "divides by the documents that passed", so it overstates and does not understate. *c* is ruled out because it "leaves out the documents that went to review or failed", and nothing is counted twice. *d* is ruled out because "The first number is true and answers a different question".
 
 </details>
 
@@ -265,28 +265,28 @@ This quiz covers both pages of the module.
 
 1. Scenario S6, structured data extraction. A 300-page contract is cut into chunks, and the per-chunk results are merged. Two chunks give different vendor names. Which merge rule fits?
    - **a**: Take the later value, since it was read with more context
-   - **b**: Take the longer name, since it carries more detail
-   - **c**: Keep the first value, note the clash and send it to a person
+   - **b**: Keep the first value, note the clash and send it to a person
+   - **c**: Take the longer name, since it carries more detail
    - **d**: Drop the field from the merged result to avoid a wrong value
 
 2. Scenario S6, structured data extraction. A team extracts invoice fields. Each failed extraction gets two more attempts. One failure is a currency written outside the allowed list, and another is a purchase order number that the document does not contain but downstream needs. Which handling is right?
-   - **a**: Send both back with their errors until each field has a value
-   - **b**: Send the first back with its error, and route the second to review untried
+   - **a**: Send the first back with its error, and route the second to review untried
+   - **b**: Send both back with their errors until each field has a value
    - **c**: Send neither back and mark both documents failed at once
    - **d**: Route the first to review and send the second back with a stricter, firmer prompt
 
 3. Scenario S6, structured data extraction. A team extracts invoice fields with a strict schema through a forced tool, and caches a long instruction block and a 200-page document. For some requests it switches `tool_choice` from `any` to `auto` and back, and costs run above plan. What explains it?
    - **a**: Each change also discards the stored tool definitions and the system prompt text
    - **b**: Moving between modes turns off structured output for the next request
-   - **c**: Requests in automatic mode are billed at a higher rate than the others
-   - **d**: Each change discards stored conversation content, which is processed again
+   - **c**: Each change discards stored conversation content, which is processed again
+   - **d**: Requests in automatic mode are billed at a higher rate than the others
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A disagreement between chunks is a conflict to record and review, and not a choice to make silently. *a* is ruled out because "A merge that always takes the last value or the longest is a guess presented as data". *b* is ruled out because "A merge that always takes the last value or the longest is a guess presented as data". *d* is ruled out because the rule is to record the clash "so that the document goes to review", and dropping the field hides it.
-2. **b**. The currency error is fixable by a second look and the missing number is absent from the source. *a* is ruled out because for an absent value "No second look will find what is not there". *c* is ruled out because a format error is what feedback is for, since "The information is in the document; the form was wrong". *d* is ruled out because it inverts the two, while "A required value that the model reports as absent is not retried".
-3. **d**. Changing the mode invalidates cached message blocks, so the content must be reprocessed. *a* is ruled out because "Tool definitions and system prompts remain cached". *b* is ruled out because the documented effect of a change is on the cache: "changing tool_choice between requests invalidates cached message blocks". *c* is ruled out because the cost described is reprocessing, since a pipeline that alternates modes "pays to reprocess the document".
+1. **b**. A disagreement between chunks is a conflict to record and review, and not a choice to make silently. *a* is ruled out because "A merge that always takes the last value or the longest is a guess presented as data". *c* is ruled out because "A merge that always takes the last value or the longest is a guess presented as data". *d* is ruled out because the rule is to record the clash "so that the document goes to review", and dropping the field hides it.
+2. **a**. The currency error is fixable by a second look and the missing number is absent from the source. *b* is ruled out because for an absent value "No second look will find what is not there". *c* is ruled out because a format error is what feedback is for, since "The information is in the document; the form was wrong". *d* is ruled out because it inverts the two, while "A required value that the model reports as absent is not retried".
+3. **c**. Changing the mode invalidates cached message blocks, so the content must be reprocessed. *a* is ruled out because "Tool definitions and system prompts remain cached". *b* is ruled out because the documented effect of a change is on the cache: "changing tool_choice between requests invalidates cached message blocks". *d* is ruled out because the cost described is reprocessing, since a pipeline that alternates modes "pays to reprocess the document".
 
 </details>
 

@@ -372,22 +372,22 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. An engineer wants a reminder about a private test server to guide Claude in one repository on their own machine, and never to reach teammates. Where does it go?
-   - **a**: A git-ignored local note beside the root instruction file
-   - **b**: The committed instruction file, under a heading for personal items
+   - **a**: The committed instruction file, under a heading for personal items
+   - **b**: A git-ignored local note beside the root instruction file
    - **c**: The personal file in the home folder, applying to every project
    - **d**: The organisation policy file, which only that engineer edits
 
 2. A session starts at the top of a project, and an instruction file sits two levels down in `web/ui/`. When do its lines reach the model?
    - **a**: At launch, together with the root file
    - **b**: Only after a restart that begins inside that directory
-   - **c**: Once Claude opens something beneath that directory
-   - **d**: When the user runs the memory command
+   - **c**: When the user runs the memory command
+   - **d**: Once Claude opens something beneath that directory
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The local file is personal to one project and is kept out of version control. *b* is ruled out because "A personal note about one project, such as a sandbox address, belongs in the local file", and a committed file would share it. *c* is ruled out because that file reaches "You, in every project", and the reminder concerns one repository. *d* is ruled out because that layer reaches "Everyone on the machine, and individual settings cannot exclude it", so it is not a private note.
-2. **c**. A file below the starting directory loads on demand. *a* is ruled out because the files that load first are the ones "above the working directory are loaded at launch", and this one is below it. *b* is ruled out because a lower file loads "on demand when Claude reads files in those directories", with no restart. *d* is ruled out because the memory command "lists your CLAUDE.md, CLAUDE.local.md, and other memory file locations" and loads nothing.
+1. **b**. The local file is personal to one project and is kept out of version control. *a* is ruled out because "A personal note about one project, such as a sandbox address, belongs in the local file", and a committed file would share it. *c* is ruled out because that file reaches "You, in every project", and the reminder concerns one repository. *d* is ruled out because that layer reaches "Everyone on the machine, and individual settings cannot exclude it", so it is not a private note.
+2. **d**. A file below the starting directory loads on demand. *a* is ruled out because the files that load first are the ones "above the working directory are loaded at launch", and this one is below it. *b* is ruled out because a lower file loads "on demand when Claude reads files in those directories", with no restart. *c* is ruled out because the memory command "lists your CLAUDE.md, CLAUDE.local.md, and other memory file locations" and loads nothing.
 
 </details>
 

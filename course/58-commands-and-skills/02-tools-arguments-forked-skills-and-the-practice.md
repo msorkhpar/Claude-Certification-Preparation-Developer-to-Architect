@@ -354,21 +354,21 @@ The practice is in [`exercises/58-commands-and-skills`](../../exercises/58-comma
 
 1. A skill's header lists `allowed-tools: Read Grep`, and its author expects editing to be impossible while the skill is active. What actually happens?
    - **a**: Editing is removed from the available tools until the next message
-   - **b**: Changing files remains allowed under the usual permission settings
+   - **b**: Editing is refused because only the two listed tools are permitted
    - **c**: Editing runs without any prompt because the skill vouches for it
-   - **d**: Editing is refused because only the two listed tools are permitted
+   - **d**: Changing files remains allowed under the usual permission settings
 
 2. A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What does the isolated helper do?
    - **a**: It reads the whole conversation and applies the conventions to it
-   - **b**: It runs inside the main conversation as if nothing were forked
+   - **b**: It gets guidelines but no assignment, and returns nothing useful
    - **c**: It asks the user which endpoint the conventions concern
-   - **d**: It gets guidelines but no assignment, and returns nothing useful
+   - **d**: It runs inside the main conversation as if nothing were forked
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The field pre-approves and restricts nothing. *a* is ruled out because removal belongs to the other field, which removes tools "from Claude's available pool while this skill is active". *d* is ruled out because the field "does not restrict which tools are available: every tool remains callable". *c* is ruled out because "your permission settings still govern tools that are not listed".
-2. **d**. A forked skill's body is its prompt, and guidelines without a task give the helper nothing to do. *a* is ruled out because the helper "doesn't see your conversation history". *c* is ruled out because the helper starts from the skill text alone, which "gives it the skill content as its prompt", so it has no one to ask. *b* is ruled out because the setting "starts a new subagent of the type named in" the agent field, so it does not stay in the conversation.
+1. **d**. The field pre-approves and restricts nothing. *a* is ruled out because removal belongs to the other field, which removes tools "from Claude's available pool while this skill is active". *b* is ruled out because the field "does not restrict which tools are available: every tool remains callable". *c* is ruled out because "your permission settings still govern tools that are not listed".
+2. **b**. A forked skill's body is its prompt, and guidelines without a task give the helper nothing to do. *a* is ruled out because the helper "doesn't see your conversation history". *c* is ruled out because the helper starts from the skill text alone, which "gives it the skill content as its prompt", so it has no one to ask. *d* is ruled out because the setting "starts a new subagent of the type named in" the agent field, so it does not stay in the conversation.
 
 </details>
 

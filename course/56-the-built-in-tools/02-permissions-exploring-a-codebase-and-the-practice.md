@@ -84,22 +84,22 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. A repository's settings deny `Read(./.env)`. The agent, trying to fix a bug, calls Edit on `.env`. What happens?
-   - **a**: It proceeds, since only reading calls are matched by that rule
-   - **b**: It is refused, since a read denial also blocks changes there
+   - **a**: It is refused, since a read denial also blocks changes there
+   - **b**: It proceeds, since only reading calls are matched by that rule
    - **c**: A person is asked, since no edit rule names that path
    - **d**: It proceeds, since the working directory counts as trusted
 
 2. A team's audit hook has the matcher `Grep` and logs nothing in a default Linux session, though the agent searches constantly. What explains it?
    - **a**: Hook matchers apply only to tools that come from MCP servers
    - **b**: Hooks cannot observe the search tools on any platform
-   - **c**: A matcher takes the parenthesized rule form, so a bare tool name never fires
-   - **d**: Its lookups run through the shell tool, so only a Bash entry sees them
+   - **c**: Its lookups run through the shell tool, so only a Bash entry sees them
+   - **d**: A matcher takes the parenthesized rule form, so a bare tool name never fires
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A read denial covers the tools that change content at the same path. *a* is ruled out because "A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there". *c* is ruled out because a deny is checked before anything else: "Deny is checked before ask and allow". *d* is ruled out because "If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode."
-2. **d**. On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool. *a* is ruled out because the tool names are "the exact strings you use in permission rules, subagent tool lists, and hook matchers". *b* is ruled out because "the searches reach your hooks and permission rules as `Bash` calls". *c* is ruled out because "Hook `matcher` fields use bare tool names, not the parenthesized rule format."
+1. **a**. A read denial covers the tools that change content at the same path. *b* is ruled out because "A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there". *c* is ruled out because a deny is checked before anything else: "Deny is checked before ask and allow". *d* is ruled out because "If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode."
+2. **c**. On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool. *a* is ruled out because the tool names are "the exact strings you use in permission rules, subagent tool lists, and hook matchers". *b* is ruled out because "the searches reach your hooks and permission rules as `Bash` calls". *d* is ruled out because "Hook `matcher` fields use bare tool names, not the parenthesized rule format."
 
 </details>
 
@@ -110,27 +110,27 @@ This quiz covers both pages of the module.
 1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants it unable to open, search or alter the folder `secrets/`. Which single entry in the settings file achieves it?
    - **a**: `Edit(secrets/**)` under deny
    - **b**: `Write(secrets/**)` under deny
-   - **c**: `Read(secrets/**)` under deny
-   - **d**: `Bash(cat secrets/*)` under deny
+   - **c**: `Bash(cat secrets/*)` under deny
+   - **d**: `Read(secrets/**)` under deny
 
 2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The agent lists TypeScript sources in a very large repository with `**/*.ts` and receives a result carrying a truncation flag. What should it do next?
-   - **a**: Repeat the same request until the results change
-   - **b**: Narrow the search to the folder that the question concerns
+   - **a**: Narrow the search to the folder that the question concerns
+   - **b**: Repeat the same request until the results change
    - **c**: Take the returned files as the complete set and proceed
    - **d**: Look up each file name through a content search instead
 
 3. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked to investigate how authentication works, it reads hundreds of files, and its answers get worse as the run goes on. What fixes it?
    - **a**: Read the whole repository once and summarise it, so that nothing is missed
    - **b**: Raise the turn limit so that the agent can finish reading before it answers
-   - **c**: List every file name in the repository first, then open each of them
-   - **d**: Start from a search for entry points and follow imports one hop at a time
+   - **c**: Start from a search for entry points and follow imports one hop at a time
+   - **d**: List every file name in the repository first, then open each of them
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "a `Write(path)` rule is never matched by the file permission checks". *d* is ruled out because a scoped Bash rule matches calls "as written", and other spellings "fall through to the permission mode", so it stops neither the search tools nor a different spelling.
-2. **b**. A capped result is a window, and a narrower request brings the rest into view. *a* is ruled out because "Results are sorted by modification time and capped at 100 files", so the same request returns the same window. *c* is ruled out because "Claude sees a truncation flag in the result and can narrow the pattern", which says the set is incomplete. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
-3. **d**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because reading everything is the failure itself: "The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context." *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *c* is ruled out because a name search returns a capped list and opening each file repeats the first failure: "If the cap is hit, Claude sees a truncation flag in the result and can narrow the pattern".
+1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "a `Write(path)` rule is never matched by the file permission checks". *c* is ruled out because a scoped Bash rule matches calls "as written", and other spellings "fall through to the permission mode", so it stops neither the search tools nor a different spelling.
+2. **a**. A capped result is a window, and a narrower request brings the rest into view. *b* is ruled out because "Results are sorted by modification time and capped at 100 files", so the same request returns the same window. *c* is ruled out because "Claude sees a truncation flag in the result and can narrow the pattern", which says the set is incomplete. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
+3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because reading everything is the failure itself: "The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context." *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because a name search returns a capped list and opening each file repeats the first failure: "If the cap is hit, Claude sees a truncation flag in the result and can narrow the pattern".
 
 </details>
 

@@ -109,10 +109,10 @@ quickly, so confirm features and plan limits on the official page the day you de
 
 2. A product team wants one visible place in Slack to chase open checklist entries, where anyone can steer the work.
    One entry is a pay dispute. Which approach fits?
-   - **a**: Use Claude Tag for ordinary items, and send the HR one to the policy that governs it
+   - **a**: Put the whole list, dispute included, in the thread so the record stays complete
    - **b**: Share a Project with the team that holds the whole list in its knowledge
    - **c**: Take the entries to a direct message, then paste the results back
-   - **d**: Put the whole list, dispute included, in the thread so the record stays complete
+   - **d**: Use Claude Tag for ordinary items, and send the HR one to the policy that governs it
 
 3. An analyst must revise a spreadsheet model, then refresh a deck and a memo that quote it. Which surface fits best?
    - **a**: Claude Tag in a channel, with the three files attached
@@ -124,8 +124,8 @@ quickly, so confirm features and plan limits on the official page the day you de
 <summary>Answer key</summary>
 
 1. **a**. A single short draft needs none of the machinery; plain chat plus a check of the facts is enough (task 6). *b* is ruled out because "Cowork or a scheduled task for a one-line draft adds risk and cost", and a weekly schedule is wrong for a single email. *c* is ruled out because "A shared Project, a published artifact and a shared skill show their content to everyone with access", which is a poor home for candidate details. *d* is ruled out because Research is for an open question with many sources, and the table lists "A job one document answers" as what Research must not be given.
-2. **a**. A channel suits shared work that anyone can steer (task 5), while a sensitive personnel matter belongs
-   with the people and policy that govern it. *d* is ruled out because a sensitive HR matter belongs "not in a tool
+2. **d**. A channel suits shared work that anyone can steer (task 5), while a sensitive personnel matter belongs
+   with the people and policy that govern it. *a* is ruled out because a sensitive HR matter belongs "not in a tool
    whose results the whole channel can read". *b* is ruled out because "A shared Project, a published artifact and a
    shared skill show their content to everyone with access". *c* is ruled out because the channel is chosen "so the
    thread is visible and anyone can steer it", and pasted results leave nobody able to steer.
@@ -141,8 +141,8 @@ This quiz covers every page of the module.
    the first week, in Auto approval, and to compare against last year's statements kept elsewhere on the drive.
    Which plan does the module support?
    - **a**: Keep Auto approval and open the entire drive so the comparison has what it needs
-   - **b**: Confirm each step by hand in a dedicated folder with that older material, then schedule it
-   - **c**: Move the job to the Excel add-in, which reaches every workbook on the drive
+   - **b**: Move the job to the Excel add-in, which reaches every workbook on the drive
+   - **c**: Confirm each step by hand in a dedicated folder with that older material, then schedule it
    - **d**: Keep the schedule and switch to Skip all approvals so a missed review cannot stall it
 
 2. A consultant opens a spreadsheet from an unknown sender in Excel with the add-in, and asks Claude to update the
@@ -154,10 +154,10 @@ This quiz covers every page of the module.
 
 3. A manager must decide on a disciplinary case about a named employee, and Claude Tag is installed in her team's
    busy channel. Which course of action matches the module?
-   - **a**: Ask in the channel, then have Claude Tag delete the thread when the session ends
+   - **a**: Handle it with the people and policy that govern such matters, outside the tool
    - **b**: Ask in the channel, but word the request without the employee's name
    - **c**: Open a shared Project for her notes, since chats inside are visible to the owner alone
-   - **d**: Handle it with the people and policy that govern such matters, outside the tool
+   - **d**: Ask in the channel, then have Claude Tag delete the thread when the session ends
 
 4. A sales lead needs an editable proposal built from last year's winning documents and a handful of fresh market
    statistics. Which combination fits best?
@@ -169,14 +169,14 @@ This quiz covers every page of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The habits say to use Manual approval for new tools and hard-to-undo actions, to grant access selectively,
+1. **c**. The habits say to use Manual approval for new tools and hard-to-undo actions, to grant access selectively,
    and to start scheduled tasks simple and review each run (Cowork page). *a* is ruled out because the habits say to
    "grant access selectively and avoid financial documents, credentials and personal records", and an entire drive
-   does the opposite. *c* is ruled out because the add-in can "read and write only files that are open at that
+   does the opposite. *b* is ruled out because the add-in can "read and write only files that are open at that
    moment". *d* is ruled out because in that mode "nothing checks its actions", which is the reverse of review.
 2. **c**. The page asks you to start from a trusted copy, review changes before finalising and read each confirmation. *b* is ruled out because cross-app work lets Claude read and write more open files, which widens reach, and the page's pattern is "least reach, least action". *a* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", and it would read untrusted content too. *d* is ruled out because the Auto mode described is for Chrome and Cowork, and the add-in page warns that "files from outside sources can contain hidden instructions".
-3. **d**. A sensitive HR matter belongs "with the people and policy that govern it", not in a tool whose results
-   others can read (task 5). *a* is ruled out because "A channel shows everything to everyone in it", and deleting
+3. **a**. A sensitive HR matter belongs "with the people and policy that govern it", not in a tool whose results
+   others can read (task 5). *d* is ruled out because "A channel shows everything to everyone in it", and deleting
    afterwards does not undo that. *b* is ruled out because "Claude Tag in a channel shows everything to everyone in
    the channel", and removing a name leaves the matter visible. *c* is ruled out because "A shared Project, a
    published artifact and a shared skill show their content to everyone with access", so it is not private.

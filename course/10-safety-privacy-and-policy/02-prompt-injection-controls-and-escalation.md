@@ -127,8 +127,8 @@ path**, and the wrong answers either comply silently with something unsafe, refu
    both?
    - **a**: Let it act under the login of whoever tagged it, so each change names that person
    - **b**: Share one administrator login among the staff who use the agent
-   - **c**: Rely on the Microsoft 365 audit logs, since every Claude product writes to them
-   - **d**: Give it a login of its own there, with the narrowest role that covers the work
+   - **c**: Give it a login of its own there, with the narrowest role that covers the work
+   - **d**: Rely on the Microsoft 365 audit logs, since every Claude product writes to them
 
 3. A manager asks an analyst to put a full customer export into Claude to get a report by tonight. Policy forbids regulated
    personal data in the tool. What is the best step?
@@ -145,10 +145,10 @@ path**, and the wrong answers either comply silently with something unsafe, refu
    for harm is unchanged by a request, and the page calls the position "safer than before, not safe enough to stop
    paying attention". *d* is ruled out because, although "Take either away and the danger drops", it gives up the mailbox reading that the company wants to keep. *c*
    is ruled out because a screen only filters, and the page's habit is to "Keep a person on consequential steps".
-2. **d**. Claude Tag acts through its own accounts, so its actions are traceable and its access can be cut off
+2. **c**. Claude Tag acts through its own accounts, so its actions are traceable and its access can be cut off
    separately (the controls table). *a* is ruled out because the agent's "access can be cut off without touching
    anyone else's" only when it does not borrow someone's login. *b* is ruled out because each account gets "the
-   narrowest role that covers the work", which a shared administrator login does not. *c* is ruled out because
+   narrowest role that covers the work", which a shared administrator login does not. *d* is ruled out because
    "coverage is not uniform: the Microsoft 365 add-ins are outside the Enterprise audit logs".
 3. **b**. The best answer "raises the conflict with the person who owns the policy and proposes a compliant path". *a* is ruled out because "Missing or unclear policy is not permission", and a verbal approval is not an exception from the policy owner. *c* is ruled out because the wrong answers include those that "refuse everything, or quietly find a way around", and an aggregated report is a compliant path. *d* is ruled out because "do not work around the rule (a personal account, a different tool, a rewording that hides the data)".
 
@@ -161,9 +161,9 @@ This quiz covers both pages of the module.
 1. A staffing firm lets Claude sort CVs into two piles for hiring managers, and also deploys it as the public face
    of its applicant helpdesk. Which pair of duties does the Usage Policy impose?
    - **a**: A qualified reviewer for the piles, and no notice, since the helpdesk only answers questions about orders
-   - **b**: A qualified reviewer before anyone relies on the result, and a notice of AI use when each visit begins
+   - **b**: A notice of AI use on each pile, which also covers the helpdesk, and no reviewer
    - **c**: Removal of candidates' names, and a yearly audit of the helpdesk's answers
-   - **d**: A notice of AI use on each pile, which also covers the helpdesk, and no reviewer
+   - **d**: A qualified reviewer before anyone relies on the result, and a notice of AI use when each visit begins
 
 2. A clinic's analyst wants Claude's help with a sheet of patient names and diagnoses, and the clinic is under a
    strict data contract. Which opening step fits?
@@ -183,14 +183,14 @@ This quiz covers both pages of the module.
    shared folder of patient letters. Which answer fits the module?
    - **a**: Turn on both, since an owner can enable any feature for the whole organisation
    - **b**: Turn on Cowork only, limited to a dedicated folder
-   - **c**: Leave both off here and ask the compliance owner what the agreement covers
-   - **d**: Turn on memory only, switched off for each chat before the first message
+   - **c**: Turn on memory only, switched off for each chat before the first message
+   - **d**: Leave both off here and ask the compliance owner what the agreement covers
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Employment decisions are high-risk, so a qualified professional reviews them, and a consumer-facing
-   chatbot must disclose that it is AI at the beginning of each chat session. *a* is ruled out because "consumer-facing chatbots must also disclose that the user is talking to AI rather than a human". *d* is ruled out because
+1. **d**. Employment decisions are high-risk, so a qualified professional reviews them, and a consumer-facing
+   chatbot must disclose that it is AI at the beginning of each chat session. *a* is ruled out because "consumer-facing chatbots must also disclose that the user is talking to AI rather than a human". *b* is ruled out because
    a "qualified professional in the field must review the content or decision", so a notice cannot replace the
    reviewer. *c* is ruled out because the review comes "before it is disseminated or finalised", not as a yearly
    audit afterwards.
@@ -201,10 +201,10 @@ This quiz covers both pages of the module.
    terms. *c* is ruled out because "Pseudonymised data is still personal data under many rules, because the key can
    reverse it".
 3. **a**. A suspicious file is reported to the security or IT contact straight away, because the same file may reach others. *b* is ruled out because deleting the line leaves others unaware, and "the same file may reach others". *c* is ruled out because running it in a tool that reads untrusted content re-creates the danger, and "Take either away and the danger drops". *d* is ruled out because "A leak or a suspicious file is reported quickly; waiting lets it spread."
-4. **c**. Memory is unavailable under HIPAA agreements and Cowork is not yet covered by the business associate
+4. **d**. Memory is unavailable under HIPAA agreements and Cowork is not yet covered by the business associate
    agreement, so the question goes to the person who owns the policy. *a* is ruled out because "a strict setting can
    switch a feature off", so an owner cannot enable what the agreement removes. *b* is ruled out because Cowork is
    "not yet covered under Anthropic's business associate agreement", and a dedicated folder limits reach, not
-   coverage. *d* is ruled out because "the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements".
+   coverage. *c* is ruled out because "the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements".
 
 </details>

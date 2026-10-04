@@ -119,8 +119,8 @@ and they differ by role only because the people relying differ.
 
 1. A non-profit's analyst must show a funder which neighbourhoods have the most health referrals, using a sheet of
    beneficiaries' names, addresses and health notes. Policy restricts sharing personal data. Which approach fits?
-   - **a**: Paste ten full records first to test the method on a sample
-   - **b**: Group the entries by area and remove identifiers, then check the totals
+   - **a**: Group the entries by area and remove identifiers, then check the totals
+   - **b**: Paste ten full records first to test the method on a sample
    - **c**: Switch to a faster, cheaper model for the sensitive records
    - **d**: Upload the full sheet and ask Claude to leave names out of its findings
 
@@ -141,9 +141,9 @@ and they differ by role only because the people relying differ.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The best answer anonymises or aggregates first and checks the results, and the funder's question needs
+1. **a**. The best answer anonymises or aggregates first and checks the results, and the funder's question needs
    areas, not individuals. *d* is ruled out because the rule is "classify first, remove identifiers before
-   analysis", and leaving names out of the findings does not keep them out of the upload. *a* is ruled out because
+   analysis", and leaving names out of the findings does not keep them out of the upload. *b* is ruled out because
    "Donor and beneficiary records are sensitive", so ten full records are still exposure. *c* is ruled out because
    "High-volume, low-stakes drafting suits a faster, cheaper model", and the tier chosen does not change the class
    of the data.
@@ -158,15 +158,15 @@ This quiz covers both pages of the module.
 
 1. Two staff members each receive a readable draft from Claude: a lesson rubric for one, a funding appeal for the other. Which pair of checks matches what each of them owns?
    - **a**: First: spelling and tone; second: sentence length and layout
-   - **b**: First: accuracy and fit to the stated outcome; second: each impact claim against its source
-   - **c**: First: pupils' reactions once it is handed out; second: donors' reactions once it is sent
+   - **b**: First: pupils' reactions once it is handed out; second: donors' reactions once it is sent
+   - **c**: First: accuracy and fit to the stated outcome; second: each impact claim against its source
    - **d**: First: Claude's own rating of its accuracy; second: Claude's own rating of its sources
 
 2. A freelancer working for a charity wants Claude to write personalised thank-you notes that cite each supporter's
    past gifts, working from the full supporter list. Charity policy says personal data may not leave its systems
    unprotected. What should happen first?
-   - **a**: Strip names and addresses, then use templates with merge fields
-   - **b**: Send twenty complete records to test the tone of the notes
+   - **a**: Send twenty complete records to test the tone of the notes
+   - **b**: Strip names and addresses, then use templates with merge fields
    - **c**: Pick a faster, cheaper model, since thanks are low-stakes drafting
    - **d**: Ask Claude to confirm that it will not keep the supporters' details
 
@@ -187,15 +187,15 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The educator checks accuracy and alignment with the outcome, and the fundraiser checks impact claims
+1. **c**. The educator checks accuracy and alignment with the outcome, and the fundraiser checks impact claims
    against the source. *a* is ruled out because the educator's checks include "alignment with the stated outcome",
-   which spelling and tone do not cover. *c* is ruled out because the educator "Owns: what students are taught, how
+   which spelling and tone do not cover. *b* is ruled out because the educator "Owns: what students are taught, how
    they are assessed and the fairness of grades", and the fundraiser must check "every claim about impact, every
    statistic and every funder requirement against the source" before the audience reacts. *d* is ruled out because
    the page lists "Impact claims and statistics against source" as the check that matters most, and a self-rating is
    not a comparison with a source.
-2. **a**. Donor records are sensitive, so identifiers come out before the data goes anywhere, and the notes can be
-   merged afterwards. *b* is ruled out because "the best answer anonymises or aggregates first and checks results",
+2. **b**. Donor records are sensitive, so identifiers come out before the data goes anywhere, and the notes can be
+   merged afterwards. *a* is ruled out because "the best answer anonymises or aggregates first and checks results",
    and twenty complete records are still personal data. *d* is ruled out because "Donor and beneficiary records are
    sensitive" and the rule is to "classify first, remove identifiers before analysis", which a promise from the tool
    does not replace. *c* is ruled out because "High-volume, low-stakes drafting suits a faster, cheaper model" is

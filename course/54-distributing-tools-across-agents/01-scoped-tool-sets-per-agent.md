@@ -260,15 +260,15 @@ These are the wrong answers that the exam's options for this task statement offe
 
 2. An analysis subagent holds a general `fetch_url` tool, and it sometimes fetches pages that have nothing to do with the documents it was given. Which change fits best?
    - **a**: Add a sentence to its prompt saying that only links to the supplied files may be fetched
-   - **b**: Take the tool away and have the coordinator paste each file's text into the brief by hand
-   - **c**: Swap it for a loader that takes only the job's links and refuses the rest with a reason
+   - **b**: Swap it for a loader that takes only the job's links and refuses the rest with a reason
+   - **c**: Take the tool away and have the coordinator paste each file's text into the brief by hand
    - **d**: Give it a second tool that reports the host of each link before the fetch is made
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. A narrow tool serves the frequent case and the coordinator keeps the rare one. *b* is ruled out because "Waiting to hand back all the checks at the end blocks later steps that depend on earlier verified facts". *c* is ruled out because "Giving the synthesis agent every search tool over-provisions it and brings back the misuse". *d* is ruled out because "Speculative caching cannot reliably predict what the synthesis agent will need to check".
-2. **c**. A constraint inside the tool holds whatever the model decides. *a* is ruled out because "an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use". *b* is ruled out because "Taking a tool away is not the fix when the role really needs the capability". *d* is ruled out because "adding a tool to describe the first adds to the list and restricts nothing".
+2. **b**. A constraint inside the tool holds whatever the model decides. *a* is ruled out because "an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use". *c* is ruled out because "Taking a tool away is not the fix when the role really needs the capability". *d* is ruled out because "adding a tool to describe the first adds to the list and restricts nothing".
 
 </details>
 

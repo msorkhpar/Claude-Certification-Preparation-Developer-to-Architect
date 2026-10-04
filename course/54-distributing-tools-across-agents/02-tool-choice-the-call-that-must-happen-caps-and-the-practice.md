@@ -270,21 +270,21 @@ These are the wrong answers that the exam's options for this task statement offe
 
 1. To force a first tool on a model that rejects forcing, a team offers only that tool in the first request and the full list in every later one. Which cost does the first change carry?
    - **a**: Only the message blocks are processed again, as for any change of tool choice
-   - **b**: The whole cached prefix is processed again, since the definitions differ
+   - **b**: Nothing is processed again, since definitions that are removed stay cached
    - **c**: Only the system prompt is processed again, because it sits above the messages
-   - **d**: Nothing is processed again, since definitions that are removed stay cached
+   - **d**: The whole cached prefix is processed again, since the definitions differ
 
 2. A loop on a model that rejects forced tool use offers one tool with automatic choice, and a reply comes back as plain text with no tool call. What should the loop do?
    - **a**: Accept the text as the answer, since the model decided that it needed no tool
    - **b**: Resend the request with `any` as the choice so that the model has to call something
-   - **c**: Keep the same request going in a loop until the turn limit ends the run
-   - **d**: Treat it as a miss, ask once more, and hand the case to a person if it recurs
+   - **c**: Treat it as a miss, ask once more, and hand the case to a person if it recurs
+   - **d**: Keep the same request going in a loop until the turn limit ends the run
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Changing the definitions changes the first layer of the cache, and every layer after it. *a* is ruled out because that holds only for the choice: "Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache". *d* is ruled out for the same reason, since the list is part of the cached prefix: "Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache". *c* is ruled out because the layers cascade downward: "Changes at each level invalidate that level and all subsequent levels."
-2. **d**. A missed call is a miss, and the loop handles it. *a* is ruled out because "A reply of text only, when a call was required, is a miss". *b* is ruled out because the parameter is refused there: "`any` and `tool` return a 400 error". *c* is ruled out because "Looping until the turn limit turns a missed call into a run that ends with nothing".
+1. **d**. Changing the definitions changes the first layer of the cache, and every layer after it. *a* is ruled out because that holds only for the choice: "Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache". *b* is ruled out for the same reason, since the list is part of the cached prefix: "Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache". *c* is ruled out because the layers cascade downward: "Changes at each level invalidate that level and all subsequent levels."
+2. **c**. A missed call is a miss, and the loop handles it. *a* is ruled out because "A reply of text only, when a call was required, is a miss". *b* is ruled out because the parameter is refused there: "`any` and `tool` return a 400 error". *d* is ruled out because "Looping until the turn limit turns a missed call into a run that ends with nothing".
 
 </details>
 
@@ -295,27 +295,27 @@ This quiz covers both pages of the module.
 1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The tool that closes a customer's account carries a description that warns the model to use it carefully. What should actually limit it?
    - **a**: A longer warning in the description, with an example of when not to call it
    - **b**: An extra required parameter in which the model states why it is calling
-   - **c**: Authorisation and scope enforced in code, whatever the caller asks
-   - **d**: A place at the end of the tool list, where the model is less likely to pick it
+   - **c**: A place at the end of the tool list, where the model is less likely to pick it
+   - **d**: Authorisation and scope enforced in code, whatever the caller asks
 
 2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. Refunds cannot be undone, the policy cap is 500, and every refund needs a person's approval. A call for 450 arrives and nobody has approved it. What should the tool layer return?
    - **a**: A result that runs the refund, since the amount is under the cap
-   - **b**: A flagged refusal that waits for a human sign-off on this very request
-   - **c**: A result that runs the refund, with a note to a person for review later
+   - **b**: A result that runs the refund, with a note to a person for review later
+   - **c**: A flagged refusal that waits for a human sign-off on this very request
    - **d**: A refusal with no reason given, so that the model cannot argue with it
 
 3. Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. All subagents hold the same 18 tools, including the one that sends the finished report, and the synthesis subagent has begun running web searches. Which redesign fits best?
-   - **a**: Run every request through a classifier that enables a subset of the tools for that request
+   - **a**: Split the list by role, and give the last irreversible step one owner, behind an approval
    - **b**: Keep the shared list and add a sentence for each role to its prompt, naming the tools it should use
    - **c**: Cut the shared list to the ten most used tools, though it is still the same for every role
-   - **d**: Split the list by role, and give the last irreversible step one owner, behind an approval
+   - **d**: Run every request through a classifier that enables a subset of the tools for that request
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A limit that the model cannot talk its way around lives in code. *a* is ruled out because "an instruction not to use a tool is a request". *b* is ruled out because a field in which the model states its reason "is a claim by the model, not a check". *d* is ruled out because "the place of a tool in the list is not a limit on what it can do".
-2. **b**. An irreversible call waits for a person even under the cap. *a* is ruled out because "An irreversible call needs an approval even when the amount is under the cap". *c* is ruled out because "a review after the fact cannot undo an irreversible call". *d* is ruled out because "it says what is needed and who can give it, so the agent can pass the case on".
-3. **d**. Scoped lists remove the misuse, and the irreversible step has an owner and an approval. *b* is ruled out because a prompt line is a request: "an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use". *c* is ruled out because "an agent outside its specialisation misuses what it holds". *a* is ruled out because "a router adds a component to keep correct".
+1. **d**. A limit that the model cannot talk its way around lives in code. *a* is ruled out because "an instruction not to use a tool is a request". *b* is ruled out because a field in which the model states its reason "is a claim by the model, not a check". *c* is ruled out because "the place of a tool in the list is not a limit on what it can do".
+2. **c**. An irreversible call waits for a person even under the cap. *a* is ruled out because "An irreversible call needs an approval even when the amount is under the cap". *b* is ruled out because "a review after the fact cannot undo an irreversible call". *d* is ruled out because "it says what is needed and who can give it, so the agent can pass the case on".
+3. **a**. Scoped lists remove the misuse, and the irreversible step has an owner and an approval. *b* is ruled out because a prompt line is a request: "an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use". *c* is ruled out because "an agent outside its specialisation misuses what it holds". *d* is ruled out because "a router adds a component to keep correct".
 
 </details>
 

@@ -241,22 +241,22 @@ claude-sonnet-5-5, two extraction tools: {"tool_choice":"auto","check_reply":tru
 ## Quiz
 
 1. An extraction schema marks the purchase order number as required, and invoices lacking one come back with believable numbers that appear nowhere in the documents. What fixes it?
-   - **a**: Allow a null for that field when the source gives none
-   - **b**: Add a minimum length so that short numbers are refused
+   - **a**: Add a minimum length so that short numbers are refused
+   - **b**: Allow a null for that field when the source gives none
    - **c**: Tell the model never to leave a required field empty
    - **d**: Set a default of `unknown` in the schema for that field
 
 2. A strict schema is in force, and one record lists line items that add up to 120.50 beside a total of 130.00. Which statement holds?
    - **a**: A type check catches it, because a total is just a number in the record
    - **b**: Strict mode catches it as soon as the tool definition sets `strict`
-   - **c**: Nothing in the contract catches it: shape is promised, meaning is not
-   - **d**: Required fields must agree with each other, so the validator rejects it
+   - **c**: Required fields must agree with each other, so the validator rejects it
+   - **d**: Nothing in the contract catches it: shape is promised, meaning is not
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value. *b* is ruled out because a length limit "would not tell a real number from an invented one". *c* is ruled out because "a required field pushes the model to fabricate a value", and the instruction adds to the pressure. *d* is ruled out because a default that looks like data is a problem because "downstream code cannot tell it from a real value".
-2. **c**. The guide says strict schemas do not prevent semantic errors, and a sum is one. *a* is ruled out because "A strict schema makes the first kind rare and does nothing about the second", and both numbers pass a type check. *b* is ruled out because strict schemas "do not prevent semantic errors", and this record already matches its shape. *d* is ruled out because "the guarantee is about shape", which covers presence of fields and not agreement between them.
+1. **b**. A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value. *a* is ruled out because a length limit "would not tell a real number from an invented one". *c* is ruled out because "a required field pushes the model to fabricate a value", and the instruction adds to the pressure. *d* is ruled out because a default that looks like data is a problem because "downstream code cannot tell it from a real value".
+2. **d**. The guide says strict schemas do not prevent semantic errors, and a sum is one. *a* is ruled out because "A strict schema makes the first kind rare and does nothing about the second", and both numbers pass a type check. *b* is ruled out because strict schemas "do not prevent semantic errors", and this record already matches its shape. *c* is ruled out because "the guarantee is about shape", which covers presence of fields and not agreement between them.
 
 </details>
 

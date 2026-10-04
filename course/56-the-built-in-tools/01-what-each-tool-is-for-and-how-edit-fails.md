@@ -282,21 +282,21 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. An agent must list every component's spec file in a repository, such as `Button.test.tsx`, wherever it sits. Which tool fits?
-   - **a**: A name pattern search, for example `**/*.test.tsx`
-   - **b**: A content search for the string `describe(` or `it(`
+   - **a**: A content search for the string `describe(` or `it(`
+   - **b**: A name pattern search, for example `**/*.test.tsx`
    - **c**: A full read of each folder in turn
    - **d**: A shell loop that opens each file in turn
 
 2. A `routes.yaml` made of ten identical blocks that differ only by position refuses an edit to the third block, because the text to replace appears ten times. So no snippet of reasonable length around the third block is unique. What should the agent do?
-   - **a**: Widen the snippet with more surrounding lines until it is unique
+   - **a**: Read it and write the whole thing again with the one alteration
    - **b**: Retry with `replace_all` set, then repair the nine others by hand
-   - **c**: Read it and write the whole thing again with the one alteration
+   - **c**: Widen the snippet with more surrounding lines until it is unique
    - **d**: Use a content search to locate the third block, then retry unchanged
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The job is matching names, which is what a name pattern search is for. *b* is ruled out because a content search finds lines inside files: "Grep finds lines inside files" and not the names that match a pattern. *c* is ruled out because a folder cannot be read: "Read only reads files, not directories". *d* is ruled out because opening every file spends the context on files that do not matter: "it spends the context on files that do not matter".
-2. **c**. The guide keys Read plus Write as the fallback for a non-unique Edit, and here no unique anchor exists. The product's documented remedies are a longer unique string or `replace_all`; Read plus Write is the guide's route when neither applies, and it is where this case lands. *b* is ruled out because "`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change." *a* is ruled out because the page names this very case as the one for the fallback: "for example when a file is made of repeated blocks that differ only by position". *d* is ruled out because "Grep finds lines inside files" and does not change them, so the retried edit would be refused again.
+1. **b**. The job is matching names, which is what a name pattern search is for. *a* is ruled out because a content search finds lines inside files: "Grep finds lines inside files" and not the names that match a pattern. *c* is ruled out because a folder cannot be read: "Read only reads files, not directories". *d* is ruled out because opening every file spends the context on files that do not matter: "it spends the context on files that do not matter".
+2. **a**. The guide keys Read plus Write as the fallback for a non-unique Edit, and here no unique anchor exists. The product's documented remedies are a longer unique string or `replace_all`; Read plus Write is the guide's route when neither applies, and it is where this case lands. *b* is ruled out because "`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change." *c* is ruled out because the page names this very case as the one for the fallback: "for example when a file is made of repeated blocks that differ only by position". *d* is ruled out because "Grep finds lines inside files" and does not change them, so the retried edit would be refused again.
 
 </details>

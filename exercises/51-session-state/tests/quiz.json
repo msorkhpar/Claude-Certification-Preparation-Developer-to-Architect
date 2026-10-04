@@ -103,15 +103,15 @@
       "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A forked agent rewrote several modules in the shared working copy. The team wants that copy exactly as it stood before the run, and wants to keep the fork's conversation. What provides this?",
       "options": {
         "a": "Resuming the original session, which brings its files back",
-        "b": "Checkpointing, which snapshots the edits and reverts them",
+        "b": "Deleting the fork's session so its edits are discarded",
         "c": "Forking again from the original, so the copy starts clean",
-        "d": "Deleting the fork's session so its edits are discarded"
+        "d": "Checkpointing, which snapshots the edits and reverts them"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "Only a snapshot of the files can return them to an earlier state.",
+        "d": "Only a snapshot of the files can return them to an earlier state.",
         "a": "Ruled out because \"Sessions persist the conversation, not the filesystem\", so a resume restores no files.",
-        "d": "Ruled out because \"If a forked agent edits files, those changes are real and visible to any session working in the same directory\", and removing the session does not undo them.",
+        "b": "Ruled out because \"If a forked agent edits files, those changes are real and visible to any session working in the same directory\", and removing the session does not undo them.",
         "c": "Ruled out because forking \"branches the conversation history, not the filesystem\", so the second copy meets the same edited files."
       }
     },

@@ -78,16 +78,16 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: Wait for larger context windows, which will remove the problem
 
 4. A `find_documents` tool answers with the sentence "Found these documents: Maintenance Schedule, Lab Access Plan." The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?
-   - **a**: Lengthen the sentence, describing each document in more prose
+   - **a**: Return each hit with a stable identifier and the fields the following step needs
    - **b**: Add a prompt rule that tells the model to derive each id from the title it was shown
    - **c**: Return every stored field of each hit, so that nothing is missing
-   - **d**: Return each hit with a stable identifier and the fields the following step needs
+   - **d**: Lengthen the sentence, describing each document in more prose
 
 <details>
 <summary>Answer key</summary>
 
 3. **b**. A page with a cursor bounds the result, and the note tells the agent how to go on. *a* is ruled out because "Bloated responses waste context and make it harder for Claude to extract what matters." *c* is ruled out because "If you choose to truncate responses, be sure to steer agents with helpful instructions." *d* is ruled out because the article expects "the need for context-efficient tools to remain".
-4. **d**. The tool should hand the next step a real identifier, in a result trimmed to what that step needs. *b* is ruled out because the documentation asks the tool to "Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references", not the model to reconstruct them. *c* is ruled out because a result should "include only the fields Claude needs to reason about its next step". *a* is ruled out because more prose adds length and no handle: "Bloated responses waste context and make it harder for Claude to extract what matters."
+4. **a**. The tool should hand the next step a real identifier, in a result trimmed to what that step needs. *b* is ruled out because the documentation asks the tool to "Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references", not the model to reconstruct them. *c* is ruled out because a result should "include only the fields Claude needs to reason about its next step". *d* is ruled out because more prose adds length and no handle: "Bloated responses waste context and make it harder for Claude to extract what matters."
 
 </details>
 
@@ -108,17 +108,17 @@ This quiz covers both pages of the module.
    - **d**: Ask each agent to explain its reasoning in a parameter of the call
 
 3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. It uses one MCP server with eight tools whose schemas take about 3% of the context window, and the team sets `ENABLE_TOOL_SEARCH=auto`. What does the SDK do?
-   - **a**: Defers all but the tools that the first prompt happens to name
+   - **a**: Loads all of them at the start, as they are under the activation level
    - **b**: Defers all eight and loads them on demand, since the mode is enabled
    - **c**: Defers the three least used tools and keeps the rest loaded at the start
-   - **d**: Loads all of them at the start, as they are under the activation level
+   - **d**: Defers all but the tools that the first prompt happens to name
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault. *b* is ruled out because more instructions can pull the wrong way: an instruction "contains a keyword that now pulls every order question toward" one tool, over the descriptions. *a* is ruled out because the article warns that "Too many tools or overlapping tools can also distract agents from pursuing efficient strategies." *d* is ruled out because where a tool is served is not a selection fault: the choice runs on "a name, a description and a schema".
 2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because a preference rule outside the descriptions is the kind of nudge that "contains a keyword that now pulls every order question toward" one tool, instead of the text the model reads. *c* is ruled out because the description is where the model learns "When it should be used (and when it shouldn't)". *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
-3. **d**. Under `auto` the point is 10% of the window, and below it everything loads at the start. *b* is ruled out because "Below that, the SDK loads every tool definition into context upfront." *c* is ruled out because the rule gives no partial deferral, and "Below that, the SDK loads every tool definition into context upfront." *a* is ruled out because the choice turns on the size of the definitions, not on the prompt: "When the total reaches 10% of the window, tool search activates."
+3. **a**. Under `auto` the point is 10% of the window, and below it everything loads at the start. *b* is ruled out because "Below that, the SDK loads every tool definition into context upfront." *c* is ruled out because the rule gives no partial deferral, and "Below that, the SDK loads every tool definition into context upfront." *d* is ruled out because the choice turns on the size of the definitions, not on the prompt: "When the total reaches 10% of the window, tool search activates."
 
 </details>
 

@@ -122,8 +122,8 @@ trust and review before sharing.
 1. A consultant must hand a client a one-page dashboard that the client will open, adjust and forward. The
    consultant also wants to try a different layout without losing the first one. Which approach fits?
    - **a**: An inline reply, with each layout pasted into a fresh chat and compared by eye
-   - **b**: An artifact, with the alternative started by editing an earlier message
-   - **c**: A skill, with each layout saved as its own custom skill in the account
+   - **b**: A skill, with each layout saved as its own custom skill in the account
+   - **c**: An artifact, with the alternative started by editing an earlier message
    - **d**: A Research run, with each layout requested as a new report with citations
 
 2. A finance team builds its monthly report inside a Project called Finance. A manager who works in separate chats
@@ -143,9 +143,9 @@ trust and review before sharing.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. An artifact opens in its own panel for editing and sharing, and editing an earlier message branches the
+1. **c**. An artifact opens in its own panel for editing and sharing, and editing an earlier message branches the
    chat so "each branch has its own artifact". *a* is ruled out because an artifact opens in a panel "so you can
-   edit and re-use it without scrolling back through a conversation". *c* is ruled out because a skill is "A
+   edit and re-use it without scrolling back through a conversation". *b* is ruled out because a skill is "A
    repeatable procedure used across many chats", not a deliverable the client can open. *d* is ruled out because
    Research is for "An open question that needs many sources and citations", and this task has known content to lay
    out.

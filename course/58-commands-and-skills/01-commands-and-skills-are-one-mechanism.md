@@ -353,22 +353,22 @@ fork: general-purpose Explore null
 ## Quiz
 
 1. A project holds `.claude/commands/deploy.md`, and a teammate then adds `.claude/skills/deploy/SKILL.md`. What does `/deploy` run?
-   - **a**: The skill, since it takes precedence over the older format
+   - **a**: The command, because it was in the project first of the two
    - **b**: Both, one after the other, with the command going first
-   - **c**: The command, because it was in the project first of the two
+   - **c**: The skill, since it takes precedence over the older format
    - **d**: Neither, because the duplicate name is refused outright
 
 2. A skill folder sits under `.claude/skills/` in a nested folder two levels below where the session began. When does it become available?
-   - **a**: Never, since only skills at the repository root are read
+   - **a**: The first time Claude reads or edits a file in that location
    - **b**: At startup, together with the skills at the repository root
-   - **c**: The first time Claude reads or edits a file in that location
+   - **c**: Never, since only skills at the repository root are read
    - **d**: Only after a restart that begins inside that folder
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The product merged the two formats and gives the skill precedence over a command file of the same name. *c* is ruled out because "A skill beats a command file of the same name", and the order of arrival plays no part. *b* is ruled out because the two formats are "one mechanism with the skill format as the richer one", so one name resolves to one definition. *d* is ruled out because "Existing command files keep working", and a shared name is settled by precedence and not refused.
-2. **c**. Skills in a lower folder load when Claude first works with a file there. *b* is ruled out because a lower skill loads "the first time Claude reads or edits a file in that subdirectory", and not at startup. *a* is ruled out because project skills are found "from the directory where you start and from every parent up to the repository root", and a lower folder loads on first use. *d* is ruled out because once loaded, the skills "stay available for the rest of the session", with no restart.
+1. **c**. The product merged the two formats and gives the skill precedence over a command file of the same name. *a* is ruled out because "A skill beats a command file of the same name", and the order of arrival plays no part. *b* is ruled out because the two formats are "one mechanism with the skill format as the richer one", so one name resolves to one definition. *d* is ruled out because "Existing command files keep working", and a shared name is settled by precedence and not refused.
+2. **a**. Skills in a lower folder load when Claude first works with a file there. *b* is ruled out because a lower skill loads "the first time Claude reads or edits a file in that subdirectory", and not at startup. *c* is ruled out because project skills are found "from the directory where you start and from every parent up to the repository root", and a lower folder loads on first use. *d* is ruled out because once loaded, the skills "stay available for the rest of the session", with no restart.
 
 </details>
 
