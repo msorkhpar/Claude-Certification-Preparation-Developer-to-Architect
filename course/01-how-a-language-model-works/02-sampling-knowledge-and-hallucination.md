@@ -37,7 +37,7 @@ Picking always the single most likely token is called greedy decoding.
 The example below is a four-token toy with fixed scores. It has no relation to Claude's actual numbers; it
 exists so you can see the effect, with a seeded generator so every run prints the same lines.
 
-<!-- example: m1-sampler tabs: python,typescript -->
+<!-- example: m1-sampler tabs: python,typescript,java,kotlin -->
 ```python
 """A toy next-token sampler. It is not Claude: it only shows what temperature does."""
 import math
@@ -169,10 +169,156 @@ T=0.2 ten draws: blue blue blue blue blue blue blue blue blue blue
 T=1.0 ten draws: blue clear blue clear blue clear blue blue blue falling
 T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
 ```
+```java
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+/** A toy next-token sampler. It is not Claude: it only shows what temperature does. */
+public final class Sampler {
+    static final String[] TOKENS = {"blue", " clear", " falling", "green"};
+    static final double[] LOGITS = {4.0, 2.5, 1.0, -1.0};
+
+    /** Turn scores into probabilities. Lower temperature sharpens, higher flattens. */
+    static double[] softmax(double[] logits, double temperature) {
+        double[] scaled = new double[logits.length];
+        double top = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < logits.length; i++) {
+            scaled[i] = logits[i] / temperature;
+            top = Math.max(top, scaled[i]);
+        }
+        double total = 0;
+        double[] exps = new double[logits.length];
+        for (int i = 0; i < logits.length; i++) {
+            exps[i] = Math.exp(scaled[i] - top);
+            total += exps[i];
+        }
+        for (int i = 0; i < exps.length; i++) exps[i] /= total;
+        return exps;
+    }
+
+    /** A tiny seeded random generator, the same in every language of this course. */
+    static final class Lcg {
+        private long state;
+
+        Lcg(long seed) {
+            state = Math.floorMod(seed, 1L << 32);
+        }
+
+        double next() {
+            state = (state * 1664525L + 1013904223L) & 0xFFFFFFFFL;
+            return state / 4294967296.0;
+        }
+    }
+
+    static int sample(double[] probs, Lcg rng) {
+        double u = rng.next();
+        double acc = 0.0;
+        for (int i = 0; i < probs.length; i++) {
+            acc += probs[i];
+            if (u < acc) return i;
+        }
+        return probs.length - 1;
+    }
+
+    static int greedy(double[] probs) {
+        int best = 0;
+        for (int i = 1; i < probs.length; i++) if (probs[i] > probs[best]) best = i;
+        return best;
+    }
+
+    public static void main(String[] args) {
+        for (double t : new double[] {0.5, 1.0, 2.0}) {
+            double[] probs = softmax(LOGITS, t);
+            List<String> cells = new ArrayList<>();
+            for (int i = 0; i < probs.length; i++) cells.add(String.format(Locale.ROOT, "%s=%.3f", TOKENS[i].strip(), probs[i]));
+            System.out.println("T=" + t + ": " + String.join("  ", cells));
+        }
+        System.out.println("greedy: " + TOKENS[greedy(softmax(LOGITS, 1.0))]);
+        for (double t : new double[] {0.2, 1.0, 2.0}) {
+            double[] probs = softmax(LOGITS, t);
+            Lcg rng = new Lcg(7);
+            List<String> picks = new ArrayList<>();
+            for (int n = 0; n < 10; n++) picks.add(TOKENS[sample(probs, rng)].strip());
+            System.out.println("T=" + t + " ten draws: " + picks.stream().collect(Collectors.joining(" ")));
+        }
+    }
+}
+```
+```text
+T=0.5: blue=0.950  clear=0.047  falling=0.002  green=0.000
+T=1.0: blue=0.781  clear=0.174  falling=0.039  green=0.005
+T=2.0: blue=0.563  clear=0.266  falling=0.126  green=0.046
+greedy: blue
+T=0.2 ten draws: blue blue blue blue blue blue blue blue blue blue
+T=1.0 ten draws: blue clear blue clear blue clear blue blue blue falling
+T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
+```
+```kotlin
+import kotlin.math.exp
+
+/** A toy next-token sampler. It is not Claude: it only shows what temperature does. */
+val TOKENS = listOf("blue", " clear", " falling", "green")
+val LOGITS = listOf(4.0, 2.5, 1.0, -1.0)
+
+/** Turn scores into probabilities. Lower temperature sharpens, higher flattens. */
+fun softmax(logits: List<Double>, temperature: Double): List<Double> {
+    val scaled = logits.map { it / temperature }
+    val top = scaled.max()
+    val exps = scaled.map { exp(it - top) }
+    val total = exps.sum()
+    return exps.map { it / total }
+}
+
+/** A tiny seeded random generator, the same in every language of this course. */
+class Lcg(seed: Long) {
+    private var state = seed.mod(1L shl 32)
+
+    fun next(): Double {
+        state = (state * 1664525L + 1013904223L) and 0xFFFFFFFFL
+        return state / 4294967296.0
+    }
+}
+
+fun sample(probs: List<Double>, rng: Lcg): Int {
+    val u = rng.next()
+    var acc = 0.0
+    for ((i, p) in probs.withIndex()) {
+        acc += p
+        if (u < acc) return i
+    }
+    return probs.lastIndex
+}
+
+fun greedy(probs: List<Double>): Int = probs.indices.maxBy { probs[it] }
+
+fun main() {
+    for (t in listOf(0.5, 1.0, 2.0)) {
+        val probs = softmax(LOGITS, t)
+        println("T=$t: " + TOKENS.indices.joinToString("  ") { "%s=%.3f".format(TOKENS[it].trim(), probs[it]) })
+    }
+    println("greedy: " + TOKENS[greedy(softmax(LOGITS, 1.0))])
+    for (t in listOf(0.2, 1.0, 2.0)) {
+        val probs = softmax(LOGITS, t)
+        val rng = Lcg(7)
+        println("T=$t ten draws: " + List(10) { TOKENS[sample(probs, rng)].trim() }.joinToString(" "))
+    }
+}
+```
+```text
+T=0.5: blue=0.950  clear=0.047  falling=0.002  green=0.000
+T=1.0: blue=0.781  clear=0.174  falling=0.039  green=0.005
+T=2.0: blue=0.563  clear=0.266  falling=0.126  green=0.046
+greedy: blue
+T=0.2 ten draws: blue blue blue blue blue blue blue blue blue blue
+T=1.0 ten draws: blue clear blue clear blue clear blue blue blue falling
+T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
+```
 <!-- /example -->
 
-(Java and Kotlin readers: the example needs only the standard library of any language; the generator is a
-four-line recurrence, so a port prints the same numbers.)
+(The Java and Kotlin tabs print the same numbers: the example needs only the standard library of any language, and
+the generator is a four-line recurrence.)
 
 Read the output. At T=0.5 the probability of `blue` is 0.950, and at T=0.2 all ten draws are `blue`. At
 T=2.0 `blue` falls to 0.563, the three weaker tokens together hold the rest, and the draws mix `falling`,
