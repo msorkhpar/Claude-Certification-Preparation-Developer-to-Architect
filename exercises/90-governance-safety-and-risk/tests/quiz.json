@@ -1,0 +1,138 @@
+{
+  "module": "90-governance-safety-and-risk",
+  "quizzes": [
+    {
+      "id": "01-controls-that-fail-closed-and-a-person-before-the-irreversible#q1",
+      "page": "01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+      "scope": "page",
+      "stem": "Scenario: Dana runs the refund flow of a claims assistant. The service that screens incoming requests stops answering, and the code must choose between two behaviours for a request that asks for a refund. Which one fits the design rules on this page?",
+      "options": {
+        "a": "Hold it and tell the caller that the check is unavailable",
+        "b": "Let the request pass and flag it for a person to look at tomorrow",
+        "c": "Run the request once more through the model's own safety training",
+        "d": "Let the request pass because the later approval step will catch it"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A refund is a high-consequence action and the screen is an input control, so the design holds.",
+        "b": "Ruled out because \"A screen that is down and lets a request through is the opening an attacker waits for\".",
+        "c": "Ruled out because the layers \"answer different attackers and different mistakes\", and the model's own training is not the missing screen.",
+        "d": "Ruled out because \"an output control cannot stop a tool call that already happened\", and a later step does not repair a gap on an earlier layer."
+      }
+    },
+    {
+      "id": "01-controls-that-fail-closed-and-a-person-before-the-irreversible#q2",
+      "page": "01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+      "scope": "page",
+      "stem": "Scenario: Ravi reviews a design in which a model must \"always ask a person before closing an account\", a rule written in the system prompt. What is the main weakness of that design?",
+      "options": {
+        "a": "The sentence is too short for the model to follow it reliably under load",
+        "b": "The rule should sit in the user turn so that the model reads it last",
+        "c": "Nothing forces the step to happen, because an instruction only asks",
+        "d": "The sentence repeats a rule the platform already applies to every account"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A line in a prompt is a request and a control is a step the model cannot skip.",
+        "a": "Ruled out because the page does not argue about length: \"a line in a prompt is a request, and a control is a step the model cannot skip\".",
+        "b": "Ruled out because the sentence stays \"a request to the model and not a control\" wherever it sits.",
+        "d": "Ruled out because \"Every control has a failure mode of its own, and the design must say it\", and no platform rule is assumed to hold it."
+      }
+    },
+    {
+      "id": "02-compliance-fairness-transparency-and-the-register#q1",
+      "page": "02-compliance-fairness-transparency-and-the-register.md",
+      "scope": "page",
+      "stem": "Scenario: Mira is asked to honour a deletion request from a customer whose requests appear in the audit entries of a claims assistant. Those entries hold tokens, and one table maps each token to a person. What does the design do?",
+      "options": {
+        "a": "Delete the entries of that customer from the log",
+        "b": "Remove the vault rows that tie them to anything in the log",
+        "c": "Replace the tokens in that customer's entries with new tokens",
+        "d": "Encrypt that customer's entries with a key that is then kept"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Removing the vault rows leaves the entries and unlinks them from the person.",
+        "a": "Ruled out because \"Deleting every audit entry would destroy the proof\".",
+        "c": "Ruled out because \"keeping both leaves the person identifiable\", and new tokens in the entries leave the vault map in place.",
+        "d": "Ruled out because the design removes \"the map: the vault entries for that person go\", and encryption keeps a key that can link them again."
+      }
+    },
+    {
+      "id": "02-compliance-fairness-transparency-and-the-register#q2",
+      "page": "02-compliance-fairness-transparency-and-the-register.md",
+      "scope": "page",
+      "stem": "Scenario: Tomas must set how long a support assistant keeps its audit records. His design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?",
+      "options": {
+        "a": "They are deleted at once because the court may inspect any copy",
+        "b": "They follow the same schedule and the case uses what is left",
+        "c": "They are moved to a table with no limit on their retention",
+        "d": "Hold them past the ceiling until the matter is settled"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A legal hold is the one thing that outranks the ceiling, and the records are released when it ends.",
+        "a": "Ruled out because the hold keeps records, as \"the records in scope are kept past it\".",
+        "c": "Ruled out because \"they are released when the hold ends\", and an unlimited table keeps them after the case.",
+        "b": "Ruled out because \"A legal hold is the one thing that outranks the ceiling\", so the ordinary schedule does not apply."
+      }
+    },
+    {
+      "id": "02-compliance-fairness-transparency-and-the-register#m1",
+      "page": "02-compliance-fairness-transparency-and-the-register.md",
+      "scope": "module",
+      "stem": "Scenario: Ines's claims assistant keeps its record of each request for a year, and a reviewer notices that the screen that checks incoming requests is allowed to let them through when it is down. Which change does the first page support?",
+      "options": {
+        "a": "Keep the pass-through and add a monitor that alerts on the gap",
+        "b": "Keep the pass-through and shorten the retention of the records",
+        "c": "Stop the call whenever that service cannot answer, and log why",
+        "d": "Move the screening into the system prompt so that it cannot be down"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "An input control holds when it fails, and the reason goes in the record.",
+        "b": "Ruled out because retention does not close the gap: \"A screen that is down and lets a request through is the opening an attacker waits for\".",
+        "a": "Ruled out because the first page puts the monitor in the layers that watch \"afterwards\", so \"an output control cannot stop a tool call that already happened\".",
+        "d": "Ruled out because \"a line in a prompt is a request, and a control is a step the model cannot skip\"."
+      }
+    },
+    {
+      "id": "02-compliance-fairness-transparency-and-the-register#m2",
+      "page": "02-compliance-fairness-transparency-and-the-register.md",
+      "scope": "module",
+      "stem": "Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. What does the second page say about that claim?",
+      "options": {
+        "a": "A small group cannot be measured, so the average is the only usable figure",
+        "b": "Fairness is a gap between segments, and a headline figure masks a failing one",
+        "c": "The group's score should be dropped when it is below the volume needed",
+        "d": "The system passes because the model was tested on a broad set before launch"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page measures fairness as a gap per group and warns that an average hides one.",
+        "a": "Ruled out because \"the groups must be defined where they can be measured\" and a group that can be labelled can be reported.",
+        "c": "Ruled out because \"a headline average hides a failing group exactly as it hides a failing segment\", so dropping the score hides it.",
+        "d": "Ruled out because \"fairness is a property of outcomes by group\", and a broad launch test is not a gap measure."
+      }
+    },
+    {
+      "id": "02-compliance-fairness-transparency-and-the-register#m3",
+      "page": "02-compliance-fairness-transparency-and-the-register.md",
+      "scope": "module",
+      "stem": "Scenario: An auditor asks a team to prove that a refund over a set amount was approved by a person. The team has an audit entry for the refund with a request id, an outcome of human and a character count. What do they have?",
+      "options": {
+        "a": "Nothing, because a record without the content is not admissible",
+        "b": "A record that is too thin, since only the text proves what happened",
+        "c": "A record that holds the refund amount and the approver's name",
+        "d": "Proof of the step, with no copy of the customer's text kept"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The record shows the step happened without a copy of the data.",
+        "b": "Ruled out because \"Content that was never stored cannot be breached, subpoenaed by accident or kept past a deletion request\".",
+        "c": "Ruled out because the entry holds \"request id, action, consequence, outcome and the size of the text\", which names no amount or approver.",
+        "a": "Ruled out because the design keeps \"proof of what happened\", and the page does not tie proof to stored content."
+      }
+    }
+  ]
+}

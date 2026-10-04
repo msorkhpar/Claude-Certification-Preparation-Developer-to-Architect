@@ -1,0 +1,224 @@
+{
+  "practice": "92-enabling-teams-and-operations/unit-01/practice-1",
+  "name": "rollout",
+  "tests": {
+    "java": "RolloutTest",
+    "kotlin": "RolloutTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_managed_file_locks_permissions_and_protects_the_environment_file",
+      "typescript": "m1 the managed file locks permissions and protects the environment file",
+      "java": "m1_theManagedFileLocksPermissionsAndProtectsTheEnvironmentFile",
+      "kotlin": "m1_theManagedFileLocksPermissionsAndProtectsTheEnvironmentFile"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_keys_only_an_organisation_can_set_live_in_the_managed_file_and_never_in_the_project_file",
+      "typescript": "e1 keys only an organisation can set live in the managed file and never in the project file",
+      "java": "e1_keysOnlyAnOrganisationCanSetLiveInTheManagedFileAndNeverInTheProjectFile",
+      "kotlin": "e1_keysOnlyAnOrganisationCanSetLiveInTheManagedFileAndNeverInTheProjectFile"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_plugins_come_only_from_the_companys_marketplace_and_cannot_be_sideloaded",
+      "typescript": "e2 plugins come only from the companys marketplace and cannot be sideloaded",
+      "java": "e2_pluginsComeOnlyFromTheCompanysMarketplaceAndCannotBeSideloaded",
+      "kotlin": "e2_pluginsComeOnlyFromTheCompanysMarketplaceAndCannotBeSideloaded"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_only_the_managed_mcp_allowlist_applies_and_a_server_is_never_allowed_and_denied",
+      "typescript": "e3 only the managed mcp allowlist applies and a server is never allowed and denied",
+      "java": "e3_onlyTheManagedMcpAllowlistAppliesAndAServerIsNeverAllowedAndDenied",
+      "kotlin": "e3_onlyTheManagedMcpAllowlistAppliesAndAServerIsNeverAllowedAndDenied"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_model_choice_is_locked_by_a_list_and_the_effort_cap_is_at_most_high",
+      "typescript": "e4 the model choice is locked by a list and the effort cap is at most high",
+      "java": "e4_theModelChoiceIsLockedByAListAndTheEffortCapIsAtMostHigh",
+      "kotlin": "e4_theModelChoiceIsLockedByAListAndTheEffortCapIsAtMostHigh"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_group_spend_limits_add_up_to_the_organisation_limit_and_no_more",
+      "typescript": "e5 the group spend limits add up to the organisation limit and no more",
+      "java": "e5_theGroupSpendLimitsAddUpToTheOrganisationLimitAndNoMore",
+      "kotlin": "e5_theGroupSpendLimitsAddUpToTheOrganisationLimitAndNoMore"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_adoption_is_measured_by_outcomes_against_a_baseline_of_at_least_4_weeks",
+      "typescript": "e6 adoption is measured by outcomes against a baseline of at least 4 weeks",
+      "java": "e6_adoptionIsMeasuredByOutcomesAgainstABaselineOfAtLeast4Weeks",
+      "kotlin": "e6_adoptionIsMeasuredByOutcomesAgainstABaselineOfAtLeast4Weeks"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_precedence_table_is_in_the_documented_order_and_no_file_holds_personal_data",
+      "typescript": "e7 the precedence table is in the documented order and no file holds personal data",
+      "java": "e7_thePrecedenceTableIsInTheDocumentedOrderAndNoFileHoldsPersonalData",
+      "kotlin": "e7_thePrecedenceTableIsInTheDocumentedOrderAndNoFileHoldsPersonalData"
+    }
+  },
+  "plants": {
+    "wrong-managed-rules-open": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "lets user and project files add permission rules beside the managed ones"
+    },
+    "wrong-bypass-allowed": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "leaves the bypass permissions mode available"
+    },
+    "wrong-env-readable": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "does not deny reading the environment file"
+    },
+    "wrong-hooks-in-project": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "puts a managed-only lock in the shared project file, where it has no effect"
+    },
+    "wrong-marketplaces-in-project": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "puts the marketplace allowlist in the shared project file"
+    },
+    "wrong-hooks-open": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "lets any hook run"
+    },
+    "wrong-marketplace-empty": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "allows no marketplace at all, the official one included"
+    },
+    "wrong-marketplace-foreign": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "allows a marketplace the company does not own"
+    },
+    "wrong-sideload-open": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets a plugin be loaded from a folder with a flag"
+    },
+    "wrong-mcp-not-exclusive": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "lets a user's own allowlist widen the managed one"
+    },
+    "wrong-mcp-two-keys": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "writes an allowlist entry with two keys"
+    },
+    "wrong-mcp-bad-name": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "allows a server whose name has a space"
+    },
+    "wrong-mcp-allowed-and-denied": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "allows and denies the same server"
+    },
+    "wrong-no-model-list": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "sets a default model and leaves the choice open"
+    },
+    "wrong-model-outside-list": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "sets a default model that the list does not allow"
+    },
+    "wrong-effort-xhigh": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "caps the effort one level above high"
+    },
+    "wrong-effort-max": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "sets the effort cap to max, which sets no cap"
+    },
+    "wrong-groups-over-org": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "gives the groups a total one unit over the organisation limit"
+    },
+    "wrong-member-over-group": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "gives a member a limit above the smallest group's"
+    },
+    "wrong-no-usage-credits": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not say that usage credits are on"
+    },
+    "wrong-baseline-3-weeks": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "takes a baseline of three weeks"
+    },
+    "wrong-activity-target": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "sets lines accepted as a target"
+    },
+    "wrong-one-target": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "sets one outcome target and not two"
+    },
+    "wrong-precedence-order": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "puts the shared project file above the project local file"
+    },
+    "wrong-no-group-note": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "does not say that server-managed settings cannot target a group yet"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes a personal home path into the plan"
+    }
+  }
+}
