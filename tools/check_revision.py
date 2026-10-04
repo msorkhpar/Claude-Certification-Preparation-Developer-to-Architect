@@ -34,6 +34,9 @@ LEVELS = {
 
 
 DIR = LEVELS[1]["dir"]
+# Level 4 (Architect Professional): modules 79 to 93, domains P1 to P7; planned minimums as for Level 2, with fewer per domain.
+LEVELS[4] = {"dir": ROOT / "exercises" / "94-exam-readiness-4", "modules": range(79, 94), "domains": {f"P{i}" for i in range(1, 8)},
+             "mins": (4, 2, 10, 6), "label": "Level 4", "near": True}
 
 
 def common(entry, kind, problems, cfg=LEVELS[1]):
