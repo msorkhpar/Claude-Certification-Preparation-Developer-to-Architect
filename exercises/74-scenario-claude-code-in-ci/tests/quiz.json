@@ -1,0 +1,195 @@
+{
+  "module": "74-scenario-claude-code-in-ci",
+  "quizzes": [
+    {
+      "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q1",
+      "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "scope": "page",
+      "stem": "A pipeline step runs `claude \"Analyze this pull request\"` and hangs. What fixes it?",
+      "options": {
+        "a": "Point its input at an empty file so it cannot wait",
+        "b": "Export an environment variable that selects headless mode",
+        "c": "Add a batch flag so the call is queued",
+        "d": "Add the print flag so that the run answers and exits"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "`-p` is the documented way to run without a person.",
+        "b": "Ruled out because no such variable exists: \"There is no headless environment variable and no `--batch` flag on the command line\".",
+        "c": "is ruled out for the same reason: \"There is no headless environment variable and no `--batch` flag on the command line\".",
+        "a": "Ruled out because it is a workaround: \"Redirecting standard input from an empty file is a Unix workaround that does not change how Claude Code runs.\""
+      }
+    },
+    {
+      "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q2",
+      "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "scope": "page",
+      "stem": "A pipeline has a gate that stops merges until it passes and a dependency digest that people read on Monday. Which calls move to batch?",
+      "options": {
+        "a": "Just the one nobody waits on, while the other stays in real time",
+        "b": "Both of them, with polling to find out when the gate is ready",
+        "c": "Neither of them, since the results of a batch arrive in any order",
+        "d": "Both of them, with a fallback to real time when a batch is slow"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Nobody waits for the digest and a developer waits for the gate.",
+        "b": "Ruled out because waiting is the problem: \"Polling a batch does not make it finish sooner.\"",
+        "c": "Ruled out because matching exists: \"Results of a batch come back matched by `custom_id`, so their order is no reason to avoid it.\"",
+        "d": "Ruled out because it adds a path: \"A fallback to real time when a batch is slow adds a second path and a second bill\"."
+      }
+    },
+    {
+      "id": "01-the-calls-that-wait-and-the-calls-that-do-not#q3",
+      "page": "01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "scope": "page",
+      "stem": "To which jobs does the audit's `no-print-flag` finding apply?",
+      "options": {
+        "a": "Any job whose api is batch, whatever its command",
+        "b": "A command that starts `python` and submits a script without `-p`",
+        "c": "A command that starts `claude` and has neither `-p` nor `--print`",
+        "d": "Any job that a developer waits for, whatever its command"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The finding is about the command line: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\"",
+        "b": "Ruled out because a script is not covered: \"the `-p` rule applies to commands that start with `claude` and not to a script\".",
+        "a": "is ruled out for the same reason: \"the `-p` rule applies to commands that start with `claude` and not to a script\".",
+        "d": "Ruled out because waiting has its own finding: \"`blocking-batch`: a job someone waits for that runs as a batch.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#q1",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which criteria file passes the practice's criteria case?",
+      "options": {
+        "a": "Two items to report, two to skip, and no example for the high severity",
+        "b": "Two items to report, two to skip, and an example for every severity",
+        "c": "Two items to report, two to skip, an example for every severity, and a line that says be conservative",
+        "d": "Two items to report and an example for every severity, with no list of items to skip"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "It has both lists and every example: \"The criteria case passes when the report and skip lists have two items each, every severity has an `Example:` and no vague phrase such as `be conservative` appears.\"",
+        "a": "is ruled out by the examples: \"every severity has an `Example:`\".",
+        "c": "is ruled out by the vague phrase: \"no vague phrase such as `be conservative` appears\".",
+        "d": "is ruled out by the lists: \"the report and skip lists have two items each\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#q2",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which `passes` setting does the practice's review case accept?",
+      "options": {
+        "a": "`all-files`, then `integration`",
+        "b": "`integration`, then `per-file`",
+        "c": "`per-file` followed by another `per-file`",
+        "d": "`per-file`, then `integration`"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A pass for each file, then the integration pass.",
+        "b": "Ruled out because the order matters: \"`passes` is `per-file` and then `integration`, in that order\".",
+        "c": "Ruled out because the second pass is not an integration pass: \"`passes` is `per-file` and then `integration`, in that order\".",
+        "a": "Ruled out because the first pass is not per file: \"`passes` is `per-file` and then `integration`, in that order\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#q3",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which command does the practice's commands case accept?",
+      "options": {
+        "a": "`claude \"...\" --output-format json --max-turns 6`",
+        "b": "`claude -p \"...\" --output-format json --max-turns 6`",
+        "c": "`claude -p \"...\" --max-turns 6 --allowedTools Read`",
+        "d": "`claude -p \"...\" --output-format json --allowedTools Read`"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The flag, the JSON format and the turn limit are all present.",
+        "a": "Ruled out because the print flag is missing: \"has `-p` or `--print`, `--output-format json` and `--max-turns` with a number\".",
+        "c": "Ruled out because the JSON format is missing: \"has `-p` or `--print`, `--output-format json` and `--max-turns` with a number\".",
+        "d": "Ruled out because the turn limit is missing: \"has `-p` or `--print`, `--output-format json` and `--max-turns` with a number\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m1",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. A job must decide whether to fail, but the seriousness of each comment is free text. What fixes that?",
+      "options": {
+        "a": "Ask the model to put the word critical at the very start of any serious comment it makes",
+        "b": "Ask for JSON that follows a schema where severity is one of a few fixed values",
+        "c": "Count the comments and fail the job once they pass a fixed number chosen by the team",
+        "d": "Search the prose of every comment for the words that usually go with a bad finding"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A closed list can be compared with a floor.",
+        "a": "Ruled out because a word in prose is a convention: \"A sentence that asks for more care is a request; the criteria are the case list.\"",
+        "c": "Ruled out because a count says nothing about how bad a finding is: \"what each severity means, with one example for each\".",
+        "d": "Ruled out because the severity belongs in the schema: \"The severity then belongs in the schema as a closed list, so a script can compare it with a floor.\""
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m2",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The job script ignores how the command ended, and the job is green although the run stopped at its turn limit. What is the remedy?",
+      "options": {
+        "a": "Read the exit status and the JSON, and fail whenever no valid answer exists",
+        "b": "Raise the turn limit until the run always finishes well before it reaches that limit",
+        "c": "Run the command again whenever the output that comes back looks a little too short",
+        "d": "Remove the turn limit so that a run stops only when all of its work is finished"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The gate fails the job whenever no valid answer exists.",
+        "b": "Ruled out because the limit exists to stop a loop: \"`--max-turns` stops a loop\".",
+        "c": "Ruled out because a rerun changes nothing: \"re-running it repeats the cost with no reason to expect a different result\".",
+        "d": "Ruled out because the limit is what ends the run by itself: \"A run with no person must end by itself\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m3",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The audit of the draft prints `batchable: debt-report`. What does that finding report?",
+      "options": {
+        "a": "A scheduled job runs in real time and pays full price",
+        "b": "A job that someone waits for runs as a batch",
+        "c": "A command that starts claude lacks the print flag",
+        "d": "A review is made in one pass and in a shared session"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The finding is about a scheduled job: \"`batchable`: a scheduled job that runs in real time and pays full price.\"",
+        "b": "Ruled out because that is the other finding: \"`blocking-batch`: a job someone waits for that runs as a batch.\"",
+        "c": "Ruled out because that is a third: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\"",
+        "d": "Ruled out because the design of a review has its own findings: \"`single-pass-review`, `shared-session`, `no-prior-findings` and `writes`: the design of a review\"."
+      }
+    },
+    {
+      "id": "02-review-passes-criteria-test-generation-and-the-practice#m4",
+      "page": "02-review-passes-criteria-test-generation-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, a pipeline that reviews pull requests and writes tests. The draft's review lists the tools Read, Grep and Bash. What does the audit report about it?",
+      "options": {
+        "a": "A job that a person waits for runs as a batch with no promise of speed",
+        "b": "A command that starts claude lacks the print flag that makes a run headless",
+        "c": "The job holds a means of changing things although it only looks at code",
+        "d": "A session that wrote the code is also the one that judges that code afterwards"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A review needs reading tools only: \"A shell tool is a way to change things\".",
+        "b": "Ruled out because that finding is about the command line: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\"",
+        "a": "Ruled out because that finding is about the API: \"`blocking-batch`: a job someone waits for that runs as a batch.\"",
+        "d": "Ruled out because the session is another property: \"the review runs as its own session and not as a continuation of the one that generated the change\"."
+      }
+    }
+  ]
+}

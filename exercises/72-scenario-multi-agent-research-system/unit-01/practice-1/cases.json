@@ -1,0 +1,124 @@
+{
+  "practice": "72-scenario-multi-agent-research-system/unit-01/practice-1",
+  "name": "synthesis",
+  "tests": {
+    "java": "SynthesisTest",
+    "kotlin": "SynthesisTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_full_run_with_agreement_returns_claims_with_every_source_and_a_complete_status",
+      "typescript": "m1 a full run with agreement returns claims with every source and a complete status",
+      "java": "m1_aFullRunWithAgreementReturnsClaimsWithEverySourceAndACompleteStatus",
+      "kotlin": "m1_aFullRunWithAgreementReturnsClaimsWithEverySourceAndACompleteStatus"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_no_results_leave_every_scope_a_gap_and_say_not_researched",
+      "typescript": "e1 no results leave every scope a gap and say not researched",
+      "java": "e1_noResultsLeaveEveryScopeAGapAndSayNotResearched",
+      "kotlin": "e1_noResultsLeaveEveryScopeAGapAndSayNotResearched"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_scope_the_plan_never_covered_and_a_scope_whose_search_failed_read_differently_in_the_note",
+      "typescript": "e2 a scope the plan never covered and a scope whose search failed read differently in the note",
+      "java": "e2_aScopeThePlanNeverCoveredAndAScopeWhoseSearchFailedReadDifferentlyInTheNote",
+      "kotlin": "e2_aScopeThePlanNeverCoveredAndAScopeWhoseSearchFailedReadDifferentlyInTheNote"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_two_values_for_one_claim_are_a_conflict_that_names_both_sources_and_no_claim",
+      "typescript": "e3 two values for one claim are a conflict that names both sources and no claim",
+      "java": "e3_twoValuesForOneClaimAreAConflictThatNamesBothSourcesAndNoClaim",
+      "kotlin": "e3_twoValuesForOneClaimAreAConflictThatNamesBothSourcesAndNoClaim"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_partial_results_are_kept_and_flagged_but_do_not_cover_the_scope_and_a_retry_that_worked_clears_the_error",
+      "typescript": "e4 partial results are kept and flagged but do not cover the scope and a retry that worked clears the error",
+      "java": "e4_partialResultsAreKeptAndFlaggedButDoNotCoverTheScopeAndARetryThatWorkedClearsTheError",
+      "kotlin": "e4_partialResultsAreKeptAndFlaggedButDoNotCoverTheScopeAndARetryThatWorkedClearsTheError"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_result_with_no_findings_does_not_cover_its_scope",
+      "typescript": "e5 a result with no findings does not cover its scope",
+      "java": "e5_aResultWithNoFindingsDoesNotCoverItsScope",
+      "kotlin": "e5_aResultWithNoFindingsDoesNotCoverItsScope"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_claims_sources_and_scopes_come_out_in_a_fixed_order_without_duplicates",
+      "typescript": "e6 claims sources and scopes come out in a fixed order without duplicates",
+      "java": "e6_claimsSourcesAndScopesComeOutInAFixedOrderWithoutDuplicates",
+      "kotlin": "e6_claimsSourcesAndScopesComeOutInAFixedOrderWithoutDuplicates"
+    }
+  },
+  "plants": {
+    "wrong-complete-by-errors": {
+      "caught_by": [
+        "e1",
+        "e5"
+      ],
+      "defect": "calls the run complete when there are no errors, although a scope was never researched"
+    },
+    "wrong-conflict-first-wins": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "keeps the first value of a claim and drops the other source"
+    },
+    "wrong-partial-covers": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "counts a scope with only partial results as covered"
+    },
+    "wrong-empty-covers": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "counts a scope whose result holds no findings as covered"
+    },
+    "wrong-partial-dropped": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "drops the partial findings of a failed search"
+    },
+    "wrong-resolved-error-kept": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "keeps the error of a scope that a later result covered"
+    },
+    "wrong-sources-duplicated": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "lists the same source twice for one claim"
+    },
+    "wrong-claims-unsorted": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "returns the claims in the order they arrived"
+    },
+    "wrong-note-silent": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e5"
+      ],
+      "defect": "writes an all-clear note whatever is missing"
+    },
+    "wrong-partial-flag-any": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags a claim as partial when any of its findings was partial"
+    }
+  }
+}

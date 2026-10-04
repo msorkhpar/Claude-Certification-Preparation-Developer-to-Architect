@@ -1902,6 +1902,171 @@ _TS60 = {
 }
 PLANTS[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {"python": ("review_gate.py", {**_CFG60, **_PY60}), "typescript": ("reviewGate.ts", {**_CFG60, **_TS60})}
 
+# ===== Level 3: modules 70 to 74 (the scenario capstones) =====
+PLANTS[f"{X}/70-scenario-customer-support-agent/unit-01/practice-1"] = {
+    "python": ("audit.py", {
+        "wrong-prereq-ignores-order": [('        elif step["tool"] in PROTECTED and not verified:', '        elif step["tool"] in PROTECTED:')],
+        "wrong-failed-identity-opens": [('if step["tool"] == "get_customer" and step["ok"]:', 'if step["tool"] == "get_customer":')],
+        "wrong-over-limit-any-outcome": [('if s["outcome"] == "resolved" and s["refund_cents"] > s["limit_cents"])', 'if s["refund_cents"] > s["limit_cents"])')],
+        "wrong-diagnosis-criteria-first": [('    elif wrong and wrong >= over + under:\n        diagnosis = "rewrite_tool_descriptions"\n    elif over + under:\n        diagnosis = "write_escalation_criteria"\n',
+                                            '    elif over + under:\n        diagnosis = "write_escalation_criteria"\n    elif wrong and wrong >= over + under:\n        diagnosis = "rewrite_tool_descriptions"\n')],
+        "wrong-target-strict": [('"meets_target": fcr >= TARGET', '"meets_target": fcr > TARGET')],
+        "wrong-wrong-tool-steps": [('wrong = sum(1 for s in sessions if any(st.get("right_tool") and st["tool"] != st["right_tool"] for st in s["steps"]))',
+                                    'wrong = sum(1 for s in sessions for st in s["steps"] if st.get("right_tool") and st["tool"] != st["right_tool"])')],
+        "wrong-no-rounding": [('fcr = round(resolved / n, 3) if n else 0.0', 'fcr = resolved / n if n else 0.0')],
+        "wrong-over-counts-needs-human": [('over = sum(1 for s in sessions if s["outcome"] == "escalated" and not s["needs_human"])', 'over = sum(1 for s in sessions if s["outcome"] == "escalated")')],
+    }),
+    "typescript": ("audit.ts", {
+        "wrong-prereq-ignores-order": [("else if (PROTECTED.includes(step.tool) && !verified) return true;", "else if (PROTECTED.includes(step.tool)) return true;")],
+        "wrong-failed-identity-opens": [('if (step.tool === "get_customer" && step.ok) verified = true;', 'if (step.tool === "get_customer") verified = true;')],
+        "wrong-over-limit-any-outcome": [('count((s) => s.outcome === "resolved" && s.refund_cents > s.limit_cents)', "count((s) => s.refund_cents > s.limit_cents)")],
+        "wrong-diagnosis-criteria-first": [('  else if (wrong && wrong >= over + under) diagnosis = "rewrite_tool_descriptions";\n  else if (over + under) diagnosis = "write_escalation_criteria";\n',
+                                            '  else if (over + under) diagnosis = "write_escalation_criteria";\n  else if (wrong && wrong >= over + under) diagnosis = "rewrite_tool_descriptions";\n')],
+        "wrong-target-strict": [("meets_target: fcr >= TARGET", "meets_target: fcr > TARGET")],
+        "wrong-wrong-tool-steps": [("const wrong = count((s) => s.steps.some((st) => st.right_tool && st.tool !== st.right_tool));",
+                                    "const wrong = sessions.reduce((a, s) => a + s.steps.filter((st) => st.right_tool && st.tool !== st.right_tool).length, 0);")],
+        "wrong-no-rounding": [("const fcr = n ? Math.round((resolved / n) * 1000) / 1000 : 0;", "const fcr = n ? resolved / n : 0;")],
+        "wrong-over-counts-needs-human": [('const over = count((s) => s.outcome === "escalated" && !s.needs_human);', 'const over = count((s) => s.outcome === "escalated");')],
+    }),
+    "java": ("Audit.java", {
+        "wrong-prereq-ignores-order": [("else if (PROTECTED.contains(step.tool()) && !verified) return true;", "else if (PROTECTED.contains(step.tool())) return true;")],
+        "wrong-failed-identity-opens": [('if (step.tool().equals("get_customer") && step.ok()) verified = true;', 'if (step.tool().equals("get_customer")) verified = true;')],
+        "wrong-over-limit-any-outcome": [('s.outcome().equals("resolved") && s.refundCents() > s.limitCents()', "s.refundCents() > s.limitCents()")],
+        "wrong-diagnosis-criteria-first": [('        else if (wrong > 0 && wrong >= over + under) diagnosis = "rewrite_tool_descriptions";\n        else if (over + under > 0) diagnosis = "write_escalation_criteria";\n',
+                                            '        else if (over + under > 0) diagnosis = "write_escalation_criteria";\n        else if (wrong > 0 && wrong >= over + under) diagnosis = "rewrite_tool_descriptions";\n')],
+        "wrong-target-strict": [("fcr >= TARGET", "fcr > TARGET")],
+        "wrong-wrong-tool-steps": [("int wrong = (int) sessions.stream().filter(s -> s.steps().stream().anyMatch(st -> st.rightTool() != null && !st.tool().equals(st.rightTool()))).count();",
+                                    "int wrong = (int) sessions.stream().flatMap(s -> s.steps().stream()).filter(st -> st.rightTool() != null && !st.tool().equals(st.rightTool())).count();")],
+        "wrong-no-rounding": [("double fcr = n > 0 ? Math.round((double) resolved / n * 1000) / 1000.0 : 0.0;", "double fcr = n > 0 ? (double) resolved / n : 0.0;")],
+        "wrong-over-counts-needs-human": [('int over = (int) sessions.stream().filter(s -> s.outcome().equals("escalated") && !s.needsHuman()).count();', 'int over = (int) sessions.stream().filter(s -> s.outcome().equals("escalated")).count();')],
+    }),
+    "kotlin": ("Audit.kt", {
+        "wrong-prereq-ignores-order": [("else if (step.tool in PROTECTED && !verified) return true", "else if (step.tool in PROTECTED) return true")],
+        "wrong-failed-identity-opens": [('if (step.tool == "get_customer" && step.ok) verified = true', 'if (step.tool == "get_customer") verified = true')],
+        "wrong-over-limit-any-outcome": [('sessions.count { it.outcome == "resolved" && it.refundCents > it.limitCents }', "sessions.count { it.refundCents > it.limitCents }")],
+        "wrong-diagnosis-criteria-first": [('        wrong > 0 && wrong >= over + under -> "rewrite_tool_descriptions"\n        over + under > 0 -> "write_escalation_criteria"\n',
+                                            '        over + under > 0 -> "write_escalation_criteria"\n        wrong > 0 && wrong >= over + under -> "rewrite_tool_descriptions"\n')],
+        "wrong-target-strict": [("fcr >= TARGET", "fcr > TARGET")],
+        "wrong-wrong-tool-steps": [("val wrong = sessions.count { s -> s.steps.any { it.rightTool != null && it.tool != it.rightTool } }",
+                                    "val wrong = sessions.sumOf { s -> s.steps.count { it.rightTool != null && it.tool != it.rightTool } }")],
+        "wrong-no-rounding": [("val fcr = if (n > 0) Math.round(resolved.toDouble() / n * 1000) / 1000.0 else 0.0", "val fcr = if (n > 0) resolved.toDouble() / n else 0.0")],
+        "wrong-over-counts-needs-human": [('val over = sessions.count { it.outcome == "escalated" && !it.needsHuman }', 'val over = sessions.count { it.outcome == "escalated" }')],
+    }),
+}
+
+_P71 = {
+    "wrong-components-unscoped": {".claude/rules/components.md": [('---\npaths:\n  - "src/ui/**/*.tsx"\n---\n\n', "")]},
+    "wrong-handlers-wide": {".claude/rules/handlers.md": [('  - "server/handlers/**/*.ts"', '  - "**/*.ts"')]},
+    "wrong-tests-folder": {".claude/rules/tests.md": [('  - "**/*.spec.ts"\n  - "**/*.spec.tsx"\n', '  - "src/ui/**/*.spec.tsx"\n')]},
+    "wrong-tests-ts-only": {".claude/rules/tests.md": [('  - "**/*.spec.tsx"\n', "")]},
+    "wrong-database-bare-folder": {".claude/rules/database.md": [('  - "server/db/**/*.ts"', '  - "server/db"')]},
+    "wrong-root-keeps-hooks": {"CLAUDE.md": [("- Run `npm test` before finishing a task.\n", "- Run `npm test` before finishing a task.\n- Write function components that use hooks.\n")]},
+    "wrong-root-long": {"CLAUDE.md": [("# Dispatch app\n", "# Dispatch app\n" + "- Background note: kept for history, it changes no behaviour.\n" * 30)]},
+    "wrong-review-bare-bash": {".claude/commands/review.md": [("allowed-tools: Read Grep Glob Bash(git diff *)", "allowed-tools: Read Grep Glob Bash")]},
+    "wrong-review-no-description": {".claude/commands/review.md": [("description: Review the current changes against the team checklist\n", "")]},
+    "wrong-no-env-deny": {".claude/settings.json": [('"deny": ["Read(./.env)"]', '"deny": []')]},
+    "wrong-bash-allow": {".claude/settings.json": [('"allow": ["Bash(npm test)"]', '"allow": ["Bash"]')]},
+    "wrong-monolith-direct": {"docs/working-modes.md": [("across dozens of files | plan |", "across dozens of files | direct |")]},
+    "wrong-typo-plan": {"docs/working-modes.md": [("| Fix a typo in an error message | direct |", "| Fix a typo in an error message | plan |")]},
+    "wrong-home-path": {"CLAUDE.md": [("# Dispatch app\n", "# Dispatch app\n\n- My notes are in /home/dev/notes.\n")]},
+}
+PLANTS[f"{X}/71-scenario-code-generation-with-claude-code/unit-01/practice-1"] = {l: ("CLAUDE.md", _P71) for l in ("python", "typescript", "java", "kotlin")}
+
+PLANTS[f"{X}/72-scenario-multi-agent-research-system/unit-01/practice-1"] = {
+    "python": ("synthesis.py", {
+        "wrong-complete-by-errors": [('"status": "partial" if gaps else "complete"', '"status": "partial" if errors else "complete"')],
+        "wrong-conflict-first-wins": [("        if len(values) > 1:", "        if False:")],
+        "wrong-partial-covers": [('ok_scopes = {r["scope"] for r in results if r["status"] == "ok" and r["findings"]}', 'ok_scopes = {r["scope"] for r in results if (r["status"] == "ok" and r["findings"]) or (r["error"] and r["error"]["partial"])}')],
+        "wrong-empty-covers": [('if r["status"] == "ok" and r["findings"]}', 'if r["status"] == "ok"}')],
+        "wrong-partial-dropped": [('seen += [(f, True) for f in r["error"]["partial"]]', 'seen += [(f, True) for f in r["error"]["partial"][:0]]')],
+        "wrong-resolved-error-kept": [('for r in results if r["status"] == "error" and r["scope"] not in covered]', 'for r in results if r["status"] == "error"]')],
+        "wrong-sources-duplicated": [('sources = _same(sources, {"source": f["source"], "date": f["date"]})', 'sources = sources + [{"source": f["source"], "date": f["date"]}]')],
+        "wrong-claims-unsorted": [("for claim in sorted(by_claim):", "for claim in by_claim:")],
+        "wrong-note-silent": [('"note": "not covered: " + ", ".join(parts) if parts else "all scopes covered"', '"note": "all scopes covered"')],
+        "wrong-partial-flag-any": [('"partial": all(p for _, p in group)', '"partial": any(p for _, p in group)')],
+    }),
+    "typescript": ("synthesis.ts", {
+        "wrong-complete-by-errors": [('status: gaps.length > 0 ? "partial" : "complete"', 'status: errors.length > 0 ? "partial" : "complete"')],
+        "wrong-conflict-first-wins": [("if (values.length > 1) {", "if (false) {")],
+        "wrong-partial-covers": [('results.filter((r) => r.status === "ok" && r.findings.length > 0).map((r) => r.scope)', 'results.filter((r) => (r.status === "ok" && r.findings.length > 0) || (r.error?.partial.length ?? 0) > 0).map((r) => r.scope)')],
+        "wrong-empty-covers": [('results.filter((r) => r.status === "ok" && r.findings.length > 0)', 'results.filter((r) => r.status === "ok")')],
+        "wrong-partial-dropped": [("else r.error!.partial.forEach((f) => seen.push([f, true]));", "else r.error!.partial.slice(0, 0).forEach((f) => seen.push([f, true]));")],
+        "wrong-resolved-error-kept": [('results.filter((r) => r.status === "error" && !covered.includes(r.scope))', 'results.filter((r) => r.status === "error")')],
+        "wrong-sources-duplicated": [("sources = same(sources, { source: f.source, date: f.date });", "sources = [...sources, { source: f.source, date: f.date }];")],
+        "wrong-claims-unsorted": [("for (const claim of [...byClaim.keys()].sort()) {", "for (const claim of [...byClaim.keys()]) {")],
+        "wrong-note-silent": [('note: parts.length > 0 ? "not covered: " + parts.join(", ") : "all scopes covered" }', 'note: "all scopes covered" }')],
+        "wrong-partial-flag-any": [("partial: group.every(([, p]) => p) }", "partial: group.some(([, p]) => p) }")],
+    }),
+    "java": ("Synthesis.java", {
+        "wrong-complete-by-errors": [('gaps.isEmpty() ? "complete" : "partial"', 'errors.isEmpty() ? "complete" : "partial"')],
+        "wrong-conflict-first-wins": [("if (values.size() > 1) {", "if (values.size() > 5) {")],
+        "wrong-partial-covers": [('r.status().equals("ok") && !r.findings().isEmpty()).map(Result::scope)', '(r.status().equals("ok") && !r.findings().isEmpty()) || (r.error() != null && !r.error().partial().isEmpty())).map(Result::scope)')],
+        "wrong-empty-covers": [('r.status().equals("ok") && !r.findings().isEmpty()).map(Result::scope)', 'r.status().equals("ok")).map(Result::scope)')],
+        "wrong-partial-dropped": [("else r.error().partial().forEach(f -> seen.add(new Seen(f, true)));", "else r.error().partial().stream().limit(0).forEach(f -> seen.add(new Seen(f, true)));")],
+        "wrong-resolved-error-kept": [('results.stream().filter(r -> r.status().equals("error") && !covered.contains(r.scope()))', 'results.stream().filter(r -> r.status().equals("error"))')],
+        "wrong-sources-duplicated": [("for (Seen s : group) addNew(sources, new Source(s.finding().source(), s.finding().date()));", "for (Seen s : group) sources.add(new Source(s.finding().source(), s.finding().date()));")],
+        "wrong-claims-unsorted": [("Map<String, List<Seen>> byClaim = new TreeMap<>();", "Map<String, List<Seen>> byClaim = new LinkedHashMap<>();")],
+        "wrong-note-silent": [('parts.isEmpty() ? "all scopes covered" : "not covered: " + String.join(", ", parts));', '"all scopes covered");')],
+        "wrong-partial-flag-any": [("group.stream().allMatch(Seen::partial)", "group.stream().anyMatch(Seen::partial)")],
+    }),
+    "kotlin": ("Synthesis.kt", {
+        "wrong-complete-by-errors": [('if (gaps.isEmpty()) "complete" else "partial"', 'if (errors.isEmpty()) "complete" else "partial"')],
+        "wrong-conflict-first-wins": [("if (values.size > 1) {", "if (values.size > 5) {")],
+        "wrong-partial-covers": [('results.filter { it.status == "ok" && it.findings.isNotEmpty() }.map { it.scope }', 'results.filter { (it.status == "ok" && it.findings.isNotEmpty()) || (it.error != null && it.error.partial.isNotEmpty()) }.map { it.scope }')],
+        "wrong-empty-covers": [('results.filter { it.status == "ok" && it.findings.isNotEmpty() }', 'results.filter { it.status == "ok" }')],
+        "wrong-partial-dropped": [("r.error!!.partial.forEach { seen += it to true }", "r.error!!.partial.take(0).forEach { seen += it to true }")],
+        "wrong-resolved-error-kept": [('results.filter { it.status == "error" && it.scope !in covered }', 'results.filter { it.status == "error" }')],
+        "wrong-sources-duplicated": [("group.forEach { (f, _) -> sources.addNew(Source(f.source, f.date)) }", "group.forEach { (f, _) -> sources.add(Source(f.source, f.date)) }")],
+        "wrong-claims-unsorted": [("seen.groupBy { it.first.claim }.toSortedMap()", "seen.groupBy { it.first.claim }")],
+        "wrong-note-silent": [('if (parts.isEmpty()) "all scopes covered" else "not covered: " + parts.joinToString(", "))', '"all scopes covered")')],
+        "wrong-partial-flag-any": [("group.all { it.second }", "group.any { it.second }")],
+    }),
+}
+
+_P73 = {
+    "wrong-unknown-server": {".claude/agents/explorer.md": [("mcp__docs__search", "mcp__wiki__search")]},
+    "wrong-settings-ghost": {".claude/settings.json": [('"mcp__tickets__get_ticket"]', '"mcp__ticket__get_ticket"]')]},
+    "wrong-literal-token": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer abc123token")]},
+    "wrong-token-default": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer ${TICKETS_TOKEN:-changeme}")]},
+    "wrong-explorer-bash": {".claude/agents/explorer.md": [("tools: Read, Grep, Glob, mcp__docs__search", "tools: Read, Grep, Glob, Bash, mcp__docs__search")]},
+    "wrong-explorer-inherits": {".claude/agents/explorer.md": [("tools: Read, Grep, Glob, mcp__docs__search\n", "")]},
+    "wrong-explorer-description": {".claude/agents/explorer.md": [("description: Use when a question is about", "description: Explains how a question is about")]},
+    "wrong-scaffolder-bash": {".claude/agents/scaffolder.md": [("tools: Read, Glob, Edit, Write", "tools: Read, Glob, Edit, Write, Bash")]},
+    "wrong-edit-bare": {".claude/settings.json": [('"Edit(src/generated/**)"', '"Edit"')]},
+    "wrong-write-wide": {".claude/settings.json": [('"Edit(src/generated/**)", ', '"Edit(src/generated/**)", "Write(src/**)", ')]},
+    "wrong-tickets-wildcard": {".claude/settings.json": [('"mcp__tickets__get_ticket"]', '"mcp__tickets__*"]')]},
+    "wrong-no-delete-deny": {".claude/settings.json": [(', "mcp__tickets__delete_ticket"', "")]},
+    "wrong-no-env-deny": {".claude/settings.json": [('"Read(./.env)", ', "")]},
+    "wrong-bash-allow": {".claude/settings.json": [('"mcp__tickets__get_ticket"]', '"mcp__tickets__get_ticket", "Bash"]')]},
+    "wrong-note-missing-variable": {"docs/team-setup.md": [("- `TICKETS_URL`: the ticket server's address (optional, `.mcp.json` sets a default)\n", "")]},
+    "wrong-rewritten-resumes": {"docs/team-setup.md": [("rewritten since the last session | fresh |", "rewritten since the last session | resume |")]},
+    "wrong-home-path": {"docs/team-setup.md": [("# Team setup\n", "# Team setup\n\nNotes live in /home/dev/notes.\n")]},
+}
+PLANTS[f"{X}/73-scenario-developer-productivity/unit-01/practice-1"] = {l: (".mcp.json", _P73) for l in ("python", "typescript", "java", "kotlin")}
+
+_P74 = {
+    "wrong-review-batch": {"ci/pipeline.json": [('"name": "pre-merge-review", "kind": "review", "audience": "waiting", "api": "realtime"', '"name": "pre-merge-review", "kind": "review", "audience": "waiting", "api": "batch"')]},
+    "wrong-debt-realtime": {"ci/pipeline.json": [('"name": "debt-report", "kind": "report", "audience": "scheduled", "api": "batch"', '"name": "debt-report", "kind": "report", "audience": "scheduled", "api": "realtime"')]},
+    "wrong-single-pass": {"ci/pipeline.json": [('["per-file", "integration"]', '["per-file"]')]},
+    "wrong-integration-first": {"ci/pipeline.json": [('["per-file", "integration"]', '["integration", "per-file"]')]},
+    "wrong-shared-session": {"ci/pipeline.json": [('"session": "fresh", "context": ["prior_findings"]', '"session": "shared", "context": ["prior_findings"]')]},
+    "wrong-no-prior-findings": {"ci/pipeline.json": [('"context": ["prior_findings"]', '"context": []')]},
+    "wrong-no-print-flag": {"ci/pipeline.json": [(r'"command": "claude -p \"Review', r'"command": "claude \"Review')]},
+    "wrong-no-schema": {"ci/pipeline.json": [(" --json-schema ci/review.schema.json", "")]},
+    "wrong-unbounded": {"ci/pipeline.json": [(" --max-turns 8", "")]},
+    "wrong-review-bash": {"ci/pipeline.json": [('"tools": ["Read", "Grep", "Glob"]', '"tools": ["Read", "Grep", "Glob", "Bash"]')]},
+    "wrong-allowed-edit": {"ci/pipeline.json": [(r'--allowedTools \"Read,Grep,Glob\"', r'--allowedTools \"Read,Grep,Glob,Edit\"')]},
+    "wrong-severity-free-text": {"ci/review.schema.json": [('"severity": {"type": "string", "enum": ["high", "medium", "low"]}', '"severity": {"type": "string"}')]},
+    "wrong-no-suggestion": {"ci/review.schema.json": [('"required": ["file", "line", "severity", "category", "issue", "suggestion"]', '"required": ["file", "line", "severity", "category", "issue"]')]},
+    "wrong-no-skip-list": {"ci/review-criteria.md": [("## Skip\n", "## Ignore\n")]},
+    "wrong-no-example": {"ci/review-criteria.md": [(" Example: a query built by joining the user's text into the SQL string.", "")]},
+    "wrong-vague-criteria": {"ci/review-criteria.md": [("Review only the lines", "Be conservative. Review only the lines")]},
+    "wrong-prompt-no-existing": {"ci/testgen-prompt.md": [("{{existing_tests}}", "(none)")]},
+    "wrong-prompt-no-useful": {"ci/testgen-prompt.md": [("## A useful test\n", "## Tests\n")]},
+    "wrong-home-path": {"ci/review-criteria.md": [("# Review criteria\n", "# Review criteria\n\nNotes live in /home/dev/notes.\n")]},
+}
+PLANTS[f"{X}/74-scenario-claude-code-in-ci/unit-01/practice-1"] = {l: ("ci/pipeline.json", _P74) for l in ("python", "typescript", "java", "kotlin")}
+
 
 # ===== Level 4: modules 79 to 84 =====
 PLANTS[f"{X}/80-end-to-end-and-multi-agent-architecture/unit-01/practice-1"] = {

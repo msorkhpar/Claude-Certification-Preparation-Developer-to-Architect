@@ -1,0 +1,195 @@
+{
+  "module": "73-scenario-developer-productivity",
+  "quizzes": [
+    {
+      "id": "01-two-subagents-and-the-tools-each-one-gets#q1",
+      "page": "01-two-subagents-and-the-tools-each-one-gets.md",
+      "scope": "page",
+      "stem": "The audit of the draft prints `bare-write-allowed`. What removes that finding?",
+      "options": {
+        "a": "Giving the scaffolding subagent a tools line of its own, with a few names",
+        "b": "Adding the file-writing tool to the tools line of the subagent that generates the code",
+        "c": "Denying `Read(./.env)` in the same settings file as the allow rule",
+        "d": "Replacing the whole-tool allow rule with one limited to `src/generated/`"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The finding is about an allow rule that covers the whole tool: \"`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool.\"",
+        "b": "Ruled out because a tools line lists tools and approves nothing in settings: \"The `tools` line is the allowlist.\"",
+        "c": "Ruled out because that is another finding: \"`env-readable`: the settings do not deny `Read(./.env)`.\"",
+        "a": "Ruled out because that is a third: \"`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it\"."
+      }
+    },
+    {
+      "id": "01-two-subagents-and-the-tools-each-one-gets#q2",
+      "page": "01-two-subagents-and-the-tools-each-one-gets.md",
+      "scope": "page",
+      "stem": "A boilerplate agent may change files only in `src/generated`. Which settings give that?",
+      "options": {
+        "a": "An allow rule for the Edit tool, limited to that folder",
+        "b": "An allow rule for the Write tool, limited to that folder",
+        "c": "An allow rule for the whole Edit tool, plus a prompt naming the folder",
+        "d": "A deny rule for the shell tool, since only commands can write"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "An Edit rule covers every built-in file-editing tool and a path keeps it to one folder.",
+        "b": "Ruled out because a Write path rule is never read: \"A path rule written for the Write tool is accepted and never consulted\".",
+        "c": "Ruled out because a bare rule has no path: \"A bare `Edit` rule has no path and approves every edit.\"",
+        "d": "Ruled out because the file tools have rules of their own: \"Denying the shell does not limit the file tools\"."
+      }
+    },
+    {
+      "id": "01-two-subagents-and-the-tools-each-one-gets#q3",
+      "page": "01-two-subagents-and-the-tools-each-one-gets.md",
+      "scope": "page",
+      "stem": "A ticket server lets a caller fetch, add and remove tickets, and agents may only look at them. Which settings give that?",
+      "options": {
+        "a": "Deny the delete tool in the settings with a rule that matches on the ticket number",
+        "b": "Allow every tool of the server, and tell the agents to read only",
+        "c": "Allow the get tool by name, and deny the create and delete tools by name",
+        "d": "Deny the whole server, then allow its get tool by name"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Allow by name and deny the others by name.",
+        "b": "Ruled out because a sentence is no limit: \"A sentence in the prompt is a request that the model weighs\".",
+        "a": "Ruled out because the rule is skipped: \"In a settings file, a rule for an MCP tool that carries parentheses is skipped, so it matches nothing\".",
+        "d": "Ruled out because a deny rule beats every allow: \"A matching deny rule wins over any allow rule, whatever the specificity.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#q1",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "page",
+      "stem": "A developer adds a header that reads a new environment name in the shared connection settings and leaves the team write-up alone. What does the practice's grading do?",
+      "options": {
+        "a": "The credentials case fails, since each new variable needs a default value",
+        "b": "The documentation case fails, because one of the variables the servers use is unlisted",
+        "c": "Nothing fails, since the write-up is advice that the grading never reads",
+        "d": "The server case fails, since a header may not refer to any variable"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The note has to list every variable: \"every variable that appears in `.mcp.json` has to appear in the note.\"",
+        "a": "Ruled out because the token has no default: \"The token has none, because a default for a token would be a credential in the file\".",
+        "c": "Ruled out because the note is checked: \"The check turns a convention into a rule that fails when someone adds a variable and forgets the note.\"",
+        "d": "Ruled out because a shared file does refer to variables: \"A committed `.mcp.json` refers to variables and cannot hold their values.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#q2",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which allow rule for the tracker passes the practice's read-only case?",
+      "options": {
+        "a": "`mcp__tickets`",
+        "b": "`mcp__tickets__*`",
+        "c": "`mcp__tickets__create_ticket`",
+        "d": "`mcp__tickets__get_ticket`"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A get tool, with the create and delete tools denied.",
+        "b": "Ruled out because a wildcard allows every tool: \"every allowed ticket tool is a get, list or search tool\".",
+        "c": "Ruled out because creating is denied: \"the create and delete tools are denied\".",
+        "a": "is ruled out for the same reason as a wildcard: \"every allowed ticket tool is a get, list or search tool\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#q3",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "page",
+      "stem": "A new colleague clones the repository, and the ticket tools answer with an authorization error. The shared configuration is committed. What should the repository hold to prevent this?",
+      "options": {
+        "a": "A default for the token, written into the shared project file",
+        "b": "A team note that names every variable that the servers need to start",
+        "c": "A private copy of the project file with a working token in it, kept outside version control",
+        "d": "A line in the root memory file that holds a shared token"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A note makes the missing variables visible.",
+        "a": "Ruled out because a default for a token is a credential in the file: \"a default for a token would be a credential in the file\".",
+        "c": "Ruled out because a second copy defeats the shared file: \"The file exists to be shared\".",
+        "d": "Ruled out because a committed file cannot hold a value: \"A committed `.mcp.json` refers to variables and cannot hold their values.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m1",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A check reports `unknown-server: wiki (explorer)`. What does the finding mean?",
+      "options": {
+        "a": "A header holds a credential that somebody typed in by hand, in plain text",
+        "b": "A reference points at an entry that the project file never defines",
+        "c": "A subagent has no tools line and inherits everything",
+        "d": "A permission rule approves the whole tool rather than one path of it"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The finding is about a name that is not configured.",
+        "a": "Ruled out because that is another finding: \"`literal-secret`: a header or environment entry whose name says token, key, secret or authorization\".",
+        "c": "is ruled out for the same reason: \"`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it\".",
+        "d": "Ruled out because that is a third: \"`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool.\""
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m2",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Which entry does the check for typed-in credentials report?",
+      "options": {
+        "a": "A header named Authorization whose value is `Bearer example-token-123`",
+        "b": "A header named Authorization whose value is `Bearer ${TICKETS_TOKEN}`",
+        "c": "A header named X-Trace whose value is `abc`, sent with every request",
+        "d": "A variable named REGION whose value is `eu`, passed to the local server"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The check reports a secret-looking name whose value has no reference: \"a header or environment entry whose name says token, key, secret or authorization and whose value has no `${` reference\".",
+        "b": "Ruled out because its value is a reference: \"whose value has no `${` reference\".",
+        "c": "Ruled out because the name says nothing of a secret: \"whose name says token, key, secret or authorization\".",
+        "d": "is ruled out for the same reason: \"whose name says token, key, secret or authorization\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m3",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Which explorer definition passes the practice's explorer case?",
+      "options": {
+        "a": "A description that starts `Use when`, and a tools line of `Read`, `Grep` and `Glob`",
+        "b": "A description that says `Explores the legacy system`, and the same tools line",
+        "c": "A description that starts `Use when`, and a tools line of `Read`, `Grep` and `Bash`",
+        "d": "A description that starts `Use when`, and no tools line at all"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The page states the case: \"The explorer case passes when its description starts with `Use when`, its `tools` line exists, and the line lists only `Read`, `Grep`, `Glob` and `mcp__docs__search`.\"",
+        "b": "is ruled out by the first condition: \"its description starts with `Use when`\".",
+        "c": "is ruled out by the last: \"the line lists only `Read`, `Grep`, `Glob` and `mcp__docs__search`\".",
+        "d": "is ruled out by the second: \"its `tools` line exists\"."
+      }
+    },
+    {
+      "id": "02-sessions-variables-and-the-practice#m4",
+      "page": "02-sessions-variables-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A team writes the header as `Bearer ${TICKETS_TOKEN:-dev-token}` so the tools work on a fresh clone. What is wrong with it?",
+      "options": {
+        "a": "A default is applied to the address and never to a header",
+        "b": "Expansion in headers handles only the plain form of a reference",
+        "c": "The default puts a usable credential into a committed file",
+        "d": "A file that carries a default cannot be shared through version control"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A default for a token is a credential in the file.",
+        "b": "Ruled out because expansion has both forms: \"Expansion of `${VAR}` and `${VAR:-default}` works in a server's `command`, `args`, `env`, `url` and `headers`\".",
+        "a": "Ruled out because a header is one of the places where it works: \"`${VAR:-default}` expands to the variable if it is set and to the default otherwise\".",
+        "d": "Ruled out because sharing is the file's purpose: \"The `.mcp.json` of a project is committed so that the team shares its servers.\""
+      }
+    }
+  ]
+}

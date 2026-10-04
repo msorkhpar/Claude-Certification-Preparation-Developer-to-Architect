@@ -1,0 +1,22 @@
+{
+  "jobs": [
+    {
+      "name": "pre-merge-review", "kind": "review", "audience": "waiting", "api": "batch",
+      "passes": ["all-files"], "session": "shared", "context": [],
+      "tools": ["Read", "Grep", "Bash"],
+      "command": "python ci/submit_batch.py pr-review"
+    },
+    {
+      "name": "debt-report", "kind": "report", "audience": "scheduled", "api": "realtime",
+      "passes": [], "session": "fresh", "context": [],
+      "tools": ["Read", "Grep", "Glob"],
+      "command": "claude \"List the technical debt in src\""
+    },
+    {
+      "name": "test-generation", "kind": "testgen", "audience": "waiting", "api": "realtime",
+      "passes": [], "session": "fresh", "context": [],
+      "tools": ["Read", "Glob", "Edit"],
+      "command": "claude \"Write tests for the changed files\""
+    }
+  ]
+}

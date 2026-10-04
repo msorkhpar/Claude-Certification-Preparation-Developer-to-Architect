@@ -1,0 +1,195 @@
+{
+  "module": "71-scenario-code-generation-with-claude-code",
+  "quizzes": [
+    {
+      "id": "01-the-team-setup-where-each-instruction-lives#q1",
+      "page": "01-the-team-setup-where-each-instruction-lives.md",
+      "scope": "page",
+      "stem": "A team wants a review command that every developer has after cloning the repository. Where does the file go?",
+      "options": {
+        "a": "In a settings file that holds a list of commands for Claude Code",
+        "b": "In a commands folder in each developer's home directory, created by hand",
+        "c": "In the root instructions file, under a heading that names the review checklist",
+        "d": "In the project's own configuration folder, committed with the sources"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A command file in the project's own folder is committed and reaches every clone.",
+        "b": "Ruled out because a home folder is personal: \"commands in the home folder are personal\".",
+        "c": "Ruled out because the memory file holds instructions and not definitions: \"the memory file is for instructions and context\".",
+        "a": "Ruled out because no such mechanism exists: \"A `commands` array in a config file is a mechanism that does not exist\"."
+      }
+    },
+    {
+      "id": "01-the-team-setup-where-each-instruction-lives#q2",
+      "page": "01-the-team-setup-where-each-instruction-lives.md",
+      "scope": "page",
+      "stem": "An audit of a team's setup prints `test-uncovered`. What does that finding report?",
+      "options": {
+        "a": "A file of tests that no rule reaches",
+        "b": "A rule whose globs match none of the project's files",
+        "c": "A root file with several sections and no rule files",
+        "d": "A project with no command file and no skill"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The finding is the colocated-tests question: \"`test-uncovered`: a test file that no rule reaches, which is the colocated-tests question of the exam.\"",
+        "b": "Ruled out because that is another finding: \"a rule with no `paths` list, or whose globs match none of the project's files\".",
+        "c": "is ruled out for the same reason: \"three or more sections in the root file and no rule files\".",
+        "d": "is ruled out as a third finding: \"no command file and no skill in the project\"."
+      }
+    },
+    {
+      "id": "01-the-team-setup-where-each-instruction-lives#q3",
+      "page": "01-the-team-setup-where-each-instruction-lives.md",
+      "scope": "page",
+      "stem": "In the fixed project, a spec file beside a handler gets two sets of conventions. Why?",
+      "options": {
+        "a": "A skill for each area starts as soon as the path matches",
+        "b": "The root file lists every rule that applies to a spec",
+        "c": "Its area's rule and the testing rule both have globs that match its path",
+        "d": "Every rule loads as soon as the first file of the session is opened"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Both rules have a glob that matches the path. The page says the spec files \"load two rule files each: the rule of their area and the testing rule\".",
+        "b": "Ruled out because the root file is not where rules are chosen: \"Nothing else loads in every session at the same priority\".",
+        "a": "Ruled out because a path starts no skill: \"a skill is invoked, or chosen by the model from its description, and a path match does not start it\".",
+        "d": "Ruled out because a rule waits for a matching file: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#q1",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which allowed-tools line does the practice accept for the shared review command?",
+      "options": {
+        "a": "`Read Grep Glob Bash Edit Write`",
+        "b": "`Read Grep Glob Bash(git diff *)`",
+        "c": "`Read Edit Write Bash(git diff *)`",
+        "d": "`Bash(git diff *) Grep Glob`"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A description, `Read`, and a pattern for `git diff`.",
+        "a": "Ruled out because a bare shell and edit tools are refused: \"`Read` and none of `Bash`, `Edit` or `Write` on its own\".",
+        "c": "is ruled out for its edit tools: \"`Read` and none of `Bash`, `Edit` or `Write` on its own\".",
+        "d": "Ruled out because the line must hold the reading tool: \"an `allowed-tools` line that has `Read`\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#q2",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which settings pass the practice's check on permissions?",
+      "options": {
+        "a": "Deny `Read(./.env)`, allow `Edit`",
+        "b": "Deny `Read(./.env)`, allow `Bash`",
+        "c": "Deny nothing, allow `Bash(npm test)`",
+        "d": "Deny `Read(./.env)`, allow `Bash(npm test)`"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The environment file is denied and no allow rule approves a whole tool: \"no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`\".",
+        "b": "Ruled out because a whole-tool allow is refused: \"no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`\".",
+        "c": "Ruled out because the deny rule is required: \"The settings pass when `Read(./.env)` is denied\".",
+        "a": "Ruled out because an edit allow without a path is a whole-tool allow as well: \"no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#q3",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "page",
+      "stem": "Which pair of rows does the practice's modes table need?",
+      "options": {
+        "a": "A typo fix is plan and the monolith is direct",
+        "b": "A typo fix is direct and the monolith is plan",
+        "c": "A rename is plan and an unclear feature is direct",
+        "d": "A validation function is plan and the auth library is direct"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Small clear work is direct and open design is plan.",
+        "a": "Ruled out because the table is the other way round: \"a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`\".",
+        "c": "is ruled out by the same sentence: \"a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`\".",
+        "d": "is ruled out by it too: \"a typo fix, a validation function and a rename are `direct` and the monolith, the auth library and an unclear feature are `plan`\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m1",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. A rule file for the handlers lists `paths: src/api`, and the audit says that it matches none of the project's files. What is the likely cause?",
+      "options": {
+        "a": "Rule files are read only when a session is first started",
+        "b": "The entry is a bare folder name and not a glob such as `src/api/**`",
+        "c": "Handlers are covered by the command folder, which takes priority in every session",
+        "d": "The path needs the word handlers in it for the rule to be found"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A bare folder name is not a glob: \"write a folder as `src/api/**`\".",
+        "a": "Ruled out because path-scoped rules load when a matching file is read: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\".",
+        "c": "Ruled out because the command folder holds commands and not conventions: \"A command file in the project, `.claude/commands/review.md`, committed to the repository\".",
+        "d": "Ruled out because the match is by glob on file paths and not by a word: \"`**` crosses folders and `*` stays inside one\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m2",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. Three specs of the flawed project get no conventions at all. What closes the gap?",
+      "options": {
+        "a": "A testing rule whose glob, such as `**/*.test.tsx`, reaches test files in any folder",
+        "b": "A longer root file that names each test file under a heading of its own",
+        "c": "A skill for tests that each developer starts by hand before a commit",
+        "d": "A memory file placed in the one folder that holds most of the tests"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A rule with a glob reaches test files wherever they sit: \"`**/*.test.tsx` reaches test files in any folder\".",
+        "b": "Ruled out because the root file leaves the choice to the model: \"One root file with a section per area leaves Claude to infer which section applies\".",
+        "c": "Ruled out because a path starts no skill: \"a skill is invoked, or chosen by the model from its description, and a path match does not start it\".",
+        "d": "Ruled out because a folder file does not reach the others: \"each file is bound to its directory, and test files next to their sources are in all of them\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m3",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. In the example's fixed project, `docs/readme.md` is opened. Which conventions load for it?",
+      "options": {
+        "a": "Only the root file's, since no rule has a glob that matches it",
+        "b": "The testing rule as well, since a readme is also a kind of test",
+        "c": "The components rule, as the nearest rule by folder",
+        "d": "None at all, since the root file loads only for source files"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The output shows `docs/readme.md <- CLAUDE.md only`: no rule reaches it, and the root file loads in every session.",
+        "b": "Ruled out because the testing rule has globs for test files: \"`**/*.test.tsx` reaches test files in any folder\".",
+        "c": "Ruled out because a match is by glob and not by nearness: \"`**` crosses folders and `*` stays inside one\".",
+        "d": "Ruled out because the root file is not conditional: \"The root `CLAUDE.md` and the rule files without a `paths` list load at the start of every session\"."
+      }
+    },
+    {
+      "id": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice#m4",
+      "page": "02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, a team using Claude Code on a shared codebase. The audit of the flawed project prints `env-readable`. What removes that finding?",
+      "options": {
+        "a": "A rule file whose glob matches `.env`",
+        "b": "A line in the root file that asks Claude not to read `.env`",
+        "c": "A deny rule for reading `.env` in the settings",
+        "d": "A review command with a read-only list of tools"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The finding says that the settings do not deny the file: \"`env-readable` and `bare-bash-allowed`: the settings do not deny reading `.env`, or allow the whole Bash tool.\"",
+        "b": "Ruled out because a sentence in a file is a request: \"a sentence in a memory file is a request that the model weighs\".",
+        "a": "Ruled out because a rule loads conventions and denies nothing: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\".",
+        "d": "Ruled out because the command's tools are another matter: \"a shared review command with a description and read-only tools\"."
+      }
+    }
+  ]
+}
