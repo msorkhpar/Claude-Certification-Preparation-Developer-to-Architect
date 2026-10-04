@@ -1,7 +1,7 @@
 #!/bin/sh
 # Gate for Level 2, modules 30 to 35. Run from the repository root:
 #   sh docs/process/batches/level2-30-35-gates.sh
-# 1. regenerate the planted wrong solutions from the reference solutions (exact replacements, each checked)
+# 1. generate the planted wrong solutions (git-ignored, never committed) from the reference solutions by exact replacements, each checked
 # 2. check the quizzes (pages agree with tests/quiz.json; wording, length, stem-echo and quotation rules)
 #    and the checker's own planted-defect tests; quiz.json files are up to date
 # 3. the exam-map coverage check
@@ -18,7 +18,7 @@ IMG=${RUNNER_IMAGE:-93d052f3fc87}      # runner image id (digest sha256:93d052f3
 HEAVY=${HEAVY_SLOT:-../.heavy-slot/run-heavy.sh}
 mkdir -p .survey-out
 export L2_MODULES='^3[0-5]-' L2_EXAMPLES='3[0-5]-' L2_EXAMPLE_SPECS='examples/3[0-5]-*/example.json'
-python3 tools/make_plants_l2d.py || exit 1
+python3 tools/make_plants.py --modules "$L2_MODULES" || exit 1
 python3 tools/test_check_quiz.py >/dev/null || { echo "check_quiz planted-defect tests failed"; exit 1; }
 python3 tools/check_quiz.py || exit 1
 before=$(cat exercises/*/tests/quiz.json | sha256sum)

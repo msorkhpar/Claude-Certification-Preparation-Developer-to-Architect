@@ -43,10 +43,23 @@ Code is shown exactly as typed (no font ligatures).
 | **P4 Harness** | Build `harness/`: replay, script, optional live, the capture tool and its id-stripping check | `harness/` with tests | A planted key or id in a capture fails the check |
 | **P5 Prose** | Study every source for the module first (official docs and courses, the exam guides, the third-party guides and question sets in the register), then draft the units in the course's own words, one level at a time | `course/*.md` | Technical review against the pinned versions; plain-language read |
 | **P6 Examples** | Write the examples as projects with tests; capture their exchanges | `examples/` | Every example's tests pass offline; a planted wrong expected output fails |
-| **P7 Practices and quizzes** | Practices by coverage of every aspect; exam-style quizzes; a mock exam per level | `exercises/` | Reference passes, planted wrong solutions fail on assertions, starter fails; an independent quiz reader |
+| **P7 Practices and quizzes** | Practices by coverage of every aspect (plants written once, see below); exam-style quizzes; a mock exam per level | `exercises/`, `tools/make_plants.py`, `tools/make_cases.py` | Reference passes, planted wrong solutions fail on assertions, starter fails; an independent quiz reader |
 | **P8 Build** | `corpus.json`, `validate`, build the site, serve it, crawl it | A running site | Zero console errors; practices run end to end; the editor opens |
 | **P9 Narration** | Once the prose is frozen, narrate the lesson prose (never practices or code) | Clips in release volumes | A listened sample from each level |
 | **P10 Release** | Re-check exam facts and model ids; images, learner `main`, README | A repository and images the owner pushes | The cold-pull check on a clean machine |
+
+## Planted wrong solutions are written once
+
+A practice commits its `reference/`, `starter/`, `tests/` and `cases.json`, and nothing else per plant. Each
+planted wrong solution is an ordered list of exact replacements against the reference, kept in a section of
+the single plant tool `tools/make_plants.py` (practice, language, main file, then `plant name: [(old, new), ...]`).
+`python3 tools/make_plants.py --modules REGEX` copies the reference into `<language>/<plant name>/` and applies
+the replacements; it stops when a pattern is missing or occurs more than once, when a plant equals the reference,
+or when a language's plants differ from the ones `cases.json` names. The `wrong-*/` folders are git-ignored:
+every batch gate and `tools/l2_run_all.sh` / `tools/run_all_practices.sh` generate them first, so a fix to a
+reference reaches every plant at the next run. `tools/make_cases.py --modules REGEX` writes `cases.json` for
+modules 30 and later from the same kind of specification. Both tools take the module as an argument; a new batch
+adds its sections, not a new script.
 
 ## Quality check against the exams
 

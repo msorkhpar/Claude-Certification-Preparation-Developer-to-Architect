@@ -1,7 +1,7 @@
 #!/bin/sh
 # Gate for Level 3, modules 45 to 50 (Architect Foundations, the first batch). Run from the repository root:
 #   sh docs/process/batches/level3-45-50-gates.sh
-# 1. write the case lists of the six practices (cases.json) and regenerate the planted wrong solutions from the reference solutions
+# 1. write the case lists of the six practices (cases.json) and generate the planted wrong solutions (git-ignored, never committed) from the reference solutions
 #    (exact replacements, each checked)
 # 2. check every quiz of Levels 1 to 3 (pages agree with quiz.json; wording, length, stem-echo and quotation rules; no question restates
 #    another of the course, across levels) and the checker's own planted-defect tests; quiz.json files are up to date
@@ -20,8 +20,8 @@ IMG=${RUNNER_IMAGE:-93d052f3fc87}      # runner image id (digest sha256:93d052f3
 HEAVY=${HEAVY_SLOT:-../.heavy-slot/run-heavy.sh}
 mkdir -p .survey-out
 export L2_MODULES='^(4[5-9]|50)-' L2_EXAMPLES='^(4[5-9]|50)-' L2_EXAMPLE_SPECS='examples/4[5-9]-*/example.json examples/50-*/example.json'
-python3 tools/l3_make_cases.py || exit 1
-python3 tools/l3_make_plants.py || exit 1
+python3 tools/make_cases.py --modules "$L2_MODULES" || exit 1
+python3 tools/make_plants.py --modules "$L2_MODULES" || exit 1
 python3 tools/test_check_quiz.py >/dev/null || { echo "check_quiz planted-defect tests failed"; exit 1; }
 python3 tools/check_quiz.py || exit 1
 before=$(cat exercises/*/tests/quiz.json | sha256sum)

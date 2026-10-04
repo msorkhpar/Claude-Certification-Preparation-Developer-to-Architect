@@ -3,6 +3,7 @@
 # every variant of every Level 2 practice in four languages, then the Level 2 examples (tests and output).
 # usage: tools/l2_run_all.sh <runner image id>        (cwd = repository root)
 IMG=$1; W=$(pwd)
+python3 tools/make_plants.py --modules "${L2_MODULES:-.*}" || exit 2   # the wrong-* folders are generated, never committed
 mkdir -p "$W/.survey-out"
 tools/l2_prepare_caches.sh "$IMG" || exit 2
 tools/l2_prepare_gradle.sh "$IMG" || exit 2
