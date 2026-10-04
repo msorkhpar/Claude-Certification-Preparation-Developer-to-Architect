@@ -893,6 +893,181 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
     },
 }
 
+# ===== Level 3: module 63 =====
+PRACTICES[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
+    "name": "batch_review", "suite": "BatchReviewTest", "langs": ["python", "typescript", "java", "kotlin"], "pyfile": "test_batch_review.py", "tsfile": "batchReview.test.ts",
+    "cases": [
+        ("m1", "main", "the interval between submissions leaves room for the window and the handling"),
+        ("e1", "edge", "an sla without room for a batch is refused"),
+        ("e2", "edge", "a blocking check or a tool loop needs the synchronous api"),
+        ("e3", "edge", "only the items that did not succeed are resubmitted by custom id"),
+        ("e4", "edge", "an item over the limit is chunked and a rejected request is fixed first"),
+        ("e5", "edge", "a multi file review gets a local pass per file and one integration pass"),
+        ("e6", "edge", "the same finding from two passes is one finding with the highest severity and the lowest confidence"),
+        ("e7", "edge", "a finding is accepted only when two independent passes agree with confidence"),
+    ],
+    "plants": {
+        "wrong-ignores-handling": (["m1", "e1"], "leaves the handling time out of the interval"),
+        "wrong-oversized-resubmitted": (["e4"], "resubmits an oversized item unchanged instead of chunking it"),
+        "wrong-resubmit-all": (["e3"], "resubmits the items that succeeded too"),
+        "wrong-no-integration-pass": (["e5"], "plans local passes only and no integration pass"),
+        "wrong-lone-confident-accepted": (["e7"], "accepts a finding that one pass reported with high confidence"),
+    },
+}
+
+# ===== Level 3: module 64 =====
+PRACTICES[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] = {
+    "name": "context_builder", "suite": "ContextBuilderTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "trimming keeps only the named fields with their exact values in the named order"),
+        ("e1", "edge", "a field that the record does not have is skipped"),
+        ("e2", "edge", "a newer fact replaces the old one and the old value is kept as history"),
+        ("e3", "edge", "an older fact that arrives late does not replace the current one"),
+        ("e4", "edge", "the case facts of another customer never enter the context"),
+        ("e5", "edge", "the context puts case facts first then the summary then the recent messages"),
+        ("e6", "edge", "a summary that loses an exact value is reported"),
+        ("e7", "edge", "the window drops the oldest messages and keeps a tool call with its result"),
+    ],
+    "plants": {
+        "wrong-no-trim": (["m1", "e1"], "returns the whole tool record instead of the named fields"),
+        "wrong-older-overwrites": (["e3"], "lets a fact that arrives late replace a newer one"),
+        "wrong-all-customers": (["e4"], "puts the case facts of every customer into the context"),
+        "wrong-facts-last": (["e5"], "places the case facts after the summary and the recent messages"),
+        "wrong-pair-split": (["e7"], "keeps a tool result without the call that produced it"),
+        "wrong-loose-summary-check": (["e6"], "counts a value as kept when only its first two characters appear"),
+    },
+}
+
+# ===== Level 3: module 65 =====
+PRACTICES[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
+    "name": "escalation", "suite": "EscalationTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a customer who asks for a person is escalated at once even when the agent could resolve it"),
+        ("e1", "edge", "frustration alone does not escalate and the reply acknowledges it"),
+        ("e2", "edge", "a request the policy does not cover is escalated and a covered one is resolved"),
+        ("e3", "edge", "several matching records need a clarifying question and never a guess"),
+        ("e4", "edge", "an explicit request for a person outranks an ambiguous match"),
+        ("e5", "edge", "no progress after the attempt limit escalates and below it does not"),
+        ("e6", "edge", "sentiment and confidence scores never change the decision"),
+        ("e7", "edge", "the clarifying question names only the fields that tell the matches apart"),
+        ("e8", "edge", "the hand off carries the structured facts and no transcript and refuses a case without an id"),
+    ],
+    "plants": {
+        "wrong-investigate-first": (["m1", "e4"], "escalates on an explicit request only when the policy also has a gap"),
+        "wrong-angry-escalates": (["e6"], "escalates an angry customer because of the sentiment"),
+        "wrong-low-confidence-escalates": (["e6"], "escalates when the model reports low confidence"),
+        "wrong-picks-first-match": (["e3", "e6"], "never asks which of several matching customers is meant"),
+        "wrong-policy-gap-resolved": (["e2"], "resolves a request the policy does not cover"),
+        "wrong-no-acknowledgement": (["e1"], "does not acknowledge a frustrated customer"),
+        "wrong-clarify-all-fields": (["e7"], "asks about fields on which the matches agree"),
+        "wrong-handoff-transcript": (["e8"], "attaches the whole transcript to the hand-off"),
+    },
+}
+
+# ===== Level 3: module 66 =====
+PRACTICES[f"{X}/66-errors-across-agents/unit-01/practice-1"] = {
+    "name": "error_flow", "suite": "ErrorFlowTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a transient failure is retried locally and the success is reported with its attempts"),
+        ("e1", "edge", "a valid empty result is a success with no findings and never an error"),
+        ("e2", "edge", "a permission or invalid query error is not retried and carries what was attempted and its alternatives"),
+        ("e3", "edge", "a failure that survives the retries carries the partial results of the last attempt"),
+        ("e4", "edge", "the coordinator uses partial results tries an alternative or flags a gap and never stops the run"),
+        ("e5", "edge", "the coverage note separates supported topics from gaps and names the cause"),
+        ("e6", "edge", "a topic with no result is a gap that was not searched"),
+    ],
+    "plants": {
+        "wrong-empty-is-error": (["e1"], "reports a search with no matches as a failure"),
+        "wrong-retry-permission": (["e2"], "retries a permission error as if it were transient"),
+        "wrong-drop-partial": (["e3"], "throws away the partial results of a failed search"),
+        "wrong-generic-error": (["e2", "e3"], "reports only that the search failed, without its type and the query attempted"),
+        "wrong-stop-on-failure": (["e4"], "abandons the whole run when one topic failed"),
+        "wrong-gap-as-supported": (["e5"], "lists a failed topic among the well-supported ones"),
+        "wrong-missing-topic-skipped": (["e6"], "leaves a topic that was never searched out of the note"),
+    },
+}
+
+# ===== Level 3: module 67 =====
+PRACTICES[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
+    "name": "recovery", "suite": "RecoveryTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a finding is recorded once per area and fact in first seen order"),
+        ("e1", "edge", "the scratchpad groups findings under their area"),
+        ("e2", "edge", "the manifest lists every agent with its state file and status and refuses bad input"),
+        ("e3", "edge", "a finished agent with its state file is reused and not run again"),
+        ("e4", "edge", "a running or failed agent with a state file is resumed from it"),
+        ("e5", "edge", "an agent whose state file is missing is restarted from scratch"),
+        ("e6", "edge", "the resume prompt carries the task and the state lines and nothing else"),
+        ("e7", "edge", "the compact command names what to keep"),
+    ],
+    "plants": {
+        "wrong-duplicate-findings": (["m1"], "records the same fact twice for one area"),
+        "wrong-ungrouped-scratchpad": (["e1"], "repeats an area heading for every finding"),
+        "wrong-manifest-unsorted": (["e2"], "lists the agents in the order they were given"),
+        "wrong-manifest-unvalidated": (["e2"], "accepts a status the manifest does not know"),
+        "wrong-rerun-done": (["e3", "e5"], "resumes an agent that already finished"),
+        "wrong-restart-running": (["e4"], "restarts an agent that has a state file to resume from"),
+        "wrong-ignore-missing-file": (["e5"], "trusts the manifest without checking that the state file exists"),
+        "wrong-no-continue-line": (["e6"], "leaves the instruction to continue out of the prompt"),
+        "wrong-compact-without-focus": (["e7"], "compacts without telling the command what to keep"),
+    },
+}
+
+# ===== Level 3: module 68 =====
+PRACTICES[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
+    "name": "review_routing", "suite": "ReviewRoutingTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "accuracy is reported per document type and field next to the overall figure"),
+        ("e1", "edge", "a weak segment is hidden by a high overall figure and found by the breakdown"),
+        ("e2", "edge", "automation needs every segment to pass and enough samples in each"),
+        ("e3", "edge", "the threshold is the lowest confidence whose accepted items meet the target precision"),
+        ("e4", "edge", "no threshold exists when no confidence level meets the target"),
+        ("e5", "edge", "the stratified sample takes the best ranked items of every stratum"),
+        ("e6", "edge", "low confidence and conflicts go to review with the weakest first"),
+        ("e7", "edge", "review capacity is respected and the rest wait in a backlog"),
+        ("e8", "edge", "an irreversible action needs a person whatever the confidence"),
+    ],
+    "plants": {
+        "wrong-overall-percent": (["m1", "e1"], "gives every segment the overall percentage"),
+        "wrong-ignores-undersampled": (["e2"], "approves automation for a segment with too few samples"),
+        "wrong-highest-confidence": (["e3"], "picks the highest qualifying confidence instead of the lowest"),
+        "wrong-strict-target": (["e4"], "demands more than the target precision"),
+        "wrong-first-n-sample": (["e5"], "samples by identifier instead of by rank"),
+        "wrong-conflict-auto": (["e6"], "lets a confident extraction with a conflict through"),
+        "wrong-id-order": (["e6"], "orders the review queue by identifier instead of weakest first"),
+        "wrong-ignores-capacity": (["e7"], "sends everything to review regardless of capacity"),
+        "wrong-irreversible-by-amount": (["e8"], "checks only the amount for an irreversible action"),
+    },
+}
+
+# ===== Level 3: module 69 =====
+PRACTICES[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
+    "name": "ledger", "suite": "LedgerTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "findings are merged per claim with every source kept once"),
+        ("e1", "edge", "a finding without a source or a date is refused"),
+        ("e2", "edge", "two values from the same date are a conflict that keeps both"),
+        ("e3", "edge", "two values from different dates are a change not a conflict"),
+        ("e4", "edge", "the coverage note separates what is well supported from what is not"),
+        ("e5", "edge", "a planned claim with no finding is a gap with its reason"),
+        ("e6", "edge", "financial data is rendered as a table"),
+        ("e7", "edge", "news is rendered as prose that says when sources disagree"),
+        ("e8", "edge", "technical findings are a list and an unknown content type is refused"),
+    ],
+    "plants": {
+        "wrong-first-wins": (["e2", "e3"], "keeps only the first value of a claim and drops the others"),
+        "wrong-ignores-dates": (["e3", "e4"], "calls every difference a conflict whatever the dates"),
+        "wrong-sources-collapsed": (["m1", "e4"], "keeps only the first source of a value"),
+        "wrong-date-optional": (["e1"], "does not require a date"),
+        "wrong-accepts-incomplete": (["e1"], "merges a finding with a missing field"),
+        "wrong-gaps-hidden": (["e5"], "leaves the planned claims with no finding out of the note"),
+        "wrong-single-source-supported": (["e4"], "calls a claim with one source well supported"),
+        "wrong-unknown-kind-accepted": (["e8"], "renders an unknown content type"),
+        "wrong-no-table": (["e6"], "renders financial data as prose"),
+        "wrong-conflict-unmarked": (["e7"], "leaves the disagreement out of the prose"),
+    },
+}
+
 # ===== Level 3: modules 70 to 74 (the scenario capstones) =====
 PRACTICES[f"{X}/70-scenario-customer-support-agent/unit-01/practice-1"] = {
     "name": "audit", "suite": "AuditTest", "langs": ["python", "typescript", "java", "kotlin"],
@@ -1185,7 +1360,6 @@ PRACTICES[f"{X}/84-cost-and-capacity-engineering/unit-01/practice-1"] = {
     },
 }
 # --- L4 79-84 END ---
-
 # --- PRACTICES ABOVE ---
 
 

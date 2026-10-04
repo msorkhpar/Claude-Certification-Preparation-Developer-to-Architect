@@ -1,0 +1,138 @@
+{
+  "module": "68-human-review-and-calibrated-confidence",
+  "quizzes": [
+    {
+      "id": "01-measuring-accuracy-by-segment-and-calibrating-confidence#q1",
+      "page": "01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+      "scope": "page",
+      "stem": "Scenario S6, structured data extraction. A pipeline gets 97% of extracted values right across a validation set that is mostly typed invoices, and the team plans to drop human checks on all of them. What should happen first?",
+      "options": {
+        "a": "Break the results down by document kind and by field name before relaxing oversight",
+        "b": "Confirm that the model reports high confidence on most of the validation set",
+        "c": "Double the validation set and confirm that the overall figure holds up",
+        "d": "Ask the reviewers to confirm the model's answers on a handful of randomly chosen documents"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The overall figure is an average that the large easy segment dominates, so each document type and field is measured on its own before any review is removed.",
+        "b": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\".",
+        "c": "Ruled out because \"A bigger validation set of the same mix gives the same hidden figure\".",
+        "d": "Ruled out because \"a handful of random documents are mostly typed invoices, because random samples reflect the mix\"."
+      }
+    },
+    {
+      "id": "01-measuring-accuracy-by-segment-and-calibrating-confidence#q2",
+      "page": "01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+      "scope": "page",
+      "stem": "Scenario S6, structured data extraction. Everything scored 90 or above is accepted untouched. The team wants the true wrong-rate of that stream and an early warning when a supplier changes its layout. Which sampling fits?",
+      "options": {
+        "a": "Pull random documents from the whole stream in a single draw, with no regard to kind",
+        "b": "Pull the documents that scored just under the cut-off every week",
+        "c": "Pull random documents of each kind that passed with no human look",
+        "d": "Pull one fixed set of old documents on a regular schedule"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A random draw inside every stratum of the unreviewed stream measures the wrong-rate of automation and exposes a new pattern, as the page puts it: \"Drawing the same number per stratum means a rare segment is checked as often as a common one\".",
+        "b": "Ruled out because \"Everything below it goes to a person\", so those documents are reviewed already.",
+        "a": "Ruled out because \"A single random pull from the whole stream is mostly easy cases\".",
+        "d": "Ruled out because \"new kinds of error appear when document formats change\", and a fixed set only repeats what is known."
+      }
+    },
+    {
+      "id": "02-routing-review-checkpoints-and-the-practice#q1",
+      "page": "02-routing-review-checkpoints-and-the-practice.md",
+      "scope": "page",
+      "stem": "Scenario S6, structured data extraction. Flagged extractions pile up faster than two reviewers can read them. Which handling fits?",
+      "options": {
+        "a": "Read them as they come in, because a first-in order treats every document and every reviewer fairly",
+        "b": "Take conflicts and the least certain items first, and keep the overflow as a backlog",
+        "c": "Drop whatever has not been read by the end of the week, so the pile never grows",
+        "d": "Lift the cut-off until the pile matches what two people can read in a day"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Conflicts and the lowest confidence are read first and the overflow waits, visibly, in a backlog.",
+        "a": "Ruled out because \"reviewer attention is limited, so spend it on conflicts and the lowest confidence first\".",
+        "c": "Ruled out because a backlog is \"a queue that is kept and shown, not dropped\".",
+        "d": "Ruled out because \"the threshold comes from labelled data. Keep it, queue the overflow and report the backlog\"."
+      }
+    },
+    {
+      "id": "02-routing-review-checkpoints-and-the-practice#q2",
+      "page": "02-routing-review-checkpoints-and-the-practice.md",
+      "scope": "page",
+      "stem": "Scenario S1, customer support resolution agent. An agent that can close accounts reports 99 out of 100 for its confidence in closing one. Where should the guard on that step live?",
+      "options": {
+        "a": "In a note appended to the closing message after the action has been taken",
+        "b": "In the system prompt, as an instruction to ask the customer first whenever the number is under 100",
+        "c": "In a confidence floor above which the agent may act on its own",
+        "d": "In a code-level gate that holds the action until a human approves"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The checkpoint reads no confidence, and the irreversible step always needs a person, as the page says: \"an action on the irreversible list always needs a person\".",
+        "b": "Ruled out because \"an instruction the model can be talked out of is a request\".",
+        "c": "Ruled out because the checkpoint \"does not read the confidence at all\", and a floor reads it.",
+        "a": "Ruled out because the account is already closed by then, and \"it does nothing about a deleted record, a sent payment or a closed account\"."
+      }
+    },
+    {
+      "id": "02-routing-review-checkpoints-and-the-practice#m1",
+      "page": "02-routing-review-checkpoints-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction. On a validation set with its right answers known, extractions scored 80 are right 62% of the time, and the goal for automatic acceptance is 90%. What follows?",
+      "options": {
+        "a": "Lower the cut-off until the share of accepted items reaches the whole validation set",
+        "b": "Keep 80 as the cut-off, because the model itself reported that score with a great deal of certainty",
+        "c": "Place the cut-off at the lowest level whose admitted items reach that bar in these records",
+        "d": "Replace the scores by an average over the document types, then reapply them"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says to \"Pick the lowest threshold whose precision reaches the target\", so the cut-off moves up to the lowest score that does.",
+        "b": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\".",
+        "a": "Ruled out because a lower cut-off lets in the less reliable items, while the page measures the precision of \"every item at or above it\".",
+        "d": "Ruled out because an average over types is the \"aggregate\" that \"hides the weak segment\"."
+      }
+    },
+    {
+      "id": "02-routing-review-checkpoints-and-the-practice#m2",
+      "page": "02-routing-review-checkpoints-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction. One kind of form has only twelve checked samples, all of them extracted correctly, and the team's rule demands at least fifty per kind, while every other kind has hundreds. May that kind be automated?",
+      "options": {
+        "a": "Yes, because a perfect score is the best a kind can have",
+        "b": "No, until further ground-truth records give it enough evidence",
+        "c": "Yes, once the overall figure is above the goal for the whole set",
+        "d": "No, because a kind with no mistakes cannot be measured at all"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The page requires \"a minimum number of labelled examples as well as a minimum accuracy\".",
+        "a": "Ruled out because \"A segment that scores 100% on four examples has shown very little\".",
+        "c": "Ruled out because \"The overall figure plays no part in the decision\".",
+        "d": "Ruled out because \"a segment with fewer than `min_n` labelled records is `undersampled`\", which is measurable and calls for more records."
+      }
+    },
+    {
+      "id": "02-routing-review-checkpoints-and-the-practice#m3",
+      "page": "02-routing-review-checkpoints-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S6, structured data extraction. Two extractions both carry a confidence of 96. One rests on two documents that give different totals, the other on a single clear document. Which one goes to a person?",
+      "options": {
+        "a": "Whichever the model rates as less certain on a second reading",
+        "b": "Both, because 96 is not high enough to skip review",
+        "c": "Neither, because both reached the same confidence",
+        "d": "Just the one with contradictory sources"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page lists \"Two documents give different values for the same field\" as a reason for review.",
+        "b": "Ruled out because \"Keep the threshold where the labelled data put it\", and nothing here says 96 falls below it.",
+        "c": "Ruled out because \"A conflict is a reason for review whatever the score\".",
+        "a": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\"."
+      }
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "practice": "63-batch-and-multi-pass-review/unit-01/practice-1",
+  "name": "batch_review",
+  "tests": {
+    "java": "BatchReviewTest",
+    "kotlin": "BatchReviewTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_interval_between_submissions_leaves_room_for_the_window_and_the_handling",
+      "typescript": "m1 the interval between submissions leaves room for the window and the handling",
+      "java": "m1_theIntervalBetweenSubmissionsLeavesRoomForTheWindowAndTheHandling",
+      "kotlin": "m1_theIntervalBetweenSubmissionsLeavesRoomForTheWindowAndTheHandling"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_an_sla_without_room_for_a_batch_is_refused",
+      "typescript": "e1 an sla without room for a batch is refused",
+      "java": "e1_anSlaWithoutRoomForABatchIsRefused",
+      "kotlin": "e1_anSlaWithoutRoomForABatchIsRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_blocking_check_or_a_tool_loop_needs_the_synchronous_api",
+      "typescript": "e2 a blocking check or a tool loop needs the synchronous api",
+      "java": "e2_aBlockingCheckOrAToolLoopNeedsTheSynchronousApi",
+      "kotlin": "e2_aBlockingCheckOrAToolLoopNeedsTheSynchronousApi"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_only_the_items_that_did_not_succeed_are_resubmitted_by_custom_id",
+      "typescript": "e3 only the items that did not succeed are resubmitted by custom id",
+      "java": "e3_onlyTheItemsThatDidNotSucceedAreResubmittedByCustomId",
+      "kotlin": "e3_onlyTheItemsThatDidNotSucceedAreResubmittedByCustomId"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_an_item_over_the_limit_is_chunked_and_a_rejected_request_is_fixed_first",
+      "typescript": "e4 an item over the limit is chunked and a rejected request is fixed first",
+      "java": "e4_anItemOverTheLimitIsChunkedAndARejectedRequestIsFixedFirst",
+      "kotlin": "e4_anItemOverTheLimitIsChunkedAndARejectedRequestIsFixedFirst"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_multi_file_review_gets_a_local_pass_per_file_and_one_integration_pass",
+      "typescript": "e5 a multi file review gets a local pass per file and one integration pass",
+      "java": "e5_aMultiFileReviewGetsALocalPassPerFileAndOneIntegrationPass",
+      "kotlin": "e5_aMultiFileReviewGetsALocalPassPerFileAndOneIntegrationPass"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_same_finding_from_two_passes_is_one_finding_with_the_highest_severity_and_the_lowest_confidence",
+      "typescript": "e6 the same finding from two passes is one finding with the highest severity and the lowest confidence",
+      "java": "e6_theSameFindingFromTwoPassesIsOneFindingWithTheHighestSeverityAndTheLowestConfidence",
+      "kotlin": "e6_theSameFindingFromTwoPassesIsOneFindingWithTheHighestSeverityAndTheLowestConfidence"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_finding_is_accepted_only_when_two_independent_passes_agree_with_confidence",
+      "typescript": "e7 a finding is accepted only when two independent passes agree with confidence",
+      "java": "e7_aFindingIsAcceptedOnlyWhenTwoIndependentPassesAgreeWithConfidence",
+      "kotlin": "e7_aFindingIsAcceptedOnlyWhenTwoIndependentPassesAgreeWithConfidence"
+    }
+  },
+  "plants": {
+    "wrong-ignores-handling": {
+      "caught_by": [
+        "m1",
+        "e1"
+      ],
+      "defect": "leaves the handling time out of the interval"
+    },
+    "wrong-oversized-resubmitted": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "resubmits an oversized item unchanged instead of chunking it"
+    },
+    "wrong-resubmit-all": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "resubmits the items that succeeded too"
+    },
+    "wrong-no-integration-pass": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "plans local passes only and no integration pass"
+    },
+    "wrong-lone-confident-accepted": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "accepts a finding that one pass reported with high confidence"
+    }
+  }
+}

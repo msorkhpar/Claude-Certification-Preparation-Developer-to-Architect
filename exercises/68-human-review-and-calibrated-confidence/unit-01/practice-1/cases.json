@@ -1,0 +1,130 @@
+{
+  "practice": "68-human-review-and-calibrated-confidence/unit-01/practice-1",
+  "name": "review_routing",
+  "tests": {
+    "java": "ReviewRoutingTest",
+    "kotlin": "ReviewRoutingTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_accuracy_is_reported_per_document_type_and_field_next_to_the_overall_figure",
+      "typescript": "m1 accuracy is reported per document type and field next to the overall figure",
+      "java": "m1_accuracyIsReportedPerDocumentTypeAndFieldNextToTheOverallFigure",
+      "kotlin": "m1_accuracyIsReportedPerDocumentTypeAndFieldNextToTheOverallFigure"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_weak_segment_is_hidden_by_a_high_overall_figure_and_found_by_the_breakdown",
+      "typescript": "e1 a weak segment is hidden by a high overall figure and found by the breakdown",
+      "java": "e1_aWeakSegmentIsHiddenByAHighOverallFigureAndFoundByTheBreakdown",
+      "kotlin": "e1_aWeakSegmentIsHiddenByAHighOverallFigureAndFoundByTheBreakdown"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_automation_needs_every_segment_to_pass_and_enough_samples_in_each",
+      "typescript": "e2 automation needs every segment to pass and enough samples in each",
+      "java": "e2_automationNeedsEverySegmentToPassAndEnoughSamplesInEach",
+      "kotlin": "e2_automationNeedsEverySegmentToPassAndEnoughSamplesInEach"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_threshold_is_the_lowest_confidence_whose_accepted_items_meet_the_target_precision",
+      "typescript": "e3 the threshold is the lowest confidence whose accepted items meet the target precision",
+      "java": "e3_theThresholdIsTheLowestConfidenceWhoseAcceptedItemsMeetTheTargetPrecision",
+      "kotlin": "e3_theThresholdIsTheLowestConfidenceWhoseAcceptedItemsMeetTheTargetPrecision"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_no_threshold_exists_when_no_confidence_level_meets_the_target",
+      "typescript": "e4 no threshold exists when no confidence level meets the target",
+      "java": "e4_noThresholdExistsWhenNoConfidenceLevelMeetsTheTarget",
+      "kotlin": "e4_noThresholdExistsWhenNoConfidenceLevelMeetsTheTarget"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_stratified_sample_takes_the_best_ranked_items_of_every_stratum",
+      "typescript": "e5 the stratified sample takes the best ranked items of every stratum",
+      "java": "e5_theStratifiedSampleTakesTheBestRankedItemsOfEveryStratum",
+      "kotlin": "e5_theStratifiedSampleTakesTheBestRankedItemsOfEveryStratum"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_low_confidence_and_conflicts_go_to_review_with_the_weakest_first",
+      "typescript": "e6 low confidence and conflicts go to review with the weakest first",
+      "java": "e6_lowConfidenceAndConflictsGoToReviewWithTheWeakestFirst",
+      "kotlin": "e6_lowConfidenceAndConflictsGoToReviewWithTheWeakestFirst"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_review_capacity_is_respected_and_the_rest_wait_in_a_backlog",
+      "typescript": "e7 review capacity is respected and the rest wait in a backlog",
+      "java": "e7_reviewCapacityIsRespectedAndTheRestWaitInABacklog",
+      "kotlin": "e7_reviewCapacityIsRespectedAndTheRestWaitInABacklog"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_an_irreversible_action_needs_a_person_whatever_the_confidence",
+      "typescript": "e8 an irreversible action needs a person whatever the confidence",
+      "java": "e8_anIrreversibleActionNeedsAPersonWhateverTheConfidence",
+      "kotlin": "e8_anIrreversibleActionNeedsAPersonWhateverTheConfidence"
+    }
+  },
+  "plants": {
+    "wrong-overall-percent": {
+      "caught_by": [
+        "m1",
+        "e1"
+      ],
+      "defect": "gives every segment the overall percentage"
+    },
+    "wrong-ignores-undersampled": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "approves automation for a segment with too few samples"
+    },
+    "wrong-highest-confidence": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "picks the highest qualifying confidence instead of the lowest"
+    },
+    "wrong-strict-target": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "demands more than the target precision"
+    },
+    "wrong-first-n-sample": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "samples by identifier instead of by rank"
+    },
+    "wrong-conflict-auto": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "lets a confident extraction with a conflict through"
+    },
+    "wrong-id-order": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "orders the review queue by identifier instead of weakest first"
+    },
+    "wrong-ignores-capacity": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "sends everything to review regardless of capacity"
+    },
+    "wrong-irreversible-by-amount": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "checks only the amount for an irreversible action"
+    }
+  }
+}

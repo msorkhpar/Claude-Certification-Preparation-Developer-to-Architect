@@ -68,6 +68,13 @@ modules 12 to 44, which is the whole of Level 2, and the first modules of Level 
 | `60-claude-code-in-ci/` | Claude Code in CI | 2 |
 | `61-criteria-and-examples/` | Criteria and examples | 2 |
 | `62-structured-output-at-the-architect-level/` | Structured output at the architect level | 2 |
+| `63-batch-and-multi-pass-review/` | Batch processing and multi-pass review | 2 |
+| `64-keeping-what-matters-in-long-conversations/` | Keeping what matters in long conversations | 2 |
+| `65-escalation-and-ambiguity/` | Escalation and ambiguity | 2 |
+| `66-errors-across-agents/` | Errors across agents | 2 |
+| `67-exploring-a-large-codebase/` | Exploring a large codebase | 2 |
+| `68-human-review-and-calibrated-confidence/` | Human review and calibrated confidence | 2 |
+| `69-provenance-and-uncertainty/` | Provenance and uncertainty | 2 |
 | `70-scenario-customer-support-agent/` | Scenario: customer support agent | 2 |
 | `71-scenario-code-generation-with-claude-code/` | Scenario: code generation with Claude Code | 2 |
 | `72-scenario-multi-agent-research-system/` | Scenario: multi-agent research system | 2 |

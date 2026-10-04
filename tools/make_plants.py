@@ -2387,6 +2387,346 @@ PLANTS[f"{X}/84-cost-and-capacity-engineering/unit-01/practice-1"] = {
 }
 # --- L4 79-84 END ---
 
+# ===== Level 3: module 63 =====
+PLANTS[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
+    "python": ("batch_review.py", {
+        "wrong-ignores-handling": [("    interval = sla_hours - window_hours - handling_hours\n", "    interval = sla_hours - window_hours\n")],
+        "wrong-oversized-resubmitted": [('        if sizes.get(custom_id, 0) > limit:\n            action = "chunk"\n        elif kind == "invalid_request":', '        if kind == "invalid_request":')],
+        "wrong-resubmit-all": [('        if kind == "succeeded":\n            continue\n', "")],
+        "wrong-no-integration-pass": [('    if len(files) > 1:\n        passes.append({"name": "integration", "files": list(files)})\n', "")],
+        "wrong-lone-confident-accepted": [('"accept" if count >= 2 and m["confidence"] >= 80 else "verify"', '"accept" if m["confidence"] >= 80 else "verify"')],
+    }),
+    "typescript": ("batchReview.ts", {
+        "wrong-ignores-handling": [("const interval = slaHours - windowHours - handlingHours;", "const interval = slaHours - windowHours;")],
+        "wrong-oversized-resubmitted": [('    if ((sizes[customId] ?? 0) > limit) action = "chunk";\n    else if (kind === "invalid_request") action = "fix";', '    if (kind === "invalid_request") action = "fix";')],
+        "wrong-resubmit-all": [('    if (kind === "succeeded") continue;\n', "")],
+        "wrong-no-integration-pass": [('  if (files.length > 1) passes.push({ name: "integration", files: [...files] });\n', "")],
+        "wrong-lone-confident-accepted": [("count >= 2 && m.confidence >= 80 ?", "m.confidence >= 80 ?")],
+    }),
+    "java": ("BatchReview.java", {
+        "wrong-ignores-handling": [("int interval = slaHours - windowHours - handlingHours;", "int interval = slaHours - windowHours;")],
+        "wrong-oversized-resubmitted": [('            if (sizes.getOrDefault(r.customId(), 0) > limit) action = "chunk";\n            else if (r.kind().equals("invalid_request")) action = "fix";', '            if (r.kind().equals("invalid_request")) action = "fix";')],
+        "wrong-resubmit-all": [('            if (r.kind().equals("succeeded")) continue;\n', "")],
+        "wrong-no-integration-pass": [('        if (files.size() > 1) passes.add(new Pass("integration", List.copyOf(files)));\n', "")],
+        "wrong-lone-confident-accepted": [("count >= 2 && conf >= 80 ?", "conf >= 80 ?")],
+    }),
+    "kotlin": ("BatchReview.kt", {
+        "wrong-ignores-handling": [("val interval = slaHours - windowHours - handlingHours", "val interval = slaHours - windowHours")],
+        "wrong-oversized-resubmitted": [('if ((sizes[r.customId] ?: 0) > limit) "chunk" else if (r.kind == "invalid_request") "fix" else "resubmit"', 'if (r.kind == "invalid_request") "fix" else "resubmit"')],
+        "wrong-resubmit-all": [('        if (r.kind == "succeeded") continue\n', "")],
+        "wrong-no-integration-pass": [('    if (files.size > 1) passes += Pass("integration", files.toList())\n', "")],
+        "wrong-lone-confident-accepted": [('if (count >= 2 && conf >= 80) "accept"', 'if (conf >= 80) "accept"')],
+    }),
+}
+
+
+# ===== Level 3: module 63 =====
+PLANTS[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
+    "python": ("batch_review.py", {
+        "wrong-ignores-handling": [("    interval = sla_hours - window_hours - handling_hours\n", "    interval = sla_hours - window_hours\n")],
+        "wrong-oversized-resubmitted": [('        if sizes.get(custom_id, 0) > limit:\n            action = "chunk"\n        elif kind == "invalid_request":', '        if kind == "invalid_request":')],
+        "wrong-resubmit-all": [('        if kind == "succeeded":\n            continue\n', "")],
+        "wrong-no-integration-pass": [('    if len(files) > 1:\n        passes.append({"name": "integration", "files": list(files)})\n', "")],
+        "wrong-lone-confident-accepted": [('"accept" if count >= 2 and m["confidence"] >= 80 else "verify"', '"accept" if m["confidence"] >= 80 else "verify"')],
+    }),
+    "typescript": ("batchReview.ts", {
+        "wrong-ignores-handling": [("const interval = slaHours - windowHours - handlingHours;", "const interval = slaHours - windowHours;")],
+        "wrong-oversized-resubmitted": [('    if ((sizes[customId] ?? 0) > limit) action = "chunk";\n    else if (kind === "invalid_request") action = "fix";', '    if (kind === "invalid_request") action = "fix";')],
+        "wrong-resubmit-all": [('    if (kind === "succeeded") continue;\n', "")],
+        "wrong-no-integration-pass": [('  if (files.length > 1) passes.push({ name: "integration", files: [...files] });\n', "")],
+        "wrong-lone-confident-accepted": [("count >= 2 && m.confidence >= 80 ?", "m.confidence >= 80 ?")],
+    }),
+    "java": ("BatchReview.java", {
+        "wrong-ignores-handling": [("int interval = slaHours - windowHours - handlingHours;", "int interval = slaHours - windowHours;")],
+        "wrong-oversized-resubmitted": [('            if (sizes.getOrDefault(r.customId(), 0) > limit) action = "chunk";\n            else if (r.kind().equals("invalid_request")) action = "fix";', '            if (r.kind().equals("invalid_request")) action = "fix";')],
+        "wrong-resubmit-all": [('            if (r.kind().equals("succeeded")) continue;\n', "")],
+        "wrong-no-integration-pass": [('        if (files.size() > 1) passes.add(new Pass("integration", List.copyOf(files)));\n', "")],
+        "wrong-lone-confident-accepted": [("count >= 2 && conf >= 80 ?", "conf >= 80 ?")],
+    }),
+    "kotlin": ("BatchReview.kt", {
+        "wrong-ignores-handling": [("val interval = slaHours - windowHours - handlingHours", "val interval = slaHours - windowHours")],
+        "wrong-oversized-resubmitted": [('if ((sizes[r.customId] ?: 0) > limit) "chunk" else if (r.kind == "invalid_request") "fix" else "resubmit"', 'if (r.kind == "invalid_request") "fix" else "resubmit"')],
+        "wrong-resubmit-all": [('        if (r.kind == "succeeded") continue\n', "")],
+        "wrong-no-integration-pass": [('    if (files.size > 1) passes += Pass("integration", files.toList())\n', "")],
+        "wrong-lone-confident-accepted": [('if (count >= 2 && conf >= 80) "accept"', 'if (conf >= 80) "accept"')],
+    }),
+}
+
+
+# ===== Level 3: module 64 =====
+PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] = {
+    "python": ("context_builder.py", {
+        "wrong-no-trim": [("    return {k: record[k] for k in keep if k in record}", "    return dict(record)")],
+        "wrong-older-overwrites": [('    elif as_of >= current["as_of"]:', "    elif True:")],
+        "wrong-all-customers": [('    mine = [f for f in facts if f["customer"] == customer]', "    mine = list(facts)")],
+        "wrong-facts-last": [(r'    return "\n\n".join(parts)', r'    return "\n\n".join(reversed(parts))')],
+        "wrong-pair-split": [('        if m["kind"] == "tool_use" and', '        if False and m["kind"] == "tool_use" and')],
+        "wrong-loose-summary-check": [('f["value"] not in summary', 'f["value"][:2] not in summary')],
+    }),
+    "typescript": ("contextBuilder.ts", {
+        "wrong-no-trim": [("  for (const k of keep) if (k in record) out[k] = record[k];", "  Object.assign(out, record);")],
+        "wrong-older-overwrites": [("} else if (asOf >= current.as_of) {", "} else if (true) {")],
+        "wrong-all-customers": [("const mine = facts.filter((f) => f.customer === customer);", "const mine = facts;")],
+        "wrong-facts-last": [('return parts.join("\\n\\n");', 'return parts.reverse().join("\\n\\n");')],
+        "wrong-pair-split": [('if (m.kind === "tool_use" &&', 'if (false && m.kind === "tool_use" &&')],
+        "wrong-loose-summary-check": [("!summary.includes(f.value)", "!summary.includes(f.value.slice(0, 2))")],
+    }),
+    "java": ("ContextBuilder.java", {
+        "wrong-no-trim": [("for (String k : keep) if (record.containsKey(k)) out.put(k, record.get(k));", "out.putAll(record);")],
+        "wrong-older-overwrites": [("} else if (asOf.compareTo(current.asOf()) >= 0) {", "} else if (true) {")],
+        "wrong-all-customers": [("if (f.customer().equals(customer)) mine.add(", "mine.add(")],
+        "wrong-facts-last": [('return String.join("\\n\\n", parts);', 'java.util.Collections.reverse(parts);\n        return String.join("\\n\\n", parts);')],
+        "wrong-pair-split": [('if (m.kind().equals("tool_use") &&', 'if (false && m.kind().equals("tool_use") &&')],
+        "wrong-loose-summary-check": [("!summary.contains(f.value())", "!summary.contains(f.value().substring(0, 2))")],
+    }),
+    "kotlin": ("ContextBuilder.kt", {
+        "wrong-no-trim": [("for (k in keep) if (k in record) out[k] = record.getValue(k)", "out.putAll(record)")],
+        "wrong-older-overwrites": [("} else if (asOf >= current.asOf) {", "} else if (true) {")],
+        "wrong-all-customers": [("val mine = facts.filter { it.customer == customer }", "val mine = facts")],
+        "wrong-facts-last": [('return parts.joinToString("\\n\\n")', 'return parts.asReversed().joinToString("\\n\\n")')],
+        "wrong-pair-split": [('if (m.kind == "tool_use" &&', 'if (false && m.kind == "tool_use" &&')],
+        "wrong-loose-summary-check": [("it.value !in summary", "it.value.take(2) !in summary")],
+    }),
+}
+
+
+# ===== Level 3: module 65 =====
+PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
+    "python": ("escalation.py", {
+        "wrong-investigate-first": [('    if case.get("asked_for_person", False):', '    if case.get("asked_for_person", False) and not case.get("policy_covers", True):')],
+        "wrong-angry-escalates": [('    if case.get("asked_for_person", False):', '    if case.get("asked_for_person", False) or case.get("sentiment", "calm") == "angry":')],
+        "wrong-low-confidence-escalates": [('    if case.get("attempts_without_progress", 0) >= max_attempts:', '    if case.get("attempts_without_progress", 0) >= max_attempts or case.get("confidence", 100) < 50:')],
+        "wrong-picks-first-match": [('    if case.get("matches", 1) > 1:', "    if False:")],
+        "wrong-policy-gap-resolved": [('    if not case.get("policy_covers", True):', "    if False:")],
+        "wrong-no-acknowledgement": [('case.get("sentiment", "calm") != "calm")', "False)")],
+        "wrong-clarify-all-fields": [('field != "id" and len({m.get(field) for m in matches}) > 1', 'field != "id"')],
+        "wrong-handoff-transcript": [(r'    return "\n".join(lines)', r'    return "\n".join(lines + [case.get("transcript", "")])')],
+    }),
+    "typescript": ("escalation.ts", {
+        "wrong-investigate-first": [("if (c.asked_for_person ?? false) return", "if ((c.asked_for_person ?? false) && !(c.policy_covers ?? true)) return")],
+        "wrong-angry-escalates": [("if (c.asked_for_person ?? false) return", 'if ((c.asked_for_person ?? false) || c.sentiment === "angry") return')],
+        "wrong-low-confidence-escalates": [("if ((c.attempts_without_progress ?? 0) >= maxAttempts) return", "if ((c.attempts_without_progress ?? 0) >= maxAttempts || (c.confidence ?? 100) < 50) return")],
+        "wrong-picks-first-match": [("if ((c.matches ?? 1) > 1) return", "if (false) return")],
+        "wrong-policy-gap-resolved": [("if (!(c.policy_covers ?? true)) return", "if (false) return")],
+        "wrong-no-acknowledgement": [('(c.sentiment ?? "calm") !== "calm")', "false)")],
+        "wrong-clarify-all-fields": [(" && new Set(matches.map((m) => m[field])).size > 1", "")],
+        "wrong-handoff-transcript": [('return lines.join("\\n");', 'return lines.concat(c.transcript ?? "").join("\\n");')],
+    }),
+    "java": ("Escalation.java", {
+        "wrong-investigate-first": [("if (c.askedForPerson()) return", "if (c.askedForPerson() && !c.policyCovers()) return")],
+        "wrong-angry-escalates": [("if (c.askedForPerson()) return", 'if (c.askedForPerson() || c.sentiment().equals("angry")) return')],
+        "wrong-low-confidence-escalates": [("if (c.attemptsWithoutProgress() >= maxAttempts) return", "if (c.attemptsWithoutProgress() >= maxAttempts || c.confidence() < 50) return")],
+        "wrong-picks-first-match": [("if (c.matches() > 1) return", "if (false) return")],
+        "wrong-policy-gap-resolved": [("if (!c.policyCovers()) return", "if (false) return")],
+        "wrong-no-acknowledgement": [('!c.sentiment().equals("calm"))', "false)")],
+        "wrong-clarify-all-fields": [("if (values.size() > 1) out.add(field);", "out.add(field);")],
+        "wrong-handoff-transcript": [('return String.join("\\n", lines);', 'return String.join("\\n", lines) + c.transcript();')],
+    }),
+    "kotlin": ("Escalation.kt", {
+        "wrong-investigate-first": [("c.askedForPerson -> ", "c.askedForPerson && !c.policyCovers -> ")],
+        "wrong-angry-escalates": [("c.askedForPerson -> ", 'c.askedForPerson || c.sentiment == "angry" -> ')],
+        "wrong-low-confidence-escalates": [("c.attemptsWithoutProgress >= maxAttempts -> ", "c.attemptsWithoutProgress >= maxAttempts || c.confidence < 50 -> ")],
+        "wrong-picks-first-match": [("c.matches > 1 -> ", "false -> ")],
+        "wrong-policy-gap-resolved": [("!c.policyCovers -> ", "false -> ")],
+        "wrong-no-acknowledgement": [('c.sentiment != "calm")', "false)")],
+        "wrong-clarify-all-fields": [('field != "id" && matches.map { it[field] }.toSet().size > 1', 'field != "id"')],
+        "wrong-handoff-transcript": [(').joinToString("\\n")', ').joinToString("\\n") + c.transcript')],
+    }),
+}
+
+
+# ===== Level 3: module 66 =====
+PLANTS[f"{X}/66-errors-across-agents/unit-01/practice-1"] = {
+    "python": ("error_flow.py", {
+        "wrong-empty-is-error": [('"success" if items else "empty"', '"success" if items else "failed"')],
+        "wrong-retry-permission": [("        if kind in TRANSIENT and attempts < max_attempts:", "        if attempts < max_attempts:")],
+        "wrong-drop-partial": [('"partial_results": reply.get("partial", [])', '"partial_results": []')],
+        "wrong-generic-error": [('"failure_type": kind, "attempted": query, ', "")],
+        "wrong-stop-on-failure": [("    plan = []\n    for topic, outcome in results.items():", '    plan = []\n    if any(o["status"] == "failed" for o in results.values()):\n        return [(topic, "abort") for topic in results]\n    for topic, outcome in results.items():')],
+        "wrong-gap-as-supported": [('        elif outcome["status"] == "success":\n            groups["Well-supported"].append(topic)', '        elif outcome["status"] in ("success", "failed"):\n            groups["Well-supported"].append(topic)')],
+        "wrong-missing-topic-skipped": [('        if outcome is None:\n            groups["Gaps"].append(f"{topic} (not searched)")', "        if outcome is None:\n            continue")],
+    }),
+    "typescript": ("errorFlow.ts", {
+        "wrong-empty-is-error": [('status: items.length > 0 ? "success" : "empty"', 'status: items.length > 0 ? "success" : "failed"')],
+        "wrong-retry-permission": [("if (TRANSIENT.includes(kind) && attempts < maxAttempts) continue;", "if (attempts < maxAttempts) continue;")],
+        "wrong-drop-partial": [("partial_results: reply.partial ?? [], ", "partial_results: [], ")],
+        "wrong-generic-error": [("failure_type: kind, attempted: query, ", "")],
+        "wrong-stop-on-failure": [("  for (const [topic, outcome] of Object.entries(results)) {\n    let action", '  if (Object.values(results).some((o: any) => o.status === "failed")) return Object.keys(results).map((t): [string, string] => [t, "abort"]);\n  for (const [topic, outcome] of Object.entries(results)) {\n    let action')],
+        "wrong-gap-as-supported": [('else if (outcome.status === "success") groups["Well-supported"].push(topic);', 'else if (outcome.status === "success" || outcome.status === "failed") groups["Well-supported"].push(topic);')],
+        "wrong-missing-topic-skipped": [('if (outcome === undefined) groups["Gaps"].push(`${topic} (not searched)`);', "if (outcome === undefined) continue;")],
+    }),
+    "java": ("ErrorFlow.java", {
+        "wrong-empty-is-error": [('reply.items().isEmpty() ? "empty" : "success"', 'reply.items().isEmpty() ? "failed" : "success"')],
+        "wrong-retry-permission": [("if (TRANSIENT.contains(kind) && attempts < maxAttempts) continue;", "if (attempts < maxAttempts) continue;")],
+        "wrong-drop-partial": [("reply.partial() == null ? List.of() : reply.partial()", "List.of()")],
+        "wrong-generic-error": [('new Outcome("failed", List.of(), attempts, kind, query, ', 'new Outcome("failed", List.of(), attempts, null, null, ')],
+        "wrong-stop-on-failure": [("        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            Outcome o = e.getValue();\n", '        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            if (e.getValue().status().equals("failed")) {\n                List<Step> aborted = new ArrayList<>();\n                for (String t : results.keySet()) aborted.add(new Step(t, "abort"));\n                return aborted;\n            }\n        }\n        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            Outcome o = e.getValue();\n')],
+        "wrong-gap-as-supported": [('else if (o.status().equals("success")) groups.get("Well-supported").add(topic);', 'else if (o.status().equals("success") || o.status().equals("failed")) groups.get("Well-supported").add(topic);')],
+        "wrong-missing-topic-skipped": [('if (o == null) groups.get("Gaps").add(topic + " (not searched)");', "if (o == null) continue;")],
+    }),
+    "kotlin": ("ErrorFlow.kt", {
+        "wrong-empty-is-error": [('if (reply.items.isEmpty()) "empty" else "success"', 'if (reply.items.isEmpty()) "failed" else "success"')],
+        "wrong-retry-permission": [("if (kind in TRANSIENT && attempts < maxAttempts) continue", "if (attempts < maxAttempts) continue")],
+        "wrong-drop-partial": [("query, reply.partial, ALTERNATIVES[kind]", "query, emptyList(), ALTERNATIVES[kind]")],
+        "wrong-generic-error": [('Outcome("failed", emptyList(), attempts, kind, query, reply.partial,', 'Outcome("failed", emptyList(), attempts, null, null, reply.partial,')],
+        "wrong-stop-on-failure": [("results.map { (topic, o) ->\n", 'results.map { (topic, o) ->\n    if (results.values.any { it.status == "failed" }) return@map Step(topic, "abort")\n')],
+        "wrong-gap-as-supported": [('o.status == "success" -> groups.getValue("Well-supported") += topic', 'o.status == "success" || o.status == "failed" -> groups.getValue("Well-supported") += topic')],
+        "wrong-missing-topic-skipped": [('o == null -> groups.getValue("Gaps") += "$topic (not searched)"', "o == null -> Unit")],
+    }),
+}
+
+
+# ===== Level 3: module 67 =====
+PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
+    "python": ("recovery.py", {
+        "wrong-duplicate-findings": [('    if any(f["area"] == area and f["fact"] == fact for f in findings):\n        return list(findings)\n', "")],
+        "wrong-ungrouped-scratchpad": [('        if f["area"] not in areas:\n            areas.append(f["area"])', '        areas.append(f["area"])')],
+        "wrong-manifest-unsorted": [('for a in sorted(agents, key=lambda a: a["name"])', "for a in agents")],
+        "wrong-manifest-unvalidated": [("    for a in agents:\n        if a[\"status\"] not in STATUSES:\n            raise ValueError(f\"unknown status {a['status']}\")\n", "")],
+        "wrong-rerun-done": [('        elif a["status"] == "done":\n            action = "reuse"', '        elif False:\n            action = "reuse"')],
+        "wrong-restart-running": [('        else:\n            action = "resume"', '        else:\n            action = "restart"')],
+        "wrong-ignore-missing-file": [('        if a["state_file"] not in existing_files:\n            action = "restart"\n        elif', '        if False:\n            action = "restart"\n        elif')],
+        "wrong-no-continue-line": [(r'"\nContinue from the first unfinished step."', '""')],
+        "wrong-compact-without-focus": [('"/compact" if not keep else "/compact Focus on " + ", ".join(keep)', '"/compact"')],
+    }),
+    "typescript": ("recovery.ts", {
+        "wrong-duplicate-findings": [("  if (findings.some((f) => f.area === area && f.fact === fact)) return [...findings];\n", "")],
+        "wrong-ungrouped-scratchpad": [("if (!areas.includes(f.area)) areas.push(f.area);", "areas.push(f.area);")],
+        "wrong-manifest-unsorted": [("const sorted = [...agents].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));", "const sorted = [...agents];")],
+        "wrong-manifest-unvalidated": [("  for (const a of agents) if (!STATUSES.includes(a.status)) throw new Error(`unknown status ${a.status}`);\n", "")],
+        "wrong-rerun-done": [('else if (a.status === "done") action = "reuse";', 'else if (false) action = "reuse";')],
+        "wrong-restart-running": [('else action = "resume";', 'else action = "restart";')],
+        "wrong-ignore-missing-file": [('if (!existingFiles.has(a.state_file)) action = "restart";', 'if (false) action = "restart";')],
+        "wrong-no-continue-line": [('"\\nContinue from the first unfinished step."', '""')],
+        "wrong-compact-without-focus": [('keep.length === 0 ? "/compact" : "/compact Focus on " + keep.join(", ")', '"/compact"')],
+    }),
+    "java": ("Recovery.java", {
+        "wrong-duplicate-findings": [("        for (Finding f : findings) if (f.area().equals(area) && f.fact().equals(fact)) return out;\n", "")],
+        "wrong-ungrouped-scratchpad": [("if (!areas.contains(f.area())) areas.add(f.area());", "areas.add(f.area());")],
+        "wrong-manifest-unsorted": [("        sorted.sort(Comparator.comparing(AgentEntry::name));\n", "")],
+        "wrong-manifest-unvalidated": [('        for (AgentEntry a : agents) if (!STATUSES.contains(a.status())) throw new IllegalArgumentException("unknown status " + a.status());\n', "")],
+        "wrong-rerun-done": [('else if (a.status().equals("done")) action = "reuse";', 'else if (false) action = "reuse";')],
+        "wrong-restart-running": [('else action = "resume";', 'else action = "restart";')],
+        "wrong-ignore-missing-file": [('if (!existingFiles.contains(a.stateFile())) action = "restart";', 'if (false) action = "restart";')],
+        "wrong-no-continue-line": [('"\\nContinue from the first unfinished step."', '""')],
+        "wrong-compact-without-focus": [('return keep.isEmpty() ? "/compact" : "/compact Focus on " + String.join(", ", keep);', 'return "/compact";')],
+    }),
+    "kotlin": ("Recovery.kt", {
+        "wrong-duplicate-findings": [("if (findings.any { it.area == area && it.fact == fact }) findings.toList() else findings + Finding(area, fact, location)", "findings + Finding(area, fact, location)")],
+        "wrong-ungrouped-scratchpad": [("findings.map { it.area }.distinct().joinToString", "findings.map { it.area }.joinToString")],
+        "wrong-manifest-unsorted": [("agents.sortedBy { it.name }", "agents")],
+        "wrong-manifest-unvalidated": [('    for (a in agents) require(a.status in STATUSES) { "unknown status ${a.status}" }\n', "")],
+        "wrong-rerun-done": [('a.status == "done" -> "reuse"', 'false -> "reuse"')],
+        "wrong-restart-running": [('else -> "resume"', 'else -> "restart"')],
+        "wrong-ignore-missing-file": [('a.stateFile !in existingFiles -> "restart"', 'false -> "restart"')],
+        "wrong-no-continue-line": [('"\\nContinue from the first unfinished step."', '""')],
+        "wrong-compact-without-focus": [('if (keep.isEmpty()) "/compact" else "/compact Focus on " + keep.joinToString(", ")', '"/compact"')],
+    }),
+}
+
+
+# ===== Level 3: module 68 =====
+PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
+    "python": ("review_routing.py", {
+        "wrong-overall-percent": [('"segment": name, "correct": c, "total": t, "percent": _percent(c, t)}', '"segment": name, "correct": c, "total": t, "percent": _percent(correct, total)}')],
+        "wrong-ignores-undersampled": [('        if s["total"] < min_n:\n            undersampled.append(s["segment"])\n        elif s["percent"] < threshold:', '        if s["percent"] < threshold:')],
+        "wrong-highest-confidence": [("for t in sorted({c for c, _ in labeled}):", "for t in sorted({c for c, _ in labeled}, reverse=True):")],
+        "wrong-strict-target": [("if 100 * sum(1 for ok in kept if ok) >= target * len(kept):", "if 100 * sum(1 for ok in kept if ok) > target * len(kept):")],
+        "wrong-first-n-sample": [('key=lambda i: (i["rank"], i["id"])', 'key=lambda i: i["id"]')],
+        "wrong-conflict-auto": [('e["conflict"] or e["confidence"] < threshold]', 'e["confidence"] < threshold]')],
+        "wrong-id-order": [('key=lambda e: (0 if e["conflict"] else e["confidence"], e["id"])', 'key=lambda e: e["id"]')],
+        "wrong-ignores-capacity": [('"review": queue[:capacity], "backlog": queue[capacity:]', '"review": queue, "backlog": []')],
+        "wrong-irreversible-by-amount": [('"human" if action in IRREVERSIBLE or amount > limit else "auto"', '"human" if amount > limit else "auto"')],
+    }),
+    "typescript": ("reviewRouting.ts", {
+        "wrong-overall-percent": [("segment: name, correct: c, total: t, percent: percent(c, t) }", "segment: name, correct: c, total: t, percent: percent(correct, total) }")],
+        "wrong-ignores-undersampled": [("    if (s.total < minN) undersampled.push(s.segment);\n    else if (s.percent < threshold) failing.push(s.segment);", "    if (s.percent < threshold) failing.push(s.segment);")],
+        "wrong-highest-confidence": [("].sort((a, b) => a - b)) {", "].sort((a, b) => b - a)) {")],
+        "wrong-strict-target": [("if (100 * right >= target * kept.length)", "if (100 * right > target * kept.length)")],
+        "wrong-first-n-sample": [(".sort((a, b) => a.rank - b.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    chosen.push", ".sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    chosen.push")],
+        "wrong-conflict-auto": [("filter((e) => e.conflict || e.confidence < threshold)", "filter((e) => e.confidence < threshold)")],
+        "wrong-id-order": [(".sort((a, b) => priority(a) - priority(b) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));", ".sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));")],
+        "wrong-ignores-capacity": [("review: queue.slice(0, capacity), backlog: queue.slice(capacity),", "review: queue, backlog: [],")],
+        "wrong-irreversible-by-amount": [("return IRREVERSIBLE.includes(action) || amount > limit ?", "return amount > limit ?")],
+    }),
+    "java": ("ReviewRouting.java", {
+        "wrong-overall-percent": [("e.getValue()[1], percent(e.getValue()[0], e.getValue()[1])));", "e.getValue()[1], percent(correct, total)));")],
+        "wrong-ignores-undersampled": [("            if (s.total() < minN) undersampled.add(s.segment());\n            else if (s.percent() < threshold) failing.add(s.segment());", "            if (s.percent() < threshold) failing.add(s.segment());")],
+        "wrong-highest-confidence": [("Set<Integer> levels = new java.util.TreeSet<>();", "Set<Integer> levels = new java.util.TreeSet<>(java.util.Comparator.reverseOrder());")],
+        "wrong-strict-target": [("if (100 * right >= target * kept) return t;", "if (100 * right > target * kept) return t;")],
+        "wrong-first-n-sample": [("members.sort(Comparator.comparingInt(Item::rank).thenComparing(Item::id));", "members.sort(Comparator.comparing(Item::id));")],
+        "wrong-conflict-auto": [("if (e.conflict() || e.confidence() < threshold) candidates.add(e);", "if (e.confidence() < threshold) candidates.add(e);")],
+        "wrong-id-order": [("candidates.sort(Comparator.<Extraction>comparingInt(e -> e.conflict() ? 0 : e.confidence()).thenComparing(Extraction::id));", "candidates.sort(Comparator.comparing(Extraction::id));")],
+        "wrong-ignores-capacity": [("int cut = Math.min(capacity, queue.size());", "int cut = queue.size();")],
+        "wrong-irreversible-by-amount": [("return IRREVERSIBLE.contains(action) || amount > limit ?", "return amount > limit ?")],
+    }),
+    "kotlin": ("ReviewRouting.kt", {
+        "wrong-overall-percent": [("rs.size, percent(rs.count { it.correct }, rs.size)) }", "rs.size, percent(correct, total)) }")],
+        "wrong-ignores-undersampled": [("val undersampled = segments.filter { it.total < minN }.map { it.segment }", "val undersampled = emptyList<String>()")],
+        "wrong-highest-confidence": [(".toSortedSet()) {", ".toSortedSet(compareByDescending { it })) {")],
+        "wrong-strict-target": [("if (100 * kept.count { it.correct } >= target * kept.size)", "if (100 * kept.count { it.correct } > target * kept.size)")],
+        "wrong-first-n-sample": [(".sortedWith(compareBy({ it.rank }, { it.id }))", ".sortedBy { it.id }")],
+        "wrong-conflict-auto": [("filter { it.conflict || it.confidence < threshold }", "filter { it.confidence < threshold }")],
+        "wrong-id-order": [(".sortedWith(compareBy({ if (it.conflict) 0 else it.confidence }, { it.id }))", ".sortedBy { it.id }")],
+        "wrong-ignores-capacity": [("Routing(queue.take(capacity), queue.drop(capacity),", "Routing(queue, emptyList(),")],
+        "wrong-irreversible-by-amount": [('= if (action in IRREVERSIBLE || amount > limit) "human"', '= if (amount > limit) "human"')],
+    }),
+}
+
+
+# ===== Level 3: module 69 =====
+PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
+    "python": ("ledger.py", {
+        "wrong-first-wins": [('        out.append({"claim": claim, "status": status, "values": values})', '        out.append({"claim": claim, "status": status, "values": values[:1]})')],
+        "wrong-ignores-dates": [('        elif any(a["value"] != b["value"] and a["date"] == b["date"] for a in group for b in group):', "        elif True:")],
+        "wrong-sources-collapsed": [('            if pair not in entry["sources"]:', '            if not entry["sources"]:')],
+        "wrong-date-optional": [('return [f for f in REQUIRED if not str(finding.get(f, "")).strip()]', 'return [f for f in REQUIRED if f != "date" and not str(finding.get(f, "")).strip()]')],
+        "wrong-accepts-incomplete": [("    for i, f in enumerate(findings):\n        missing = check_finding(f)\n        if missing:\n            raise ValueError(f\"finding {i} is missing {', '.join(missing)}\")\n", "")],
+        "wrong-gaps-hidden": [('    note["gaps"] = [{"claim": c, "reason": unavailable.get(c, "no source found")} for c in planned if c not in have]', '    note["gaps"] = []')],
+        "wrong-single-source-supported": [('elif len({s["source"] for s in e["values"][0]["sources"]}) >= 2:', 'elif len({s["source"] for s in e["values"][0]["sources"]}) >= 1:')],
+        "wrong-unknown-kind-accepted": [('    if kind not in KINDS:\n        raise ValueError(f"unknown content type {kind}")\n', "")],
+        "wrong-no-table": [('    if kind == "financial":', "    if False:")],
+        "wrong-conflict-unmarked": [('    if entry["status"] == "conflict":\n        text += " The sources disagree."\n    elif', '    if False:\n        text += " The sources disagree."\n    elif')],
+    }),
+    "typescript": ("ledger.ts", {
+        "wrong-first-wins": [("    return { claim, status, values };", "    return { claim, status, values: values.slice(0, 1) };")],
+        "wrong-ignores-dates": [('      if (same) status = "conflict";', '      if (true) status = "conflict";')],
+        "wrong-sources-collapsed": [("if (!entry.sources.some((s) => s.source === f.source && s.date === f.date)) entry.sources.push", "if (entry.sources.length === 0) entry.sources.push")],
+        "wrong-date-optional": [('return REQUIRED.filter((f) => String(finding[f] ?? "").trim() === "");', 'return REQUIRED.filter((f) => f !== "date" && String(finding[f] ?? "").trim() === "");')],
+        "wrong-accepts-incomplete": [("  findings.forEach((f, i) => {\n    const missing = checkFinding(f);\n    if (missing.length > 0) throw new Error(`finding ${i} is missing ${missing.join(\", \")}`);\n  });\n", "")],
+        "wrong-gaps-hidden": [('  note.gaps = planned.filter((c) => !have.has(c)).map((c) => ({ claim: c, reason: unavailable[c] ?? "no source found" }));', "  note.gaps = [];")],
+        "wrong-single-source-supported": [("else if (new Set(e.values[0].sources.map((s: any) => s.source)).size >= 2)", "else if (new Set(e.values[0].sources.map((s: any) => s.source)).size >= 1)")],
+        "wrong-unknown-kind-accepted": [("  if (!KINDS.includes(kind)) throw new Error(`unknown content type ${kind}`);\n", "")],
+        "wrong-no-table": [('  if (kind === "financial") return', '  if (false) return')],
+        "wrong-conflict-unmarked": [('  if (entry.status === "conflict") text += " The sources disagree.";', '  if (false) text += " The sources disagree.";')],
+    }),
+    "java": ("Ledger.java", {
+        "wrong-first-wins": [("            out.add(new Entry(claim, status, values));", "            out.add(new Entry(claim, status, values.subList(0, 1)));")],
+        "wrong-ignores-dates": [("} else if (group.stream().anyMatch(a -> group.stream().anyMatch(b -> !a.value().equals(b.value()) && a.date().equals(b.date())))) {", "} else if (true) {")],
+        "wrong-sources-collapsed": [("if (!sources.get(at).contains(pair)) sources.get(at).add(pair);", "if (sources.get(at).isEmpty()) sources.get(at).add(pair);")],
+        "wrong-date-optional": [("for (String name : REQUIRED) if (field(finding, name).isBlank()) missing.add(name);", 'for (String name : REQUIRED) if (!name.equals("date") && field(finding, name).isBlank()) missing.add(name);')],
+        "wrong-accepts-incomplete": [('        for (int i = 0; i < findings.size(); i++) {\n            List<String> missing = checkFinding(findings.get(i));\n            if (!missing.isEmpty()) throw new IllegalArgumentException("finding " + i + " is missing " + String.join(", ", missing));\n        }\n', "")],
+        "wrong-gaps-hidden": [('        for (String c : planned) if (!have.contains(c)) gaps.add(new Gap(c, unavailable.getOrDefault(c, "no source found")));\n', "")],
+        "wrong-single-source-supported": [(".distinct().count() >= 2) well.add", ".distinct().count() >= 1) well.add")],
+        "wrong-unknown-kind-accepted": [('        if (!KINDS.contains(kind)) throw new IllegalArgumentException("unknown content type " + kind);\n', "")],
+        "wrong-no-table": [('        if (kind.equals("financial")) {', "        if (false) {")],
+        "wrong-conflict-unmarked": [('        if (entry.status().equals("conflict")) text += " The sources disagree.";', '        if (false) text += " The sources disagree.";')],
+    }),
+    "kotlin": ("Ledger.kt", {
+        "wrong-first-wins": [("val values = group.map { it.value!! }.distinct().map { value ->", "val values = group.map { it.value!! }.distinct().take(1).map { value ->")],
+        "wrong-ignores-dates": [('group.any { a -> group.any { b -> a.value != b.value && a.date == b.date } } -> Entry(claim, "conflict", values)', 'true -> Entry(claim, "conflict", values)')],
+        "wrong-sources-collapsed": [(".map { Src(it.source!!, it.date!!) }.distinct()", ".map { Src(it.source!!, it.date!!) }.take(1)")],
+        "wrong-date-optional": [("REQUIRED.filter { field(finding, it).isBlank() }", 'REQUIRED.filter { it != "date" && field(finding, it).isBlank() }')],
+        "wrong-accepts-incomplete": [('    findings.forEachIndexed { i, f ->\n        val missing = checkFinding(f)\n        require(missing.isEmpty()) { "finding $i is missing ${missing.joinToString(", ")}" }\n    }\n', "")],
+        "wrong-gaps-hidden": [('planned.filter { it !in have }.map { Gap(it, unavailable[it] ?: "no source found") },', "emptyList(),")],
+        "wrong-single-source-supported": [(".distinct().size >= 2 }", ".distinct().size >= 1 }"), (".distinct().size < 2 }", ".distinct().size < 1 }")],
+        "wrong-unknown-kind-accepted": [('    require(kind in KINDS) { "unknown content type $kind" }\n', "")],
+        "wrong-no-table": [('        "financial" -> (listOf', '        "financial-x" -> (listOf')],
+        "wrong-conflict-unmarked": [('"conflict" -> " The sources disagree."', '"conflict" -> ""')],
+    }),
+}
+
+
 # ===== Survey practice: the tiny agent loop (no module; not part of any batch gate) =====
 PLANTS[f"{X}/agent-loop"] = {
     "python": ("agent.py", {

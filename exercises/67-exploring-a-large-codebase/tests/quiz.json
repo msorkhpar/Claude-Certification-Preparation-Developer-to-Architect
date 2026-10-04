@@ -1,0 +1,138 @@
+{
+  "module": "67-exploring-a-large-codebase",
+  "quizzes": [
+    {
+      "id": "01-why-explorations-degrade-and-where-findings-live#q1",
+      "page": "01-why-explorations-degrade-and-where-findings-live.md",
+      "scope": "page",
+      "stem": "Scenario S4, developer productivity with Claude. After two hours on a payments codebase, the agent answers a question about retries by describing how such systems typically retry, though it read the actual retry classes an hour earlier. Which practice would have prevented this?",
+      "options": {
+        "a": "Writing specific findings to a notes file and consulting it for later queries",
+        "b": "Switching to a model with a bigger context window for the whole of the session",
+        "c": "Raising the output limit so that each answer can quote more of the code",
+        "d": "Telling the agent in its prompt to avoid generic answers from here onward"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The specifics are kept in a file that outlives the window and are read again when a later question needs them.",
+        "d": "Ruled out because \"A reminder in the prompt does not bring back a class that has left the window\".",
+        "b": "Ruled out because \"a bigger window only moves the problem later\".",
+        "c": "Ruled out because the symptom is that \"answers become inconsistent from one turn to the next, and specific names give way to plausible generalities\", which more output does not repair."
+      }
+    },
+    {
+      "id": "01-why-explorations-degrade-and-where-findings-live#q2",
+      "page": "01-why-explorations-degrade-and-where-findings-live.md",
+      "scope": "page",
+      "stem": "Scenario S4, developer productivity with Claude. A coordinator must list every test file that covers refunds in a very large repository, then trace the refund flow. It does both in its own conversation, and the context fills with listings and file contents. Which structure fits?",
+      "options": {
+        "a": "Hand the whole job to one helper with the brief to explore everything and report it all",
+        "b": "Keep the reading in the coordinator and add a notes file for what it finds",
+        "c": "Give each question to a read-only exploring helper and keep just the summaries",
+        "d": "Use a helper with every tool, so that it can save the lists to files"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Each narrow question goes to a read-only subagent, and the coordinator receives only a summary.",
+        "a": "Ruled out because \"a broad brief returns a broad report\".",
+        "b": "Ruled out because \"Each file read, each search result, each command output stays in the window\", so the coordinator's own reading keeps filling it.",
+        "d": "Ruled out because \"Read-only matters: an exploration that can edit can also damage\"."
+      }
+    },
+    {
+      "id": "02-compaction-crash-recovery-and-the-practice#q1",
+      "page": "02-compaction-crash-recovery-and-the-practice.md",
+      "scope": "page",
+      "stem": "Scenario S4, developer productivity with Claude. During a long exploration the team wants automatic summarising near the limit to keep the roster of sources already opened and the commands that run the tests. What should they do?",
+      "options": {
+        "a": "Turn automatic summarising off so that nothing is condensed at all",
+        "b": "Add a sentence on what to preserve to the project's instructions file",
+        "c": "Raise the output limit so that the summary can run longer than usual",
+        "d": "Clear the conversation at each phase so that nothing needs preserving"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A standing instruction in the project's file steers the automatic summary toward what the exploration needs.",
+        "a": "Ruled out because \"Turning compaction off is not a remedy: the window then fills, and performance degrades\".",
+        "c": "Ruled out because \"Left to itself the summary keeps what looks important\", and a longer summary still chooses by that.",
+        "d": "Ruled out because clearing \"starts over and is right between unrelated tasks\", and a phase of the same exploration is not one."
+      }
+    },
+    {
+      "id": "02-compaction-crash-recovery-and-the-practice#q2",
+      "page": "02-compaction-crash-recovery-and-the-practice.md",
+      "scope": "page",
+      "stem": "Scenario S4, developer productivity with Claude. A coordinator restarts after a crash. Its manifest lists 6 agents as running, and notes written by only 4 of them can be found on disk. What should it do?",
+      "options": {
+        "a": "Restart the whole set, since a manifest written before a crash cannot be trusted",
+        "b": "Resume each of the 6 on the manifest's word, giving empty notes to the 2 without any",
+        "c": "Replay the 6 transcripts into the new coordinator before it continues",
+        "d": "Carry on from the saved material where it exists and begin afresh where it does not"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The agents with files continue from them and the others start over, since the file outranks the status.",
+        "a": "Ruled out because for an agent whose file survived, \"the file is there, so the work is kept\".",
+        "b": "Ruled out because for a missing file there is \"nothing to continue from, whatever the manifest says\".",
+        "c": "Ruled out because \"the transcripts are what filled the window\"."
+      }
+    },
+    {
+      "id": "02-compaction-crash-recovery-and-the-practice#m1",
+      "page": "02-compaction-crash-recovery-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. After a crash, one agent is started again from material it wrote out earlier. What should its new prompt hold?",
+      "options": {
+        "a": "Its assignment alone, because the saved material is implied by it",
+        "b": "Its assignment and the complete old transcript, so that nothing is lost",
+        "c": "Its assignment, the exported notes and an instruction to continue",
+        "d": "The saved notes alone, because the assignment is contained in them"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The page says the prompt \"carries its task, the state lines it exported, and one instruction: continue from the first unfinished step\".",
+        "b": "Ruled out because \"It does not get the old transcript, which is what filled the first window\".",
+        "a": "Ruled out because the prompt \"carries its task, the state lines it exported\", so the notes are not implied.",
+        "d": "Ruled out because the prompt \"carries its task, the state lines it exported\", and the task comes first."
+      }
+    },
+    {
+      "id": "02-compaction-crash-recovery-and-the-practice#m2",
+      "page": "02-compaction-crash-recovery-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. A team needs a code-searching helper whose work can be picked up later in the same session. Which fits?",
+      "options": {
+        "a": "The built-in Explore subagent, continued with its own history",
+        "b": "A custom subagent, continued with its own history",
+        "c": "A fresh Explore each time, handed a copy of the earlier transcript",
+        "d": "A second coordinator that reads the first coordinator's conversation"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A custom subagent can be resumed with its history, and the built-in one cannot.",
+        "a": "Ruled out because \"The built-in Explore agent is one-shot\".",
+        "c": "Ruled out because \"the transcripts are what filled the window\".",
+        "d": "Ruled out because \"a crash that ended the session leaves only the files\", and an ordinary session leaves a resumable subagent."
+      }
+    },
+    {
+      "id": "02-compaction-crash-recovery-and-the-practice#m3",
+      "page": "02-compaction-crash-recovery-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S4, developer productivity with Claude. A session finishes one exploration, and an unrelated piece of work then begins in the same window. Which step fits?",
+      "options": {
+        "a": "Turn compaction off for the new job so that no detail is lost",
+        "b": "Compact it with instructions to keep everything the first job found",
+        "c": "Enlarge the context limit so that both jobs fit side by side",
+        "d": "Clear the conversation, since nothing from the first job is needed"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"`/clear` starts over and is right between unrelated tasks\".",
+        "b": "Ruled out because \"Compaction continues the same work with a shorter memory of it\".",
+        "c": "Ruled out because \"a bigger window only moves the problem later\".",
+        "a": "Ruled out because \"Turning compaction off is not a remedy: the window then fills, and performance degrades\"."
+      }
+    }
+  ]
+}

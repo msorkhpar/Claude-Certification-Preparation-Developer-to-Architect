@@ -1,0 +1,125 @@
+{
+  "practice": "65-escalation-and-ambiguity/unit-01/practice-1",
+  "name": "escalation",
+  "tests": {
+    "java": "EscalationTest",
+    "kotlin": "EscalationTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_customer_who_asks_for_a_person_is_escalated_at_once_even_when_the_agent_could_resolve_it",
+      "typescript": "m1 a customer who asks for a person is escalated at once even when the agent could resolve it",
+      "java": "m1_aCustomerWhoAsksForAPersonIsEscalatedAtOnceEvenWhenTheAgentCouldResolveIt",
+      "kotlin": "m1_aCustomerWhoAsksForAPersonIsEscalatedAtOnceEvenWhenTheAgentCouldResolveIt"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_frustration_alone_does_not_escalate_and_the_reply_acknowledges_it",
+      "typescript": "e1 frustration alone does not escalate and the reply acknowledges it",
+      "java": "e1_frustrationAloneDoesNotEscalateAndTheReplyAcknowledgesIt",
+      "kotlin": "e1_frustrationAloneDoesNotEscalateAndTheReplyAcknowledgesIt"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_request_the_policy_does_not_cover_is_escalated_and_a_covered_one_is_resolved",
+      "typescript": "e2 a request the policy does not cover is escalated and a covered one is resolved",
+      "java": "e2_aRequestThePolicyDoesNotCoverIsEscalatedAndACoveredOneIsResolved",
+      "kotlin": "e2_aRequestThePolicyDoesNotCoverIsEscalatedAndACoveredOneIsResolved"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_several_matching_records_need_a_clarifying_question_and_never_a_guess",
+      "typescript": "e3 several matching records need a clarifying question and never a guess",
+      "java": "e3_severalMatchingRecordsNeedAClarifyingQuestionAndNeverAGuess",
+      "kotlin": "e3_severalMatchingRecordsNeedAClarifyingQuestionAndNeverAGuess"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_an_explicit_request_for_a_person_outranks_an_ambiguous_match",
+      "typescript": "e4 an explicit request for a person outranks an ambiguous match",
+      "java": "e4_anExplicitRequestForAPersonOutranksAnAmbiguousMatch",
+      "kotlin": "e4_anExplicitRequestForAPersonOutranksAnAmbiguousMatch"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_no_progress_after_the_attempt_limit_escalates_and_below_it_does_not",
+      "typescript": "e5 no progress after the attempt limit escalates and below it does not",
+      "java": "e5_noProgressAfterTheAttemptLimitEscalatesAndBelowItDoesNot",
+      "kotlin": "e5_noProgressAfterTheAttemptLimitEscalatesAndBelowItDoesNot"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_sentiment_and_confidence_scores_never_change_the_decision",
+      "typescript": "e6 sentiment and confidence scores never change the decision",
+      "java": "e6_sentimentAndConfidenceScoresNeverChangeTheDecision",
+      "kotlin": "e6_sentimentAndConfidenceScoresNeverChangeTheDecision"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_clarifying_question_names_only_the_fields_that_tell_the_matches_apart",
+      "typescript": "e7 the clarifying question names only the fields that tell the matches apart",
+      "java": "e7_theClarifyingQuestionNamesOnlyTheFieldsThatTellTheMatchesApart",
+      "kotlin": "e7_theClarifyingQuestionNamesOnlyTheFieldsThatTellTheMatchesApart"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_the_hand_off_carries_the_structured_facts_and_no_transcript_and_refuses_a_case_without_an_id",
+      "typescript": "e8 the hand off carries the structured facts and no transcript and refuses a case without an id",
+      "java": "e8_theHandOffCarriesTheStructuredFactsAndNoTranscriptAndRefusesACaseWithoutAnId",
+      "kotlin": "e8_theHandOffCarriesTheStructuredFactsAndNoTranscriptAndRefusesACaseWithoutAnId"
+    }
+  },
+  "plants": {
+    "wrong-investigate-first": {
+      "caught_by": [
+        "m1",
+        "e4"
+      ],
+      "defect": "escalates on an explicit request only when the policy also has a gap"
+    },
+    "wrong-angry-escalates": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "escalates an angry customer because of the sentiment"
+    },
+    "wrong-low-confidence-escalates": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "escalates when the model reports low confidence"
+    },
+    "wrong-picks-first-match": {
+      "caught_by": [
+        "e3",
+        "e6"
+      ],
+      "defect": "never asks which of several matching customers is meant"
+    },
+    "wrong-policy-gap-resolved": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "resolves a request the policy does not cover"
+    },
+    "wrong-no-acknowledgement": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "does not acknowledge a frustrated customer"
+    },
+    "wrong-clarify-all-fields": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "asks about fields on which the matches agree"
+    },
+    "wrong-handoff-transcript": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "attaches the whole transcript to the hand-off"
+    }
+  }
+}
