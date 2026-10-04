@@ -17,7 +17,7 @@ multiple-response items; this mock has single-answer items only.
 1. **Choose your conditions.** For a readiness test, take all 53 questions in **120 minutes** with no notes, which is the Developer exam's pace of
    about 2.3 minutes an item. For learning, take it untimed and read each explanation.
 2. **Answer every question.** The guides describe no penalty for a wrong answer.
-3. **Mark each answer** and open the folded key at the end only when you finish.
+3. **Mark each answer** and read the explanations only after you finish.
 4. **Score by domain,** not only in total, using the table below, and spend your next study session on the weakest domain with the most weight.
 
 There is no official conversion from a mock percentage to a result. The real exam reports the percent correct for each domain, but **pass or fail
@@ -41,7 +41,7 @@ beside the official weight so that you can see the split matches.
 | 51 to 52 | DV7 Claude Code | 3.1% | 2 | 3.8% | 38, 39 |
 | 53 | DV8 Evaluation, testing and debugging | 2.6% | 1 | 1.9% | 42 |
 
-For a miss, open the page that the folded key names for that question, as (module, page), and reread the passage it quotes. A cluster of misses in one
+For a miss, open the page that the question's explanation names, as (module, page), and reread the passage it quotes. A cluster of misses in one
 domain points at that domain's modules in the last column. The questions on the API, cloud platforms and streaming (DV1) and on model choice, thinking
 and caching (DV2) carry most of the weight, so they repay the first revision session.
 

@@ -37,7 +37,7 @@ function readJson(rel: string): any {
 
 function layers(withLocal = true): Record<string, any> {
   const out: Record<string, any> = { managed: MANAGED, user: USER, project: readJson(".claude/settings.json") };
-  if (withLocal && existsSync(join(ROOT, ".claude/settings.local.json"))) out.local = readJson(".claude/settings.local.json");
+  if (withLocal && existsSync(join(ROOT, ".claude/settings.local.json"))) out["local"] = readJson(".claude/settings.local.json");
   return out;
 }
 

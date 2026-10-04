@@ -17,7 +17,7 @@ the pages can answer each question from them.
 1. **Choose your conditions.** For a readiness test, take all 30 questions in **60 minutes** with no notes, which is the
    Associate exam's pace of two minutes a question. For learning, take it untimed and read each explanation.
 2. **Answer every question.** The guides describe no penalty for a wrong answer.
-3. **Mark each answer** and open the folded key at the end only when you finish.
+3. **Mark each answer** and read the explanations only after you finish.
 4. **Score by domain,** not only in total, using the table below, and spend your next study session on the weakest domain
    with the most weight.
 
