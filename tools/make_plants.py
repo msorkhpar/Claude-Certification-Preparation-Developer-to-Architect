@@ -1969,6 +1969,43 @@ PLANTS[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
 }
 
 
+# ===== Level 3: module 64 =====
+PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] = {
+    "python": ("context_builder.py", {
+        "wrong-no-trim": [("    return {k: record[k] for k in keep if k in record}", "    return dict(record)")],
+        "wrong-older-overwrites": [('    elif as_of >= current["as_of"]:', "    elif True:")],
+        "wrong-all-customers": [('    mine = [f for f in facts if f["customer"] == customer]', "    mine = list(facts)")],
+        "wrong-facts-last": [(r'    return "\n\n".join(parts)', r'    return "\n\n".join(reversed(parts))')],
+        "wrong-pair-split": [('        if m["kind"] == "tool_use" and', '        if False and m["kind"] == "tool_use" and')],
+        "wrong-loose-summary-check": [('f["value"] not in summary', 'f["value"][:2] not in summary')],
+    }),
+    "typescript": ("contextBuilder.ts", {
+        "wrong-no-trim": [("  for (const k of keep) if (k in record) out[k] = record[k];", "  Object.assign(out, record);")],
+        "wrong-older-overwrites": [("} else if (asOf >= current.as_of) {", "} else if (true) {")],
+        "wrong-all-customers": [("const mine = facts.filter((f) => f.customer === customer);", "const mine = facts;")],
+        "wrong-facts-last": [('return parts.join("\\n\\n");', 'return parts.reverse().join("\\n\\n");')],
+        "wrong-pair-split": [('if (m.kind === "tool_use" &&', 'if (false && m.kind === "tool_use" &&')],
+        "wrong-loose-summary-check": [("!summary.includes(f.value)", "!summary.includes(f.value.slice(0, 2))")],
+    }),
+    "java": ("ContextBuilder.java", {
+        "wrong-no-trim": [("for (String k : keep) if (record.containsKey(k)) out.put(k, record.get(k));", "out.putAll(record);")],
+        "wrong-older-overwrites": [("} else if (asOf.compareTo(current.asOf()) >= 0) {", "} else if (true) {")],
+        "wrong-all-customers": [("if (f.customer().equals(customer)) mine.add(", "mine.add(")],
+        "wrong-facts-last": [('return String.join("\\n\\n", parts);', 'java.util.Collections.reverse(parts);\n        return String.join("\\n\\n", parts);')],
+        "wrong-pair-split": [('if (m.kind().equals("tool_use") &&', 'if (false && m.kind().equals("tool_use") &&')],
+        "wrong-loose-summary-check": [("!summary.contains(f.value())", "!summary.contains(f.value().substring(0, 2))")],
+    }),
+    "kotlin": ("ContextBuilder.kt", {
+        "wrong-no-trim": [("for (k in keep) if (k in record) out[k] = record.getValue(k)", "out.putAll(record)")],
+        "wrong-older-overwrites": [("} else if (asOf >= current.asOf) {", "} else if (true) {")],
+        "wrong-all-customers": [("val mine = facts.filter { it.customer == customer }", "val mine = facts")],
+        "wrong-facts-last": [('return parts.joinToString("\\n\\n")', 'return parts.asReversed().joinToString("\\n\\n")')],
+        "wrong-pair-split": [('if (m.kind == "tool_use" &&', 'if (false && m.kind == "tool_use" &&')],
+        "wrong-loose-summary-check": [("it.value !in summary", "it.value.take(2) !in summary")],
+    }),
+}
+
+
 # ===== Survey practice: the tiny agent loop (no module; not part of any batch gate) =====
 PLANTS[f"{X}/agent-loop"] = {
     "python": ("agent.py", {
