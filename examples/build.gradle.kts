@@ -51,6 +51,8 @@ subprojects {
     }
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        timeout.set(java.time.Duration.ofMinutes(5))                          // a hung test must not hold the run
+        systemProperty("junit.jupiter.execution.timeout.default", "2m")
         testLogging { events("failed"); showExceptions = true; exceptionFormat = TestExceptionFormat.SHORT }
         val summary = file("$exOut/ex-$projName-test.txt")
         addTestListener(object : TestListener {
@@ -82,6 +84,7 @@ subprojects {
         val mainSources = the<SourceSetContainer>()["main"]
         tasks.register<JavaExec>("runExample") {
             group = "verification"
+            timeout.set(java.time.Duration.ofMinutes(3))
             dependsOn("classes")
             classpath = mainSources.runtimeClasspath
             this.mainClass.set(mainClassName)
