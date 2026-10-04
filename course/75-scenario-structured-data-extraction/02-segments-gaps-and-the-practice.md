@@ -90,11 +90,11 @@ This quiz covers both pages of the module.
    - **c**: Documents sent to a person are counted elsewhere, in the figure for wasted retries
    - **d**: The count would otherwise be larger than the number of documents that the run held
 
-3. Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. The example's by-kind line reads typed 2/2, scanned 1/2 and handwritten 0/2. Why is only the typed kind listed for automation?
+3. Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. The example's by-kind line reads typed 2/2, scanned 1/2 and handwritten 0/2, under a policy of at least two documents and a target of 100 percent. Why is only the typed kind listed for automation?
    - **a**: It is the only kind that has a total printed in every one of its documents
-   - **b**: It has enough documents and no misses, unlike the others
+   - **b**: It meets the minimum and the goal, while the others fall short on accuracy
    - **c**: It was the first kind to appear in the run, and the list stops after the first
-   - **d**: It is the only kind that needed no retry at any point in the whole run
+   - **d**: It is the kind with the most documents behind it in the whole run
 
 4. Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. A run shows a few invented vendor names and a long list of wasted retries. The team wants to begin with the retries, because they are far more frequent. What does the order of fixes say?
    - **a**: Begin with the retries, since frequency is the best guide to what a defect costs overall
@@ -107,7 +107,7 @@ This quiz covers both pages of the module.
 
 1. **d**. Both conditions are checked per kind. *a* is ruled out because the average is not the test: "The overall figure plays no part in this decision". *b* is ruled out because a kind is judged on its own documents: "A kind of document may go without a person only when two things hold". *c* is ruled out because a small sample is no evidence: "The minimum matters because ten correct documents are a small sample, and the target is a floor and not a ceiling."
 2. **a**. Only an accepted record can carry an unchecked total. *b* is ruled out because the reason is who looked and not whether a total exists: "A document that went to a person was looked at, and a document that failed was never delivered". *c* is ruled out because the wasted-retry count is a different shape: "A wasted retry costs money and time and corrupts nothing, so it comes second." *d* is ruled out because the counts are per shape and not capped by the run: "The audit counts an unchecked total only among documents accepted as valid."
-3. **b**. The kind needs documents and accuracy. *a* is ruled out because totals are not the test: "A kind of document may go without a person only when two things hold". *c* is ruled out because the order of kinds plays no part and the list is built per kind: "Only typed documents have earned automation." *d* is ruled out because retries are not part of the test: "The overall figure plays no part in this decision".
+3. **b**. The kind needs documents and accuracy. *a* is ruled out because totals are not the test: "A kind of document may go without a person only when two things hold". *c* is ruled out because the order of kinds plays no part and the list is built per kind: "Only typed documents have earned automation." *d* is ruled out because every kind has the same count and the test is documents and accuracy: "The overall figure plays no part in this decision".
 4. **b**. Damage downstream sets the order. *a* is ruled out because frequency does not set it: "The order follows the damage a shape does downstream." *c* is ruled out because the audit names one fix first: "A run often shows several failure shapes at once, and the audit names one fix first." *d* is ruled out because the measurement fault comes fourth: "An overstated figure is a measurement fault, fourth."
 
 </details>

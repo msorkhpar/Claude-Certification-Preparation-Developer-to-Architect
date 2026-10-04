@@ -93,11 +93,11 @@ This quiz covers both pages of the module.
    - **c**: Raise the assistant's confidence threshold before it answers anything
    - **d**: Ask the model to rate every customer message for distress and hand over above a score
 
-2. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A returning customer says their delivery address has changed, while the memory shows an address saved 200 days ago. What should the assistant do?
-   - **a**: Overwrite the old entry silently and carry on with the order
-   - **b**: Use the stored entry and mention the change at the end of the conversation
-   - **c**: Keep both entries and let the carrier decide which one to use
-   - **d**: Confirm the details with the person and store the correction with today's date
+2. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A returning shopper is greeted with an address saved 200 days ago, and the policy limit is thirty days. What should the assistant do first?
+   - **a**: Use it as it stands, since a saved address is the best evidence there is
+   - **b**: Use it and ask the person about it at the end of the call
+   - **c**: Delete every stored fact older than the limit without telling anyone
+   - **d**: Have the person confirm it before relying on it
 
 3. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A segment of three conversations has none resolved by the assistant, the floor is 80 percent and the minimum is three. What does the review say about it?
    - **a**: It is weak, since the count is enough to judge and the result is short of the bar
@@ -115,7 +115,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The route is code. *a* is ruled out because a prompt is a request: "Put every rule in the system prompt, in capitals." *c* is ruled out because a confidence threshold is the model's own judgement: "It fails because it makes a probabilistic judgement the only barrier on the one decision that must not be missed". *d* is ruled out for the same reason: "What the design must not do is make the model the only layer."
-2. **d**. The fact is confirmed and saved with its date. *a* is ruled out because a fact is checked with its owner: "a fact has an age and an owner: an old fact is verified before it is used, and the store is read for one customer". *b* is ruled out because an old fact is verified before use: "so that the assistant asks the customer before it relies on an address from last year". *c* is ruled out because the store holds one current answer per fact: "A recalled fact is a claim with a date".
+2. **d**. An old fact is checked with the person before it is relied on: "an old fact is verified before it is used". *a* is ruled out because an old fact is not trusted: "a fact that has not been touched for months is more likely to be wrong than one from last week". *b* is ruled out because an old fact is verified before use: "so that the assistant asks the customer before it relies on an address from last year". *c* is ruled out because an old fact is verified and not discarded: "A recalled fact is a claim with a date".
 3. **a**. A segment at the minimum and below the floor is weak. *b* is ruled out because the minimum is met: "two unresolved conversations prove nothing and three begin to". *c* is ruled out because the minimum is a floor and not a margin: "only when it has at least a minimum number of conversations". *d* is ruled out because a settlement by a person is not the assistant's: "A conversation that a person settled is a good outcome and is not the assistant's."
 4. **c**. A hand-over takes the conversation out of the measure. *a* is ruled out because the length alone is not the test: "A conversation with more turns than the limit and no hand-off." *b* is ruled out because the stall is a hand-off: "A conversation that was handed over is not overlong, because somebody took over." *d* is ruled out because the hand-off is counted elsewhere: "A hand-off nobody needed and that had no safety signal behind it is over-escalation".
 

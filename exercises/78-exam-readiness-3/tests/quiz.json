@@ -1430,11 +1430,11 @@
       "id": "04-architect-mock-exam-2#x16",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S4. On Wednesday an engineer wants to carry on Monday's exploration of the payments module as a single line of work. Which control fits?",
+      "stem": "Scenario S4. On Wednesday an engineer wants to carry on Monday's exploration of the payments module as a single line of work, although two other sessions have run in that directory since. Which control fits?",
       "options": {
         "a": "Resume that session by its id, which adds to the original and keeps one thread",
         "b": "Fork the session, since a fork keeps the whole history and carries on the work",
-        "c": "Continue the most recent session, which is the one from Monday",
+        "c": "Continue the most recent session, which takes the newest one whatever it is",
         "d": "Start fresh with a prompt that asks the model to recall Monday from memory"
       },
       "key": "a",
@@ -1791,19 +1791,19 @@
       "id": "04-architect-mock-exam-2#x35",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S6. An extraction tool's write to a store times out after the request left, and the store honours idempotency keys. Which retry is safe?",
+      "stem": "Scenario S6. An extraction tool looks up a vendor record by its number, and the call times out. Which handling does the page give?",
       "options": {
-        "a": "Resend with a new token each time, so that every attempt is tracked",
-        "b": "Never resend, because any timeout means that the write failed",
-        "c": "Resend with the identical token on every attempt, so the action is performed once",
-        "d": "Resend without a token, since the store deduplicates by content"
+        "a": "Send it again only after the vendor service confirms the first call did not run",
+        "b": "Treat the timeout as proof that the record does not exist",
+        "c": "Send it again, since repeating a read changes nothing",
+        "d": "Send it once more with a new record number, so that attempts are told apart"
       },
       "key": "c",
       "explanation": {
-        "c": "The page lists the safe cases (module 53, page 2): \"A call that carries an idempotency key that the service honours.\"",
-        "a": "Ruled out because the same key is the point: \"The tool sends the same key on every attempt, and the service performs the action once\"",
-        "b": "Ruled out because a timeout is news-free: \"A timeout after sending is not a failure of the effect; it is the absence of news.\"",
-        "d": "Ruled out because without a key the call is unsafe: \"Everything else is unsafe\""
+        "c": "The page gives the rule (module 53, page 2): \"Repeating a read changes nothing, so a timed out lookup can simply be sent again.\"",
+        "a": "Ruled out because a read needs no confirmation: \"Repeating a read changes nothing\"",
+        "b": "Ruled out because a timeout carries no news: \"A timeout after sending is not a failure of the effect; it is the absence of news.\"",
+        "d": "Ruled out because the number is the lookup key: \"so a timed out lookup can simply be sent again\""
       }
     },
     {
@@ -2239,7 +2239,7 @@
       "explanation": {
         "c": "The page quotes the documentation (module 76, page 1): \"Setting a role in the system prompt focuses Claude's behavior and tone for your use case. Even a single sentence makes a difference.\"",
         "a": "Ruled out because a persona needs little: \"A persona needs a name, a manner and its limits, not a page of rules\"",
-        "b": "Ruled out because rules that must hold belong elsewhere: \"the rules that must hold belong in the s\"",
+        "b": "Ruled out because rules that must hold belong elsewhere: \"the rules that must hold belong in the second row\"",
         "d": "Ruled out because a role focuses behaviour for the use case: \"focuses Claude's behavior and tone for your use case\""
       }
     },
