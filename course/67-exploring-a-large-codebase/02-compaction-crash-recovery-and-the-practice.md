@@ -89,30 +89,30 @@ The practice is in [`exercises/67-exploring-a-large-codebase`](../../exercises/6
 
 This quiz covers both pages of the module.
 
-1. Scenario S4, developer productivity with Claude. A coordinator has finished mapping a service's modules and now launches subagents to trace three flows. How should the flow subagents learn what the mapping found?
-   - **a**: Each of them repeats the mapping first, to be certain of the ground
-   - **b**: Each of them receives the full mapping transcripts in its prompt
-   - **c**: Their prompts carry a short summary of the findings from the notes
-   - **d**: They inherit the coordinator's conversation without any further step
+1. Scenario S4, developer productivity with Claude. After a crash, one agent is started again from material it wrote out earlier. What should its new prompt hold?
+   - **a**: Its assignment alone, because the saved material is implied by it
+   - **b**: Its assignment and the complete old transcript, so that nothing is lost
+   - **c**: Its assignment, the exported notes and an instruction to continue
+   - **d**: The saved notes alone, because the assignment is contained in them
 
-2. Scenario S4, developer productivity with Claude. A team needs a code-searching helper whose work can be continued later in the same session. Which fits?
+2. Scenario S4, developer productivity with Claude. A team needs a code-searching helper whose work can be picked up later in the same session. Which fits?
    - **a**: The built-in Explore subagent, continued with its own history
-   - **b**: A custom subagent, since the built-in Explore is a one-shot tool
+   - **b**: A custom subagent, continued with its own history
    - **c**: A fresh Explore each time, handed a copy of the earlier transcript
    - **d**: A second coordinator that reads the first coordinator's conversation
 
-3. Scenario S4, developer productivity with Claude. One agent is marked done in the manifest, yet no state file exists for it. How should it be handled?
-   - **a**: Reuse it, since the manifest is the record of what finished
-   - **b**: Resume it from whatever the manifest's last line says about it
-   - **c**: Drop it from the plan and report its area as covered anyway
-   - **d**: Run it again, as missing evidence outranks a written status
+3. Scenario S4, developer productivity with Claude. A session finishes one exploration, and an unrelated piece of work then begins in the same window. Which step fits?
+   - **a**: Turn compaction off for the new job so that no detail is lost
+   - **b**: Compact it with instructions to keep everything the first job found
+   - **c**: Enlarge the context limit so that both jobs fit side by side
+   - **d**: Clear the conversation, since nothing from the first job is needed
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The summary of the first phase goes into the next prompts, so nothing is rediscovered and no transcript is carried. *a* is ruled out because "they do not rediscover it". *b* is ruled out because "they do not receive the first phase's transcripts". *d* is ruled out because a subagent receives its own prompt and project instructions, and not "the parent's conversation history or tool results".
+1. **c**. The page says the prompt "carries its task, the state lines it exported, and one instruction: continue from the first unfinished step". *b* is ruled out because "It does not get the old transcript, which is what filled the first window". *a* is ruled out because the prompt "carries its task, the state lines it exported", so the notes are not implied. *d* is ruled out because the prompt "carries its task, the state lines it exported", and the task comes first.
 2. **b**. A custom subagent can be resumed with its history, and the built-in one cannot. *a* is ruled out because "The built-in Explore agent is one-shot". *c* is ruled out because "the transcripts are what filled the window". *d* is ruled out because "a crash that ended the session leaves only the files", and an ordinary session leaves a resumable subagent.
-3. **d**. A status is a claim and a file is evidence, so the missing file decides. *a* is ruled out because "A status is a claim written at one moment; a state file is evidence". *b* is ruled out because for a missing file there is "nothing to continue from, whatever the manifest says". *c* is ruled out because trusting the status "loses that agent's work without anyone noticing".
+3. **d**. The page says "`/clear` starts over and is right between unrelated tasks". *b* is ruled out because "Compaction continues the same work with a shorter memory of it". *c* is ruled out because "a bigger window only moves the problem later". *a* is ruled out because "Turning compaction off is not a remedy: the window then fills, and performance degrades".
 
 </details>
 

@@ -418,22 +418,22 @@ independent=yes: carries the reasoning: no
 ## Quiz
 
 1. Scenario S5, Claude Code in CI. A pipeline runs two Claude jobs: a verdict that a pull request needs before it may merge, and a Sunday scan of every service for outdated patterns. A manager wants both moved to the discounted bulk queue. What should the architect do?
-   - **a**: Move both, since half the price outweighs a wait of unknown length
-   - **b**: Keep the first on the immediate API and send the second through a batch
+   - **a**: Keep the first on the immediate API and send the second through a batch
+   - **b**: Move both, since half the price outweighs a wait of unknown length
    - **c**: Put the first through a batch and keep the second on the immediate API
    - **d**: Move both, but submit a batch every hour so that the wait stays short
 
 2. Scenario S6, structured data extraction. A contract-intake service promises that every uploaded document is extracted within 30 hours. Extraction runs as batches that finish within 24 hours, and the results take 2 hours to validate and deliver. What is the longest gap, in hours, between batch submissions that still keeps the promise?
    - **a**: 28
    - **b**: 24
-   - **c**: 6
-   - **d**: 4
+   - **c**: 4
+   - **d**: 6
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A merge verdict is a blocking check that cannot wait for a window without a latency guarantee, while the weekly scan can wait. *a* is ruled out because "It is not a reason to move work that cannot" wait, whatever the discount. *c* is ruled out because "a blocking check cannot wait for a window that has no latency guarantee", and this option sends exactly that check there. *d* is ruled out because "the window is a ceiling and not a promise of an hour", so more frequent submissions do not give the verdict a deadline.
-2. **d**. The worst case is the interval plus the window plus the handling, so 30 minus 24 minus 2 leaves 4. *a* is ruled out because "worst-case wait = submission interval + processing window + handling time" includes the 24-hour window, which 28 ignores. *b* is ruled out because "a nightly batch gives a worst wait of 24 + 24 + handling, which is 50 hours". *c* is ruled out because the arithmetic starts from "2 hours to read and deliver the results", which 6 leaves out.
+1. **a**. A merge verdict is a blocking check that cannot wait for a window without a latency guarantee, while the weekly scan can wait. *b* is ruled out because "It is not a reason to move work that cannot" wait, whatever the discount. *c* is ruled out because "a blocking check cannot wait for a window that has no latency guarantee", and this option sends exactly that check there. *d* is ruled out because "the window is a ceiling and not a promise of an hour", so more frequent submissions do not give the verdict a deadline.
+2. **c**. The worst case is the interval plus the window plus the handling, so 30 minus 24 minus 2 leaves 4. *a* is ruled out because "worst-case wait = submission interval + processing window + handling time" includes the 24-hour window, which 28 ignores. *b* is ruled out because "a nightly batch gives a worst wait of 24 + 24 + handling, which is 50 hours". *d* is ruled out because the arithmetic starts from "2 hours to read and deliver the results", which 6 leaves out.
 
 </details>
 

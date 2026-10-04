@@ -393,22 +393,22 @@ Customer: "This is the third time my parcel is late!" -> resolve (a late parcel 
 ## Quiz
 
 1. Scenario S1, customer support resolution agent. A customer writes that they want to speak to a person about a change of delivery address. The agent has a tool that can make the change in one step. What should the agent do?
-   - **a**: Make the change first, since it takes one step, then offer a transfer
-   - **b**: Hand over to a human straight away, before touching the account
+   - **a**: Hand over to a human straight away, before touching the account
+   - **b**: Make the change first, since it takes one step, then offer a transfer
    - **c**: Ask why a human is wanted and transfer only if the reason is unclear
    - **d**: Offer to complete the update and transfer only if the customer repeats the wish
 
 2. Scenario S1, customer support resolution agent. A customer asks the agent to match a competitor's lower price. The policy describes adjustments to the company's own prices and says nothing about competitors. The agent can issue a price adjustment. What should it do?
    - **a**: Apply the nearest own-price rule, as that is the fairest reading
-   - **b**: Route it to a colleague authorised to rule on the exception
-   - **c**: Decline politely, since the policy does not allow the match
+   - **b**: Decline politely, since the policy does not allow the match
+   - **c**: Route it to a colleague authorised to rule on the exception
    - **d**: Issue the adjustment and flag it for review afterwards
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. An explicit request for a person is honoured at once, with no investigation first. *a* is ruled out because "an investigation before the transfer is the agent deciding it knows better". *c* is ruled out because the agent "does not first try to solve the problem, ask why", and a question is a delay. *d* is ruled out because "An explicit request is honoured at once"; offering a fix first is the answer for frustration, not for a request.
-2. **b**. A silent policy is a gap, and a gap goes to a person who can decide. *a* is ruled out because "an agent that applies the nearest rule is inventing policy". *c* is ruled out because "A policy exception or a gap is a trigger", and declining is also a decision the policy did not make. *d* is ruled out because "the agent escalates and does not invent policy", and acting first leaves the invention in place.
+1. **a**. An explicit request for a person is honoured at once, with no investigation first. *b* is ruled out because "an investigation before the transfer is the agent deciding it knows better". *c* is ruled out because the agent "does not first try to solve the problem, ask why", and a question is a delay. *d* is ruled out because "An explicit request is honoured at once"; offering a fix first is the answer for frustration, not for a request.
+2. **c**. A silent policy is a gap, and a gap goes to a person who can decide. *a* is ruled out because "an agent that applies the nearest rule is inventing policy". *b* is ruled out because "A policy exception or a gap is a trigger", and declining is also a decision the policy did not make. *d* is ruled out because "the agent escalates and does not invent policy", and acting first leaves the invention in place.
 
 </details>
 

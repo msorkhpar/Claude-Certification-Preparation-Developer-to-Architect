@@ -31,7 +31,7 @@ The practice's `coverage_note` is that table. Two details matter. "At least two 
 
 ### Structure the report by certainty
 
-The guide asks for a report with explicit sections for well-established and for contested findings. A reader then meets the settled facts first and the open questions in a place of their own, each with what is needed to judge it. Inside a finding the report keeps what the source said about itself and how it knew: the source's own characterisation ("preliminary", "estimate", "audited") and the method ("survey of 400 firms", "from filings"). A figure from a survey and a figure from an audit are not interchangeable, and dropping the method turns a disagreement of method into a mystery. These are fields of the finding like the source and the date, and the synthesis keeps them as it keeps the others.
+The guide asks for a report with explicit sections for well-established and for contested findings. A reader then meets the settled facts first and the open questions in a place of their own, each with what is needed to judge it. A confidence value that the model produced about its own finding carries the same blind spot as the finding (module 63), so it does not replace the sections. Inside a finding the report keeps what the source said about itself and how it knew: the source's own characterisation ("preliminary", "estimate", "audited") and the method ("survey of 400 firms", "from filings"). A figure from a survey and a figure from an audit are not interchangeable, and dropping the method turns a disagreement of method into a mystery. These are fields of the finding like the source and the date, and the synthesis keeps them as it keeps the others.
 
 ### Render each content type fittingly
 
@@ -57,22 +57,22 @@ The practice is in [`exercises/69-provenance-and-uncertainty`](../../exercises/6
 ## Quiz
 
 1. Scenario S3, multi-agent research system. A synthesis agent holds sales numbers for five companies over four quarters, a short account of a takeover and the usage caps of a vendor's service. How should it present them?
-   - **a**: Present them in one uniform bulleted layout, for consistency across the whole report
-   - **b**: Lay out the figures as a grid, the story as running text and the quotas as bullet points
-   - **c**: Present them in one uniform block of paragraphs, so that the report reads smoothly
-   - **d**: Present them in one uniform grid, so that each value sits in a column of its own, whatever it is
+   - **a**: Figures as bullets, the story as a grid, the quotas as running text
+   - **b**: Figures as a grid, the story as running text, the quotas as bullets
+   - **c**: Everything as one grid, with a column naming the kind of content
+   - **d**: Everything as running text, with the figures spelled out in sentences
 
 2. Scenario S3, multi-agent research system. A draft report mixes claims that three independent sources confirm with one where two reports disagree. A reviewer says readers cannot tell the two kinds apart. Which change fits the guide's advice?
    - **a**: Place the oldest results first and the newest last within each part
-   - **b**: Add a confidence percentage in brackets after each sentence of the report
+   - **b**: Add a confidence value produced by the model after each sentence of the report
    - **c**: Remove the disputed claims until the sources can be reconciled by someone
    - **d**: Give the established and the contested results sections of their own
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The guide renders "financial data as tables, news as prose, technical findings as structured lists". *a* is ruled out because the guide warns against "converting everything to a uniform format". *c* is ruled out because "a table of figures turned into sentences cannot be compared". *d* is ruled out because when a news story is turned into a table, "it loses its causes and its sequence".
-2. **d**. The guide asks for "explicit sections distinguishing well-established findings from contested ones". *b* is ruled out because a number after each sentence leaves the two mixed, while the structure puts "the open questions in a place of their own". *c* is ruled out because removal takes away the open questions "each with what is needed to judge it". *a* is ruled out because ordering by age does not let "A reader then meets the settled facts first".
+1. **b**. The guide renders "financial data as tables, news as prose, technical findings as structured lists". *a* is ruled out because when a news story is turned into a table, "it loses its causes and its sequence". *c* is ruled out because the guide warns against "converting everything to a uniform format". *d* is ruled out because "a table of figures turned into sentences cannot be compared".
+2. **d**. The guide asks for "explicit sections distinguishing well-established findings from contested ones". *b* is ruled out because a value the model produced about its own finding "carries the same blind spot as the finding", and it leaves the two kinds mixed. *c* is ruled out because removal takes away the open questions "each with what is needed to judge it". *a* is ruled out because ordering by age leaves the two kinds mixed, whereas the page sets "the settled facts first and the open questions in a place of their own".
 
 </details>
 
@@ -80,17 +80,17 @@ The practice is in [`exercises/69-provenance-and-uncertainty`](../../exercises/6
 
 This quiz covers both pages of the module.
 
-1. Scenario S3, multi-agent research system. A summariser squeezes forty items gathered by four subagents into one paragraph for the writer, and the finished report cannot say where any number came from. Where did the fault lie?
-   - **a**: The writer lacked an instruction to cite sources while composing the finished document
-   - **b**: The subagents gathered far too much material for one writer to handle within a single run
-   - **c**: The compression stage converted structured entries into prose and dropped the claim-source mappings
-   - **d**: The four subagents used different search tools to reach their results, which broke the trail
+1. Scenario S3, multi-agent research system. Forty entries, each with a source field, pass through a summariser and then a writer, and the finished report names no sources. What should have been done at the hand-off?
+   - **a**: Give each run more material, so that the summariser has more detail to keep
+   - **b**: Ask the writer to cite sources by recalling each figure's original publication
+   - **c**: Pair each claim with its origin as structured data at every exchange between the stages
+   - **d**: Give all the subagents one search tool, so that every trail looks alike
 
-2. Scenario S3, multi-agent research system. A forecast dated 2022 gives 7% and a measurement dated 2024 gives 9% for one quantity. What should the write-up show?
-   - **a**: A contested finding, since two numbers cannot both hold for one quantity at the same time
-   - **b**: Both values with their dates, the older first, and a note that the dates differ
-   - **c**: The newer value by itself, because the older one has been superseded
-   - **d**: A single value between the two, to cover the whole span of years
+2. Scenario S3, multi-agent research system. Two reports state 12% and 9% for one measure, and each carries a 2024 date. What label does the write-up carry?
+   - **a**: A change, ordered with the older value first and the newer last
+   - **b**: A conflict, with both values and their publishers
+   - **c**: An agreement, at the mean of the two values
+   - **d**: A conflict, settled in favour of the larger publisher's value
 
 3. Scenario S3, multi-agent research system. A subagent half remembers a statistic but finds no document stating it. What should its output hold?
    - **a**: An entry that names the subagent itself as the origin of the number
@@ -101,8 +101,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The guide says attribution "is lost during summarization steps when findings are compressed without preserving claim-source mappings". *b* is ruled out because "A source survives as long as it travels with its claim in a field", whatever the volume. *a* is ruled out because "the sources are lost in the compression and cannot be rebuilt from prose". *d* is ruled out because "Every hand-off between agents carries claim-source mappings", and the search tool does not decide that.
-2. **b**. The page lists them "listed oldest first, and the report says that the figures come from different dates". *a* is ruled out because "Two findings for a claim with different values and the same date are a `conflict`", and these dates differ. *c* is ruled out because "choosing one value hides a disagreement the reader needs". *d* is ruled out because "the number appears in no source and cannot be checked".
+1. **c**. The page says "a compression step keeps them next to the text it produces", so the pairing survives every step. *b* is ruled out because "the sources are lost in the compression and cannot be rebuilt from prose". *a* is ruled out because "A source survives as long as it travels with its claim in a field", whatever the volume. *d* is ruled out because "Every hand-off between agents carries claim-source mappings", which a shared tool does not provide.
+2. **b**. The page says "Two findings for a claim with different values and the same date are a `conflict`". *a* is ruled out because "With different dates they are `changed`, listed oldest first", and these dates are equal. *c* is ruled out because "the number appears in no source and cannot be checked". *d* is ruled out because "choosing one value hides a disagreement the reader needs".
 3. **d**. The subagent "reports it separately as unsourced, or leaves it out". *b* is ruled out because "What the pipeline never does is fill the field with a plausible name". *c* is ruled out because "a finding without one is refused where it enters the pipeline". *a* is ruled out because the design is to "make the source part of the schema and required", and a subagent is not the source of a fact it recalls.
 
 </details>

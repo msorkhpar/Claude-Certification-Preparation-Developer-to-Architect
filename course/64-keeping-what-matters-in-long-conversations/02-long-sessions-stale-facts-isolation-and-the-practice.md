@@ -53,21 +53,21 @@ The practice is in [`exercises/64-keeping-what-matters-in-long-conversations`](.
 
 1. Scenario S1, customer support resolution agent. At turn twelve a customer says the delivery address has changed. A delayed copy of the customer's turn-two message, which holds the old address, is processed afterwards. What should the facts store hold?
    - **a**: The old address, because it was the last one processed
-   - **b**: Both addresses as current values until the customer confirms one
-   - **c**: The updated value as current, with the earlier one in the history
+   - **b**: The updated value as current, with the earlier one in the history
+   - **c**: Both addresses as current values until the customer confirms one
    - **d**: The new address, with the old one deleted so that no trace remains
 
 2. Scenario S1, customer support resolution agent. One agent process serves many customers. After a deploy, customers see another customer's order details. The engineers find that the facts store was keyed by an id that the model copied from the conversation. What should they change?
    - **a**: Add a prompt rule telling the model to leave other people's data out of its replies
-   - **b**: Take the key from the authenticated session and filter where the context is built
+   - **b**: Empty the store hourly so that stale entries cannot be reached by anyone
    - **c**: Add the customer's name to each fact so that the model can tell them apart
-   - **d**: Empty the store hourly so that stale entries cannot be reached by anyone
+   - **d**: Take the key from the authenticated session and filter where the context is built
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The date decides, so the late older value goes to the history and the current value is untouched. *a* is ruled out because "Order of arrival does not decide". *b* is ruled out because "a value with an earlier date is recorded in the history and does not replace anything", so nothing is left unsettled. *d* is ruled out because "The old value is kept in the history, since an audit or a dispute may ask what was known when".
-2. **b**. The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything. *a* is ruled out because "A rule written in the prompt is not isolation". *c* is ruled out because facts of other customers are "excluded where the text is assembled, not left for the model to ignore". *d* is ruled out because the leak comes from the key, and the page's remedy is "Everything that is cached, remembered or summarised is scoped the same way", not a periodic clearing.
+1. **b**. The date decides, so the late older value goes to the history and the current value is untouched. *a* is ruled out because "Order of arrival does not decide". *c* is ruled out because "a value with an earlier date is recorded in the history and does not replace anything", so nothing is left unsettled. *d* is ruled out because "The old value is kept in the history, since an audit or a dispute may ask what was known when".
+2. **d**. The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything. *a* is ruled out because "A rule written in the prompt is not isolation". *c* is ruled out because facts of other customers are "excluded where the text is assembled, not left for the model to ignore". *b* is ruled out because the leak comes from the key, and the page's remedy is "Everything that is cached, remembered or summarised is scoped the same way", not a periodic clearing.
 
 </details>
 
@@ -82,8 +82,8 @@ This quiz covers both pages of the module.
    - **d**: Discard every stored fact and rebuild the case from the customer's messages
 
 2. Scenario S3, multi-agent research system. A synthesis agent receives forty findings from subagents as one long text, and its report leaves out findings from the middle of that text. Which change fits best?
-   - **a**: Open with a short digest of key points, then group detail under headers
-   - **b**: Ask each subagent for longer explanations so that every finding takes more room
+   - **a**: Ask each subagent for longer explanations so that every finding takes more room
+   - **b**: Open with a short digest of key points, then group detail under headers
    - **c**: Send the same forty findings twice so that each one appears in two places
    - **d**: Sort the findings alphabetically before they are joined into the input
 
@@ -97,7 +97,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. A fact past its freshness limit is read again from the system of record, and the agent states the date it is going by. *a* is ruled out because "a stale fact is a guess with a date on it". *b* is ruled out because the remedy is to read the value again "from the system of record", not to ask the customer to recall it. *d* is ruled out because the facts are valid until their limit, and the block is how the numbers survive: "the case facts block carries the numbers".
-2. **a**. Key findings go first under a header, with the detail under explicit headers. *b* is ruled out because "the middle is where findings go missing", and longer text makes the middle longer. *c* is ruled out because the guide's remedy is placement: "Put the key findings and the case facts at the beginning of the aggregated input". *d* is ruled out because ordering by name changes nothing about where a finding sits: "Organise the detail under explicit headers".
+2. **b**. Key findings go first under a header, with the detail under explicit headers. *a* is ruled out because "the middle is where findings go missing", and longer text makes the middle longer. *c* is ruled out because the guide's remedy is placement: "Put the key findings and the case facts at the beginning of the aggregated input". *d* is ruled out because ordering by name changes nothing about where a finding sits: "Organise the detail under explicit headers".
 3. **d**. Each matter has its own entry, and no entry is dropped until the case closes. *a* is ruled out because "each issue has its own entry in the block, so that two refunds in one conversation never share an amount". *b* is ruled out because "A reader of the summary cannot tell that anything was lost". *c* is ruled out because "no issue's entry is dropped until the case closes".
 
 </details>

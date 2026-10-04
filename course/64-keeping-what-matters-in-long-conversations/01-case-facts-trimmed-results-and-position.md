@@ -365,9 +365,9 @@ refund_amount seen on day 124, today day 125, limit 3 days: still fresh
 ## Quiz
 
 1. Scenario S1, customer support resolution agent. A refund agent condenses the conversation every ten turns. At turn forty the condensed text says only that the customer awaits "a refund soon"; the sum and the promised day from turn six are gone, and the agent quotes something else. Which change fits best?
-   - **a**: Condense each fifth turn instead, so that less is rounded off in each round
-   - **b**: Keep amounts, dates and statuses in a structured block on each request
-   - **c**: Tell the condensing prompt to preserve each number that it meets in the text
+   - **a**: Keep amounts, dates and statuses in a structured block on each request
+   - **b**: Condense each fifth turn instead, so that less is rounded off in each round
+   - **c**: Ask the condensing prompt for longer summaries, with more detail kept in the prose
    - **d**: Send the full transcript on each request in place of the condensed text
 
 2. Scenario S1, customer support resolution agent. A lookup returns 42 fields, and the agent needs five of them to decide on a return. After thirty lookups in one conversation, answers are slower and costlier. Which change fits best?
@@ -379,7 +379,7 @@ refund_amount seen on day 124, today day 125, limit 3 days: still fresh
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The exact values leave the text that gets condensed, so no round of condensing can round them off. *a* is ruled out because "Each round compresses the previous summary, so a detail that survived once can be rounded off the next time", and more rounds means more rounding. *c* is ruled out because "A reader of the summary cannot tell that anything was lost", so an instruction inside the prose gives no check. *d* is ruled out because "Resending the whole transcript is not the answer either".
+1. **a**. The exact values leave the text that gets condensed, so no round of condensing can round them off. *b* is ruled out because "Each round compresses the previous summary, so a detail that survived once can be rounded off the next time", and more rounds means more rounding. *c* is ruled out because "A reader of the summary cannot tell that anything was lost", so more prose gives no check. *d* is ruled out because "Resending the whole transcript is not the answer either".
 2. **c**. The decision's fields are kept with their exact values and the rest is dropped before it accumulates. *a* is ruled out because the full result "is carried and paid for on every later request", whatever the window. *b* is ruled out because the advice is to "trim by a list written for the decisions the agent makes, not by length". *d* is ruled out because the fields are kept "with their exact values (never rounded or reworded)".
 
 </details>

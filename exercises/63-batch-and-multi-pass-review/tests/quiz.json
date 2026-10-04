@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "Scenario S5, Claude Code in CI. A pipeline runs two Claude jobs: a verdict that a pull request needs before it may merge, and a Sunday scan of every service for outdated patterns. A manager wants both moved to the discounted bulk queue. What should the architect do?",
       "options": {
-        "a": "Move both, since half the price outweighs a wait of unknown length",
-        "b": "Keep the first on the immediate API and send the second through a batch",
+        "a": "Keep the first on the immediate API and send the second through a batch",
+        "b": "Move both, since half the price outweighs a wait of unknown length",
         "c": "Put the first through a batch and keep the second on the immediate API",
         "d": "Move both, but submit a batch every hour so that the wait stays short"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "A merge verdict is a blocking check that cannot wait for a window without a latency guarantee, while the weekly scan can wait.",
-        "a": "Ruled out because \"It is not a reason to move work that cannot\" wait, whatever the discount.",
+        "a": "A merge verdict is a blocking check that cannot wait for a window without a latency guarantee, while the weekly scan can wait.",
+        "b": "Ruled out because \"It is not a reason to move work that cannot\" wait, whatever the discount.",
         "c": "Ruled out because \"a blocking check cannot wait for a window that has no latency guarantee\", and this option sends exactly that check there.",
         "d": "Ruled out because \"the window is a ceiling and not a promise of an hour\", so more frequent submissions do not give the verdict a deadline."
       }
@@ -28,33 +28,33 @@
       "options": {
         "a": "28",
         "b": "24",
-        "c": "6",
-        "d": "4"
+        "c": "4",
+        "d": "6"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The worst case is the interval plus the window plus the handling, so 30 minus 24 minus 2 leaves 4.",
+        "c": "The worst case is the interval plus the window plus the handling, so 30 minus 24 minus 2 leaves 4.",
         "a": "Ruled out because \"worst-case wait = submission interval + processing window + handling time\" includes the 24-hour window, which 28 ignores.",
         "b": "Ruled out because \"a nightly batch gives a worst wait of 24 + 24 + handling, which is 50 hours\".",
-        "c": "Ruled out because the arithmetic starts from \"2 hours to read and deliver the results\", which 6 leaves out."
+        "d": "Ruled out because the arithmetic starts from \"2 hours to read and deliver the results\", which 6 leaves out."
       }
     },
     {
       "id": "02-independent-passes-combined-verdicts-and-the-practice#q1",
       "page": "02-independent-passes-combined-verdicts-and-the-practice.md",
       "scope": "page",
-      "stem": "Scenario S2, code generation with Claude Code. A team's agent writes a change and then reviews it in the same conversation. Adding the instruction \"question every decision\" and a larger thinking budget leaves nearly every verdict as approval. Which step addresses the cause?",
+      "stem": "Scenario S2, code generation with Claude Code. A team reviews each change in a separate run, yet nearly every verdict is still approval, because the run is also handed the author's rationale for each change. Which step removes the remaining cause?",
       "options": {
-        "a": "Add a second review turn in the same conversation and take the stricter result",
-        "b": "Raise the thinking budget again until the verdicts stop being approvals",
-        "c": "Hand the diff and criteria to a fresh instance that never saw the reasoning",
-        "d": "Ask the agent to write a stricter checklist, then review against it"
+        "a": "Keep the notes and add a second review turn in the same conversation",
+        "b": "Give the new instance the diff and the criteria without the notes",
+        "c": "Keep the notes and raise the thinking budget until verdicts stop approving",
+        "d": "Keep the notes and ask the instance to write a stricter checklist first"
       },
-      "key": "c",
+      "key": "b",
       "explanation": {
-        "c": "The cause is the reasoning still held in the author's context, and a reviewer without it has nothing to defend.",
+        "b": "The page says \"the reasoning that justified the code is still in the context\", and the notes carry that reasoning into the new instance, so withholding them removes the cause.",
         "a": "Ruled out because the option is \"a second review in the same conversation, which adds a third reader who shares the first two readers' context\".",
-        "b": "Ruled out because it is \"a larger thinking budget, which gives the model more room to reason from the same starting point\".",
+        "c": "Ruled out because it is \"a larger thinking budget, which gives the model more room to reason from the same starting point\".",
         "d": "Ruled out because a checklist is \"a stricter instruction in the same conversation, since the reasoning is still there\"."
       }
     },
@@ -66,15 +66,15 @@
       "options": {
         "a": "Accept at 99 instead, because a higher bar lets fewer wrong ones through",
         "b": "Have the same pass explain its score and accept when the explanation reads sound",
-        "c": "Have a separate instance try to refute each one before it is trusted",
-        "d": "Send the lowest-scoring tenth to a person and accept the rest as they are"
+        "c": "Send the lowest-scoring tenth to a person and accept the rest as they are",
+        "d": "Have a separate instance try to refute each one before it is trusted"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "A score the same pass produced about its own claim is not independent evidence, and another instance that tries to refute the claim is.",
+        "d": "A score the same pass produced about its own claim is not independent evidence, and another instance that tries to refute the claim is.",
         "a": "Ruled out because \"a number the same pass produced about its own finding carries the same blind spot as the finding\".",
         "b": "Ruled out because \"confident-but-wrong claim is confident because the reasoning behind it looked sound to its author\", so a sound-sounding explanation proves nothing.",
-        "d": "Ruled out because \"a finding reported by one pass is not accepted on confidence alone, however high\", and this option accepts the rest on exactly that."
+        "c": "Ruled out because \"a finding reported by one pass is not accepted on confidence alone, however high\", and this option accepts the rest on exactly that."
       }
     },
     {
@@ -85,15 +85,15 @@
       "options": {
         "a": "26",
         "b": "48",
-        "c": "49",
-        "d": "50"
+        "c": "50",
+        "d": "49"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The integration pass reads the first batch's results, so the two windows run one after the other, with the handling after each: 24 + 1 + 24 + 1.",
+        "c": "The integration pass reads the first batch's results, so the two windows run one after the other, with the handling after each: 24 + 1 + 24 + 1.",
         "a": "Ruled out because \"it cannot be in the same batch as them\", so the audit is not one window.",
         "b": "Ruled out because the worst case is \"two processing windows plus the handling after each\", and 48 has no handling.",
-        "c": "is ruled out for the same sentence, since the handling is \"plus the handling after each\" batch and not once."
+        "d": "is ruled out for the same sentence, since the handling is \"plus the handling after each\" batch and not once."
       }
     },
     {
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. Two independent review passes report the same injection risk. One rates it 1 on a severity scale of 1 to 3 with confidence 95, and the other rates it 3 with confidence 70. Which entry does the combined list carry?",
       "options": {
-        "a": "3 / 70",
+        "a": "2 / 83",
         "b": "1 / 95",
         "c": "3 / 95",
-        "d": "2 / 83"
+        "d": "3 / 70"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The entry keeps the highest severity and the lowest confidence.",
+        "d": "The entry keeps the highest severity and the lowest confidence.",
         "b": "Ruled out because the rule is \"so that a pass that saw the danger is not overruled by one that missed it\".",
         "c": "Ruled out because the rule is \"the lowest confidence, so that the weakest evidence caps the claim\".",
-        "d": "Ruled out because the rule is \"Take the highest severity any pass gave\", and nothing is averaged."
+        "a": "Ruled out because the rule is \"Take the highest severity any pass gave\", and nothing is averaged."
       }
     }
   ]

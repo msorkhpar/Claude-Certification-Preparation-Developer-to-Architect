@@ -59,7 +59,7 @@ The practice is in [`exercises/68-human-review-and-calibrated-confidence`](../..
    - **a**: In a note appended to the closing message after the action has been taken
    - **b**: In the system prompt, as an instruction to ask the customer first whenever the number is under 100
    - **c**: In a confidence floor above which the agent may act on its own
-   - **d**: In a code-level check that always requires a person here, whatever the number
+   - **d**: In a code-level gate that holds the action until a human approves
 
 <details>
 <summary>Answer key</summary>
@@ -79,24 +79,24 @@ This quiz covers both pages of the module.
    - **c**: Place the cut-off at the lowest level whose admitted items reach that bar in these records
    - **d**: Replace the scores by an average over the document types, then reapply them
 
-2. Scenario S6, structured data extraction. One kind of form has only a dozen checked samples, all of them extracted correctly, while every other kind has hundreds. May that kind be automated?
+2. Scenario S6, structured data extraction. One kind of form has only twelve checked samples, all of them extracted correctly, and the team's rule demands at least fifty per kind, while every other kind has hundreds. May that kind be automated?
    - **a**: Yes, because a perfect score is the best a kind can have
    - **b**: No, until further ground-truth records give it enough evidence
    - **c**: Yes, once the overall figure is above the goal for the whole set
    - **d**: No, because a kind with no mistakes cannot be measured at all
 
-3. Scenario S6, structured data extraction. Two source documents give different totals for one invoice, and the model reports 96 for the value it chose. What happens to the extraction?
-   - **a**: It is accepted, because the score is above the calibrated cut-off
-   - **b**: It is dropped from the batch, because the sources cannot both be right
-   - **c**: It is accepted after the model is asked to restate its score
-   - **d**: It goes to a person, because the disagreement is the reason, whatever the score
+3. Scenario S6, structured data extraction. Two extractions both carry a confidence of 96. One rests on two documents that give different totals, the other on a single clear document. Which one goes to a person?
+   - **a**: Whichever the model rates as less certain on a second reading
+   - **b**: Both, because 96 is not high enough to skip review
+   - **c**: Neither, because both reached the same confidence
+   - **d**: Just the one with contradictory sources
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The page says to "Pick the lowest threshold whose precision reaches the target", so the cut-off moves up to the lowest score that does. *b* is ruled out because "the model wrote the number, and only a labelled validation set says how often that score is right". *a* is ruled out because a lower cut-off lets in the less reliable items, while the page measures the precision of "every item at or above it". *d* is ruled out because an average over types is the "aggregate" that "hides the weak segment".
 2. **b**. The page requires "a minimum number of labelled examples as well as a minimum accuracy". *a* is ruled out because "A segment that scores 100% on four examples has shown very little". *c* is ruled out because "The overall figure plays no part in the decision". *d* is ruled out because "a segment with fewer than `min_n` labelled records is `undersampled`", which is measurable and calls for more records.
-3. **d**. A conflict is a reason for review whatever the score. *a* is ruled out because the model "picked one reading and never noticed the other". *c* is ruled out because "the model wrote the number, and only a labelled validation set says how often that score is right", so a restated score settles nothing. *b* is ruled out because a backlog is "kept and shown, not dropped", and a dropped item loses the invoice.
+3. **d**. The page lists "Two documents give different values for the same field" as a reason for review. *b* is ruled out because "Keep the threshold where the labelled data put it", and nothing here says 96 falls below it. *c* is ruled out because "A conflict is a reason for review whatever the score". *a* is ruled out because "the model wrote the number, and only a labelled validation set says how often that score is right".
 
 </details>
 

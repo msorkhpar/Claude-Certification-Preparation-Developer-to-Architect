@@ -7,16 +7,16 @@
       "scope": "page",
       "stem": "Scenario S1, customer support resolution agent. A refund agent condenses the conversation every ten turns. At turn forty the condensed text says only that the customer awaits \"a refund soon\"; the sum and the promised day from turn six are gone, and the agent quotes something else. Which change fits best?",
       "options": {
-        "a": "Condense each fifth turn instead, so that less is rounded off in each round",
-        "b": "Keep amounts, dates and statuses in a structured block on each request",
-        "c": "Tell the condensing prompt to preserve each number that it meets in the text",
+        "a": "Keep amounts, dates and statuses in a structured block on each request",
+        "b": "Condense each fifth turn instead, so that less is rounded off in each round",
+        "c": "Ask the condensing prompt for longer summaries, with more detail kept in the prose",
         "d": "Send the full transcript on each request in place of the condensed text"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The exact values leave the text that gets condensed, so no round of condensing can round them off.",
-        "a": "Ruled out because \"Each round compresses the previous summary, so a detail that survived once can be rounded off the next time\", and more rounds means more rounding.",
-        "c": "Ruled out because \"A reader of the summary cannot tell that anything was lost\", so an instruction inside the prose gives no check.",
+        "a": "The exact values leave the text that gets condensed, so no round of condensing can round them off.",
+        "b": "Ruled out because \"Each round compresses the previous summary, so a detail that survived once can be rounded off the next time\", and more rounds means more rounding.",
+        "c": "Ruled out because \"A reader of the summary cannot tell that anything was lost\", so more prose gives no check.",
         "d": "Ruled out because \"Resending the whole transcript is not the answer either\"."
       }
     },
@@ -46,15 +46,15 @@
       "stem": "Scenario S1, customer support resolution agent. At turn twelve a customer says the delivery address has changed. A delayed copy of the customer's turn-two message, which holds the old address, is processed afterwards. What should the facts store hold?",
       "options": {
         "a": "The old address, because it was the last one processed",
-        "b": "Both addresses as current values until the customer confirms one",
-        "c": "The updated value as current, with the earlier one in the history",
+        "b": "The updated value as current, with the earlier one in the history",
+        "c": "Both addresses as current values until the customer confirms one",
         "d": "The new address, with the old one deleted so that no trace remains"
       },
-      "key": "c",
+      "key": "b",
       "explanation": {
-        "c": "The date decides, so the late older value goes to the history and the current value is untouched.",
+        "b": "The date decides, so the late older value goes to the history and the current value is untouched.",
         "a": "Ruled out because \"Order of arrival does not decide\".",
-        "b": "Ruled out because \"a value with an earlier date is recorded in the history and does not replace anything\", so nothing is left unsettled.",
+        "c": "Ruled out because \"a value with an earlier date is recorded in the history and does not replace anything\", so nothing is left unsettled.",
         "d": "Ruled out because \"The old value is kept in the history, since an audit or a dispute may ask what was known when\"."
       }
     },
@@ -65,16 +65,16 @@
       "stem": "Scenario S1, customer support resolution agent. One agent process serves many customers. After a deploy, customers see another customer's order details. The engineers find that the facts store was keyed by an id that the model copied from the conversation. What should they change?",
       "options": {
         "a": "Add a prompt rule telling the model to leave other people's data out of its replies",
-        "b": "Take the key from the authenticated session and filter where the context is built",
+        "b": "Empty the store hourly so that stale entries cannot be reached by anyone",
         "c": "Add the customer's name to each fact so that the model can tell them apart",
-        "d": "Empty the store hourly so that stale entries cannot be reached by anyone"
+        "d": "Take the key from the authenticated session and filter where the context is built"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything.",
+        "d": "The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything.",
         "a": "Ruled out because \"A rule written in the prompt is not isolation\".",
         "c": "Ruled out because facts of other customers are \"excluded where the text is assembled, not left for the model to ignore\".",
-        "d": "Ruled out because the leak comes from the key, and the page's remedy is \"Everything that is cached, remembered or summarised is scoped the same way\", not a periodic clearing."
+        "b": "Ruled out because the leak comes from the key, and the page's remedy is \"Everything that is cached, remembered or summarised is scoped the same way\", not a periodic clearing."
       }
     },
     {
@@ -102,15 +102,15 @@
       "scope": "module",
       "stem": "Scenario S3, multi-agent research system. A synthesis agent receives forty findings from subagents as one long text, and its report leaves out findings from the middle of that text. Which change fits best?",
       "options": {
-        "a": "Open with a short digest of key points, then group detail under headers",
-        "b": "Ask each subagent for longer explanations so that every finding takes more room",
+        "a": "Ask each subagent for longer explanations so that every finding takes more room",
+        "b": "Open with a short digest of key points, then group detail under headers",
         "c": "Send the same forty findings twice so that each one appears in two places",
         "d": "Sort the findings alphabetically before they are joined into the input"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "Key findings go first under a header, with the detail under explicit headers.",
-        "b": "Ruled out because \"the middle is where findings go missing\", and longer text makes the middle longer.",
+        "b": "Key findings go first under a header, with the detail under explicit headers.",
+        "a": "Ruled out because \"the middle is where findings go missing\", and longer text makes the middle longer.",
         "c": "Ruled out because the guide's remedy is placement: \"Put the key findings and the case facts at the beginning of the aggregated input\".",
         "d": "Ruled out because ordering by name changes nothing about where a finding sits: \"Organise the detail under explicit headers\"."
       }

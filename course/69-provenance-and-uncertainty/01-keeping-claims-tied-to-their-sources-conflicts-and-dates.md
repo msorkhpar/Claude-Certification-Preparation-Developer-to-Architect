@@ -67,7 +67,7 @@ The example compresses seven findings from five invented sources twice. The plai
    - **c**: Present a single figure between the two, which fairly reflects both of the sources
    - **d**: Present only the more recently published value and leave the other out for brevity
 
-2. Scenario S3, multi-agent research system. A report calls two numbers contradictory: one subagent found 7% in a source and another found 9% in a different source. Nothing in either output says when its number was gathered. Which change to the subagents' output prevents the misreading?
+2. Scenario S3, multi-agent research system. A report calls two numbers contradictory: one subagent found 7% in a source and another found 9% in a different source. Which change to the subagents' output prevents the misreading?
    - **a**: Require each subagent to rank its sources by how well known they are
    - **b**: Require a longer excerpt from each source around every number
    - **c**: Require a publication or data collection date next to every value

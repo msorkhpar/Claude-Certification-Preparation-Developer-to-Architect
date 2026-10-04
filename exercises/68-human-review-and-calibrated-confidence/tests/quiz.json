@@ -67,7 +67,7 @@
         "a": "In a note appended to the closing message after the action has been taken",
         "b": "In the system prompt, as an instruction to ask the customer first whenever the number is under 100",
         "c": "In a confidence floor above which the agent may act on its own",
-        "d": "In a code-level check that always requires a person here, whatever the number"
+        "d": "In a code-level gate that holds the action until a human approves"
       },
       "key": "d",
       "explanation": {
@@ -100,7 +100,7 @@
       "id": "02-routing-review-checkpoints-and-the-practice#m2",
       "page": "02-routing-review-checkpoints-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S6, structured data extraction. One kind of form has only a dozen checked samples, all of them extracted correctly, while every other kind has hundreds. May that kind be automated?",
+      "stem": "Scenario S6, structured data extraction. One kind of form has only twelve checked samples, all of them extracted correctly, and the team's rule demands at least fifty per kind, while every other kind has hundreds. May that kind be automated?",
       "options": {
         "a": "Yes, because a perfect score is the best a kind can have",
         "b": "No, until further ground-truth records give it enough evidence",
@@ -119,19 +119,19 @@
       "id": "02-routing-review-checkpoints-and-the-practice#m3",
       "page": "02-routing-review-checkpoints-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S6, structured data extraction. Two source documents give different totals for one invoice, and the model reports 96 for the value it chose. What happens to the extraction?",
+      "stem": "Scenario S6, structured data extraction. Two extractions both carry a confidence of 96. One rests on two documents that give different totals, the other on a single clear document. Which one goes to a person?",
       "options": {
-        "a": "It is accepted, because the score is above the calibrated cut-off",
-        "b": "It is dropped from the batch, because the sources cannot both be right",
-        "c": "It is accepted after the model is asked to restate its score",
-        "d": "It goes to a person, because the disagreement is the reason, whatever the score"
+        "a": "Whichever the model rates as less certain on a second reading",
+        "b": "Both, because 96 is not high enough to skip review",
+        "c": "Neither, because both reached the same confidence",
+        "d": "Just the one with contradictory sources"
       },
       "key": "d",
       "explanation": {
-        "d": "A conflict is a reason for review whatever the score.",
-        "a": "Ruled out because the model \"picked one reading and never noticed the other\".",
-        "c": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\", so a restated score settles nothing.",
-        "b": "Ruled out because a backlog is \"kept and shown, not dropped\", and a dropped item loses the invoice."
+        "d": "The page lists \"Two documents give different values for the same field\" as a reason for review.",
+        "b": "Ruled out because \"Keep the threshold where the labelled data put it\", and nothing here says 96 falls below it.",
+        "c": "Ruled out because \"A conflict is a reason for review whatever the score\".",
+        "a": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\"."
       }
     }
   ]

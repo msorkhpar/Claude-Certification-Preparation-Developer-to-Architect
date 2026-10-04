@@ -7,15 +7,15 @@
       "scope": "page",
       "stem": "Scenario S1, customer support resolution agent. A customer writes that they want to speak to a person about a change of delivery address. The agent has a tool that can make the change in one step. What should the agent do?",
       "options": {
-        "a": "Make the change first, since it takes one step, then offer a transfer",
-        "b": "Hand over to a human straight away, before touching the account",
+        "a": "Hand over to a human straight away, before touching the account",
+        "b": "Make the change first, since it takes one step, then offer a transfer",
         "c": "Ask why a human is wanted and transfer only if the reason is unclear",
         "d": "Offer to complete the update and transfer only if the customer repeats the wish"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "An explicit request for a person is honoured at once, with no investigation first.",
-        "a": "Ruled out because \"an investigation before the transfer is the agent deciding it knows better\".",
+        "a": "An explicit request for a person is honoured at once, with no investigation first.",
+        "b": "Ruled out because \"an investigation before the transfer is the agent deciding it knows better\".",
         "c": "Ruled out because the agent \"does not first try to solve the problem, ask why\", and a question is a delay.",
         "d": "Ruled out because \"An explicit request is honoured at once\"; offering a fix first is the answer for frustration, not for a request."
       }
@@ -27,15 +27,15 @@
       "stem": "Scenario S1, customer support resolution agent. A customer asks the agent to match a competitor's lower price. The policy describes adjustments to the company's own prices and says nothing about competitors. The agent can issue a price adjustment. What should it do?",
       "options": {
         "a": "Apply the nearest own-price rule, as that is the fairest reading",
-        "b": "Route it to a colleague authorised to rule on the exception",
-        "c": "Decline politely, since the policy does not allow the match",
+        "b": "Decline politely, since the policy does not allow the match",
+        "c": "Route it to a colleague authorised to rule on the exception",
         "d": "Issue the adjustment and flag it for review afterwards"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "A silent policy is a gap, and a gap goes to a person who can decide.",
+        "c": "A silent policy is a gap, and a gap goes to a person who can decide.",
         "a": "Ruled out because \"an agent that applies the nearest rule is inventing policy\".",
-        "c": "Ruled out because \"A policy exception or a gap is a trigger\", and declining is also a decision the policy did not make.",
+        "b": "Ruled out because \"A policy exception or a gap is a trigger\", and declining is also a decision the policy did not make.",
         "d": "Ruled out because \"the agent escalates and does not invent policy\", and acting first leaves the invention in place."
       }
     },
@@ -46,15 +46,15 @@
       "stem": "Scenario S1, customer support resolution agent. A lookup by name returns three customers, and the caller has given no other detail. Which action fits best?",
       "options": {
         "a": "Pick the customer with the most recent order and proceed from there",
-        "b": "Escalate at once, since an ambiguous match is beyond the agent",
+        "b": "Ask for an identifier that tells them apart, such as the email on the account",
         "c": "Read the three candidates' cities back and let the caller choose",
-        "d": "Ask for an identifier that tells them apart, such as the email on the account"
+        "d": "Escalate at once, since an ambiguous match is beyond the agent"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The agent asks for something that tells the candidates apart and leaves the choice to the caller's answer.",
+        "b": "The agent asks for something that tells the candidates apart and leaves the choice to the caller's answer.",
         "a": "Ruled out because choosing by a heuristic \"is a guess that succeeds often enough to go unnoticed until it fails\".",
-        "b": "Ruled out because \"an ambiguous match is a reason to ask, and not by itself one of the three triggers\".",
+        "d": "Ruled out because \"an ambiguous match is a reason to ask, and not by itself one of the three triggers\".",
         "c": "Ruled out because offering the candidates' values \"gives data about three accounts to someone who has not been identified\"."
       }
     },
@@ -62,19 +62,19 @@
       "id": "02-ambiguous-matches-hand-offs-and-the-practice#q2",
       "page": "02-ambiguous-matches-hand-offs-and-the-practice.md",
       "scope": "page",
-      "stem": "Scenario S1, customer support resolution agent. An agent faces two customer records for one name and asks the caller: \"Is it the one in Leeds or the one in Bath?\" The caller answers \"Bath\". What is wrong with this design?",
+      "stem": "Scenario S1, customer support resolution agent. A caller demands to speak to a human in the same message in which their name matches three records. What happens next?",
       "options": {
-        "a": "Nothing, because a short choice between two options is the quickest fix",
-        "b": "It should have listed the street names too, so that the caller can be sure",
-        "c": "The question disclosed where both people live before anyone was identified",
-        "d": "It should have sent the customer to a person at once, because two records matched"
+        "a": "Read the candidates' cities back and pass the case on with the caller's choice",
+        "b": "Ask for an identifier first, then pass the case on once one account is confirmed",
+        "c": "Choose the most active account by a rule, then pass the case on with it",
+        "d": "Pass the case to a person at once, before settling which account is meant"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "Naming the cities hands out data about both records to a caller who has not proved who they are.",
-        "a": "Ruled out because the offer \"gives data about three accounts to someone who has not been identified\", and two records are no different.",
-        "b": "Ruled out because the rule is \"So the agent names the field and not the values\", and more values means more disclosure.",
-        "d": "Ruled out because \"an ambiguous match is a reason to ask, and not by itself one of the three triggers\"."
+        "d": "The page puts \"an explicit request for a person first, because nothing may delay it\".",
+        "b": "Ruled out because that sentence continues \"(not even an ambiguous match)\".",
+        "c": "Ruled out because choosing by a rule \"is a guess that succeeds often enough to go unnoticed until it fails\".",
+        "a": "Ruled out because offering the values \"gives data about three accounts to someone who has not been identified\"."
       }
     },
     {
@@ -85,15 +85,15 @@
       "options": {
         "a": "Lower the cutoff to 50 and add more mood keywords to the detector",
         "b": "Ask the model to score each case's difficulty from 1 to 10 and escalate the top ones",
-        "c": "Escalate any conversation that runs past six turns, whatever its content",
-        "d": "Escalate on a request for a person, a gap in the policy or stalled work, with examples"
+        "c": "Escalate on a request for a person, a gap in the policy or stalled work, with examples",
+        "d": "Escalate any conversation that runs past six turns, whatever its content"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The triggers are properties of the case, and examples carry the judgement.",
+        "c": "The triggers are properties of the case, and examples carry the judgement.",
         "a": "Ruled out because the guide calls these signals \"unreliable proxies for actual case complexity\".",
         "b": "Ruled out because \"A confidence number that the model writes about itself carries its blind spots\".",
-        "c": "Ruled out because \"Complexity alone is not a trigger\"."
+        "d": "Ruled out because \"Complexity alone is not a trigger\"."
       }
     },
     {

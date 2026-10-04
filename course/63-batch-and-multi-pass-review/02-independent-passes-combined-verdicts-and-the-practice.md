@@ -60,23 +60,23 @@ The practice is in [`exercises/63-batch-and-multi-pass-review`](../../exercises/
 
 ## Quiz
 
-1. Scenario S2, code generation with Claude Code. A team's agent writes a change and then reviews it in the same conversation. Adding the instruction "question every decision" and a larger thinking budget leaves nearly every verdict as approval. Which step addresses the cause?
-   - **a**: Add a second review turn in the same conversation and take the stricter result
-   - **b**: Raise the thinking budget again until the verdicts stop being approvals
-   - **c**: Hand the diff and criteria to a fresh instance that never saw the reasoning
-   - **d**: Ask the agent to write a stricter checklist, then review against it
+1. Scenario S2, code generation with Claude Code. A team reviews each change in a separate run, yet nearly every verdict is still approval, because the run is also handed the author's rationale for each change. Which step removes the remaining cause?
+   - **a**: Keep the notes and add a second review turn in the same conversation
+   - **b**: Give the new instance the diff and the criteria without the notes
+   - **c**: Keep the notes and raise the thinking budget until verdicts stop approving
+   - **d**: Keep the notes and ask the instance to write a stricter checklist first
 
 2. Scenario S6, structured data extraction. A verification pass gives each extracted claim a confidence score, and claims scored 95 or more are accepted without further checks. An audit finds wrong claims among the accepted ones. Which change fits best?
    - **a**: Accept at 99 instead, because a higher bar lets fewer wrong ones through
    - **b**: Have the same pass explain its score and accept when the explanation reads sound
-   - **c**: Have a separate instance try to refute each one before it is trusted
-   - **d**: Send the lowest-scoring tenth to a person and accept the rest as they are
+   - **c**: Send the lowest-scoring tenth to a person and accept the rest as they are
+   - **d**: Have a separate instance try to refute each one before it is trusted
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The cause is the reasoning still held in the author's context, and a reviewer without it has nothing to defend. *a* is ruled out because the option is "a second review in the same conversation, which adds a third reader who shares the first two readers' context". *b* is ruled out because it is "a larger thinking budget, which gives the model more room to reason from the same starting point". *d* is ruled out because a checklist is "a stricter instruction in the same conversation, since the reasoning is still there".
-2. **c**. A score the same pass produced about its own claim is not independent evidence, and another instance that tries to refute the claim is. *a* is ruled out because "a number the same pass produced about its own finding carries the same blind spot as the finding". *b* is ruled out because "confident-but-wrong claim is confident because the reasoning behind it looked sound to its author", so a sound-sounding explanation proves nothing. *d* is ruled out because "a finding reported by one pass is not accepted on confidence alone, however high", and this option accepts the rest on exactly that.
+1. **b**. The page says "the reasoning that justified the code is still in the context", and the notes carry that reasoning into the new instance, so withholding them removes the cause. *a* is ruled out because the option is "a second review in the same conversation, which adds a third reader who shares the first two readers' context". *c* is ruled out because it is "a larger thinking budget, which gives the model more room to reason from the same starting point". *d* is ruled out because a checklist is "a stricter instruction in the same conversation, since the reasoning is still there".
+2. **d**. A score the same pass produced about its own claim is not independent evidence, and another instance that tries to refute the claim is. *a* is ruled out because "a number the same pass produced about its own finding carries the same blind spot as the finding". *b* is ruled out because "confident-but-wrong claim is confident because the reasoning behind it looked sound to its author", so a sound-sounding explanation proves nothing. *c* is ruled out because "a finding reported by one pass is not accepted on confidence alone, however high", and this option accepts the rest on exactly that.
 
 </details>
 
@@ -87,8 +87,8 @@ This quiz covers both pages of the module.
 1. Scenario S5, Claude Code in CI. A weekly audit submits per-file entries as one batch. When it ends, an integration pass over those results is submitted as a second batch. Each batch finishes within 24 hours, and handling takes 1 hour after each. What is the longest the audit can take, in hours?
    - **a**: 26
    - **b**: 48
-   - **c**: 49
-   - **d**: 50
+   - **c**: 50
+   - **d**: 49
 
 2. Scenario S6, structured data extraction. A team will extract fields from 400,000 archived documents through a batch. A trial on 100 easy documents shows no failures. What should happen before the full submission?
    - **a**: Submit everything and repair the prompt from whatever fails
@@ -97,17 +97,17 @@ This quiz covers both pages of the module.
    - **d**: Run the sample through the batch queue, so that the trial costs half as much per item
 
 3. Scenario S2, code generation with Claude Code. Two independent review passes report the same injection risk. One rates it 1 on a severity scale of 1 to 3 with confidence 95, and the other rates it 3 with confidence 70. Which entry does the combined list carry?
-   - **a**: 3 / 70
+   - **a**: 2 / 83
    - **b**: 1 / 95
    - **c**: 3 / 95
-   - **d**: 2 / 83
+   - **d**: 3 / 70
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The integration pass reads the first batch's results, so the two windows run one after the other, with the handling after each: 24 + 1 + 24 + 1. *a* is ruled out because "it cannot be in the same batch as them", so the audit is not one window. *b* is ruled out because the worst case is "two processing windows plus the handling after each", and 48 has no handling. *c* is ruled out for the same sentence, since the handling is "plus the handling after each" batch and not once.
+1. **c**. The integration pass reads the first batch's results, so the two windows run one after the other, with the handling after each: 24 + 1 + 24 + 1. *a* is ruled out because "it cannot be in the same batch as them", so the audit is not one window. *b* is ruled out because the worst case is "two processing windows plus the handling after each", and 48 has no handling. *d* is ruled out for the same sentence, since the handling is "plus the handling after each" batch and not once.
 2. **b**. A prompt is proven on a sample that includes the awkward documents, run synchronously so the answer comes at once, before the discount is spent on volume. *a* is ruled out because "a day passes before the failures show, and the whole run is repeated". *c* is ruled out because "a sample of easy documents proves nothing". *d* is ruled out because the advice is to "run the prompt synchronously on a small, varied sample", not to wait a window for a trial.
-3. **a**. The entry keeps the highest severity and the lowest confidence. *b* is ruled out because the rule is "so that a pass that saw the danger is not overruled by one that missed it". *c* is ruled out because the rule is "the lowest confidence, so that the weakest evidence caps the claim". *d* is ruled out because the rule is "Take the highest severity any pass gave", and nothing is averaged.
+3. **d**. The entry keeps the highest severity and the lowest confidence. *b* is ruled out because the rule is "so that a pass that saw the danger is not overruled by one that missed it". *c* is ruled out because the rule is "the lowest confidence, so that the weakest evidence caps the claim". *a* is ruled out because the rule is "Take the highest severity any pass gave", and nothing is averaged.
 
 </details>
 

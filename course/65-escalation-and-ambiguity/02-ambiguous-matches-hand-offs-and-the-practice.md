@@ -48,21 +48,21 @@ The practice is in [`exercises/65-escalation-and-ambiguity`](../../exercises/65-
 
 1. Scenario S1, customer support resolution agent. A lookup by name returns three customers, and the caller has given no other detail. Which action fits best?
    - **a**: Pick the customer with the most recent order and proceed from there
-   - **b**: Escalate at once, since an ambiguous match is beyond the agent
+   - **b**: Ask for an identifier that tells them apart, such as the email on the account
    - **c**: Read the three candidates' cities back and let the caller choose
-   - **d**: Ask for an identifier that tells them apart, such as the email on the account
+   - **d**: Escalate at once, since an ambiguous match is beyond the agent
 
-2. Scenario S1, customer support resolution agent. An agent faces two customer records for one name and asks the caller: "Is it the one in Leeds or the one in Bath?" The caller answers "Bath". What is wrong with this design?
-   - **a**: Nothing, because a short choice between two options is the quickest fix
-   - **b**: It should have listed the street names too, so that the caller can be sure
-   - **c**: The question disclosed where both people live before anyone was identified
-   - **d**: It should have sent the customer to a person at once, because two records matched
+2. Scenario S1, customer support resolution agent. A caller demands to speak to a human in the same message in which their name matches three records. What happens next?
+   - **a**: Read the candidates' cities back and pass the case on with the caller's choice
+   - **b**: Ask for an identifier first, then pass the case on once one account is confirmed
+   - **c**: Choose the most active account by a rule, then pass the case on with it
+   - **d**: Pass the case to a person at once, before settling which account is meant
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The agent asks for something that tells the candidates apart and leaves the choice to the caller's answer. *a* is ruled out because choosing by a heuristic "is a guess that succeeds often enough to go unnoticed until it fails". *b* is ruled out because "an ambiguous match is a reason to ask, and not by itself one of the three triggers". *c* is ruled out because offering the candidates' values "gives data about three accounts to someone who has not been identified".
-2. **c**. Naming the cities hands out data about both records to a caller who has not proved who they are. *a* is ruled out because the offer "gives data about three accounts to someone who has not been identified", and two records are no different. *b* is ruled out because the rule is "So the agent names the field and not the values", and more values means more disclosure. *d* is ruled out because "an ambiguous match is a reason to ask, and not by itself one of the three triggers".
+1. **b**. The agent asks for something that tells the candidates apart and leaves the choice to the caller's answer. *a* is ruled out because choosing by a heuristic "is a guess that succeeds often enough to go unnoticed until it fails". *d* is ruled out because "an ambiguous match is a reason to ask, and not by itself one of the three triggers". *c* is ruled out because offering the candidates' values "gives data about three accounts to someone who has not been identified".
+2. **d**. The page puts "an explicit request for a person first, because nothing may delay it". *b* is ruled out because that sentence continues "(not even an ambiguous match)". *c* is ruled out because choosing by a rule "is a guess that succeeds often enough to go unnoticed until it fails". *a* is ruled out because offering the values "gives data about three accounts to someone who has not been identified".
 
 </details>
 
@@ -73,8 +73,8 @@ This quiz covers both pages of the module.
 1. Scenario S1, customer support resolution agent. A team routes conversations to staff when a message sounds upset or when the model rates its own confidence below 70. Most such routings turn out to be simple, while cases outside the written guidelines are settled by the agent at confidence above 90. Which change fits best?
    - **a**: Lower the cutoff to 50 and add more mood keywords to the detector
    - **b**: Ask the model to score each case's difficulty from 1 to 10 and escalate the top ones
-   - **c**: Escalate any conversation that runs past six turns, whatever its content
-   - **d**: Escalate on a request for a person, a gap in the policy or stalled work, with examples
+   - **c**: Escalate on a request for a person, a gap in the policy or stalled work, with examples
+   - **d**: Escalate any conversation that runs past six turns, whatever its content
 
 2. Scenario S1, customer support resolution agent. A customer writes in capitals that the third late parcel is unacceptable and asks for nothing else. A reship is within the agent's tools. What should the agent do?
    - **a**: Escalate at once, because an upset customer wants a person
@@ -91,7 +91,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The triggers are properties of the case, and examples carry the judgement. *a* is ruled out because the guide calls these signals "unreliable proxies for actual case complexity". *b* is ruled out because "A confidence number that the model writes about itself carries its blind spots". *c* is ruled out because "Complexity alone is not a trigger".
+1. **c**. The triggers are properties of the case, and examples carry the judgement. *a* is ruled out because the guide calls these signals "unreliable proxies for actual case complexity". *b* is ruled out because "A confidence number that the model writes about itself carries its blind spots". *d* is ruled out because "Complexity alone is not a trigger".
 2. **b**. An upset customer with a problem inside the agent's reach is helped, with the frustration acknowledged. *a* is ruled out because "Mood tells you how to speak and says little about what the case needs". *c* is ruled out because the agent "does not turn a complaint into one" (a request for a person). *d* is ruled out because "the agent acknowledges the frustration, offers to resolve the issue", and a silent fix does not.
 3. **d**. Two attempts without progress hit the third trigger, and the hand-off carries what was tried. *a* is ruled out because "A loop that carries on is the same failure that module 45 bounded in the agent loop". *b* is ruled out because "the agent stops and hands off with what it tried", not with a request to come back. *c* is ruled out because a guess from earlier orders "is a guess that succeeds often enough to go unnoticed until it fails".
 
