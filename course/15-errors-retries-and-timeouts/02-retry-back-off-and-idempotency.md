@@ -91,7 +91,7 @@ thumb: **retry the call, never the side effect**.
 
 The example runs the same call through the real SDK in five situations. Read it against the table above.
 
-<!-- example: m15-sdk-retries tabs: python,typescript -->
+<!-- example: m15-sdk-retries tabs: python,typescript,java,kotlin -->
 ```python
 """What the SDK retries on its own, and what it does not, against a scripted transport.
 
@@ -213,6 +213,156 @@ if (import.meta.main) await main();
 spend-cap 429, maxRetries=2: 3 request(s), retry-count header [0, 1, 2] -> RateLimitError 429 rate_limit_error request id req_illustrative_0429
 connection fails twice, maxRetries=1: 2 request(s), retry-count header [0, 1] -> APIConnectionError
 ```
+```java
+import static harness.Scripted.map;
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.errors.AnthropicIoException;
+import com.anthropic.errors.AnthropicServiceException;
+import com.anthropic.models.messages.Message;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import harness.Reply;
+import harness.Scripted;
+import harness.ScriptedHttp;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * What the SDK retries on its own, and what it does not, against a scripted transport.
+ *
+ * <p>The failures are illustrative, hand-written replies shaped like the API's error bodies.
+ * The SDK asks for a short exponential back-off between attempts (about 0.5 s, then about 1 s); the course's transport records
+ * those waits instead of sleeping them.
+ */
+public final class SdkRetries {
+    static final String MODEL = "claude-sonnet-5-5";
+
+    static MessageCreateParams params() {
+        return MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(16).addUserMessage("Hi").build();
+    }
+
+    static Reply error(int status, String kind, String requestId) {
+        return Reply.json(status, map("type", "error", "error", map("type", kind, "message", kind), "request_id", requestId), "request-id", requestId);
+    }
+
+    static final Reply OVERLOADED = error(529, "overloaded_error", "req_illustrative_0529");
+    static final Reply BAD_REQUEST = error(400, "invalid_request_error", "req_illustrative_0400");
+    static final Reply SPEND_CAP = Reply.json(429, map("type", "error", "error", map("type", "rate_limit_error", "message", "monthly limit reached",
+        "details", map("error_code", "enforced_spend_limit_reached")), "request_id", "req_illustrative_0429"), "request-id", "req_illustrative_0429");
+
+    static AnthropicClient clientFor(ScriptedHttp transport, int maxRetries) {
+        return Scripted.clientOn(transport, maxRetries);
+    }
+
+    static void attempt(String label, List<Object> script, int maxRetries) {
+        ScriptedHttp transport = Scripted.http(script.toArray());
+        String outcome;
+        try {
+            Message reply = clientFor(transport, maxRetries).messages().create(params());
+            outcome = "ok '" + reply.content().get(0).asText().text() + "'";
+        } catch (AnthropicServiceException err) {
+            outcome = err.getClass().getSimpleName() + " " + err.statusCode() + " " + err.errorType().get().asString() + " request id " + err.headers().values("request-id").get(0);
+        } catch (AnthropicIoException err) {
+            outcome = err.getClass().getSimpleName();
+        }
+        List<String> counts = new ArrayList<>();
+        transport.headers.forEach(h -> counts.add("'" + h.get("x-stainless-retry-count") + "'"));
+        System.out.println(label + ": " + transport.requests.size() + " request(s), retry-count header [" + String.join(", ", counts) + "] -> " + outcome);
+    }
+
+    public static void main(String[] args) {
+        attempt("529, 529, then 200, max_retries=2", List.of(OVERLOADED, OVERLOADED, message(List.of(text("Hello.")))), 2);
+        attempt("529, 529, then 200, max_retries=0", List.of(OVERLOADED, OVERLOADED, message(List.of(text("Hello.")))), 0);
+        attempt("400 is never retried, max_retries=2", List.of(BAD_REQUEST, message(List.of(text("Hello.")))), 2);
+        attempt("spend-cap 429, max_retries=2", List.of(SPEND_CAP, SPEND_CAP, SPEND_CAP), 2);
+        AnthropicIoException timeout = new AnthropicIoException("scripted", new SocketTimeoutException("scripted"));
+        attempt("timeout twice, max_retries=1", List.of(timeout, timeout), 1);
+    }
+}
+```
+```text
+529, 529, then 200, max_retries=2: 3 request(s), retry-count header ['0', '1', '2'] -> ok 'Hello.'
+529, 529, then 200, max_retries=0: 1 request(s), retry-count header ['0'] -> InternalServerException 529 overloaded_error request id req_illustrative_0529
+400 is never retried, max_retries=2: 1 request(s), retry-count header ['0'] -> BadRequestException 400 invalid_request_error request id req_illustrative_0400
+spend-cap 429, max_retries=2: 3 request(s), retry-count header ['0', '1', '2'] -> RateLimitException 429 rate_limit_error request id req_illustrative_0429
+timeout twice, max_retries=1: 2 request(s), retry-count header ['0', '1'] -> AnthropicIoException
+```
+```kotlin
+import com.anthropic.client.AnthropicClient
+import com.anthropic.errors.AnthropicIoException
+import com.anthropic.errors.AnthropicServiceException
+import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.Model
+import harness.Reply
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+import harness.ScriptedHttp
+import java.net.SocketTimeoutException
+
+/**
+ * What the SDK retries on its own, and what it does not, against a scripted transport.
+ *
+ * The failures are illustrative, hand-written replies shaped like the API's error bodies.
+ * The SDK asks for a short exponential back-off between attempts (about 0.5 s, then about 1 s); the course's transport records
+ * those waits instead of sleeping them.
+ */
+const val MODEL = "claude-sonnet-5-5"
+
+fun params(): MessageCreateParams = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(16).addUserMessage("Hi").build()
+
+fun error(status: Int, kind: String, requestId: String) =
+    Reply.json(status, map("type", "error", "error", map("type", kind, "message", kind), "request_id", requestId), "request-id", requestId)
+
+val OVERLOADED = error(529, "overloaded_error", "req_illustrative_0529")
+val BAD_REQUEST = error(400, "invalid_request_error", "req_illustrative_0400")
+val SPEND_CAP = Reply.json(
+    429,
+    map(
+        "type", "error",
+        "error", map("type", "rate_limit_error", "message", "monthly limit reached", "details", map("error_code", "enforced_spend_limit_reached")),
+        "request_id", "req_illustrative_0429",
+    ),
+    "request-id", "req_illustrative_0429",
+)
+
+fun clientFor(transport: ScriptedHttp, maxRetries: Int): AnthropicClient = Scripted.clientOn(transport, maxRetries)
+
+fun attempt(label: String, script: List<Any>, maxRetries: Int) {
+    val transport = Scripted.http(*script.toTypedArray())
+    val outcome = try {
+        "ok '${clientFor(transport, maxRetries).messages().create(params()).content()[0].asText().text()}'"
+    } catch (err: AnthropicServiceException) {
+        "${err.javaClass.simpleName} ${err.statusCode()} ${err.errorType().get().asString()} request id ${err.headers().values("request-id")[0]}"
+    } catch (err: AnthropicIoException) {
+        err.javaClass.simpleName
+    }
+    val counts = transport.headers.joinToString(", ", "[", "]") { "'${it["x-stainless-retry-count"]}'" }
+    println("$label: ${transport.requests.size} request(s), retry-count header $counts -> $outcome")
+}
+
+fun main() {
+    attempt("529, 529, then 200, max_retries=2", listOf(OVERLOADED, OVERLOADED, message(listOf(text("Hello.")))), 2)
+    attempt("529, 529, then 200, max_retries=0", listOf(OVERLOADED, OVERLOADED, message(listOf(text("Hello.")))), 0)
+    attempt("400 is never retried, max_retries=2", listOf(BAD_REQUEST, message(listOf(text("Hello.")))), 2)
+    attempt("spend-cap 429, max_retries=2", listOf(SPEND_CAP, SPEND_CAP, SPEND_CAP), 2)
+    val timeout = AnthropicIoException("scripted", SocketTimeoutException("scripted"))
+    attempt("timeout twice, max_retries=1", listOf(timeout, timeout), 1)
+}
+```
+```text
+529, 529, then 200, max_retries=2: 3 request(s), retry-count header ['0', '1', '2'] -> ok 'Hello.'
+529, 529, then 200, max_retries=0: 1 request(s), retry-count header ['0'] -> InternalServerException 529 overloaded_error request id req_illustrative_0529
+400 is never retried, max_retries=2: 1 request(s), retry-count header ['0'] -> BadRequestException 400 invalid_request_error request id req_illustrative_0400
+spend-cap 429, max_retries=2: 3 request(s), retry-count header ['0', '1', '2'] -> RateLimitException 429 rate_limit_error request id req_illustrative_0429
+timeout twice, max_retries=1: 2 request(s), retry-count header ['0', '1'] -> AnthropicIoException
+```
 <!-- /example -->
 
 The output shows, in order:
@@ -231,9 +381,12 @@ The output shows, in order:
 So the SDK default is a good floor for a script and a poor policy for a product. The product needs its own budget,
 its own handling of the spend cap and its own idempotency, which is what the practice builds.
 
-Java and Kotlin have no example tab on this page. The Java SDK documents the same defaults (two retries; connection
-errors, 408, 409, 429 and 5xx retried) and the builder method `maxRetries`, so `AnthropicOkHttpClient.builder().fromEnv()
-.maxRetries(4).build()` changes them. The practice below runs in all four languages.
+The Java and Kotlin tabs run the same scripted failures through the Java SDK, which documents the same defaults (two retries;
+connection errors, 408, 409, 429 and 5xx retried) and the builder method `maxRetries`, so `AnthropicOkHttpClient.builder().fromEnv()
+.maxRetries(4).build()` changes them. The back-off is recorded by a sleeper the example gives the client, not waited for. The
+error classes carry the Java names: `BadRequestException`, `RateLimitException`, `InternalServerException` for the 529 (the SDK has
+no class of its own for it; the body's `overloaded_error` still shows) and `AnthropicIoException` for the two timeouts. The counts
+and the retry-count headers are the same. The practice below runs in all four languages.
 
 ## The practice: a retry policy
 
