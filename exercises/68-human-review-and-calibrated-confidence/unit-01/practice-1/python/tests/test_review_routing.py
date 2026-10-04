@@ -48,6 +48,8 @@ def test_e2_automation_needs_every_segment_to_pass_and_enough_samples_in_each():
     assert can_automate(recs("invoice", "total", 97, 3) + recs("receipt", "date", 45, 5), 95, 30) == {"automate": False, "failing": ["receipt/date"], "undersampled": []}
     assert can_automate(recs("invoice", "total", 97, 3) + recs("receipt", "date", 50, 0), 95, 30) == {"automate": True, "failing": [], "undersampled": []}
     assert can_automate([], 95, 30)["automate"] is False
+    assert can_automate(recs("invoice", "total", 97, 3) + recs("receipt", "date", 20, 10), 95, 30) == {"automate": False, "failing": ["receipt/date"], "undersampled": []}
+    assert can_automate(recs("invoice", "total", 95, 5), 95, 30) == {"automate": True, "failing": [], "undersampled": []}
 
 
 def test_e3_the_threshold_is_the_lowest_confidence_whose_accepted_items_meet_the_target_precision():
@@ -72,8 +74,8 @@ def test_e5_the_stratified_sample_takes_the_best_ranked_items_of_every_stratum()
 
 
 def test_e6_low_confidence_and_conflicts_go_to_review_with_the_weakest_first():
-    rows = [{"id": "x1", "confidence": 90, "conflict": False}, {"id": "x2", "confidence": 60, "conflict": False}, {"id": "x3", "confidence": 99, "conflict": True}, {"id": "x4", "confidence": 79, "conflict": False}]
-    assert route(rows, 80, 10) == {"review": ["x3", "x2", "x4"], "backlog": [], "auto": ["x1"]}
+    rows = [{"id": "x1", "confidence": 90, "conflict": False}, {"id": "x2", "confidence": 60, "conflict": False}, {"id": "x3", "confidence": 99, "conflict": True}, {"id": "x4", "confidence": 79, "conflict": False}, {"id": "x5", "confidence": 80, "conflict": False}]
+    assert route(rows, 80, 10) == {"review": ["x3", "x2", "x4"], "backlog": [], "auto": ["x1", "x5"]}
 
 
 def test_e7_review_capacity_is_respected_and_the_rest_wait_in_a_backlog():

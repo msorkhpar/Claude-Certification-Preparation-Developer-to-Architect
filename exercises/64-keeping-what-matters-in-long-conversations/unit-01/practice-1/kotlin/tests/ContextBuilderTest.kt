@@ -32,6 +32,7 @@ class ContextBuilderTest {
         val later = got(updateFacts(start, "address", "9 Elm Rd", "2026-09-10"))
         assertEquals(Fact("9 Elm Rd", "2026-09-10", listOf("12 Oak St@2026-08-01")), later["address"])
         assertEquals(Fact("12 Oak St", "2026-08-01", emptyList()), start["address"])
+        assertEquals(Fact("9 Elm Rd", "2026-08-01", listOf("12 Oak St@2026-08-01")), got(updateFacts(start, "address", "9 Elm Rd", "2026-08-01"))["address"])
     }
 
     @Test

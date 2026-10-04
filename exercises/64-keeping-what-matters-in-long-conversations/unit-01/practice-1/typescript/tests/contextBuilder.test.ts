@@ -33,6 +33,7 @@ test("e2 a newer fact replaces the old one and the old value is kept as history"
   const later = updateFacts(start, "address", "9 Elm Rd", "2026-09-10");
   assert.deepEqual(later.address, { value: "9 Elm Rd", as_of: "2026-09-10", superseded: ["12 Oak St@2026-08-01"] });
   assert.ok(start.address.value === "12 Oak St" && start.address.superseded.length === 0);
+  assert.deepEqual(updateFacts(start, "address", "9 Elm Rd", "2026-08-01").address, { value: "9 Elm Rd", as_of: "2026-08-01", superseded: ["12 Oak St@2026-08-01"] });
 });
 
 test("e3 an older fact that arrives late does not replace the current one", () => {

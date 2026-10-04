@@ -915,6 +915,10 @@ PRACTICES[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
     },
 }
 
+_c = PRACTICES[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"]["plants"]
+_c["wrong-chunk-at-limit"] = (["e4"], "chunks an entry that is exactly at the limit")
+_c["wrong-interval-boundary"] = (["m1"], "refuses a submission interval of one hour")
+
 # ===== Level 3: module 64 =====
 PRACTICES[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] = {
     "name": "context_builder", "suite": "ContextBuilderTest", "langs": ["python", "typescript", "java", "kotlin"],
@@ -937,6 +941,8 @@ PRACTICES[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1
         "wrong-loose-summary-check": (["e6"], "counts a value as kept when only its first two characters appear"),
     },
 }
+
+PRACTICES[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"]["plants"]["wrong-equal-date-ignored"] = (["e2"], "ignores a fact dated the same day as the stored one")
 
 # ===== Level 3: module 65 =====
 PRACTICES[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
@@ -1039,6 +1045,11 @@ PRACTICES[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] =
         "wrong-irreversible-by-amount": (["e8"], "checks only the amount for an irreversible action"),
     },
 }
+
+_c = PRACTICES[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"]["plants"]
+_c["wrong-minn-boundary"] = (["e2"], "lets a segment with exactly the minimum number of records fail unnoticed")
+_c["wrong-threshold-boundary"] = (["e2"], "fails a segment that is exactly at the threshold")
+_c["wrong-route-boundary"] = (["e6"], "sends an extraction exactly at the threshold to review")
 
 # ===== Level 3: module 69 =====
 PRACTICES[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {

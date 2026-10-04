@@ -26,6 +26,7 @@ def finding(file="a.py", line=10, severity="medium", issue="unchecked input", co
 
 def test_m1_the_interval_between_submissions_leaves_room_for_the_window_and_the_handling():
     assert submission_interval(30) == 4
+    assert not refused(submission_interval, 27) and submission_interval(27) == 1
     assert submission_interval(48, window_hours=24, handling_hours=4) == 20
 
 
@@ -49,6 +50,7 @@ def test_e4_an_item_over_the_limit_is_chunked_and_a_rejected_request_is_fixed_fi
     results = [("big", "invalid_request"), ("bad", "invalid_request"), ("late", "expired"), ("bigexp", "expired")]
     sizes = {"big": 5000, "bad": 100, "late": 100, "bigexp": 5000}
     assert resubmission_plan(results, sizes, 1000) == [("big", "chunk"), ("bad", "fix"), ("late", "resubmit"), ("bigexp", "chunk")]
+    assert resubmission_plan([("exact", "expired")], {"exact": 1000}, 1000) == [("exact", "resubmit")]
 
 
 def test_e5_a_multi_file_review_gets_a_local_pass_per_file_and_one_integration_pass():

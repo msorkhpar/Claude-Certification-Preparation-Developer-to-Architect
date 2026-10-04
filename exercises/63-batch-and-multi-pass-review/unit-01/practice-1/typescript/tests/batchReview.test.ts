@@ -15,6 +15,8 @@ const finding = (over: Record<string, unknown> = {}): any => ({ file: "a.py", li
 
 test("m1 the interval between submissions leaves room for the window and the handling", () => {
   assert.equal(submissionInterval(30), 4);
+  assert.doesNotThrow(() => submissionInterval(27));
+  assert.equal(submissionInterval(27), 1);
   assert.equal(submissionInterval(48, 24, 4), 20);
 });
 
@@ -39,6 +41,7 @@ test("e4 an item over the limit is chunked and a rejected request is fixed first
   const results = [["big", "invalid_request"], ["bad", "invalid_request"], ["late", "expired"], ["bigexp", "expired"]];
   const sizes = { big: 5000, bad: 100, late: 100, bigexp: 5000 };
   assert.deepEqual(resubmissionPlan(results, sizes, 1000), [["big", "chunk"], ["bad", "fix"], ["late", "resubmit"], ["bigexp", "chunk"]]);
+  assert.deepEqual(resubmissionPlan([["exact", "expired"]], { exact: 1000 }, 1000), [["exact", "resubmit"]]);
 });
 
 test("e5 a multi file review gets a local pass per file and one integration pass", () => {

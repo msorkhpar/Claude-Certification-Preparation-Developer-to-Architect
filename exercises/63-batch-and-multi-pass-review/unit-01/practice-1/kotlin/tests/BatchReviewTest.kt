@@ -12,6 +12,8 @@ class BatchReviewTest {
     @Test
     fun m1_theIntervalBetweenSubmissionsLeavesRoomForTheWindowAndTheHandling() {
         assertEquals(4, submissionInterval(30))
+        assertDoesNotThrow { submissionInterval(27) }
+        assertEquals(1, submissionInterval(27))
         assertEquals(20, submissionInterval(48, 24, 4))
     }
 
@@ -40,6 +42,7 @@ class BatchReviewTest {
         val results = listOf(Result("big", "invalid_request"), Result("bad", "invalid_request"), Result("late", "expired"), Result("bigexp", "expired"))
         val sizes = mapOf("big" to 5000, "bad" to 100, "late" to 100, "bigexp" to 5000)
         assertEquals(listOf(Step("big", "chunk"), Step("bad", "fix"), Step("late", "resubmit"), Step("bigexp", "chunk")), resubmissionPlan(results, sizes, 1000))
+        assertEquals(listOf(Step("exact", "resubmit")), resubmissionPlan(listOf(Result("exact", "expired")), mapOf("exact" to 1000), 1000))
     }
 
     @Test

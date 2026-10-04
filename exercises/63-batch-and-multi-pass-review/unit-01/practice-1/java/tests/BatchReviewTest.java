@@ -29,6 +29,8 @@ class BatchReviewTest {
     @Test
     void m1_theIntervalBetweenSubmissionsLeavesRoomForTheWindowAndTheHandling() {
         assertEquals(4, BatchReview.submissionInterval(30));
+        assertDoesNotThrow(() -> BatchReview.submissionInterval(27));
+        assertEquals(1, BatchReview.submissionInterval(27));
         assertEquals(20, BatchReview.submissionInterval(48, 24, 4));
     }
 
@@ -57,6 +59,7 @@ class BatchReviewTest {
         List<BatchReview.Result> results = List.of(r("big", "invalid_request"), r("bad", "invalid_request"), r("late", "expired"), r("bigexp", "expired"));
         Map<String, Integer> sizes = Map.of("big", 5000, "bad", 100, "late", 100, "bigexp", 5000);
         assertEquals(List.of(s("big", "chunk"), s("bad", "fix"), s("late", "resubmit"), s("bigexp", "chunk")), BatchReview.resubmissionPlan(results, sizes, 1000));
+        assertEquals(List.of(s("exact", "resubmit")), BatchReview.resubmissionPlan(List.of(r("exact", "expired")), Map.of("exact", 1000), 1000));
     }
 
     @Test
