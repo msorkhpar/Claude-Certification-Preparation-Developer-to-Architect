@@ -78,7 +78,7 @@ A batch is written by one agent: no drafting or fixing forks or sub-agents, exce
 independent quiz readers. No test, example or program runs on the host outside the heavy-job slot, even a
 small one, and no process is killed except one the batch itself started and can name.
 Browser checks run in a headless Chrome with a throwaway profile, never in the owner's own browser.
-Every container or test run goes through the heavy-job slot, one at a time, never in the background,
+Every container or test run goes through the heavy-job slots (two light jobs may run side by side; the slot script decides), never in the background,
 with its real exit status read; a refusal is waited out, never bypassed. When a wait times out, read the job log's first line and the slot holders (`pgrep -af run-heavy.sh`) to tell a queued job from a running or hung one, and report "queued behind <job> since <time>" instead of relaunching the same wait; after two waits with no progress, hand back that status. Docker runs on the
 `desktop-linux` context with no host `/tmp` mounts, and scratch images and containers are removed. Commit
 messages end with the attribution line in `CLAUDE.md`'s convention; before each commit, check for
