@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -23,8 +24,43 @@ def out_path(practice, lang, variant):
     return OUT / f"{practice.replace('/', '_')}-{lang}-{variant}.txt"
 
 
-def analyse(lang, text, cases):
-    """Return (failed case ids, other problems, rc) for one run's output."""
+ASSERTION_TYPES = ("AssertionFailedError", "AssertionError", "ComparisonFailure", "MultipleFailuresError")
+
+
+def junit_results(practice, lang, variant):
+    """{test name: failure type or None} read from the JUnit XML report Gradle wrote for one Java or Kotlin variant, or None.
+
+    Gradle's short console format prints no exception line for some assertion failures (a multi-line assertEquals),
+    so the failure type is read from the report: <failure type=...> is an assertion, <error type=...> is any other exception."""
+    folder = ROOT / practice / f".build-{lang}" / variant / "test-results" / "test"
+    reports = sorted(folder.glob("TEST-*.xml"))
+    if not reports:
+        return None
+    results = {}
+    for report in reports:
+        for case in ET.parse(report).getroot().iter("testcase"):
+            bad = case.find("failure") if case.find("failure") is not None else case.find("error")
+            results[case.get("name").removesuffix("()")] = None if bad is None else (bad.tag, bad.get("type") or "")
+    return results
+
+
+def jvm_failures(text, suite, names, junit, failed, problems):
+    """Add the failed case ids and the non-assertion failures of one Java or Kotlin run (report first, console as a fallback)."""
+    if junit is not None:
+        for name, bad in junit.items():
+            if bad is not None:
+                failed.add(names.get(name, name))
+                if bad[0] != "failure" or not bad[1].endswith(ASSERTION_TYPES):
+                    problems.append(f"{name}: {bad[1] or bad[0]}")
+        return
+    for m in re.finditer(suite + r" > (\w+)\(\) FAILED\n\s+(\S+)", text):
+        failed.add(names.get(m.group(1), m.group(1)))
+        if "AssertionFailedError" not in m.group(2):
+            problems.append(f"{m.group(1)}: {m.group(2)}")
+
+
+def analyse(lang, text, cases, junit=None):
+    """Return (failed case ids, other problems, rc) for one run's output; junit is junit_results() for java and kotlin."""
     names = {c[lang]: cid for cid, c in cases["cases"].items()}
     failed, problems = set(), []
     rc_match = re.search(r"^rc=(\d+)\s*$", text, re.M)
@@ -48,20 +84,14 @@ def analyse(lang, text, cases):
         if re.search(r"error: |Execution failed for task ':compileJava'|Execution failed for task ':compileTestJava'", text):
             problems.append("compilation error")
         suite = cases["tests"]["java"]
-        for m in re.finditer(suite + r" > (\w+)\(\) FAILED\n\s+(\S+)", text):
-            failed.add(names.get(m.group(1), m.group(1)))
-            if "AssertionFailedError" not in m.group(2):
-                problems.append(f"{m.group(1)}: {m.group(2)}")
+        jvm_failures(text, suite, names, junit, failed, problems)
         if "BUILD FAILED" in text and not failed and not problems:
             problems.append("the build failed without a failing test")
     else:
         if re.search(r"^e: ", text, re.M):
             problems.append("compilation error")
         suite = cases["tests"]["kotlin"]
-        for m in re.finditer(suite + r" > (\w+)\(\) FAILED\n\s+(\S+)", text):
-            failed.add(names.get(m.group(1), m.group(1)))
-            if "AssertionFailedError" not in m.group(2):
-                problems.append(f"{m.group(1)}: {m.group(2)}")
+        jvm_failures(text, suite, names, junit, failed, problems)
         if "FAILED" in text and "BUILD FAILED" in text and not failed and not problems:
             problems.append("the build failed without a failing test")
     return failed, problems, rc
@@ -79,7 +109,7 @@ def main():
                     print(f"{practice} {lang} {variant}: no output at {p.name}")
                     findings += 1
                     continue
-                failed, problems, rc = analyse(lang, p.read_text(), cases)
+                failed, problems, rc = analyse(lang, p.read_text(), cases, junit_results(practice, lang, variant) if lang in ("java", "kotlin") else None)
                 if variant == "reference":
                     ok = not failed and not problems and rc == 0
                     want = "all pass with rc=0"
