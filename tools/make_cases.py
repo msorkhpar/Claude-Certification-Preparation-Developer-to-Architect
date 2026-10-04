@@ -1225,6 +1225,91 @@ PRACTICES[f"{X}/74-scenario-claude-code-in-ci/unit-01/practice-1"] = {
     },
 }
 
+# ===== Level 3: module 75 (the scenario capstone S6) =====
+PRACTICES[f"{X}/75-scenario-structured-data-extraction/unit-01/practice-1"] = {
+    "name": "run_audit", "suite": "RunAuditTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a mixed run gets every count both accuracies the segments and the first fix"),
+        ("e1", "edge", "an empty run has zero figures no segments and never meets the target"),
+        ("e2", "edge", "the run meets the target at exactly the target and not below it"),
+        ("e3", "edge", "a kind needs at least the minimum number of documents to be automated"),
+        ("e4", "edge", "a kind is automated at exactly the target accuracy and not below it"),
+        ("e5", "edge", "the figure is overstated only when the validated accuracy exceeds the all document accuracy by more than the gap"),
+        ("e6", "edge", "each shape counts documents once and an unchecked total counts only documents accepted as valid"),
+        ("e7", "edge", "the first fix follows the order of what costs most"),
+        ("e8", "edge", "percentages are whole numbers rounded half up"),
+    ],
+    "plants": {
+        "wrong-validated-denominator": (["m1", "e5"], "divides the correct documents by the valid ones and calls that the accuracy of the run"),
+        "wrong-target-strict": (["e2"], "requires the accuracy to be above the target and not at it"),
+        "wrong-segment-strict": (["e4"], "automates a kind only when its accuracy is above the target and not at it"),
+        "wrong-min-n-strict": (["m1", "e3"], "automates a kind only when it has more documents than the minimum and not at least that many"),
+        "wrong-gap-inclusive": (["e5"], "calls the figure overstated when the gap equals the limit"),
+        "wrong-unchecked-any-status": (["e6"], "counts an unchecked total in documents that were never accepted as valid"),
+        "wrong-fix-order": (["m1", "e7"], "puts the wasted retries before the invented values in the order of fixes"),
+        "wrong-rounding-floor": (["e8"], "rounds a percentage down and not half up"),
+        "wrong-empty-meets-target": (["e1"], "says an empty run meets the target"),
+    },
+}
+
+# ===== Level 3: module 76 (the conversational assistant capstone) =====
+PRACTICES[f"{X}/76-scenario-conversational-ai-assistant/unit-01/practice-1"] = {
+    "name": "conversation_review", "suite": "ConversationReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a mixed batch gets every count the segments and a verdict"),
+        ("e1", "edge", "an empty batch has zero figures and is held for lack of data"),
+        ("e2", "edge", "a safety signal counts as missed unless it went to a person as a safety hand off"),
+        ("e3", "edge", "a conversation is overlong only above the turn limit and only when nobody took over"),
+        ("e4", "edge", "repeated questions are acceptable at exactly the limit and not above it"),
+        ("e5", "edge", "a segment is weak only below the resolution floor and not at it"),
+        ("e6", "edge", "a segment needs the minimum number of conversations before it can be called weak"),
+        ("e7", "edge", "a hand off is over escalation only when no person was needed and no safety signal was present"),
+        ("e8", "edge", "only conversations the assistant settled alone count as resolved"),
+        ("e9", "edge", "percentages are whole numbers rounded half up"),
+    ],
+    "plants": {
+        "wrong-safety-any-hand-off": (["e2"], "counts a safety signal as handled when any person took over and not a safety hand off"),
+        "wrong-overlong-inclusive": (["e3"], "calls a conversation overlong when it has exactly the turn limit"),
+        "wrong-repeat-strict": (["e1", "e4"], "accepts repeated questions only below the limit and not at it"),
+        "wrong-weak-inclusive": (["m1", "e5"], "calls a segment weak when it is exactly at the resolution floor"),
+        "wrong-weak-ignores-min-n": (["m1", "e6"], "calls a small segment weak whatever its size"),
+        "wrong-min-n-strict": (["e6"], "needs more conversations than the minimum and not at least that many"),
+        "wrong-over-escalated-counts-risk": (["e7"], "counts a safety hand off as over escalation"),
+        "wrong-resolved-ignores-hand-off": (["e8"], "counts a conversation a person settled as resolved by the assistant"),
+        "wrong-rounding-floor": (["m1", "e9"], "rounds a percentage down and not half up"),
+        "wrong-safety-never-holds": (["e2"], "ships the assistant although a safety signal was missed"),
+    },
+}
+
+# ===== Level 3: module 77 (the agentic tool builder capstone) =====
+PRACTICES[f"{X}/77-scenario-agentic-tool-builder/unit-01/practice-1"] = {
+    "name": "tool_review", "suite": "ToolReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a well formed read only tool is approved and leaves an audit line"),
+        ("e1", "edge", "a description needs at least the minimum number of words"),
+        ("e2", "edge", "the timeout and the memory may equal their limits and not exceed them"),
+        ("e3", "edge", "a name is lower case snake case of at most sixty four characters"),
+        ("e4", "edge", "forbidden calls in the code refuse the tool and are all listed in order"),
+        ("e5", "edge", "a permission the code uses without declaring it or a denied one refuses the tool"),
+        ("e6", "edge", "a declared write is approved only with a gate and a read alone is approved outright"),
+        ("e7", "edge", "a refusal beats a revision and a revision beats a gate"),
+        ("e8", "edge", "the permissions the code uses are reported in alphabetical order"),
+    ],
+    "plants": {
+        "wrong-description-inclusive": (["e1"], "calls a description too short when it has exactly the minimum number of words"),
+        "wrong-timeout-inclusive": (["e2"], "flags a timeout that equals the limit"),
+        "wrong-memory-inclusive": (["e2"], "flags a memory request that equals the limit"),
+        "wrong-name-too-long": (["e3"], "rejects a name of exactly sixty four characters"),
+        "wrong-forbidden-first-only": (["e4"], "lists only the first forbidden call"),
+        "wrong-undeclared-ignored": (["e5"], "does not refuse a permission that the code uses and the proposal does not declare"),
+        "wrong-denied-ignored": (["e5"], "does not refuse a denied permission that the proposal declares"),
+        "wrong-gate-skipped": (["e6"], "approves a declared write outright with no gate"),
+        "wrong-revise-before-refuse": (["e7"], "sends a refused tool back for revision because it also has a finding"),
+        "wrong-used-unsorted": (["e8"], "reports the permissions in the order of the scan table and not alphabetically"),
+    },
+}
+
+
 # ===== Level 4: modules 79 to 84 =====
 PRACTICES[f"{X}/80-end-to-end-and-multi-agent-architecture/unit-01/practice-1"] = {
     "name": "architecture_review", "suite": "ArchitectureReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
