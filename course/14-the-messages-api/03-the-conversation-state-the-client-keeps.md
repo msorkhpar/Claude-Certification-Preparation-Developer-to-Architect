@@ -39,7 +39,7 @@ The program below keeps a history list, sends all of it on every turn and adds u
 against a scripted transport. The three replies end three different ways: normally, at `max_tokens`, and at a stop
 sequence. Read the output for what each request contained.
 
-<!-- example: m14-conversation tabs: python,typescript -->
+<!-- example: m14-conversation tabs: python,typescript,java,kotlin -->
 ```python
 """A conversation the client keeps: the API is stateless, so every request carries the whole history.
 
@@ -162,6 +162,154 @@ turn 3: sent 5 message(s) [user, assistant, user, assistant, user] -> stop_seque
 totals: { input: 89, output: 12 }
 system is a top-level field: true | roles ever used in messages: [ 'assistant', 'user' ]
 ```
+```java
+import static harness.Scripted.map;
+import static harness.Scripted.message;
+import static harness.Scripted.text;
+
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.models.messages.Message;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import com.fasterxml.jackson.databind.JsonNode;
+import harness.Scripted;
+import harness.ScriptedHttp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+/**
+ * A conversation the client keeps: the API is stateless, so every request carries the whole history.
+ *
+ * <p>Three turns through the real SDK against a scripted transport. The replies are illustrative,
+ * hand-written Messages responses (claude-sonnet-5-5), not captures.
+ */
+public final class Conversation {
+    static final String MODEL = "claude-sonnet-5-5";
+    static final String SYSTEM = "You answer in one short sentence.";
+
+    static final List<Map<String, Object>> REPLIES = List.of(
+        message(List.of(text("Paris.")), "end_turn", MODEL, map("input_tokens", 18, "output_tokens", 4), null),
+        message(List.of(text("It has been the capital since")), "max_tokens", MODEL, map("input_tokens", 30, "output_tokens", 6), null),
+        message(List.of(text("Seine")), "stop_sequence", MODEL, map("input_tokens", 41, "output_tokens", 2), "END"));
+    static final List<String> QUESTIONS = List.of("Capital of France?", "Since when?", "Name its river. End with END.");
+
+    /** One turn: the reply and the token totals so far. */
+    record Turn(Message reply, long input, long output) {}
+
+    /** Keep the history in the request builder and send all of it every time. */
+    static List<Turn> run(AnthropicClient client, List<String> questions) {
+        MessageCreateParams.Builder history = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(16).system(SYSTEM).stopSequences(List.of("END"));
+        long input = 0, output = 0;
+        List<Turn> turns = new ArrayList<>();
+        for (String question : questions) {
+            history.addUserMessage(question);
+            Message reply = client.messages().create(history.build());
+            history.addMessage(reply); // the assistant turn goes back exactly as it was received
+            input += reply.usage().inputTokens();
+            output += reply.usage().outputTokens();
+            turns.add(new Turn(reply, input, output));
+        }
+        return turns;
+    }
+
+    public static void main(String[] args) {
+        ScriptedHttp transport = Scripted.http(REPLIES.toArray());
+        List<Turn> turns = run(Scripted.clientOn(transport, 0), QUESTIONS);
+        for (int number = 1; number <= turns.size(); number++) {
+            Message reply = turns.get(number - 1).reply();
+            JsonNode sent = transport.requests.get(number - 1).get("messages");
+            List<String> roles = new ArrayList<>();
+            sent.forEach(m -> roles.add(m.get("role").asText()));
+            String stop = reply.stopReason().get().asString();
+            String sequence = reply.stopSequence().map(s -> " '" + s + "'").orElse("");
+            System.out.println("turn " + number + ": sent " + sent.size() + " message(s) [" + String.join(", ", roles) + "] -> " + stop + sequence + ", '" + reply.content().get(0).asText().text() + "'");
+        }
+        Turn last = turns.get(turns.size() - 1);
+        System.out.println("totals: {'input': " + last.input() + ", 'output': " + last.output() + "}");
+        boolean systemTopLevel = transport.requests.stream().allMatch(r -> SYSTEM.equals(r.path("system").asText()));
+        TreeSet<String> used = new TreeSet<>();
+        transport.requests.forEach(r -> r.get("messages").forEach(m -> used.add(m.get("role").asText())));
+        System.out.println("system is a top-level field: " + (systemTopLevel ? "True" : "False") + " | roles ever used in messages: "
+            + used.stream().map(r -> "'" + r + "'").collect(Collectors.joining(", ", "[", "]")));
+    }
+}
+```
+```text
+turn 1: sent 1 message(s) [user] -> end_turn, 'Paris.'
+turn 2: sent 3 message(s) [user, assistant, user] -> max_tokens, 'It has been the capital since'
+turn 3: sent 5 message(s) [user, assistant, user, assistant, user] -> stop_sequence 'END', 'Seine'
+totals: {'input': 89, 'output': 12}
+system is a top-level field: True | roles ever used in messages: ['assistant', 'user']
+```
+```kotlin
+import com.anthropic.client.AnthropicClient
+import com.anthropic.models.messages.Message
+import com.anthropic.models.messages.MessageCreateParams
+import com.anthropic.models.messages.Model
+import harness.Scripted
+import harness.Scripted.map
+import harness.Scripted.message
+import harness.Scripted.text
+
+/**
+ * A conversation the client keeps: the API is stateless, so every request carries the whole history.
+ *
+ * Three turns through the real SDK against a scripted transport. The replies are illustrative,
+ * hand-written Messages responses (claude-sonnet-5-5), not captures.
+ */
+const val MODEL = "claude-sonnet-5-5"
+const val SYSTEM = "You answer in one short sentence."
+
+val REPLIES = listOf(
+    message(listOf(text("Paris.")), "end_turn", MODEL, map("input_tokens", 18, "output_tokens", 4), null),
+    message(listOf(text("It has been the capital since")), "max_tokens", MODEL, map("input_tokens", 30, "output_tokens", 6), null),
+    message(listOf(text("Seine")), "stop_sequence", MODEL, map("input_tokens", 41, "output_tokens", 2), "END"),
+)
+val QUESTIONS = listOf("Capital of France?", "Since when?", "Name its river. End with END.")
+
+/** One turn: the reply and the token totals so far. */
+data class Turn(val reply: Message, val input: Long, val output: Long)
+
+/** Keep the history in the request builder and send all of it every time. */
+fun run(client: AnthropicClient, questions: List<String>): List<Turn> {
+    val history = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(16).system(SYSTEM).stopSequences(listOf("END"))
+    var input = 0L
+    var output = 0L
+    return questions.map { question ->
+        history.addUserMessage(question)
+        val reply = client.messages().create(history.build())
+        history.addMessage(reply) // the assistant turn goes back exactly as it was received
+        input += reply.usage().inputTokens()
+        output += reply.usage().outputTokens()
+        Turn(reply, input, output)
+    }
+}
+
+fun main() {
+    val transport = Scripted.http(*REPLIES.toTypedArray())
+    val turns = run(Scripted.clientOn(transport, 0), QUESTIONS)
+    for ((index, turn) in turns.withIndex()) {
+        val sent = transport.requests[index]["messages"]
+        val roles = sent.map { it["role"].asText() }
+        val sequence = turn.reply.stopSequence().map { " '$it'" }.orElse("")
+        println("turn ${index + 1}: sent ${sent.size()} message(s) [${roles.joinToString(", ")}] -> ${turn.reply.stopReason().get().asString()}$sequence, '${turn.reply.content()[0].asText().text()}'")
+    }
+    println("totals: {'input': ${turns.last().input}, 'output': ${turns.last().output}}")
+    val systemTopLevel = transport.requests.all { it.path("system").asText() == SYSTEM }
+    val used = transport.requests.flatMap { r -> r["messages"].map { it["role"].asText() } }.toSortedSet()
+    println("system is a top-level field: ${if (systemTopLevel) "True" else "False"} | roles ever used in messages: ${used.joinToString(", ", "[", "]") { "'$it'" }}")
+}
+```
+```text
+turn 1: sent 1 message(s) [user] -> end_turn, 'Paris.'
+turn 2: sent 3 message(s) [user, assistant, user] -> max_tokens, 'It has been the capital since'
+turn 3: sent 5 message(s) [user, assistant, user, assistant, user] -> stop_sequence 'END', 'Seine'
+totals: {'input': 89, 'output': 12}
+system is a top-level field: True | roles ever used in messages: ['assistant', 'user']
+```
 <!-- /example -->
 
 What the output shows:
@@ -174,9 +322,8 @@ What the output shows:
    mid-sentence) and `stop_sequence` with the sequence that matched.
 5. **Usage adds up**: 89 input tokens and 12 output tokens over the three turns in this scripted run.
 
-Java and Kotlin have no example tab on this page; the Java SDK builds the same list with `addUserMessage` and
-`addAssistantMessage` on `MessageCreateParams` (documented on the Java page), and the practice below runs in all four
-languages.
+The Java and Kotlin tabs build the same list with `addUserMessage` and `addMessage` (which takes the reply the SDK returned)
+on `MessageCreateParams`, and print the same lines. The practice below runs in all four languages.
 
 ### The cost of a long conversation
 
