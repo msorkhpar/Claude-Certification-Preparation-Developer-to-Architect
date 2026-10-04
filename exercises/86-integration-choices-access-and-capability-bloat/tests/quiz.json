@@ -1,0 +1,138 @@
+{
+  "module": "86-integration-choices-access-and-capability-bloat",
+  "quizzes": [
+    {
+      "id": "01-which-mechanism-a-gateway-and-whose-rights#q1",
+      "page": "01-which-mechanism-a-gateway-and-whose-rights.md",
+      "scope": "page",
+      "stem": "A nightly job always does the same three things in the same order: fetch invoices, ask Claude to label each one, write the labels to a ledger. How should the invoice system be reached?",
+      "options": {
+        "a": "As a plain function call made by the code that runs the sequence",
+        "b": "As an MCP server that the model decides to call when it needs invoices",
+        "c": "As a tool in the model's list, left for the model to call when it sees fit",
+        "d": "As a remote agent that the job reaches over an agent-to-agent protocol"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The path is fixed, so the code calls the invoice system and the model is not asked whether to.",
+        "b": "Ruled out because \"Workflows are systems where LLMs and tools are orchestrated through predefined code paths\", and a fixed step needs no model decision.",
+        "c": "Ruled out because for a known path \"the code calls, so the step is testable\", which a tool left to the model's choice is not.",
+        "d": "Ruled out because agent-to-agent suits \"The counterpart is another agent with its own goals and owner\", and an invoice system is not one."
+      }
+    },
+    {
+      "id": "01-which-mechanism-a-gateway-and-whose-rights#q2",
+      "page": "01-which-mechanism-a-gateway-and-whose-rights.md",
+      "scope": "page",
+      "stem": "A support agent runs under one service account that may issue refunds, and supervisors legitimately use the same agent for them. A clerk who may only read tickets asks it for a refund, and it is paid. What closes the gap?",
+      "options": {
+        "a": "Take the refund tool out of the agent's configuration for every user",
+        "b": "Record each refund so that the clerk's request can be found later",
+        "c": "Allow the call only when the person asking also holds the scope for it",
+        "d": "Add a line to the system prompt telling clerks not to ask for refunds"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The call is allowed only when the user holds the scope and the agent does too, so the agent's rights are a ceiling.",
+        "a": "Ruled out because \"it also stops the supervisors who are allowed to use it\".",
+        "b": "Ruled out because \"A record is written after the refund is paid\", so it detects and does not prevent.",
+        "d": "Ruled out because \"a line in the system prompt is a request to the model and not a control\", and an agent that holds the right can still grant the request."
+      }
+    },
+    {
+      "id": "02-capability-bloat-progressive-discovery-and-the-practice#q1",
+      "page": "02-capability-bloat-progressive-discovery-and-the-practice.md",
+      "scope": "page",
+      "stem": "A support agent can read tickets, draft replies, pay customers back and permanently close user profiles. Staff only ever read tickets and draft replies. Applying least privilege, which change reduces risk most?",
+      "options": {
+        "a": "Record every repayment and closure so that misuse can be audited later",
+        "b": "Strip the repayment and account-closure capabilities from its configuration altogether",
+        "c": "Keep every capability but ask for a confirmation before each repayment and closure",
+        "d": "Replace the agent with a larger model that follows instructions more reliably"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The role never needs those capabilities, so removing them from the configuration removes the risk.",
+        "a": "Ruled out because \"Logging and confirmation prompts are compensating controls\", acting after the privilege exists.",
+        "c": "is ruled out for the same reason, since a confirmation means \"they ask a person to carry the risk of a capability the role never needed\".",
+        "d": "Ruled out because \"A larger model does not change what the agent is allowed to do\"."
+      }
+    },
+    {
+      "id": "02-capability-bloat-progressive-discovery-and-the-practice#q2",
+      "page": "02-capability-bloat-progressive-discovery-and-the-practice.md",
+      "scope": "page",
+      "stem": "An internal agent is offered 45 capabilities from eight systems. It increasingly picks the wrong one, and the descriptions of all of them fill much of the window before the first message. Which first step fits?",
+      "options": {
+        "a": "Shorten every description so that the definitions take fewer tokens",
+        "b": "Merge the capabilities into a few multi-purpose ones that take a mode argument",
+        "c": "Move to a larger model so that more definitions fit in the window",
+        "d": "Defer most definitions behind a search tool and keep the few most used loaded"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "With 10 or more tools and large definitions, the search tool loads on demand and the most used tools stay loaded.",
+        "a": "Ruled out because shortening trades selection quality for tokens, and \"Too many tools or overlapping tools can also distract agents from pursuing efficient strategies\".",
+        "b": "Ruled out because merging \"hides the behaviours from the model's own choice and leaves the number of capabilities the same\".",
+        "c": "Ruled out because a larger window does not cure it: \"Claude's ability to pick the right tool degrades once you exceed 30–50 available tools\"."
+      }
+    },
+    {
+      "id": "02-capability-bloat-progressive-discovery-and-the-practice#m1",
+      "page": "02-capability-bloat-progressive-discovery-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team has 60 tools and turns on the tool search tool. A developer proposes to omit the least-used tools from the request, to save tokens. What does the documentation say?",
+      "options": {
+        "a": "Send the least-used ones inside the system prompt as plain text",
+        "b": "Send only the loaded tools, and keep the rest in the application",
+        "c": "Send every definition and mark the infrequent ones as deferred",
+        "d": "Send every definition with a cache breakpoint on each deferred one"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The search runs on the full set, so every definition is sent and the infrequent ones are marked as deferred.",
+        "b": "Ruled out because \"You still send every tool's full definition in the `tools` array on every request\".",
+        "a": "Ruled out because deferral changes \"what enters the context window\", and text in the prompt would load them all every time.",
+        "d": "Ruled out because deferred tools are kept out of the prefix, and \"A deferred tool cannot itself carry a cache breakpoint\"."
+      }
+    },
+    {
+      "id": "02-capability-bloat-progressive-discovery-and-the-practice#m2",
+      "page": "02-capability-bloat-progressive-discovery-and-the-practice.md",
+      "scope": "module",
+      "stem": "A company wants its developers to use Claude without handing them the model provider's credentials, with a limit per team and a record of every call. Which design fits?",
+      "options": {
+        "a": "One provider credential shared in a settings file that every developer receives",
+        "b": "A gateway that holds the vendor secret and gives each engineer a personal login",
+        "c": "A separate provider credential for each developer, each with a spend limit",
+        "d": "A proxy in each developer's editor that forwards calls without any check"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A gateway keeps the provider key on the server, gives each developer a credential and enforces limits and records in one place.",
+        "a": "Ruled out because \"the provider key stays server-side; developers hold gateway credentials instead\".",
+        "c": "Ruled out because the gateway is where \"enforce budgets and rate limits in one place\" and a record of every request are kept, and separate keys leave them in each client.",
+        "d": "Ruled out because \"who is calling comes first, because every later rule is a rule about a team\", and a proxy that forwards without a check decides nothing."
+      }
+    },
+    {
+      "id": "02-capability-bloat-progressive-discovery-and-the-practice#m3",
+      "page": "02-capability-bloat-progressive-discovery-and-the-practice.md",
+      "scope": "module",
+      "stem": "A partner company's autonomous research system, built on another framework, must hand sub-tasks to your own autonomous system and collect the results. Which mechanism does the integration use?",
+      "options": {
+        "a": "An MCP server that exposes your system as one tool of the partner's system",
+        "b": "A direct call from the partner's code into the functions of your system",
+        "c": "A subagent that your own framework starts on the partner's behalf",
+        "d": "An agent-to-agent protocol between the two independent parties"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The counterpart is an independent agent with its own owner, which is the agent-to-agent case.",
+        "a": "Ruled out because \"MCP is for agent-to-tool communication\", and the partner's agent is a peer and not a tool.",
+        "b": "Ruled out because a direct call suits \"The path is known: the same steps in the same order\", and a delegation between two agents is not that.",
+        "c": "Ruled out because A2A is \"Not a sub-agent or tool-call protocol\", and a subagent is how an agent delegates inside its own framework, not across two."
+      }
+    }
+  ]
+}
