@@ -60,7 +60,7 @@ Cancellation depends on the transport. On stdio the client sends a `notification
 
 The example runs a small server and a client over Streamable HTTP on the loopback interface. The tool `deploy` needs a person's confirmation for production, and `release_notes` asks the client's model for one sentence. Scripted callbacks stand in for the person and the model, and a log of the `tools/call` requests shows what crossed the wire.
 
-<!-- example: m33-streamable-http-mrtr tabs: python,typescript -->
+<!-- example: m33-streamable-http-mrtr tabs: python,typescript,java,kotlin -->
 ```python
 """A tool that asks for a person's confirmation and for a model completion, over Streamable HTTP on the loopback interface.
 
@@ -346,9 +346,486 @@ release_notes -> api: Checkout is faster.
 the first request was initialize: True and every later request carried a session id: True
 a client that cannot be asked -> a tool error that says so: True
 ```
+```java
+import io.modelcontextprotocol.client.McpClient;
+import io.modelcontextprotocol.client.McpSyncClient;
+import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
+import io.modelcontextprotocol.json.McpJsonDefaults;
+import io.modelcontextprotocol.json.TypeRef;
+import io.modelcontextprotocol.server.McpServer;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
+import io.modelcontextprotocol.spec.McpClientTransport;
+import io.modelcontextprotocol.spec.McpSchema;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.catalina.Context;
+import org.apache.catalina.startup.Tomcat;
+import reactor.core.publisher.Mono;
+
+/**
+ * A tool that asks for a person's confirmation and for a model completion, over Streamable HTTP on the loopback interface.
+ *
+ * <p>The server and the client are `io.modelcontextprotocol.sdk:mcp` 2.0.1 (the server runs in an embedded Tomcat), with scripted callbacks in
+ * place of a person and a model. This SDK speaks the 2025-11-25 revision, so the flow differs from the Python example next to it: there is an
+ * `initialize` handshake and a session id, and the server calls the client in the middle of the request, as a request of its own on the
+ * response stream. The log under the program output is what the client's transport sent and received, one JSON-RPC message at a time.
+ * Checked on 2026-10-04 against the "Streamable HTTP" page of the MCP specification.
+ */
+public final class MrtrHttp {
+    static final Map<String, Object> CONFIRM_SCHEMA = Map.of("type", "object", "properties", Map.of("confirm", Map.of("type", "boolean", "title", "Confirm the deployment")), "required", List.of("confirm"));
+
+    static McpSchema.CallToolResult text(String text, boolean isError) {
+        return McpSchema.CallToolResult.builder().addTextContent(text).isError(isError).build();
+    }
+
+    static SyncToolSpecification deploy() {
+        Map<String, Object> schema = Map.of("type", "object", "properties", Map.of("service", Map.of("type", "string"), "env", Map.of("type", "string")), "required", List.of("service", "env"));
+        McpSchema.Tool tool = McpSchema.Tool.builder("deploy", schema).description("Deploy a service; production needs a person's confirmation.").build();
+        return SyncToolSpecification.builder().tool(tool).callHandler((exchange, request) -> {
+            String service = (String) request.arguments().get("service"), env = (String) request.arguments().get("env");
+            if (env.equals("production")) {
+                if (exchange.getClientCapabilities().elicitation() == null) return text("Deploying to production needs confirmation, and this client cannot be asked.", true);
+                McpSchema.ElicitResult answer = exchange.createElicitation(new McpSchema.ElicitFormRequest("Deploy " + service + " to production?", CONFIRM_SCHEMA, null));
+                if (answer.action() != McpSchema.ElicitResult.Action.ACCEPT || !Boolean.TRUE.equals(answer.content().get("confirm"))) return text("Deployment cancelled", false);
+            }
+            return text("Deployed " + service + " to " + env, false);
+        }).build();
+    }
+
+    static SyncToolSpecification releaseNotes() {
+        Map<String, Object> schema = Map.of("type", "object", "properties", Map.of("service", Map.of("type", "string")), "required", List.of("service"));
+        McpSchema.Tool tool = McpSchema.Tool.builder("release_notes", schema).description("Write release notes with the client's model.").build();
+        return SyncToolSpecification.builder().tool(tool).callHandler((exchange, request) -> {
+            String service = (String) request.arguments().get("service");
+            McpSchema.CreateMessageResult completion = exchange.createMessage(McpSchema.CreateMessageRequest.builder(
+                List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER, new McpSchema.TextContent("Write one sentence of release notes for " + service + "."))), 100).build());
+            return text(service + ": " + ((McpSchema.TextContent) completion.content()).text(), false);
+        }).build();
+    }
+
+    /** The MCP endpoint on 127.0.0.1: an embedded Tomcat on a free port, with one session-aware transport for the one client of this program. */
+    record Running(Tomcat tomcat, String url) implements AutoCloseable {
+        @Override
+        public void close() throws Exception {
+            tomcat.stop();
+            tomcat.destroy();
+        }
+    }
+
+    static Running serveOnLoopback() throws Exception {
+        Logger.getLogger("org.apache").setLevel(Level.WARNING);
+        HttpServletStreamableServerTransportProvider transport = HttpServletStreamableServerTransportProvider.builder().jsonMapper(McpJsonDefaults.getMapper()).mcpEndpoint("/mcp").build();
+        McpServer.sync(transport).serverInfo("deployer", "1.0.0").capabilities(McpSchema.ServerCapabilities.builder().tools(false).build()).tools(deploy(), releaseNotes()).build();
+        Tomcat tomcat = new Tomcat();
+        String base = Files.createTempDirectory("mrtr-tomcat").toString();
+        tomcat.setBaseDir(base);
+        tomcat.setPort(0);
+        tomcat.getConnector().setProperty("address", "127.0.0.1");
+        Context context = tomcat.addContext("", base);
+        Tomcat.addServlet(context, "mcp", transport).setAsyncSupported(true);
+        context.addServletMappingDecoded("/mcp", "mcp");
+        tomcat.start();
+        return new Running(tomcat, "http://127.0.0.1:" + tomcat.getConnector().getLocalPort());
+    }
+
+    /** One line for a JSON-RPC message that crossed the wire. */
+    @SuppressWarnings("unchecked")
+    static String describe(McpSchema.JSONRPCMessage message, boolean fromServer) {
+        if (message instanceof McpSchema.JSONRPCRequest request) {
+            Object name = request.params() instanceof Map<?, ?> p ? p.get("name") : request.params() instanceof McpSchema.CallToolRequest c ? c.name() : null;
+            return request.method() + (name != null ? " " + name : "") + (fromServer ? " (a request from the server)" : "");
+        }
+        if (message instanceof McpSchema.JSONRPCResponse response) {
+            if (response.error() != null) return "error " + response.error().code();
+            if (fromServer && response.result() instanceof Map<?, ?> r && r.get("content") instanceof List<?> content) return "complete: " + ((Map<String, Object>) content.get(0)).get("text");
+            return "the answer to the server's request";
+        }
+        return ((McpSchema.JSONRPCNotification) message).method();
+    }
+
+    /** What the client's transport carried, in the order it happened, and whether every request after the first carried the session id. */
+    static final class WireLog {
+        final List<String> lines = Collections.synchronizedList(new ArrayList<>());
+        final Set<Object> callIds = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        volatile boolean sawInitialize = false, sessionOnEvery = true;
+
+        /** Wraps a transport so that each tools/call, each request from the server and each response is logged as it passes. */
+        McpClientTransport around(McpClientTransport inner) {
+            return new McpClientTransport() {
+                @Override
+                public Mono<Void> connect(Function<Mono<McpSchema.JSONRPCMessage>, Mono<McpSchema.JSONRPCMessage>> handler) {
+                    return inner.connect(incoming -> handler.apply(incoming.doOnNext(message -> {
+                        if (message instanceof McpSchema.JSONRPCRequest || (message instanceof McpSchema.JSONRPCResponse r && callIds.contains(r.id()))) lines.add("<- " + describe(message, true));
+                    })));
+                }
+
+                @Override
+                public Mono<Void> sendMessage(McpSchema.JSONRPCMessage message) {
+                    if (message instanceof McpSchema.JSONRPCRequest request && request.method().equals("tools/call")) {
+                        callIds.add(request.id());
+                        lines.add("-> " + describe(message, false));
+                    } else if (message instanceof McpSchema.JSONRPCResponse) {
+                        lines.add("-> " + describe(message, false));
+                    }
+                    return inner.sendMessage(message);
+                }
+
+                @Override
+                public Mono<Void> closeGracefully() {
+                    return inner.closeGracefully();
+                }
+
+                @Override
+                public <T> T unmarshalFrom(Object data, TypeRef<T> typeRef) {
+                    return inner.unmarshalFrom(data, typeRef);
+                }
+
+                @Override
+                public List<String> protocolVersions() {
+                    return inner.protocolVersions();
+                }
+
+                @Override
+                public void setExceptionHandler(Consumer<Throwable> handler) {
+                    inner.setExceptionHandler(handler);
+                }
+            };
+        }
+
+        /** Looks at each HTTP request the transport is about to send: the first must be initialize, the others must carry a session id. */
+        void check(java.net.http.HttpRequest.Builder builder, String method, java.net.URI endpoint, String body) {
+            boolean hasSession = builder.build().headers().firstValue("mcp-session-id").isPresent();
+            if (body != null && body.contains("\"method\":\"initialize\"")) sawInitialize = true;
+            else if (!hasSession) sessionOnEvery = false;
+        }
+    }
+
+    static McpSyncClient connect(String url, WireLog log, Function<McpSchema.ElicitFormRequest, McpSchema.ElicitResult> person, Function<McpSchema.CreateMessageRequest, McpSchema.CreateMessageResult> model) {
+        HttpClientStreamableHttpTransport http = HttpClientStreamableHttpTransport.builder(url).endpoint("/mcp")
+            .httpRequestCustomizer((builder, method, endpoint, body, context) -> log.check(builder, method, endpoint, body)).build();
+        McpClient.SyncSpec spec = McpClient.sync(log.around(http)).clientInfo(new McpSchema.Implementation("host", "1.0.0"));
+        if (person != null) spec.elicitation(person);
+        if (model != null) spec.sampling(model);
+        McpSyncClient client = spec.build();
+        client.initialize();
+        return client;
+    }
+
+    static String textOf(McpSchema.CallToolResult result) {
+        return ((McpSchema.TextContent) result.content().get(0)).text();
+    }
+
+    static String py(boolean value) {
+        return value ? "True" : "False";
+    }
+
+    public static void main(String[] args) throws Exception {
+        WireLog log = new WireLog();
+        Function<McpSchema.ElicitFormRequest, McpSchema.ElicitResult> person = request -> {
+            System.out.println("the person is asked: " + request.message());
+            return new McpSchema.ElicitResult(McpSchema.ElicitResult.Action.ACCEPT, Map.of("confirm", true));
+        };
+        Function<McpSchema.CreateMessageRequest, McpSchema.CreateMessageResult> model = request -> {
+            System.out.println("the client's model is asked: " + ((McpSchema.TextContent) request.messages().get(0).content()).text());
+            return new McpSchema.CreateMessageResult(McpSchema.Role.ASSISTANT, new McpSchema.TextContent("Checkout is faster."), "scripted", McpSchema.CreateMessageResult.StopReason.END_TURN);
+        };
+        try (Running server = serveOnLoopback()) {
+            McpSyncClient client = connect(server.url(), log, person, model);
+            Object[][] calls = {{"deploy", Map.of("service", "api", "env", "production")}, {"deploy", Map.of("service", "api", "env", "staging")}, {"release_notes", Map.of("service", "api")}};
+            for (Object[] call : calls) {
+                @SuppressWarnings("unchecked") Map<String, Object> arguments = (Map<String, Object>) call[1];
+                log.lines.clear();
+                McpSchema.CallToolResult result = client.callTool(new McpSchema.CallToolRequest((String) call[0], arguments));
+                System.out.println(call[0] + (arguments.containsKey("env") ? " " + arguments.get("env") : "") + " -> " + textOf(result));
+                synchronized (log.lines) {
+                    log.lines.forEach(line -> System.out.println("   " + line));
+                }
+            }
+            System.out.println("the first request was initialize: " + py(log.sawInitialize) + " and every later request carried a session id: " + py(log.sessionOnEvery));
+            client.closeGracefully();
+        }
+        try (Running second = serveOnLoopback()) {
+            McpSyncClient bare = connect(second.url(), new WireLog(), null, null);
+            McpSchema.CallToolResult result = bare.callTool(new McpSchema.CallToolRequest("deploy", Map.of("service", "api", "env", "production")));
+            System.out.println("a client that cannot be asked -> " + (Boolean.TRUE.equals(result.isError()) ? "a tool error" : "a result") + " that says so: " + py(textOf(result).contains("cannot be asked")));
+            bare.closeGracefully();
+        }
+        System.exit(0);
+    }
+}
+```
+```text
+the person is asked: Deploy api to production?
+deploy production -> Deployed api to production
+   -> tools/call deploy
+   <- elicitation/create (a request from the server)
+   -> the answer to the server's request
+   <- complete: Deployed api to production
+deploy staging -> Deployed api to staging
+   -> tools/call deploy
+   <- complete: Deployed api to staging
+the client's model is asked: Write one sentence of release notes for api.
+release_notes -> api: Checkout is faster.
+   -> tools/call release_notes
+   <- sampling/createMessage (a request from the server)
+   -> the answer to the server's request
+   <- complete: api: Checkout is faster.
+the first request was initialize: True and every later request carried a session id: True
+a client that cannot be asked -> a tool error that says so: True
+```
+```kotlin
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO as ClientCIO
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.plugin
+import io.ktor.client.plugins.sse.SSE
+import io.ktor.http.HttpMethod
+import io.ktor.server.application.install
+import io.ktor.server.cio.CIO as ServerCIO
+import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.embeddedServer
+import io.modelcontextprotocol.kotlin.sdk.client.Client
+import io.modelcontextprotocol.kotlin.sdk.client.ClientOptions
+import io.modelcontextprotocol.kotlin.sdk.client.mcpStreamableHttpTransport
+import io.modelcontextprotocol.kotlin.sdk.server.Server
+import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
+import io.modelcontextprotocol.kotlin.sdk.server.mcpStreamableHttp
+import io.modelcontextprotocol.kotlin.sdk.shared.Transport
+import io.modelcontextprotocol.kotlin.sdk.shared.TransportSendOptions
+import io.modelcontextprotocol.kotlin.sdk.types.BooleanSchema
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.ClientCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.CreateMessageRequest
+import io.modelcontextprotocol.kotlin.sdk.types.CreateMessageRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.CreateMessageResult
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.ElicitResult
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCError
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCNotification
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCRequest
+import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCResponse
+import io.modelcontextprotocol.kotlin.sdk.types.Method
+import io.modelcontextprotocol.kotlin.sdk.types.RequestId
+import io.modelcontextprotocol.kotlin.sdk.types.Role
+import io.modelcontextprotocol.kotlin.sdk.types.SamplingMessage
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.StopReason
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.exitProcess
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+
+/**
+ * A tool that asks for a person's confirmation and for a model completion, over Streamable HTTP on the loopback interface.
+ *
+ * The server and the client are `io.modelcontextprotocol:kotlin-sdk` 0.15.0 (the server runs on Ktor's CIO engine), with scripted callbacks
+ * in place of a person and a model. This SDK speaks the 2025-11-25 revision, so the flow differs from the Python example next to it: there
+ * is an `initialize` handshake and a session id, and the server calls the client in the middle of the request, as a request of its own on
+ * the response stream. The log under the program output is what the client's transport sent and received, one JSON-RPC message at a time.
+ * Checked on 2026-10-04 against the "Streamable HTTP" page of the MCP specification.
+ */
+private fun text(text: String, isError: Boolean) = CallToolResult(content = listOf(TextContent(text)), isError = isError)
+
+private fun property(type: String) = buildJsonObject { put("type", type) }
+
+fun buildServer(): Server {
+    val server = Server(Implementation("deployer", "1.0.0"), ServerOptions(ServerCapabilities(tools = ServerCapabilities.Tools(false))))
+    server.addTool(
+        "deploy", "Deploy a service; production needs a person's confirmation.",
+        ToolSchema(properties = buildJsonObject { put("service", property("string")); put("env", property("string")) }, required = listOf("service", "env")),
+    ) { request ->
+        val service = request.arguments!!["service"]!!.jsonPrimitive.content
+        val env = request.arguments!!["env"]!!.jsonPrimitive.content
+        if (env == "production") {
+            val answer = try {
+                createElicitation("Deploy $service to production?", ElicitRequestParams.RequestedSchema(properties = mapOf("confirm" to BooleanSchema(title = "Confirm the deployment")), required = listOf("confirm")))
+            } catch (e: IllegalStateException) { // the SDK refuses to ask a client that did not declare elicitation
+                return@addTool text("Deploying to production needs confirmation, and this client cannot be asked.", true)
+            }
+            if (answer.action != ElicitResult.Action.Accept || answer.content?.get("confirm")?.jsonPrimitive?.booleanOrNull != true) return@addTool text("Deployment cancelled", false)
+        }
+        text("Deployed $service to $env", false)
+    }
+    server.addTool(
+        "release_notes", "Write release notes with the client's model.",
+        ToolSchema(properties = buildJsonObject { put("service", property("string")) }, required = listOf("service")),
+    ) { request ->
+        val service = request.arguments!!["service"]!!.jsonPrimitive.content
+        val completion = createMessage(CreateMessageRequest(CreateMessageRequestParams(
+            maxTokens = 100, messages = listOf(SamplingMessage(Role.User, listOf(TextContent("Write one sentence of release notes for $service.")))))))
+        text("$service: ${(completion.content[0] as TextContent).text}", false)
+    }
+    return server
+}
+
+/** The MCP endpoint on 127.0.0.1: Ktor's CIO engine on a free port. */
+class Running(val engine: EmbeddedServer<*, *>, val url: String) : AutoCloseable {
+    override fun close() = engine.stop(0, 0)
+}
+
+suspend fun serveOnLoopback(): Running {
+    val engine = embeddedServer(ServerCIO, port = 0, host = "127.0.0.1") { mcpStreamableHttp { buildServer() } }.startSuspend(wait = false)
+    return Running(engine, "http://127.0.0.1:${engine.engine.resolvedConnectors().first().port}/mcp")
+}
+
+/** One line for a JSON-RPC message that crossed the wire. */
+fun describe(message: JSONRPCMessage, fromServer: Boolean): String = when (message) {
+    is JSONRPCRequest -> message.method + (message.params?.jsonObject?.get("name")?.jsonPrimitive?.content?.let { " $it" } ?: "") + if (fromServer) " (a request from the server)" else ""
+    is JSONRPCResponse -> if (fromServer && message.result is CallToolResult) "complete: " + ((message.result as CallToolResult).content[0] as TextContent).text else "the answer to the server's request"
+    is JSONRPCError -> "error ${message.error.code}"
+    is JSONRPCNotification -> message.method
+    else -> ""
+}
+
+/** What the client's transport carried, in the order it happened, and whether every request after the first carried the session id. */
+class WireLog {
+    val lines = CopyOnWriteArrayList<String>()
+    private val callIds = java.util.concurrent.ConcurrentHashMap.newKeySet<RequestId>()
+    @Volatile var sawInitialize = false
+    @Volatile var sessionOnEvery = true
+    private val first = AtomicBoolean(true)
+
+    /** Wraps a transport so that each tools/call, each request from the server and each response is logged as it passes. */
+    fun around(inner: Transport) = object : Transport by inner {
+        override fun onMessage(block: suspend (JSONRPCMessage) -> Unit) = inner.onMessage { message ->
+            if (message is JSONRPCRequest || (message is JSONRPCResponse && message.id in callIds)) lines += "<- ${describe(message, true)}"
+            block(message)
+        }
+
+        override suspend fun send(message: JSONRPCMessage, options: TransportSendOptions?) {
+            if (message is JSONRPCRequest && message.method == Method.Defined.Initialize.value) sawInitialize = true
+            if (message is JSONRPCRequest && message.method == Method.Defined.ToolsCall.value) {
+                callIds += message.id
+                lines += "-> ${describe(message, false)}"
+            } else if (message is JSONRPCResponse) {
+                lines += "-> ${describe(message, false)}"
+            }
+            inner.send(message, options)
+        }
+    }
+
+    private val eventStreamOpen = CompletableDeferred<Unit>()
+
+    /** Looks at each HTTP request the client is about to send: the first is the initialize, the others must carry a session id. */
+    fun attach(http: HttpClient) {
+        http.plugin(HttpSend).intercept { request ->
+            if (!first.getAndSet(false) && request.headers["mcp-session-id"] == null) sessionOnEvery = false
+            val call = execute(request)
+            if (request.method == HttpMethod.Get) eventStreamOpen.complete(Unit) // the server has answered the client's request for its event stream
+            call
+        }
+    }
+
+    /**
+     * This server answers each call with plain JSON, so a request that it makes in the middle of a call can only travel on the client's
+     * standalone event stream (a GET that the client opens on its own after the handshake). A caller waits for that stream before the first call.
+     */
+    suspend fun awaitEventStream() = withTimeout(10_000) { eventStreamOpen.await() }
+}
+
+suspend fun connect(url: String, log: WireLog, person: ((ElicitRequestParams) -> ElicitResult)?, model: ((CreateMessageRequest) -> CreateMessageResult)?): Client {
+    val http = HttpClient(ClientCIO) {
+        install(SSE)
+        install(HttpTimeout) { requestTimeoutMillis = 120_000 } // the engine's default of 15 seconds also applies to a stream that stays open
+    }
+    log.attach(http)
+    val capabilities = ClientCapabilities(
+        sampling = if (model != null) ClientCapabilities.Sampling() else null,
+        elicitation = if (person != null) ClientCapabilities.Elicitation(form = JsonObject(emptyMap())) else null)
+    val client = Client(Implementation("host", "1.0.0"), ClientOptions(capabilities = capabilities))
+    if (person != null) client.setElicitationHandler { request -> person(request.params) }
+    if (model != null) client.setRequestHandler<CreateMessageRequest>(Method.Defined.SamplingCreateMessage) { request, _ -> model(request) }
+    client.connect(log.around(http.mcpStreamableHttpTransport(url)))
+    log.awaitEventStream()
+    return client
+}
+
+fun textOf(result: CallToolResult) = (result.content[0] as TextContent).text
+
+fun py(value: Boolean) = if (value) "True" else "False"
+
+fun main() {
+  System.setProperty("kotlin-logging.logStartupMessage", "false") // the SDK's logging library would otherwise print one line to stdout
+  runBlocking {
+    val log = WireLog()
+    val person = { request: ElicitRequestParams ->
+        println("the person is asked: ${request.message}")
+        ElicitResult(ElicitResult.Action.Accept, buildJsonObject { put("confirm", true) })
+    }
+    val model = { request: CreateMessageRequest ->
+        println("the client's model is asked: ${(request.params.messages[0].content[0] as TextContent).text}")
+        CreateMessageResult(Role.Assistant, listOf(TextContent("Checkout is faster.")), "scripted", StopReason.EndTurn)
+    }
+    serveOnLoopback().use { server ->
+        val client = connect(server.url, log, person, model)
+        for ((name, arguments) in listOf("deploy" to mapOf("service" to "api", "env" to "production"), "deploy" to mapOf("service" to "api", "env" to "staging"), "release_notes" to mapOf("service" to "api"))) {
+            log.lines.clear()
+            val result = client.callTool(name, arguments)
+            println("$name${if ("env" in arguments) " " + arguments["env"] else ""} -> ${textOf(result)}")
+            log.lines.forEach { println("   $it") }
+        }
+        println("the first request was initialize: ${py(log.sawInitialize)} and every later request carried a session id: ${py(log.sessionOnEvery)}")
+        client.close()
+    }
+    serveOnLoopback().use { second ->
+        val bare = connect(second.url, WireLog(), null, null)
+        val result = bare.callTool("deploy", mapOf("service" to "api", "env" to "production"))
+        println("a client that cannot be asked -> ${if (result.isError == true) "a tool error" else "a result"} that says so: ${py("cannot be asked" in textOf(result))}")
+        bare.close()
+    }
+  }
+  exitProcess(0)
+}
+```
+```text
+the person is asked: Deploy api to production?
+deploy production -> Deployed api to production
+   -> tools/call deploy
+   <- elicitation/create (a request from the server)
+   -> the answer to the server's request
+   <- complete: Deployed api to production
+deploy staging -> Deployed api to staging
+   -> tools/call deploy
+   <- complete: Deployed api to staging
+the client's model is asked: Write one sentence of release notes for api.
+release_notes -> api: Checkout is faster.
+   -> tools/call release_notes
+   <- sampling/createMessage (a request from the server)
+   -> the answer to the server's request
+   <- complete: api: Checkout is faster.
+the first request was initialize: True and every later request carried a session id: True
+a client that cannot be asked -> a tool error that says so: True
+```
 <!-- /example -->
 
 Read the two outputs side by side. In the Python output, the first request ends with an input-required result that asks for an `elicitation/create` and carries a `requestState`. The second `tools/call` is the retry, with `inputResponses` and the state, and it is answered with the final result. A staging deploy needs no input, and it completes in one round trip. A client that did not declare elicitation gets the -32021 error. The TypeScript output shows the other era, because the TypeScript SDK in the course speaks 2025-11-25: the server sends its own `elicitation/create` request on the stream of the call and waits for the client's answer, the first request of the conversation is `initialize`, and every later request carries a session id. A client that cannot be asked gets a tool error that says so. Same tools, same answers, and two different wires. A server written for 2026-07-28 does not work this way, and a server written for 2025-11-25 does.
+
+The Java and Kotlin tabs print the same lines as the TypeScript tab, because the JVM MCP SDKs (`io.modelcontextprotocol.sdk:mcp` 2.0.1, with the server in an embedded Tomcat, and `io.modelcontextprotocol:kotlin-sdk` 0.15.0, on Ktor) also speak 2025-11-25. The log in those tabs is the JSON-RPC messages that the client's transport sent and received, taken from a wrapper around the transport; the session-id check looks at each HTTP request the client is about to send. One difference in how it is built: the Kotlin SDK's server answers each call with plain JSON, so a request that it makes in the middle of a call can only travel on the client's standalone event stream, and the Kotlin tab waits for that stream to open before its first call (the Java SDK's server ties the request to the call's own stream).
 
 ## Traps
 
