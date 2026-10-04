@@ -1,0 +1,139 @@
+{
+  "practice": "84-cost-and-capacity-engineering/unit-01/practice-1",
+  "name": "gateway_budget",
+  "tests": {
+    "java": "GatewayBudgetTest",
+    "kotlin": "GatewayBudgetTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_request_follows_the_route_table_of_the_gateway",
+      "typescript": "m1 a request follows the route table of the gateway",
+      "java": "m1_aRequestFollowsTheRouteTableOfTheGateway",
+      "kotlin": "m1_aRequestFollowsTheRouteTableOfTheGateway"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_team_near_its_budget_is_moved_to_a_cheaper_model_and_a_team_over_it_is_refused",
+      "typescript": "e1 a team near its budget is moved to a cheaper model and a team over it is refused",
+      "java": "e1_aTeamNearItsBudgetIsMovedToACheaperModelAndATeamOverItIsRefused",
+      "kotlin": "e1_aTeamNearItsBudgetIsMovedToACheaperModelAndATeamOverItIsRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_request_is_admitted_warned_or_blocked_against_the_budget",
+      "typescript": "e2 a request is admitted warned or blocked against the budget",
+      "java": "e2_aRequestIsAdmittedWarnedOrBlockedAgainstTheBudget",
+      "kotlin": "e2_aRequestIsAdmittedWarnedOrBlockedAgainstTheBudget"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_showback_adds_each_teams_tokens_at_the_price_of_the_model_and_refuses_an_unknown_model",
+      "typescript": "e3 showback adds each teams tokens at the price of the model and refuses an unknown model",
+      "java": "e3_showbackAddsEachTeamsTokensAtThePriceOfTheModelAndRefusesAnUnknownModel",
+      "kotlin": "e3_showbackAddsEachTeamsTokensAtThePriceOfTheModelAndRefusesAnUnknownModel"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_showback_rounds_each_teams_total_to_a_cent_once",
+      "typescript": "e4 showback rounds each teams total to a cent once",
+      "java": "e4_showbackRoundsEachTeamsTotalToACentOnce",
+      "kotlin": "e4_showbackRoundsEachTeamsTotalToACentOnce"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_caller_with_a_hard_latency_limit_gets_accept_and_poll_when_the_slow_case_does_not_fit",
+      "typescript": "e5 a caller with a hard latency limit gets accept and poll when the slow case does not fit",
+      "java": "e5_aCallerWithAHardLatencyLimitGetsAcceptAndPollWhenTheSlowCaseDoesNotFit",
+      "kotlin": "e5_aCallerWithAHardLatencyLimitGetsAcceptAndPollWhenTheSlowCaseDoesNotFit"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_model_pinned_by_a_team_is_honoured_only_when_the_policy_allows_it",
+      "typescript": "e6 a model pinned by a team is honoured only when the policy allows it",
+      "java": "e6_aModelPinnedByATeamIsHonouredOnlyWhenThePolicyAllowsIt",
+      "kotlin": "e6_aModelPinnedByATeamIsHonouredOnlyWhenThePolicyAllowsIt"
+    }
+  },
+  "plants": {
+    "wrong-route-ignores-table": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "sends every task to the default model"
+    },
+    "wrong-warn-keeps-model": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "keeps the expensive model for a team that is near its budget"
+    },
+    "wrong-block-still-routes": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "routes a request of a team that is over its budget"
+    },
+    "wrong-warn-strict": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "warns only above 80 percent and not at it"
+    },
+    "wrong-block-at-budget": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "blocks a request that lands exactly on the budget"
+    },
+    "wrong-zero-budget-open": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets a team with no budget through"
+    },
+    "wrong-showback-unknown-free": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "prices an unknown model at nothing"
+    },
+    "wrong-showback-by-name": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "lists teams by name and not by cost"
+    },
+    "wrong-showback-row-rounding": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "rounds every row to a cent before adding them"
+    },
+    "wrong-showback-floors": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "rounds a team's total down and not to the nearest cent"
+    },
+    "wrong-delivery-strict": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "chooses accept and poll when the slow case exactly fits"
+    },
+    "wrong-delivery-no-margin": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the safety margin out of the comparison"
+    },
+    "wrong-pin-always-honoured": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "honours any model a team pins"
+    }
+  }
+}

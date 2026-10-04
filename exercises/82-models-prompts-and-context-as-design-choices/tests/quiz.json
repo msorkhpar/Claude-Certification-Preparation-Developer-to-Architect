@@ -1,0 +1,138 @@
+{
+  "module": "82-models-prompts-and-context-as-design-choices",
+  "quizzes": [
+    {
+      "id": "01-assembling-a-prompt-in-cache-friendly-order#q1",
+      "page": "01-assembling-a-prompt-in-cache-friendly-order.md",
+      "scope": "page",
+      "stem": "Scenario: Egret Support's request holds fixed rules, a conversation history ranked 5 and marketing blurbs ranked 1. It exceeds its token budget by a small margin. What does the assembler do?",
+      "options": {
+        "a": "Truncates the end of the rules until the whole request fits within the budget",
+        "b": "Drops the conversation history first, because it is the largest block of the three",
+        "c": "Refuses the request at once, since it is over budget by any amount at all",
+        "d": "Sheds the least important block first, stopping as soon as it fits"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The lowest-ranked dynamic block goes first, and the assembler climbs only while the request is still over.",
+        "a": "Ruled out because \"The static modules are never dropped\".",
+        "b": "Ruled out because \"the assembler drops the lowest first\", by rank and not by size.",
+        "c": "Ruled out because refusal is for when \"only static modules remain and they still exceed the budget, the assembler refuses the request\"."
+      }
+    },
+    {
+      "id": "01-assembling-a-prompt-in-cache-friendly-order#q2",
+      "page": "01-assembling-a-prompt-in-cache-friendly-order.md",
+      "scope": "page",
+      "stem": "Scenario: Heron Retail has four teams that each write the support prompt by hand as one string, with a slightly different order, and the cache hit rate is low. Which change helps most?",
+      "options": {
+        "a": "A reminder in the team wiki that the policy text ought to come first in the prompt",
+        "b": "A longer cache lifetime, so that the different strings are all kept for longer",
+        "c": "A standard header that every team adds to the start of its own prompt",
+        "d": "A single assembler that orders named modules, with callers passing only values"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "One assembler fixes the order, so every team's prefix matches.",
+        "a": "Ruled out because a reminder leaves the order to each caller, where \"the assembler decides the order and callers cannot\".",
+        "b": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", and a longer lifetime does not make the strings identical.",
+        "c": "Ruled out because a header does not fix the order that follows it: \"The order is the same every time\" only when one assembler decides it."
+      }
+    },
+    {
+      "id": "02-choosing-a-model-and-shaping-the-context#q1",
+      "page": "02-choosing-a-model-and-shaping-the-context.md",
+      "scope": "page",
+      "stem": "Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?",
+      "options": {
+        "a": "C, since the lowest price decides the matter once capability has been established",
+        "b": "B, the lowest-priced of the ones that satisfy every requirement",
+        "c": "A, since the dearer option is the safer one for a first release to customers",
+        "d": "Whichever the team used last, because consistency across workloads outweighs the saving"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Latency rules C out, and price ranks the models that remain.",
+        "a": "Ruled out because C fails the limit, and price \"can only rank models that are already right\".",
+        "c": "Ruled out because the rule is to choose \"among the models whose tier is at least the workload's and whose latency is within the limit\" and take the cheapest, with no bonus for the dearer one.",
+        "d": "Ruled out because the choice is \"a design choice per workload\", not one habit applied to all."
+      }
+    },
+    {
+      "id": "02-choosing-a-model-and-shaping-the-context#q2",
+      "page": "02-choosing-a-model-and-shaping-the-context.md",
+      "scope": "page",
+      "stem": "Scenario: Kestrel Labs needs a model for a task at tier 3 with a latency limit of 500 ms. The candidates are a tier 3 model at 2,500 ms and a tier 2 model at 300 ms. What should the plan record?",
+      "options": {
+        "a": "The tier 2 candidate, since it is the only one that stays within the limit",
+        "b": "The tier 3 candidate, since capability matters more than speed in a first release to customers",
+        "c": "That nothing qualifies, a mismatch that someone must resolve by relaxing a requirement",
+        "d": "The cheaper of the two candidates, so that the budget of the project is protected"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "No candidate meets both the tier and the latency, so the finding is the mismatch.",
+        "a": "Ruled out because \"A model below the tier fails the task\".",
+        "b": "Ruled out because the limit is part of the requirement too, and the candidate would fall under \"A model slower than the limit\".",
+        "d": "Ruled out because \"Price comes last because it is the only fact that cannot make a model wrong\"."
+      }
+    },
+    {
+      "id": "02-choosing-a-model-and-shaping-the-context#m1",
+      "page": "02-choosing-a-model-and-shaping-the-context.md",
+      "scope": "module",
+      "stem": "Scenario: Plover Insurance's assembler receives a dynamic module with the placeholder {claim_id}, and the caller supplies no value for it. What should the assembler do?",
+      "options": {
+        "a": "Send the request with the placeholder left in the text as it stands",
+        "b": "Refuse to build the request and name what is absent",
+        "c": "Send it with the placeholder replaced by an empty string instead",
+        "d": "Fill the gap with a guess drawn from the previous call of the same caller"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A missing value is a defect in the caller, so the assembler refuses and names it.",
+        "a": "Ruled out because \"A request that goes out with `{customer}` in its text\" is sent with a gap that nobody checks.",
+        "c": "Ruled out because a blank is the same silent defect, and \"A missing variable is an error\".",
+        "d": "Ruled out because a guess invents data nobody supplied, and a request with a gap \"is a defect that no model will report\"."
+      }
+    },
+    {
+      "id": "02-choosing-a-model-and-shaping-the-context#m2",
+      "page": "02-choosing-a-model-and-shaping-the-context.md",
+      "scope": "module",
+      "stem": "Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?",
+      "options": {
+        "a": "Take the largest model for safety, and place the long text last in the request",
+        "b": "Take the cheapest model of any tier, and place the long text in the final message",
+        "c": "Take the model that was used last time, and cache the whole request as one piece",
+        "d": "Take the cheapest that is capable and quick enough, and put the bulky constant passage first"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached.",
+        "a": "Ruled out because the page says \"static modules first, in the order given, then the dynamic ones\".",
+        "b": "Ruled out because \"A model below the tier fails the task\", whatever its price.",
+        "c": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", so the whole request, which includes the changing part, cannot be cached as one piece."
+      }
+    },
+    {
+      "id": "02-choosing-a-model-and-shaping-the-context#m3",
+      "page": "02-choosing-a-model-and-shaping-the-context.md",
+      "scope": "module",
+      "stem": "Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?",
+      "options": {
+        "a": "All four as static modules, so that the whole request can be cached together",
+        "b": "Rules and question as static modules, with policy and chat as dynamic ones",
+        "c": "Stable parts as static modules, per-visit parts as dynamic ones, the older talk ranked lower",
+        "d": "All four as dynamic modules, so that no edit to any piece can block the others"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The pieces that never change go first as static modules, and the per-request pieces follow, with the less useful one ranked lower so that it is shed first.",
+        "a": "Ruled out because \"A static module whose text holds a `{variable}` is refused\", and the question changes on every request.",
+        "b": "Ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against \"static modules first, in the order given, then the dynamic ones\".",
+        "d": "Ruled out because the cache works on \"the request from its start up to a marked breakpoint\", so with no static modules there is nothing to cache."
+      }
+    }
+  ]
+}

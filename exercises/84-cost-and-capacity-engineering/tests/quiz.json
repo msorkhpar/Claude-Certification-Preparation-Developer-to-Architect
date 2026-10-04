@@ -1,0 +1,138 @@
+{
+  "module": "84-cost-and-capacity-engineering",
+  "quizzes": [
+    {
+      "id": "01-sizing-a-workload-limits-tiers-and-the-bill#q1",
+      "page": "01-sizing-a-workload-limits-tiers-and-the-bill.md",
+      "scope": "page",
+      "stem": "Scenario: Wicker Foods' service peaks at 600 requests a minute, each with 4,000 uncached input tokens and 300 output tokens, with 30 percent headroom. Using the tiers on the page, which is the smallest that fits?",
+      "options": {
+        "a": "Start, since 780 requests a minute is below its request ceiling",
+        "b": "Scale, since the headroom pushes the totals past the limits of the tier below",
+        "c": "A custom arrangement, since four thousand tokens a request is more than any tier allows",
+        "d": "Build, since only the intake volume exceeds Start's allowance while the rest fit"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The three figures are 780 RPM, 3,120,000 ITPM and 234,000 OTPM, and the input figure is over Start's 2 million and under Build's 5 million.",
+        "a": "Ruled out because \"the workload fits a tier only if all three fit\".",
+        "b": "Ruled out because the headroom is already in the figures: \"each multiplied by a headroom for peaks and growth\".",
+        "c": "Ruled out because \"a workload above Scale needs a custom arrangement\", and this one is far below it."
+      }
+    },
+    {
+      "id": "01-sizing-a-workload-limits-tiers-and-the-bill#q2",
+      "page": "01-sizing-a-workload-limits-tiers-and-the-bill.md",
+      "scope": "page",
+      "stem": "Scenario: Fjord Media's support assistant costs $38,800.00 a month without caching and $17,400.00 with it, on 2 million requests. About what share of the uncached bill does caching remove?",
+      "options": {
+        "a": "About 15 percent",
+        "b": "About 30 percent",
+        "c": "About 55 percent",
+        "d": "About 85 percent"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The difference is $21,400.00, which is about 55 percent of $38,800.00.",
+        "a": "Ruled out because 15 percent is the batching figure: \"takes a further 15 percent off by moving the share of work that can wait\".",
+        "b": "Ruled out because 30 percent is the share sent through the Batch API: \"30 percent of requests through the Batch API\".",
+        "d": "Ruled out because caching removes about half, \"because the long stable prefix is read at a tenth of the input price\" and the output and the first writes are still billed."
+      }
+    },
+    {
+      "id": "02-the-gateway-budgets-and-callers-that-cannot-wait#q1",
+      "page": "02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+      "scope": "page",
+      "stem": "Scenario: Oriel Telecom's legacy billing system can call only synchronous endpoints and times out after two seconds, but the task needs long reasoning that takes about twenty. What design fits best?",
+      "options": {
+        "a": "Cut the reasoning short, so that the answer arrives before the legacy timeout expires",
+        "b": "Ask the platform team to raise the legacy timeout to thirty seconds for this one job",
+        "c": "Accept the job, hand back a ticket number at once, and deliver the outcome afterwards",
+        "d": "Move the task to the smallest available model, which answers quickly enough to fit"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Accept-and-poll decouples submission from delivery, so the limit and the work coexist.",
+        "a": "Ruled out because \"truncating the work sacrifices the task\".",
+        "b": "Ruled out because the timeout \"is often not yours to change\", and raising it moves the problem into a system nobody owns.",
+        "d": "Ruled out because \"A faster model may not exist for the quality needed\"."
+      }
+    },
+    {
+      "id": "02-the-gateway-budgets-and-callers-that-cannot-wait#q2",
+      "page": "02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+      "scope": "page",
+      "stem": "Scenario: Pylon Software's four teams each hold a separate key, and finance cannot say which team spent what. The platform team proposes an internal gateway. What will the gateway achieve by itself?",
+      "options": {
+        "a": "A lower token bill for the teams, since requests now pass through a central point, and less waste",
+        "b": "One shared point for credentials, routing, budgets and the record of spend",
+        "c": "Faster answers for the teams, since the gateway adds capacity to the shared model, and fewer errors",
+        "d": "Better quality for the teams, because the gateway improves the prompts it forwards, and fewer refusals"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A gateway is a control point for credentials, routing, budgets and usage records.",
+        "a": "Ruled out because the savings \"come from caching, the choice of model and batching\" and not from the gateway.",
+        "c": "Ruled out because a gateway does not \"Make a model faster\" and adds no capacity of its own.",
+        "d": "Ruled out because it does not \"Remove the need to evaluate a model for a task\", and it does not rewrite prompts."
+      }
+    },
+    {
+      "id": "02-the-gateway-budgets-and-callers-that-cannot-wait#m1",
+      "page": "02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+      "scope": "module",
+      "stem": "Scenario: Zephyr Games' team pins its requests to the most expensive model, which the gateway policy does not list as allowed. What does the gateway do?",
+      "options": {
+        "a": "Honours the pin, since the team chose that model deliberately",
+        "b": "Blocks the team for breaking the policy until it has been reviewed",
+        "c": "Uses the pin once and warns the platform team afterwards",
+        "d": "Ignores the pin and routes by the table entry, since a pin is merely a wish"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A pin is honoured only when the policy allows it, and otherwise the table decides.",
+        "a": "Ruled out because \"The gateway uses the pin only when the policy allows that model\".",
+        "b": "Ruled out because the gateway does not punish: \"Otherwise it uses the route for the task, and the default for a task the table does not know\".",
+        "c": "Ruled out because there is no allowance for one exception, and the page says \"because a pin is a request and not a right\"."
+      }
+    },
+    {
+      "id": "02-the-gateway-budgets-and-callers-that-cannot-wait#m2",
+      "page": "02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+      "scope": "module",
+      "stem": "Scenario: Tallow Insurance's gateway sees a team at exactly 80 percent of its budget, and the next request is estimated to stay under 100 percent. What does admission return?",
+      "options": {
+        "a": "Allow, since the team has not yet passed its budget and nothing is wrong at this point",
+        "b": "Warn, since the threshold is reached even though the spend remains inside the limit",
+        "c": "Block, because a team near its budget should not be given any more requests at all",
+        "d": "Warn only if the same team has also overspent in a previous month of the same year"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Admission warns at 80 percent, and exactly 80 percent warns.",
+        "a": "Ruled out because \"Reaching 80 percent warns, and exactly 80 percent warns\".",
+        "c": "Ruled out because a request that stays within budget does not block: \"one that brings it exactly to the budget does not\".",
+        "d": "Ruled out because admission takes \"Given what a team has spent, its budget and the estimate for one more request\", and not earlier months."
+      }
+    },
+    {
+      "id": "02-the-gateway-budgets-and-callers-that-cannot-wait#m3",
+      "page": "02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+      "scope": "module",
+      "stem": "Scenario: Umber Retail's showback holds two usage lines for one team, each worth 0.4 of a cent. What amount in whole cents should be shown?",
+      "options": {
+        "a": "0, because each line rounds down to nothing when it is taken on its own account",
+        "b": "2, because every line is rounded up so that none of the usage goes unbilled",
+        "c": "1, because rounding happens once after they are summed",
+        "d": "0.8, since fractions of a cent are kept for each team on the final screen"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The total is divided by a million and rounded once, so two rows of 0.4 cent are 1 cent.",
+        "a": "Ruled out because \"rounding each row first gains or loses cents\".",
+        "b": "Ruled out because rounding up each row gives 2 and is the loss of precision that \"two rows of 0.4 cent are 1 cent together and 0 apart\" shows.",
+        "d": "Ruled out because \"The figure shown to a team is a whole number of cents\"."
+      }
+    }
+  ]
+}

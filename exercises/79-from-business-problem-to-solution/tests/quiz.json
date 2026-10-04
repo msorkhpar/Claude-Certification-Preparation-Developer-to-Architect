@@ -1,0 +1,138 @@
+{
+  "module": "79-from-business-problem-to-solution",
+  "quizzes": [
+    {
+      "id": "01-from-a-business-problem-to-the-simplest-pattern#q1",
+      "page": "01-from-a-business-problem-to-the-simplest-pattern.md",
+      "scope": "page",
+      "stem": "Scenario: Harbor Mutual's loan officers need policy questions answered with citations, and separately need decline letters drafted from structured decision data. A vendor proposes a single autonomous multi-agent system for both jobs. Which design fits best?",
+      "options": {
+        "a": "The vendor's system, since both jobs work on documents and one shared platform is easier to run and to staff",
+        "b": "One agent that holds every tool, plus a routing prompt that picks the task to perform",
+        "c": "Two parts: retrieval with a cited reply, plus a template-driven workflow for correspondence",
+        "d": "One model tuned on both kinds of text, so that no outside lookup is needed at all"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The two jobs have different shapes, so each gets the cheapest structure that fits and its own measures.",
+        "a": "Ruled out because \"Documents in common are not an architectural argument\".",
+        "b": "Ruled out because a single agent with every tool joins two risk profiles, and \"two different shapes need two different structures\".",
+        "d": "Ruled out because the first job needs the current policy text: \"The answer needs outside facts or one action\"."
+      }
+    },
+    {
+      "id": "01-from-a-business-problem-to-the-simplest-pattern#q2",
+      "page": "01-from-a-business-problem-to-the-simplest-pattern.md",
+      "scope": "page",
+      "stem": "Scenario: Greywell Insurance's sponsor says the claims project exists to cut handling time per claim on routine claims, measured against last quarter. Which pillar does the sponsor want served?",
+      "options": {
+        "a": "Transformation, a capability that did not exist before the project",
+        "b": "Efficiency, the same output with less effort for each unit",
+        "c": "Cost, the whole process priced lower than before",
+        "d": "Performance service levels, agreed targets that are met"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Handling time per claim against a baseline is the efficiency pillar's measure.",
+        "a": "Ruled out because transformation claims \"Something that could not be done before\", and routine claims were handled before.",
+        "c": "Ruled out because cost counts \"tokens, review time and rework, not model price alone\" per task, and the sponsor named time.",
+        "d": "Ruled out because that pillar's measures are \"95th percentile latency, availability, accuracy by case type\"."
+      }
+    },
+    {
+      "id": "02-the-automation-boundary-needed-accuracy-and-the-pilot#q1",
+      "page": "02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+      "scope": "page",
+      "stem": "Scenario: Ridgeway Credit wants an autonomous agent that approves loan disbursements end to end, and the sponsor is eager to start. What should the architect establish first?",
+      "options": {
+        "a": "Which model tier will run the approval steps, so that the cost of the project can be estimated early in planning",
+        "b": "How many tokens one disbursement review is expected to consume across all the steps",
+        "c": "Whether the build can be completed inside the quarter that the sponsor has proposed",
+        "d": "Which decisions carry accountability for the lender and so have to stay with a person"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Where accountability sits fixes what may be automated at all, and everything else follows from that boundary.",
+        "a": "Ruled out because the model comes after the boundary, and the page says to \"Keep with a person\" decisions that carry accountability.",
+        "b": "Ruled out because cost is downstream of the same question, and the page asks \"who answers for it, and could a person have caught it?\".",
+        "c": "Ruled out because a schedule does not decide what may be automated, and a regulatory control \"never rests on the model alone\"."
+      }
+    },
+    {
+      "id": "02-the-automation-boundary-needed-accuracy-and-the-pilot#q2",
+      "page": "02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+      "scope": "page",
+      "stem": "Scenario: Alder Health's ten-user pilot of a note-summarising assistant went well, and the business now wants it for two thousand clinicians. What should the architect raise first?",
+      "options": {
+        "a": "The cost of the additional licences for the two thousand new users",
+        "b": "Which friendly conditions of the trial will not carry over to everyone",
+        "c": "Whether a larger and more capable model should replace the smaller one that was used in the pilot",
+        "d": "The training timetable for the clinicians who will start using it"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Scale changes the surroundings, so the first contribution is naming the assumptions that held only in friendly conditions.",
+        "a": "Ruled out because licences are a consequence and not a risk, and a roll-out plan \"that lists licence counts is not\" a plan.",
+        "c": "Ruled out because the page says \"None of the rows is about the model getting worse\".",
+        "d": "Ruled out because training addresses a later step, while the page asks for the assumptions to be named \"before the roll-out, not after the first incident\"."
+      }
+    },
+    {
+      "id": "02-the-automation-boundary-needed-accuracy-and-the-pilot#m1",
+      "page": "02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+      "scope": "module",
+      "stem": "Scenario: Quillfeather Retail's sponsor tells the architect that a returns-triage system must be \"as accurate as possible\" and asks for a design. Which response fits best?",
+      "options": {
+        "a": "Settle what accuracy the use case needs and what a wrong decision costs, then build to that",
+        "b": "Start from the most capable model and optimise the prompts until accuracy stops improving",
+        "c": "Choose the most elaborate pattern the budget allows, since that gives the highest ceiling",
+        "d": "Hold the question open until the pilot has produced some real accuracy figures to use"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "An unbounded requirement cannot be designed against, so it is made concrete first: \"needed accuracy comes from two costs\".",
+        "b": "Ruled out because capability without a target spends money without a bar: \"cannot be designed against, tested or priced\".",
+        "c": "Ruled out because the ladder buys complexity only for a stated requirement, and the page says \"find the simplest solution possible\".",
+        "d": "Ruled out because the design is aimed at a number, and \"the first piece of work\" is finding it before the pilot is built."
+      }
+    },
+    {
+      "id": "02-the-automation-boundary-needed-accuracy-and-the-pilot#m2",
+      "page": "02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+      "scope": "module",
+      "stem": "Scenario: Pine Ridge Insurance prices three designs for 20,000 monthly decisions. A person checking one item costs 5, a wrong decision costs 250, and the model is right on 99 percent of its confident items. Which handling of the confident items fits best?",
+      "options": {
+        "a": "Send each of them to a person, because a human check lowers the error count and so repays its price",
+        "b": "Pass them through unreviewed, because reviewing them would burn more than the errors it prevents",
+        "c": "Sample a tenth of them for review, since a sample is cheaper than a full check",
+        "d": "Hold them until the model reaches the break-even of full accuracy on every slice"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money.",
+        "a": "Ruled out because \"reviewing it loses money\" where the model beats the break-even, and the page says \"Reviewing everything wastes review\".",
+        "c": "Ruled out because a sample is a guess at the same trade-off, and the page asks for design that spends attention \"only where it changes the outcome\".",
+        "d": "Ruled out because the break-even accuracy is 98 percent and a design routes by slice, not by \"one number for the whole system\"."
+      }
+    },
+    {
+      "id": "02-the-automation-boundary-needed-accuracy-and-the-pilot#m3",
+      "page": "02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+      "scope": "module",
+      "stem": "Scenario: Corvid Care runs a pilot of a discharge-letter drafting assistant for nurses, who now spend less time writing. The sponsor must say which value pillar the project serves and how it will be shown. Which answer fits best?",
+      "options": {
+        "a": "Productivity, measured by hours saved per staff member each week against a baseline taken before launch",
+        "b": "Cost, measured by the monthly token bill of the assistant compared with the licence fee that the hospital pays today",
+        "c": "Transformation, measured by the count of letters that the assistant produced during the pilot",
+        "d": "Performance, measured by the median response time of the assistant for each single request"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Nurses getting more done is the productivity pillar, measured as hours saved per person.",
+        "b": "Ruled out because the page says the cost pillar counts \"tokens, review time and rework, not model price alone\".",
+        "c": "Ruled out because a count of outputs measures activity and not a new capability: \"Share of customers served in a new way\".",
+        "d": "Ruled out because latency belongs to the performance pillar, with \"95th percentile latency, availability, accuracy by case type\"."
+      }
+    }
+  ]
+}
