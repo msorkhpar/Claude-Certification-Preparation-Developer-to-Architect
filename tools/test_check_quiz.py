@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import (check_duplicate, check_named_page, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
+from check_quiz import (check_duplicate, check_named_page, check_page_has_quiz, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
                         key_is_longest)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
@@ -115,5 +115,12 @@ expect("plant: no page named", check_named_page("x#x1", 'The page says "Not ever
 expect("plant: page does not exist", check_named_page("x#x1", GOOD.replace("module 42, page 1", "module 42, page 9")), True)
 expect("plant: quotation is not on the named page", check_named_page("x#x1", GOOD.replace("module 42, page 1", "module 42, page 2")), True)
 expect("plant: the named page is quoted by a phrase of fewer than four words", check_named_page("x#x1", 'Because "failing eval" (module 42, page 1).'), True)
+
+# a page may go without a quiz only when it is an exam-readiness page
+ORDINARY = "# A page\n\n**Level:** Foundations \u00b7 **Module 3:** Claude's family and its surfaces \u00b7 **Page 1 of 4**\n\n## The idea\n\ntext\n"
+READY = ORDINARY.replace("Claude's family and its surfaces", "Exam readiness 1")
+expect("plant: an ordinary page without a quiz is refused", check_page_has_quiz("p.md", ORDINARY), True)
+expect("clean: an exam-readiness page may have no quiz", check_page_has_quiz("p.md", READY), False)
+expect("clean: an ordinary page with a quiz", check_page_has_quiz("p.md", ORDINARY + "\n## Quiz\n\n1. Q?\n   - **a**: x\n"), False)
 
 sys.exit(1 if failures else 0)

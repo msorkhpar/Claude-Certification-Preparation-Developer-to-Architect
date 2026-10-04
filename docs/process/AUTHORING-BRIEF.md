@@ -54,6 +54,11 @@ outside the worktree. Web requests carry no personal data; nothing is signed int
   `tools/check_quiz.py` enforces what it can. It cannot see a question that tests the same fact in
   other words: before writing a mock-exam or module question, search every `quiz.json` and mock exam
   of the course so far for the same fact; a same-fact question is a restatement, however it is worded.
+  A page gets a quiz only when it teaches something an exam scenario can test. Exam-readiness, strategy and
+  revision pages (how the exams work, booking and proctoring, reading a question, a study plan) get none: their
+  module title reads "Exam readiness" in the page header, and `tools/check_quiz.py` accepts a page without a quiz
+  by that signal alone and refuses a missing quiz on any other page. Mock exams, flashcards and the review bank
+  stay. The independent reader judges whether each page's quiz earns its place.
 
 ## Before hand-back
 

@@ -118,34 +118,3 @@ mock exam and review bank in this module are for that.
    check your confirmation.
 3. **Treating an expired credential as renewable.** Renewal is before expiry and by the free assessment; after a lapse the
    full exam is needed.
-
-## Quiz
-
-1. A candidate with a documented condition needing extra time books her exam for Friday and asks for the adjustment on
-   Thursday. What is the problem?
-   - **a**: Adjustments are only ever given for test-centre sittings, and never for online ones
-   - **b**: Approval has to come first, and the appointment should have followed it
-   - **c**: The adjustment needs a second payment made on the same day as the request
-   - **d**: Extra time is added automatically for anyone who simply asks on the day itself
-
-2. A candidate registered under a nickname, but her passport shows her full legal name. What should she do?
-   - **a**: Use a second photo card that carries her nickname
-   - **b**: Bring a letter from her employer explaining the nickname on the day
-   - **c**: Plan to explain the difference to the proctor when she sits down to start
-   - **d**: Have the entry amended through the support contact before booking a slot
-
-3. A candidate's credential ran out three weeks ago, and she hopes to use the free renewal assessment. What is the accurate
-   position?
-   - **a**: She can still take the free assessment within a grace period of about a month
-   - **b**: That step had to happen earlier, so she needs the whole exam again
-   - **c**: She pays half the usual fee and sits a shortened version of the test
-   - **d**: She keeps the badge on display and simply updates the date on her profile
-
-<details>
-<summary>Answer key</summary>
-
-1. **b**. The fixed order is to request through the test provider, wait for approval and only then schedule. *a* is ruled out because the page says accommodations are for "documented disabilities or needs", with no restriction by delivery mode. *c* is ruled out because the page describes no extra payment, only "request the accommodation through Pearson VUE, wait for approval, and only then schedule the exam". *d* is ruled out because "Extra time or a break you did not arrange in advance is not available on the day".
-2. **d**. The name must match exactly, and a correction is made before scheduling through the support contact in the guide. *b* is ruled out because "The name on your registration must match your ID exactly", and an employer's letter is not an accepted fix. *c* is ruled out because "if the name differs, you may be refused entry and lose the fee", so nothing can be explained away at check-in. *a* is ruled out because the ID must be "a valid, unexpired, government-issued photo ID", and a card showing a nickname is not one.
-3. **b**. Renewal is before expiry, and "after a lapse the full exam is needed" at the full fee. *a* is ruled out because the Exam Policy says "once a certification has expired you can no longer renew it". *c* is ruled out because the lapsed holder "must retake the full exam at the full fee". *d* is ruled out because under the Terms "you must not present yourself as currently certified after it expires".
-
-</details>

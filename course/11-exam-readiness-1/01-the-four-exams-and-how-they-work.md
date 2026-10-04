@@ -115,34 +115,3 @@ about a failed attempt.
    decides the result.
 3. **Studying for a memorised answer.** Items are scenario judgment questions, and the content is confidential; the
    skill is reasoning about the situation.
-
-## Quiz
-
-1. A marketing manager who configures Projects and drafts campaign material daily, and has never written code, wants a
-   Claude certification. Which choice fits best?
-   - **a**: The one for senior architects who govern enterprise solutions end to end
-   - **b**: The one for engineers who build products with interfaces and protocols
-   - **c**: The one for architects who design agentic production systems for customers
-   - **d**: The one for business users applying the assistant to routine work
-
-2. A candidate scores 760 overall but only 55 percent in one domain, and asks whether she passed. What is the correct
-   reading?
-   - **a**: Yes: the combined scaled figure alone decides the outcome
-   - **b**: No, because every single domain needs a minimum share of correct items
-   - **c**: No, she must retake only that domain after a short waiting period
-   - **d**: Neither yet, since the result is withheld until a reviewer weighs each domain
-
-3. A candidate plans to prepare by collecting live test items that others have posted online. What is the best advice?
-   - **a**: Use them only for the domains that carry the heaviest weights in the guide
-   - **b**: Use them, since repeated questions are the surest route to a pass mark
-   - **c**: Avoid them: that material is confidential and the skill is judgment
-   - **d**: Share them with colleagues so that everyone benefits equally from the effort
-
-<details>
-<summary>Answer key</summary>
-
-1. **d**. The Associate is for professionals who use Claude as a productivity tool, and it needs no software-development experience (the table and the choosing section). *b* is ruled out because the Developer row is for "Engineers who build with the API, Claude Code and MCP", which describes someone writing code. *c* is ruled out because the Architect, Foundations row is for "Solution architects who build production applications with Claude". *a* is ruled out because the Professional exam is for "Mid to senior architects who design, build and govern production solutions".
-2. **a**. The page says the domain percentages "are there to guide revision and are not used to decide pass or fail, which depends on the total scaled score". *b* is ruled out because pass or fail "depends on the total scaled score", with no per-domain minimum. *c* is ruled out because the "percentages are there to guide revision and are not used to decide pass or fail", and the page describes no domain-only retake. *d* is ruled out because you get "pass or fail, your scaled score, and the percentage correct in each domain", with nothing withheld for a review.
-3. **c**. The content is confidential, and "the skill is reasoning about the situation". *b* is ruled out because "Studying for a memorised answer" is the trap named, and the questions are scenarios. *a* is ruled out because the "questions, options and scenarios are Anthropic's confidential property", whatever the domain. *d* is ruled out because "you accept a non-disclosure agreement before the exam begins", and passing the questions on breaks it.
-
-</details>

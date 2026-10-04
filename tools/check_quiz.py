@@ -21,6 +21,9 @@ Rules (CLAUDE.md quiz rules that a script can check):
     exam is counted on its own questions;
   - no two questions of the course so far have stem+key token sets with Jaccard similarity of 0.5 or more;
   - the stem holds no evaluative word that names the key's quality (balanced, safest, proper, correct way, ...).
+  - every page carries a quiz section (Quiz or Mock exam), except an exam-readiness page: a page whose header line
+    reads "**Module N:** Exam readiness ..." teaches how the exams work, not a topic an exam scenario tests, so it
+    has no quiz; its module's mock exam pages are quizzes and are checked as usual.
 usage: tools/check_quiz.py [module-folder-prefix ...]   exit 1 on any finding
 """
 import json
@@ -81,6 +84,16 @@ def norm(text):
     """Page and quotation text for verbatim matching: no markup, curly quotes straightened, one space, lower case."""
     text = text.replace("’", "'").replace("“", '"').replace("”", '"')
     return re.sub(r"\s+", " ", re.sub(r"[*`]", "", text)).strip().lower()
+
+
+READINESS = re.compile(r"^\*\*Level:\*\*.*\*\*Module \d+:\*\* Exam readiness\b", re.M)
+
+
+def check_page_has_quiz(name, md):
+    """An ordinary page has a quiz section; an exam-readiness page (module title 'Exam readiness') may have none."""
+    if READINESS.search(md) or parse_page_quizzes(md):
+        return []
+    return [f"{name}: no quiz section (only an exam-readiness page may go without)"]
 
 
 def prose_of(md):
@@ -311,6 +324,7 @@ def check_module(folder):
                             level_stems[f"{pg.stem}#{QID[kind]}{n}"] = stem
     for page in pages:
         md = page.read_text()
+        problems += check_page_has_quiz(page.name, md)
         for kind, questions, keys in parse_page_quizzes(md):
             if len(keys) != len(questions):
                 problems.append(f"{page.name}: {kind} has {len(questions)} questions but {len(keys)} keys")
