@@ -1,8 +1,10 @@
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO as ClientCIO
 import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.plugin
 import io.ktor.client.plugins.sse.SSE
+import io.ktor.http.HttpMethod
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO as ServerCIO
 import io.ktor.server.engine.EmbeddedServer
@@ -42,7 +44,9 @@ import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonArray
@@ -140,17 +144,30 @@ class WireLog {
         }
     }
 
+    private val eventStreamOpen = CompletableDeferred<Unit>()
+
     /** Looks at each HTTP request the client is about to send: the first is the initialize, the others must carry a session id. */
     fun attach(http: HttpClient) {
         http.plugin(HttpSend).intercept { request ->
             if (!first.getAndSet(false) && request.headers["mcp-session-id"] == null) sessionOnEvery = false
-            execute(request)
+            val call = execute(request)
+            if (request.method == HttpMethod.Get) eventStreamOpen.complete(Unit) // the server has answered the client's request for its event stream
+            call
         }
     }
+
+    /**
+     * This server answers each call with plain JSON, so a request that it makes in the middle of a call can only travel on the client's
+     * standalone event stream (a GET that the client opens on its own after the handshake). A caller waits for that stream before the first call.
+     */
+    suspend fun awaitEventStream() = withTimeout(10_000) { eventStreamOpen.await() }
 }
 
 suspend fun connect(url: String, log: WireLog, person: ((ElicitRequestParams) -> ElicitResult)?, model: ((CreateMessageRequest) -> CreateMessageResult)?): Client {
-    val http = HttpClient(ClientCIO) { install(SSE) }
+    val http = HttpClient(ClientCIO) {
+        install(SSE)
+        install(HttpTimeout) { requestTimeoutMillis = 120_000 } // the engine's default of 15 seconds also applies to a stream that stays open
+    }
     log.attach(http)
     val capabilities = ClientCapabilities(
         sampling = if (model != null) ClientCapabilities.Sampling() else null,
@@ -159,6 +176,7 @@ suspend fun connect(url: String, log: WireLog, person: ((ElicitRequestParams) ->
     if (person != null) client.setElicitationHandler { request -> person(request.params) }
     if (model != null) client.setRequestHandler<CreateMessageRequest>(Method.Defined.SamplingCreateMessage) { request, _ -> model(request) }
     client.connect(log.around(http.mcpStreamableHttpTransport(url)))
+    log.awaitEventStream()
     return client
 }
 

@@ -53,7 +53,7 @@ subprojects {
         useJUnitPlatform()
         timeout.set(java.time.Duration.ofMinutes(5))                          // a hung test must not hold the run
         systemProperty("junit.jupiter.execution.timeout.default", "2m")
-        testLogging { events("failed"); showExceptions = true; exceptionFormat = TestExceptionFormat.SHORT }
+        testLogging { events("failed"); showExceptions = true; exceptionFormat = TestExceptionFormat.FULL }
         val summary = file("$exOut/ex-$projName-test.txt")
         addTestListener(object : TestListener {
             override fun beforeSuite(s: TestDescriptor) {}
