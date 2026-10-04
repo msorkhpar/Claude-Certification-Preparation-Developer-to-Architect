@@ -70,3 +70,12 @@ distractors, repeated themes: anonymise-first, cheap-tier escalation, faster tie
   - 56: 02#m1, 02#m3
   - The key letters of modules 51 and 52 no longer share one sequence; vary the start of the sequence per module at the next pass.
 
+
+- Level 3 modules 57 to 62 (independent reader: 11 pass, 23 weak, 8 fail of 42; the eight fails were replaced, two weak items were reworded, and the ten changed items were re-read: 3 pass, 7 weak, 0 fail; the reader's fact findings were fixed on the pages). Remaining WEAK items, with the recurring reasons (a rule-out quote that names the topic without excluding the option; a key near-verbatim from the page; a distractor that is not a plausible mistake):
+  - 57: 02#q2, 02#m1, 02#m2 (near rb-091 on the imports fact), 02#m3 (near 02#q1)
+  - 58: 01#q1, 01#q2 (quotes only half-exclude c and d), 02#q2, 02#m1, 02#m2 (near 02#q1)
+  - 59: 01#q2, 02#q1, 02#m1 (option d is not a plausible mistake), 02#m2, 02#m3
+  - 60: 01#q1, 02#q1, 02#q2, 02#m1 (the rule-out of d), 02#m2 (the rule-outs of b and c)
+  - 61: 01#q1, 02#q1, 02#m1 (key is the longest and a compound), 02#m2 (option d is arbitrary), 02#m3 (same branch family as 02#q2)
+  - 62: 01#q2 (near 25 02#m1 on shape against meaning), 02#q2, 02#m3
+  - The course models of the glob rules and of the review policy are marked on the pages as the course's design; two quotes attributed to the exam guide ("less effective at reviewing its own changes", two to four examples) have no saved official page.

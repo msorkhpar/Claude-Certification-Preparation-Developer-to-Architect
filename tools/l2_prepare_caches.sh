@@ -4,8 +4,9 @@
 IMG=$1; W=$(pwd)
 mkdir -p "$W/.survey-out/py/site" "$W/.survey-out/npm/off/node_modules"
 if [ ! -d "$W/.survey-out/py/wheelhouse" ] && [ ! -d "$W/.survey-out/npm/cache" ]; then
-  echo "no SDK caches: the Python and npm SDK sites stay empty (practices and examples that need no SDK still run)"
-  exit 0
+  echo "no SDK caches: fetching the pinned wheels and npm packages once, online (a fresh worktree has none)"
+  tools/survey_c04_fetch_py.sh "$IMG" || exit 1     # anthropic, mcp, claude-agent-sdk, pydantic and their dependencies (httpx2, anyio, ...), pinned
+  tools/survey_c04_fetch_npm.sh "$IMG" || exit 1    # the npm SDK packages, pinned by tools/npm-sdk/package.json
 fi
 if [ ! -d "$W/.survey-out/py/site/mcp" ] || [ ! -d "$W/.survey-out/py/site/claude_agent_sdk" ]; then
   docker --context desktop-linux run --rm --network none --user 1000:1000 -e HOME=/work/home -v "$W/.survey-out/py:/work" -w /work --entrypoint sh "$IMG" -c \

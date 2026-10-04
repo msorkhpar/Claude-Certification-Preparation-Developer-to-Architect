@@ -1,0 +1,138 @@
+{
+  "module": "58-commands-and-skills",
+  "quizzes": [
+    {
+      "id": "01-commands-and-skills-are-one-mechanism#q1",
+      "page": "01-commands-and-skills-are-one-mechanism.md",
+      "scope": "page",
+      "stem": "A project holds `.claude/commands/deploy.md`, and a teammate then adds `.claude/skills/deploy/SKILL.md`. What does `/deploy` run?",
+      "options": {
+        "a": "The command, because it was in the project first of the two",
+        "b": "Both, one after the other, with the command going first",
+        "c": "The skill, since it takes precedence over the older format",
+        "d": "Neither, because the duplicate name is refused outright"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The product merged the two formats and gives the skill precedence over a command file of the same name.",
+        "a": "Ruled out because \"A skill beats a command file of the same name\", and the order of arrival plays no part.",
+        "b": "Ruled out because the two formats are \"one mechanism with the skill format as the richer one\", so one name resolves to one definition.",
+        "d": "Ruled out because \"Existing command files keep working\", and a shared name is settled by precedence and not refused."
+      }
+    },
+    {
+      "id": "01-commands-and-skills-are-one-mechanism#q2",
+      "page": "01-commands-and-skills-are-one-mechanism.md",
+      "scope": "page",
+      "stem": "A skill folder sits under `.claude/skills/` in a nested folder two levels below where the session began. When does it become available?",
+      "options": {
+        "a": "The first time Claude reads or edits a file in that location",
+        "b": "At startup, together with the skills at the repository root",
+        "c": "Never, since only skills at the repository root are read",
+        "d": "Only after a restart that begins inside that folder"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "Skills in a lower folder load when Claude first works with a file there.",
+        "b": "Ruled out because a lower skill loads \"the first time Claude reads or edits a file in that subdirectory\", and not at startup.",
+        "c": "Ruled out because project skills are found \"from the directory where you start and from every parent up to the repository root\", and a lower folder loads on first use.",
+        "d": "Ruled out because once loaded, the skills \"stay available for the rest of the session\", with no restart."
+      }
+    },
+    {
+      "id": "02-tools-arguments-forked-skills-and-the-practice#q1",
+      "page": "02-tools-arguments-forked-skills-and-the-practice.md",
+      "scope": "page",
+      "stem": "A skill's header lists `allowed-tools: Read Grep`, and its author expects editing to be impossible while the skill is active. What actually happens?",
+      "options": {
+        "a": "Editing is removed from the available tools until the next message",
+        "b": "Editing is refused because only the two listed tools are permitted",
+        "c": "Editing runs without any prompt because the skill vouches for it",
+        "d": "Changing files remains allowed under the usual permission settings"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The field pre-approves and restricts nothing.",
+        "a": "Ruled out because removal belongs to the other field, which removes tools \"from Claude's available pool while this skill is active\".",
+        "b": "Ruled out because the field \"does not restrict which tools are available: every tool remains callable\".",
+        "c": "Ruled out because \"your permission settings still govern tools that are not listed\"."
+      }
+    },
+    {
+      "id": "02-tools-arguments-forked-skills-and-the-practice#q2",
+      "page": "02-tools-arguments-forked-skills-and-the-practice.md",
+      "scope": "page",
+      "stem": "A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What does the isolated helper do?",
+      "options": {
+        "a": "It reads the whole conversation and applies the conventions to it",
+        "b": "It gets guidelines but no assignment, and returns nothing useful",
+        "c": "It asks the user which endpoint the conventions concern",
+        "d": "It runs inside the main conversation as if nothing were forked"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A forked skill's body is its prompt, and guidelines without a task give the helper nothing to do.",
+        "a": "Ruled out because the helper \"doesn't see your conversation history\".",
+        "c": "Ruled out because the helper starts from the skill text alone, which \"gives it the skill content as its prompt\", so it has no one to ask.",
+        "d": "Ruled out because the setting \"starts a new subagent of the type named in\" the agent field, so it does not stay in the conversation."
+      }
+    },
+    {
+      "id": "02-tools-arguments-forked-skills-and-the-practice#m1",
+      "page": "02-tools-arguments-forked-skills-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A skill explains how an old billing system works, and Claude should consult it when relevant, while typing its name would do nothing useful. Which header line fits?",
+      "options": {
+        "a": "`disable-model-invocation: true`",
+        "b": "`allowed-tools: Bash(git log *) Bash(git show *)`",
+        "c": "`user-invocable: false`",
+        "d": "`argument-hint: [system-name]` with `context: fork`"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "It hides the skill from the person and leaves it available to Claude, which suits background knowledge.",
+        "a": "Ruled out because it does the opposite, so that only the person starts it and \"the full skill loads only when you invoke it\".",
+        "b": "Ruled out because a pre-approval for git commands says nothing about who may start the skill, since the field \"Pre-approves the listed tools for the turn that invokes the skill\".",
+        "d": "Ruled out because `argument-hint` \"only shows the expected shape in autocomplete\", and a fork would give a background note no task."
+      }
+    },
+    {
+      "id": "02-tools-arguments-forked-skills-and-the-practice#m2",
+      "page": "02-tools-arguments-forked-skills-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. The team's review skill must be unable to change files for the turn that runs it. Which header line does that?",
+      "options": {
+        "a": "`allowed-tools: Read Grep Glob`",
+        "b": "`disallowed-tools: Edit Write`",
+        "c": "`argument-hint: [read-only]`",
+        "d": "`disallowed-tools: Edit(src/**)`"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A bare name in the removal field takes the tool out of the pool while the skill is active.",
+        "a": "Ruled out because the pre-approval field \"does not restrict which tools are available\".",
+        "c": "Ruled out because `argument-hint` \"only shows the expected shape in autocomplete\".",
+        "d": "Ruled out because \"only a bare name removes a tool\", so the scoped entry leaves editing in place."
+      }
+    },
+    {
+      "id": "02-tools-arguments-forked-skills-and-the-practice#m3",
+      "page": "02-tools-arguments-forked-skills-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A command text reads 'Summarise the commits by $ARGUMENTS since yesterday', and a developer runs `/standup ana`. What does Claude receive?",
+      "options": {
+        "a": "The sentence unchanged, with the name in a separate note",
+        "b": "The sentence with a blank where the name belongs",
+        "c": "The sentence with the name filled in and a line `ARGUMENTS: ana` after it",
+        "d": "The sentence with the name filled in and nothing appended"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The placeholder received the input, so it is substituted and nothing is added.",
+        "a": "Ruled out because the placeholder takes \"All arguments, as typed\" and is replaced in the text.",
+        "b": "Ruled out because a blank arises only for a named placeholder without an argument, since an indexed one \"stays in the content unchanged\", and here the input is given.",
+        "c": "Ruled out because the extra line appears only when \"no placeholder receives them\", and this one did."
+      }
+    }
+  ]
+}

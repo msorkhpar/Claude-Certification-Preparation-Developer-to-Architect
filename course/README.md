@@ -2,7 +2,7 @@
 
 The lessons of the course, one markdown file per page, grouped by module. These pages hold Level 1
 (Foundations), modules 1 to 11, which is the whole of Level 1, and the modules of Level 2 (Developer),
-modules 12 to 44, which is the whole of Level 2, and the first modules of Level 3 (Architect), modules 45 to 56:
+modules 12 to 44, which is the whole of Level 2, and the first modules of Level 3 (Architect), modules 45 to 62:
 
 | Folder | Module | Pages |
 |---|---|---|
@@ -62,6 +62,12 @@ modules 12 to 44, which is the whole of Level 2, and the first modules of Level 
 | `54-distributing-tools-across-agents/` | Distributing tools across agents | 2 |
 | `55-mcp-in-claude-code/` | MCP in Claude Code | 2 |
 | `56-the-built-in-tools/` | The built-in tools | 2 |
+| `57-memory-files-and-rules/` | Memory files and rules | 2 |
+| `58-commands-and-skills/` | Commands and skills | 2 |
+| `59-plan-mode-and-iterative-refinement/` | Plan mode and iterative refinement | 2 |
+| `60-claude-code-in-ci/` | Claude Code in CI | 2 |
+| `61-criteria-and-examples/` | Criteria and examples | 2 |
+| `62-structured-output-at-the-architect-level/` | Structured output at the architect level | 2 |
 
 Every page has the shape of a unit: a title with the level, module and exam codes, what the reader can do
 afterwards, why it matters, the idea, examples, two or three traps, and a quiz or a practice. A page names

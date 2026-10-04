@@ -1,0 +1,188 @@
+{
+  "practice": "61-criteria-and-examples/unit-01/practice-1",
+  "name": "review_spec",
+  "tests": {
+    "java": "ReviewSpecTest",
+    "kotlin": "ReviewSpecTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_prompt_puts_criteria_first_then_examples_then_the_diff_last",
+      "typescript": "m1 the prompt puts criteria first then examples then the diff last",
+      "java": "m1_thePromptPutsCriteriaFirstThenExamplesThenTheDiffLast",
+      "kotlin": "m1_thePromptPutsCriteriaFirstThenExamplesThenTheDiffLast"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_vague_criteria_are_refused_in_both_the_report_and_the_skip_text",
+      "typescript": "e1 vague criteria are refused in both the report and the skip text",
+      "java": "e1_vagueCriteriaAreRefusedInBothTheReportAndTheSkipText",
+      "kotlin": "e1_vagueCriteriaAreRefusedInBothTheReportAndTheSkipText"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_criterion_needs_report_skip_and_a_concrete_severity_example_for_high_and_low",
+      "typescript": "e2 a criterion needs report skip and a concrete severity example for high and low",
+      "java": "e2_aCriterionNeedsReportSkipAndAConcreteSeverityExampleForHighAndLow",
+      "kotlin": "e2_aCriterionNeedsReportSkipAndAConcreteSeverityExampleForHighAndLow"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_two_to_four_examples_with_a_report_and_a_skip_each_carrying_a_reason",
+      "typescript": "e3 two to four examples with a report and a skip each carrying a reason",
+      "java": "e3_twoToFourExamplesWithAReportAndASkipEachCarryingAReason",
+      "kotlin": "e3_twoToFourExamplesWithAReportAndASkipEachCarryingAReason"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_category_with_enough_reviews_and_low_precision_is_disabled",
+      "typescript": "e4 a category with enough reviews and low precision is disabled",
+      "java": "e4_aCategoryWithEnoughReviewsAndLowPrecisionIsDisabled",
+      "kotlin": "e4_aCategoryWithEnoughReviewsAndLowPrecisionIsDisabled"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_most_dismissed_patterns_are_listed_by_count_then_name_and_capped_at_three",
+      "typescript": "e5 the most dismissed patterns are listed by count then name and capped at three",
+      "java": "e5_theMostDismissedPatternsAreListedByCountThenNameAndCappedAtThree",
+      "kotlin": "e5_theMostDismissedPatternsAreListedByCountThenNameAndCappedAtThree"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_an_attended_run_asks_only_what_it_cannot_assume_and_states_its_assumptions",
+      "typescript": "e6 an attended run asks only what it cannot assume and states its assumptions",
+      "java": "e6_anAttendedRunAsksOnlyWhatItCannotAssumeAndStatesItsAssumptions",
+      "kotlin": "e6_anAttendedRunAsksOnlyWhatItCannotAssumeAndStatesItsAssumptions"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_an_unattended_run_never_asks_it_states_assumptions_or_stops",
+      "typescript": "e7 an unattended run never asks it states assumptions or stops",
+      "java": "e7_anUnattendedRunNeverAsksItStatesAssumptionsOrStops",
+      "kotlin": "e7_anUnattendedRunNeverAsksItStatesAssumptionsOrStops"
+    }
+  },
+  "plants": {
+    "wrong-diff-first": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "puts the diff before the criteria"
+    },
+    "wrong-vague-report-only": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "checks the report text for vague phrases and not the skip text"
+    },
+    "wrong-vague-short-list": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "leaves be conservative out of the vague phrases"
+    },
+    "wrong-skip-blank": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts a blank report or skip text"
+    },
+    "wrong-severity-high-only": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "asks for a high severity example and not for a low one"
+    },
+    "wrong-examples-up-to-six": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "allows up to six examples"
+    },
+    "wrong-all-report-examples": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts a set of examples that are all reports"
+    },
+    "wrong-reason-optional": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts an example whose reason is blank"
+    },
+    "wrong-unknown-category": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts a report example for a category that is not a criterion"
+    },
+    "wrong-disable-few": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "disables a category on too few reviews"
+    },
+    "wrong-precision-inverted": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "computes the share dismissed and calls it precision"
+    },
+    "wrong-boundary-disables": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "disables a category whose precision is exactly the limit"
+    },
+    "wrong-top-by-name": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lists dismissed patterns by name and not by count"
+    },
+    "wrong-top-uncapped": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lists every dismissed pattern"
+    },
+    "wrong-counts-accepted": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "counts the patterns of accepted findings as dismissed"
+    },
+    "wrong-ask-defaults": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "asks for fields that have a default"
+    },
+    "wrong-no-assumptions": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "assumes defaults without stating them"
+    },
+    "wrong-unattended-asks": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "asks a question in a run that nobody attends"
+    },
+    "wrong-unattended-guess": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "proceeds in an unattended run without a value that has no default"
+    },
+    "wrong-blank-is-present": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "treats a field that holds only spaces as given"
+    }
+  }
+}

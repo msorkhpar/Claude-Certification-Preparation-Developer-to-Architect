@@ -1,0 +1,391 @@
+# What the run knows: context, independence and the practice
+
+**Level:** Architect · **Module 60:** Claude Code in CI · **Page 2 of 2**
+**Exams:** A3.6; S5
+
+**After this page you can** give a CI run the project context it needs, keep the reviewer independent of the session that wrote the code, put earlier findings and existing tests in the prompt so that a re-run reports only what is new, write review criteria that a run can follow, and write the module's practice.
+
+Checked on 2026-10-03 against the Claude Code documentation pages "Run Claude Code programmatically", "Best practices for Claude Code" (fresh context for review) and "Claude Code GitHub Actions", documenting behaviour up to Claude Code v2.1.286. The practice is a workflow, a schema, a criteria file and a decision function, graded by Python and TypeScript test suites, offline, on the course's model of the documented command-line behaviour (`examples/60-ci-gate`); nothing in it starts Claude Code. This page deepens module 38 and module 40 and does not repeat them. The command and the gate are the first page.
+
+> **Exam guide and current product.** *What the guide states (task statement 3.6), and so what the exam keys:* the CI task (3.6) asks for CLAUDE.md to give the run testing standards, fixture conventions and review criteria; session context isolation, because "the same Claude session that generated code is less effective at reviewing its own changes compared to an independent review instance"; prior review findings included in the prompt when a re-run follows new commits, "instructing Claude to report only new or still-unaddressed issues"; and existing test files in the prompt of a test-generation run, so that suggestions do not duplicate covered scenarios. *What the current product does (documentation checked 2026-10-03):* the same ideas, with one wrinkle for CLAUDE.md: it is read by an ordinary run, and "`--bare` ... skip[s] auto-discovery of hooks, skills, ... auto memory, and CLAUDE.md", so a bare CI run gets its criteria through `--append-system-prompt-file`. The documentation's advice on review is the guide's: "A fresh context improves code review since Claude won't be biased toward code it just wrote." On the exam, answer with CLAUDE.md for criteria, an independent instance for review, and findings in the prompt for re-runs; in a bare job, pass the file.
+
+## Why it matters
+
+A pull request is reviewed on every push. The first push gets six comments; the second push, after the author fixed four of them, gets the same six and two new ones, and the author stops reading. A test-generation step proposes a test for a branch that an existing test already covers, three times in a week. Both failures have one cause: each run starts from nothing, and the prompt did not say what had already happened. Scenario S5 asks how to make the step report only what is new, and the answer is in the prompt, not in the model.
+
+## The idea
+
+### The criteria live in a file
+
+"Be conservative" and "report only important issues" do not change what a reviewer reports, because they leave the threshold unstated. The criteria file says what to report, what to skip, and what each severity means, with a concrete example at each level; module 61 shows why the examples matter. The same file holds the testing standards a generation run needs: where tests live, which fixtures they use, and what makes a test worth adding ("a branch or an edge case that no existing test covers"). In an ordinary run Claude reads `CLAUDE.md` itself, and the documentation's advice for CI is to keep it concise because it is read on every run. In a bare run the file is passed explicitly with `--append-system-prompt-file`; a bare run without it reviews with no criteria at all, and nothing says so.
+
+### An independent reviewer
+
+A session that wrote a change carries its reasoning, and it is "less effective at reviewing its own changes" for that reason. In CI the arrangement is easy: the review job is a separate run that sees the diff and the criteria, and nothing the author's session decided. The documented patterns for interactive work are a second session as reviewer, or a reviewer subagent in a fresh context that "sees only the diff and the criteria you give it, not the reasoning that produced the change". Two cautions from the documentation: a reviewer asked to find gaps will usually report some, so tell it to flag only what affects correctness or the stated requirements; and the independent run is a separate invocation, not a second pass in the same conversation.
+
+### A re-run needs memory it does not have
+
+A CI run does not remember the last one. For the review that follows new commits, put what was already reported in the prompt, say not to repeat it, and say to report only issues that are new or still unaddressed. For test generation, put the existing tests in the prompt and say not to suggest a covered scenario. The practice's prompt builder puts the instructions and the two lists first and the diff last, in tagged sections: that order is the course's design, which keeps the instructions and the lists together. The prompting guidance for very long inputs is the reverse, with the long material near the top and the question after it, so for a large diff end the prompt with a one-line restatement of the task.
+
+A record of findings between runs, which the prompt carries, is the only state the pipeline has. Where it lives (a comment on the pull request, a file, a store) is a design choice; the exam only asks that it reaches the prompt.
+
+### Posting the result
+
+Because the answer is structured, each finding becomes an inline comment with its file, line, severity and suggested fix; a `detected_pattern` field per finding lets the team analyse which patterns draw dismissals and tune the criteria. The Claude Code GitHub Action does the plumbing for the common case, taking `claude_args` such as `--max-turns` and `--allowedTools`, and the documentation lists the same controls for cost: a concise CLAUDE.md, a turn limit, job timeouts and concurrency limits.
+
+### The example
+
+<!-- example: m60-ci-gate tabs: python,typescript -->
+```python
+"""A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.
+
+Facts checked on the Claude Code pages "Run Claude Code programmatically" and "CLI reference" and the Agent SDK pages on structured outputs and the result message
+(read on 2026-10-03, Claude Code v2.1.286): `-p` runs without a prompt for input; `--output-format json` prints one JSON object whose `structured_output` field holds the
+answer when `--json-schema` is given; a run can end with `is_error` true and a subtype such as `error_max_turns` or `error_max_structured_output_retries`; `--max-turns` exits with an error
+when the limit is reached; `--bare` skips CLAUDE.md, hooks, skills, MCP servers and auto memory, so the context is passed with `--append-system-prompt-file`. The envelope below is
+the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network.
+"""
+import json
+import re
+
+SEVERITIES = ["low", "medium", "high"]
+REVIEW_SCHEMA = {
+    "type": "object",
+    "properties": {"findings": {"type": "array", "items": {"type": "object", "properties": {
+        "file": {"type": "string"}, "line": {"type": "integer"}, "category": {"type": "string", "enum": ["bug", "security", "style", "other"]},
+        "severity": {"type": "string", "enum": SEVERITIES}, "issue": {"type": "string"}, "suggested_fix": {"type": "string"}, "detected_pattern": {"type": "string"}},
+        "required": ["file", "line", "category", "severity", "issue", "suggested_fix", "detected_pattern"], "additionalProperties": False}}},
+    "required": ["findings"], "additionalProperties": False,
+}
+
+
+def build_command(prompt, schema, max_turns=8, tools=("Read", "Grep", "Glob", "Bash(git diff *)"), context_file="CLAUDE.md"):
+    """The argument list of a review run: headless, one JSON object out, the answer checked against a schema, a turn limit, read-only tools, and the project context passed by hand."""
+    return ["claude", "--bare", "-p", prompt, "--append-system-prompt-file", context_file, "--output-format", "json", "--json-schema", json.dumps(schema, separators=(",", ":")),
+            "--max-turns", str(max_turns), "--allowedTools", ",".join(tools)]
+
+
+def lint_command(text):
+    """Findings (rule ids) for the text of a shell step that runs `claude`: what a CI run needs and what it must not be allowed."""
+    text = re.sub(r"\\\n\s*", " ", text)
+    found = []
+    if not re.search(r"\sclaude\b", " " + text):
+        return ["no-claude-command"]
+    if not re.search(r"\s(-p|--print)\b", text):
+        found.append("no-print")
+    if not re.search(r"--output-format[ =]json\b", text):
+        found.append("no-json")
+    if not re.search(r"--json-schema\b", text):
+        found.append("no-schema")
+    turns = re.search(r"--max-turns[ =](\d+)", text)
+    if not turns or int(turns.group(1)) > 20:
+        found.append("no-turn-limit")
+    allowed = re.search(r"--allowed[Tt]ools[ =](\"[^\"]*\"|'[^']*'|\S+)", text)
+    names = re.findall(r"[^\s,(]+(?:\([^)]*\))?", allowed.group(1).strip("\"'")) if allowed else []
+    if not allowed:
+        found.append("no-tool-list")
+    elif any(n in ("Bash", "Edit", "Write", "MultiEdit", "NotebookEdit") for n in names):
+        found.append("wide-tools")
+    if "--bare" not in text:
+        found.append("no-bare")
+    elif not re.search(r"--append-system-prompt(-file)?\b", text):
+        found.append("bare-without-context")
+    return found
+
+
+def schema_check(value, schema, path="$"):
+    """Errors of a value against the JSON Schema subset the structured outputs support: type, enum, required, properties, items and additionalProperties false."""
+    kinds = {"object": dict, "array": list, "string": str, "boolean": bool, "null": type(None)}
+    want = schema.get("type")
+    wants = want if isinstance(want, list) else [want] if want else []
+    ok = not wants
+    for kind in wants:
+        if kind == "integer":
+            ok = ok or (isinstance(value, int) and not isinstance(value, bool))
+        elif kind == "number":
+            ok = ok or (isinstance(value, (int, float)) and not isinstance(value, bool))
+        else:
+            ok = ok or isinstance(value, kinds[kind])
+    if not ok:
+        return [f"{path}: expected {' or '.join(wants)}"]
+    errors = []
+    if "enum" in schema and value not in schema["enum"]:
+        errors.append(f"{path}: {value!r} is not one of {schema['enum']}")
+    if isinstance(value, dict):
+        errors += [f"{path}.{k}: is required" for k in schema.get("required", []) if k not in value]
+        if schema.get("additionalProperties") is False:
+            errors += [f"{path}.{k}: is not allowed" for k in value if k not in schema.get("properties", {})]
+        for k, sub in schema.get("properties", {}).items():
+            if k in value:
+                errors += schema_check(value[k], sub, f"{path}.{k}")
+    if isinstance(value, list) and "items" in schema:
+        for i, item in enumerate(value):
+            errors += schema_check(item, schema["items"], f"{path}[{i}]")
+    return errors
+
+
+def gate(stdout, exit_code, schema, policy):
+    """Decide a review job from what `claude -p --output-format json --json-schema ...` printed. A run that failed in any way fails the job: it never passes by saying nothing."""
+    problems = []
+    if exit_code != 0:
+        problems.append(f"claude exited with status {exit_code}")
+    try:
+        envelope = json.loads(stdout)
+    except ValueError:
+        envelope = None
+    if not isinstance(envelope, dict):
+        return {"exit": 1, "comments": [], "problems": problems + ["the output is not a JSON object"]}
+    if envelope.get("is_error") or envelope.get("subtype") != "success":
+        problems.append(f"the run ended with {envelope.get('subtype')}")
+    output = envelope.get("structured_output")
+    if output is None:
+        problems.append("the result has no structured_output")
+    else:
+        problems += [f"schema {e}" for e in schema_check(output, schema)]
+    if problems:
+        return {"exit": 1, "comments": [], "problems": problems}
+    floor = SEVERITIES.index(policy["min_severity"])
+    comments = [{"file": f["file"], "line": f["line"], "severity": f["severity"], "body": f"{f['issue']} Suggested fix: {f['suggested_fix']}"}
+                for f in output["findings"] if f["category"] not in policy["disabled_categories"] and SEVERITIES.index(f["severity"]) >= floor]
+    blocked = any(c["severity"] in policy["fail_on"] for c in comments)
+    return {"exit": 1 if blocked else 0, "comments": comments, "problems": []}
+
+
+def envelope(**over):
+    return json.dumps({"type": "result", "subtype": "success", "is_error": False, "result": "done", "num_turns": 3, "total_cost_usd": 0.05, "session_id": "s-1", **over})
+
+
+def main():
+    command = build_command("Review the diff on standard input.", {"type": "object", "properties": {"findings": {"type": "array"}}}, tools=("Read", "Grep"))
+    print("command:", " ".join(command[:5]), "...", command[-4:])
+    print("lint, the good step:", lint_command("git diff main | claude --bare -p 'Review.' --append-system-prompt-file CLAUDE.md --output-format json --json-schema '{}' --max-turns 8 --allowedTools 'Read,Grep'"))
+    print("lint, a careless step:", lint_command("claude 'Review the change' --allowedTools Bash,Edit"))
+    policy = {"min_severity": "medium", "disabled_categories": ["style"], "fail_on": ["high"]}
+    findings = [{"file": "api.py", "line": 12, "category": "bug", "severity": "high", "issue": "Unchecked None.", "suggested_fix": "Return early.", "detected_pattern": "missing-none-check"},
+                {"file": "api.py", "line": 40, "category": "style", "severity": "high", "issue": "Long line.", "suggested_fix": "Wrap it.", "detected_pattern": "line-length"},
+                {"file": "ui.py", "line": 3, "category": "bug", "severity": "low", "issue": "Odd name.", "suggested_fix": "Rename.", "detected_pattern": "naming"}]
+    runs = {"a finding that blocks": (envelope(structured_output={"findings": findings}), 0), "no findings": (envelope(structured_output={"findings": []}), 0),
+            "turn limit": (envelope(subtype="error_max_turns", is_error=True), 1), "success without output": (envelope(), 0), "not JSON": ("Error: no key", 1),
+            "wrong shape": (envelope(structured_output={"findings": [{"file": "a.py"}]}), 0)}
+    for label, (out, code) in runs.items():
+        result = gate(out, code, REVIEW_SCHEMA, policy)
+        print(f"{label}: exit {result['exit']}, {len(result['comments'])} comment(s){', ' + result['problems'][0] if result['problems'] else ''}")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+command: claude --bare -p Review the diff on standard input. --append-system-prompt-file ... ['--max-turns', '8', '--allowedTools', 'Read,Grep']
+lint, the good step: []
+lint, a careless step: ['no-print', 'no-json', 'no-schema', 'no-turn-limit', 'wide-tools', 'no-bare']
+a finding that blocks: exit 1, 1 comment(s)
+no findings: exit 0, 0 comment(s)
+turn limit: exit 1, 0 comment(s), claude exited with status 1
+success without output: exit 1, 0 comment(s), the result has no structured_output
+not JSON: exit 1, 0 comment(s), claude exited with status 1
+wrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required
+```
+```typescript
+/**
+ * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.
+ *
+ * Facts checked on the Claude Code pages "Run Claude Code programmatically" and "CLI reference" and the Agent SDK pages on structured outputs and the result message
+ * (read on 2026-10-03, Claude Code v2.1.286): `-p` runs without a prompt for input; `--output-format json` prints one JSON object whose `structured_output` field holds the
+ * answer when `--json-schema` is given; a run can end with `is_error` true and a subtype such as `error_max_turns` or `error_max_structured_output_retries`; `--max-turns` exits with an error
+ * when the limit is reached; `--bare` skips CLAUDE.md, hooks, skills, MCP servers and auto memory, so the context is passed with `--append-system-prompt-file`. The envelope below is
+ * the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network.
+ */
+export const SEVERITIES = ["low", "medium", "high"];
+export type Schema = { [key: string]: any };
+export const REVIEW_SCHEMA: Schema = {
+  type: "object",
+  properties: { findings: { type: "array", items: { type: "object", properties: {
+    file: { type: "string" }, line: { type: "integer" }, category: { type: "string", enum: ["bug", "security", "style", "other"] },
+    severity: { type: "string", enum: SEVERITIES }, issue: { type: "string" }, suggested_fix: { type: "string" }, detected_pattern: { type: "string" } },
+    required: ["file", "line", "category", "severity", "issue", "suggested_fix", "detected_pattern"], additionalProperties: false } } },
+  required: ["findings"], additionalProperties: false,
+};
+
+/** The argument list of a review run: headless, one JSON object out, the answer checked against a schema, a turn limit, read-only tools, and the project context passed by hand. */
+export function buildCommand(prompt: string, schema: Schema, maxTurns = 8, tools = ["Read", "Grep", "Glob", "Bash(git diff *)"], contextFile = "CLAUDE.md"): string[] {
+  return ["claude", "--bare", "-p", prompt, "--append-system-prompt-file", contextFile, "--output-format", "json", "--json-schema", JSON.stringify(schema),
+    "--max-turns", String(maxTurns), "--allowedTools", tools.join(",")];
+}
+
+/** Findings (rule ids) for the text of a shell step that runs `claude`: what a CI run needs and what it must not be allowed. */
+export function lintCommand(raw: string): string[] {
+  const text = raw.replace(/\\\n\s*/g, " ");
+  if (!/\sclaude\b/.test(" " + text)) return ["no-claude-command"];
+  const found: string[] = [];
+  if (!/\s(-p|--print)\b/.test(text)) found.push("no-print");
+  if (!/--output-format[ =]json\b/.test(text)) found.push("no-json");
+  if (!/--json-schema\b/.test(text)) found.push("no-schema");
+  const turns = /--max-turns[ =](\d+)/.exec(text);
+  if (!turns || Number(turns[1]) > 20) found.push("no-turn-limit");
+  const allowed = /--allowed[Tt]ools[ =]("[^"]*"|'[^']*'|\S+)/.exec(text);
+  const names = allowed ? allowed[1].replace(/^["']|["']$/g, "").match(/[^\s,(]+(?:\([^)]*\))?/g) ?? [] : [];
+  if (!allowed) found.push("no-tool-list");
+  else if (names.some((n) => ["Bash", "Edit", "Write", "MultiEdit", "NotebookEdit"].includes(n))) found.push("wide-tools");
+  if (!text.includes("--bare")) found.push("no-bare");
+  else if (!/--append-system-prompt(-file)?\b/.test(text)) found.push("bare-without-context");
+  return found;
+}
+
+const isKind = (kind: string, value: unknown): boolean =>
+  kind === "object" ? typeof value === "object" && value !== null && !Array.isArray(value)
+    : kind === "array" ? Array.isArray(value)
+    : kind === "string" ? typeof value === "string"
+    : kind === "boolean" ? typeof value === "boolean"
+    : kind === "null" ? value === null
+    : kind === "integer" ? typeof value === "number" && Number.isInteger(value)
+    : kind === "number" ? typeof value === "number" : false;
+
+/** Errors of a value against the JSON Schema subset the structured outputs support: type, enum, required, properties, items and additionalProperties false. */
+export function schemaCheck(value: any, schema: Schema, path = "$"): string[] {
+  const wants: string[] = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
+  if (wants.length > 0 && !wants.some((k) => isKind(k, value))) return [`${path}: expected ${wants.join(" or ")}`];
+  const errors: string[] = [];
+  if (schema.enum && !schema.enum.includes(value)) errors.push(`${path}: ${JSON.stringify(value)} is not one of ${JSON.stringify(schema.enum)}`);
+  if (isKind("object", value)) {
+    for (const k of schema.required ?? []) if (!(k in value)) errors.push(`${path}.${k}: is required`);
+    if (schema.additionalProperties === false) for (const k of Object.keys(value)) if (!(k in (schema.properties ?? {}))) errors.push(`${path}.${k}: is not allowed`);
+    for (const [k, sub] of Object.entries(schema.properties ?? {})) if (k in value) errors.push(...schemaCheck(value[k], sub as Schema, `${path}.${k}`));
+  }
+  if (Array.isArray(value) && schema.items) value.forEach((item, i) => errors.push(...schemaCheck(item, schema.items, `${path}[${i}]`)));
+  return errors;
+}
+
+export type Policy = { min_severity: string; disabled_categories: string[]; fail_on: string[] };
+export type Gate = { exit: number; comments: Array<{ file: string; line: number; severity: string; body: string }>; problems: string[] };
+
+/** Decide a review job from what `claude -p --output-format json --json-schema ...` printed. A run that failed in any way fails the job: it never passes by saying nothing. */
+export function gate(stdout: string, exitCode: number, schema: Schema, policy: Policy): Gate {
+  const problems: string[] = [];
+  if (exitCode !== 0) problems.push(`claude exited with status ${exitCode}`);
+  let envelope: any = null;
+  try {
+    envelope = JSON.parse(stdout);
+  } catch {
+    envelope = null;
+  }
+  if (!isKind("object", envelope)) return { exit: 1, comments: [], problems: [...problems, "the output is not a JSON object"] };
+  if (envelope.is_error || envelope.subtype !== "success") problems.push(`the run ended with ${envelope.subtype}`);
+  const output = envelope.structured_output;
+  if (output === undefined || output === null) problems.push("the result has no structured_output");
+  else problems.push(...schemaCheck(output, schema).map((e) => `schema ${e}`));
+  if (problems.length > 0) return { exit: 1, comments: [], problems };
+  const floor = SEVERITIES.indexOf(policy.min_severity);
+  const comments = output.findings
+    .filter((f: any) => !policy.disabled_categories.includes(f.category) && SEVERITIES.indexOf(f.severity) >= floor)
+    .map((f: any) => ({ file: f.file, line: f.line, severity: f.severity, body: `${f.issue} Suggested fix: ${f.suggested_fix}` }));
+  const blocked = comments.some((c: any) => policy.fail_on.includes(c.severity));
+  return { exit: blocked ? 1 : 0, comments, problems: [] };
+}
+
+export function envelope(over: Record<string, unknown> = {}): string {
+  return JSON.stringify({ type: "result", subtype: "success", is_error: false, result: "done", num_turns: 3, total_cost_usd: 0.05, session_id: "s-1", ...over });
+}
+
+function main() {
+  const command = buildCommand("Review the diff on standard input.", { type: "object", properties: { findings: { type: "array" } } }, 8, ["Read", "Grep"]);
+  console.log("command:", command.slice(0, 5).join(" "), "...", JSON.stringify(command.slice(-4)));
+  console.log("lint, the good step:", JSON.stringify(lintCommand("git diff main | claude --bare -p 'Review.' --append-system-prompt-file CLAUDE.md --output-format json --json-schema '{}' --max-turns 8 --allowedTools 'Read,Grep'")));
+  console.log("lint, a careless step:", JSON.stringify(lintCommand("claude 'Review the change' --allowedTools Bash,Edit")));
+  const policy: Policy = { min_severity: "medium", disabled_categories: ["style"], fail_on: ["high"] };
+  const findings = [
+    { file: "api.py", line: 12, category: "bug", severity: "high", issue: "Unchecked None.", suggested_fix: "Return early.", detected_pattern: "missing-none-check" },
+    { file: "api.py", line: 40, category: "style", severity: "high", issue: "Long line.", suggested_fix: "Wrap it.", detected_pattern: "line-length" },
+    { file: "ui.py", line: 3, category: "bug", severity: "low", issue: "Odd name.", suggested_fix: "Rename.", detected_pattern: "naming" },
+  ];
+  const runs: Record<string, [string, number]> = {
+    "a finding that blocks": [envelope({ structured_output: { findings } }), 0], "no findings": [envelope({ structured_output: { findings: [] } }), 0],
+    "turn limit": [envelope({ subtype: "error_max_turns", is_error: true }), 1], "success without output": [envelope(), 0], "not JSON": ["Error: no key", 1],
+    "wrong shape": [envelope({ structured_output: { findings: [{ file: "a.py" }] } }), 0],
+  };
+  for (const [label, [out, code]] of Object.entries(runs)) {
+    const result = gate(out, code, REVIEW_SCHEMA, policy);
+    console.log(`${label}: exit ${result.exit}, ${result.comments.length} comment(s)${result.problems.length ? ", " + result.problems[0] : ""}`);
+  }
+}
+
+if (import.meta.main) main();
+```
+```text
+command: claude --bare -p Review the diff on standard input. --append-system-prompt-file ... ["--max-turns","8","--allowedTools","Read,Grep"]
+lint, the good step: []
+lint, a careless step: ["no-print","no-json","no-schema","no-turn-limit","wide-tools","no-bare"]
+a finding that blocks: exit 1, 1 comment(s)
+no findings: exit 0, 0 comment(s)
+turn limit: exit 1, 0 comment(s), claude exited with status 1
+success without output: exit 1, 0 comment(s), the result has no structured_output
+not JSON: exit 1, 0 comment(s), claude exited with status 1
+wrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required
+```
+<!-- /example -->
+
+### The practice: a review job that fails closed
+
+The practice is in [`exercises/60-claude-code-in-ci`](../../exercises/60-claude-code-in-ci/unit-01/practice-1/statement.md). You write the workflow (headless, bare, JSON with a schema, a turn limit, read-only tools, the criteria file, a timeout and a secret), the schema of a finding, the criteria file, the prompt builder that carries earlier findings and existing tests, and the gate that turns the run's output into a job status and comments. It is graded by test suites in Python and TypeScript, offline. The configuration files have no Java or Kotlin edition, because no YAML reader is available offline for those two here and a second edition would test the same files. The statement lists nine cases, and each says what you should see when it works.
+
+## Traps
+
+1. **"Have the session that wrote the change also review it; it knows the code best."** It is tempting because the session has the context. The exam rejects it: that is the reason it reviews badly, since it carries the reasoning that produced the change. An independent instance sees the diff and the criteria.
+2. **"Run the review again on each push with the same prompt."** It is tempting because each run is correct on its own. The exam rejects it: without the earlier findings in the prompt, every push repeats them. Include them and ask for new or unaddressed issues only.
+3. **"Tell the reviewer to be conservative and report only high-confidence issues."** It is tempting because it sounds like a precision filter. The exam rejects it: the threshold is still unstated. Explicit categories, what to skip and a severity example at each level are what change the output.
+4. **"The bare run will read the repository's CLAUDE.md like any other."** It is tempting because the file is in the checkout. The documentation rejects it: bare mode skips CLAUDE.md, so the criteria go in with `--append-system-prompt-file`.
+
+## Quiz
+
+1. A review job runs on every push and keeps posting remarks that the author has already fixed. What fixes it?
+   - **a**: Raise the turn limit so that the run can compare with earlier comments
+   - **b**: Put earlier reports in the prompt and ask for new issues only
+   - **c**: Tell the reviewer to be more conservative about what it reports
+   - **d**: Run the review inside the session that wrote the change
+
+2. A job that drafts additional checks keeps proposing situations that are already exercised. What belongs in its prompt?
+   - **a**: A request for many more checks so that coverage becomes certain
+   - **b**: The production code alone, to keep the whole prompt short
+   - **c**: A lower turn limit, so that fewer proposals come back at all
+   - **d**: The test files that exist, plus a request to skip covered cases
+
+<details>
+<summary>Answer key</summary>
+
+1. **b**. A run has no memory of the last one, so what was reported must be in the prompt. *a* is ruled out because "A CI run does not remember the last one", and a longer loop does not change that. *c* is ruled out because such wording does not change what a reviewer reports, since vague instructions "leave the threshold unstated". *d* is ruled out because the writing session is "less effective at reviewing its own changes" and still would not know what was said on earlier pushes.
+2. **d**. The remedy is to show the run what the suite already covers. *a* is ruled out because more proposals add duplicates, while the aim is "so that suggestions do not duplicate covered scenarios". *b* is ruled out because without the tests the run cannot see what is covered: "put the existing tests in the prompt". *c* is ruled out because a record of earlier work carried by the prompt "is the only state the pipeline has", and a turn limit adds none.
+
+</details>
+
+## Module quiz
+
+This quiz covers both pages of the module.
+
+1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?
+   - **a**: Ask the same session to think harder before it approves
+   - **b**: Give the session the full history of the change to review against
+   - **c**: Start a separate run that receives only the diff and the criteria
+   - **d**: Lower the number of turns so that the session decides faster
+
+2. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?
+   - **a**: The file is too long, so cut it until it fits the prompt
+   - **b**: Headless runs read the file only on the first push of a branch
+   - **c**: The rules need a `paths` header before a headless run applies them
+   - **d**: That mode skips it, so supply it with `--append-system-prompt-file`
+
+3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?
+   - **a**: It passes and posts no comment
+   - **b**: It fails, because a high finding exists
+   - **c**: It passes and posts the low bug as a comment
+   - **d**: It fails, because a finding in a disabled category counts as an error
+
+<details>
+<summary>Answer key</summary>
+
+1. **c**. An independent run sees the change without the reasoning that produced it. *a* is ruled out because the writing session is "less effective at reviewing its own changes", and more effort does not remove the bias. *b* is ruled out because a reviewer "sees only the diff and the criteria you give it, not the reasoning that produced the change". *d* is ruled out because "the independent run is a separate invocation, not a second pass in the same conversation".
+2. **d**. Bare mode skips CLAUDE.md, so the criteria must be passed in by hand. *a* is ruled out because length is not the issue: "In a bare run the file is passed explicitly" and otherwise it is not read at all. *b* is ruled out because "A CI run does not remember the last one", and no first-push behaviour exists. *c* is ruled out because no header is involved, and "a bare run without it reviews with no criteria at all, and nothing says so".
+3. **a**. The high finding is dropped with its category and the low one falls below the floor, so nothing is kept. *b* is ruled out because "categories the team disabled are dropped", so the high style finding cannot fail the job. *c* is ruled out because "findings below a floor are dropped", and a low finding is below a medium floor. *d* is ruled out because only "a kept finding at a failing severity" fails the job, and a disabled category is dropped before that.
+
+</details>
+
+Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course.

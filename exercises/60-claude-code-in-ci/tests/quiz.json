@@ -1,0 +1,138 @@
+{
+  "module": "60-claude-code-in-ci",
+  "quizzes": [
+    {
+      "id": "01-a-headless-run-its-json-and-the-job-status#q1",
+      "page": "01-a-headless-run-its-json-and-the-job-status.md",
+      "scope": "page",
+      "stem": "A CI step runs Claude Code unattended, and each issue it reports must be posted as an inline note. Which flags make the reply usable for that?",
+      "options": {
+        "a": "`--output-format text` with a prompt asking for a bulleted list",
+        "b": "`--max-turns` with a high limit so that the list is complete",
+        "c": "`--output-format json` with `--json-schema`",
+        "d": "`--bare` alone, which formats replies for scripts"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The schema makes the answer a validated object in `structured_output`.",
+        "a": "Ruled out because text leaves the entries to be parsed from prose, and \"a decision made on prose is a guess\".",
+        "b": "Ruled out because a limit bounds the loop and does not shape the answer: \"The run exits with an error at the limit\".",
+        "d": "Ruled out because the flag controls what the run loads, with \"no hooks, skills, MCP servers, memory or CLAUDE.md\", and formats nothing."
+      }
+    },
+    {
+      "id": "01-a-headless-run-its-json-and-the-job-status#q2",
+      "page": "01-a-headless-run-its-json-and-the-job-status.md",
+      "scope": "page",
+      "stem": "A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?",
+      "options": {
+        "a": "Fail, because no valid answer exists",
+        "b": "Pass, since the run reports success",
+        "c": "Retry the same request until a value appears",
+        "d": "Pass, with a note that nothing was reported"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A run without a valid answer is a failure whatever its subtype says.",
+        "b": "Ruled out because the documentation says \"Treat that case as a failure as well\".",
+        "c": "Ruled out because \"Retrying inside the job repeats cost with no reason to expect a different result\".",
+        "d": "Ruled out because \"A job never passes by saying nothing\", and a silent pass cannot be told from a failed run."
+      }
+    },
+    {
+      "id": "02-context-independence-and-the-practice#q1",
+      "page": "02-context-independence-and-the-practice.md",
+      "scope": "page",
+      "stem": "A review job runs on every push and keeps posting remarks that the author has already fixed. What fixes it?",
+      "options": {
+        "a": "Raise the turn limit so that the run can compare with earlier comments",
+        "b": "Put earlier reports in the prompt and ask for new issues only",
+        "c": "Tell the reviewer to be more conservative about what it reports",
+        "d": "Run the review inside the session that wrote the change"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A run has no memory of the last one, so what was reported must be in the prompt.",
+        "a": "Ruled out because \"A CI run does not remember the last one\", and a longer loop does not change that.",
+        "c": "Ruled out because such wording does not change what a reviewer reports, since vague instructions \"leave the threshold unstated\".",
+        "d": "Ruled out because the writing session is \"less effective at reviewing its own changes\" and still would not know what was said on earlier pushes."
+      }
+    },
+    {
+      "id": "02-context-independence-and-the-practice#q2",
+      "page": "02-context-independence-and-the-practice.md",
+      "scope": "page",
+      "stem": "A job that drafts additional checks keeps proposing situations that are already exercised. What belongs in its prompt?",
+      "options": {
+        "a": "A request for many more checks so that coverage becomes certain",
+        "b": "The production code alone, to keep the whole prompt short",
+        "c": "A lower turn limit, so that fewer proposals come back at all",
+        "d": "The test files that exist, plus a request to skip covered cases"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The remedy is to show the run what the suite already covers.",
+        "a": "Ruled out because more proposals add duplicates, while the aim is \"so that suggestions do not duplicate covered scenarios\".",
+        "b": "Ruled out because without the tests the run cannot see what is covered: \"put the existing tests in the prompt\".",
+        "c": "Ruled out because a record of earlier work carried by the prompt \"is the only state the pipeline has\", and a turn limit adds none."
+      }
+    },
+    {
+      "id": "02-context-independence-and-the-practice#m1",
+      "page": "02-context-independence-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?",
+      "options": {
+        "a": "Ask the same session to think harder before it approves",
+        "b": "Give the session the full history of the change to review against",
+        "c": "Start a separate run that receives only the diff and the criteria",
+        "d": "Lower the number of turns so that the session decides faster"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "An independent run sees the change without the reasoning that produced it.",
+        "a": "Ruled out because the writing session is \"less effective at reviewing its own changes\", and more effort does not remove the bias.",
+        "b": "Ruled out because a reviewer \"sees only the diff and the criteria you give it, not the reasoning that produced the change\".",
+        "d": "Ruled out because \"the independent run is a separate invocation, not a second pass in the same conversation\"."
+      }
+    },
+    {
+      "id": "02-context-independence-and-the-practice#m2",
+      "page": "02-context-independence-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?",
+      "options": {
+        "a": "The file is too long, so cut it until it fits the prompt",
+        "b": "Headless runs read the file only on the first push of a branch",
+        "c": "The rules need a `paths` header before a headless run applies them",
+        "d": "That mode skips it, so supply it with `--append-system-prompt-file`"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand.",
+        "a": "Ruled out because length is not the issue: \"In a bare run the file is passed explicitly\" and otherwise it is not read at all.",
+        "b": "Ruled out because \"A CI run does not remember the last one\", and no first-push behaviour exists.",
+        "c": "Ruled out because no header is involved, and \"a bare run without it reviews with no criteria at all, and nothing says so\"."
+      }
+    },
+    {
+      "id": "02-context-independence-and-the-practice#m3",
+      "page": "02-context-independence-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?",
+      "options": {
+        "a": "It passes and posts no comment",
+        "b": "It fails, because a high finding exists",
+        "c": "It passes and posts the low bug as a comment",
+        "d": "It fails, because a finding in a disabled category counts as an error"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The high finding is dropped with its category and the low one falls below the floor, so nothing is kept.",
+        "b": "Ruled out because \"categories the team disabled are dropped\", so the high style finding cannot fail the job.",
+        "c": "Ruled out because \"findings below a floor are dropped\", and a low finding is below a medium floor.",
+        "d": "Ruled out because only \"a kept finding at a failing severity\" fails the job, and a disabled category is dropped before that."
+      }
+    }
+  ]
+}
