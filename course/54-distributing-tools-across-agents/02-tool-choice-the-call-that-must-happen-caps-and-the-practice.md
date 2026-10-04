@@ -65,7 +65,7 @@ Each refusal is a result that the agent can use (module 53): it says what is nee
 
 The example is the same program as on page 1, and the part that belongs here is the rest of its output: the turn whose first call must be `extract_metadata` on a model that accepts forcing and on one that does not, with what each costs in caching; what the loop does with three replies; and five refund decisions.
 
-<!-- example: m54-tool-distribution tabs: python,typescript -->
+<!-- example: m54-tool-distribution tabs: python,typescript,java,kotlin -->
 ```python
 """Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.
 
@@ -222,6 +222,224 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+catalog: 8 tools
+  searcher: web_search, fetch_page, verify_fact
+  analyst: load_document, extract_data_points
+  synthesizer: verify_fact, summarize_content
+  reporter: write_report
+a synthesizer that may also check one fact has verify_fact, and nothing else from the web
+first call must be extract_metadata:
+  claude-opus-5: tool_choice=tool:extract_metadata, tools=['extract_metadata', 'enrich'], check the reply=False
+    cost against a turn with auto and both tools: the cached messages (tool_choice changed)
+  claude-sonnet-5-5: tool_choice=auto, tools=['extract_metadata'], check the reply=True
+    cost against a turn with auto and both tools: everything (the tool definitions changed)
+a reply to the fallback turn:
+  text only: re-ask once, then escalate
+  the right call: accept
+  another tool: re-ask once, then escalate
+refund decisions:
+  lookup 0, approved=no: run
+  refund 150, approved=no: wait: a person must approve
+  refund 150, approved=yes: run
+  refund 400, approved=yes: refused: above the limit of 200, send to a person
+  delete_account 0, approved=yes: refused: unknown tool
+```
+```java
+import static harness.Show.py;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.
+ *
+ * <p>No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
+ */
+public final class Distribution {
+    static final Map<String, List<String>> CATALOG = new LinkedHashMap<>();
+    static final Set<String> IRREVERSIBLE = Set.of("send_report");
+    static final Map<String, String> ROLES = new LinkedHashMap<>();
+    static final Set<String> NO_FORCING = Set.of("claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1");
+
+    static {
+        CATALOG.put("web_search", List.of("web"));
+        CATALOG.put("fetch_page", List.of("web"));
+        CATALOG.put("verify_fact", List.of("web", "synthesis"));
+        CATALOG.put("load_document", List.of("documents"));
+        CATALOG.put("extract_data_points", List.of("documents"));
+        CATALOG.put("summarize_content", List.of("synthesis"));
+        CATALOG.put("write_report", List.of("reports"));
+        CATALOG.put("send_report", List.of("reports"));
+        ROLES.put("searcher", "web");
+        ROLES.put("analyst", "documents");
+        ROLES.put("synthesizer", "synthesis");
+        ROLES.put("reporter", "reports");
+    }
+
+    /** The settings of one request: the tool_choice, the tools offered, and whether the reply must be checked for the call. */
+    record Turn(String toolChoice, List<String> tools, boolean checkReply) {}
+
+    /** One block of a reply: its type and the text or tool name it holds. */
+    record Block(String type, String value) {}
+
+    static List<String> toolsFor(String role) {
+        return CATALOG.entrySet().stream().filter(e -> e.getValue().contains(ROLES.get(role)) && !IRREVERSIBLE.contains(e.getKey())).map(Map.Entry::getKey).toList();
+    }
+
+    /** The request settings for a turn whose first call must be `forced`. */
+    static Turn turnFor(String model, String forced, List<String> tools) {
+        if (NO_FORCING.contains(model)) return new Turn("auto", List.of(forced), true);
+        return new Turn("tool:" + forced, tools, false);
+    }
+
+    /** What switching from one request to another costs in prompt caching. */
+    static String cacheCost(Turn before, Turn after) {
+        if (!before.tools().equals(after.tools())) return "everything (the tool definitions changed)";
+        if (!before.toolChoice().equals(after.toolChoice())) return "the cached messages (tool_choice changed)";
+        return "nothing";
+    }
+
+    static boolean madeTheCall(List<Block> reply, String forced) {
+        List<Block> calls = reply.stream().filter(b -> b.type().equals("tool_use")).toList();
+        return !calls.isEmpty() && calls.get(0).value().equals(forced);
+    }
+
+    static String allowed(String tool, int amount, boolean approved, int cap) {
+        if (!Set.of("refund", "lookup").contains(tool)) return "refused: unknown tool";
+        if (tool.equals("lookup")) return "run";
+        if (amount > cap) return "refused: above the limit of " + cap + ", send to a person";
+        return approved ? "run" : "wait: a person must approve";
+    }
+
+    static String allowed(String tool, int amount, boolean approved) {
+        return allowed(tool, amount, approved, 200);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("catalog: " + CATALOG.size() + " tools");
+        for (String role : ROLES.keySet()) System.out.println("  " + role + ": " + String.join(", ", toolsFor(role)));
+        System.out.println("a synthesizer that may also check one fact has verify_fact, and nothing else from the web");
+        System.out.println("first call must be extract_metadata:");
+        List<String> both = List.of("extract_metadata", "enrich");
+        for (String model : List.of("claude-opus-5", "claude-sonnet-5-5")) {
+            Turn turn = turnFor(model, "extract_metadata", both);
+            System.out.println("  " + model + ": tool_choice=" + turn.toolChoice() + ", tools=" + py(turn.tools()) + ", check the reply=" + py(turn.checkReply()));
+            System.out.println("    cost against a turn with auto and both tools: " + cacheCost(new Turn("auto", both, false), turn));
+        }
+        System.out.println("a reply to the fallback turn:");
+        Object[][] replies = {
+            {"text only", List.of(new Block("text", "I will look at the metadata."))},
+            {"the right call", List.of(new Block("tool_use", "extract_metadata"))},
+            {"another tool", List.of(new Block("tool_use", "enrich"))}};
+        for (Object[] r : replies) {
+            @SuppressWarnings("unchecked")
+            List<Block> reply = (List<Block>) r[1];
+            System.out.println("  " + r[0] + ": " + (madeTheCall(reply, "extract_metadata") ? "accept" : "re-ask once, then escalate"));
+        }
+        System.out.println("refund decisions:");
+        Object[][] decisions = {{"lookup", 0, false}, {"refund", 150, false}, {"refund", 150, true}, {"refund", 400, true}, {"delete_account", 0, true}};
+        for (Object[] d : decisions) {
+            System.out.println("  " + d[0] + " " + d[1] + ", approved=" + ((Boolean) d[2] ? "yes" : "no") + ": " + allowed((String) d[0], (Integer) d[1], (Boolean) d[2]));
+        }
+    }
+}
+```
+```text
+catalog: 8 tools
+  searcher: web_search, fetch_page, verify_fact
+  analyst: load_document, extract_data_points
+  synthesizer: verify_fact, summarize_content
+  reporter: write_report
+a synthesizer that may also check one fact has verify_fact, and nothing else from the web
+first call must be extract_metadata:
+  claude-opus-5: tool_choice=tool:extract_metadata, tools=['extract_metadata', 'enrich'], check the reply=False
+    cost against a turn with auto and both tools: the cached messages (tool_choice changed)
+  claude-sonnet-5-5: tool_choice=auto, tools=['extract_metadata'], check the reply=True
+    cost against a turn with auto and both tools: everything (the tool definitions changed)
+a reply to the fallback turn:
+  text only: re-ask once, then escalate
+  the right call: accept
+  another tool: re-ask once, then escalate
+refund decisions:
+  lookup 0, approved=no: run
+  refund 150, approved=no: wait: a person must approve
+  refund 150, approved=yes: run
+  refund 400, approved=yes: refused: above the limit of 200, send to a person
+  delete_account 0, approved=yes: refused: unknown tool
+```
+```kotlin
+import harness.Show.py
+
+/**
+ * Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.
+ *
+ * No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
+ */
+val CATALOG = linkedMapOf(
+    "web_search" to listOf("web"), "fetch_page" to listOf("web"), "verify_fact" to listOf("web", "synthesis"), "load_document" to listOf("documents"),
+    "extract_data_points" to listOf("documents"), "summarize_content" to listOf("synthesis"), "write_report" to listOf("reports"), "send_report" to listOf("reports"),
+)
+val IRREVERSIBLE = setOf("send_report")
+val ROLES = linkedMapOf("searcher" to "web", "analyst" to "documents", "synthesizer" to "synthesis", "reporter" to "reports")
+val NO_FORCING = setOf("claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1")
+
+/** The settings of one request: the tool_choice, the tools offered, and whether the reply must be checked for the call. */
+data class Turn(val toolChoice: String, val tools: List<String>, val checkReply: Boolean)
+
+/** One block of a reply: its type and the text or tool name it holds. */
+data class Block(val type: String, val value: String)
+
+fun toolsFor(role: String): List<String> = CATALOG.filter { (name, tags) -> ROLES.getValue(role) in tags && name !in IRREVERSIBLE }.keys.toList()
+
+/** The request settings for a turn whose first call must be `forced`. */
+fun turnFor(model: String, forced: String, tools: List<String>): Turn =
+    if (model in NO_FORCING) Turn("auto", listOf(forced), true) else Turn("tool:$forced", tools, false)
+
+/** What switching from one request to another costs in prompt caching. */
+fun cacheCost(before: Turn, after: Turn): String = when {
+    before.tools != after.tools -> "everything (the tool definitions changed)"
+    before.toolChoice != after.toolChoice -> "the cached messages (tool_choice changed)"
+    else -> "nothing"
+}
+
+fun madeTheCall(reply: List<Block>, forced: String): Boolean = reply.filter { it.type == "tool_use" }.let { it.isNotEmpty() && it[0].value == forced }
+
+fun allowed(tool: String, amount: Int, approved: Boolean, cap: Int = 200): String = when {
+    tool !in setOf("refund", "lookup") -> "refused: unknown tool"
+    tool == "lookup" -> "run"
+    amount > cap -> "refused: above the limit of $cap, send to a person"
+    approved -> "run"
+    else -> "wait: a person must approve"
+}
+
+fun main() {
+    println("catalog: ${CATALOG.size} tools")
+    for (role in ROLES.keys) println("  $role: ${toolsFor(role).joinToString(", ")}")
+    println("a synthesizer that may also check one fact has verify_fact, and nothing else from the web")
+    println("first call must be extract_metadata:")
+    val both = listOf("extract_metadata", "enrich")
+    for (model in listOf("claude-opus-5", "claude-sonnet-5-5")) {
+        val turn = turnFor(model, "extract_metadata", both)
+        println("  $model: tool_choice=${turn.toolChoice}, tools=${py(turn.tools)}, check the reply=${py(turn.checkReply)}")
+        println("    cost against a turn with auto and both tools: ${cacheCost(Turn("auto", both, false), turn)}")
+    }
+    println("a reply to the fallback turn:")
+    for ((label, reply) in listOf(
+        "text only" to listOf(Block("text", "I will look at the metadata.")),
+        "the right call" to listOf(Block("tool_use", "extract_metadata")),
+        "another tool" to listOf(Block("tool_use", "enrich")),
+    )) {
+        println("  $label: ${if (madeTheCall(reply, "extract_metadata")) "accept" else "re-ask once, then escalate"}")
+    }
+    println("refund decisions:")
+    for ((tool, amount, approved) in listOf(Triple("lookup", 0, false), Triple("refund", 150, false), Triple("refund", 150, true), Triple("refund", 400, true), Triple("delete_account", 0, true))) {
+        println("  $tool $amount, approved=${if (approved) "yes" else "no"}: ${allowed(tool, amount, approved)}")
+    }
+}
 ```
 ```text
 catalog: 8 tools

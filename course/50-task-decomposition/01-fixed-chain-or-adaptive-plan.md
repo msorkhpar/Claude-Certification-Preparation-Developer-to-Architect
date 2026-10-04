@@ -61,7 +61,7 @@ Two design points follow from this, and they come back in the practice. The cros
 
 The example runs a three-file change through the two passes with scripted stand-ins, and then runs an adaptive loop whose planner reads each result. It prints what each call was given.
 
-<!-- example: m50-decomposition-flow tabs: python,typescript -->
+<!-- example: m50-decomposition-flow tabs: python,typescript,java,kotlin -->
 ```python
 """Two decompositions with scripted model replies: a per-file pass followed by one cross-file pass, and an adaptive loop that plans each step from the last.
 
@@ -214,6 +214,198 @@ function main() {
 }
 
 if (import.meta.main) main();
+```
+```text
+per file, then across files:
+  file pass api.py: 2 lines, no other file
+  file pass db.py: 2 lines, no other file
+  file pass ui.py: 2 lines, no other file
+  cross pass: 3 summaries, 123 characters of source withheld
+  finding: api.py passes an id but db.py looks up by name
+
+adaptive, each step planned from the last:
+  step 1: list the test files -> 3 files
+  step 2: run the failing test -> 1 failure in test_parse
+  step 3: read the module under test -> parse() drops the last field
+  status: done after 3 steps; the failure is in parse()
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Two decompositions with scripted model replies: a per-file pass followed by one cross-file pass, and an adaptive loop that plans each step from the last.
+ *
+ * <p>The "model" is a set of hand-written functions, so the output shows what each pass was given and what the control flow did with the answers, and nothing about
+ * how a real model would review the code. The files, summaries and findings are illustrative.
+ */
+public final class Flow {
+    static final Map<String, String> CHANGE = new LinkedHashMap<>();
+    static final Map<String, String> SUMMARIES = new LinkedHashMap<>();
+
+    static {
+        CHANGE.put("api.py", "def get_user(id):\n    return db.find(id)\n");
+        CHANGE.put("db.py", "def find(name):\n    return rows.get(name)\n");
+        CHANGE.put("ui.py", "def show(user):\n    print(user['name'])\n");
+        SUMMARIES.put("api.py", "get_user passes an id to db.find");
+        SUMMARIES.put("db.py", "find looks a row up by name");
+        SUMMARIES.put("ui.py", "show prints the name field");
+    }
+
+    /** A file's path and the summary of it. */
+    record Summary(String path, String text) {}
+
+    /** One step of the adaptive run: the subtask and what the worker answered. */
+    record Step(String subtask, String result) {}
+
+    /** What the planner answers: done with a summary, or the next subtask. */
+    record Plan(boolean done, String next, String summary) {}
+
+    /** The end of an adaptive run. */
+    record Run(String status, List<Step> steps, String summary) {}
+
+    /** One call per file: it is given this file and nothing else. */
+    static String filePass(String path, String text) {
+        System.out.println("  file pass " + path + ": " + text.lines().count() + " lines, no other file");
+        return SUMMARIES.get(path);
+    }
+
+    /** One call over the summaries: the relations between files, never the text. */
+    static List<String> crossPass(List<Summary> summaries) {
+        int withheld = CHANGE.values().stream().mapToInt(String::length).sum();
+        System.out.println("  cross pass: " + summaries.size() + " summaries, " + withheld + " characters of source withheld");
+        Map<String, String> names = new LinkedHashMap<>();
+        for (Summary s : summaries) names.put(s.path(), s.text());
+        if (names.get("api.py").contains("id") && names.get("db.py").contains("name")) return List.of("api.py passes an id but db.py looks up by name");
+        return List.of();
+    }
+
+    /** A scripted planner: what it answers depends on what the steps so far found. */
+    static Plan plan(String goal, List<Step> steps) {
+        List<String> done = steps.stream().map(Step::subtask).toList();
+        if (steps.isEmpty()) return new Plan(false, "list the test files", null);
+        if (done.contains("list the test files") && !done.contains("run the failing test")) return new Plan(false, "run the failing test", null);
+        if (done.contains("read the module under test")) return new Plan(true, null, "the failure is in parse()");
+        if (steps.get(steps.size() - 1).result().startsWith("1 failure")) return new Plan(false, "read the module under test", null);
+        return new Plan(true, null, "nothing failed");
+    }
+
+    static String work(String subtask) {
+        return Map.of("list the test files", "3 files", "run the failing test", "1 failure in test_parse", "read the module under test", "parse() drops the last field").get(subtask);
+    }
+
+    static Run runAdaptive(String goal, int maxSteps) {
+        List<Step> steps = new ArrayList<>();
+        while (true) {
+            Plan reply = plan(goal, new ArrayList<>(steps));
+            if (reply.done()) return new Run("done", steps, reply.summary());
+            if (steps.size() >= maxSteps) return new Run("step_limit", steps, "");
+            steps.add(new Step(reply.next(), work(reply.next())));
+            System.out.println("  step " + steps.size() + ": " + reply.next() + " -> " + steps.get(steps.size() - 1).result());
+        }
+    }
+
+    static Run runAdaptive(String goal) {
+        return runAdaptive(goal, 5);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("per file, then across files:");
+        List<Summary> summaries = new ArrayList<>();
+        CHANGE.forEach((path, text) -> summaries.add(new Summary(path, filePass(path, text))));
+        for (String finding : crossPass(summaries)) System.out.println("  finding: " + finding);
+        System.out.println("\nadaptive, each step planned from the last:");
+        Run run = runAdaptive("find why the parser test fails");
+        System.out.println("  status: " + run.status() + " after " + run.steps().size() + " steps; " + run.summary());
+    }
+}
+```
+```text
+per file, then across files:
+  file pass api.py: 2 lines, no other file
+  file pass db.py: 2 lines, no other file
+  file pass ui.py: 2 lines, no other file
+  cross pass: 3 summaries, 123 characters of source withheld
+  finding: api.py passes an id but db.py looks up by name
+
+adaptive, each step planned from the last:
+  step 1: list the test files -> 3 files
+  step 2: run the failing test -> 1 failure in test_parse
+  step 3: read the module under test -> parse() drops the last field
+  status: done after 3 steps; the failure is in parse()
+```
+```kotlin
+/**
+ * Two decompositions with scripted model replies: a per-file pass followed by one cross-file pass, and an adaptive loop that plans each step from the last.
+ *
+ * The "model" is a set of hand-written functions, so the output shows what each pass was given and what the control flow did with the answers, and nothing about
+ * how a real model would review the code. The files, summaries and findings are illustrative.
+ */
+val CHANGE = linkedMapOf(
+    "api.py" to "def get_user(id):\n    return db.find(id)\n",
+    "db.py" to "def find(name):\n    return rows.get(name)\n",
+    "ui.py" to "def show(user):\n    print(user['name'])\n",
+)
+val SUMMARIES = linkedMapOf("api.py" to "get_user passes an id to db.find", "db.py" to "find looks a row up by name", "ui.py" to "show prints the name field")
+
+/** One step of the adaptive run: the subtask and what the worker answered. */
+data class Step(val subtask: String, val result: String)
+
+/** What the planner answers: done with a summary, or the next subtask. */
+data class Plan(val done: Boolean, val next: String? = null, val summary: String? = null)
+
+/** The end of an adaptive run. */
+data class Run(val status: String, val steps: List<Step>, val summary: String)
+
+/** One call per file: it is given this file and nothing else. */
+fun filePass(path: String, text: String): String {
+    println("  file pass $path: ${text.lines().size - (if (text.endsWith("\n")) 1 else 0)} lines, no other file")
+    return SUMMARIES.getValue(path)
+}
+
+/** One call over the summaries: the relations between files, never the text. */
+fun crossPass(summaries: List<Pair<String, String>>): List<String> {
+    println("  cross pass: ${summaries.size} summaries, ${CHANGE.values.sumOf { it.length }} characters of source withheld")
+    val names = summaries.toMap()
+    return if ("id" in names.getValue("api.py") && "name" in names.getValue("db.py")) listOf("api.py passes an id but db.py looks up by name") else emptyList()
+}
+
+/** A scripted planner: what it answers depends on what the steps so far found. */
+fun plan(goal: String, steps: List<Step>): Plan {
+    val done = steps.map { it.subtask }
+    return when {
+        steps.isEmpty() -> Plan(false, next = "list the test files")
+        "list the test files" in done && "run the failing test" !in done -> Plan(false, next = "run the failing test")
+        "read the module under test" in done -> Plan(true, summary = "the failure is in parse()")
+        steps.last().result.startsWith("1 failure") -> Plan(false, next = "read the module under test")
+        else -> Plan(true, summary = "nothing failed")
+    }
+}
+
+fun work(subtask: String): String =
+    mapOf("list the test files" to "3 files", "run the failing test" to "1 failure in test_parse", "read the module under test" to "parse() drops the last field").getValue(subtask)
+
+fun runAdaptive(goal: String, maxSteps: Int = 5): Run {
+    val steps = mutableListOf<Step>()
+    while (true) {
+        val reply = plan(goal, steps.toList())
+        if (reply.done) return Run("done", steps, reply.summary!!)
+        if (steps.size >= maxSteps) return Run("step_limit", steps, "")
+        steps += Step(reply.next!!, work(reply.next))
+        println("  step ${steps.size}: ${reply.next} -> ${steps.last().result}")
+    }
+}
+
+fun main() {
+    println("per file, then across files:")
+    val summaries = CHANGE.map { (path, text) -> path to filePass(path, text) }
+    for (finding in crossPass(summaries)) println("  finding: $finding")
+    println("\nadaptive, each step planned from the last:")
+    val run = runAdaptive("find why the parser test fails")
+    println("  status: ${run.status} after ${run.steps.size} steps; ${run.summary}")
+}
 ```
 ```text
 per file, then across files:

@@ -47,7 +47,7 @@ A hybrid is normal: explore and plan for the large change, then run the implemen
 
 ### The example
 
-<!-- example: m59-refinement tabs: python,typescript -->
+<!-- example: m59-refinement tabs: python,typescript,java,kotlin -->
 ```python
 """Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.
 
@@ -203,6 +203,185 @@ messages: [["sort-order","pagination"],["typo-in-label"],["null-date"]]
 2 of 3 tests fail:
 - empty list: input [], expected [], got null
 - null entry: input [2,null], expected [2], got [2,null]
+```
+```java
+import static harness.Show.py;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.
+ *
+ * <p>The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-practices page confirms (read on 2026-10-03): plan when the change is large, architectural,
+ * touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and
+ * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.
+ */
+public final class Refinement {
+    /** What decides the mode of a task. */
+    record Task(boolean diffInOneSentence, int files, boolean architectural, int approaches) {}
+
+    /** A problem found in review and the ids of the problems it interacts with. */
+    record Issue(String id, List<String> interactsWith) {
+        Issue(String id) {
+            this(id, List.of());
+        }
+    }
+
+    /** One test run: the test's name, its input, the expected output and the actual one. */
+    record Result(String name, Object input, Object expected, Object actual) {}
+
+    /** Phases of the work: `plan` first when the change is large, architectural, spread over files or has several valid approaches. */
+    static List<String> chooseMode(Task task) {
+        boolean small = task.diffInOneSentence() && task.files() <= 1 && !task.architectural();
+        if (small) return List.of("implement");
+        if (task.architectural() || task.approaches() > 1 || task.files() > 1) return List.of("explore", "plan", "implement");
+        return List.of("implement");
+    }
+
+    private static String find(Map<String, String> parent, String x) {
+        while (!parent.get(x).equals(x)) {
+            parent.put(x, parent.get(parent.get(x)));
+            x = parent.get(x);
+        }
+        return x;
+    }
+
+    /** Messages to send, in order: problems that interact travel together, independent ones go one at a time. */
+    static List<List<String>> groupFeedback(List<Issue> issues) {
+        Map<String, String> parent = new HashMap<>();
+        for (Issue i : issues) parent.put(i.id(), i.id());
+        for (Issue issue : issues) {
+            for (String other : issue.interactsWith()) {
+                if (parent.containsKey(other)) parent.put(find(parent, issue.id()), find(parent, other));
+            }
+        }
+        Map<String, List<String>> groups = new LinkedHashMap<>();
+        for (Issue issue : issues) groups.computeIfAbsent(find(parent, issue.id()), k -> new ArrayList<>()).add(issue.id());
+        return new ArrayList<>(groups.values());
+    }
+
+    /** The message that closes the loop: each failing test with its input, the expected output and the actual one; nothing about the passing tests. */
+    static String failureReport(List<Result> results) {
+        List<Result> failing = results.stream().filter(r -> !Objects.equals(r.actual(), r.expected())).toList();
+        if (failing.isEmpty()) return "All tests pass.";
+        List<String> lines = new ArrayList<>();
+        lines.add(failing.size() + " of " + results.size() + " tests fail:");
+        for (Result r : failing) lines.add("- " + r.name() + ": input " + py(r.input()) + ", expected " + py(r.expected()) + ", got " + py(r.actual()));
+        return String.join("\n", lines);
+    }
+
+    public static void main(String[] args) {
+        Map<String, Task> tasks = new LinkedHashMap<>();
+        tasks.put("rename a variable in one function", new Task(true, 1, false, 1));
+        tasks.put("add a date check to one handler", new Task(true, 1, false, 1));
+        tasks.put("split a monolith into services", new Task(false, 60, true, 3));
+        tasks.put("migrate a library used in 45 files", new Task(false, 45, false, 1));
+        tasks.forEach((name, task) -> System.out.println(name + ": " + String.join(" > ", chooseMode(task))));
+        List<Issue> issues = List.of(new Issue("sort-order", List.of("pagination")), new Issue("pagination", List.of("sort-order")), new Issue("typo-in-label"), new Issue("null-date"));
+        System.out.println("messages: " + py(groupFeedback(issues)));
+        List<Result> results = List.of(
+            new Result("keeps order", List.of(3, 1, 2), List.of(1, 2, 3), List.of(1, 2, 3)),
+            new Result("empty list", List.of(), List.of(), null),
+            new Result("null entry", Arrays.asList(2, null), List.of(2), Arrays.asList(2, null)));
+        System.out.println(failureReport(results));
+    }
+}
+```
+```text
+rename a variable in one function: implement
+add a date check to one handler: implement
+split a monolith into services: explore > plan > implement
+migrate a library used in 45 files: explore > plan > implement
+messages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]
+2 of 3 tests fail:
+- empty list: input [], expected [], got None
+- null entry: input [2, None], expected [2], got [2, None]
+```
+```kotlin
+import harness.Show.py
+
+/**
+ * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.
+ *
+ * The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-practices page confirms (read on 2026-10-03): plan when the change is large, architectural,
+ * touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and
+ * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.
+ */
+
+/** What decides the mode of a task. */
+data class Task(val diffInOneSentence: Boolean, val files: Int, val architectural: Boolean, val approaches: Int)
+
+/** A problem found in review and the ids of the problems it interacts with. */
+data class Issue(val id: String, val interactsWith: List<String> = emptyList())
+
+/** One test run: the test's name, its input, the expected output and the actual one. */
+data class Result(val name: String, val input: Any?, val expected: Any?, val actual: Any?)
+
+/** Phases of the work: `plan` first when the change is large, architectural, spread over files or has several valid approaches. */
+fun chooseMode(task: Task): List<String> {
+    val small = task.diffInOneSentence && task.files <= 1 && !task.architectural
+    if (small) return listOf("implement")
+    if (task.architectural || task.approaches > 1 || task.files > 1) return listOf("explore", "plan", "implement")
+    return listOf("implement")
+}
+
+/** Messages to send, in order: problems that interact travel together, independent ones go one at a time. */
+fun groupFeedback(issues: List<Issue>): List<List<String>> {
+    val parent = issues.associate { it.id to it.id }.toMutableMap()
+    fun find(start: String): String {
+        var x = start
+        while (parent.getValue(x) != x) {
+            parent[x] = parent.getValue(parent.getValue(x))
+            x = parent.getValue(x)
+        }
+        return x
+    }
+    for (issue in issues) for (other in issue.interactsWith) if (other in parent) parent[find(issue.id)] = find(other)
+    val groups = linkedMapOf<String, MutableList<String>>()
+    for (issue in issues) groups.getOrPut(find(issue.id)) { mutableListOf() }.add(issue.id)
+    return groups.values.toList()
+}
+
+/** The message that closes the loop: each failing test with its input, the expected output and the actual one; nothing about the passing tests. */
+fun failureReport(results: List<Result>): String {
+    val failing = results.filter { it.actual != it.expected }
+    if (failing.isEmpty()) return "All tests pass."
+    return (listOf("${failing.size} of ${results.size} tests fail:") + failing.map { "- ${it.name}: input ${py(it.input)}, expected ${py(it.expected)}, got ${py(it.actual)}" }).joinToString("\n")
+}
+
+fun main() {
+    val tasks = linkedMapOf(
+        "rename a variable in one function" to Task(true, 1, false, 1),
+        "add a date check to one handler" to Task(true, 1, false, 1),
+        "split a monolith into services" to Task(false, 60, true, 3),
+        "migrate a library used in 45 files" to Task(false, 45, false, 1),
+    )
+    for ((name, task) in tasks) println("$name: ${chooseMode(task).joinToString(" > ")}")
+    val issues = listOf(Issue("sort-order", listOf("pagination")), Issue("pagination", listOf("sort-order")), Issue("typo-in-label"), Issue("null-date"))
+    println("messages: ${py(groupFeedback(issues))}")
+    val results = listOf(
+        Result("keeps order", listOf(3, 1, 2), listOf(1, 2, 3), listOf(1, 2, 3)),
+        Result("empty list", emptyList<Int>(), emptyList<Int>(), null),
+        Result("null entry", listOf(2, null), listOf(2), listOf(2, null)),
+    )
+    println(failureReport(results))
+}
+```
+```text
+rename a variable in one function: implement
+add a date check to one handler: implement
+split a monolith into services: explore > plan > implement
+migrate a library used in 45 files: explore > plan > implement
+messages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]
+2 of 3 tests fail:
+- empty list: input [], expected [], got None
+- null entry: input [2, None], expected [2], got [2, None]
 ```
 <!-- /example -->
 
