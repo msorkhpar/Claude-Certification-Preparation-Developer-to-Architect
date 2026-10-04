@@ -25,7 +25,7 @@ Claude Code reads settings from five places. In order of precedence, highest fir
 4. **Shared project.** The file in the repository that the team commits.
 5. **User.** A developer's settings for every project.
 
-A key set at a higher level overrides the same key set lower down. That sentence is the whole rule for ordinary keys, and the example applies it: the managed file sets `cleanupPeriodDays` to 7, the command line sets 14, and the effective value is 7. The managed level is not a default that a developer may change: no user, project or local value overrides it.
+A key set at a higher level overrides the same key set lower down. That sentence is the whole rule for ordinary keys, and the example applies it: the managed file sets `cleanupPeriodDays` to 7, the command line sets 14, and the effective value is 7. The managed level is not a default that a developer may change: no user, project or local value overrides it, with one exception: a managed `model` is only a default, as the lock section below shows.
 
 ### Lists merge, except where a lock stops them
 
@@ -68,7 +68,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 ## Quiz
 
-1. Scenario: Dmitri's company wants developers limited to two approved models. The platform team sets `model` to the first of them in the managed file and tells the developers the choice is closed. What happens when a developer picks another model?
+1. Scenario: Dmitri's company wants developers limited to two approved models. The platform team sets `model` to the first of them in the managed file and tells the developers to use only those two. What happens when a developer picks another model?
    - **a**: It is allowed, since a default gets overridden and only a list restricts
    - **b**: The choice is refused, because the managed file outranks the developer's own picks
    - **c**: The pick is refused for the session and restored after the next restart

@@ -93,7 +93,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 
 1. Scenario: A review of a pilot finds one medium finding, a missing owner, and two low findings, a small evaluation set and an unstated accuracy. There is no high finding. What does the review conclude?
    - **a**: Approve it, since no finding is serious enough to stop the pilot
-   - **b**: Send it back for a change before approval
+   - **b**: Return it for revision, since the ladder calls for one here
    - **c**: Reject it, since the findings differ in kind and several are present
    - **d**: Approve it, since the two low findings outnumber the medium one
 

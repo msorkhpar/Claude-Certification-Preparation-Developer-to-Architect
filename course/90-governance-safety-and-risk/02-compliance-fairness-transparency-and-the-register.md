@@ -72,7 +72,7 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
    - **a**: They are deleted at once because the court may inspect any copy
    - **b**: They follow the same schedule and the case uses what is left
    - **c**: They are moved to a table with no limit on their retention
-   - **d**: Hold them past the ceiling until the matter is settled
+   - **d**: They are held past the ceiling until the matter is settled
 
 <details>
 <summary>Answer key</summary>

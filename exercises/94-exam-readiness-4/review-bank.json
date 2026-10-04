@@ -153,15 +153,15 @@
       "domains": [
         "P1"
       ],
-      "stem": "Scenario: A refund agent fails, and the runner calls a backup agent. Which idempotency identifier should the backup's call carry?",
+      "stem": "Scenario: A batch of ten jobs stops on an unexpected error in the last one, after nine have finished. What is the right handling?",
       "options": {
-        "a": "The same one as the primary, so that the tool treats both calls as one action",
-        "b": "A separate one derived from the primary's, since it is a different attempt",
-        "c": "None at all, since a backup answer needs no protection against repeats",
-        "d": "A fresh random one that is not stored anywhere, to avoid clashes"
+        "a": "Catch the error and carry on, reporting the batch as complete",
+        "b": "Fix the cause, then resume from the results already stored",
+        "c": "Start the batch again so that every result is made fresh",
+        "d": "Discard the stored results, since a stop makes them untrustworthy"
       },
       "key": "b",
-      "explanation": "The fallback is a different attempt with a different effect, so it carries its own key, the primary's with a suffix, and the breaker rules apply to it as to any agent."
+      "explanation": "A crash is not caught: the process stops, the cause is fixed and the run resumes, because finished results were written as work was done."
     },
     {
       "id": "rb-010",
@@ -363,7 +363,7 @@
         "a": "As ok, since a right answer is the goal of the whole system",
         "b": "As a generation failure, since the model wrote the final answer",
         "c": "As noise, to be dropped from the denominator of the recall",
-        "d": "As ungrounded, a fault in retrieval, since it rests on luck"
+        "d": "As unsupported, a fault in retrieval, since it rests on luck"
       },
       "key": "d",
       "explanation": "A right answer without retrieved evidence is a defect in retrieval, because it will not stay right, and it is counted as unsupported."
@@ -375,15 +375,15 @@
       "domains": [
         "P3"
       ],
-      "stem": "Scenario: An MCP server accepts a credential that was issued for a different product and passes it on to a third system. What is wrong?",
+      "stem": "Scenario: A request reaches a company gateway with no sign of who sent it, and it also names a model that is off the list. What verdict does it get?",
       "options": {
-        "a": "The credential is too long to be forwarded through a gateway",
-        "b": "The product that issued it must renew it before each use",
-        "c": "The downstream party trusts a token whose audience was never verified",
-        "d": "The server stores the credential in a log that others can read"
+        "a": "Model not allowed, since the list of models is the first rule applied",
+        "b": "Rate limited, since the count of requests is the first rule applied",
+        "c": "Unauthenticated, since the identity check comes ahead of every other rule",
+        "d": "Unknown team, since it is sent to a default set of rules instead"
       },
       "key": "c",
-      "explanation": "Token passthrough is explicitly forbidden: the downstream service would trust a token whose audience was never checked, and audience-based controls are bypassed."
+      "explanation": "A request with no credential is refused as unauthenticated even when it also asks for a model it may not have, because who is calling comes first."
     },
     {
       "id": "rb-023",

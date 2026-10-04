@@ -76,10 +76,10 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 This quiz covers both pages of the module.
 
-1. Scenario: A developer reports that the managed policy "does nothing" for the allowlist of MCP servers on her laptop. The organisation's allowlist is in the shared project file of the repository. Which fact explains it?
+1. Scenario: A developer reports that the managed policy "does nothing" for the allowlist of MCP servers on her laptop. The organisation's allowlist, and the key that makes it the only list, are both in the shared project file of the repository. Which fact explains it?
    - **a**: Lists in settings files merge, so her own list has been added to the policy
    - **b**: The command line always outranks the managed file, so the list is overridden
-   - **c**: That setting is honoured at the top tier alone and is inert below it
+   - **c**: Settings of that kind are honoured at the top tier alone and inert below it
    - **d**: The shared project file is read first, so the policy file replaced it
 
 2. Scenario: A security lead asks for a way to refuse the options that bring in a plugin, an agent or an MCP server for one run only. Which key does that, and where is it set?
@@ -92,7 +92,7 @@ This quiz covers both pages of the module.
    - **a**: Because usage credits reset every four weeks and the data must match
    - **b**: Because the dashboard keeps only four weeks, so older data is lost
    - **c**: To show leadership how many lines developers write without the tool
-   - **d**: A release cycle fits inside it, so any subsequent shift is judged against it
+   - **d**: Because a release cycle fits inside it, so any shift is judged against it
 
 <details>
 <summary>Answer key</summary>

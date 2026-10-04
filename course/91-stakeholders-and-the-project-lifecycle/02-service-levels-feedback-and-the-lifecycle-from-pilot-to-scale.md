@@ -71,7 +71,7 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 1. Scenario: Ola's team reports its latency service level, a ceiling of 2000 ms at the 95th percentile. The week's measured figure is exactly 2000 ms. How does the report read?
    - **a**: Missed by 0 ms, since the measure has reached the limit
    - **b**: Met, since a value at the limit counts as inside it
-   - **c**: Met, with a note that the margin is too small to trust
+   - **c**: Met, but with the ceiling raised to 2100 ms for the week
    - **d**: Undecided until a second week of measurements arrives
 
 2. Scenario: Vera is writing the pilot table for a billing assistant and offers the stop trigger "if the quality is worse than we hoped". What is wrong with it?
@@ -83,7 +83,7 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A service level is met at its limit exactly. *a* is ruled out because "A latency of 2000 ms against a ceiling of 2000 ms is met". *c* is ruled out because the rule is "A miss says by how much", and a figure at the limit is not a miss. *d* is ruled out because "Met at the limit exactly" settles the case without a second week.
+1. **b**. A service level is met at its limit exactly. *a* is ruled out because "A latency of 2000 ms against a ceiling of 2000 ms is met". *c* is ruled out because the ceiling is the target, and "Met at the limit exactly" leaves no reason to raise it. *d* is ruled out because "Met at the limit exactly" settles the case without a second week.
 2. **d**. A trigger needs a number to be reached. *a* is ruled out because "A trigger that says \"if it goes wrong\" is not a trigger", whoever decides. *c* is ruled out because the record lists each assumption "with a test and a stop trigger that has a number in it" before the pilot runs. *b* is ruled out because the table's triggers belong to the pilot, whose assumptions "each with a test" the record lists.
 
 </details>
