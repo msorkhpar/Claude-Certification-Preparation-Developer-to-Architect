@@ -1,0 +1,146 @@
+{
+  "practice": "88-evaluation-and-optimisation/unit-01/practice-1",
+  "name": "evalkit",
+  "tests": {
+    "java": "EvalKitTest",
+    "kotlin": "EvalKitTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_segment_table_reports_accuracy_and_error_cost_with_the_costliest_segment_first",
+      "typescript": "m1 a segment table reports accuracy and error cost with the costliest segment first",
+      "java": "m1_aSegmentTableReportsAccuracyAndErrorCostWithTheCostliestSegmentFirst",
+      "kotlin": "m1_aSegmentTableReportsAccuracyAndErrorCostWithTheCostliestSegmentFirst"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_segment_with_no_cost_entry_costs_one_per_error_and_no_results_give_an_empty_table",
+      "typescript": "e1 a segment with no cost entry costs one per error and no results give an empty table",
+      "java": "e1_aSegmentWithNoCostEntryCostsOnePerErrorAndNoResultsGiveAnEmptyTable",
+      "kotlin": "e1_aSegmentWithNoCostEntryCostsOnePerErrorAndNoResultsGiveAnEmptyTable"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_percentile_uses_the_nearest_rank_and_does_not_need_sorted_input",
+      "typescript": "e2 a percentile uses the nearest rank and does not need sorted input",
+      "java": "e2_aPercentileUsesTheNearestRankAndDoesNotNeedSortedInput",
+      "kotlin": "e2_aPercentileUsesTheNearestRankAndDoesNotNeedSortedInput"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_test_with_fewer_cases_than_the_minimum_in_either_arm_decides_nothing",
+      "typescript": "e3 a test with fewer cases than the minimum in either arm decides nothing",
+      "java": "e3_aTestWithFewerCasesThanTheMinimumInEitherArmDecidesNothing",
+      "kotlin": "e3_aTestWithFewerCasesThanTheMinimumInEitherArmDecidesNothing"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_difference_is_called_only_when_it_clears_the_95_percent_bar_and_the_better_side_is_named",
+      "typescript": "e4 a difference is called only when it clears the 95 percent bar and the better side is named",
+      "java": "e4_aDifferenceIsCalledOnlyWhenItClearsThe95PercentBarAndTheBetterSideIsNamed",
+      "kotlin": "e4_aDifferenceIsCalledOnlyWhenItClearsThe95PercentBarAndTheBetterSideIsNamed"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_shadow_run_is_held_for_a_regression_in_a_protected_segment_or_for_more_losses_than_gains",
+      "typescript": "e5 a shadow run is held for a regression in a protected segment or for more losses than gains",
+      "java": "e5_aShadowRunIsHeldForARegressionInAProtectedSegmentOrForMoreLossesThanGains",
+      "kotlin": "e5_aShadowRunIsHeldForARegressionInAProtectedSegmentOrForMoreLossesThanGains"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_diagnosis_checks_the_evidence_then_the_grounding_then_the_format_then_the_stronger_model",
+      "typescript": "e6 diagnosis checks the evidence then the grounding then the format then the stronger model",
+      "java": "e6_diagnosisChecksTheEvidenceThenTheGroundingThenTheFormatThenTheStrongerModel",
+      "kotlin": "e6_diagnosisChecksTheEvidenceThenTheGroundingThenTheFormatThenTheStrongerModel"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_model_choice_takes_the_cheapest_option_that_meets_the_accuracy_floor_and_the_latency_limit",
+      "typescript": "e7 model choice takes the cheapest option that meets the accuracy floor and the latency limit",
+      "java": "e7_modelChoiceTakesTheCheapestOptionThatMeetsTheAccuracyFloorAndTheLatencyLimit",
+      "kotlin": "e7_modelChoiceTakesTheCheapestOptionThatMeetsTheAccuracyFloorAndTheLatencyLimit"
+    }
+  },
+  "plants": {
+    "wrong-pct-truncated": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "rounds an accuracy down instead of to the nearest whole percent"
+    },
+    "wrong-sorted-by-name": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "orders the report by segment name and not by error cost"
+    },
+    "wrong-default-cost-zero": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "makes the errors of a segment with no cost entry free"
+    },
+    "wrong-percentile-floor": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "takes the rank rounded down, so the 95th percentile of four values is the third"
+    },
+    "wrong-percentile-unsorted": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "reads the percentile from the values in the order they arrived"
+    },
+    "wrong-ab-min-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "gives a verdict on a handful of cases"
+    },
+    "wrong-ab-always-new": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "names the new version as better whenever it clears the bar, even when it is worse"
+    },
+    "wrong-ab-90-percent": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "uses the 90 percent bar and calls a difference that could be chance"
+    },
+    "wrong-gate-net-only": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "ships a version that lost a right answer in a protected segment because it gained as many elsewhere"
+    },
+    "wrong-gate-protected-only": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "ships a version that lost more answers than it gained in segments that are not protected"
+    },
+    "wrong-diagnose-grounding-late": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "checks the format before it asks whether the answer is supported by the evidence"
+    },
+    "wrong-choose-ignores-latency": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "picks a model that is too slow because it meets the accuracy floor"
+    },
+    "wrong-choose-ties-by-order": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "breaks a tie in cost by the order the options were listed"
+    }
+  }
+}

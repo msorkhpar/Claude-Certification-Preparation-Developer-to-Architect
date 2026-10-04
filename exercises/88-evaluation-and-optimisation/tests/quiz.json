@@ -1,0 +1,138 @@
+{
+  "module": "88-evaluation-and-optimisation",
+  "quizzes": [
+    {
+      "id": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure#q1",
+      "page": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure.md",
+      "scope": "page",
+      "stem": "Two versions of a support assistant both score 92 percent on the evaluation set. One of them gets refund answers wrong far more often, and a wrong refund answer costs twenty times a wrong status answer. What should the report show?",
+      "options": {
+        "a": "Accuracy by type of case, with the price of every mistake, so the system failing the expensive cases is exposed",
+        "b": "The overall accuracy of each version alone, since equal scores mean that the versions are equal",
+        "c": "The average latency of each version, because speed is the thing that users notice first",
+        "d": "The number of cases in the set, since a larger set makes the score fair to both versions"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A table by segment with the cost of the errors shows the regression that the overall figure averages away.",
+        "b": "Ruled out because \"Equal overall scores can hide unequal failures\".",
+        "c": "Ruled out because \"A figure from another dimension cannot stand in for the segment that is failing\".",
+        "d": "Ruled out because \"More cases make the score steadier and do not show where it is low\"."
+      }
+    },
+    {
+      "id": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure#q2",
+      "page": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure.md",
+      "scope": "page",
+      "stem": "A team grades a research assistant's free-form reports only with exact-match checks, and the score barely moves when the quality of the reports visibly changes. Which addition fits best?",
+      "options": {
+        "a": "A longer answer key, so that more phrasings of each answer count as a match",
+        "b": "Human review of every report, since people are the only judges whose verdict is valid, whatever the cost in time",
+        "c": "A rubric-driven judge that is itself a model, for the open text, with people reading a sample for what it misses",
+        "d": "Fewer test cases of higher quality, each of them graded by hand with great care"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Free text has no single correct form, so a rubric grader scales and people sample for what it misses.",
+        "a": "Ruled out because \"Exact match suits answers with one correct form and rejects a correct report that is worded differently\".",
+        "b": "Ruled out because \"Human review of every output does not scale\".",
+        "d": "Ruled out because the documentation advises \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals\"."
+      }
+    },
+    {
+      "id": "02-changing-safely-diagnosing-and-the-practice#q1",
+      "page": "02-changing-safely-diagnosing-and-the-practice.md",
+      "scope": "page",
+      "stem": "A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team conclude?",
+      "options": {
+        "a": "Adopt the new prompt now, because five points is the larger number and both arms have the same size",
+        "b": "Too small a sample to tell, so gather the planned numbers and see whether the gap clears the bar",
+        "c": "Run the same 80 cases again and average the two results, to get a steadier estimate",
+        "d": "Extend the test only if the new prompt is behind, and stop at once if it is ahead"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "With 80 cases in an arm the gap is inside chance, so the verdict is that there are too few cases.",
+        "a": "Ruled out because \"The larger number is not the better version\".",
+        "c": "Ruled out because \"Running the same cases again repeats the same sample and adds no information\".",
+        "d": "Ruled out because \"Stopping or extending a test according to who is ahead produces false wins\"."
+      }
+    },
+    {
+      "id": "02-changing-safely-diagnosing-and-the-practice#q2",
+      "page": "02-changing-safely-diagnosing-and-the-practice.md",
+      "scope": "page",
+      "stem": "A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate do?",
+      "options": {
+        "a": "Ship it to everyone, because the overall totals are equal and the gains in one segment cover the losses in another",
+        "b": "Average the accuracy of the two segments and ship if that average has risen",
+        "c": "Ship it to half of the live traffic and watch whether any customers complain",
+        "d": "Hold the change, since the costly segment regressed and improvements elsewhere cannot pay for that"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The gate has a key for guarded segments, and a loss there blocks the change.",
+        "a": "Ruled out because \"A gain in one segment does not pay for a loss in another\".",
+        "c": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it\".",
+        "b": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price\"."
+      }
+    },
+    {
+      "id": "02-changing-safely-diagnosing-and-the-practice#m1",
+      "page": "02-changing-safely-diagnosing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A reply to a policy question is confident and wrong. The right passage was not among the chunks the model was given. Which first step fits?",
+      "options": {
+        "a": "Lower the temperature so that the wording of the answers stops varying between runs",
+        "b": "Move the question to a larger model, which is more likely to know what the policy says than the current one is",
+        "c": "Inspect the index and the splitting of documents upstream of the generation stage, because the evidence never arrived",
+        "d": "Add more examples of confident replies to the prompt, so that the style is consistent"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The evidence was never retrieved, so the index and chunking are the cheapest place to look.",
+        "b": "Ruled out because \"A larger model does not know a document it was never shown\".",
+        "a": "Ruled out because \"Sampling settings change how an answer is worded and not what evidence it was given\".",
+        "d": "Ruled out because \"Examples teach a format; they do not supply a missing fact\"."
+      }
+    },
+    {
+      "id": "02-changing-safely-diagnosing-and-the-practice#m2",
+      "page": "02-changing-safely-diagnosing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A feature must answer within two seconds at its slowest five percent and reach 90 percent accuracy. Three candidate models have been measured. Which rule picks one?",
+      "options": {
+        "a": "The most accurate candidate, since quality is the first thing that users will notice about the feature once it ships",
+        "b": "The least expensive option that clears the quality floor and whose tail latency stays inside the limit",
+        "c": "The candidate with the best average latency, since users notice a fast reply most",
+        "d": "The cheapest candidate overall, then lengthen its prompt until it reaches the floor"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Both limits come first and the price decides among those that pass.",
+        "a": "Ruled out because \"Choosing the most accurate model pays for accuracy that the floor does not ask for\".",
+        "c": "Ruled out because \"A mean hides the tail: the slowest five in a hundred requests are the ones users complain about\".",
+        "d": "Ruled out because \"Cheapest first ignores the two limits, and the limits come before the price\"."
+      }
+    },
+    {
+      "id": "02-changing-safely-diagnosing-and-the-practice#m3",
+      "page": "02-changing-safely-diagnosing-and-the-practice.md",
+      "scope": "module",
+      "stem": "A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. What does the research team's experience suggest?",
+      "options": {
+        "a": "Test on the examples that sit in the prompt, since those are already written down",
+        "b": "Wait until the full set is built, because a small set of examples cannot show a change at all, however large",
+        "c": "Keep judging by feel until launch, and begin to measure once real users arrive",
+        "d": "Start now with a small set of real queries, since big first-round effects show up in just a few"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Early changes are large, so a small set shows them.",
+        "b": "Ruled out because \"We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful\", which the team found untrue.",
+        "c": "Ruled out because \"every week without an eval is a week of judging by feel\".",
+        "a": "Ruled out because the set should \"mirror your real-world task distribution\", and the examples in a prompt are not that."
+      }
+    }
+  ]
+}
