@@ -11,7 +11,7 @@ Checked on 2026-10-04 against the Claude Certified Architect, Professional exam 
 
 ## Why it matters
 
-An engineer designs a billing-dispute assistant for three months and brings the result to the sponsor in a forty-slide deck. The sponsor asks one question, "what do you want from me?", and the deck does not say. The engineer, for his part, finds out in the build that "fast" meant two seconds to the agents and that the credit decisions cost 250 when wrong, which nobody had written down. Both failures come from the same place: the facts were in the room and not in a document. The exam treats communication as a technical skill, and asks what a discovery must produce, how a trade-off is told and what a design record holds.
+An engineer designs a billing-dispute assistant for three months and brings the result to the sponsor in a forty-slide deck. The sponsor asks one question, "what do you want from me?", and the deck does not say. The engineer, for their part, finds out in the build that "fast" meant two seconds to the agents and that the credit decisions cost 250 when wrong, which nobody had written down. Both failures come from the same place: the facts were in the room and not in a document. The exam treats communication as a technical skill, and asks what a discovery must produce, how a trade-off is told and what a design record holds.
 
 ## The idea
 
