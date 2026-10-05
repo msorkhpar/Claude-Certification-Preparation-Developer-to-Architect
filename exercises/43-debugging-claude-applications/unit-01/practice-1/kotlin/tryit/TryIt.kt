@@ -9,7 +9,13 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    // A trace is the list of what happened: the request, then what came back.
+    val request = mapOf("kind" to "request", "model" to "claude-sonnet-5-5", "max_tokens" to 1024,
+        "tools" to listOf("get_weather"), "last_user_blocks" to listOf("text"))
+
+    for ((status, errorType) in listOf(401 to "authentication_error", 529 to "overloaded_error")) {
+        val error = mapOf("kind" to "error", "status" to status, "error_type" to errorType, "message" to "m")
+        val d = Diagnose.diagnose(listOf(request, error))
+        println("HTTP $status: type=${d["type"]} origin=${d["origin"]} recovery=${d["recovery"]}")
+    }
 }

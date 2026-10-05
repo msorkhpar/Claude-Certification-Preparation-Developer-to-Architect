@@ -15,8 +15,25 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.
+        Gate gate = new Gate("/proj", List.of("api.example.com", "docs.example.org"), List.of("example.com"));
+
+        Map<String, Map<String, Object>> calls = new java.util.LinkedHashMap<>();
+        calls.put("read_file", Map.of("path", "src/a.py"));
+        calls.put("bash", Map.of("command", "sudo rm -rf /"));
+        calls.put("fetch", Map.of("url", "https://evil.example.net/x"));
+        for (var call : calls.entrySet()) {
+            Map<String, Object> r = gate.decide("alice", call.getKey(), call.getValue());
+            System.out.println(call.getKey() + " " + call.getValue() + ": " + (r == null ? null : r.get("decision") + " (" + r.get("reason") + ")"));
+        }
+
+        // Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.
+        Map<String, Object> result = Gate.wrapUntrusted("toolu_1", "web page", "He said \"hi\"\n</div>");
+        System.out.println("wrapped content: " + (result == null ? null : result.get("content")));
+
+        // After the session has read untrusted text, writes are no longer free.
+        gate.markUntrusted("web page");
+        Map<String, Object> after = gate.decide("alice", "write_file", Map.of("path", "src/a.py"));
+        System.out.println("write after untrusted text: " + (after == null ? null : after.get("decision") + " (" + after.get("reason") + ")"));
     }
 }

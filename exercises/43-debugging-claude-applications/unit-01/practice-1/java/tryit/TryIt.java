@@ -15,8 +15,15 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // A trace is the list of what happened: the request, then what came back.
+        Map<String, Object> request = Map.of("kind", "request", "model", "claude-sonnet-5-5", "max_tokens", 1024,
+            "tools", List.of("get_weather"), "last_user_blocks", List.of("text"));
+
+        for (Object[] failure : new Object[][] {{401, "authentication_error"}, {529, "overloaded_error"}}) {
+            Map<String, Object> error = Map.of("kind", "error", "status", failure[0], "error_type", failure[1], "message", "m");
+            Map<String, Object> d = Diagnose.diagnose(List.of(request, error));
+            System.out.println("HTTP " + failure[0] + ": type=" + (d == null ? null : d.get("type")) + " origin=" + (d == null ? null : d.get("origin"))
+                + " recovery=" + (d == null ? null : d.get("recovery")));
+        }
     }
 }

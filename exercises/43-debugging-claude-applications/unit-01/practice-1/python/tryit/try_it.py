@@ -4,8 +4,16 @@ import logging
 # Turn the logger up, so the `log.debug` lines of your code show under the printed lines.
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 
-from diagnose import Thing
+from diagnose import diagnose
 
-# A stand-in for the API, like the one the tests use for the first main case m1.
-# TODO: copy that setup here, call the class on the statement's example, then print the results:
-# print("history size:", ...)
+# A trace is the list of what happened: the request, then what came back.
+REQUEST = {"kind": "request", "model": "claude-sonnet-5-5", "max_tokens": 1024, "tools": ["get_weather"], "last_user_blocks": ["text"]}
+
+
+def error(status, error_type):
+    return {"kind": "error", "status": status, "error_type": error_type, "message": "m"}
+
+
+for status, error_type in ((401, "authentication_error"), (529, "overloaded_error")):
+    d = diagnose([REQUEST, error(status, error_type)]) or {}
+    print(f"HTTP {status}: type={d.get('type')} origin={d.get('origin')} recovery={d.get('recovery')}")

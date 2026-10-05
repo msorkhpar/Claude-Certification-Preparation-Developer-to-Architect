@@ -9,7 +9,21 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    // A well-made tool, like the one the tests start from: a clear description with when to use it and when not.
+    val good = mapOf(
+        "name" to "lookup_order",
+        "description" to ("Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id " +
+            "such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of " +
+            "this tool for that. It returns no payment details."),
+        "input_schema" to mapOf("type" to "object", "required" to listOf("order_id"),
+            "properties" to mapOf("order_id" to mapOf("type" to "string", "description" to "The order id, for example A-1042."))),
+        "input_examples" to listOf(mapOf("order_id" to "A-1042")),
+        "annotations" to mapOf("readOnlyHint" to true),
+    )
+    // A poor one: a vague name, a short description and a parameter nobody explained.
+    val poor = mapOf("name" to "helper", "description" to "Gets stuff.",
+        "input_schema" to mapOf("type" to "object", "properties" to mapOf("q" to mapOf("type" to "string")), "required" to listOf("q")))
+
+    println("good tool: ${lintTool(good)}")
+    println("poor tool: ${lintTool(poor)}")
 }

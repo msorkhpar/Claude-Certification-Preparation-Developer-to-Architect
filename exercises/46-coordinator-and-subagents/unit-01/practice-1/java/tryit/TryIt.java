@@ -1,3 +1,4 @@
+import java.util.function.Function;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.ConsoleHandler;
@@ -15,8 +16,22 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // The four model roles are plain functions, like the ones the tests script.
+        Function<String, Map<String, Object>> planner = question -> Map.of("delegate", true, "answer", "", "subtasks", List.of(
+            Map.of("scope", "chips", "brief", "chips: find 2024 chip supply news"),
+            Map.of("scope", "cars", "brief", "cars: find 2024 car output news"),
+            Map.of("scope", "rates", "brief", "rates: find 2024 interest rates")));
+        // A subagent knows only its brief: here it just reports on the topic that starts it.
+        Function<String, String> subagent = brief -> brief.split(":")[0] + " report";
+        java.util.function.BiFunction<String, List<Map<String, Object>>, List<String>> reviewer = (question, findings) -> List.of(); // no gaps
+        java.util.function.BiFunction<String, List<Map<String, Object>>, String> synthesizer = (question, findings) ->
+            String.join(" | ", findings.stream().map(f -> String.valueOf(f.get("text"))).toList());
+
+        Map<String, Object> result = Coordinator.coordinate(planner, subagent, reviewer, synthesizer, "How did supply change?");
+
+        System.out.println("status: " + (result == null ? null : result.get("status")) + " | subagent calls: " + (result == null ? null : result.get("subagent_calls"))
+            + " | rounds: " + (result == null ? null : result.get("rounds")));
+        System.out.println("findings: " + (result == null ? null : result.get("findings")));
+        System.out.println("answer: " + (result == null ? null : result.get("answer")));
     }
 }

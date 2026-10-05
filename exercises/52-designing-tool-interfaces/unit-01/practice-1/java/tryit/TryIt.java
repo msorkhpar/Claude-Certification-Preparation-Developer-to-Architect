@@ -15,8 +15,21 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // A well-made tool, like the one the tests start from: a clear description with when to use it and when not.
+        Map<String, Object> good = Map.of(
+            "name", "lookup_order",
+            "description", "Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id "
+                + "such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of "
+                + "this tool for that. It returns no payment details.",
+            "input_schema", Map.of("type", "object", "required", List.of("order_id"),
+                "properties", Map.of("order_id", Map.of("type", "string", "description", "The order id, for example A-1042."))),
+            "input_examples", List.of(Map.of("order_id", "A-1042")),
+            "annotations", Map.of("readOnlyHint", true));
+        // A poor one: a vague name, a short description and a parameter nobody explained.
+        Map<String, Object> poor = Map.of("name", "helper", "description", "Gets stuff.",
+            "input_schema", Map.of("type", "object", "properties", Map.of("q", Map.of("type", "string")), "required", List.of("q")));
+
+        System.out.println("good tool: " + Toolset.lintTool(good));
+        System.out.println("poor tool: " + Toolset.lintTool(poor));
     }
 }

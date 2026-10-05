@@ -9,7 +9,21 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    // The four model roles are plain functions, like the ones the tests script.
+    val planner: Planner = { _ ->
+        mapOf("delegate" to true, "answer" to null, "subtasks" to listOf(
+            mapOf("scope" to "chips", "brief" to "chips: find 2024 chip supply news"),
+            mapOf("scope" to "cars", "brief" to "cars: find 2024 car output news"),
+            mapOf("scope" to "rates", "brief" to "rates: find 2024 interest rates")))
+    }
+    // A subagent knows only its brief: here it just reports on the topic that starts it.
+    val subagent: Spoke = { brief -> brief.substringBefore(":") + " report" }
+    val reviewer: Reviewer = { _, _ -> emptyList() } // no gaps: nothing more to ask
+    val synthesizer: Synthesizer = { _, findings -> findings.joinToString(" | ") { it["text"].toString() } }
+
+    val result = coordinate(planner, subagent, reviewer, synthesizer, "How did supply change?")
+
+    println("status: ${result?.get("status")} | subagent calls: ${result?.get("subagent_calls")} | rounds: ${result?.get("rounds")}")
+    println("findings: ${result?.get("findings")}")
+    println("answer: ${result?.get("answer")}")
 }
