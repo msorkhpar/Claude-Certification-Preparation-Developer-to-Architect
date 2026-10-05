@@ -860,7 +860,7 @@ The example merges layers and decides calls. It starts with a user file that all
 
 ## Quiz
 
-1. A team keeps credentials in `.env` and wants Claude never to open them. A sentence about it goes in the memory file, and a deny entry goes in the shared settings. Which one actually stops it?
+1. A repository holds credentials in `.env`, and Claude must never open them. One teammate writes a sentence about it in the memory file, and another adds a path block to the shared configuration. Which one actually stops it?
    - **a**: The `Read` rule, which is checked before each call runs
    - **b**: The memory sentence, which Claude Code enforces once it loads
    - **c**: Both entries equally, since each is read before any tool call
