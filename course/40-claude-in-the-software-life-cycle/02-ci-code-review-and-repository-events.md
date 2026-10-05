@@ -598,7 +598,7 @@ good workflow: 0 finding(s)
 ```
 <!-- /example -->
 
-The example reads a workflow as data and applies nine rules from this page. The first workflow breaks all of them and gets nine findings: a literal key, no concurrency group, the `@beta` action, a key that is not read from the secrets context, no `--max-turns`, no checkout, `contents: write` on a review job, no timeout, and no `@claude` guard. The second workflow follows every rule and gets none. Both languages print the same text.
+The example reads a workflow as data and applies nine rules from this page. The first workflow breaks all of them and gets nine findings: a literal key, no concurrency group, the `@beta` action, a key that is not read from the secrets context, no `--max-turns`, no checkout, `contents: write` on a review job, no timeout, and no `@claude` guard. The second workflow follows every rule and gets none. All four languages print the same text.
 
 ### The practice
 
@@ -621,21 +621,21 @@ The practice puts Claude into a small repository. You fix a mention workflow tha
 
 2. A review job should inspect the code and post findings. Which permission set fits?
    - **a**: Write access to every scope, so the job never fails for a missing grant
-   - **b**: Write access to the contents, so that findings can be committed
+   - **b**: Write access to the contents, so that findings can be committed to the branch
    - **c**: No permissions at all, because comments need no access to the code
-   - **d**: Read access to the contents, plus the token needed for authentication
+   - **d**: Read access to the contents, plus the scopes for comments and authentication
 
 3. A team wants Claude's review to stop a merge until findings are fixed. What does Code Review do?
-   - **a**: It fails the check run whenever a finding is marked important by the review
-   - **b**: It completes its check run as neutral, so branch protection never blocks on it
-   - **c**: It approves the pull request when no finding is marked important at all
-   - **d**: It requests changes from the author on every single finding it posts
+   - **a**: It marks its check run failed whenever a finding is rated important
+   - **b**: It leaves its check run neutral, so the decision stays with a person
+   - **c**: It approves the pull request when no finding is rated important
+   - **d**: It requests changes from the author on every finding it posts
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "Without the `if`, a runner starts for every comment in the repository", and the guard is `if: contains(github.event.comment.body, '@claude')`. *a* is ruled out because the timeout bounds one run and does not stop runs from starting: the page lists it with "workflow-level timeouts to avoid runaway jobs". *c* is ruled out because "Set `--max-turns` in `claude_args` to limit iterations", which acts inside a run and does not stop one from starting. *d* is ruled out because write access is a permission and not a trigger filter, and the page says "Grant the least a job needs".
-2. **d**. The page says "A job that only reviews needs `contents: read`", and the review example reads pull requests and issues as well. *b* is ruled out because the page says "Reading is enough to review", and write access lets a compromised run change the repository. *c* is ruled out because "A job that only reviews needs `contents: read`", so some access to the code is required. *a* is ruled out because the page says "Grant the least a job needs", and a grant of every scope is the opposite.
+2. **d**. The page says "A job that only reviews needs `contents: read`", and the review example reads pull requests and issues as well, and has the `id-token: write` permission for authentication. *b* is ruled out because the page says "Reading is enough to review", and write access lets a compromised run change the repository. *c* is ruled out because "A job that only reviews needs `contents: read`", so some access to the code is required. *a* is ruled out because the page says "Grant the least a job needs", and a grant of every scope is the opposite.
 3. **b**. The page says "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules." *a* is ruled out because the same sentence says the check run "always completes with a neutral conclusion", so it never fails. *c* is ruled out because findings "don't approve or block" a pull request, and so an empty review is no approval. *d* is ruled out because findings are posted "as inline comments", and Code Review "so it advises, and a person merges".
 
 </details>
