@@ -49,6 +49,9 @@ The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-
 touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and
 independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def choose_mode(task):
@@ -121,6 +124,8 @@ messages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]
 - null entry: input [2, None], expected [2], got [2, None]
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("refinement");
 /**
  * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.
  *
@@ -217,6 +222,7 @@ import java.util.Objects;
  * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.
  */
 public final class Refinement {
+    private static final System.Logger LOG = System.getLogger(Refinement.class.getName());
     /** What decides the mode of a task. */
     record Task(boolean diffInOneSentence, int files, boolean architectural, int approaches) {}
 
@@ -299,6 +305,8 @@ messages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]
 ```
 ```kotlin
 import harness.Show.py
+
+private val log = System.getLogger("refinement")
 
 /**
  * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.
