@@ -1078,7 +1078,7 @@
         "c": "A guarantee that must always hold \"belongs in code, not in a prompt\", so the screening runs on every output (module 12, page 1).",
         "a": "Ruled out because a rule such as never output a card number \"is only a request to the model\".",
         "b": "Ruled out because a quality target is \"stated as a rate over a set of examples\", which tolerates misses, while this rule must hold for every summary.",
-        "d": "Ruled out because wording in any turn only raises the odds, since \"it cannot make it certain\"."
+        "d": "Ruled out because wording in any turn only raises the odds, since \"it cannot make it certain\" (module 1, page 2)."
       }
     },
     {
@@ -1115,8 +1115,8 @@
       "explanation": {
         "d": "The SDK offers a raw-response accessor in Python that gives the headers first, then the parsed object, because \"each SDK has an escape hatch\" (module 13, page 2).",
         "a": "Ruled out because a hand-written client takes back work the SDK does, since raw code must \"Parse JSON and navigate untyped maps\" and \"Write the retry policy (module 15)\".",
-        "b": "Ruled out because \"Debug logging is a development tool\", and bodies stay visible in it.",
-        "c": "Ruled out because the usage fields report \"what the call consumed\", not the allowance that is left."
+        "b": "Ruled out because \"Debug logging is a development tool\" (module 15, page 3), and bodies stay visible in it.",
+        "c": "Ruled out because the usage fields report \"what the call consumed\" (module 14, page 2), not the allowance that is left."
       }
     },
     {
@@ -1125,9 +1125,9 @@
       "scope": "level",
       "stem": "A hand-written reader for streamed replies waits for a final data line reading [DONE] and hangs on every call. Which two statements explain it? (Select two.)",
       "options": {
-        "a": "A longer read timeout lets the missing line finally arrive",
+        "a": "A closed connection is what signals the end of a complete reply",
         "b": "The format uses only named events",
-        "c": "A websocket is needed to signal the end of a reply",
+        "c": "A blank line after the last event marks the end of the reply",
         "d": "A keep-alive ping is what normally marks the end of a reply",
         "e": "The old closing marker no longer exists"
       },
@@ -1138,9 +1138,9 @@
       "explanation": {
         "b": "The page records that \"All events are named events\" in the version the API uses, and \"the old data: [DONE] marker is gone\", so the end of a reply is a named event (module 13, page 3).",
         "e": "The page records that \"All events are named events\" in the version the API uses, and \"the old data: [DONE] marker is gone\", so the end of a reply is a named event (module 13, page 3).",
-        "a": "Ruled out because the end of a reply is a named event, \"The stream finished normally\" for `message_stop`, so no amount of waiting will bring a data line.",
-        "c": "Ruled out because \"The Messages API does not need it\".",
-        "d": "Ruled out because a ping is \"a keep-alive with no content\", and it does not mark the end."
+        "a": "Ruled out because \"A stream that ends without message_stop is an incomplete message, not a short one\" (module 17, page 1), so a closed connection proves nothing.",
+        "c": "Ruled out because \"Each event is a few lines, ended by a blank line\" (module 13, page 3), so the blank line closes an event and not the reply.",
+        "d": "Ruled out because a ping is \"a keep-alive with no content\" (module 17, page 1), and it does not mark the end."
       },
       "select": 2
     },
@@ -1148,19 +1148,19 @@
       "id": "04-developer-mock-exam-2#x5",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "After a tool loop, Claude Sonnet 5.5 sometimes ends its turn with no content at all. The client packs each tool's findings into the message together with a sentence announcing that data is attached. Which change fits best?",
+      "stem": "After a tool loop, Claude Sonnet 5.5 sometimes ends with an empty reply. The client's user message holds each tool's findings and a short note that data is attached. Which change fits best?",
       "options": {
         "a": "Raise max_tokens to give the model room to produce a full answer",
         "b": "Retry the identical request until a non-empty reply finally arrives",
-        "c": "Send the result blocks alone, with no text placed beside them",
+        "c": "Strip the extra prose and send nothing but the result blocks back",
         "d": "Switch the request to streaming so the empty turn is delivered in pieces"
       },
       "key": "c",
       "explanation": {
         "c": "Text added next to the results \"teaches Claude to expect user input after every tool use\", so the results go alone (module 14, page 2).",
-        "a": "Ruled out because an empty reply with end_turn \"is almost always self-inflicted\", and a larger ceiling does not touch the cause.",
-        "b": "Ruled out because \"Don't retry empty responses without modification\".",
-        "d": "Ruled out because streaming only \"changes when the bytes arrive\", not what the model produces."
+        "a": "Ruled out because an empty reply with end_turn \"is almost always self-inflicted\" (module 14, page 2), and a larger ceiling does not touch the cause.",
+        "b": "Ruled out because \"Don't retry empty responses without modification\" (module 43, page 1).",
+        "d": "Ruled out because streaming only \"changes when the bytes arrive\" (module 17, page 2), not what the model produces."
       }
     },
     {
@@ -1179,7 +1179,7 @@
         "a": "The page says an empty user turn is a wasted call, so \"refuse it before anything is sent\" (module 14, page 3).",
         "b": "Ruled out because \"An empty user turn is a wasted call at best\", and discarding the reply does not save the cost.",
         "c": "Ruled out because that makes \"a different conversation from the one the user sees\".",
-        "d": "Ruled out because \"A sentence in a prompt can make a behaviour much more likely\", but the call is still paid for."
+        "d": "Ruled out because \"A sentence in a prompt can make a behaviour much more likely\" (module 1, page 2), but the call is still paid for."
       }
     },
     {
@@ -1264,7 +1264,7 @@
       "explanation": {
         "a": "A signature \"must be sent back unchanged with the thinking block\" (module 17, page 1), and a signature_delta sets it.",
         "d": "A signature \"must be sent back unchanged with the thinking block\" (module 17, page 1), and a signature_delta sets it.",
-        "b": "Ruled out because \"thinking or redacted_thinking blocks in the latest assistant message cannot be modified\".",
+        "b": "Ruled out because \"thinking or redacted_thinking blocks in the latest assistant message cannot be modified\" (module 43, page 1).",
         "c": "Ruled out because the rule to \"ignore event types you do not know\" covers unknown types, and this one is documented.",
         "e": "Ruled out because \"a signature_delta sets the signature\", and it does not extend the thinking."
       },
@@ -1278,15 +1278,15 @@
       "options": {
         "a": "Write an event handler of your own that assembles each content block as it arrives",
         "b": "Lower max_tokens until the request passes the size check and goes out",
-        "c": "Use the final-message helper, which relies on events internally and returns one message",
-        "d": "Move the request into a batch, whose results arrive together as one file"
+        "c": "Call the SDK's final-message helper and read the one finished message",
+        "d": "Move the request into a batch of one and wait for its result file"
       },
       "key": "c",
       "explanation": {
         "c": "The helpers \"stream underneath and return one message\", so a long call needs no event handling (module 17, page 2).",
-        "a": "Ruled out because a long call \"does not need the event handling in your own code\".",
-        "b": "Ruled out because the refusal is a hint, since \"if you see it, you wanted streaming\".",
-        "d": "Ruled out because a batch does not fit \"work needed within the hour\"."
+        "a": "Ruled out because a long call \"does not need the event handling in your own code\" (module 17, page 2).",
+        "b": "Ruled out because the refusal is a hint, since \"if you see it, you wanted streaming\" (module 13, page 3).",
+        "d": "Ruled out because a batch does not fit \"work needed within the hour\" (module 21, page 1)."
       }
     },
     {
@@ -1314,17 +1314,17 @@
       "scope": "level",
       "stem": "A team on Google Cloud wants to reference a PDF by its web address in each request instead of embedding it. What do the platform pages say?",
       "options": {
-        "a": "Web addresses work there, and a PDF counts as a document block like any other",
-        "b": "Web addresses do not work there for documents, though they do for images",
-        "c": "A single upload through the Files API lets later requests reference the PDF by id",
-        "d": "That source type is not offered there, so supply the file another way"
+        "a": "A URL source works there, like any document block on the first-party API",
+        "b": "A URL source is refused for documents there but accepted for images",
+        "c": "A file id from the Files API replaces the address after one upload",
+        "d": "Only base64 sources are available there, so the bytes travel inline"
       },
       "key": "d",
       "explanation": {
         "d": "The Google Cloud list of gaps includes \"Input sources (URL sources for images and documents, Files API)\" (module 22, page 2).",
-        "a": "Ruled out because \"On Amazon Bedrock and Google Cloud only base64 sources are available\" for a PDF.",
-        "b": "Ruled out because images are held to the same limit: \"only base64-encoded sources are currently available.\"",
-        "c": "Ruled out because the table shows \"Files API | yes | no | no\", so it is missing there too."
+        "a": "Ruled out because \"On Amazon Bedrock and Google Cloud only base64 sources are available\" for a PDF (module 30, page 2).",
+        "b": "Ruled out because images are held to the same limit: \"only base64-encoded sources are currently available.\" (module 30, page 1).",
+        "c": "Ruled out because the table shows \"Files API | yes | no | no\" (module 22, page 2), so it is missing there too."
       }
     },
     {
@@ -1379,9 +1379,9 @@
       "key": "b",
       "explanation": {
         "b": "The order is \"Enterprise over personal, and personal over project\" (module 39, page 1).",
-        "a": "Ruled out because committing only shares a skill: \"Commit it so your team gets it too\".",
-        "c": "Ruled out because \"When two skills share a name, the location decides\".",
-        "d": "Ruled out because \"When two skills share a name, the location decides\", so one copy wins and the other is not merged."
+        "a": "Ruled out because committing only shares a skill: \"Commit it so your team gets it too\" (module 39, page 1).",
+        "c": "Ruled out because the page lets the location settle a clash and never prompts the user: \"When two skills share a name, the location decides\" (module 39, page 1).",
+        "d": "Ruled out because the ranking puts one scope above the other, and a ranking leaves no room for running both: \"Enterprise over personal, and personal over project\" (module 39, page 1)."
       }
     },
     {
@@ -1399,27 +1399,27 @@
       "explanation": {
         "d": "\"Each git worktree is a separate checkout on its own branch\" (module 40, page 1).",
         "a": "Ruled out because the rule is \"Commit on a branch, never on main\".",
-        "b": "Ruled out because memory text is only context: \"Claude treats them as context, not enforced configuration\".",
-        "c": "Ruled out because plan mode only delays the writes: \"Claude reads files and proposes a plan but makes no edits until you approve\"."
+        "b": "Ruled out because memory text is only context: \"Claude treats them as context, not enforced configuration\" (module 38, page 2).",
+        "c": "Ruled out because plan mode only delays the writes: \"Claude reads files and proposes a plan but makes no edits until you approve\" (module 38, page 1)."
       }
     },
     {
       "id": "04-developer-mock-exam-2#x18",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A reply begins with a confident wrong figure, and the rest of the answer then builds on it without any correction. What explains this?",
+      "stem": "An answer opens with a wrong date, and every later sentence treats that date as settled. What explains this?",
       "options": {
-        "a": "The model consults a stored draft of the whole answer and then defends that draft",
-        "b": "Each later piece is chosen with the earlier text in view, so the slip becomes context",
-        "c": "The window dropped the opening lines, so the model lost track of what it had said earlier",
-        "d": "A hidden checker reviews each sentence and approves it before the sentence is shown"
+        "a": "The model keeps a stored draft of the whole answer and then defends it",
+        "b": "Every token is picked with all the text so far in view, mistakes included",
+        "c": "The window dropped the opening lines, so the model lost track of them",
+        "d": "A hidden checker reviews each sentence and approves it before it is shown"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"An answer is a long chain of single choices, each made with everything before it in view\" (module 1, page 1).",
-        "a": "Ruled out because \"There is no plan stored somewhere and no lookup of a finished answer\".",
-        "c": "Ruled out because \"previous turns are preserved completely\", so the opening lines are still there.",
-        "d": "Ruled out because the loop is only \"The model computes, for every token it knows, how likely it is to come next\", with no review step in it."
+        "a": "Ruled out because \"There is no plan stored somewhere and no lookup of a finished answer\" (module 1, page 1).",
+        "c": "Ruled out because \"previous turns are preserved completely\" (module 1, page 1), so the opening lines are still there.",
+        "d": "Ruled out because the loop is only \"The model computes, for every token it knows, how likely it is to come next\" (module 1, page 1), with no review step in it."
       }
     },
     {
@@ -1430,8 +1430,8 @@
       "options": {
         "a": "Recall degrades as the space fills",
         "b": "A larger window restores accuracy, and more room means better recall",
-        "c": "Lowering the effort speeds up processing of the extra tokens",
-        "d": "Repeating the key instruction inside the archive fixes the drift",
+        "c": "Lowering the effort shrinks the input that is read on each call",
+        "d": "Placing the archive after the question removes the drift",
         "e": "Trimming to what the task needs helps"
       },
       "key": [
@@ -1441,9 +1441,9 @@
       "explanation": {
         "a": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1), and \"accuracy and recall degrade as the window fills\".",
         "e": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1), and \"accuracy and recall degrade as the window fills\".",
-        "b": "Ruled out because \"A request that fits can still answer badly\", so a larger window is no promise of quality.",
-        "c": "Ruled out because \"cost grows with every token you send\", whatever the effort.",
-        "d": "Ruled out because an archive that already hurts answers only grows when the instruction is repeated inside it, and \"cost grows with every token you send\"."
+        "b": "Ruled out because \"A request that fits can still answer badly\" (module 4, page 1), so a larger window is no promise of quality.",
+        "c": "Ruled out because effort affects \"all tokens in the response\" (module 19, page 1), which is output and not the input that the archive supplies.",
+        "d": "Ruled out because the layout rule is to \"put long documents first and the question last\" (module 4, page 1)."
       },
       "select": 2
     },
@@ -1461,16 +1461,16 @@
       "key": "a",
       "explanation": {
         "a": "\"protecting a secret is a job for code\" (module 6, page 1).",
-        "b": "Ruled out because \"a role is a request, not a credential\".",
-        "c": "Ruled out because such a line \"is a request that can be argued around\".",
-        "d": "Ruled out because \"a role is not a safeguard\", and both halves still sit in the context."
+        "b": "Ruled out because \"a role is a request, not a credential\" (module 6, page 1).",
+        "c": "Ruled out because such a line \"is a request that can be argued around\" (module 6, page 1).",
+        "d": "Ruled out because \"A secret that is not in the prompt cannot leak from it\" (module 41, page 3), and both halves would still sit in the context."
       }
     },
     {
       "id": "04-developer-mock-exam-2#x21",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A classification prompt carries five examples. Some show the label alone and others wrap it in a sentence, and live replies now vary in the same way. Which change fits best?",
+      "stem": "A classification prompt carries five examples, two with a bare label and three with the label inside a sentence. Live replies now come back in both shapes. Which change fits best?",
       "options": {
         "a": "Add more sentence-style samples so that this style outweighs the other one",
         "b": "Drop every sample and rely on the written instruction to fix the shape",
@@ -1480,9 +1480,9 @@
       "key": "c",
       "explanation": {
         "c": "The page states the course's own rule to \"keep the format consistent across examples, since the model will copy inconsistencies\" (module 6, page 2).",
-        "a": "Ruled out because the count is not the problem: \"Include 3-5 examples for best results.\"",
-        "b": "Ruled out because multi-shot is for when \"The task has subtle boundaries, or the format is unusual\".",
-        "d": "Ruled out because tags only mark examples as \"wrapped in <example> tags\", so that they are distinguished from instructions, and they do not change what the answers look like."
+        "a": "Ruled out because the count is not the problem: \"Include 3-5 examples for best results.\" (module 6, page 2).",
+        "b": "Ruled out because \"a few well-crafted examples (known as few-shot or multishot prompting) improve accuracy and consistency\" (module 6, page 2), so removing them loses that help.",
+        "d": "Ruled out because tags only mark examples as \"wrapped in <example> tags\", so that they are distinguished from instructions, and they do not change what the answers look like (module 6, page 2)."
       }
     },
     {
@@ -1491,17 +1491,17 @@
       "scope": "level",
       "stem": "A support prompt is one long paragraph, and reviewers cannot tell which piece of it causes made-up verdicts when the policy is silent. Which change fits best?",
       "options": {
-        "a": "Give the assistant a flattering role to make it feel bound to be careful",
-        "b": "Separate the parts, then add a fallback value and a test for it",
-        "c": "Ask for a longer reply in which the model explains its reasoning at length",
-        "d": "Move the documents below the task and put the policy last"
+        "a": "Give the assistant a flattering role and ask it to be careful",
+        "b": "Rebuild it as labelled parts, one stating what to answer when the rules do not decide",
+        "c": "Ask for a longer reply and let the model explain its reasoning at length",
+        "d": "Move the documents below the task and put the policy last in the prompt"
       },
       "key": "b",
       "explanation": {
-        "b": "The page treats the prompt \"like a short contract\" whose parts are each checkable, with a constraint for the silent case and a test for it (module 6, page 3).",
-        "a": "is ruled out because, as module 6, page 1 puts it, \"A role is a request, not a credential\".",
-        "c": "Ruled out because what must hold is stated as a constraint: \"use only the policy; if the policy does not decide the case, say\", and a longer reply pins nothing down.",
-        "d": "Ruled out because the page says \"Order: material first, the task last\"."
+        "b": "The page treats the prompt \"like a short contract\" whose parts are each checkable, with a constraint for the case the rules leave open (module 6, page 3).",
+        "a": "Ruled out because \"A role is a request, not a credential\" (module 6, page 1), and a flattering role leaves one paragraph that nobody can inspect.",
+        "c": "Ruled out because what must hold is stated as a constraint: \"use only the policy; if the policy does not decide the case, say\" (module 6, page 3), and a longer reply pins nothing down.",
+        "d": "Ruled out because the page says \"Order: material first, the task last\" (module 6, page 3)."
       }
     },
     {
@@ -1510,26 +1510,26 @@
       "scope": "level",
       "stem": "A team plans to use the token-counting tool before each message request and worries that those calls will use up the allowance for its message calls. What should the review say?",
       "options": {
-        "a": "Counting needs a paid tier of its own before it can be used at all in a live service",
-        "b": "Counting is unlimited, so it can be called as often as needed without any pacing",
-        "c": "They are limited separately and independently, though the pre-check has its own cap",
-        "d": "Both draw on one allowance, so each count spends a message request"
+        "a": "Both draw on one pool, so each count costs a message request",
+        "b": "Counting is unmetered, so it can be called at any pace",
+        "c": "Each endpoint keeps a limit of its own, separate from the other",
+        "d": "Counting needs a paid tier of its own before it works in a live service"
       },
       "key": "c",
       "explanation": {
         "c": "The endpoint's own limits are stated: \"it has its own limits\" (module 18, page 2).",
-        "a": "Ruled out because \"Token counting is free to use\".",
-        "b": "Ruled out because it is \"subject to requests per minute rate limits based on your usage tier\".",
-        "d": "Ruled out because \"Token counting and message creation have separate and independent rate limits\"."
+        "a": "Ruled out because \"Token counting and message creation have separate and independent rate limits\" (module 18, page 2).",
+        "b": "Ruled out because it is \"subject to requests per minute rate limits based on your usage tier\" (module 18, page 2).",
+        "d": "Ruled out because \"Token counting is free to use\" (module 18, page 2)."
       }
     },
     {
       "id": "04-developer-mock-exam-2#x24",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A feature returns a short label, and the team wants it to appear sooner. It proposes fast mode on Claude Opus 5.5. Which two statements should the review make? (Select two.)",
+      "stem": "A feature returns a short label and feels slow to its users, and the team proposes fast mode on Claude Opus 5.5. Which two statements should the review make? (Select two.)",
       "options": {
-        "a": "Fast mode also lowers latency to the first token for any interactive feature",
+        "a": "Fast mode is offered on every cloud platform that serves Opus 5.5",
         "b": "Fast mode applies once the work moves to the Message Batches API",
         "c": "Time to the first word barely changes",
         "d": "Fast mode is free on Opus 5.5 and needs only a beta header",
@@ -1542,9 +1542,9 @@
       "explanation": {
         "c": "\"A feature that waits for the first word gains little\" (module 19, page 2), because fast mode raises output speed and not the time to the first token.",
         "e": "\"A feature that waits for the first word gains little\" (module 19, page 2), because fast mode raises output speed and not the time to the first token.",
-        "a": "Ruled out because \"Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)\".",
-        "b": "Ruled out because \"Fast mode is not available with the Batch API\".",
-        "d": "Ruled out because it is priced \"twice the standard $4 and $20\"."
+        "a": "Ruled out because the Pricing page says fast mode \"is available on the Claude API (first-party) only\" (module 19, page 2).",
+        "b": "Ruled out because \"Fast mode is not available with the Batch API\" (module 19, page 2).",
+        "d": "Ruled out because it is priced at \"twice the standard $4 and $20\" (module 19, page 2)."
       },
       "select": 2
     },
@@ -1554,17 +1554,17 @@
       "scope": "level",
       "stem": "A team avoids adding a second `cache_control` entry to its prompt, believing each extra entry is billed on its own. What should the review say?",
       "options": {
-        "a": "Each marker is billed at the input price, on top of the tokens it covers",
-        "b": "A marker is billed once per request, whether or not the prefix is reused",
-        "c": "A marker costs nothing by itself; billing covers tokens written, read and left uncached",
-        "d": "Markers are free, but only the first one placed in a request can ever be read"
+        "a": "Each breakpoint is charged at the input price, on top of the tokens it covers",
+        "b": "A breakpoint is charged once per request, whether or not the prefix is reused",
+        "c": "A breakpoint is free, with the price following tokens alone",
+        "d": "Only the first breakpoint in a request can ever be read back, so extras add nothing"
       },
       "key": "c",
       "explanation": {
         "c": "\"Marking costs nothing by itself\" (module 20, page 1).",
-        "a": "Ruled out because \"You pay for what is written, what is read and what is neither\".",
-        "b": "Ruled out because \"Cache breakpoints themselves don't add any cost\".",
-        "d": "Ruled out because \"You can place up to four\" explicit breakpoints, each of which can be read."
+        "a": "Ruled out because \"You pay for what is written, what is read and what is neither\" (module 20, page 1), which names tokens and no marker fee.",
+        "b": "Ruled out because \"Cache breakpoints themselves don't add any cost\" (module 20, page 1).",
+        "d": "Ruled out because \"You can place up to four\" explicit breakpoints (module 20, page 1), each of which can be read."
       }
     },
     {
@@ -1592,7 +1592,7 @@
       "scope": "level",
       "stem": "A router asks a cheap model to classify each question, then maps the reply to a prompt. One reply comes back as 'Refunds?', which matches no route, and the request crashes. Which fix fits best?",
       "options": {
-        "a": "Normalise the text, look it up, and send anything unknown to a default branch",
+        "a": "Clean the label text and add a default path for any unknown label",
         "b": "Retry the classification up to five times until the reply matches a known route",
         "c": "Let the model add a new route whenever its reply names an unknown label",
         "d": "Run every question through all routes in parallel and keep the first reply"
@@ -1600,9 +1600,9 @@
       "key": "a",
       "explanation": {
         "a": "\"A router must normalize the model's reply and have a default route\" (module 34, page 1).",
-        "b": "Ruled out because \"The model's reply is text, so it may carry a capital letter, a full stop or a word nobody planned\", and a retry can repeat it.",
-        "c": "Ruled out because workflows are \"orchestrated through predefined code paths\", so the routes are fixed by the program.",
-        "d": "Ruled out because routing \"directs it to a specialized followup task\", one task and not all of them."
+        "b": "Ruled out because \"The model's reply is text, so it may carry a capital letter, a full stop or a word nobody planned\" (module 34, page 1), and a retry can repeat it.",
+        "c": "Ruled out because workflows are \"orchestrated through predefined code paths\" (module 34, page 1), so the routes are fixed by the program.",
+        "d": "Ruled out because routing \"directs it to a specialized followup task\" (module 34, page 1), one task and not all of them."
       }
     },
     {
@@ -1611,17 +1611,17 @@
       "scope": "level",
       "stem": "An orchestrator splits a task into three subtasks, and all three workers throw errors. The last step is asked to merge the results and writes a confident answer. What should the program do instead?",
       "options": {
-        "a": "Run the last step anyway, but tell it to mention that some work failed",
+        "a": "Run the last step anyway and tell it to mention that some work failed",
         "b": "Retry each worker in a loop until at least one of them returns a result",
-        "c": "Skip that stage and flag the whole job as failed, with nothing produced for the user",
+        "c": "Halt at that stage and report the whole job as failed",
         "d": "Return the plan text as the answer, which already describes the work"
       },
       "key": "c",
       "explanation": {
         "c": "\"when every worker failed, nothing is combined\" (module 34, page 2).",
-        "a": "Ruled out because \"a synthesis over no results is a made-up answer\".",
-        "b": "Ruled out because \"a loop with no maximum on its iterations is an open bill\".",
-        "d": "Ruled out because \"A model's plan is text\", and not a result."
+        "a": "Ruled out because \"a synthesis over no results is a made-up answer\" (module 34, page 2).",
+        "b": "Ruled out because \"a loop with no maximum on its iterations is an open bill\" (module 34, page 2).",
+        "d": "Ruled out because \"A model's plan is text\" (module 34, page 2), and not a result."
       }
     },
     {
@@ -1684,7 +1684,7 @@
         "a": "\"Set the permission mode in the options and read it back from the flags in a test\" (module 35, page 3).",
         "b": "Ruled out because \"decide can be right while build_options leaves an allow list in\".",
         "c": "Ruled out because \"The tests never call a model\", which keeps them repeatable.",
-        "d": "Ruled out because \"If you omit it, the session can start in auto mode\"."
+        "d": "Ruled out because \"If you omit it, the session can start in auto mode\" (module 35, page 2)."
       }
     },
     {
@@ -1693,17 +1693,17 @@
       "scope": "level",
       "stem": "A hosted agent's shell command prints about 400,000 characters. What does the model receive for that output?",
       "options": {
-        "a": "The full text, sent in several consecutive events until it is complete",
-        "b": "Nothing at all, and the whole output is discarded for good",
+        "a": "The whole text, delivered in several events until it is complete",
+        "b": "Nothing at all, with the output dropped for good",
         "c": "A truncated preview, with the path of a sandbox file that holds the rest",
-        "d": "An error result that tells it the output was too long"
+        "d": "An error result saying that the output exceeded the limit"
       },
       "key": "c",
       "explanation": {
         "c": "\"the model gets a truncated preview with the path\" (module 36, page 1).",
-        "a": "Ruled out because an output that \"exceeds 100,000 characters (about 25,000 tokens)\" is not sent whole.",
-        "b": "Ruled out because the output is \"automatically written to a file in the sandbox\", so the model keeps the path to it.",
-        "d": "Ruled out because the platform handles the size without failing the call: the output \"is automatically written to a file in the sandbox\" instead of being returned as an error."
+        "a": "Ruled out because an output over the limit is \"automatically written to a file in the sandbox\" (module 36, page 1), and is not streamed to the model in pieces.",
+        "b": "Ruled out because the model still \"gets a truncated preview with the path\" (module 36, page 1), so something arrives.",
+        "d": "Ruled out because the platform handles the size without failing the call: the output \"exceeds 100,000 characters (about 25,000 tokens)\" (module 36, page 1) and goes to a file instead of coming back as an error."
       }
     },
     {
@@ -1739,9 +1739,9 @@
       "key": "b",
       "explanation": {
         "b": "\"the failure goes back to the model as a retry message and the run continues\" (module 37, page 1).",
-        "a": "Ruled out because \"a reply that does not validate against the output type is refused\".",
-        "c": "Ruled out because the design \"turns a malformed reply into a recoverable event\".",
-        "d": "Ruled out because \"a reply that does not validate against the output type is refused\", and nothing is guessed."
+        "a": "Ruled out because the style suits services \"whose callers need a record of fixed shape\" (module 37, page 1), and an accepted invalid record has none.",
+        "c": "Ruled out because the design \"turns a malformed reply into a recoverable event\" (module 37, page 1).",
+        "d": "Ruled out because \"a reply that does not validate against the output type is refused\" (module 37, page 1), and nothing is guessed."
       }
     },
     {
@@ -1760,7 +1760,7 @@
         "d": "The builder \"raises an error for an unfilled variable\" (module 24, page 1).",
         "a": "Ruled out because \"A blank where a document should be gives a confident answer about nothing\", and a default only hides the gap.",
         "b": "Ruled out because \"A missing variable is an error\".",
-        "c": "Ruled out because private material \"is unknown to it unless you supply it in the context or give it a tool that fetches it\"."
+        "c": "Ruled out because private material \"is unknown to it unless you supply it in the context or give it a tool that fetches it\" (module 1, page 2)."
       }
     },
     {
@@ -1771,8 +1771,8 @@
       "options": {
         "a": "Delete every clause that looks unrelated to the question first",
         "b": "Move the contract into the system prompt of each step",
-        "c": "Hand on only the extracted excerpts",
-        "d": "Intermediate outputs can be read separately",
+        "c": "Pass along only the extracted excerpts",
+        "d": "Every handoff can be examined on its own",
         "e": "Merge the three steps into one prompt so the contract goes once"
       },
       "key": [
@@ -1780,11 +1780,11 @@
         "d"
       ],
       "explanation": {
-        "c": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry, and chaining lets you inspect intermediate outputs.",
-        "d": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry, and chaining lets you inspect intermediate outputs.",
-        "a": "Ruled out because the method is to \"ask Claude to quote relevant parts of the documents first\", not to delete by guesswork.",
-        "b": "Ruled out because \"Each step costs the full input again\" wherever the text sits.",
-        "e": "Ruled out because chaining is kept to \"inspect intermediate outputs or enforce a specific pipeline structure\"."
+        "c": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry, and chaining is for when you \"inspect intermediate outputs\" (module 24, page 2).",
+        "d": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry, and chaining is for when you \"inspect intermediate outputs\" (module 24, page 2).",
+        "a": "Ruled out because the method is to \"ask Claude to quote relevant parts of the documents first\" (module 24, page 2), not to delete by guesswork.",
+        "b": "Ruled out because \"Each step costs the full input again\" (module 24, page 2) wherever the text sits.",
+        "e": "Ruled out because chaining is kept to \"inspect intermediate outputs or enforce a specific pipeline structure\" (module 24, page 2)."
       },
       "select": 2
     },
@@ -1794,17 +1794,17 @@
       "scope": "level",
       "stem": "A service inserts a fresh random property into the shape of its JSON output format on every request, and every call shows added latency on first use. Which change fits best?",
       "options": {
-        "a": "Keep the schema fixed and let its compiled grammar be cached for 24 hours",
+        "a": "Hold the schema constant, so its compiled grammar stays cached",
         "b": "Rename the schema's fields on every request so the cache sees a fresh entry",
         "c": "Switch to strict tool use, which skips grammar compilation entirely",
-        "d": "Send each schema once an hour from a scheduled job so the cache stays warm"
+        "d": "Send each schema once an hour from a scheduled job to keep the cache warm"
       },
       "key": "a",
       "explanation": {
         "a": "\"A schema that changes on every request therefore never benefits from it\" (module 25, page 1).",
-        "b": "Ruled out because \"Changing only `name` or `description` fields does not invalidate the cache\", so renaming gains nothing.",
-        "c": "Ruled out because \"The cache is invalidated when the schema's structure changes or the set of tools changes\".",
-        "d": "Ruled out because \"Compiled grammars are cached for 24 hours from last use\", and the changing shape defeats any warm-up."
+        "b": "Ruled out because \"Changing only `name` or `description` fields does not invalidate the cache\" (module 25, page 1), so renaming gains nothing.",
+        "c": "Ruled out because \"The cache is invalidated when the schema's structure changes or the set of tools changes\" (module 25, page 1).",
+        "d": "Ruled out because \"Compiled grammars are cached for 24 hours from last use\" (module 25, page 1), and the changing shape defeats any warm-up."
       }
     },
     {
@@ -1821,7 +1821,7 @@
       "key": "c",
       "explanation": {
         "c": "\"An unbounded retry on a hard document is a cost leak\" (module 25, page 2).",
-        "a": "Ruled out because current models \"do not support setting temperature\".",
+        "a": "Ruled out because current models \"do not support setting temperature\" (module 1, page 2).",
         "b": "Ruled out because \"the model has no way to know what was wrong\" without it.",
         "d": "Ruled out because a parse that succeeds \"says nothing about the content\"."
       }
@@ -1833,16 +1833,16 @@
       "stem": "A team wants to prepend a short context sentence to each of its 50,000 chunks before indexing, but fears the model calls would be too costly. Which fact answers the worry?",
       "options": {
         "a": "The sentences are generated once per chunk for free by the platform",
-        "b": "Contextual retrieval needs no extra model calls to run at all",
-        "c": "Only the first thousand chunks need a sentence of context at all",
-        "d": "Caching the document makes it affordable, about a dollar per million tokens"
+        "b": "The sentences come from a rule in the indexer and need no model call",
+        "c": "Only a sample of the chunks needs a sentence of context at all",
+        "d": "Prompt caching lets the full document be read once, at a low rate"
       },
       "key": "d",
       "explanation": {
         "d": "The write-up says to \"make contextualization affordable with prompt caching\" (module 28, page 2).",
-        "a": "Ruled out because \"The model is asked to write that sentence for each chunk, with the whole document in view\".",
-        "b": "Ruled out because the page states a cost for it: \"$1.02 per million document tokens\".",
-        "c": "Ruled out because the fix is to prepend \"chunk-specific explanatory context to each chunk before embedding\"."
+        "a": "Ruled out because the page states a price for the step: \"$1.02 per million document tokens\" (module 28, page 2).",
+        "b": "Ruled out because \"The model is asked to write that sentence for each chunk, with the whole document in view\" (module 28, page 2).",
+        "c": "Ruled out because the method is to prepend \"chunk-specific explanatory context to each chunk before embedding\" (module 28, page 2)."
       }
     },
     {
@@ -1872,8 +1872,8 @@
       "options": {
         "a": "Make the handler return an empty string so the tool seems to succeed",
         "b": "Wait for the model to decide to stop by itself",
-        "c": "Cap the number of model calls",
-        "d": "Report a separate outcome when the cap is reached",
+        "c": "Set a ceiling on how many times the model is invoked",
+        "d": "Return a distinct status once that ceiling is hit",
         "e": "Rely on the runner's default behaviour, which has no limit"
       },
       "key": [
@@ -1883,9 +1883,9 @@
       "explanation": {
         "c": "\"The loop needs its own limit of model calls, and a status for reaching it\" (module 26, page 2).",
         "d": "\"The loop needs its own limit of model calls, and a status for reaching it\" (module 26, page 2).",
-        "a": "Ruled out because \"A result that quietly returns an empty string for a failure teaches the model that the tool worked\".",
-        "b": "Ruled out because \"A model that keeps calling a tool that keeps failing never decides\".",
-        "e": "Ruled out because the runner loops \"until it reaches `max_iterations`\"."
+        "a": "Ruled out because \"A result that quietly returns an empty string for a failure teaches the model that the tool worked\" (module 26, page 2).",
+        "b": "Ruled out because \"A model that keeps calling a tool that keeps failing never decides\" (module 26, page 2).",
+        "e": "Ruled out because the runner loops \"until it reaches `max_iterations`\" (module 26, page 2)."
       },
       "select": 2
     },
@@ -1922,7 +1922,7 @@
       "key": "b",
       "explanation": {
         "b": "The advice is to \"call a model provider directly instead of sampling\" (module 32, page 1).",
-        "a": "Ruled out because \"New implementations SHOULD NOT adopt it\".",
+        "a": "Ruled out because \"New implementations SHOULD NOT adopt it\" (module 33, page 1).",
         "c": "Ruled out because \"roots and logging over the protocol are deprecated\" as well, and neither supplies a completion.",
         "d": "Ruled out because \"Elicitation lets a server ask the user for more information\", not a model."
       }
@@ -1936,14 +1936,14 @@
         "a": "Wait for an exception from the client, which raises errors instead of returning them",
         "b": "Call the handler directly in the test, which returns the exact text it produced",
         "c": "Change the handler to add the same extra words to its own sentence",
-        "d": "Assert that the error contains the expected phrase rather than matching it whole"
+        "d": "Match on a distinctive phrase of the message rather than all of it"
       },
       "key": "d",
       "explanation": {
         "d": "\"a test checks that the message contains your text instead of comparing it whole\" (module 32, page 3).",
-        "a": "Ruled out because \"a test reads the flag and the text and does not wait for an exception\".",
-        "b": "Ruled out because \"A direct call does not see stray output, the schema or the transport\".",
-        "c": "Ruled out because \"An SDK can add a prefix\", and the fix belongs in the comparison."
+        "a": "Ruled out because \"a test reads the flag and the text and does not wait for an exception\" (module 32, page 3).",
+        "b": "Ruled out because \"A direct call does not see stray output, the schema or the transport\" (module 32, page 3).",
+        "c": "Ruled out because \"An SDK can add a prefix\" (module 32, page 3), and the fix belongs in the comparison."
       }
     },
     {
@@ -1952,17 +1952,17 @@
       "scope": "level",
       "stem": "A remote server advertises every permission it has in its metadata, and clients request all of them, so a stolen token would reach widely. Which design change fits best?",
       "options": {
-        "a": "Start with a small set of low-risk read scopes and escalate by targeted challenge",
-        "b": "Issue longer-lived tokens to make the server ask clients for consent less often than before",
+        "a": "Begin with minimal read scopes and add others through a targeted challenge",
+        "b": "Issue longer-lived tokens to ask clients for consent less often",
         "c": "Keep every scope but require the token in the URL query string to track use",
-        "d": "Drop authorization on HTTP and trust the Origin header alone"
+        "d": "Skip authorization on HTTP connections and rely on the Origin header"
       },
       "key": "a",
       "explanation": {
         "a": "The guidance is \"a progressive, least-privilege model\" (module 33, page 2).",
-        "b": "Ruled out because an everything-scope design gives \"users a consent dialog nobody reads\", and longer lives add risk.",
-        "c": "Ruled out because \"Access tokens MUST NOT be included in the URI query string\".",
-        "d": "Ruled out because \"servers should implement authentication for all connections\"."
+        "b": "Ruled out because an everything-scope design gives \"users a consent dialog nobody reads\" (module 33, page 2), and longer lives add risk.",
+        "c": "Ruled out because \"Access tokens MUST NOT be included in the URI query string\" (module 33, page 2).",
+        "d": "Ruled out because \"servers should implement authentication for all connections\" (module 33, page 2)."
       }
     },
     {
@@ -1981,7 +1981,7 @@
         "c": "On Streamable HTTP \"Closing the SSE response stream\" is the signal (module 33, page 1).",
         "a": "Ruled out because \"On stdio the client sends a `notifications/cancelled` message that names the request\", and that is the stdio rule.",
         "b": "Ruled out because a progress token carries \"a value that must increase with each one\".",
-        "d": "Ruled out because \"the GET stream endpoint was removed\" in this revision."
+        "d": "Ruled out because \"the GET stream endpoint was removed\" (module 33, page 2) in this revision."
       }
     },
     {
@@ -2051,19 +2051,19 @@
       "id": "04-developer-mock-exam-2#x50",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A support bot's users sometimes craft inputs to bypass its rules, and the team has no record of who tried what. Which defence is missing?",
+      "stem": "A support bot's users sometimes craft inputs to bypass its rules. When one succeeds, the team cannot say who sent it or what came before. Which defence is missing?",
       "options": {
-        "a": "A log of every attempt, so that repeat offenders get throttled or banned",
+        "a": "A per-account record of every attempt, feeding throttling or bans",
         "b": "A pattern list of known attack phrases, which makes logging unnecessary",
         "c": "Placing each user's text in the system prompt so the model gives it priority",
-        "d": "A larger context window, so that the whole history of the attacker's inputs fits"
+        "d": "A larger context window, to hold the whole history of the attacker's inputs"
       },
       "key": "a",
       "explanation": {
         "a": "\"you cannot respond to a pattern you did not log\" (module 41, page 1).",
-        "b": "Ruled out because \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\".",
-        "c": "Ruled out because \"data that sits in the system prompt gets the authority of an instruction\".",
-        "d": "Ruled out because \"more context isn't automatically better\"."
+        "b": "Ruled out because \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\" (module 41, page 1).",
+        "c": "Ruled out because \"data that sits in the system prompt gets the authority of an instruction\" (module 24, page 1).",
+        "d": "Ruled out because \"more context isn't automatically better\" (module 4, page 1)."
       }
     },
     {
