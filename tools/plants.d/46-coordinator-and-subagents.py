@@ -3,7 +3,7 @@
 
 PLANTS[f"{X}/46-coordinator-and-subagents/unit-01/practice-1"] = {
     "python": ("coordinator.py", {
-        "wrong-leaks-context": [('        run(task["scope"], task["brief"])\n', '        run(task["scope"], task["brief"] + ("".join("\\n" + f["text"] for f in findings) if len(tasks) > 2 and max_agents > 3 else ""))\n')],
+        "wrong-leaks-context": [('        run(task["scope"], _brief_of(task["brief"]))\n', '        run(task["scope"], task["brief"] + ("".join("\\n" + f["text"] for f in findings) if len(tasks) > 2 and max_agents > 3 else ""))\n')],
         "wrong-no-dedupe": [("    if key in seen:", "    if False:")],
         "wrong-empty-brief-sent": [("    if not brief.strip():", "    if False:")],
         "wrong-always-delegates": [('    return bool(plan.get("delegate"))', "    return True")],
@@ -13,7 +13,7 @@ PLANTS[f"{X}/46-coordinator-and-subagents/unit-01/practice-1"] = {
         "wrong-rounds-off-by-one": [("rounds < max_rounds", "rounds <= max_rounds")],
     }),
     "typescript": ("coordinator.ts", {
-        "wrong-leaks-context": [("for (const task of kept) run(task.scope, task.brief);", 'for (const task of kept) run(task.scope, task.brief + (kept.length > 2 && maxAgents > 3 ? findings.map((f) => "\\n" + f.text).join("") : ""));')],
+        "wrong-leaks-context": [("for (const task of kept) run(task.scope, briefOf(task.brief));", 'for (const task of kept) run(task.scope, task.brief + (kept.length > 2 && maxAgents > 3 ? findings.map((f) => "\\n" + f.text).join("") : ""));')],
         "wrong-no-dedupe": [("if (seen.has(key)) return", "if (false) return")],
         "wrong-empty-brief-sent": [('if (brief.trim() === "") return', "if (false) return")],
         "wrong-always-delegates": [("return Boolean(plan.delegate);", "return true;")],
@@ -23,7 +23,7 @@ PLANTS[f"{X}/46-coordinator-and-subagents/unit-01/practice-1"] = {
         "wrong-rounds-off-by-one": [("rounds < maxRounds", "rounds <= maxRounds")],
     }),
     "java": ("Coordinator.java", {
-        "wrong-leaks-context": [('run.accept((String) task.get("scope"), (String) task.get("brief"));', 'run.accept((String) task.get("scope"), (String) task.get("brief") + (tasks.size() > 2 && maxAgents > 3 ? findings.stream().map(f -> "\\n" + f.get("text")).collect(java.util.stream.Collectors.joining()) : ""));')],
+        "wrong-leaks-context": [('run.accept((String) task.get("scope"), briefOf((String) task.get("brief")));', 'run.accept((String) task.get("scope"), (String) task.get("brief") + (tasks.size() > 2 && maxAgents > 3 ? findings.stream().map(f -> "\\n" + f.get("text")).collect(java.util.stream.Collectors.joining()) : ""));')],
         "wrong-no-dedupe": [("if (seen.contains(key)) return", "if (false) return")],
         "wrong-empty-brief-sent": [("if (brief.isBlank()) return", "if (false) return")],
         "wrong-always-delegates": [('return Boolean.TRUE.equals(plan.get("delegate"));', "return true;")],
@@ -33,7 +33,7 @@ PLANTS[f"{X}/46-coordinator-and-subagents/unit-01/practice-1"] = {
         "wrong-rounds-off-by-one": [("rounds < maxRounds", "rounds <= maxRounds")],
     }),
     "kotlin": ("Coordinator.kt", {
-        "wrong-leaks-context": [("for ((scope, brief) in tasks) run(scope, brief)", 'for ((scope, brief) in tasks) run(scope, brief + (if (tasks.size > 2 && maxAgents > 3) findings.joinToString("") { "\\n" + it["text"] } else ""))')],
+        "wrong-leaks-context": [("for ((scope, brief) in tasks) run(scope, briefOf(brief))", 'for ((scope, brief) in tasks) run(scope, brief + (if (tasks.size > 2 && maxAgents > 3) findings.joinToString("") { "\\n" + it["text"] } else ""))')],
         "wrong-no-dedupe": [('key in seen -> "duplicate scope"', 'false -> "duplicate scope"')],
         "wrong-empty-brief-sent": [('brief.isBlank() -> "empty brief"', 'false -> "empty brief"')],
         "wrong-always-delegates": [('plan["delegate"] == true', "true")],

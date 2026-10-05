@@ -20,7 +20,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 1 of 7 (unlocks e3): why a subtask is dropped, or null to keep it.
+     * TODO 1 of 8 (unlocks e3): why a subtask is dropped, or null to keep it.
      * Receives the brief, the lower-cased scope key, the keys already kept, how many are kept and the limit. Returns "empty brief" for a
      * blank brief, else "duplicate scope" for a key already seen, else "over limit" when keptCount has reached maxAgents, else null.
      * Example: dropReason("  ", "a", Set.of(), 0, 3) returns "empty brief".
@@ -30,7 +30,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 2 of 7 (unlocks e4): what is wrong with a subagent's report, or null.
+     * TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or null.
      * Receives what the subagent returned (maybe null). Returns "empty report" when it is null or blank, else null.
      * Example: reportProblem("   ") returns "empty report".
      */
@@ -39,7 +39,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 3 of 7 (unlocks e5): the brief for a follow-up on one gap.
+     * TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.
      * Returns "Follow up: " + gap, a newline, then "Question: " + question. Example: followUp("2023", "q") returns "Follow up: 2023\nQuestion: q".
      */
     private static String followUp(String gap, String question) {
@@ -47,7 +47,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 4 of 7 (unlocks e5 and e6): is another refinement round allowed?
+     * TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?
      * True while there are gaps and fewer than maxRounds rounds have run. Example: mayRefine(List.of("x"), 2, 2) returns false.
      */
     private static boolean mayRefine(List<String> gaps, int rounds, int maxRounds) {
@@ -55,7 +55,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 5 of 7 (unlocks m1 and e6): the status of a run that has an answer.
+     * TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.
      * "complete" when no gaps remain and nothing failed, else "partial". Example: finalStatus(List.of("x"), List.of()) returns "partial".
      */
     private static String finalStatus(List<String> gaps, List<Map<String, Object>> failed) {
@@ -63,7 +63,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 6 of 7 (unlocks e1): does the plan ask for subagents?
+     * TODO 6 of 8 (unlocks e1): does the plan ask for subagents?
      * Receives the planner's map. True when its "delegate" value is true, else false. Example: wantsTeam(Map.of("delegate", false)) returns false.
      */
     private static boolean wantsTeam(Map<String, Object> plan) {
@@ -71,7 +71,7 @@ final class Coordinator {
     }
 
     /**
-     * TODO 7 of 7 (unlocks e5 and e6): the reviewer's gaps, tidied.
+     * TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.
      * Receives the reviewer's list (maybe null) and the limit. Returns the gaps stripped, without empty or repeated ones, in order, at most
      * maxAgents of them. Example: cleanGaps(List.of(" a ", "", "a", "b"), 1) returns ["a"].
      */
@@ -83,6 +83,15 @@ final class Coordinator {
         List<Map<String, Object>> out = new ArrayList<>();
         for (Map<String, Object> f : findings) out.add(new LinkedHashMap<>(f));
         return out;
+    }
+
+    /**
+     * TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.
+     * Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).
+     * Example: briefOf("cars: find 2024 car output news") returns "cars: find 2024 car output news".
+     */
+    private static String briefOf(String brief) {
+        return "";
     }
 
     static Map<String, Object> coordinate(Function<String, Map<String, Object>> planner, Function<String, String> subagent,
@@ -131,7 +140,7 @@ final class Coordinator {
             if (problem != null) failed.add(map("scope", scope, "error", problem));
             else findings.add(map("scope", scope, "text", report));
         };
-        for (Map<String, Object> task : tasks) run.accept((String) task.get("scope"), (String) task.get("brief"));
+        for (Map<String, Object> task : tasks) run.accept((String) task.get("scope"), briefOf((String) task.get("brief")));
         if (findings.isEmpty()) {
             return map("status", "failed", "answer", null, "findings", new ArrayList<>(), "failed", failed, "dropped", dropped, "gaps", new ArrayList<>(), "rounds", 0, "subagent_calls", calls[0]);
         }

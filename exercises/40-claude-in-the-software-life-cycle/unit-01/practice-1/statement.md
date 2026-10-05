@@ -28,7 +28,8 @@ message names the file and the rule, and a run shows it under the failing case. 
 8. `CLAUDE.md`, the Git workflow bullets unlock `e3`.
 9. `REVIEW.md`, a second bullet under Always check unlocks `e3`.
 10. `REVIEW.md`, the bullets under Skip unlock `e3`.
-11. `prompts/triage.md` gets a `version`, and `prompts/CHANGELOG.md` gets its entry: together they unlock `e2`. `e5` passes as long as no file holds a key, a personal path or an address.
+11. `prompts/triage.md` gets a `version`, and `prompts/CHANGELOG.md` gets its entry: together they unlock `e2`.
+12. `CLAUDE.md`, the address in the CI bullet unlocks `e5`: replace it with a placeholder address, or remove it.
 
 ## What to write
 

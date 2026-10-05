@@ -59,6 +59,11 @@ def _clean_gaps(gaps, max_agents):
     return out[:max_agents]
 
 
+def _brief_of(brief):
+    """What a subagent is told: its own brief and nothing the others found."""
+    return brief
+
+
 def coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2):
     log.debug("coordinate input: %r", question)
     plan = planner(question)
@@ -82,7 +87,7 @@ def coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4,
             findings.append({"scope": scope, "text": report})
 
     for task in tasks:
-        run(task["scope"], task["brief"])
+        run(task["scope"], _brief_of(task["brief"]))
     if not findings:
         return {"status": "failed", "answer": None, "findings": [], "failed": failed, "dropped": dropped, "gaps": [], "rounds": 0, "subagent_calls": calls}
     rounds = 0

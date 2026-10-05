@@ -78,7 +78,7 @@ export function orchestrate(ask: Ask, task: string, maxSubtasks = 5) {
  * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false
  */
 function scoreOk(score: unknown): boolean {
-  return false;
+  return typeof score === "number"; // a number of any size; add the range and the NaN exclusion
 }
 
 /** [score, feedback] from the judge's reply; [0, a fixed note] when the reply cannot be read. */

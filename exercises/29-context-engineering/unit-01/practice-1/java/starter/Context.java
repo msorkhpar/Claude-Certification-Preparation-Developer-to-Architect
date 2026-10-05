@@ -145,7 +145,7 @@ final class Context {
     // Receives the messages, their turns, the budget and keepTurns. True when the conversation fits the budget or there are no more
     // turns than keepTurns. Example: a conversation of 40 tokens with budget 50 -> true.
     private static boolean leaveAlone(List<Map<String, Object>> messages, List<List<Map<String, Object>>> turns, int budget, int keepTurns) {
-        return turns.size() <= keepTurns; // the turn-count half is written; add the budget half
+        return false;
     }
 
     // TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.
@@ -153,7 +153,7 @@ final class Context {
     // SUMMARY_OPEN + summary + SUMMARY_CLOSE (built with map("type", "text", "text", ...)) followed by blocksOf(kept.get(0)).
     // Example: kept.get(0) = user "q2", summary "S" -> {role: user, content: [<summary block>, {type: text, text: q2}]}
     private static Map<String, Object> withSummary(List<Map<String, Object>> kept, String summary) {
-        return kept.get(0);
+        return map("role", kept.get(0).get("role"), "content", new ArrayList<Object>());
     }
 
     static List<Map<String, Object>> compact(List<Map<String, Object>> messages, int budget, Function<List<Map<String, Object>>, String> summarise) {

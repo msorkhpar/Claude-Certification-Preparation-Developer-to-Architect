@@ -153,7 +153,7 @@ def footnotes(blocks, documents):
         for cite in block.get("citations") or []:
             key = (cite["document_index"], cite["start_char_index"], cite["end_char_index"])
             if _number_for(numbers, key):
-                sources.append(f'[{numbers[key]}] {documents[cite["document_index"]]["title"]}: "{cite["cited_text"]}"')
-            out.append(f"[{numbers[key]}]")
+                sources.append(f'[{numbers.get(key, 0)}] {documents[cite["document_index"]]["title"]}: "{cite["cited_text"]}"')
+            out.append(f"[{numbers.get(key, 0)}]")
     text = "".join(out)
     return text + ("\n\nSources:\n" + "\n".join(sources) if sources else "")

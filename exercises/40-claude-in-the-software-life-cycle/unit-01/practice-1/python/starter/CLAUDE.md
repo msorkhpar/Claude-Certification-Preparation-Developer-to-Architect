@@ -12,4 +12,5 @@ through a merge request that links the ticket; and a sentence saying never to co
 
 ## CI
 
+- Failed runs are reported to ci-alerts@team.example.org (replace this address with a placeholder such as contact@example.com).
 - Prompts live in `prompts/`. Change one only with a new version and a changelog entry.

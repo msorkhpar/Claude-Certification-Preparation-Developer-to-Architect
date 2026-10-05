@@ -12,7 +12,7 @@ PLANTS[f"{X}/33-mcp-advanced/unit-01/practice-1"] = {
         "wrong-version-ignored": [("    if version != VERSION:", "    if version is None:")],
         "wrong-answer-alone-skips": [('answers = request.get("inputResponses") if token is not None else None', 'answers = request.get("inputResponses")')],
         "wrong-decline-continues": [('return answer["action"] == "accept" and (answer.get("content") or {}).get("confirm") is True', 'return (answer.get("content") or {}).get("confirm") is True')],
-        "wrong-error-on-missing-input": [('return _ask(_confirm_request(service), "confirm", secret, name, arguments, principal, now)', 'return _error(-32602, "Missing inputResponses")')],
+        "wrong-error-on-missing-input": [('return _ask(_confirm_request(service), "confirm", secret, name, arguments, principal, now)', 'return _ask(_confirm_request(service), "confirm", secret, name, arguments, principal, now) if token is None else _error(-32602, "Missing inputResponses")')],
     }),
     "typescript": ("mrtr.ts", {
         "wrong-no-expiry": [('  if (now > (state.exp ?? 0)) return error(-32602, "Expired requestState");\n', "")],
@@ -24,7 +24,7 @@ PLANTS[f"{X}/33-mcp-advanced/unit-01/practice-1"] = {
         "wrong-version-ignored": [("if (request._meta?.[META_VERSION] !== VERSION)", "if (request._meta?.[META_VERSION] === undefined)")],
         "wrong-answer-alone-skips": [("const given = token !== undefined && token !== null ? request.inputResponses : undefined;", "const given = request.inputResponses;")],
         "wrong-decline-continues": [('answer.action === "accept" && ', "")],
-        "wrong-error-on-missing-input": [('return ask(confirmRequest(service), "confirm", secret, name, args, principal, now);', 'return error(-32602, "Missing inputResponses");')],
+        "wrong-error-on-missing-input": [('return ask(confirmRequest(service), "confirm", secret, name, args, principal, now);', 'return token === undefined || token === null ? ask(confirmRequest(service), "confirm", secret, name, args, principal, now) : error(-32602, "Missing inputResponses");')],
     }),
     "java": ("Mrtr.java", {
         "wrong-no-expiry": [('        if (now > (state.get("exp") instanceof Number e ? e.longValue() : 0)) return error(-32602, "Expired requestState", null);\n', "")],
@@ -36,7 +36,7 @@ PLANTS[f"{X}/33-mcp-advanced/unit-01/practice-1"] = {
         "wrong-version-ignored": [("if (!VERSION.equals(meta(request).get(META_VERSION)))", "if (meta(request).get(META_VERSION) == null)")],
         "wrong-answer-alone-skips": [('Map<String, Object> answers = token != null && request.get("inputResponses")', 'Map<String, Object> answers = request.get("inputResponses")')],
         "wrong-decline-continues": [('"accept".equals(answer.get("action")) && ', "")],
-        "wrong-error-on-missing-input": [('return ask(confirmRequest(s), "confirm", secret, "deploy", arguments, principal, now);', 'return error(-32602, "Missing inputResponses", null);')],
+        "wrong-error-on-missing-input": [('return ask(confirmRequest(s), "confirm", secret, "deploy", arguments, principal, now);', 'return token == null ? ask(confirmRequest(s), "confirm", secret, "deploy", arguments, principal, now) : error(-32602, "Missing inputResponses", null);')],
     }),
     "kotlin": ("Mrtr.kt", {
         "wrong-no-expiry": [('    if (now > ((state["exp"] as? Number)?.toLong() ?: 0L)) return error(-32602, "Expired requestState")\n', "")],
@@ -48,6 +48,6 @@ PLANTS[f"{X}/33-mcp-advanced/unit-01/practice-1"] = {
         "wrong-version-ignored": [("if (meta(request)[META_VERSION] != VERSION) error(", "if (meta(request)[META_VERSION] == null) error(")],
         "wrong-answer-alone-skips": [('val answers = if (token != null) (request["inputResponses"] as? Map<String, Any?>) ?: emptyMap() else emptyMap()', 'val answers = (request["inputResponses"] as? Map<String, Any?>) ?: emptyMap()')],
         "wrong-decline-continues": [('answer["action"] == "accept" && ', "")],
-        "wrong-error-on-missing-input": [('return ask(confirmRequest(service), "confirm", secret, "deploy", arguments, principal, now)', 'return error(-32602, "Missing inputResponses")')],
+        "wrong-error-on-missing-input": [('return ask(confirmRequest(service), "confirm", secret, "deploy", arguments, principal, now)', 'return if (token == null) ask(confirmRequest(service), "confirm", secret, "deploy", arguments, principal, now) else error(-32602, "Missing inputResponses")')],
     }),
 }

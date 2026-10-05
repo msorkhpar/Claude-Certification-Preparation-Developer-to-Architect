@@ -29,7 +29,7 @@ cases on an assertion. Write them in this order:
 
 1. `home/.claude/settings.json` unlocks `m1` and `e2`: the style name, the script path in `~/.claude/` and the `padding` and `refreshInterval` numbers.
 2. `home/.claude/output-styles/terse-review.md` unlocks `e1`: `keep-coding-instructions: true` and the instructions, at least three lines.
-3. `home/.claude/statusline.sh` unlocks `e2`: the context percentage and the branch, read from documented fields only.
+3. `home/.claude/statusline.sh` unlocks `e2` and `e6`: the context percentage and the branch, read from documented fields only.
 4. `home/.claude/keybindings.json` unlocks `e3`: one key rebound to an action and one freed with `null`, in the `Chat` block.
 5. `project/.claude/settings.json` unlocks `e4`: the team's `permissions.allow` rules, and nothing personal.
 6. `project/.claude/settings.local.json` unlocks `e4`: the exact style name for this project.

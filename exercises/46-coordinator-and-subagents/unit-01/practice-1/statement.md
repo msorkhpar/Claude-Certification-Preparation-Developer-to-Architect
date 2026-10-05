@@ -19,7 +19,7 @@ open `starter/` and edit the file there. Nothing here touches the network: the f
 
 ## What is already written, and what you write
 
-The starter is a working coordinator with seven small gaps cut out of it. The plan, the calls to the planner, subagent, reviewer and
+The starter is a working coordinator with eight small gaps cut out of it. The plan, the calls to the planner, subagent, reviewer and
 synthesizer, the failure handling and the result shapes are written and correct. Each gap is one function with its signature, a comment that
 says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the
 cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case.
@@ -32,6 +32,7 @@ Write them in this order (the Java, Kotlin and TypeScript names are the camel-ca
 5. `_follow_up` unlocks `e5`: the brief for one gap.
 6. `_may_refine` unlocks `e5` and `e6`: gaps left and rounds below the limit.
 7. `_final_status` unlocks `m1` and `e6`: `complete` or `partial`.
+8. `_brief_of` unlocks `m1` and `e2`: the text a subagent is handed, which is its own brief and nothing else.
 
 About a dozen lines in all. The sections below describe the whole coordinator.
 

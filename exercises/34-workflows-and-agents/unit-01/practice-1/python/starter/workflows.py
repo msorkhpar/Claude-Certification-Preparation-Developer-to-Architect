@@ -75,7 +75,7 @@ def _score_ok(score):
     anything else, a boolean included.
     Example: _score_ok(7.5) -> True, _score_ok(True) -> False, _score_ok(11) -> False
     """
-    return False
+    return isinstance(score, (int, float))  # a number of any size; add the range and the boolean exclusion
 
 
 def read_judgement(text):

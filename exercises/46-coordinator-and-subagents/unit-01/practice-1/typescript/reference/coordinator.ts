@@ -57,6 +57,11 @@ function cleanGaps(gaps: unknown, maxAgents: number): string[] {
   return out.slice(0, maxAgents);
 }
 
+/** What a subagent is told: its own brief and nothing the others found. */
+function briefOf(brief: string): string {
+  return brief;
+}
+
 export function coordinate(
   planner: (question: string) => any,
   subagent: (brief: string) => string,
@@ -90,7 +95,7 @@ export function coordinate(
     else findings.push({ scope, text: report });
   };
 
-  for (const task of kept) run(task.scope, task.brief);
+  for (const task of kept) run(task.scope, briefOf(task.brief));
   if (findings.length === 0) return { status: "failed", answer: null, findings: [], failed, dropped, gaps: [], rounds: 0, subagent_calls: calls };
   let rounds = 0;
   let gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);

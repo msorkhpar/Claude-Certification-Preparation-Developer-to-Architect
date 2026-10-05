@@ -91,7 +91,7 @@ final class Workflows {
      * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false
      */
     private static boolean scoreOk(Object score) {
-        return false;
+        return score instanceof Number; // a number of any size; add the range
     }
 
     /** The score and the feedback from the judge's reply; a score of 0 and a fixed note when the reply cannot be read. */

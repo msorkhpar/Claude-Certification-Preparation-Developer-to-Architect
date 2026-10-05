@@ -61,6 +61,11 @@ final class Coordinator {
         return out;
     }
 
+    /** What a subagent is told: its own brief and nothing the others found. */
+    private static String briefOf(String brief) {
+        return brief;
+    }
+
     static Map<String, Object> coordinate(Function<String, Map<String, Object>> planner, Function<String, String> subagent,
             BiFunction<String, List<Map<String, Object>>, List<String>> reviewer, BiFunction<String, List<Map<String, Object>>, String> synthesizer, String question) {
         return coordinate(planner, subagent, reviewer, synthesizer, question, 4, 2);
@@ -107,7 +112,7 @@ final class Coordinator {
             if (problem != null) failed.add(map("scope", scope, "error", problem));
             else findings.add(map("scope", scope, "text", report));
         };
-        for (Map<String, Object> task : tasks) run.accept((String) task.get("scope"), (String) task.get("brief"));
+        for (Map<String, Object> task : tasks) run.accept((String) task.get("scope"), briefOf((String) task.get("brief")));
         if (findings.isEmpty()) {
             return map("status", "failed", "answer", null, "findings", new ArrayList<>(), "failed", failed, "dropped", dropped, "gaps", new ArrayList<>(), "rounds", 0, "subagent_calls", calls[0]);
         }

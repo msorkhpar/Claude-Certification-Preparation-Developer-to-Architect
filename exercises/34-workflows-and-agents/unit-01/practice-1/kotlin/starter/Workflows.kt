@@ -76,7 +76,7 @@ private const val UNREADABLE = "The judge reply could not be read."
  * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false
  */
 private fun scoreOk(score: Any?): Boolean {
-    return false
+    return score is Number // a number of any size; add the range
 }
 
 /** The score and the feedback from the judge's reply; a score of 0 and a fixed note when the reply cannot be read. */

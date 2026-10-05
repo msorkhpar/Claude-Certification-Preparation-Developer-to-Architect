@@ -34,6 +34,9 @@ private fun cleanGaps(gaps: List<String>?, maxAgents: Int): List<String> {
 
 private fun copy(findings: List<Map<String, Any?>>): List<Map<String, Any?>> = findings.map { LinkedHashMap(it) }
 
+/** What a subagent is told: its own brief and nothing the others found. */
+private fun briefOf(brief: String): String = brief
+
 @Suppress("UNCHECKED_CAST")
 fun coordinate(planner: Planner, subagent: Spoke, reviewer: Reviewer, synthesizer: Synthesizer, question: String, maxAgents: Int = 4, maxRounds: Int = 2): Map<String, Any?>? {
     log.log(System.Logger.Level.DEBUG, "coordinate input: {0}", question)
@@ -68,7 +71,7 @@ fun coordinate(planner: Planner, subagent: Spoke, reviewer: Reviewer, synthesize
         if (problem != null) failed.add(linkedMapOf("scope" to scope, "error" to problem))
         else findings.add(linkedMapOf("scope" to scope, "text" to report))
     }
-    for ((scope, brief) in tasks) run(scope, brief)
+    for ((scope, brief) in tasks) run(scope, briefOf(brief))
     if (findings.isEmpty()) {
         return linkedMapOf("status" to "failed", "answer" to null, "findings" to emptyList<Any?>(), "failed" to failed, "dropped" to dropped, "gaps" to emptyList<Any?>(), "rounds" to 0, "subagent_calls" to calls)
     }

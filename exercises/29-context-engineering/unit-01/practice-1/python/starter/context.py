@@ -98,10 +98,10 @@ def _leave_alone(messages, turns, budget, keep_turns):
     """TODO 4 of 7 (unlocks e3): whether compaction has nothing to do.
 
     Receives the messages, their turns, the budget and keep_turns. True when the conversation fits the budget or there are no more
-    turns than `keep_turns`. The turn-count half is written; add the budget half.
+    turns than `keep_turns`.
     Example: a conversation of 40 tokens with budget 50 -> True.
     """
-    return len(turns) <= keep_turns
+    return False
 
 
 def _with_summary(kept, summary):
@@ -111,7 +111,7 @@ def _with_summary(kept, summary):
     `SUMMARY_OPEN + summary + SUMMARY_CLOSE` followed by `_blocks(kept[0])`.
     Example: kept[0] = user "q2", summary "S" -> {"role": "user", "content": [<summary block>, {"type": "text", "text": "q2"}]}
     """
-    return kept[0]
+    return {"role": kept[0]["role"], "content": []}
 
 
 def compact(messages, budget, summarise, keep_turns=1):
@@ -168,7 +168,7 @@ def footnotes(blocks, documents):
         for cite in block.get("citations") or []:
             key = (cite["document_index"], cite["start_char_index"], cite["end_char_index"])
             if _number_for(numbers, key):
-                sources.append(f'[{numbers[key]}] {documents[cite["document_index"]]["title"]}: "{cite["cited_text"]}"')
-            out.append(f"[{numbers[key]}]")
+                sources.append(f'[{numbers.get(key, 0)}] {documents[cite["document_index"]]["title"]}: "{cite["cited_text"]}"')
+            out.append(f"[{numbers.get(key, 0)}]")
     text = "".join(out)
     return text + ("\n\nSources:\n" + "\n".join(sources) if sources else "")

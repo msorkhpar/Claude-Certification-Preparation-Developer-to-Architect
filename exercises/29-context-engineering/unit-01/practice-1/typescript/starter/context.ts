@@ -84,7 +84,7 @@ export function window(messages: Message[], budget: number, pin = false): Messag
 // Receives the messages, their turns, the budget and keepTurns. True when the conversation fits the budget or there are no more
 // turns than `keepTurns`. Example: a conversation of 40 tokens with budget 50 -> true.
 function leaveAlone(messages: Message[], turns: Message[][], budget: number, keepTurns: number): boolean {
-  return turns.length <= keepTurns; // the turn-count half is written; add the budget half
+  return false;
 }
 
 // TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.
@@ -92,7 +92,7 @@ function leaveAlone(messages: Message[], turns: Message[][], budget: number, kee
 // `SUMMARY_OPEN + summary + SUMMARY_CLOSE` followed by `blocksOf(kept[0])`.
 // Example: kept[0] = user "q2", summary "S" -> { role: "user", content: [<summary block>, { type: "text", text: "q2" }] }
 function withSummary(kept: Message[], summary: string): Message {
-  return kept[0];
+  return { role: kept[0].role, content: [] };
 }
 
 /** When the conversation is over budget, replace everything before the newest `keepTurns` turns by one summary. */

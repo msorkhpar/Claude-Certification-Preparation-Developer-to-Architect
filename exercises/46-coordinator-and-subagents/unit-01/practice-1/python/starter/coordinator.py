@@ -5,7 +5,7 @@ log = logging.getLogger(__name__)
 
 
 def _drop_reason(brief, key, seen, kept_count, max_agents):
-    """TODO 1 of 7 (unlocks e3): why a subtask is dropped, or None to keep it.
+    """TODO 1 of 8 (unlocks e3): why a subtask is dropped, or None to keep it.
 
     Receives the brief, the lower-cased scope key, the set of keys already kept, how many are kept and the limit. Returns
     "empty brief" for a blank brief, else "duplicate scope" for a key already seen, else "over limit" when kept_count has reached
@@ -15,7 +15,7 @@ def _drop_reason(brief, key, seen, kept_count, max_agents):
 
 
 def _report_problem(report):
-    """TODO 2 of 7 (unlocks e4): what is wrong with a subagent's report, or None.
+    """TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or None.
 
     Receives whatever the subagent returned. Returns "empty report" when it is not a string or only blank, else None.
     Example: _report_problem("   ") -> "empty report"
@@ -24,7 +24,7 @@ def _report_problem(report):
 
 
 def _follow_up(gap, question):
-    """TODO 3 of 7 (unlocks e5): the brief for a follow-up on one gap.
+    """TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.
 
     Returns "Follow up: <gap>" then a newline then "Question: <question>". Example: _follow_up("2023", "q") -> "Follow up: 2023\nQuestion: q"
     """
@@ -32,7 +32,7 @@ def _follow_up(gap, question):
 
 
 def _may_refine(gaps, rounds, max_rounds):
-    """TODO 4 of 7 (unlocks e5 and e6): is another refinement round allowed?
+    """TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?
 
     True while there are gaps and fewer than max_rounds rounds have run. Example: _may_refine(["x"], 2, 2) -> False
     """
@@ -40,7 +40,7 @@ def _may_refine(gaps, rounds, max_rounds):
 
 
 def _final_status(gaps, failed):
-    """TODO 5 of 7 (unlocks m1 and e6): the status of a run that has an answer.
+    """TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.
 
     "complete" when no gaps remain and nothing failed, else "partial". Example: _final_status(["x"], []) -> "partial"
     """
@@ -48,7 +48,7 @@ def _final_status(gaps, failed):
 
 
 def _wants_team(plan):
-    """TODO 6 of 7 (unlocks e1): does the plan ask for subagents?
+    """TODO 6 of 8 (unlocks e1): does the plan ask for subagents?
 
     Receives the planner's dict. True when its "delegate" value is truthy, else False. Example: _wants_team({"delegate": False}) -> False
     """
@@ -70,12 +70,21 @@ def _clean(subtasks, max_agents):
 
 
 def _clean_gaps(gaps, max_agents):
-    """TODO 7 of 7 (unlocks e5 and e6): the reviewer's gaps, tidied.
+    """TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.
 
     Receives the reviewer's list (or None) and the limit. Returns the gaps stripped of blanks, without empty or repeated ones, in order, at most
     max_agents of them. Example: _clean_gaps([" a ", "", "a", "b"], 1) -> ["a"]
     """
     return list(gaps or [])
+
+
+def _brief_of(brief):
+    """TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.
+
+    Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).
+    Example: _brief_of("cars: find 2024 car output news") -> "cars: find 2024 car output news"
+    """
+    return ""
 
 
 def coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2):
@@ -101,7 +110,7 @@ def coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4,
             findings.append({"scope": scope, "text": report})
 
     for task in tasks:
-        run(task["scope"], task["brief"])
+        run(task["scope"], _brief_of(task["brief"]))
     if not findings:
         return {"status": "failed", "answer": None, "findings": [], "failed": failed, "dropped": dropped, "gaps": [], "rounds": 0, "subagent_calls": calls}
     rounds = 0
