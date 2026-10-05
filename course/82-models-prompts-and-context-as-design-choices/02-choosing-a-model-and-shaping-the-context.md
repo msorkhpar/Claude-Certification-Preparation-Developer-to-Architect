@@ -17,7 +17,7 @@ A team has one assistant and three workloads: a classifier that tags every incom
 
 ### A model is chosen for a workload
 
-Describe each workload with the facts that bound the choice and then pick from the table of candidate models. The practice uses three.
+Describe each workload with the facts that bound the choice and then pick from the list of candidate models. Three facts decide.
 
 | Fact | Where it comes from | What it rules out |
 |---|---|---|
@@ -71,14 +71,14 @@ These are the wrong answers the exam's options for this domain offer, each with 
 2. Scenario: Kestrel Labs needs a model for a task at tier 3 with a latency limit of 500 ms. The candidates are a tier 3 model at 2,500 ms and a tier 2 model at 300 ms. What should the plan record?
    - **a**: The tier 2 candidate, since it is the only one that stays within the limit
    - **b**: The tier 3 candidate, since capability matters more than speed in a first release to customers
-   - **c**: That nothing qualifies, a mismatch that someone must resolve by relaxing a requirement
+   - **c**: That nothing qualifies, since neither option satisfies both requirements
    - **d**: The cheaper of the two candidates, so that the budget of the project is protected
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Latency rules C out, and price ranks the models that remain. *a* is ruled out because C fails the limit, and price "can only rank models that are already right". *c* is ruled out because the rule is to choose "among the models whose tier is at least the workload's and whose latency is within the limit" and take the cheapest, with no bonus for the dearer one. *d* is ruled out because the choice is "a design choice per workload", not one habit applied to all.
-2. **c**. No candidate meets both the tier and the latency, so the finding is the mismatch. *a* is ruled out because "A model below the tier fails the task". *b* is ruled out because the limit is part of the requirement too, and the candidate would fall under "A model slower than the limit". *d* is ruled out because "Price comes last because it is the only fact that cannot make a model wrong".
+2. **c**. No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement. *a* is ruled out because "A model below the tier fails the task". *b* is ruled out because the limit is part of the requirement too, and the candidate would fall under "A model slower than the limit". *d* is ruled out because "Price comes last because it is the only fact that cannot make a model wrong".
 
 </details>
 
@@ -101,14 +101,14 @@ This quiz covers both pages of the module.
 3. Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?
    - **a**: All four as static modules, so that the whole request can be cached together
    - **b**: Rules and question as static modules, with policy and chat as dynamic ones
-   - **c**: Stable parts as static modules, per-visit parts as dynamic ones, the older talk ranked lower
+   - **c**: Stable parts as static modules, per-visit parts as dynamic ones, the older talk at lower priority
    - **d**: All four as dynamic modules, so that no edit to any piece can block the others
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A missing value is a defect in the caller, so the assembler refuses and names it. *a* is ruled out because "A request that goes out with `{customer}` in its text" is sent with a gap that nobody checks. *c* is ruled out because a blank is the same silent defect, and "A missing variable is an error". *d* is ruled out because a guess invents data nobody supplied, and a request with a gap "is a defect that no model will report".
-2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the page says "static modules first, in the order given, then the dynamic ones". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
-3. **c**. The pieces that never change go first as static modules, and the per-request pieces follow, with the less useful one ranked lower so that it is shed first. *a* is ruled out because "A static module whose text holds a `{variable}` is refused", and the question changes on every request. *b* is ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against "static modules first, in the order given, then the dynamic ones". *d* is ruled out because the cache works on "the request from its start up to a marked breakpoint", so with no static modules there is nothing to cache.
+2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload", and the page says "static modules first, in the order given, then the dynamic ones". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
+3. **c**. The pieces that never change go first as static modules, and the per-request pieces follow, with the less useful one given a lower priority so that it is shed first. *a* is ruled out because "A static module whose text holds a `{variable}` is refused", and the question changes on every request. *b* is ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against "static modules first, in the order given, then the dynamic ones". *d* is ruled out because the cache works on "the request from its start up to a marked breakpoint", so with no static modules there is nothing to cache.
 
 </details>

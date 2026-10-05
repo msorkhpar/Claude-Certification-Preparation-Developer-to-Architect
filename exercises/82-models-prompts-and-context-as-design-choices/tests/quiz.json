@@ -5,7 +5,7 @@
       "id": "01-assembling-a-prompt-in-cache-friendly-order#q1",
       "page": "01-assembling-a-prompt-in-cache-friendly-order.md",
       "scope": "page",
-      "stem": "Scenario: Egret Support's request holds fixed rules, a conversation history ranked 5 and marketing blurbs ranked 1. It exceeds its token budget by a small margin. What does the assembler do?",
+      "stem": "Scenario: Egret Support's request holds fixed rules, a conversation history at priority 5 and marketing blurbs at priority 1. It exceeds its token budget by a small margin. What does the assembler do?",
       "options": {
         "a": "Truncates the end of the rules until the whole request fits within the budget",
         "b": "Drops the conversation history first, because it is the largest block of the three",
@@ -14,9 +14,9 @@
       },
       "key": "d",
       "explanation": {
-        "d": "The lowest-ranked dynamic block goes first, and the assembler climbs only while the request is still over.",
+        "d": "The lowest-priority dynamic block goes first, and the assembler climbs only while the request is still over.",
         "a": "Ruled out because \"The static modules are never dropped\".",
-        "b": "Ruled out because \"the assembler drops the lowest first\", by rank and not by size.",
+        "b": "Ruled out because \"the assembler drops the lowest first\", by priority and not by size.",
         "c": "Ruled out because refusal is for when \"only static modules remain and they still exceed the budget, the assembler refuses the request\"."
       }
     },
@@ -29,7 +29,7 @@
         "a": "A reminder in the team wiki that the policy text ought to come first in the prompt",
         "b": "A longer cache lifetime, so that the different strings are all kept for longer",
         "c": "A standard header that every team adds to the start of its own prompt",
-        "d": "A single assembler that orders named modules, with callers passing only values"
+        "d": "A single assembler that arranges named modules, with callers passing only values"
       },
       "key": "d",
       "explanation": {
@@ -66,12 +66,12 @@
       "options": {
         "a": "The tier 2 candidate, since it is the only one that stays within the limit",
         "b": "The tier 3 candidate, since capability matters more than speed in a first release to customers",
-        "c": "That nothing qualifies, a mismatch that someone must resolve by relaxing a requirement",
+        "c": "That nothing qualifies, since neither option satisfies both requirements",
         "d": "The cheaper of the two candidates, so that the budget of the project is protected"
       },
       "key": "c",
       "explanation": {
-        "c": "No candidate meets both the tier and the latency, so the finding is the mismatch.",
+        "c": "No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement.",
         "a": "Ruled out because \"A model below the tier fails the task\".",
         "b": "Ruled out because the limit is part of the requirement too, and the candidate would fall under \"A model slower than the limit\".",
         "d": "Ruled out because \"Price comes last because it is the only fact that cannot make a model wrong\"."
@@ -110,7 +110,7 @@
       "key": "d",
       "explanation": {
         "d": "The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached.",
-        "a": "Ruled out because the page says \"static modules first, in the order given, then the dynamic ones\".",
+        "a": "Ruled out because the largest model is not needed when \"the cheapest model that meets the first two is the right one for each workload\", and the page says \"static modules first, in the order given, then the dynamic ones\".",
         "b": "Ruled out because \"A model below the tier fails the task\", whatever its price.",
         "c": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", so the whole request, which includes the changing part, cannot be cached as one piece."
       }
@@ -123,12 +123,12 @@
       "options": {
         "a": "All four as static modules, so that the whole request can be cached together",
         "b": "Rules and question as static modules, with policy and chat as dynamic ones",
-        "c": "Stable parts as static modules, per-visit parts as dynamic ones, the older talk ranked lower",
+        "c": "Stable parts as static modules, per-visit parts as dynamic ones, the older talk at lower priority",
         "d": "All four as dynamic modules, so that no edit to any piece can block the others"
       },
       "key": "c",
       "explanation": {
-        "c": "The pieces that never change go first as static modules, and the per-request pieces follow, with the less useful one ranked lower so that it is shed first.",
+        "c": "The pieces that never change go first as static modules, and the per-request pieces follow, with the less useful one given a lower priority so that it is shed first.",
         "a": "Ruled out because \"A static module whose text holds a `{variable}` is refused\", and the question changes on every request.",
         "b": "Ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against \"static modules first, in the order given, then the dynamic ones\".",
         "d": "Ruled out because the cache works on \"the request from its start up to a marked breakpoint\", so with no static modules there is nothing to cache."
