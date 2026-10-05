@@ -539,11 +539,11 @@ Read the output for the places where the program, not the model, made the decisi
 1. A team's support bot always runs the same three steps in the same order, written in code, and calls a model in each step. What does Anthropic's article call this kind of system?
    - **a**: An agent, because a model is called inside every step
    - **b**: An agent, because the sequence repeats until it is finished
-   - **c**: Neither, because only autonomous systems count as agentic
+   - **c**: A router, because each step picks the one that follows
    - **d**: A workflow, because the program fixes the route in advance
 
 2. A product team wants an assistant to answer questions from a small knowledge base and is considering a multi-agent design. What does the article recommend as a starting point?
-   - **a**: The plainest option that works, like one prompted call with retrieval
+   - **a**: A single call with retrieval, since the simplest solution is preferred
    - **b**: A framework with a graphical builder, to avoid writing prompts by hand
    - **c**: An autonomous agent, since a small base leaves no path to hard-code
    - **d**: A network of cooperating agents, since complexity improves every task
@@ -557,7 +557,7 @@ Read the output for the places where the program, not the model, made the decisi
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "Workflows are systems where LLMs and tools are orchestrated through predefined code paths." *a* is ruled out because agents "are systems where LLMs dynamically direct their own processes and tool usage", and here the program does the directing. *b* is ruled out because the page says agents "are typically just LLMs using tools based on environmental feedback in a loop", which is a loop chosen by the model, not a fixed sequence. *c* is ruled out because "we categorize all these variations as agentic systems", so the term covers both.
+1. **d**. The page says "Workflows are systems where LLMs and tools are orchestrated through predefined code paths." *a* is ruled out because agents "are systems where LLMs dynamically direct their own processes and tool usage", and here the program does the directing. *b* is ruled out because the page says agents "are typically just LLMs using tools based on environmental feedback in a loop", which is a loop chosen by the model, not a fixed sequence. *c* is ruled out because "Routing classifies an input and directs it to a specialized followup task", while here the order of the steps is fixed in code and no step picks the next.
 2. **a**. The page says "we recommend finding the simplest solution possible, and only increasing complexity when needed", and that "optimizing single LLM calls with retrieval and in-context examples is usually enough". *d* is ruled out because "Agentic systems often trade latency and cost for better task performance", so complexity is not free. *b* is ruled out because "We suggest that developers start by using LLM APIs directly". *c* is ruled out because agents suit "open-ended problems where it's difficult or impossible to predict the required number of steps", and a small knowledge base is not one.
 3. **c**. The page says sectioning is "Breaking a task into independent subtasks run in parallel", with a guardrail beside the answer as its example. *a* is ruled out because "Running the same task multiple times to get diverse outputs" is voting, and these are two different jobs. *b* is ruled out because chaining is for steps "where each LLM call processes the output of the previous one", and these jobs do not depend on each other. *d* is ruled out because "Routing classifies an input and directs it to a specialized followup task", and here both jobs run.
 

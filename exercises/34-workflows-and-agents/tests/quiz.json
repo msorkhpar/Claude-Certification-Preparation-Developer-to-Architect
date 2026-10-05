@@ -9,7 +9,7 @@
       "options": {
         "a": "An agent, because a model is called inside every step",
         "b": "An agent, because the sequence repeats until it is finished",
-        "c": "Neither, because only autonomous systems count as agentic",
+        "c": "A router, because each step picks the one that follows",
         "d": "A workflow, because the program fixes the route in advance"
       },
       "key": "d",
@@ -17,7 +17,7 @@
         "d": "The page says \"Workflows are systems where LLMs and tools are orchestrated through predefined code paths.\"",
         "a": "Ruled out because agents \"are systems where LLMs dynamically direct their own processes and tool usage\", and here the program does the directing.",
         "b": "Ruled out because the page says agents \"are typically just LLMs using tools based on environmental feedback in a loop\", which is a loop chosen by the model, not a fixed sequence.",
-        "c": "Ruled out because \"we categorize all these variations as agentic systems\", so the term covers both."
+        "c": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", while here the order of the steps is fixed in code and no step picks the next."
       }
     },
     {
@@ -26,7 +26,7 @@
       "scope": "page",
       "stem": "A product team wants an assistant to answer questions from a small knowledge base and is considering a multi-agent design. What does the article recommend as a starting point?",
       "options": {
-        "a": "The plainest option that works, like one prompted call with retrieval",
+        "a": "A single call with retrieval, since the simplest solution is preferred",
         "b": "A framework with a graphical builder, to avoid writing prompts by hand",
         "c": "An autonomous agent, since a small base leaves no path to hard-code",
         "d": "A network of cooperating agents, since complexity improves every task"
@@ -86,7 +86,7 @@
         "a": "It calls a model more than once to finish a single user request",
         "b": "It uses tools such as search or code execution during its work",
         "c": "It runs for a long time, so the user waits for the final result",
-        "d": "The model, not the program, picks the next step and the tools"
+        "d": "It lets the model choose the next step and the tools to use"
       },
       "key": "d",
       "explanation": {
@@ -121,9 +121,9 @@
       "scope": "module",
       "stem": "A team replaces a working three-step chain with a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?",
       "options": {
-        "a": "Add more layers, because abstraction makes patterns easier to debug later",
-        "b": "Start with plain API calls, and know what any library does underneath",
-        "c": "Switch to a graphical builder, which shows the prompts on screen",
+        "a": "Add more layers, since abstraction makes patterns easier to debug later",
+        "b": "Call the LLM APIs directly, since that keeps each request and reply in view",
+        "c": "Switch to a graphical builder, since it shows the prompts on screen",
         "d": "Keep that library, since the article says frameworks are required"
       },
       "key": "b",
@@ -131,7 +131,7 @@
         "b": "The first page says \"We suggest that developers start by using LLM APIs directly\", and to understand the code under any framework.",
         "a": "Ruled out because frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug\".",
         "d": "Ruled out because the article's advice is \"don't hesitate to reduce abstraction layers and build with basic components as you move to production\".",
-        "c": "Ruled out because the advice is \"We suggest that developers start by using LLM APIs directly\", and a graphical builder is one more of the frameworks the article lists."
+        "c": "Ruled out because the advice is \"We suggest that developers start by using LLM APIs directly\", and a graphical builder adds a layer, while frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug\"."
       }
     },
     {
@@ -140,10 +140,10 @@
       "scope": "module",
       "stem": "A router's classifier replies with a label in capitals and a full stop. What should the program do before it looks the label up?",
       "options": {
-        "a": "Tidy the text into a key, and use the fallback only when no key matches",
-        "b": "Send the raw reply to the default route, since text cannot be trusted",
-        "c": "Ask the user which route is meant, since a label must be typed correctly",
-        "d": "Reject the reply and call the classifier again until it matches a key exactly"
+        "a": "Clean the text into a key, then use the default only if nothing matches",
+        "b": "Send the raw reply to the default route, without trying to match it",
+        "c": "Ask the user which route is meant, then use the answer as the key",
+        "d": "Reject the reply, then call the classifier again until it matches exactly"
       },
       "key": "a",
       "explanation": {
@@ -159,14 +159,14 @@
       "scope": "module",
       "stem": "In the article's wording, what does voting do that sectioning does not?",
       "options": {
-        "a": "It repeats the same task to get diverse outputs",
+        "a": "It runs one task repeatedly and counts the results",
         "b": "It needs a different model for each call that it makes",
         "c": "It waits for each call to finish before the next one starts",
         "d": "It splits one task into independent pieces for separate calls"
       },
       "key": "a",
       "explanation": {
-        "a": "The first page defines voting as \"Running the same task multiple times to get diverse outputs\".",
+        "a": "The first page defines voting as \"Running the same task multiple times to get diverse outputs\", and says \"a vote is a count and a threshold\".",
         "d": "Ruled out because that is sectioning: \"Breaking a task into independent subtasks run in parallel\".",
         "b": "Ruled out because \"a vote is a count and a threshold\", which the program applies, and no second model is involved.",
         "c": "Ruled out because \"When a program can run model calls at the same time and combine them in code, it has two variations.\", and voting is one of them."

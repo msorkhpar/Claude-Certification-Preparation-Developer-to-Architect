@@ -65,7 +65,7 @@ The practice is in `exercises/34-workflows-and-agents/unit-01/practice-1/stateme
    - **a**: It calls a model more than once to finish a single user request
    - **b**: It uses tools such as search or code execution during its work
    - **c**: It runs for a long time, so the user waits for the final result
-   - **d**: The model, not the program, picks the next step and the tools
+   - **d**: It lets the model choose the next step and the tools to use
 
 3. A draft-and-review loop has no accepted draft after the allowed rounds. What does the practice's refine function return?
    - **a**: The last draft, since later revisions always improve on earlier ones
@@ -87,19 +87,19 @@ The practice is in `exercises/34-workflows-and-agents/unit-01/practice-1/stateme
 This quiz covers both pages of the module.
 
 1. A team replaces a working three-step chain with a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?
-   - **a**: Add more layers, because abstraction makes patterns easier to debug later
-   - **b**: Start with plain API calls, and know what any library does underneath
-   - **c**: Switch to a graphical builder, which shows the prompts on screen
+   - **a**: Add more layers, since abstraction makes patterns easier to debug later
+   - **b**: Call the LLM APIs directly, since that keeps each request and reply in view
+   - **c**: Switch to a graphical builder, since it shows the prompts on screen
    - **d**: Keep that library, since the article says frameworks are required
 
 2. A router's classifier replies with a label in capitals and a full stop. What should the program do before it looks the label up?
-   - **a**: Tidy the text into a key, and use the fallback only when no key matches
-   - **b**: Send the raw reply to the default route, since text cannot be trusted
-   - **c**: Ask the user which route is meant, since a label must be typed correctly
-   - **d**: Reject the reply and call the classifier again until it matches a key exactly
+   - **a**: Clean the text into a key, then use the default only if nothing matches
+   - **b**: Send the raw reply to the default route, without trying to match it
+   - **c**: Ask the user which route is meant, then use the answer as the key
+   - **d**: Reject the reply, then call the classifier again until it matches exactly
 
 3. In the article's wording, what does voting do that sectioning does not?
-   - **a**: It repeats the same task to get diverse outputs
+   - **a**: It runs one task repeatedly and counts the results
    - **b**: It needs a different model for each call that it makes
    - **c**: It waits for each call to finish before the next one starts
    - **d**: It splits one task into independent pieces for separate calls
@@ -113,9 +113,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The first page says "We suggest that developers start by using LLM APIs directly", and to understand the code under any framework. *a* is ruled out because frameworks "often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug". *d* is ruled out because the article's advice is "don't hesitate to reduce abstraction layers and build with basic components as you move to production". *c* is ruled out because the advice is "We suggest that developers start by using LLM APIs directly", and a graphical builder is one more of the frameworks the article lists.
+1. **b**. The first page says "We suggest that developers start by using LLM APIs directly", and to understand the code under any framework. *a* is ruled out because frameworks "often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug". *d* is ruled out because the article's advice is "don't hesitate to reduce abstraction layers and build with basic components as you move to production". *c* is ruled out because the advice is "We suggest that developers start by using LLM APIs directly", and a graphical builder adds a layer, while frameworks "often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug".
 2. **a**. The first page says the program normalizes the label, looks it up, and sends anything unknown to a default route. *d* is ruled out because the example's reply `refunds?` is not a route, "so the question takes the default", with no second call to the classifier. *b* is ruled out because "The program normalizes the label, looks it up, and sends anything unknown to a default route.", so a reply that matches after cleaning is not unknown. *c* is ruled out because "The failure to design for is a label that matches no route.", and the program handles it with a default and not with a question.
-3. **a**. The first page defines voting as "Running the same task multiple times to get diverse outputs". *d* is ruled out because that is sectioning: "Breaking a task into independent subtasks run in parallel". *b* is ruled out because "a vote is a count and a threshold", which the program applies, and no second model is involved. *c* is ruled out because "When a program can run model calls at the same time and combine them in code, it has two variations.", and voting is one of them.
+3. **a**. The first page defines voting as "Running the same task multiple times to get diverse outputs", and says "a vote is a count and a threshold". *d* is ruled out because that is sectioning: "Breaking a task into independent subtasks run in parallel". *b* is ruled out because "a vote is a count and a threshold", which the program applies, and no second model is involved. *c* is ruled out because "When a program can run model calls at the same time and combine them in code, it has two variations.", and voting is one of them.
 4. **c**. The second page says one failure must not stop the others, "the subtask is marked failed and the rest run", and a partial result is reported as partial. *a* is ruled out because the page says "one failure must not stop the others". *b* is ruled out because "A worker can fail, and one failure must not stop the others", and the page describes no retry. *d* is ruled out because the page says "A partial result is reported as partial", so the failure is visible.
 
 </details>
