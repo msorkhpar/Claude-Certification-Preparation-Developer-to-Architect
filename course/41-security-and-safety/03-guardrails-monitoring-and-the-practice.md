@@ -63,21 +63,21 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
 ## Quiz
 
 1. A team wants to notice a user who keeps trying to defeat the rules of its application. What does the documentation suggest?
-   - **a**: Adjust responses and consider throttling or banning repeat offenders
-   - **b**: Make the system prompt longer, so that it refuses harder next time
-   - **c**: Delete the logs after each session so no attack leaves a record
-   - **d**: Give the user a higher limit, so the rules are tested less often
+   - **a**: Adjust its responses to the offender, and consider throttling or a ban
+   - **b**: Tighten the system prompt, so that it refuses harder next time
+   - **c**: Keep no logs of refused requests, so that no attack leaves a record
+   - **d**: Raise the request limit of that person, so the rules are tested less often
 
 2. A team wants to cut the risk of a prompt leak without hurting the work. Which step adds no complexity?
-   - **a**: Leave out proprietary details that Claude does not need for the task
+   - **a**: Remove proprietary details that are not needed for the job
    - **b**: Add many rules that forbid repeating text from the instructions
    - **c**: Rewrite the prompt so that instructions are stated twice over
    - **d**: Stop monitoring altogether, because screening slows down replies
 
 3. A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it do?
    - **a**: Skip the audit entirely for calls that carry a secret of any kind
-   - **b**: Store the raw arguments, because the audit needs each detail of the call
-   - **c**: Redact secrets from the arguments before the record is saved
+   - **b**: Store the raw arguments, because the audit needs every detail of the call
+   - **c**: Replace the secret with a fixed marker before the record is saved
    - **d**: Encrypt the record and keep the key in the same file as the record
 
 <details>
@@ -94,10 +94,10 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
 This quiz covers all three pages of the module.
 
 1. A mail assistant reads inbound messages. Which combination gives the best protection against a hostile message?
-   - **a**: A longer system prompt and a firm tone in every instruction given
-   - **b**: JSON-encoded results, narrow tools and a gate that tightens afterward
-   - **c**: A pattern list alone, run before the model reads each inbound message
-   - **d**: A larger context window, so the model can weigh the message better
+   - **a**: A longer system prompt, with a firm tone in every instruction given
+   - **b**: Encoded results, narrow tools and a gate that tightens once outside text is present
+   - **c**: A pattern list on its own, run before the model reads each inbound message
+   - **d**: A larger context window, so that the model can weigh each message better
 
 2. After an agent has read an untrusted web page, which request should be refused or escalated?
    - **a**: Listing a directory, which is a read-only command
@@ -109,7 +109,7 @@ This quiz covers all three pages of the module.
    - **a**: Block every shell command, whatever its purpose or its origin
    - **b**: Match the text `rm -rf` and allow whatever it cannot parse at all
    - **c**: Match the text `rm -rf` and rely on the model's own caution alone
-   - **d**: Parse the command, look through wrappers and fail closed on errors
+   - **d**: Parse the command into parts, see through wrappers and block what it cannot read
 
 4. A team's key is stored in the environment for a CI job. Which practice fits both CI and an agent in production?
    - **a**: Write the value into the workflow file, so every runner has it
