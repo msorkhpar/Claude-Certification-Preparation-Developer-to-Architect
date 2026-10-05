@@ -28,7 +28,7 @@ A team generates code, refactors, debugs and writes documentation with Claude Co
 | A rule that must hold whatever Claude decides: never read `.env` | A permission rule or a hook | A memory file is context: Claude "treats them as context, not enforced configuration" |
 | Domain knowledge needed only sometimes | A skill, which loads on demand | The root file loads in every session and costs context each time |
 
-The sixth row and the fifth carry the course's recurring distinction: a sentence in a memory file is a request that the model weighs, and a permission rule or a hook is code that runs. The documentation draws the line on the memory page itself: "To block an action regardless of what Claude decides, use a PreToolUse hook instead."
+The fifth row carries the course's recurring distinction: a sentence in a memory file is a request that the model weighs, and a permission rule or a hook is code that runs. The documentation draws the line on the memory page itself: "To block an action regardless of what Claude decides, use a PreToolUse hook instead."
 
 ### What loads when
 
@@ -573,7 +573,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 1. **d**. A command file in the project's own folder is committed and reaches every clone. *b* is ruled out because a home folder is personal: "commands in the home folder are personal". *c* is ruled out because the memory file holds instructions and not definitions: "the memory file is for instructions and context". *a* is ruled out because no such mechanism exists: "A `commands` array in a config file is a mechanism that does not exist".
 2. **a**. The finding is the colocated-tests question: "`test-uncovered`: a test file that no rule reaches, which is the colocated-tests question of the exam." *b* is ruled out because that is another finding: "a rule with no `paths` list, or whose globs match none of the project's files". *c* is ruled out for the same reason: "three or more sections in the root file and no rule files". *d* is ruled out as a third finding: "no command file and no skill in the project".
-3. **c**. Both rules have a glob that matches the path. The page says the spec files "load two rule files each: the rule of their area and the testing rule". *b* is ruled out because the root file is not where rules are chosen: "Nothing else loads in every session at the same priority". *a* is ruled out because a path starts no skill: "a skill is invoked, or chosen by the model from its description, and a path match does not start it". *d* is ruled out because a rule waits for a matching file: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs".
+3. **c**. Both rules have a glob that matches the path. The page says the spec files "load two rule files each: the rule of their area and the testing rule". *b* is ruled out because the root file is for "What every task needs: the test command, the repository's etiquette", kept short, and not a list of rules by kind of file. *a* is ruled out because a path starts no skill: "a skill is invoked, or chosen by the model from its description, and a path match does not start it". *d* is ruled out because a rule waits for a matching file: "A rule with a `paths` list loads when Claude works with a file that matches one of its globs".
 
 </details>
 

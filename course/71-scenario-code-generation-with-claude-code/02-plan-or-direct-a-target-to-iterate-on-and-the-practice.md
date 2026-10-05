@@ -47,7 +47,7 @@ The scenario's pieces fit as follows. The root file holds what every task needs,
 
 The practice is `exercises/71-scenario-code-generation-with-claude-code/unit-01/practice-1/statement.md`, in Python, TypeScript, Java and Kotlin. The starter is a project whose single root file holds every convention, a review checklist and a personal note, and whose settings allow the whole Bash tool. You write the files that fix it: a short root file; four rule files, each scoped by glob to the files of its area (components, handlers, database access, and test files wherever they sit); a shared review command with a description and read-only tools; settings that deny reading `.env` and approve no whole tool; and a table that sends six described tasks to plan mode or to direct execution.
 
-The tests grade seven cases: each convention loads for exactly the files of its area (read through the globs against sample files), the root file is short and holds none of the area conventions, the review command is shared and read-only, the settings protect the environment file, the modes table sends open design work to plan mode and clear small work to direct, every rule has a glob that matches a file, and no file holds a personal path, an address or a key. The starter fails all seven. The reference passes them. Each of fourteen planted wrong solutions per language fails on an assertion of the case it breaks: a rule with no paths, a rule scoped too widely, test rules scoped to one folder or to one extension, a bare folder name as a path, a convention left in the root file, a root file padded past the limit, a command that approves the whole Bash tool or has no description, an environment file left readable, a whole-tool allow, the monolith sent to direct execution, a typo fix sent through plan mode, and a personal path.
+The tests grade seven cases: each convention loads for exactly the files of its area (read through the globs against sample files), the root file is short and holds none of the area conventions, the review command is shared and read-only, the settings protect the environment file, the modes table sends open design work to plan mode and clear small work to direct, every rule has a glob that matches a file, and no file holds a personal path, an address or a key. The starter fails all seven. The reference passes them. Each of thirteen planted wrong solutions per language fails on an assertion of the case it breaks: a rule with no paths, a rule scoped too widely, test rules scoped to one folder or to one extension, a convention left in the root file, a root file padded past the limit, a command that approves the whole Bash tool or has no description, an environment file left readable, a whole-tool allow, the monolith sent to direct execution, a typo fix sent through plan mode, and a personal path.
 
 ### What the tests accept
 
@@ -96,7 +96,7 @@ This quiz covers both pages of the module.
 
 1. Scenario S2, a team using Claude Code on a shared codebase. A rule file for the handlers lists `paths: src/api`, and the audit says that it matches none of the project's files. What is the likely cause?
    - **a**: Rule files are read only when a session is first started
-   - **b**: The entry is a bare folder name and not a glob such as `src/api/**`
+   - **b**: The entry is a bare folder name and not a glob that ends in a double star
    - **c**: Handlers are covered by the command folder, which takes priority in every session
    - **d**: The path needs the word handlers in it for the rule to be found
 
