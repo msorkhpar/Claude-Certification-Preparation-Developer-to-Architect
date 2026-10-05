@@ -5,7 +5,7 @@ PLANTS[f"{X}/81-reliability-of-multi-agent-systems/unit-01/practice-1"] = {
     "python": ("reliable_agents.py", {
         "wrong-key-changes-late": [("status, value = call_once(agents, name, key, inputs)", 'status, value = call_once(agents, name, key if n < 3 else key + ":retry", inputs)')],
         "wrong-one-more-attempt": [("for n in range(1, attempts + 1):", "for n in range(1, attempts + 1 + (attempts == 3)):")],
-        "wrong-dependents-still-run": [("return next((n for n in needs if n not in done), None)", "return None"), ("inputs = {n: done[n] for n in needs}", 'inputs = {n: done.get(n, "") for n in needs}')],
+        "wrong-dependents-still-run": [("return next((n for n in needs if n not in done), None)", "return None")],
         "wrong-breaker-total": [("consecutive[name] = 0 if ok else consecutive.get(name, 0) + 1", "consecutive[name] = consecutive.get(name, 0) + (0 if ok else 1)")],
         "wrong-breaker-never-opens": [("return consecutive.get(name, 0) >= threshold", "return False")],
         "wrong-fallback-same-key": [('return key + ":fallback"', "return key")],
@@ -38,7 +38,7 @@ PLANTS[f"{X}/81-reliability-of-multi-agent-systems/unit-01/practice-1"] = {
     "kotlin": ("ReliableAgents.kt", {
         "wrong-key-changes-late": [("val (status, value) = callOnce(agents, name, key, inputs)", 'val (status, value) = callOnce(agents, name, if (n < 3) key else key + ":retry", inputs)')],
         "wrong-one-more-attempt": [("for (n in 1..attempts) {", "for (n in 1..attempts + (if (attempts == 3) 1 else 0)) {")],
-        "wrong-dependents-still-run": [("= needs.firstOrNull { it !in done }", "= null"), ("needs.associateWith { done.getValue(it) }", 'needs.associateWith { done[it] ?: "" }')],
+        "wrong-dependents-still-run": [("= needs.firstOrNull { it !in done }", "= null")],
         "wrong-breaker-total": [("consecutive[name] = if (ok) 0 else (consecutive[name] ?: 0) + 1", "consecutive[name] = (consecutive[name] ?: 0) + (if (ok) 0 else 1)")],
         "wrong-breaker-never-opens": [("= (consecutive[name] ?: 0) >= threshold", "= false")],
         "wrong-fallback-same-key": [('= key + ":fallback"', "= key")],
