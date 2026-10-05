@@ -11,6 +11,9 @@ PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
         "wrong-no-acknowledgement": [('case.get("sentiment", "calm") != "calm")', "False)")],
         "wrong-clarify-all-fields": [('field != "id" and len({m.get(field) for m in matches}) > 1', 'field != "id"')],
         "wrong-handoff-transcript": [(r'    return "\n".join(lines)', r'    return "\n".join(lines + [case.get("transcript", "")])')],
+        "wrong-three-matches-guessed": [('if case.get("matches", 1) > 1:', 'if case.get("matches", 1) == 2:')],
+        "wrong-ask-loses-to-many-matches": [('if case.get("asked_for_person", False):', 'if case.get("asked_for_person", False) and case.get("matches", 1) < 4:')],
+        "wrong-limit-off-by-one": [('attempts_without_progress", 0) >= max_attempts:', 'attempts_without_progress", 0) > max_attempts:')],
     }),
     "typescript": ("escalation.ts", {
         "wrong-investigate-first": [("if (c.asked_for_person ?? false) return", "if ((c.asked_for_person ?? false) && !(c.policy_covers ?? true)) return")],
@@ -21,6 +24,9 @@ PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
         "wrong-no-acknowledgement": [('(c.sentiment ?? "calm") !== "calm")', "false)")],
         "wrong-clarify-all-fields": [(" && new Set(matches.map((m) => m[field])).size > 1", "")],
         "wrong-handoff-transcript": [('return lines.join("\\n");', 'return lines.concat(c.transcript ?? "").join("\\n");')],
+        "wrong-three-matches-guessed": [('if ((c.matches ?? 1) > 1) return', 'if ((c.matches ?? 1) === 2) return')],
+        "wrong-ask-loses-to-many-matches": [('if (c.asked_for_person ?? false) return', 'if ((c.asked_for_person ?? false) && (c.matches ?? 1) < 4) return')],
+        "wrong-limit-off-by-one": [('(c.attempts_without_progress ?? 0) >= maxAttempts', '(c.attempts_without_progress ?? 0) > maxAttempts')],
     }),
     "java": ("Escalation.java", {
         "wrong-investigate-first": [("if (c.askedForPerson()) return", "if (c.askedForPerson() && !c.policyCovers()) return")],
@@ -31,6 +37,9 @@ PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
         "wrong-no-acknowledgement": [('!c.sentiment().equals("calm"))', "false)")],
         "wrong-clarify-all-fields": [("if (values.size() > 1) out.add(field);", "out.add(field);")],
         "wrong-handoff-transcript": [('return String.join("\\n", lines);', 'return String.join("\\n", lines) + c.transcript();')],
+        "wrong-three-matches-guessed": [('if (c.matches() > 1) return', 'if (c.matches() == 2) return')],
+        "wrong-ask-loses-to-many-matches": [('if (c.askedForPerson()) return', 'if (c.askedForPerson() && c.matches() < 4) return')],
+        "wrong-limit-off-by-one": [('c.attemptsWithoutProgress() >= maxAttempts', 'c.attemptsWithoutProgress() > maxAttempts')],
     }),
     "kotlin": ("Escalation.kt", {
         "wrong-investigate-first": [("c.askedForPerson -> ", "c.askedForPerson && !c.policyCovers -> ")],
@@ -41,5 +50,8 @@ PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
         "wrong-no-acknowledgement": [('c.sentiment != "calm")', "false)")],
         "wrong-clarify-all-fields": [('field != "id" && matches.map { it[field] }.toSet().size > 1', 'field != "id"')],
         "wrong-handoff-transcript": [(').joinToString("\\n")', ').joinToString("\\n") + c.transcript')],
+        "wrong-three-matches-guessed": [('c.matches > 1 ->', 'c.matches == 2 ->')],
+        "wrong-ask-loses-to-many-matches": [('c.askedForPerson ->', 'c.askedForPerson && c.matches < 4 ->')],
+        "wrong-limit-off-by-one": [('c.attemptsWithoutProgress >= maxAttempts ->', 'c.attemptsWithoutProgress > maxAttempts ->')],
     }),
 }

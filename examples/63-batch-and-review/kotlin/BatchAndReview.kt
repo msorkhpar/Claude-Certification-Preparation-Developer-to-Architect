@@ -1,3 +1,5 @@
+private val log = System.getLogger("batch_and_review")
+
 /**
  * What a batch asks of its caller, and what an independent review is given.
  *

@@ -1,5 +1,7 @@
 /** Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md. */
 
+private val log = System.getLogger("batch_review")
+
 val SEVERITIES = listOf("low", "medium", "high")
 
 data class Result(val customId: String, val kind: String)
@@ -13,6 +15,7 @@ data class Finding(val file: String, val line: Int, val severity: String, val is
 data class Merged(val file: String, val line: Int, val issue: String, val severity: String, val passes: Int, val confidence: Int, val route: String)
 
 fun submissionInterval(slaHours: Int, windowHours: Int = 24, handlingHours: Int = 2): Int {
+    log.log(System.Logger.Level.DEBUG, "submissionInterval input: {0}", slaHours)
     val interval = slaHours - windowHours - handlingHours
     require(interval > 0) { "the SLA leaves no room to wait for a batch to fill" }
     return interval

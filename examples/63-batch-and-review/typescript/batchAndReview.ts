@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("batch_and_review");
 /**
  * What a batch asks of its caller, and what an independent review is given.
  *

@@ -1,5 +1,7 @@
 /** When a support agent resolves, asks or hands off, and what a hand-off carries. See ../../statement.md. */
 
+private val log = System.getLogger("escalation")
+
 data class Case(val askedForPerson: Boolean = false, val matches: Int = 1, val policyCovers: Boolean = true, val attemptsWithoutProgress: Int = 0, val sentiment: String = "calm", val confidence: Int = 50)
 
 data class Decision(val action: String, val reason: String, val acknowledge: Boolean)
@@ -20,6 +22,7 @@ fun clarifyingFields(matches: List<Map<String, String>>): List<String> {
 }
 
 fun handoffText(c: HandoffCase): String {
+    log.log(System.Logger.Level.DEBUG, "handoffText input: {0}", c)
     require(!c.customerId.isNullOrEmpty() && !c.issue.isNullOrEmpty()) { "a hand-off needs a customer id and an issue" }
     return listOf(
         "Customer: ${c.customerId}",

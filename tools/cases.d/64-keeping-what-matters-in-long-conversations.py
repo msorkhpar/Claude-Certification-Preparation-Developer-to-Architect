@@ -14,12 +14,13 @@ PRACTICES[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1
         ("e7", "edge", "the window drops the oldest messages and keeps a tool call with its result"),
     ],
     "plants": {
-        "wrong-no-trim": (["m1", "e1"], "returns the whole tool record instead of the named fields"),
+        "wrong-no-trim": (["e1", "m1"], "returns the whole tool record instead of the named fields"),
         "wrong-older-overwrites": (["e3"], "lets a fact that arrives late replace a newer one"),
         "wrong-all-customers": (["e4"], "puts the case facts of every customer into the context"),
         "wrong-facts-last": (["e5"], "places the case facts after the summary and the recent messages"),
         "wrong-pair-split": (["e7"], "keeps a tool result without the call that produced it"),
         "wrong-loose-summary-check": (["e6"], "counts a value as kept when only its first two characters appear"),
+        "wrong-missing-field-blank": (["e1"], "keeps a named field that the record does not have, with an empty value"),
     },
 }
 

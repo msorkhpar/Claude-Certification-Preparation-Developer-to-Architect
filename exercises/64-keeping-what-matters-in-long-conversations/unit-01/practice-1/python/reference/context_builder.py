@@ -1,5 +1,9 @@
 """What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 def estimate_tokens(text):
     return -(-len(text) // 4)
@@ -23,6 +27,7 @@ def update_facts(facts, name, value, as_of):
 
 
 def build_context(customer, facts, summary, recent):
+    log.debug("build_context input: %r", customer)
     parts = []
     mine = [f for f in facts if f["customer"] == customer]
     if mine:

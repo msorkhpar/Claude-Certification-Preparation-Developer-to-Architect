@@ -5,6 +5,10 @@ tool results pile up in the context out of proportion to their use (40 fields in
 (read 2026-10-04) says to put long documents at the top and the question at the end, which can improve quality in tests by up to 30 percent, and to structure documents with tags. The functions below show the bookkeeping;
 nothing here calls a model, and the numbers come from the sample data, not from a measurement.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 TOOL_FIELDS = {
     "lookup_order": ["order_id", "purchase_date", "items", "return_window", "refund_amount"],
     "lookup_customer": ["customer_id", "tier"],

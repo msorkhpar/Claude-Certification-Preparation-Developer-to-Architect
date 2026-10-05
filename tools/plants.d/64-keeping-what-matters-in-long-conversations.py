@@ -9,6 +9,7 @@ PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] 
         "wrong-facts-last": [(r'    return "\n\n".join(parts)', r'    return "\n\n".join(reversed(parts))')],
         "wrong-pair-split": [('        if m["kind"] == "tool_use" and', '        if False and m["kind"] == "tool_use" and')],
         "wrong-loose-summary-check": [('f["value"] not in summary', 'f["value"][:2] not in summary')],
+        "wrong-missing-field-blank": [('{k: record[k] for k in keep if k in record}', '{k: record.get(k, "") for k in keep}')],
     }),
     "typescript": ("contextBuilder.ts", {
         "wrong-no-trim": [("  for (const k of keep) if (k in record) out[k] = record[k];", "  Object.assign(out, record);")],
@@ -17,6 +18,7 @@ PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] 
         "wrong-facts-last": [('return parts.join("\\n\\n");', 'return parts.reverse().join("\\n\\n");')],
         "wrong-pair-split": [('if (m.kind === "tool_use" &&', 'if (false && m.kind === "tool_use" &&')],
         "wrong-loose-summary-check": [("!summary.includes(f.value)", "!summary.includes(f.value.slice(0, 2))")],
+        "wrong-missing-field-blank": [('for (const k of keep) if (k in record) out[k] = record[k];', 'for (const k of keep) out[k] = record[k] ?? "";')],
     }),
     "java": ("ContextBuilder.java", {
         "wrong-no-trim": [("for (String k : keep) if (record.containsKey(k)) out.put(k, record.get(k));", "out.putAll(record);")],
@@ -25,6 +27,7 @@ PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] 
         "wrong-facts-last": [('return String.join("\\n\\n", parts);', 'java.util.Collections.reverse(parts);\n        return String.join("\\n\\n", parts);')],
         "wrong-pair-split": [('if (m.kind().equals("tool_use") &&', 'if (false && m.kind().equals("tool_use") &&')],
         "wrong-loose-summary-check": [("!summary.contains(f.value())", "!summary.contains(f.value().substring(0, 2))")],
+        "wrong-missing-field-blank": [('for (String k : keep) if (record.containsKey(k)) out.put(k, record.get(k));', 'for (String k : keep) out.put(k, record.getOrDefault(k, ""));')],
     }),
     "kotlin": ("ContextBuilder.kt", {
         "wrong-no-trim": [("for (k in keep) if (k in record) out[k] = record.getValue(k)", "out.putAll(record)")],
@@ -33,6 +36,7 @@ PLANTS[f"{X}/64-keeping-what-matters-in-long-conversations/unit-01/practice-1"] 
         "wrong-facts-last": [('return parts.joinToString("\\n\\n")', 'return parts.asReversed().joinToString("\\n\\n")')],
         "wrong-pair-split": [('if (m.kind == "tool_use" &&', 'if (false && m.kind == "tool_use" &&')],
         "wrong-loose-summary-check": [("it.value !in summary", "it.value.take(2) !in summary")],
+        "wrong-missing-field-blank": [('for (k in keep) if (k in record) out[k] = record.getValue(k)', 'for (k in keep) out[k] = record[k] ?: ""')],
     }),
 }
 

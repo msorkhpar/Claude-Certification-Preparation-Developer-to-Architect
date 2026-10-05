@@ -1,8 +1,11 @@
+import { logger } from "../logger.ts";
+const log = logger("batch_review");
 /** Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md. */
 
 export const SEVERITIES = ["low", "medium", "high"];
 
 export function submissionInterval(slaHours: number, windowHours = 24, handlingHours = 2): number {
+  log.debug("submissionInterval input", slaHours);
   const interval = slaHours - windowHours - handlingHours;
   if (interval <= 0) throw new Error("the SLA leaves no room to wait for a batch to fill");
   return interval;

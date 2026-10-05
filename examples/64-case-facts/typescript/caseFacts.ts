@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("case_facts");
 /**
  * What a long support conversation should keep, and where it should sit.
  *
