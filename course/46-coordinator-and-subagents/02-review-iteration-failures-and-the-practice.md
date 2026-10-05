@@ -59,14 +59,14 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 3. A subagent's call is cut short by a rate limit, and the coordinator's synthesis quotes the line "API error: rate limited" as if it were a finding. What should the coordinator do instead?
-   - **a**: Keep the error line among the findings so that the user sees what happened
+   - **a**: Keep the error line among the findings
    - **b**: Record the scope as failed and tell the user what is missing
    - **c**: Instruct the synthesizer to skip any sentence that looks like an error
    - **d**: Send the whole team out again until every subagent succeeds
 
 4. After its first wave of subagents the lead finds that two of five sections are weak. It sends every assignment out again, and the bill doubles with little new content. Which change fits best?
    - **a**: Stop after the first wave and report the whole answer as complete and final
-   - **b**: Start more subagents in the first wave so that fewer gaps appear afterwards
+   - **b**: Start more subagents in the first wave
    - **c**: Let the synthesis step fill the weak sections from what the model already knows
    - **d**: Dispatch follow-ups for the flagged gaps alone, inside a fixed number of rounds
 
@@ -91,13 +91,13 @@ This quiz covers both pages of the module.
 2. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. The coordinator starts the same five subagents for every query, including "what is the boiling point of water". Which redesign fits best?
    - **a**: Keep the five subagents but lower the token limit of each one
    - **b**: Size the team by difficulty, down to a lone worker for a plain fact
-   - **c**: Let the five subagents share one context so that they finish sooner
+   - **c**: Let the five subagents share one context
    - **d**: Start the team only when the user asks for a long report
 
 3. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and cost rises while details get lost in the summaries. Which architecture change fits best?
-   - **a**: Cap the turns of each specialist so that its drafts stay short and focused
+   - **a**: Cap the turns of each specialist
    - **b**: Ask the coordinator to condense every draft before the next specialist starts work
-   - **c**: Hand each specialist the coordinator's whole conversation so that drafts can be rebuilt
+   - **c**: Hand each specialist the coordinator's whole conversation
    - **d**: Keep each output in an outside store and forward only a short pointer
 
 <details>
