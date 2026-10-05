@@ -59,7 +59,7 @@ request", and a larger schema fails with "Schema is too complex for compilation.
 
 ### The limits move into your program
 
-A rule such as "the total is at least 0" cannot go in the schema. The SDK helpers deal with it in four steps, and the second one is
+A rule such as "the total is at least 0" cannot go in the schema. The SDK helpers deal with it in steps, and the second one is
 the one to remember. They "Remove unsupported constraints", "Update descriptions by adding each unsupported constraint to the field's
 description" and then validate the reply against the original schema "if the helper validates responses". The documentation sums it
 up: "Claude receives a simplified schema, but a helper that validates responses still enforces every constraint in your code."
@@ -651,7 +651,7 @@ Java and Kotlin readers: the practice of the next page implements the parser and
 3. A reply arrives with a 200 status and `stop_reason` of `refusal`. What should the program assume about the body?
    - **a**: It becomes whole once the call is repeated with more tokens
    - **b**: It keeps the shape, because the status code says success
-   - **c**: The refusal message takes the place of the promised shape
+   - **c**: The model's decline takes the place of the promised shape
    - **d**: It is always an empty object, which signals the refusal
 
 <details>
