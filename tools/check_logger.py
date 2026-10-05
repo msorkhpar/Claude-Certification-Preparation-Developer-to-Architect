@@ -54,6 +54,8 @@ def main():
                     folder = p / lang / variant
                     if not folder.is_dir():
                         continue
+                    if not any(folder.glob("*" + EXT[lang])):
+                        continue   # a configuration practice: the files to write are data, there is no source file to declare a logger in
                     f = main_file(folder, lang, name)
                     checked += 1
                     if f is None:
