@@ -7,10 +7,10 @@
       "scope": "page",
       "stem": "A team adds the computer use toolset to a request and expects Claude to press keys on the machine. Which part performs the keystroke?",
       "options": {
-        "a": "Claude itself, through a remote link that the toolset opens",
+        "a": "Claude itself, through a remote link the toolset opens",
         "b": "An Anthropic server that replays the call on the desktop",
         "c": "The beta header on the request, which enables key presses",
-        "d": "Your own program, inside an environment that you set up"
+        "d": "Your own program, in an environment it controls"
       },
       "key": "d",
       "explanation": {
@@ -64,14 +64,14 @@
       "scope": "page",
       "stem": "An agent browses supplier websites in a container that holds the team's admin password, so that it can log in to portals. A hidden line on one page tells the agent to send the password to an outside address. Which precaution from the documentation addresses this exposure?",
       "options": {
-        "a": "Rely on the classifiers alone, since they replace the other precautions",
-        "b": "Keep secrets away from the machine and allow only listed destinations",
-        "c": "Use a larger screen so that hidden text is displayed more clearly",
-        "d": "Add a line to the prompt that tells Claude to ignore text on web pages"
+        "a": "Rely on the classifiers to replace the other precautions",
+        "b": "Keep sensitive data away from the model's machine",
+        "c": "Use a larger screen so hidden text is displayed more clearly",
+        "d": "Add a line to the prompt telling Claude to ignore web text"
       },
       "key": "b",
       "explanation": {
-        "b": "The page lists two precautions for this: \"Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft\", and \"Limiting internet access to an allowlist of domains to reduce exposure to malicious content.\"",
+        "b": "The page lists this precaution: \"Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft\".",
         "a": "Ruled out because \"The precautions above remain important even with these classifiers in place.\"",
         "d": "Ruled out because \"Claude will follow commands found in content even when they conflict with your instructions\", so a line in the prompt is not a control.",
         "c": "Ruled out because the commands may be \"instructions embedded in webpages or images\", and a larger screen only shows them better."
@@ -102,17 +102,17 @@
       "scope": "page",
       "stem": "A loop on Claude Sonnet 5.5 keeps growing its context with screenshots, and an engineer proposes dropping the oldest one each turn on the client. What does the documentation advise?",
       "options": {
-        "a": "Drop one every turn, which keeps the cached prefix byte-identical",
-        "b": "Resize to 2000 px or less per side and let the server clear earlier results",
-        "c": "Keep the whole history, because only the first screenshot counts",
-        "d": "Remove them in groups of three on the client, with no other side effects"
+        "a": "Drop the oldest one from the history on the client every turn",
+        "b": "Let the server clear older tool results",
+        "c": "Keep all of them, since only the first twenty are counted",
+        "d": "Remove them in batches of three on the client"
       },
       "key": "b",
       "explanation": {
         "b": "The page says the documentation prefers resizing screenshots to \"2000 px or less\" per side and server-side tool result clearing, which drops old results from the context.",
         "a": "Ruled out because \"Dropping a screenshot every turn changes the prefix every turn and invalidates the cache.\"",
         "d": "Ruled out because removing an earlier screenshot \"invalidates every later thinking block in every request that still carries those turns\".",
-        "c": "Ruled out because every image in a request over 20 images \"is held to a stricter per-side limit\", not only the later ones."
+        "c": "Ruled out because \"Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit.\""
       }
     },
     {
@@ -140,17 +140,17 @@
       "scope": "module",
       "stem": "A payment form appears in the middle of a batch that the app has already started. Where must the check by a person sit?",
       "options": {
-        "a": "Ahead of every single block, since one turn finishes several steps",
-        "b": "Only at the start of the task, when the user's request arrives",
-        "c": "Never, because classifiers steer the model away from unsafe clicks",
-        "d": "Once, after every block has run and the screen has been captured"
+        "a": "Before each block runs, one by one",
+        "b": "When the user's request arrives at the app",
+        "c": "After the whole batch has finished running",
+        "d": "In the classifier layer, instead of a person"
       },
       "key": "a",
       "explanation": {
         "a": "The first page says that \"a batch can finish a multistep action inside one turn\", so the check goes before each block runs.",
-        "d": "Ruled out because the page says to \"make that check before each block runs\", and a check after the batch comes too late.",
+        "c": "Ruled out because the page says to \"make that check before each block runs\", and a check after the batch comes too late.",
         "b": "Ruled out because the documentation asks for \"Asking a human to confirm decisions that might result in meaningful real-world consequences\", and a payment appears at a point the first request never named.",
-        "c": "Ruled out because the classifier layer is a second one: \"That layer is not a replacement\"."
+        "d": "Ruled out because the classifier layer is a second one: \"That layer is not a replacement\"."
       }
     },
     {
@@ -159,10 +159,10 @@
       "scope": "module",
       "stem": "An application sizes screenshots with the rule of the practice, on a model of the high-resolution tier. What is the effect?",
       "options": {
-        "a": "It works everywhere, but finer detail that the larger budget allows is lost",
-        "b": "Coordinates from Claude must now be multiplied instead of divided",
-        "c": "The tier needs a beta header, so requests without it fail",
-        "d": "The API rejects the screenshots, since they fall below a minimum size"
+        "a": "Detail that the larger budget would allow is lost",
+        "b": "Coordinates from Claude must be multiplied instead of divided",
+        "c": "Requests without a beta header fail",
+        "d": "The API rejects screenshots below a minimum size"
       },
       "key": "a",
       "explanation": {
@@ -178,10 +178,10 @@
       "scope": "module",
       "stem": "A compliance team asks where the screenshots from a computer use session are kept. What is the documented answer?",
       "options": {
-        "a": "In a vault that Anthropic holds for every session by default",
-        "b": "In the Files API, where the workspace can read them later",
-        "c": "In the customer's own environment, and not at Anthropic",
-        "d": "Nowhere, since screenshots are deleted as soon as Claude answers"
+        "a": "In a vault that Anthropic holds for each session",
+        "b": "In the Files API, where the workspace can read them",
+        "c": "In an environment that the customer controls",
+        "d": "Nowhere, since they are deleted once Claude answers"
       },
       "key": "c",
       "explanation": {
