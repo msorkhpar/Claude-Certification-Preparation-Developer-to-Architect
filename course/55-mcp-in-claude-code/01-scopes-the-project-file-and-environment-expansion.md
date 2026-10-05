@@ -864,7 +864,7 @@ These are the wrong answers that the exam's options for this task statement offe
 2. A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Where should it be registered?
    - **a**: Local scope, the default for a newly added server
    - **b**: Project scope, kept in the shared `.mcp.json` file
-   - **c**: User scope, kept in the home directory file
+   - **c**: User scope, which loads the server in every project
    - **d**: The local settings file, kept inside the repository
 
 <details>

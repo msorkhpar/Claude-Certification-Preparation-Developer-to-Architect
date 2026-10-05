@@ -28,7 +28,7 @@
       "options": {
         "a": "Local scope, the default for a newly added server",
         "b": "Project scope, kept in the shared `.mcp.json` file",
-        "c": "User scope, kept in the home directory file",
+        "c": "User scope, which loads the server in every project",
         "d": "The local settings file, kept inside the repository"
       },
       "key": "a",
@@ -45,14 +45,14 @@
       "scope": "page",
       "stem": "An agent keeps answering documentation questions with Grep on the checkout, although the team's documentation server has a search tool whose description reads `Searches docs`. What is the best fix?",
       "options": {
-        "a": "Make the documentation server load at the start so the definition is visible",
-        "b": "Say when it beats pattern matching and what comes back, main point first",
-        "c": "Remove the competing tool so that only the documentation tool remains",
-        "d": "Lengthen the description past the cut-off so that no detail is left out"
+        "a": "Make the documentation server load at the start of each session",
+        "b": "Open its text with when to prefer it over pattern matching",
+        "c": "Remove the competing tool from the agent's list of tools",
+        "d": "Lengthen the text until it covers every detail of the tool"
       },
       "key": "b",
       "explanation": {
-        "b": "The description is what the model chooses by, so it must say when to prefer the tool, with the point first.",
+        "b": "The description is what the model chooses by, so it must say when to prefer the tool, with the point first and the boundary against the competing tool near the start.",
         "a": "Ruled out because loading at the start only makes the definition visible: \"makes the definition visible and does not say when to prefer it\".",
         "c": "Ruled out because \"Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout\".",
         "d": "Ruled out because \"Claude Code truncates each tool description and each server's instructions at 2,048 characters by default\"."
@@ -64,10 +64,10 @@
       "scope": "page",
       "stem": "A support agent calls three listing tools before each database question, only to learn which tables exist. Which change cuts those calls?",
       "options": {
-        "a": "Attach the schemas as a resource that can be mentioned in the prompt",
-        "b": "Raise the output limit so that each listing returns more rows at once",
-        "c": "Mark the listing tools as read-only so that they can run side by side",
-        "d": "Move the database server into the user scope so that it loads everywhere"
+        "a": "Expose the schemas as a resource mentioned in the prompt",
+        "b": "Raise the output limit on the listing tools to return more rows",
+        "c": "Mark the listing tools read-only and let them run side by side",
+        "d": "Move the database server into the user scope to load everywhere"
       },
       "key": "a",
       "explanation": {
@@ -83,10 +83,10 @@
       "scope": "page",
       "stem": "A team gives the agent its whole orders database through one MCP tool that runs any SQL it is given, and the job is to report on open orders. What is the architectural concern?",
       "options": {
-        "a": "A result above the limit is lost, so the agent never sees the rows",
-        "b": "The description is cut at the limit, so the agent cannot use it",
-        "c": "Access cannot be narrowed, because one entry point covers every task",
-        "d": "Tool search hides the definition until a person asks for it"
+        "a": "An oversized result is lost, and the agent never sees any of the rows",
+        "b": "The description is cut at the limit, and the agent cannot use it",
+        "c": "Access stays all-or-nothing, with no permission rule to scope it",
+        "d": "Tool search hides the definition, and the agent cannot find it"
       },
       "key": "c",
       "explanation": {
@@ -122,8 +122,8 @@
       "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A CI job runs `claude -p` on a fresh clone, and a pull request has added a server to `.mcp.json` that nobody on the team has seen. What happens when the job starts?",
       "options": {
         "a": "It stays pending until a person approves it in an interactive session",
-        "b": "It is skipped, because an unattended run has no trust dialog to accept",
-        "c": "It loads without asking, since the run has no person to approve it",
+        "b": "It is skipped, and the job runs without that server",
+        "c": "It loads without asking and is available in that run",
         "d": "It loads only if the repository's own settings file approves it in advance"
       },
       "key": "c",
