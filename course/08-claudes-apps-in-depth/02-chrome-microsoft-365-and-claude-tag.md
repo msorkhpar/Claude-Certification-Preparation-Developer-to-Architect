@@ -9,7 +9,7 @@ modes control it, who administers it, and where a person must still check the wo
 Checked against the Claude help centre pages "Use Claude in Chrome safely" and "Claude in Chrome permissions guide",
 the Claude documentation pages for Claude for Excel and "Work across M365 apps", and the Claude Tag help and
 documentation pages ("What is Claude Tag?", "Get started", "Set up Claude Tag"), read on 2026-10-02. Claude Tag was in
-public beta on that date, and all three products change often; the official page decides when it differs.
+beta on that date, and all three products change often; the official page decides when it differs.
 
 ## Why it matters
 
@@ -90,7 +90,7 @@ the example (the page for each add-in follows the same pattern):
 
 Claude Tag is Claude working in your team's Slack workspace: you tag `@Claude` in a conversation and it takes on real
 work, using your organisation's tools and the shared context. It replaced the earlier Claude in Slack experience in
-August 2026 and was in public beta on 2026-10-02. It is available on Team and Enterprise plans only, on Anthropic's own
+August 2026 and was in beta on 2026-10-02. It is available on Team and Enterprise plans only, on Anthropic's own
 service, and not for organisations with zero data retention or customer-managed encryption, because it stores channel
 memory and session transcripts.
 
@@ -147,13 +147,13 @@ same thread.
 
 2. An Enterprise team with the Compliance API enabled wants one record of the Excel add-in's use, and wants its
    custom data-retention rule to govern it. What does the page support?
-   - **a**: Sessions are included as a public beta, but the deletion schedule does not carry over
-   - **b**: Neither the API nor the audit logs cover it, so no central record exists
-   - **c**: Chat history sits on Anthropic's servers, so the deletion schedule governs it
-   - **d**: Use shows in the audit logs, and the custom deletion schedule applies to it
+   - **a**: Sessions are logged centrally, and the deletion schedule does not reach them
+   - **b**: Sessions appear in neither central log, and no schedule can apply
+   - **c**: Chat history is held on Anthropic's servers, and the deletion schedule governs it
+   - **d**: Use shows in the audit logs, and the deletion schedule applies to it
 
-3. A manager wants Claude Tag to draft a delicate reply from her saved connectors, hidden from the team, with the
-   usage counted against her individual account. Where should she write to it?
+3. A manager wants Claude Tag to draft a delicate reply from their saved connectors, hidden from the team, with the
+   usage counted against their individual account. Where should they write to it?
    - **a**: In a channel where an admin set up the connectors for everyone there
    - **b**: In a direct message, whose access and cost belong to the sender
    - **c**: In a channel, then ask Claude to hide the reply afterwards

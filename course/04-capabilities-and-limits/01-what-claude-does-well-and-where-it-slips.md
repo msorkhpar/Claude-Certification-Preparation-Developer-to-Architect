@@ -38,8 +38,8 @@ reasoning (a test, a calculation in code, a second reader).
 
 ### Coding
 
-Code generation, explanation and review are core uses; the models overview lists complex agentic coding as
-the purpose of Opus 5.5 and everyday code generation for Sonnet 5.5. The limits are those of any
+Code generation, explanation and review are core uses; the models overview describes Opus 5.5 as the model
+for long-running agentic coding and Sonnet 5.5 as the best balance of speed and intelligence. The limits are those of any
 unreviewed contribution: code can look right and not run, call a function that does not exist (a
 hallucination of the kind module 1 described), or pass the example it was shown and fail the next one.
 What fixes it is the machinery engineers already own: run it, test it, review it. Claude Code (module 38)
@@ -89,7 +89,7 @@ code-execution tool, or have it write the program and run it yourself.
 ### Recency and private knowledge
 
 The model's knowledge stops at its cut-off (June 2026 for the three large models, February 2025 reliable
-for Haiku 4.5, on the models table) and it has no clock and no access to your systems. Anything recent,
+for Haiku 4.5, as module 1 page 2 tabulates) and it has no clock and no access to your systems. Anything recent,
 private or fast-changing has to come in through the prompt, a retrieval step (module 28) or a tool
 (module 26). Asked without them, it answers from what it has, which is how a stale or invented answer is
 produced with a confident voice.
@@ -128,7 +128,7 @@ produced with a confident voice.
    wrong on crowded shelves, and the total feeds a purchasing decision. Which design response fits what the
    documentation says?
    - **a**: Shrink each photo heavily so the scene looks simpler to the model
-   - **b**: Crop each photo to a single row and add up the row counts afterwards
+   - **b**: Take the coordinates it returns for each bottle as exact positions to count
    - **c**: Label the figures approximate and verify the important ones against real stock
    - **d**: Switch to a larger model and treat its counts as final in the weekly purchasing report
 
@@ -139,9 +139,8 @@ produced with a confident voice.
 2. **c**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in
    high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked. *a* is ruled
    out because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small
-   images under 200 pixels", so heavy shrinking makes it worse. *b* is ruled out because Claude "can give
-   approximate counts of objects in an image but might not always be precisely accurate", and adding up many
-   approximate counts does not make the total exact. *d* is ruled out because the page says "Do not use Claude for
+   images under 200 pixels", so heavy shrinking makes it worse. *b* is ruled out because the vision list says "Coordinates and localisation outputs are approximate", so
+   they cannot give an exact count either. *d* is ruled out because the page says "Do not use Claude for
    tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
 
 </details>

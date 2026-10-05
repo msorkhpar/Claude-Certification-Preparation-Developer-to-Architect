@@ -117,9 +117,9 @@ and they differ by role only because the people relying differ.
 
 ## Quiz
 
-1. A non-profit's analyst must show a funder which neighbourhoods have the most health referrals, using a sheet of
+1. A non-profit's analyst must show a funder where demand is highest, using a sheet of
    beneficiaries' names, addresses and health notes. Policy restricts sharing personal data. Which approach fits?
-   - **a**: Group the entries by area and remove identifiers, then check the totals
+   - **a**: Summarise it to district counts, then verify those counts
    - **b**: Paste ten full records first to test the method on a sample
    - **c**: Switch to a faster, cheaper model for the sensitive records
    - **d**: Upload the full sheet and ask Claude to leave names out of its findings
@@ -131,9 +131,9 @@ and they differ by role only because the people relying differ.
    - **c**: Ask Claude whether the figure is right, and send if it agrees
    - **d**: Check each date and commitment against the actual policy
 
-3. An illustrator wants to use Claude on a picture-book project and cares about being recognised for her style. Which use
+3. An illustrator wants to use Claude on a picture-book project and cares about being recognised for their style. Which use
    fits best?
-   - **a**: Ask it to generate the whole story in her style, then sign it
+   - **a**: Ask it to generate the whole story in their style, then sign it
    - **b**: Hand it production tasks, and keep the ideas and final choices
    - **c**: Have it write the narrative and present the result as unaided work
    - **d**: Let it decide the visual direction, since it knows many styles
@@ -148,7 +148,7 @@ and they differ by role only because the people relying differ.
    "High-volume, low-stakes drafting suits a faster, cheaper model", and the tier chosen does not change the class
    of the data.
 2. **d**. A reply that states a date is a promise the owner holds, so each date is checked against the actual policy. *b* is ruled out because the check is "that a confident reply to a customer is not invented", so confidence proves nothing. *c* is ruled out because "A small owner has no one else to catch the error", and asking the same tool whether it is right does not check the policy. *a* is ruled out because "High-volume, low-stakes drafting suits a faster, cheaper model" with a spot check, so stopping altogether is not needed.
-3. **b**. Delegate production and keep authorship, the page's guidance for makers. *a* is ruled out because the maker keeps "the part that makes the work theirs", and a whole story signed by her is not that. *c* is ruled out because "Disclosure matters more here than in many fields", and presenting AI work as unaided is the opposite. *d* is ruled out because "For a maker the distinctive voice is the product", and the visual direction is part of it.
+3. **b**. Delegate production and keep authorship, the page's guidance for makers. *a* is ruled out because the maker keeps "the part that makes the work theirs", and a whole story signed by the maker is not that. *c* is ruled out because "Disclosure matters more here than in many fields", and presenting AI work as unaided is the opposite. *d* is ruled out because "For a maker the distinctive voice is the product", and the visual direction is part of it.
 
 </details>
 
@@ -157,9 +157,9 @@ and they differ by role only because the people relying differ.
 This quiz covers both pages of the module.
 
 1. Two staff members each receive a readable draft from Claude: a lesson rubric for one, a funding appeal for the other. Which pair of checks matches what each of them owns?
-   - **a**: First: spelling and tone; second: sentence length and layout
+   - **a**: First: reading level and layout; second: tone and brand voice
    - **b**: First: pupils' reactions once it is handed out; second: donors' reactions once it is sent
-   - **c**: First: accuracy and fit to the outcome; second: impact claims against sources
+   - **c**: First: accuracy and outcome fit; second: impact claims against sources
    - **d**: First: Claude's own rating of its accuracy; second: Claude's own rating of its sources
 
 2. A freelancer working for a charity wants Claude to write personalised thank-you notes that cite each supporter's
@@ -181,15 +181,15 @@ This quiz covers both pages of the module.
    contain nuts" for an item that the sheet marks nut-free. What should the owner do?
    - **a**: Treat it as a one-off slip and correct only that item
    - **b**: Ask Claude to explain how it reached that note, then trust the rest
-   - **c**: Compare every listed statement with the original document before anything goes out
-   - **d**: Add a line saying an AI drafted the notice, and publish the rest unchanged
+   - **c**: Check every statement against its source before anything goes out
+   - **d**: Add a line saying an AI drafted it, and publish the rest unchanged
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The educator checks accuracy and alignment with the outcome, and the fundraiser checks impact claims
    against the source. *a* is ruled out because the educator's checks include "alignment with the stated outcome",
-   which spelling and tone do not cover. *b* is ruled out because the educator "Owns: what students are taught, how
+   which reading level and layout do not cover, and they leave out "accuracy of the content taught". *b* is ruled out because the educator "Owns: what students are taught, how
    they are assessed and the fairness of grades", and the fundraiser must check "every claim about impact, every
    statistic and every funder requirement against the source" before the audience reacts. *d* is ruled out because
    the page lists "Impact claims and statistics against source" as the check that matters most, and a self-rating is

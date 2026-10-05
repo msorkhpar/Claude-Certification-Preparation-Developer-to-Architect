@@ -143,8 +143,8 @@ against a prompt that goes out with a hole in it. A guarantee belongs in code, a
 
 This quiz covers all four pages of the module.
 
-1. A classification prompt gets most tickets right but keeps mislabelling sarcastic ones, and nobody can see
-   why. Which step fits best?
+1. A classification prompt gets most tickets right but keeps mislabelling sarcastic ones. Which first step
+   fits best?
    - **a**: Swap in a larger model and see whether the sarcastic cases improve
    - **b**: Leave the wording alone and sort the failures against the diagnosis table
    - **c**: Add twenty more examples of sarcasm and rewrite the instructions at the same time

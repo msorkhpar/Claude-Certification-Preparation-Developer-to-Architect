@@ -125,10 +125,10 @@ This quiz covers both pages of the module.
 2. A computer-use loop sends full-resolution monitor captures as tool results, and the API refuses some of
    them. The agent's pointer actions also sometimes land beside their target. What does the documentation
    support?
-   - **a**: Resend oversized screenshots unchanged, and ask in the prompt for exact click positions
-   - **b**: Let the API downscale oversized screenshots, and resend each click that missed
-   - **c**: Resize each screenshot in your own program first, and treat click positions as approximate
-   - **d**: Move to a model with a larger window, which takes bigger screenshots and exact positions
+   - **a**: Resend oversized screenshots as they are, and ask in the prompt for better aim
+   - **b**: Let the API downscale oversized screenshots, and resend any click that missed
+   - **c**: Resize screenshots yourself first, and treat clicks as approximate
+   - **d**: Move to a model with a larger window, which takes bigger screenshots and aims better
 
 3. A product owner wants an assistant that books flights by operating an airline's website through
    screenshots and clicks. Which design point matters most for safety?

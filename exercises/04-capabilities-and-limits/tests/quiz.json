@@ -27,7 +27,7 @@
       "stem": "An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes wrong on crowded shelves, and the total feeds a purchasing decision. Which design response fits what the documentation says?",
       "options": {
         "a": "Shrink each photo heavily so the scene looks simpler to the model",
-        "b": "Crop each photo to a single row and add up the row counts afterwards",
+        "b": "Take the coordinates it returns for each bottle as exact positions to count",
         "c": "Label the figures approximate and verify the important ones against real stock",
         "d": "Switch to a larger model and treat its counts as final in the weekly purchasing report"
       },
@@ -35,7 +35,7 @@
       "explanation": {
         "c": "The vision page says counts can be approximate, and its closing advice is to verify interpretations in\n   high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked.",
         "a": "is ruled\n   out because Claude \"might hallucinate or make mistakes when interpreting low-quality, rotated, or very small\n   images under 200 pixels\", so heavy shrinking makes it worse.",
-        "b": "Ruled out because Claude \"can give\n   approximate counts of objects in an image but might not always be precisely accurate\", and adding up many\n   approximate counts does not make the total exact.",
+        "b": "Ruled out because the vision list says \"Coordinates and localisation outputs are approximate\", so\n   they cannot give an exact count either.",
         "d": "Ruled out because the page says \"Do not use Claude for\n   tasks requiring perfect precision or sensitive image analysis without human oversight\", for any tier."
       }
     },
@@ -102,10 +102,10 @@
       "scope": "module",
       "stem": "A computer-use loop sends full-resolution monitor captures as tool results, and the API refuses some of them. The agent's pointer actions also sometimes land beside their target. What does the documentation support?",
       "options": {
-        "a": "Resend oversized screenshots unchanged, and ask in the prompt for exact click positions",
-        "b": "Let the API downscale oversized screenshots, and resend each click that missed",
-        "c": "Resize each screenshot in your own program first, and treat click positions as approximate",
-        "d": "Move to a model with a larger window, which takes bigger screenshots and exact positions"
+        "a": "Resend oversized screenshots as they are, and ask in the prompt for better aim",
+        "b": "Let the API downscale oversized screenshots, and resend any click that missed",
+        "c": "Resize screenshots yourself first, and treat clicks as approximate",
+        "d": "Move to a model with a larger window, which takes bigger screenshots and aims better"
       },
       "key": "c",
       "explanation": {
