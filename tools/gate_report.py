@@ -98,7 +98,8 @@ def examples():
 
 
 def jvm_tasks():
-    return " ".join(f":{d}:{l}:{t}" for d, langs in examples() for l in ("java", "kotlin") if l in langs for t in ("test", "runExample"))
+    # cleanTest first: an up-to-date test task would not write the test summary the gate has just deleted
+    return " ".join(f":{d}:{l}:{t}" for d, langs in examples() for l in ("java", "kotlin") if l in langs for t in ("cleanTest", "test", "runExample"))
 
 
 def clean():

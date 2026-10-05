@@ -96,7 +96,7 @@ def main():
 
     # ---- defect 1: Java editions skipped (no runs) ----
     moved = []
-    for f in OUT.glob("exercises_*-java-*.txt"):
+    for f in [*OUT.glob("exercises_*-java-*.txt"), *OUT.glob("ex-*-java-*.txt")]:
         f.rename(f.with_name(f.name + ".moved"))
         moved.append(f)
     code, out = gate("--report-only")
@@ -151,7 +151,7 @@ def main():
     sh("git", "checkout", "--", str(p62))
 
     # ---- defect 4: personal data in a page (an e-mail at a domain built here, never a real one) ----
-    page = sorted((ROOT / "course").glob(f"{p62.parts[-4].split('-')[0]}-*/*.md"))[0]
+    page = sorted((ROOT / "course").glob(f"{p62.parent.parent.name.split('-')[0]}-*/*.md"))[0]
     fake = "j" + "ane.roe" + "@" + "acme" + "-widgets" + ".com"
     replace_once(page, "\n", f"\nContact {fake} for questions.\n")
     try:
