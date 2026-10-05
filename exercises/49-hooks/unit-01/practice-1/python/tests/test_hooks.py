@@ -116,7 +116,11 @@ def test_e8_a_run_through_the_sdk_denies_the_large_refund_and_shows_the_model_a_
     async def collect():
         return [m async for m in query(prompt="Refund order A-7", options=options)]
     results = {}
-    for m in asyncio.run(collect()):
+    try:
+        messages = asyncio.run(collect())
+    except Exception as e:
+        raise AssertionError(f"the run did not finish: {e}")
+    for m in messages:
         if isinstance(m, UserMessage) and isinstance(m.content, list):
             for b in m.content:
                 if isinstance(b, ToolResultBlock):

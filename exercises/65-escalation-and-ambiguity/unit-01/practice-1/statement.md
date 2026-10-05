@@ -21,7 +21,7 @@ The starter is a working escalation policy with seven gaps cut out of it. Everyt
 6. The clarifying fields (unlocks `e7`): the question names only the fields (other than `id`) whose values differ between the matches, so the customer can tell them apart; fewer than two matches have none.
 7. The actions and the recommendation of the hand-off (unlocks `e8`): the hand-off lists the actions taken (joined with `; `, or `none`) and the recommended action (or `review the case`), as plain facts without the transcript.
 
-`m1` needs gap 1. About eight lines in all. The steps below describe the whole policy, so you can see how your gaps are used.
+`m1` needs gap 1. About ten lines in all. The steps below describe the whole policy, so you can see how your gaps are used.
 
 ## What to write
 

@@ -28,7 +28,7 @@ The starter is a working tool-error helper with nine gaps cut out of it. Everyth
 8. The next action (unlocks `e6`): an error maps to the action of its category in ACTIONS; a result that is not an error is `accept_empty` when it is empty and `continue` otherwise.
 9. The unexpected exception (unlocks `e7`): an exception that is not a tool error becomes an `internal` structured error that says the tool failed unexpectedly, and the run goes on.
 
-`m1` needs gap 1. About ten lines in all. The steps below describe the whole helper, so you can see how your gaps are used.
+`m1` needs gap 1. About twelve lines in all. The steps below describe the whole helper, so you can see how your gaps are used.
 
 ## Build it in four steps
 

@@ -23,7 +23,7 @@ The starter is a working set of hooks with ten gaps cut out of it. Everything th
 9. The blocked commands (unlocks `e6`): a Bash command that matches a pattern of BLOCKED_COMMANDS blocks with exit code 2 and that pattern's reason.
 10. The settings block (unlocks `e7`): the `PreToolUse` entry for the matcher `Bash` runs the command with the given timeout.
 
-`m1` needs gap 1. About twenty lines in all. The steps below describe the whole module, so you can see how your gaps are used.
+`m1` needs gap 1. About twenty-two lines in all. The steps below describe the whole module, so you can see how your gaps are used.
 
 ## What to write
 

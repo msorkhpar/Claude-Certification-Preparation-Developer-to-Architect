@@ -13,7 +13,7 @@ const log = logger("hook_gates");
 
 export const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
 const GUARD = new URL("../guard_hook.py", import.meta.url).pathname;
-export const log: string[] = [];
+export const ran: string[] = [];
 
 /** The decision for a refund amount: small goes through, a middle one needs a person, a large one is refused. */
 export function tier(amount: unknown): [string, string] {
@@ -25,7 +25,7 @@ export function tier(amount: unknown): [string, string] {
 
 async function refundGate(input: any) {
   const [decision, reason] = tier(input.tool_input.amount);
-  log.push(`PreToolUse ${input.tool_name} amount=${input.tool_input.amount ?? "None"} -> ${decision}`);
+  ran.push(`PreToolUse ${input.tool_name} amount=${input.tool_input.amount ?? "None"} -> ${decision}`);
   return { hookSpecificOutput: { hookEventName: "PreToolUse" as const, permissionDecision: decision as "allow" | "ask" | "deny", permissionDecisionReason: reason } };
 }
 
@@ -33,13 +33,13 @@ export async function readableOrder(input: any) {
   const order = JSON.parse(input.tool_response);
   order.created = new Date(order.created * 1000).toISOString().slice(0, 10);
   order.status = ({ 0: "pending", 1: "approved", 2: "declined" } as Record<number, string>)[order.status] ?? "unknown";
-  log.push(`PostToolUse ${input.tool_name} -> readable output`);
+  ran.push(`PostToolUse ${input.tool_name} -> readable output`);
   return { hookSpecificOutput: { hookEventName: "PostToolUse" as const, updatedToolOutput: JSON.stringify(order) } };
 }
 
 async function personSaysNo(toolName: string, toolInput: Record<string, any>) {
   if (toolName === "get_order") return { behavior: "allow" as const, updatedInput: toolInput };
-  log.push(`a person is asked about ${toolName} amount=${toolInput.amount} and declines`);
+  ran.push(`a person is asked about ${toolName} amount=${toolInput.amount} and declines`);
   return { behavior: "deny" as const, message: "A person declined this refund" };
 }
 
@@ -83,7 +83,7 @@ async function main() {
     } else if (message.type === "result") console.log(`done: ${message.subtype}`);
   }
   console.log("\nwhat ran in this process, in order:");
-  for (const line of log) console.log(" ", line);
+  for (const line of ran) console.log(" ", line);
   console.log("\nthe command hook, as a process:");
   for (const event of [{ tool_name: "Bash", tool_input: { command: "git push origin main" } }, { tool_name: "Bash", tool_input: { command: "git status" } }, "{not json"]) {
     const [code, reason] = runGuard(typeof event === "string" ? event : JSON.stringify(event));

@@ -20,8 +20,8 @@ PRACTICES[f"{X}/49-hooks/unit-01/practice-1"] = {
         "wrong-missing-amount-allowed": (["e2"], "lets a refund with no amount through"),
         "wrong-coerces-amount": (["e2"], "turns a text or a boolean amount into a number"),
         "wrong-gates-every-tool": (["e2"], "applies the refund limits to a tool that is not a refund"),
-        "wrong-always-milliseconds": (["e3"], "reads every epoch as milliseconds"),
-        "wrong-cents-kept": (["e3"], "leaves amount_cents beside the new amount"),
+        "wrong-always-milliseconds": (["e3", "e8"], "reads every epoch as milliseconds"),
+        "wrong-cents-kept": (["e3", "e8"], "leaves amount_cents beside the new amount"),
         "wrong-rewrites-plain-text": (["e4"], "answers a replacement for output that is not json"),
         "wrong-not-idempotent": (["e4"], "reports a change for output that is already readable"),
         "wrong-no-matcher": (["e5"], "registers the refund gate for every tool"),
@@ -30,5 +30,6 @@ PRACTICES[f"{X}/49-hooks/unit-01/practice-1"] = {
         "wrong-bad-input-passes": (["e6"], "lets a call through when the hook input is not json"),
         "wrong-settings-no-timeout": (["e7"], "writes the settings hook without a timeout"),
         "wrong-turn-limit-too-low": (["e8"], "limits the run to two turns, so the second refund is never reached"),
+        "wrong-unknown-status-blank": (["e3"], "leaves the status word empty for a code it does not know"),
     },
 }

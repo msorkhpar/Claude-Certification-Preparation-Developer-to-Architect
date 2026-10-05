@@ -18,6 +18,7 @@ PLANTS[f"{X}/49-hooks/unit-01/practice-1"] = {
         "wrong-bad-input-passes": [('return {"exit": 2, "stderr": "The hook input', 'return {"exit": 0, "stderr": "The hook input')],
         "wrong-settings-no-timeout": [('"command": script, "timeout": timeout}', '"command": script}')],
         "wrong-turn-limit-too-low": [("max_turns=6", "max_turns=2")],
+        "wrong-unknown-status-blank": [('STATUS.get(status, "unknown")', 'STATUS.get(status, "")')],
     }),
     "typescript": ("hooks.ts", {
         "wrong-200-asks": [("if (amount <= AUTO_LIMIT)", "if (amount < AUTO_LIMIT)")],
@@ -35,5 +36,6 @@ PLANTS[f"{X}/49-hooks/unit-01/practice-1"] = {
         "wrong-bad-input-passes": [("return { exit: 2, stderr: \"The hook input", "return { exit: 0, stderr: \"The hook input")],
         "wrong-settings-no-timeout": [("command: script, timeout }", "command: script }")],
         "wrong-turn-limit-too-low": [("maxTurns: 6", "maxTurns: 2")],
+        "wrong-unknown-status-blank": [('STATUS[out.status as number] ?? "unknown"', 'STATUS[out.status as number] ?? ""')],
     }),
 }

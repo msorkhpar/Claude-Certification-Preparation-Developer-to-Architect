@@ -21,7 +21,7 @@ The starter is a working context builder with six gaps cut out of it. Everything
 5. The values the summary lost (unlocks `e6`): the names of the facts whose exact value does not appear in the summary are returned, so a summary that lost a value is reported.
 6. The tool call with its result (unlocks `e7`): a tool call and the result that follows it with the same id form one unit that the window keeps or drops whole; every other message is a unit of its own.
 
-`m1` needs gap 1. About ten lines in all. The steps below describe the whole builder, so you can see how your gaps are used.
+`m1` needs gap 1. About sixteen lines in all. The steps below describe the whole builder, so you can see how your gaps are used.
 
 ## What to write
 

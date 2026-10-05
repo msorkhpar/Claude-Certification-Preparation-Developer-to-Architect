@@ -20,7 +20,7 @@ The starter is a working set of configuration files with six gaps cut out of it.
 5. The exploration steps, in `docs/exploration-plan.md` (unlocks `e5`): step 3 reads the entry point files with `Read` and follows imports one hop at a time; step 4 lists the names each wrapper module exports and searches for each with `Grep` before tracing usage.
 6. The edit remedies, in `docs/exploration-plan.md` (unlocks `e6`, `e7`): three numbered remedies in this order: more surrounding lines, `replace_all`, then `Read` the whole file and `Write` it back; and no personal path in the file.
 
-`m1` needs gaps 1 and 2. About ten lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
+`m1` needs gaps 1 and 2. About five lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
 
 ## What to write
 

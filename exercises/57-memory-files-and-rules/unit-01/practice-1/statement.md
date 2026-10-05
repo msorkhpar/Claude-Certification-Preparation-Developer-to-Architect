@@ -20,7 +20,7 @@ The starter is a working set of memory files with seven gaps cut out of it. Ever
 6. The personal files, in `user-memory.example.md`, `CLAUDE.local.example.md` and `.gitignore` (unlocks `e4`): the short-answers preference in the first, the sandbox note in the second, neither left in the root file, and `CLAUDE.local.md` in the ignore file.
 7. The personal path, in `CLAUDE.md` (unlocks `e7`): the line that names a path in a home folder is removed; no file holds a personal path, an address or a key.
 
-`m1` needs gaps 1, 3 and 4. About thirteen lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
+`m1` needs gaps 1, 3 and 4. About ten lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
 
 ## What to write
 

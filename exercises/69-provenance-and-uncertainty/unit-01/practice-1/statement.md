@@ -21,7 +21,7 @@ The starter is a working ledger of claims with eight gaps cut out of it. Everyth
 7. The technical list (unlocks `e8`): technical findings are a list: the claim and a colon, then one `- value (source, date)` line per source.
 8. The disagreement in the news (unlocks `e7`): news is prose; when the sources disagree it ends with `The sources disagree.`, and when the figures come from different dates with `The figures are from different dates.`.
 
-`m1` needs gap 2. About seventeen lines in all. The steps below describe the whole ledger, so you can see how your gaps are used.
+`m1` needs gap 2. About twenty-two lines in all. The steps below describe the whole ledger, so you can see how your gaps are used.
 
 ## What to write
 

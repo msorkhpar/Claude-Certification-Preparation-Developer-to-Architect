@@ -21,7 +21,7 @@ The starter is a working review router with seven gaps cut out of it. Everything
 6. The review capacity (unlocks `e7`): no more than `capacity` items go to review, the first ones of the queue; the rest wait in the backlog, in order.
 7. The checkpoint (unlocks `e8`): an irreversible action (`delete_records`, `send_payment`, `close_account`) needs a `human` whatever the confidence; so does an amount above the limit; any other action is `auto`.
 
-`m1` needs gap 1. About twelve lines in all. The steps below describe the whole router, so you can see how your gaps are used.
+`m1` needs gap 1. About sixteen lines in all. The steps below describe the whole router, so you can see how your gaps are used.
 
 ## What to write
 
