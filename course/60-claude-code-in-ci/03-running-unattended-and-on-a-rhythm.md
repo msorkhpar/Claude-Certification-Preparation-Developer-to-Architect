@@ -40,13 +40,13 @@ The `/loop` bundled skill re-runs a prompt while the session stays open. What yo
 | `/loop check the deploy` | Claude chooses a delay after each iteration |
 | `/loop` | a built-in maintenance prompt runs, or your own `loop.md` |
 
-**Fixed interval.** Claude turns the interval into a cron expression and confirms the cadence and a job ID. The units are seconds, minutes, hours and days. "Seconds are rounded up to the nearest minute since cron has one-minute granularity", and an interval that is not a clean cron step, such as 7 minutes or 90 minutes, is rounded to the nearest one that is, with Claude saying what it picked. The practice's loop rounds seconds up and never goes below one minute.
+**Fixed interval.** Claude turns the interval into a cron expression and confirms the cadence and a job ID. The units are seconds, minutes, hours and days. Any interval from one minute upwards is allowed. "Seconds are rounded up to the nearest minute since cron has one-minute granularity", and an interval that is not a clean cron step, such as 7 minutes or 90 minutes, is rounded to the nearest one that is, with Claude saying what it picked. The practice's loop rounds seconds up and never goes below one minute.
 
 **Self-paced.** With no interval, "After each iteration it picks a delay between one minute and one hour based on what it observed". The delay and the reason are printed at the end of each iteration: short while a build finishes, longer when nothing is pending. Under the hood Claude reschedules with a `ScheduleWakeup` tool, and it can end the loop itself when the work is done. If an iteration ends without rescheduling or stopping, Claude Code schedules one fallback wakeup about 20 minutes later and ends the loop when that iteration does not reschedule either. Pressing `Esc` while it waits clears the pending wakeup.
 
 **The bare form.** `/loop` with no prompt runs a maintenance prompt that works through unfinished work, the current branch's pull request (review comments, failed CI, merge conflicts) and cleanup passes, and "irreversible actions such as pushing or deleting only proceed when they continue something the transcript already authorized". A `.claude/loop.md` in the project, or `~/.claude/loop.md` for you, replaces that default; the project file wins when both exist, edits apply on the next iteration, and anything beyond 25,000 bytes is cut.
 
-**What a loop can run.** A prompt, or a skill: `/loop 20m /review-pr 1234`. "A scheduled fire only runs skills that Claude is allowed to invoke on its own." Built-in commands such as `/model` or `/clear`, skills marked `disable-model-invocation: true` (the bundled `/verify` among them) and MCP prompts reach Claude as plain text instead of executing. A one-time reminder needs no `/loop`: say "remind me at 3pm to push the release branch", and Claude schedules a single task that deletes itself after it fires.
+**What a loop can run.** A prompt, or a skill: `/loop 20m /review-pr 1234`. "A scheduled fire only runs skills that Claude is allowed to invoke on its own." Built-in commands such as `/model` or `/clear`, skills marked `disable-model-invocation: true` (the bundled `/verify`, which builds the app, runs it and observes the result, among them) and MCP prompts reach Claude as plain text instead of executing. A one-time reminder needs no `/loop`: say "remind me at 3pm to push the release branch", and Claude schedules a single task that deletes itself after it fires.
 
 **How it runs, and where it stops.** The scheduler checks every second and a due prompt "fires between your turns, not while Claude is mid-response"; it waits for the current turn. Recurring tasks get a deterministic offset of up to 30 minutes (up to half the interval when more often than hourly), so an exact minute is chosen away from `:00` and `:30`. A session holds at most 50 tasks. The limits that matter for the choice are these:
 
@@ -54,6 +54,7 @@ The `/loop` bundled skill re-runs a prompt while the session stays open. What yo
 - "No catch-up for missed fires": a task that came due during a long turn fires once when Claude is idle, not once per missed interval.
 - Recurring tasks "expire 7 days after creation". The task fires one last time, then deletes itself.
 - On `--resume` or `--continue` the scheduled tasks come back, except expired ones and one-shot tasks whose time has passed, and a self-paced loop isn't restored on resume, so it is started again. Background shell commands and monitors are never restored.
+- Loops on a fixed interval "keep running until you cancel them" like any other scheduled task, or until seven days elapse.
 - `CLAUDE_CODE_DISABLE_CRON=1` turns the whole scheduler off.
 
 ### Routines and desktop tasks: schedules that outlive the session
@@ -72,7 +73,7 @@ Two products keep a schedule without an open session, and the documentation comp
 **A routine** is "a saved Claude Code configuration: a prompt, one or more repositories, and a set of connectors, packaged once and run automatically". It has one or more triggers, and one routine can combine them: a schedule (hourly, nightly, weekly, or once at a specific time), an API call with a per-routine bearer token, and GitHub events (pull requests and releases, with filters). It is created at the web page for routines, in the Desktop app, or in the CLI with `/schedule` (alias `/routines`). Facts that decide a design:
 
 - "Routines execute on Anthropic-managed cloud infrastructure ... so they keep working when your laptop is closed." Each run starts from a fresh clone of the repositories, and Claude pushes to `claude/`-prefixed branches unless told otherwise.
-- "The minimum interval is one hour; expressions that run more frequently are rejected." Scheduled runs are limited to 100 per hour per account, and an API call that fires a routine is limited to 30 per hour per routine.
+- "The minimum interval is one hour; expressions that run more frequently are rejected." Scheduled runs are limited to 100 per hour per account, and an API call that fires a routine is limited to 30 per hour per routine, a count that Run now shares.
 - It runs without asking: "Claude can use every tool from an included connector, including writes, without asking for permission during a run." So the connectors and the environment's network access are scoped to what the routine needs.
 - A saved prompt is the assignment, but the text sent with an API call arrives wrapped as untrusted data: the saved prompt must say to act on it, for example "Investigate the alert described in the routine-fire-payload block".
 - The status can mislead. "A green status in the run list means the session started and exited without an infrastructure error. It does not mean the task in your prompt succeeded." Open the run and read the transcript.
@@ -85,7 +86,7 @@ Two products keep a schedule without an open session, and the documentation comp
 
 These are not schedules. They keep Claude working while something else runs.
 
-**Background commands.** "For long-running processes such as dev servers or watch builds, Claude can set `run_in_background: true`", and `/tasks` lists and stops them. A foreground command that reaches its timeout (two minutes by default, ten at most) is moved to the background instead of being stopped, unless it starts with `sleep`. In a session that runs unattended, such as a run with `-p`, an SDK application, a CI job or a cloud session, a background command has a time limit: 30 minutes, or the `timeout` Claude passes up to 2 hours. A session you work in from a terminal or an editor has none (the limit applies to unattended sessions from v2.1.288).
+**Background commands.** "For long-running processes such as dev servers or watch builds, Claude can set `run_in_background: true`", and `/tasks` lists and stops them. A foreground command that reaches its timeout (two minutes by default, ten at most) is moved to the background instead of being stopped, unless it starts with `sleep`. In a session that runs unattended, such as a run with `-p`, an SDK application, a CI job or a cloud session, a background command has a time limit: 30 minutes, or the `timeout` Claude passes up to 2 hours. A session you work in from a terminal or an editor has none (the limit exists from v2.1.285; before v2.1.288 it applied in every session).
 
 **Monitor.** The Monitor tool "runs a command in the background and feeds each output line back to Claude, so it can react to log entries, file changes, or polled status mid-conversation", and it can also treat each message of a WebSocket as an event. It avoids polling, which is why a self-paced loop may use it. Its limits decide where it fits: "Every watch Claude starts has a deadline: 5 minutes by default, at most 30 minutes, and at most 10 minutes in a non-interactive run given a single prompt with `-p`." Monitor uses the same permission rules as Bash, and it is not available on Amazon Bedrock, Google Cloud's Agent Platform or Microsoft Foundry.
 
@@ -204,8 +205,8 @@ The practice is in [`exercises/60-claude-code-in-ci/unit-02`](../../exercises/60
 
 1. A team needs a nightly triage of its issue tracker to run while every laptop is shut. Which setup fits?
    - **a**: A fixed loop started by an engineer before leaving for the day
-   - **b**: A routine that carries a schedule trigger and a connector
-   - **c**: A self-paced loop that picks a long delay between its iterations
+   - **b**: A routine, set up once with a schedule trigger in the cloud
+   - **c**: A desktop task on the laptop of one engineer on the team
    - **d**: A monitor that watches the tracker through the whole night
 
 2. A migration has dozens of failing call sites. An engineer wants Claude to keep working without being prompted until the build is clean and the checks pass, and then to stop. Which fits?
@@ -214,17 +215,17 @@ The practice is in [`exercises/60-claude-code-in-ci/unit-02`](../../exercises/60
    - **c**: A monitor that streams the compiler output into the chat
    - **d**: A routine that starts a fresh cloud session each hour
 
-3. An engineer starts `/loop 20m /verify`. At the first run the app was not exercised and Claude replied as if it had received an ordinary sentence. What is the cause?
-   - **a**: The interval is too short for a loop to run any command, bundled or custom
-   - **b**: That command refuses invocation by the model, so each scheduled prompt arrived as plain text
-   - **c**: A loop re-runs prompts only and never starts a bundled command, whatever its settings
-   - **d**: The session was not restored after the first run, so the loop lost its task
+3. An engineer starts `/loop 20m /verify`. At the first fire Claude replied in general terms and nothing was exercised. What is the cause?
+   - **a**: The interval is too short for a loop to launch any skill, bundled or custom, at all
+   - **b**: That bundled skill forbids model invocation, the only kind a scheduled prompt runs
+   - **c**: A loop re-runs prompts only and never starts a bundled skill, whatever its settings
+   - **d**: The session was not restored after the first fire, so the loop lost its task entirely
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says routines "keep working when your laptop is closed", and a routine can carry a schedule trigger and connectors. *a* is ruled out because "Tasks only fire while Claude Code is running and idle." *c* is ruled out because a self-paced loop "isn't restored on resume", and it is a loop of the session in any case. *d* is ruled out because a watch has "5 minutes by default, at most 30 minutes" and cannot last a night.
-2. **a**. The page says that after each turn "a model checks whether the condition holds" and that the goal clears when it is met. *b* is ruled out because a loop's next turn starts when "a time interval elapses" and not when a check holds. *c* is ruled out because Monitor only "feeds each output line back to Claude" and has a deadline, so it neither continues the work nor stops on a condition. *d* is ruled out because a routine starts each run from a fresh clone, and "Routines execute on Anthropic-managed cloud infrastructure" with no memory of an engineer's session.
-3. **b**. The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text. *a* is ruled out because the interval is not what decides: "A scheduled fire only runs skills that Claude is allowed to invoke on its own." *c* is ruled out because a loop can run "A prompt, or a skill", for example `/review-pr 1234`, which Claude may invoke on its own. *d* is ruled out because "the scheduled tasks come back" on resume apart from expired ones, and nothing in the session ended here.
+1. **b**. The page says routines "keep working when your laptop is closed", and a routine can carry a schedule trigger and connectors. *a* is ruled out because "Tasks only fire while Claude Code is running and idle." *c* is ruled out because a desktop task "only fires while the app is open and your computer is awake", and every laptop is shut. *d* is ruled out because a watch has "5 minutes by default, at most 30 minutes" and cannot last a night.
+2. **a**. The page says that after each turn "a model checks whether the condition holds" and that the goal clears when it is met. *b* is ruled out because a loop's next turn starts when "a time interval elapses" and not when a check holds. *c* is ruled out because Monitor only "feeds each output line back to Claude" and has a deadline, so it neither continues the work nor stops on a condition. *d* is ruled out because a routine starts each run from a fresh clone, and "Routines execute on Anthropic-managed cloud infrastructure" from a fresh clone, so they never continue the engineer's own session.
+3. **b**. The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text, because "A scheduled fire only runs skills that Claude is allowed to invoke on its own." *a* is ruled out because "Any interval from one minute upwards is allowed", and 20 minutes is well above it. *c* is ruled out because a loop can run "A prompt, or a skill", for example `/review-pr 1234`, which Claude may invoke on its own. *d* is ruled out because loops on a fixed interval "keep running until you cancel them", and nothing in the session ended here.
 
 </details>

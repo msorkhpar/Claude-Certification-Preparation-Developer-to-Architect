@@ -141,15 +141,15 @@
       "stem": "A team needs a nightly triage of its issue tracker to run while every laptop is shut. Which setup fits?",
       "options": {
         "a": "A fixed loop started by an engineer before leaving for the day",
-        "b": "A routine that carries a schedule trigger and a connector",
-        "c": "A self-paced loop that picks a long delay between its iterations",
+        "b": "A routine, set up once with a schedule trigger in the cloud",
+        "c": "A desktop task on the laptop of one engineer on the team",
         "d": "A monitor that watches the tracker through the whole night"
       },
       "key": "b",
       "explanation": {
         "b": "The page says routines \"keep working when your laptop is closed\", and a routine can carry a schedule trigger and connectors.",
         "a": "Ruled out because \"Tasks only fire while Claude Code is running and idle.\"",
-        "c": "Ruled out because a self-paced loop \"isn't restored on resume\", and it is a loop of the session in any case.",
+        "c": "Ruled out because a desktop task \"only fires while the app is open and your computer is awake\", and every laptop is shut.",
         "d": "Ruled out because a watch has \"5 minutes by default, at most 30 minutes\" and cannot last a night."
       }
     },
@@ -169,26 +169,26 @@
         "a": "The page says that after each turn \"a model checks whether the condition holds\" and that the goal clears when it is met.",
         "b": "Ruled out because a loop's next turn starts when \"a time interval elapses\" and not when a check holds.",
         "c": "Ruled out because Monitor only \"feeds each output line back to Claude\" and has a deadline, so it neither continues the work nor stops on a condition.",
-        "d": "Ruled out because a routine starts each run from a fresh clone, and \"Routines execute on Anthropic-managed cloud infrastructure\" with no memory of an engineer's session."
+        "d": "Ruled out because a routine starts each run from a fresh clone, and \"Routines execute on Anthropic-managed cloud infrastructure\" from a fresh clone, so they never continue the engineer's own session."
       }
     },
     {
       "id": "03-running-unattended-and-on-a-rhythm#q3",
       "page": "03-running-unattended-and-on-a-rhythm.md",
       "scope": "page",
-      "stem": "An engineer starts `/loop 20m /verify`. At the first run the app was not exercised and Claude replied as if it had received an ordinary sentence. What is the cause?",
+      "stem": "An engineer starts `/loop 20m /verify`. At the first fire Claude replied in general terms and nothing was exercised. What is the cause?",
       "options": {
-        "a": "The interval is too short for a loop to run any command, bundled or custom",
-        "b": "That command refuses invocation by the model, so each scheduled prompt arrived as plain text",
-        "c": "A loop re-runs prompts only and never starts a bundled command, whatever its settings",
-        "d": "The session was not restored after the first run, so the loop lost its task"
+        "a": "The interval is too short for a loop to launch any skill, bundled or custom, at all",
+        "b": "That bundled skill forbids model invocation, the only kind a scheduled prompt runs",
+        "c": "A loop re-runs prompts only and never starts a bundled skill, whatever its settings",
+        "d": "The session was not restored after the first fire, so the loop lost its task entirely"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text.",
-        "a": "Ruled out because the interval is not what decides: \"A scheduled fire only runs skills that Claude is allowed to invoke on its own.\"",
+        "b": "The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text, because \"A scheduled fire only runs skills that Claude is allowed to invoke on its own.\"",
+        "a": "Ruled out because \"Any interval from one minute upwards is allowed\", and 20 minutes is well above it.",
         "c": "Ruled out because a loop can run \"A prompt, or a skill\", for example `/review-pr 1234`, which Claude may invoke on its own.",
-        "d": "Ruled out because \"the scheduled tasks come back\" on resume apart from expired ones, and nothing in the session ended here."
+        "d": "Ruled out because loops on a fixed interval \"keep running until you cancel them\", and nothing in the session ended here."
       }
     }
   ]

@@ -114,7 +114,7 @@ The rules that an error hides behind:
 
 ### Where each setting lives: the scopes
 
-Settings files have scopes, and the documentation gives their order, highest precedence first: managed settings, command line arguments, project local settings (`.claude/settings.local.json`), shared project settings (`.claude/settings.json`), user settings (`~/.claude/settings.json`). "A key at a higher level overrides the same key anywhere below it", while list keys such as `permissions.allow` are combined, not replaced.
+Settings files have scopes, and the documentation gives their order, highest precedence first. When the same key appears in more than one place, "Claude Code uses the value from the highest level that sets it". The order: managed settings, command line arguments, project local settings (`.claude/settings.local.json`), shared project settings (`.claude/settings.json`), user settings (`~/.claude/settings.json`). "A key at a higher level overrides the same key anywhere below it", while list keys such as `permissions.allow` are combined, not replaced.
 
 | Scope | File | Who it affects | Use it for |
 |---|---|---|---|
@@ -147,29 +147,29 @@ The practice is in [`exercises/39-extending-claude-code`](../../exercises/39-ext
 
 ## Quiz
 
-1. A developer's settings file contains `"outputStyle": "explanatory"`. Replies in the session keep Claude Code's standard wording and no error appears. What is the cause?
+1. A developer selects a built-in style in a settings file with `"outputStyle": "explanatory"`. Replies keep Claude Code's standard wording and no error appears. What is the cause?
    - **a**: The session must be restarted first, because styles are read only at launch
    - **b**: Project files cannot set a style at all, so the value belongs in the user folder
    - **c**: A hook must apply the choice on each reply, because settings only suggest it to Claude
-   - **d**: The value must match a name exactly, or the default is silently selected
+   - **d**: The value must match a name exactly, or the default applies without a message
 
 2. A keybindings file sets `ctrl+s` to `null` and `ctrl+c` to a custom action. What results?
-   - **a**: Both keys change as written, because the file is applied block by block in order
-   - **b**: Neither key changes, because one invalid entry makes the whole file ignored
-   - **c**: Both keys are freed, because null applies to every key of the block at once
-   - **d**: Ctrl+S is freed, while Ctrl+C keeps its default because it cannot be rebound
+   - **a**: Both keys change as written, and a warning appears on the screen at once
+   - **b**: Ctrl+C is rebound as written, and Ctrl+S keeps stashing the prompt as before
+   - **c**: Both keys are freed together, and Ctrl+C then does nothing at all in the chat
+   - **d**: Ctrl+S is freed, and Ctrl+C keeps its default because it is reserved
 
-3. A team's checked-in `.claude/settings.json` names an output style, and a developer wants another for their own sessions in that repository only. Where does the choice go?
-   - **a**: In the user settings, which rank above every project setting
-   - **b**: In the committed file itself, since teammates can override it later
-   - **c**: In the managed settings, which an individual can edit freely in any project
-   - **d**: In settings.local.json, which outranks the shared copy and stays out of git
+3. One developer's `~/.claude/settings.json` names an output style, while the repository's `.claude/settings.json` names a different one. Which does the session use?
+   - **a**: The personal choice, because a developer's own file always wins for that person
+   - **b**: Whichever file was saved last, because Claude Code compares modification times
+   - **c**: Neither choice, because a key set at two levels is rejected as a conflict
+   - **d**: The project's choice, because that level outranks the user level
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "A value that doesn't match a style name exactly, such as `explanatory`, gives you the Default style", with no error. *a* is ruled out because "Claude uses the new style starting with your next message", and a built-in style needs no restart. *b* is ruled out because "A project's own settings files take precedence over that value", so a project file can set a style. *c* is ruled out because a style is applied by Claude Code itself: "Claude Code sends the active style's instructions with every request", and no hook is involved.
-2. **d**. The page says reserved keys cannot be rebound, "These shortcuts cannot be rebound.", and `null` "frees the one key it is written against". *a* is ruled out because Ctrl+C is on the reserved list, and "These shortcuts cannot be rebound." *b* is ruled out because a mistake only costs its own binding: "Claude Code skips the binding and keeps any default binding for that key in effect." *c* is ruled out because `null` "frees the one key it is written against", not the block.
-3. **d**. The page puts project local settings above shared project settings in precedence, and says Claude Code keeps `.claude/settings.local.json` out of git. *a* is ruled out because user settings come last in the order, and "A key at a higher level overrides the same key anywhere below it". *b* is ruled out because the file is committed "so everyone who clones the repository gets the same permissions, hooks, and plugins", so an edit there reaches every teammate. *c* is ruled out because of "Nothing you set overrides them", which says managed settings are an organization's and not an individual's to change.
+1. **d**. The page says "A value that doesn't match a style name exactly, such as `explanatory`, gives you the Default style", with no error. *a* is ruled out because "Claude uses the new style starting with your next message", and a built-in style needs no restart; only a style file created in a running session does. *b* is ruled out because "A project's own settings files take precedence over that value", so a project file can set a style. *c* is ruled out because a style is applied by Claude Code itself: "Claude Code sends the active style's instructions with every request", and no hook is involved.
+2. **d**. The page says `null` "frees the one key it is written against", and that reserved keys cannot be rebound: "These shortcuts cannot be rebound." *a* is ruled out because Claude Code "writes a warning to the debug log", not to the screen, and the reserved key does not change. *b* is ruled out because `null` "frees the one key it is written against", so Ctrl+S stops stashing. *c* is ruled out because "These shortcuts cannot be rebound", and Ctrl+C is reserved, so it keeps interrupting.
+3. **d**. The page says "Claude Code uses the value from the highest level that sets it", and the shared project settings sit above the user settings. *a* is ruled out because "A key at a higher level overrides the same key anywhere below it", and the user level is the lowest of the files. *b* is ruled out because the documentation gives "their order, highest precedence first", and no file date is involved. *c* is ruled out because "Claude Code uses the value from the highest level that sets it", so two levels are resolved by order and not rejected.
 
 </details>
