@@ -1,6 +1,6 @@
 # Professional exam strategy
 
-**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 1 of 3**
+**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 1 of 4**
 **Exams:** P1 to P7 (CCAR-P)
 
 **After this page you can** read the Professional blueprint as a study plan weighted by domain, recognise the decision patterns that the scenario items test across Level 4, pace a 63-item sitting, and work the exam guide's own three sample questions with the course's pages.

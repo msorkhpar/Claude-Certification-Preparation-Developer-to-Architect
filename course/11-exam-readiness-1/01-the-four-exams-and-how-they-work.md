@@ -1,6 +1,6 @@
 # The four exams and how they work
 
-**Level:** Foundations · **Module 11:** Exam readiness 1 · **Page 1 of 4**
+**Level:** Foundations · **Module 11:** Exam readiness 1 · **Page 1 of 5**
 **Exams:** all (AS3 for choosing a product or model; the guides' format and scoring facts apply to every exam)
 
 **After this page you can** name the four Claude certification exams, choose the one that fits a person's job, and say

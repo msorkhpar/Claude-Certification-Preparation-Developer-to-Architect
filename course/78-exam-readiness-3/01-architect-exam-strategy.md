@@ -1,6 +1,6 @@
 # Architect exam strategy
 
-**Level:** Architect · **Module 78:** Exam readiness 3 · **Page 1 of 4**
+**Level:** Architect · **Module 78:** Exam readiness 3 · **Page 1 of 5**
 **Exams:** A1 to A5 (CCAR-F)
 
 **After this page you can** read the Architect blueprint as a study plan weighted by domain, recognise the decision patterns that the scenario items test, pace a 60-item sitting built on four scenarios, and work three sample questions in the style of the exam guide with the course's pages.

@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import (check_duplicate, check_named_page, check_page_has_quiz, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
-                        key_is_longest)
+from check_quiz import (check_multi, keys_longest, parse_page_quizzes, select_count, check_duplicate, check_named_page, check_page_has_quiz, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
+                        key_is_longest, check_mock_item, check_mock_extremes)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
 CLEAN = {"a": "Measure the input again for the target model", "b": "Split every document into chapters by hand",
@@ -122,5 +122,60 @@ READY = ORDINARY.replace("Claude's family and its surfaces", "Exam readiness 1")
 expect("plant: an ordinary page without a quiz is refused", check_page_has_quiz("p.md", ORDINARY), True)
 expect("clean: an exam-readiness page may have no quiz", check_page_has_quiz("p.md", READY), False)
 expect("clean: an ordinary page with a quiz", check_page_has_quiz("p.md", ORDINARY + "\n## Quiz\n\n1. Q?\n   - **a**: x\n"), False)
+
+# (i) multiple-response items: "(Select two.)", five options, a keyed pair written "**a and c**"
+MS = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings. Which two steps fit? (Select two.)"
+MO = {"a": "Measure the input again for the target model", "b": "Split every document into chapters by hand",
+      "c": "Compare piece counts before any release", "d": "Raise the output cap on the request body", "e": "Switch the job to a cheaper model tier"}
+expect("clean multiple-response item", check_multi("t#x1", MS, MO, ["a", "c"]), False)
+expect("plant: marker says two but one letter is keyed", check_multi("t#x1", MS, MO, "a"), True)
+expect("plant: two letters keyed and no marker", check_multi("t#x1", MS.replace(" (Select two.)", ""), MO, ["a", "c"]), True)
+expect("plant: marker says three, two keyed", check_multi("t#x1", MS.replace("two.", "three."), MO, ["a", "c"]), True)
+expect("plant: every option keyed", check_multi("t#x1", MS.replace("two.", "five."), MO, ["a", "b", "c", "d", "e"]), True)
+expect("plant: key letters out of order", check_multi("t#x1", MS, MO, ["c", "a"]), True)
+expect("plant: a multiple-response item with four options", check_multi("t#x1", MS, {k: v for k, v in MO.items() if k != "e"}, ["a", "c"]), True)
+expect("plant: a keyed option repeats a stem word", check_multi("t#x1", MS, dict(MO, c="Compare the tokenizer outputs before any release"), ["a", "c"]), True)
+expect("plant: keyed options far longer than the distractors", check_multi("t#x1", MS, dict(MO, a="Measure the input again for the target model before every deployment and compare it", c="Compare piece counts before any release and after every vendor update of the tool"), ["a", "c"]), True)
+expect("clean: a single-answer item passes through", check_multi("t#q1", STEM, CLEAN, "a"), False)
+expect("plant: select_count reads the marker", [1] if select_count(MS) == 2 and select_count(STEM) is None else [], True)
+expect("plant: a longest keyed option is detected", [1] if keys_longest(dict(MO, a="Measure the input again for the target model and then compare it with last month"), ["a", "c"]) else [], True)
+PAGE_MULTI = """## Mock exam
+
+1. Which two steps fit? (Select two.)
+   - **a**: one
+   - **b**: two
+   - **c**: three
+   - **d**: four
+   - **e**: five
+
+<details>
+<summary>Answer key</summary>
+
+1. **a and c**. Because. *b* is ruled out because x. *d* is ruled out because y. *e* is ruled out because z.
+
+</details>
+"""
+(_, _qs, _keys), = parse_page_quizzes(PAGE_MULTI)
+expect("clean: a page parses a pair key and five options", [] if _keys == [["a", "c"]] and sorted(_qs[0][1]) == list("abcde") else [1], False)
+expect("clean folded key for a pair", check_key_paragraph("t#x1", "**a and c**. Because. *b* is ruled out because x. *d* is ruled out because y. *e* is ruled out because z.", ["a", "c"], "abcde"), False)
+expect("plant: folded key for a pair misses an option", check_key_paragraph("t#x1", "**a and c**. Because. *b* is ruled out because x. *d* is ruled out because y.", ["a", "c"], "abcde"), True)
+expect("plant: folded key for a pair merges two options", check_key_paragraph("t#x1", "**a and c**. Because. *b*, *d* and *e* are ruled out because they do nothing.", ["a", "c"], "abcde"), True)
+
+# mock-page tells: reason-clause asymmetry, extreme key length, duplicate options, odd form
+M_CLEAN = {"a": "Measure the input again for the target model", "b": "Split every document into chapters by hand",
+           "c": "Raise the output cap on the request body", "d": "Switch the job to a cheaper model tier"}
+expect("clean mock item", check_mock_item("t#x1", M_CLEAN, "a"), False)
+expect("plant: reason clause only on distractors", check_mock_item("t#x1", dict(M_CLEAN, b="Split every document by hand, since chapters are small"), "a"), True)
+expect("plant: reason clause only on the key", check_mock_item("t#x1", dict(M_CLEAN, a="Measure the input again, because the tokenizer changed"), "a"), True)
+expect("clean: reason clause on key and distractor", check_mock_item("t#x1", dict(M_CLEAN, a="Measure the input again, since the tokenizer changed", b="Split every document by hand, since chapters are small"), "a"), False)
+expect("plant: select-two key set lacks the clause the rest carry", check_mock_item("t#x1", {"a": "Measure the input again", "b": "Split by hand, so that chapters stay small", "c": "Check the new limit", "d": "Raise the cap, as it is cheap", "e": "Switch tiers"}, ["a", "c"]), True)
+expect("plant: duplicate options", check_mock_item("t#x1", dict(M_CLEAN, c="split every document into chapters by hand."), "a"), True)
+expect("plant: key is an odd phrase among clauses", check_mock_item("t#x1", {"a": "Remeasuring the input", "b": "Raising fails when the cap is low", "c": "The window is too small", "d": "Tokens are counted twice"}, "a"), True)
+expect("plant: every other option opens with the same word", check_mock_item("t#x1", {"a": "Remeasure the input", "b": "Cut the input by hand", "c": "Cut the cap on the body", "d": "Cut the tier of the job"}, "a"), True)
+ROWS_LONG = [({"a": "x" * 30, "b": "y" * 10, "c": "z" * 11, "d": "w" * 12}, "a")] * 4 + [({"a": "x" * 5, "b": "y" * 20, "c": "z" * 11, "d": "w" * 25}, "a")] * 4
+expect("plant: key is the longest in a third of the items", check_mock_extremes("t", ROWS_LONG[:2] + ROWS_LONG[4:]), True)
+expect("plant: key is the longest in more than a quarter", check_mock_extremes("t", ROWS_LONG[:3] + ROWS_LONG[4:6]), True)
+expect("plant: key is the shortest in more than a quarter", check_mock_extremes("t", ROWS_LONG[4:]), True)
+expect("clean: key length is spread", check_mock_extremes("t", [({"a": "x" * 15, "b": "y" * 10, "c": "z" * 20, "d": "w" * 25}, "a")] * 4), False)
 
 sys.exit(1 if failures else 0)

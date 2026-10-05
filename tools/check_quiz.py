@@ -2,7 +2,8 @@
 """Check the quizzes of Levels 1 to 3 (every module so far): pages agree with quiz.json, shape and wording rules hold.
 
 Rules (CLAUDE.md quiz rules that a script can check):
-  - every question has four options a-d and a key among them;
+  - every question has four options a-d and a key among them; a multiple-response question (stem ends
+    "(Select two.)") has five options a-e and exactly that many keyed letters, "**a and c**." in the folded key;
   - the key option shares no content word (after simple stemming, hyphens split) with the stem, and no stem is
     contained in a longer word on the other side ("send" in "resend", "want" in "unwanted");
   - the key is at most 1.3 times the mean length of the distractors, in characters (warning when the key is the
@@ -106,13 +107,14 @@ def prose_of(md):
 
 
 def check_quotes(qid, explanation, key, prose):
+    keyset = {key} if isinstance(key, str) else set(key)
     """Every non-key option is ruled out by a quotation of 4 or more words that appears verbatim in the prose."""
     problems = []
     page = norm(prose)
     for letter in sorted(explanation):
         problems += [p for p in check_text_shape(f"{qid} option {letter} explanation", explanation[letter])
                      if "doubled" in p]
-        if letter == key:
+        if letter in keyset:
             continue
         quotes = [q for q in QUOTE.findall(explanation[letter]) if len(q.split()) >= MIN_QUOTE_WORDS]
         if not quotes:
@@ -249,19 +251,159 @@ def check_question(qid, stem, opts, key):
     return problems
 
 
-def check_key_paragraph(qid, para, key):
-    """The folded key: key letter first, then one sentence per other option, none merged."""
+SELECT = re.compile(r"\(Select (two|three|four|five|six|seven|eight|nine|[2-9])\.\)\s*$")
+WORDNUM = {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}
+
+
+def select_count(stem):
+    """N when the stem ends with the marker (Select N.), else None."""
+    m = SELECT.search(stem)
+    if not m:
+        return None
+    w = m.group(1)
+    return WORDNUM[w] if w in WORDNUM else int(w)
+
+
+def check_multi(qid, stem, opts, key):
+    """Findings for one question that may be multiple-response: the marker and the keyed letters agree, N is below
+    the number of options, a multiple-response item has options a-e, and its keys obey the wording rules."""
+    keys = [key] if isinstance(key, str) else list(key)
+    n = select_count(stem)
     problems = []
-    text = re.sub(r"^\*\*[a-d]\*\*\.\s*", "", para.strip())
-    groups = re.findall(r"(?:\*[a-d]\*(?:, and |, | and )?)+", text)
-    singles = [g for g in groups if len(re.findall(r"\*([a-d])\*", g)) == 1]
-    merged = [g for g in groups if len(re.findall(r"\*([a-d])\*", g)) > 1]
+    if len(keys) == 1 and n is not None:
+        problems.append(f"{qid}: the stem says (Select {n}.) but the key has one letter")
+        return problems
+    if len(keys) > 1 and n is None:
+        problems.append(f"{qid}: the key has {len(keys)} letters but the stem has no (Select N.) marker")
+        return problems
+    if len(keys) == 1:
+        return check_question(qid, stem, opts, keys[0])
+    if n != len(keys):
+        problems.append(f"{qid}: the stem says (Select {n}.) but the key has {len(keys)} letters")
+    if len(set(keys)) != len(keys) or keys != sorted(keys):
+        problems.append(f"{qid}: key letters {keys} must be distinct and in alphabetical order")
+    if len(keys) >= len(opts):
+        problems.append(f"{qid}: {len(keys)} keyed letters of {len(opts)} options leaves no distractor")
+        return problems
+    if sorted(opts) != list("abcde"):
+        problems.append(f"{qid}: a multiple-response question has options a-e, found {sorted(opts)}")
+    if any(k not in opts for k in keys):
+        return problems
+    problems += check_text_shape(f"{qid} stem", stem)
+    for letter, text in sorted(opts.items()):
+        problems += check_text_shape(f"{qid} option {letter}", text)
+    plain = re.sub(r"`[^`]*`", " ", re.sub(SELECT, "", stem))
+    for k in keys:
+        shared = words(opts[k]) & stem_of(plain)
+        if shared:
+            problems.append(f"{qid}: key {k} repeats stem words {sorted(shared)}")
+        elif stems(opts[k]) & stems(plain):
+            problems.append(f"{qid}: key {k} echoes the stem by stem {sorted(stems(opts[k]) & stems(plain))}")
+        elif contained_echo(opts[k], plain):
+            problems.append(f"{qid}: key {k} echoes the stem inside a longer word {sorted(contained_echo(opts[k], plain))}")
+    problems += check_giveaway(qid, stem)
+    others = [len(v) for k, v in opts.items() if k not in keys]
+    ratio = (sum(len(opts[k]) for k in keys) / len(keys)) / (sum(others) / len(others))
+    if ratio > LENGTH_RATIO:
+        problems.append(f"{qid}: the keys are {ratio:.2f} times the mean distractor length (limit {LENGTH_RATIO})")
+    if all(ABSOLUTE.search(opts[k]) is None for k in keys) and all(ABSOLUTE.search(v) for k, v in opts.items() if k not in keys):
+        problems.append(f"{qid}: form tell: every distractor carries an absolute marker, no key does")
+    if all(HEDGE.search(opts[k]) for k in keys) and not any(HEDGE.search(v) for k, v in opts.items() if k not in keys):
+        problems.append(f"{qid}: form tell: the keys alone are hedged")
+    return problems
+
+
+def keys_longest(opts, key):
+    """True when the longest option is a keyed one (for a multiple-response question), else the single-key rule."""
+    keys = [key] if isinstance(key, str) else list(key)
+    top = max(len(v) for v in opts.values())
+    return any(len(opts[k]) == top and sum(1 for v in opts.values() if len(v) == top) == 1 for k in keys)
+
+
+MOCK_TELL_MODULES = ("11", "44", "78", "94")
+REASON = re.compile(r"(,\s+(since|because|as)\b|\bso that\b)", re.I)
+AUXILIARY = set("is are was were has have had does do did will would can could should must may might".split())
+FINITE_VERBS = set("""loads load runs run returns return reads read keeps keep stays stay holds hold counts count applies apply
+allows allow blocks block refuses refuse costs cost needs need fails fail works work shows show makes make gives give
+takes take sets set sends send writes write changes change covers cover requires require uses use treats treat passes pass
+drops drop moves move expands expand matches match asks ask stops stop becomes become comes come goes go carries carry""".split())
+
+
+def reason_clause(text):
+    return bool(REASON.search(text))
+
+
+def main_part(text):
+    return re.split(r"[,;]", text, maxsplit=1)[0]
+
+
+def has_finite_verb(text):
+    """Conservative: a finite auxiliary or a listed verb after a subject, anywhere in the option."""
+    return any(w.lower() in AUXILIARY or w.lower() in FINITE_VERBS for w in WORD.findall(text)[1:])
+
+
+def option_tokens(text):
+    return frozenset(re.sub(r"[^a-z0-9 ]+", " ", text.lower()).split())
+
+
+def check_mock_item(qid, opts, key):
+    """Tells that single out the key of a mock or pool item: reason clauses, identical options, an odd form."""
+    keys = [key] if isinstance(key, str) else list(key)
+    rest = [k for k in sorted(opts) if k not in keys]
+    problems = []
+    keyed = [reason_clause(opts[k]) for k in keys]
+    others = [reason_clause(opts[k]) for k in rest]
+    if (any(others) and not any(keyed)) or (any(keyed) and not any(others)):
+        problems.append(f"{qid}: reason-clause asymmetry: the key set {'carries' if any(keyed) else 'lacks'} a reason clause that the other options {'lack' if any(keyed) else 'carry'}")
+    letters = sorted(opts)
+    for i, a in enumerate(letters):
+        for b in letters[i + 1:]:
+            ta, tb = option_tokens(opts[a]), option_tokens(opts[b])
+            if ta == tb or (len(ta | tb) and len(ta & tb) / len(ta | tb) >= 0.8):
+                problems.append(f"{qid}: options {a} and {b} are duplicates or near duplicates")
+    if len(keys) == 1 and rest:
+        lead = lambda text: [w for w in WORD.findall(text) if w.lower() not in ("a", "an", "the")][:1]
+        firsts = [lead(opts[k]) for k in rest]
+        if all(firsts) and len({f[0].lower() for f in firsts}) == 1 and [w.lower() for w in lead(opts[keys[0]])] != [firsts[0][0].lower()]:
+            problems.append(f"{qid}: the key is the odd one out in form: every other option opens with {firsts[0][0]!r}")
+        aux = {k: bool(AUXILIARY & {w.lower() for w in WORD.findall(opts[k])[1:]}) for k in opts}
+        verbs = {k: has_finite_verb(opts[k]) for k in opts}
+        if all(aux[k] for k in rest) and not verbs[keys[0]]:
+            problems.append(f"{qid}: the key is the odd one out in form: a phrase among full clauses")
+        if not any(verbs[k] for k in rest) and aux[keys[0]]:
+            problems.append(f"{qid}: the key is the odd one out in form: a full clause among phrases")
+    return problems
+
+
+MOCK_EXTREME = 0.25
+
+
+def check_mock_extremes(label, rows):
+    """rows: [(opts, key letter)] for the single-answer items of one mock page."""
+    problems = []
+    total = len(rows)
+    longest = sum(1 for o, k in rows if all(len(o[k]) > len(v) for x, v in o.items() if x != k))
+    shortest = sum(1 for o, k in rows if all(len(o[k]) < len(v) for x, v in o.items() if x != k))
+    for name, hits in (("longest", longest), ("shortest", shortest)):
+        if total and hits / total > MOCK_EXTREME:
+            problems.append(f"{label}: key is the {name} option in {hits} of {total} single-answer items ({hits / total:.0%}), limit {MOCK_EXTREME:.0%}")
+    return problems
+
+
+def check_key_paragraph(qid, para, key, letters="abcd"):
+    """The folded key: key letter(s) first, then one sentence per other option, none merged."""
+    problems = []
+    keys = [key] if isinstance(key, str) else list(key)
+    text = re.sub(r"^\*\*[a-e](?: and [a-e])*\*\*\.\s*", "", para.strip())
+    groups = re.findall(r"(?:\*[a-e]\*(?:, and |, | and )?)+", text)
+    singles = [g for g in groups if len(re.findall(r"\*([a-e])\*", g)) == 1]
+    merged = [g for g in groups if len(re.findall(r"\*([a-e])\*", g)) > 1]
     if merged:
         problems.append(f"{qid}: folded key merges options ({merged[0].strip()}); give each its own sentence")
-    letters = sorted(re.findall(r"\*([a-d])\*", " ".join(singles)))
-    want = sorted(set("abcd") - {key})
-    if letters != want and not merged:
-        problems.append(f"{qid}: folded key explains {letters}, want one sentence each for {want}")
+    found = sorted(re.findall(r"\*([a-e])\*", " ".join(singles)))
+    want = sorted(set(letters) - set(keys))
+    if found != want and not merged:
+        problems.append(f"{qid}: folded key explains {found}, want one sentence each for {want}")
     return problems
 
 
@@ -269,7 +411,7 @@ def key_paragraphs(md):
     result = []
     for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         _, _, keyblock = m.group(2).partition("<details>")
-        result.append(re.findall(r"^\d+\. (\*\*[a-d]\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M))
+        result.append(re.findall(r"^\d+\. (\*\*[a-e](?: and [a-e])*\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M))
     return result
 
 
@@ -284,7 +426,7 @@ def parse_page_quizzes(md):
             lines = q.group(1).strip().split("\n")
             stem_lines, opts, last = [], {}, None
             for line in lines:
-                om = re.match(r"\s*- \*\*([a-d])\*\*: (.*)", line)
+                om = re.match(r"\s*- \*\*([a-e])\*\*: (.*)", line)
                 if om:
                     opts[om.group(1)] = om.group(2).strip()
                     last = om.group(1)
@@ -293,7 +435,7 @@ def parse_page_quizzes(md):
                 elif last and line.strip():
                     opts[last] += " " + line.strip()
             questions.append((" ".join(stem_lines), opts))
-        keys = re.findall(r"^\d+\. \*\*([a-d])\*\*", keyblock, re.M)
+        keys = [k if " and " not in k else k.split(" and ") for k in re.findall(r"^\d+\. \*\*([a-e](?: and [a-e])*)\*\*", keyblock, re.M)]
         out.append((m.group(1), questions, keys))
     return out
 
@@ -308,6 +450,7 @@ def check_module(folder):
     seen = set()
     longest = {}
     all_items = {}
+    mock_rows = {}
     pages = sorted(folder.glob("*.md"))
     module_prose = "\n".join(prose_of(p.read_text()) for p in pages)
     page_stems = {}
@@ -341,16 +484,23 @@ def check_module(folder):
                     problems.append(f"{qid}: not in quiz.json")
                     continue
                 seen.add(qid)
-                if sorted(opts) != list("abcd"):
-                    problems.append(f"{qid}: options are {sorted(opts)}, want a-d")
+                want_letters = "abcde" if select_count(stem) else "abcd"
+                if sorted(opts) != list(want_letters):
+                    problems.append(f"{qid}: options are {sorted(opts)}, want {want_letters[0]}-{want_letters[-1]}")
                 if q["stem"] != stem or q["options"] != opts:
                     problems.append(f"{qid}: page text differs from quiz.json")
                 key = keys[n - 1] if n - 1 < len(keys) else None
                 if key != q["key"]:
                     problems.append(f"{qid}: page key {key} differs from quiz.json key {q['key']}")
-                if sorted(q.get("explanation", {})) != list("abcd"):
-                    problems.append(f"{qid}: quiz.json must explain every option a-d")
-                problems += check_question(qid, stem, opts, q["key"])
+                if sorted(q.get("explanation", {})) != list(want_letters):
+                    problems.append(f"{qid}: quiz.json must explain every option {want_letters[0]}-{want_letters[-1]}")
+                if q.get("select") != select_count(stem):
+                    problems.append(f"{qid}: quiz.json select {q.get('select')} differs from the page marker {select_count(stem)}")
+                problems += check_multi(qid, stem, opts, q["key"])
+                if kind == "Mock exam" and folder.name[:2] in MOCK_TELL_MODULES:
+                    problems += check_mock_item(qid, opts, q["key"])
+                    if isinstance(q["key"], str):
+                        mock_rows.setdefault(page.stem, []).append((opts, q["key"]))
                 scope_prose = {"Quiz": prose_of(md), "Module quiz": module_prose, "Mock exam": level_prose}[kind]
                 problems += check_quotes(qid, q.get("explanation", {}), q["key"], scope_prose)
                 if kind == "Module quiz":
@@ -358,14 +508,16 @@ def check_module(folder):
                 if kind == "Mock exam":
                     problems += check_duplicate(qid, stem, {k: v for k, v in level_stems.items() if not k.startswith(page.stem + "#")})
                     if folder.name[:2] in NAMED_PAGE_MOCKS:
-                        problems += check_named_page(qid, q.get("explanation", {}).get(q["key"], ""))
+                        problems += check_named_page(qid, q.get("explanation", {}).get(q["key"] if isinstance(q["key"], str) else q["key"][0], ""))
                 paras = key_paragraphs(md)
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
                 if n - 1 < len(paras[idx]):
-                    problems += check_key_paragraph(qid, paras[idx][n - 1], q["key"])
+                    problems += check_key_paragraph(qid, paras[idx][n - 1], q["key"], want_letters)
                 grp = longest.setdefault("mock exam" if kind == "Mock exam" else "module", [0, 0])
-                grp[0] += key_is_longest(opts, q["key"])
+                grp[0] += keys_longest(opts, q["key"])
                 grp[1] += 1
+    for page_name, rows in sorted(mock_rows.items()):
+        problems += check_mock_extremes(page_name, rows)
     for qid in by_id:
         if qid not in seen:
             problems.append(f"{qid}: in quiz.json but not on any page")
@@ -375,7 +527,7 @@ def check_module(folder):
             problems.append(finding)
         if warning:
             print(f"warning: {warning}")
-    keys_used = [q["key"] for q in data["quizzes"]]
+    keys_used = [q["key"] for q in data["quizzes"] if isinstance(q["key"], str)]
     for letter in "abcd":
         if keys_used and keys_used.count(letter) > (len(keys_used) + 1) // 2:
             problems.append(f"{folder.name}: key letter {letter} is overused ({keys_used.count(letter)} of {len(keys_used)})")
@@ -392,8 +544,9 @@ def main(argv):
         for pg in sorted(f.glob("*.md")):
             for kind, questions, keys in parse_page_quizzes(pg.read_text()):
                 for n, ((stem, opts), key) in enumerate(zip(questions, keys), start=1):
-                    if key in opts:
-                        items[f"{f.name[:2]}/{pg.stem[:2]}#{QID[kind]}{n}"] = (stem, opts[key])
+                    ks = [key] if isinstance(key, str) else key
+                    if all(k in opts for k in ks):
+                        items[f"{f.name[:2]}/{pg.stem[:2]}#{QID[kind]}{n}"] = (stem, " ".join(opts[k] for k in ks))
     for p in check_near_duplicates(items):
         print(p)
         total += 1

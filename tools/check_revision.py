@@ -96,7 +96,7 @@ def quiz_item_stems():
     out = {}
     for f in (ROOT / "exercises").glob("*/tests/quiz.json"):
         for q in json.loads(f.read_text())["quizzes"]:
-            out[q["id"]] = stems(re.sub(r"`[^`]*`", " ", q["stem"]) + " " + q["options"][q["key"]])
+            out[q["id"]] = stems(re.sub(r"`[^`]*`", " ", q["stem"]) + " " + " ".join(q["options"][k] for k in ([q["key"]] if isinstance(q["key"], str) else q["key"])))
     return out
 
 

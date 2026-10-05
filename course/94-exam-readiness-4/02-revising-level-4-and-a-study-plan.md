@@ -1,6 +1,6 @@
 # Revising Level 4: flashcards, the review bank and a study plan
 
-**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 2 of 3**
+**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 2 of 4**
 **Exams:** P1 to P7 (CCAR-P)
 
 **After this page you can** use the Level 4 flashcards and the spaced-review question bank on a schedule, read a mock exam result by domain and by cause of the miss, and run a four-week plan that spends time where the marks are.
@@ -19,7 +19,7 @@ Level 4 holds fifteen modules, and nobody keeps all of it in mind. The mock exam
 |---|---|---|
 | **Flashcards** | 95 short question-and-answer cards for modules 79 to 93, one fact or distinction each | Learn and recall limits, rules, names and distinctions |
 | **Review bank** | 48 scenario questions for modules 79 to 93, with a key and a reason | Practise applying a page to a situation, on a spaced schedule |
-| **Professional mock exam** | One mock exam of 63 questions, page 3 | Test readiness under time and find weak domains |
+| **Professional mock exam** | Two mock exams of 63 questions, pages 3 and 4 | Test readiness under time and find weak domains |
 | **The earlier kits** | The Level 1 and Level 2 flashcards, review banks and mock exams of modules 11 and 44 | Keep the shared foundations fresh |
 
 The flashcards and the bank are plain data files in `exercises/94-exam-readiness-4/`, `flashcards.json` and `review-bank.json`, and `course/README.md` documents their format. Every card and item names the course page that states the fact, and the Professional domains it serves (P1 to P7), so you can filter by domain, by module or by page. The earlier kits still matter, because Levels 1 to 3 are the path to this exam and the Professional questions assume what they teach.
@@ -51,7 +51,7 @@ The plan assumes about forty minutes on most days and a little more at the weeke
 
 1. **Week 1: baseline.** Take the mock exam untimed, with no notes, and read every explanation. Fill the error log. Rank the domains by the weight of the domain times the share you missed. Start the flashcard schedule for the top two domains.
 2. **Weeks 2 and 3: the weak domains, by weight.** Work the review bank for the ranked domains, and reread the pages behind your misses. Make a card for every fact that you did not know. In the second week add the next domain on the list. Keep the daily flashcard session going; it is short, and it is the part that holds. Read module 93 once more in week 3: it is the one page that uses all seven domains together.
-3. **Week 4: exam conditions.** Take the mock exam again in one sitting of 120 minutes, with no notes and the pacing of page 1, after at least two weeks since the first sitting so that you answer from understanding and not from memory of the keys. Compare its domain scores with the first sitting. Spend the next three days on the domains that still lag.
+3. **Week 4: exam conditions.** Take the other mock exam in one sitting of 120 minutes, with no notes and the pacing of page 1, after at least two weeks since the first sitting so that you answer from understanding and not from memory of the keys. Compare its domain scores with the first sitting. Spend the next three days on the domains that still lag.
 4. **The last two days.** Review flashcards and your error log only, and check the logistics of module 11, page 2: the name on the booking against the ID, the booking time, the system check or the journey.
 
 If your first sitting already shows an even profile, shorten the plan and move the second sitting earlier. If it shows a gap in a heavy domain, add a week and begin with that domain's pages, not its cards: cards recall a fact, and a pattern needs the page.

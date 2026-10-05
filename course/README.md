@@ -17,7 +17,7 @@ and modules 79 to 94 of Level 4 (Architect Professional), which is the whole of 
 | `08-claudes-apps-in-depth/` | Claude's apps in depth | 3 |
 | `09-claude-for-every-role/` | Claude for every role | 2 |
 | `10-safety-privacy-and-policy/` | Safety, privacy and policy | 2 |
-| `11-exam-readiness-1/` | Exam readiness 1 (three pages and the Level 1 mock exam) | 4 |
+| `11-exam-readiness-1/` | Exam readiness 1 (three pages and two Level 1 mock exams) | 5 |
 | `12-from-business-need-to-a-testable-spec/` | From business need to a testable spec | 3 |
 | `13-one-rest-api-under-every-sdk/` | One REST API under every SDK | 3 |
 | `14-the-messages-api/` | The Messages API | 3 |
@@ -84,7 +84,7 @@ and modules 79 to 94 of Level 4 (Architect Professional), which is the whole of 
 | `75-scenario-structured-data-extraction/` | Scenario: structured data extraction | 2 |
 | `76-scenario-conversational-ai-assistant/` | Scenario: conversational AI assistant | 2 |
 | `77-scenario-agentic-tool-builder/` | Scenario: agentic tool builder | 2 |
-| `78-exam-readiness-3/` | Exam readiness 3 (two pages and two Architect mock exams) | 4 |
+| `78-exam-readiness-3/` | Exam readiness 3 (two pages, two Architect mock exams and a scenario question pool) | 5 |
 | `79-from-business-problem-to-solution/` | From business problem to solution | 2 |
 | `80-end-to-end-and-multi-agent-architecture/` | End-to-end and multi-agent architecture | 2 |
 | `81-reliability-of-multi-agent-systems/` | Reliability of multi-agent systems | 2 |
@@ -100,7 +100,7 @@ and modules 79 to 94 of Level 4 (Architect Professional), which is the whole of 
 | `91-stakeholders-and-the-project-lifecycle/` | Stakeholders and the project lifecycle | 2 |
 | `92-enabling-teams-and-operations/` | Enabling teams and operations | 2 |
 | `93-professional-capstone/` | Professional capstone | 2 |
-| `94-exam-readiness-4/` | Exam readiness 4 | 3 |
+| `94-exam-readiness-4/` | Exam readiness 4 (two pages and two Professional mock exams) | 4 |
 
 Modules 85 to 89 belong to Level 4 (Architect Professional); their pages open with `**Level:** Architect Professional` and the exam codes P3, P4 or P6.
 

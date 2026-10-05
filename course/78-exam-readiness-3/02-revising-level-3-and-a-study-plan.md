@@ -1,6 +1,6 @@
 # Revising Level 3: flashcards, the review bank and a study plan
 
-**Level:** Architect · **Module 78:** Exam readiness 3 · **Page 2 of 4**
+**Level:** Architect · **Module 78:** Exam readiness 3 · **Page 2 of 5**
 **Exams:** A1 to A5 (CCAR-F)
 
 **After this page you can** use the Level 3 flashcards and the spaced-review question bank on a schedule, read a mock exam result by domain, by scenario and by cause of the miss, and run a four-week plan that spends time where the marks are.

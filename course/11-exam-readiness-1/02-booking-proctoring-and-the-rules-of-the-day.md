@@ -1,6 +1,6 @@
 # Booking, proctoring and the rules of the day
 
-**Level:** Foundations · **Module 11:** Exam readiness 1 · **Page 2 of 4**
+**Level:** Foundations · **Module 11:** Exam readiness 1 · **Page 2 of 5**
 **Exams:** all
 
 **After this page you can** book an exam, prepare for online proctoring or a test centre, request an accommodation in the
