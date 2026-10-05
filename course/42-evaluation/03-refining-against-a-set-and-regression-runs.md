@@ -445,7 +445,7 @@ A regression run is the same set, run again, with a comparison against the last 
 | A changed tool or schema | The model reads the description, so a rename changes its choices | Before the merge |
 | A scheduled run | The provider may change what an alias points to, and traffic drifts | Nightly, with an alert on a drop |
 
-The pinned model ids the course uses are snapshots, which is what makes a before-and-after comparison fair. The errors page shows that some migrations fail at the request and not in the output: a prefilled assistant message returns a 400 on Claude 4.6 and later models, a forced `tool_choice` returns a 400 on Claude Opus 5.5 and Sonnet 5.5, among others, and `thinking: {"type": "enabled"}` returns a 400 on models from 4.7. A regression run on the new id turns each of those into a failed case the same afternoon, and not a failed request in production. Module 43 reads such failures.
+The pinned model ids the course uses are snapshots, which is what makes a before-and-after comparison fair. The errors page shows that some migrations fail at the request and not in the output: a prefilled assistant message returns a 400 on Claude 4.6 and later models, a forced `tool_choice` returns a 400 on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and `thinking: {"type": "enabled"}` returns a 400 on models from 4.7. A regression run on the new id turns each of those into a failed case the same afternoon, and not a failed request in production. Module 43 reads such failures.
 
 A pull request check is the natural home for the run: module 40 shows a workflow triggered by a repository event, and an eval job is one more job in it. The set lives in the repository beside the prompt, so a change to either shows in the same diff.
 
@@ -491,23 +491,23 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
    - **d**: Rerun the set until that input passes
 
 2. A regression run is scheduled for the day a team changes the model id in its configuration. Which failure does that run catch that a prompt-only check would not?
-   - **a**: A prefilled assistant turn that the new release rejects at the request
-   - **b**: A typo that has crept into one of the example sentences
-   - **c**: A grader scale written from one to five instead of zero to five
+   - **a**: A prefilled assistant turn that the new release rejects
+   - **b**: A typo that crept into an example sentence in the prompt
+   - **c**: An edit that fixes one case and breaks another
    - **d**: A label that was copied wrongly from a spreadsheet into the set
 
-3. A team re-grades 800 items with a model every night, and nobody waits for the result. Which option lowers the cost of that work the most?
-   - **a**: Remove the edge items because they are rare
-   - **b**: Run the work again on every commit instead of once a day
-   - **c**: Submit it through the Message Batches API
-   - **d**: Grade every item twice and keep the higher score
+3. A team re-grades 800 items with a model every night, and nobody waits for the result. Which option cuts the price of that job the most?
+   - **a**: Grade a random tenth of the items each night
+   - **b**: Rerun the work on every commit instead of nightly
+   - **c**: Submit the work through the Message Batches API
+   - **d**: Send the items as parallel synchronous requests
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says that "An average never excuses a regression": "If a case passed before and fails now, a person looks at it", and then the decision is made. *b* is ruled out because the example's v2 also raised the average and still failed its gate, and the rule for step 5 is to keep a change "only if every success dimension still holds and nothing regressed without a reason you accept". *c* is ruled out because "A case that disappears is not a pass", and dropping the case that fails "is the easiest way to improve a score". *d* is ruled out because a rerun until the input passes treats a signal as noise, while the page says "a flaky case is a finding".
-2. **a**. The page says a prefilled assistant message "returns a 400 on Claude 4.6 and later models", and that a regression run on the new id "turns each of those into a failed case the same afternoon". *b* is ruled out because an example sentence typo is a prompt edit, which the table already puts "Before the merge, as a check on the pull request". *c* is ruled out because the grader's scale belongs to the grader, and the new id changes the application's behaviour: "Models differ, and a migration changes behaviour". *d* is ruled out because a wrongly copied label is a data error, and "The set lives in the repository beside the prompt", so a review of the diff finds it.
-3. **c**. The page says the Message Batches API "charges half the standard price for work that can wait up to a day", and calls a nightly regression run "the typical batch job". *b* is ruled out because a run on every commit multiplies the requests, and the page says "A quick check on a pull request stays synchronous and small". *a* is ruled out because "The edge tag has its own threshold", since the edge cases are where regressions hide. *d* is ruled out because grading twice doubles the requests, and keeping the higher score contradicts the rule to "pass it only if every run passes".
+2. **a**. The page says a prefilled assistant message "returns a 400 on Claude 4.6 and later models", and that a regression run on the new id "turns each of those into a failed case the same afternoon". *b* is ruled out because an example sentence typo is a prompt edit, which the table already puts "Before the merge, as a check on the pull request". *c* is ruled out because the table gives the prompt edit its own run, where "The edit fixes one case and breaks another", with no model id involved. *d* is ruled out because a wrongly copied label is a data error, and "The set lives in the repository beside the prompt", so a review of the diff finds it.
+3. **c**. The page says the Message Batches API "charges half the standard price for work that can wait up to a day", and calls a nightly regression run "the typical batch job". *b* is ruled out because a run on every commit multiplies the requests, and the page says "A quick check on a pull request stays synchronous and small". *a* is ruled out because grading a sample drops cases, and "A case that disappears is not a pass". *d* is ruled out because the discount is for work that can wait, and synchronous calls take none of it: the Batches API "charges half the standard price for work that can wait up to a day".
 
 </details>
 
@@ -516,35 +516,35 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
 This quiz covers all three pages of the module.
 
 1. A team writes one criterion, "replies should be accurate". Which addition turns it into something an eval can enforce?
-   - **a**: A promise to review the replies at the end of each month
-   - **b**: A threshold on a named metric, over a fixed set of cases
-   - **c**: A longer list of the qualities that a good reply has
-   - **d**: A statement that accuracy matters more than speed or cost
+   - **a**: A monthly review where the team reads sample replies
+   - **b**: A target that sets a metric, a threshold and a data set
+   - **c**: A longer list that spells out the qualities of a good reply
+   - **d**: A ranking that puts accuracy ahead of speed and cost
 
 2. A ticket-routing prompt is edited, and the team reruns a set in which every case is graded by a script. Which grader fits a case whose output must parse as a JSON object holding a `queue` key?
-   - **a**: A model grader that rates the whole output from one to five
-   - **b**: A similarity score against a reference output of the same kind
+   - **a**: A pattern check that finds the word queue in the output
+   - **b**: An exact match against one stored reference output
    - **c**: A structure check that decodes and compares the value
-   - **d**: A human who reads every single item that the set holds
+   - **d**: A similarity score against a reference output
 
 3. A prompt change scores better overall, and the team wants to be sure the improvement is real before launch. Which pair of checks gives the most trustworthy answer?
-   - **a**: A larger set of the same easy cases, and a stricter threshold
-   - **b**: A second run of the same cases, and a review of the average
-   - **c**: A review of the edits, and the same cases graded by a person
+   - **a**: A comparison per case, and a second run of the same cases
+   - **b**: A review of the average, and a run on held-out cases
+   - **c**: A larger set of the same easy cases, and a stricter threshold
    - **d**: A comparison per case, and a run on held-out cases
 
 4. A case passes in two of three repeated runs. How should the harness treat it?
-   - **a**: As a pass, since most runs passed
-   - **b**: As a fail, and as flaky in the report
-   - **c**: As a pass, after the failing run is thrown away
-   - **d**: As a fail, kept out of the flaky count
+   - **a**: A pass, because two of three runs succeeded
+   - **b**: A fail, listed as flaky in the report
+   - **c**: A pass, once the failing run is discarded
+   - **d**: A fail, left out of the count of flaky cases
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A good criterion names "a metric, a threshold, a data set, and a baseline to beat", and the four traits ask for "quantitative metrics or well-defined qualitative scales". *a* is ruled out because a promise to review is a process and does not make the criterion measurable: "Nobody can say what number or scale a result would have". *c* is ruled out because a longer list of qualities repeats the problem, since good, accurate and natural are "wishes until they carry a number or a scale and a data set". *d* is ruled out because the page says "Most use cases need multidimensional evaluation along several success criteria", which means a number for each, not one ranking in a sentence.
-2. **c**. The page lists a "Structure check" for "A reply that must parse and carry the right fields", and says it "parses the whole output as JSON". *a* is ruled out because a model grader belongs to "A judgement no code can make", and a field comparison is code. *b* is ruled out because similarity answers "Whether two texts say the same thing", and a queue name has an exact right value. *d* is ruled out because the case is graded by a script, and a human belongs in "A sample, to check the model grader".
-3. **d**. The page says "Compare per case" and to "Keep a held-out slice that the loop never touches and run it at the end". *b* is ruled out because rerunning the same cases repeats the tuned set, and "The score is then a memory test". *c* is ruled out because a list of edits records effort and a person grading the same cases still scores the cases the prompt was shaped by, and the page says "More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals". *a* is ruled out because "Grading only what is easy to grade" measures a different task, and a threshold on easy cases does not change that.
+1. **b**. A good criterion names "a metric, a threshold, a data set, and a baseline to beat", and the four traits ask for "quantitative metrics or well-defined qualitative scales". *a* is ruled out because a review is a process and does not make the criterion measurable: "Nobody can say what number or scale a result would have". *c* is ruled out because a longer list of qualities repeats the problem, since good, accurate and natural are "wishes until they carry a number or a scale and a data set". *d* is ruled out because the page says "Most use cases need multidimensional evaluation along several success criteria", which means a number for each, not one ranking in a sentence.
+2. **c**. The page lists a "Structure check" for "A reply that must parse and carry the right fields", and says it "parses the whole output as JSON". *a* is ruled out because a pattern "is found anywhere in the output", so it would pass text that does not parse as one JSON object. *b* is ruled out because exact match decides "A categorical answer: a label, a choice", and a whole reference output would fail on key order or an extra field. *d* is ruled out because similarity answers "Whether two texts say the same thing", and a queue name has an exact right value.
+3. **d**. The page says "Compare per case" and to "Keep a held-out slice that the loop never touches and run it at the end". *a* is ruled out because rerunning the same cases repeats the tuned set, and "The score is then a memory test". *b* is ruled out because a review of the average cannot show a rare failure, and "An average never excuses a regression". *c* is ruled out because "Grading only what is easy to grade" measures a different task, and a threshold on easy cases does not change that.
 4. **b**. The page says to "pass it only if every run passes", and that "A case that passes in some runs and fails in others is flaky". *a* is ruled out because a case that fails sometimes will fail for some customers, which is why "a flaky case is a finding". *c* is ruled out because discarding the failing run removes the evidence, and the page says to "pass it only if every run passes". *d* is ruled out because the criteria "can say how many flaky cases are tolerated", which needs the count to include it.
 
 </details>
