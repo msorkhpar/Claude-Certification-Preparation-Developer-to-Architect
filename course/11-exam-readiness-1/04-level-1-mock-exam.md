@@ -60,7 +60,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: A sample of the target style is the missing piece
    - **b**: The performance part is the one that is absent
    - **c**: The process part is the one that is absent
-   - **d**: That part should say whether the assistant may disagree
+   - **d**: That part says whether pushback is welcome
    - **e**: The product part is the one that is unclear
 
 4. A user pastes a 25-page report beneath a single line of instruction and gets weak, unfocused answers. The user also needs any instruction hidden inside the report to be ignored. Which change fits best?
@@ -140,7 +140,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 16. An analyst asks Claude for the reasons a new policy will succeed, and the reply gives only supporters' views. The memo goes to a review committee. What is the best next step?
    - **a**: Ask Claude whether its answer was biased and accept the reply
    - **b**: Add a line to the memo saying that an AI drafted it
-   - **c**: Reword the request to ask for the leading argument on each side
+   - **c**: Reword the request to cover each side's leading argument
    - **d**: Switch to a larger tier and ask the same question again
 
 17. A finance team plans to use Claude for Excel to produce the reconciliation that its auditors will rely on, and to send the result with no further checks. What does the add-in page say about this plan?
@@ -214,7 +214,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **b**: The weights should have updated after the exchange
    - **c**: The behaviour is intended and not a fault
    - **d**: Incognito chats can only be started inside a Project
-   - **e**: That mode excludes the conversation from memory and history by design
+   - **e**: That mode is built to bypass memory and history
 
 29. An FP&A analyst must trace how a revenue figure in a long workbook is derived before presenting it. Which capability of the Excel add-in helps most directly?
    - **a**: Reading closed workbooks stored in the shared drive
@@ -425,8 +425,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    used".
 2. **d**. A drafting task wants audience, tone and an example of the target style (module 5, page 1). *a* is ruled out because that is the brainstorming task: "brainstorming wants breadth first and judgment later". *b* is ruled out because that is the research task: "research wants sources named and unsupported claims flagged". *c* is ruled out because that is the analysis task: "Analysis wants the material and the question".
 3. **b and d**. The performance part says how Claude should behave, including "whether to challenge you" (module 5, page 1), and the stem leaves it out. *a* is ruled out because the page adds an example only "when a style matters". *c* is ruled out because the page describes that part as "The steps or approach you want followed, what to consult, what to ignore". *e* is ruled out because the page defines it as "The deliverable, its form (an email, a table, a list of options), its length and its audience".
-4. **b**. Long inputs go near the top, tagged as data, with the query at the end (module 6, pages 1 and 2). *a* is
-   ruled out because "A role is a request, not a credential", so it changes voice and not focus on the material. *d*
+4. **b**. Long inputs go near the top, tagged as data, with the query at the end (module 6, pages 1 and 2). *a* is ruled out because a role "changes style and focus, not truth", and it neither marks the report as data nor moves the question to the end. *d*
    is ruled out because "Moving a pasted document above the instructions does not mark it as data". *c* is ruled out
    because "A key instruction buried in a long paragraph is easy to underweight".
 5. **a**. The colleague test: if a capable newcomer would need to ask a question first, the answer belongs in the prompt (module 6, page 1). *b* is ruled out because "Changing a prompt and re-reading one answer is anecdote". *c* is ruled out because "Self-reported confidence is not a measure of accuracy". *d* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap.

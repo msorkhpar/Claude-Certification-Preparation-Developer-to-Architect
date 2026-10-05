@@ -168,8 +168,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **e**: Ask Claude whether each reference is real before using it
 
 21. A freelance writer uses Claude to draft a short story opening and wants to be sure it is safe to publish under their own name. Which check does the course name for creative work?
-   - **a**: Whether a disclosure line can be skipped for short pieces
-   - **b**: Whether it leans on an existing piece and keeps the maker's voice
+   - **a**: Whether a disclosure line can be skipped for pieces this short
+   - **b**: Whether it copies a prior piece and keeps the maker's voice
    - **c**: Whether the plot can be handed to Claude to finish
    - **d**: Whether Claude's reply says that the opening is original
 
@@ -207,13 +207,13 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 27. A free-plan user wants to hand Cowork a folder on their computer. What does the help centre say it needs?
    - **a**: A terminal with the command-line tool installed
    - **b**: A Team plan, which is the only plan that has it
-   - **c**: A paid subscription and the desktop app, open and connected
+   - **c**: A paid subscription and the open, connected desktop app
    - **d**: Nothing beyond a browser with the web app open and a login
 
 28. A manager asks Claude for a two-sentence reply to a colleague and then for a reusable 40-line status dashboard for the team. Which pair of outputs does the help centre's rule produce?
    - **a**: The short reply as an artifact and the dashboard inline
    - **b**: Both as artifacts, opened in a side panel for the manager
-   - **c**: The short answer stays in chat; the larger one opens in a panel
+   - **c**: The brief one in chat, the larger one as an artifact
    - **d**: Both inline, kept in the chat thread as plain text
 
 29. A team plans an agent that will update records and send emails by itself. Which approach reflects the course's habit for human and agent teams?
@@ -323,7 +323,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 46. A freelancer on a Pro plan asks whether Anthropic uses their chats to improve Claude. What does the course say?
    - **a**: Only for incognito chats, which feed improvements to the models
-   - **b**: Only if they opt in through privacy settings, or a conversation is flagged
+   - **b**: Only if they opt in, or a conversation is flagged
    - **c**: Never, whatever settings they have chosen or plan they hold
    - **d**: Always, with no setting available to stop the use in any plan
 
@@ -448,7 +448,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 29. **a**. The agent is treated like a new colleague with limited access (module 5, page 1). *b* is ruled out because the page says "Start narrow, learn how Claude does on your material, then widen". *c* is ruled out because the habit needs "a review before consequences". *d* is ruled out because the questions include "what must a person approve, who is notified of what it did, and where does it stop".
 30. **b**. A step stays with a person or code when a mistake would be hard to reverse (module 5, page 1). *a* is ruled out because a good step is "tolerant of an occasional miss that a review will catch". *c* is ruled out because "A small, clear step with a visible result is easier to judge". *d* is ruled out because a step suits Claude when it is "drafting, summarising, comparing, extracting, rewording, brainstorming".
 31. **a and e**. A recurring task set with /schedule "runs in the cloud, so it does not need your computer awake or the desktop app open" (module 8, page 1). *b* is ruled out because "A recurring task, set with a /schedule command". *c* is ruled out because "Tasks run in the cloud on Anthropic's servers", not through the desktop app. *d* is ruled out because "sessions can continue when your computer is offline".
-32. **d**. The course recommends a deliberate starting point of no AI, adding it only where analysis says it earns its place (module 9, page 2). *a* is ruled out because the course "recommends a deliberate starting point of no AI". *b* is ruled out because "audiences, commissioners and platforms may have rules or expectations about AI involvement". *c* is ruled out because a maker keeps "the idea, the voice, the final choices and the signature".
+32. **d**. The course recommends a deliberate starting point of no AI, adding it only where analysis says it earns its place (module 9, page 2). *a* is ruled out because the course "recommends a deliberate starting point of no AI". *b* is ruled out because the course "recommends a deliberate starting point of no AI", and AI at every stage from the outset is the reverse. *c* is ruled out because a maker keeps "the idea, the voice, the final choices and the signature".
 33. **b**. Diligence is the official name for taking responsibility: will I stand behind this, tell people honestly what Claude did and have I protected the data (module 9, page 1). *a* is ruled out because that question belongs to the habit of describing: "Have I said what I want, so the job can be done and judged?" *c* is ruled out because the table gives that question as "Is what came back accurate, complete, fair and fit for its reader?" for the habit of judging. *d* is ruled out because that question belongs to deciding what to hand over: "Which parts of this job go to Claude, and which stay with me?"
 34. **a**. A step-by-step task on trusted live pages suits Claude in Chrome with manual approval and a clean profile (module 8, page 3). *b* is ruled out because in that setting "Claude does not pause and nothing checks its actions". *c* is ruled out because "A dedicated folder limits what an injected instruction or a mistake can reach". *d* is ruled out because Research suits "A job one document answers", and not a step-by-step task that the buyer wants to watch.
 35. **c**. A task that began as a one-off and became weekly deserves a Project or a skill (module 8, page 3). *a* is ruled out because Chrome is for "A step-by-step task on a website you trust". *b* is ruled out because the page says to "revisit it when the work changes". *d* is ruled out because "Picking the most powerful surface" is named as a trap.
