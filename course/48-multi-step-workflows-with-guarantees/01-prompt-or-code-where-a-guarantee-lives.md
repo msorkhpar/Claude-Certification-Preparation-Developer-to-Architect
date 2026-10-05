@@ -80,6 +80,9 @@ verification first in both runs: what differs is whether the code that runs the 
 """
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+import logging
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 SYSTEM = "You are a support agent. Verify the customer's identity before any refund."
@@ -165,6 +168,8 @@ code gate  : first result sent back to the model: BLOCKED identity_required: Ver
 // verification first in both runs: what differs is whether the code that runs the tools checks it.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("identity_gate");
 
 export const MODEL = "claude-sonnet-5-5";
 export const SYSTEM = "You are a support agent. Verify the customer's identity before any refund.";
@@ -292,6 +297,7 @@ import java.util.Map;
  * verification first in both runs: what differs is whether the code that runs the tools checks it.
  */
 public final class IdentityGate {
+    private static final System.Logger LOG = System.getLogger(IdentityGate.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String SYSTEM = "You are a support agent. Verify the customer's identity before any refund.";
 
@@ -409,6 +415,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
+
+private val log = System.getLogger("identity_gate")
 
 /**
  * The same scripted model, which skips identity verification, run against a loop that trusts the prompt and a loop that enforces the prerequisite in code.
