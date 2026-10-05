@@ -74,8 +74,8 @@ single response can be up to 128K tokens on the three large models and 64K on Ha
 The Messages API is stateless. The documentation describes the standard behaviour: each user message and
 assistant response accumulates in the window, "previous turns are preserved completely", and each turn's
 input is "all previous conversation history plus the current user message". In practice your code resends
-the whole history on every request. Chat products such as claude.ai manage this for you, and the page notes
-they can manage the window on a rolling first-in, first-out basis; the API does not.
+the whole history on every request. Chat products such as claude.ai manage this for you, and the context windows
+page notes they can manage the window on a rolling first-in, first-out basis; the API does not.
 
 <!-- illustrative -->
 This is a hand-scripted pair of requests, not a recorded exchange. The second request carries the first
@@ -124,7 +124,7 @@ A request has a 6,000-token system prompt, a 40,000-token document, a 2,000-toke
 `max_tokens` of 4,000, sent to a model with a 200K window (Haiku 4.5): input is 48,000 tokens, plus up to
 4,000 of output, so 52,000 of 200,000. It fits with room for a long conversation. If the same document is re-sent on every turn of that
 conversation, its cost is paid again each time, which is the problem prompt caching (module 20) was made
-for, and the reason the window sizes in the model table of module 3 matter.
+for. The window sizes in the model table of module 3 matter for the same reason.
 
 ## Traps
 
