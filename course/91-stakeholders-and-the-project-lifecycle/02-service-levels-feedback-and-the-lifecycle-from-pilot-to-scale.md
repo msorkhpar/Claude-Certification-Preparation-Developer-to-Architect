@@ -23,7 +23,7 @@ The example reports each one at its edge. The rule has three parts.
 
 - **Met at the limit exactly.** A latency of 2000 ms against a ceiling of 2000 ms is met, and an availability exactly at its floor is met. Writing "below the target" and meaning "at or below" is the edge-case defect that this practice tests.
 - **A miss says by how much.** 2150 ms against 2000 ms is "missed by 150 ms", and an availability of 990 per mille against a floor of 995 is "missed by 5 per mille". A bare "failed" starts an argument that a number would have ended.
-- **The direction is part of the target.** A ceiling is met below it and a floor is met above it; mixing them up reports a healthy system as broken or the reverse.
+- **The direction is part of the target.** A ceiling is met at or below it and a floor is met at or above it; mixing them up reports a healthy system as broken or the reverse.
 
 ### Aligning expectations
 
@@ -43,7 +43,7 @@ A loop is closed when a change goes back out through the gate of module 89 and t
 
 The guide lists five phases: discovery, design, handoff, monitoring and iteration. The first two are the first page. The three that follow are where designs are lost.
 
-**Pilot to scale.** A pilot proves a design under conditions that are kinder than production, and each kindness is an assumption. The record lists them, each with a **test** and a **stop trigger** that has a number in it. The dispute assistant's four: the inputs were typical (sample production disputes and score them by segment; stop if credit accuracy falls below 60 percent on the sample); staff covered the edge cases by hand (count escalations per 100 disputes; stop above 12); capacity was never close (replay peak load against the rate limits; stop at any 429 error at 70 percent of the limit); reviewers kept up (compute reviewer hours from volume and routing; stop when the queue is older than 4 hours). A trigger that says "if it goes wrong" is not a trigger, and an assumption without a test is a hope. The trigger sits exactly at its number, so a case at the limit and a case one past it behave differently, as the practice tests.
+**Pilot to scale.** A pilot proves a design under conditions that are kinder than production, and each kindness is an assumption. The record lists them, each with a **test** and a **stop trigger** that has a number in it. The dispute assistant's four: the inputs were typical (sample production disputes and score them by segment; stop if credit accuracy falls below 60 percent on the sample); staff covered the edge cases by hand (count escalations per 100 disputes; stop above 12); capacity was never close (replay peak load against the rate limits; stop at any 429 error at 70 percent of the limit); reviewers kept up (compute reviewer hours from volume and routing; stop when the queue is older than 4 hours). A trigger that says "if it goes wrong" is not a trigger, and an assumption without a test is a hope. The aim is the sponsor's, but the stop trigger is the pilot's own, and it turns that aim into a number. The trigger sits exactly at its number, so a case at the limit and a case one past it behave differently, as the practice tests.
 
 **Hand-off.** The people who run the system are not the people who built it, and the record says who they are: the owner of the service (a role), the owner of the runbook that explains each alert, the monitors (at least two signals, such as refusals, tokens per answer, the share of answers a person flagged and the 95th percentile latency, each compared with a baseline in both directions) and the rollback, which sends every request to the previous model that stays configured and tested until its own retirement date (module 89). Implementation guidance is part of the hand-off and not an extra: a diagram without the runbook leaves the first incident to the person who happens to remember.
 
@@ -394,13 +394,13 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
    - **a**: It should name the reviewer who decides when quality is poor enough
    - **b**: It states a quality aim, which belongs to the sponsor and not the pilot
    - **c**: It should come after the roll-out so that the data exists to judge it
-   - **d**: It holds no number, so the moment of reaching it is a matter of opinion
+   - **d**: It holds no number, so reaching it is a matter of opinion
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A service level is met at its limit exactly. *a* is ruled out because "A latency of 2000 ms against a ceiling of 2000 ms is met". *c* is ruled out because the ceiling is the target, and "Met at the limit exactly" leaves no reason to raise it. *d* is ruled out because "Met at the limit exactly" settles the case without a second week.
-2. **d**. A trigger needs a number to be reached. *a* is ruled out because "A trigger that says \"if it goes wrong\" is not a trigger", whoever decides. *c* is ruled out because the record lists each assumption "with a test and a stop trigger that has a number in it" before the pilot runs. *b* is ruled out because the table's triggers belong to the pilot, whose assumptions "each with a test" the record lists.
+2. **d**. A trigger needs a number to be reached. *a* is ruled out because "A trigger that says \"if it goes wrong\" is not a trigger", whoever decides. *c* is ruled out because the record lists each assumption "with a test and a stop trigger that has a number in it" before the pilot runs. *b* is ruled out because "the stop trigger is the pilot's own", so the aim may be the sponsor's while the trigger is not.
 
 </details>
 
