@@ -58,7 +58,7 @@ The rules are the lessons of Level 4 written as checks. Each is a fact about the
 | P6 | `accuracy-unstated` | low | the needed accuracy is not stated |
 | P7 | `unmanaged-team-settings` | medium | a team above 10 without managed settings |
 
-Two rules are conditional on a second fact: an agent is only flagged when the path is known, and an irreversible action is only flagged when no person stands before it. A rule that fires without its second fact is a false alarm, and the practice tests each.
+Two rules are conditional on a second fact: an agent is only flagged when the path is known, and an irreversible action is only flagged when no person stands before it. A rule that fires without its second fact is a false alarm, and the practice tests each. The `tool-bloat` threshold is this review's own design value: module 86 teaches deferral for ten or more tools or for definitions over 10,000 tokens, and the review keeps only the token figure, flagged when nothing is deferred.
 
 ### Thresholds sit at an edge
 
@@ -633,7 +633,7 @@ This quiz covers both pages of the module.
    - **a**: Two blocking items, so the pipeline is rejected twice over
    - **b**: Two items that ask for revision and nothing that blocks
    - **c**: One minor item that is only recorded and one that blocks
-   - **d**: One blocking item and one that asks for revision, and nothing minor
+   - **d**: One blocking item and one revision item, with none minor
 
 <details>
 <summary>Answer key</summary>

@@ -568,7 +568,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 ## Quiz
 
 1. Scenario: Larch Mutual's assistant answers a coverage question with a limit of 3,000, and the current policy says 5,000. Latency and the model version have not changed since the documents were refreshed. Where does the investigation start?
-   - **a**: The retrieval step, to see whether a superseded chunk was returned
+   - **a**: The retrieval step, to see whether a stale chunk was returned
    - **b**: The model, to see whether its weights were updated by the vendor
    - **c**: The sampling temperature, to see whether it was lowered by a release
    - **d**: The context window, to see whether the prompt was cut short
