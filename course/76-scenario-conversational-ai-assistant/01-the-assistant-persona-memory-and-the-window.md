@@ -379,26 +379,26 @@ These are the answers that sound sensible and fail in a conversational assistant
 1. A customer's message to the example assistant asks to speak to a human and, in the same sentence, says they might hurt themselves. Where does the route lead?
    - **a**: To a request hand-off, since asking for a person is stated first in the sentence
    - **b**: To a safety hand-off, since a signal of risk is checked first
-   - **c**: To the model, which weighs the two parts of the message together before it replies
-   - **d**: To a stalled hand-off, after the second unanswered question in the conversation
+   - **c**: To the model, since it weighs the two parts of the message together before it replies
+   - **d**: To a stalled hand-off, since two questions have gone unanswered in the conversation
 
 2. The example recalls two facts for a customer on 2026-10-04: an address saved on 2026-09-20 and a plan saved on 2025-12-01, with a limit of thirty days. What does the assistant do with them?
-   - **a**: Treats both as current, since nobody has complained about either of them in the meantime
+   - **a**: Treats both as current and goes on to use them
    - **b**: Uses the postal one and has the subscription one confirmed before relying on it
-   - **c**: Drops both facts from the conversation, since a memory that is not read each day goes stale
+   - **c**: Drops both facts from the conversation and starts afresh
    - **d**: Verifies both facts with the person before saying anything else to them in the conversation
 
 3. A team stores memory files for all customers under one directory and serves any path that begins with `/memories`. A request arrives for `/memories/../../secrets.env`. What is the documentation's guidance?
-   - **a**: Allow it, because the string begins with the expected prefix of the memory area
+   - **a**: Allow it on the strength of the matching prefix of the memory area
    - **b**: Let the model decide whether the file is sensitive before anything is returned to it
    - **c**: Check each one in every command and refuse whatever resolves outside the root
-   - **d**: Rely on the model, which usually refuses to touch files that it was never asked about
+   - **d**: Rely on the platform to confine every file operation to the memory area
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Risk is checked first. *a* is ruled out because the order puts safety above a request: "a signal of risk goes to a person, a request for a person is honoured, a stalled conversation is handed over after two misses". *c* is ruled out because the decision is made before the model sees the message: "Before the model sees a message, code checks it in a fixed order". *d* is ruled out because the stall comes last: "a message that asks for a human and also signals risk is a safety hand-off".
 2. **b**. The address is current and the plan is marked to be verified. *a* is ruled out because an old fact is not trusted: "a fact that has not been touched for months is more likely to be wrong than one from last week". *c* is ruled out because the old fact is checked and not thrown away: "so that the assistant asks the customer before it relies on an address from last year". *d* is ruled out because only the old fact needs confirming: "the example marks each fact `current` when it is no older than a limit, and `verify` when it is older".
-3. **c**. Every path is validated. *a* is ruled out because the prefix is not enough: "A malicious path such as `/memories/../../secrets.env` can reach files outside the `/memories` directory". *b* is ruled out because a decision by the model is a request and not a guarantee: "A refusal that usually happens is a request, and a handler that strips is a guarantee." *d* is ruled out for the same reason: "Claude usually refuses to write sensitive information to memory files".
+3. **c**. Every path is validated. *a* is ruled out because the prefix is not enough: "A malicious path such as `/memories/../../secrets.env` can reach files outside the `/memories` directory". *b* is ruled out because a decision by the model is a request and not a guarantee: "A refusal that usually happens is a request, and a handler that strips is a guarantee." *d* is ruled out because the platform does not execute the operations: "The memory tool operates client-side: Claude requests file operations, and your application executes them."
 
 </details>

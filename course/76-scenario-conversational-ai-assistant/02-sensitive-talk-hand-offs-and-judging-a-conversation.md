@@ -57,13 +57,13 @@ These are the answers that sound sensible and fail in a conversational assistant
 ## Quiz
 
 1. In a reviewed batch of 200 conversations, 199 are excellent, and one customer's message about their own safety got a product tip. The average quality score is 98. What does the review decide?
-   - **a**: Ship it, since the average clears any reasonable bar by a wide margin
+   - **a**: Ship it on the strength of an average that clears any reasonable bar by a wide margin
    - **b**: Hold it until such cases are routed to a person every time
-   - **c**: Ship it with a note, since one case in two hundred is within normal noise
+   - **c**: Ship it with a note that one case in two hundred is within normal noise
    - **d**: Hold it only if the next batch shows a second case of the same kind
 
 2. A conversation is handed over after a signal of risk. What should the assistant do while the person takes over?
-   - **a**: Keep the conversation going as usual, to avoid alarming the customer before the person arrives
+   - **a**: Keep the conversation going as usual until the person arrives
    - **b**: Acknowledge the message, say that someone is coming, and stop advising
    - **c**: Offer a diagnosis of what the customer is going through and a plan to address it
    - **d**: Finish the order question first, then mention that a person may join afterwards
@@ -72,7 +72,7 @@ These are the answers that sound sensible and fail in a conversational assistant
    - **a**: No, because any repeated question counts against the assistant in a review
    - **b**: No, because the limit has to be stayed under and cannot simply be touched
    - **c**: Yes, since the share equals the limit and a limit is met when reached
-   - **d**: Yes, but only when the repeats all came from a single customer in the batch
+   - **d**: Yes, since the repeats all came from a single customer in the batch
 
 <details>
 <summary>Answer key</summary>
@@ -94,30 +94,30 @@ This quiz covers both pages of the module.
    - **d**: Ask the model to rate every customer message for distress and hand over above a score
 
 2. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A returning shopper is greeted with an address saved 200 days ago, and the policy limit is thirty days. What should the assistant do first?
-   - **a**: Use it as it stands, since a saved address is the best evidence there is
+   - **a**: Use it as it stands, treating a saved address as the best evidence there is
    - **b**: Use it and ask the account holder about it at the end of the call
    - **c**: Delete every stored fact older than the limit without telling anyone
    - **d**: Have the account holder confirm it before relying on it
 
 3. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A segment of three conversations has none resolved by the assistant, the floor is 80 percent and the minimum is three. What does the review say about it?
-   - **a**: It is weak, since the count is enough to judge and the result is short of the bar
-   - **b**: The segment is not weak, as three conversations are too few to judge
-   - **c**: The segment is weak only when a fourth conversation confirms the pattern
-   - **d**: The segment is not weak, as a person settled some of the conversations
+   - **a**: It is weak, since the sample suffices and the result misses the bar
+   - **b**: It is not weak, since three conversations are too few to judge
+   - **c**: It is not weak yet, since a fourth conversation must confirm the pattern
+   - **d**: It is not weak, since a person settled some of the conversations
 
 4. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A conversation with forty turns ends in a stalled hand-off. Is it counted as overlong?
    - **a**: Yes, since forty turns is above any sensible limit
    - **b**: Yes, because a stall proves that the assistant should have stopped earlier
-   - **c**: No, since a person took over, and the measure covers only cases that nobody took over
+   - **c**: No, since a person took over
    - **d**: No, because stalled hand-offs are excluded from every figure in the review
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The route is code. *a* is ruled out because a prompt is a request: "Put every rule in the system prompt, in capitals." *c* is ruled out because a confidence threshold is the model's own judgement: "It fails because it makes a probabilistic judgement the only barrier on the one decision that must not be missed". *d* is ruled out for the same reason: "What the design must not do is make the model the only layer."
-2. **d**. An old fact is checked with the account holder before it is relied on: "an old fact is verified before it is used". *a* is ruled out because an old fact is not trusted: "a fact that has not been touched for months is more likely to be wrong than one from last week". *b* is ruled out because an old fact is verified before use: "so that the assistant asks the customer before it relies on an address from last year". *c* is ruled out because an old fact is verified and not discarded: "A recalled fact is a claim with a date".
+1. **b**. The route is code. *a* is ruled out because a prompt is a request that the model weighs, and the rule that must hold belongs in code: "a prompt is a request that a model weighs" *c* is ruled out because a confidence threshold is the model's own judgement: "It fails because it makes a probabilistic judgement the only barrier on the one decision that must not be missed". *d* is ruled out for the same reason: "What the design must not do is make the model the only layer."
+2. **d**. An old fact is checked with the account holder before it is relied on: "an old fact is verified before it is used". *a* is ruled out because an old fact is not trusted: "a fact that has not been touched for months is more likely to be wrong than one from last week". *b* is ruled out because an old fact is verified before use: "so that the assistant asks the customer before it relies on an address from last year". *c* is ruled out because an old fact is marked for checking and not discarded: "the example marks each fact `current` when it is no older than a limit, and `verify` when it is older".
 3. **a**. A segment at the minimum and below the floor is weak. *b* is ruled out because the minimum is met: "two unresolved conversations prove nothing and three begin to". *c* is ruled out because the minimum is a floor and not a margin: "only when it has at least a minimum number of conversations". *d* is ruled out because a settlement by a person is not the assistant's: "A conversation that a person settled is a good outcome and is not the assistant's."
-4. **c**. A hand-over takes the conversation out of the measure. *a* is ruled out because the length alone is not the test: "A conversation with more turns than the limit and no hand-off." *b* is ruled out because the stall is a hand-off: "A conversation that was handed over is not overlong, because somebody took over." *d* is ruled out because the hand-off is counted elsewhere: "A hand-off nobody needed and that had no safety signal behind it is over-escalation".
+4. **c**. A hand-over takes the conversation out of the measure. *a* is ruled out because the length alone is not the test: "A conversation with more turns than the limit and no hand-off." *b* is ruled out because the stall is a hand-off: "A conversation that was handed over is not overlong, because somebody took over." *d* is ruled out because a hand-off still enters the escalation counts: "A hand-off nobody needed and that had no safety signal behind it is over-escalation, and a conversation that needed a person and never got one is under-escalation. Both are counted".
 
 </details>
 
