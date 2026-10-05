@@ -26,11 +26,15 @@ KEY = re.compile(r"sk-ant-[A-Za-z0-9_-]{20,}")
 SKIP_DIRS = {"node_modules", ".gradle", ".kotlin", "home", "__pycache__", ".pytest_cache"}
 
 
+#: Identities that name a product or a service account, not a person (a cloud session's git user is "Claude").
+NOT_PERSONAL = {"claude", "anthropic", "runner", "ubuntu", "root", "user"}
+
+
 def run_time_identity():
     out = set()
     for key in ("user.email", "user.name"):
         v = subprocess.run(["git", "config", key], capture_output=True, text=True, cwd=ROOT).stdout.strip()
-        if len(v) >= 5:
+        if len(v) >= 5 and v.lower() not in NOT_PERSONAL:
             out.add(v)
     h = socket.gethostname()
     if len(h) >= 4:
