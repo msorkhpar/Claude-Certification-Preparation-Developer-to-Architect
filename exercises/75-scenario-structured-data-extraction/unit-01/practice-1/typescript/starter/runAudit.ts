@@ -25,7 +25,7 @@ export function percent(correct: number, total: number): number {
  * Example: 9 of 10 typed documents with min_n 5 and target 90 -> [{ kind: "typed", n: 10, correct: 9, percent: 90, automate: true }]
  */
 export function segmentsOf(runs: Run[], policy: Policy): Segment[] {
-  return [];
+  return [{ kind: "", n: 0, correct: 0, percent: 0, automate: false }];
 }
 
 /**

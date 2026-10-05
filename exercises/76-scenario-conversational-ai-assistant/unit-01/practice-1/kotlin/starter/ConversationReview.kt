@@ -60,7 +60,7 @@ fun countEscalations(conversations: List<Conversation>): Pair<Int, Int> = Pair(0
  * `weak` needs at least `minN` conversations and `resolved * 100 < minResolved * n` for the segment.
  * Example: 3 unresolved "refunds" conversations with minN 3 -> [Segment("refunds", 3, 0, 0, true)]
  */
-fun segmentsOf(conversations: List<Conversation>, policy: Policy): List<Segment> = emptyList()
+fun segmentsOf(conversations: List<Conversation>, policy: Policy): List<Segment> = listOf(Segment("", 0, 0, 0, false))
 
 /**
  * TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.

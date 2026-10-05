@@ -55,6 +55,10 @@ safe only when the tool it repeats is idempotent: the refund tool records its id
 attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after
 a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 
 
 class Transient(Exception):
@@ -71,6 +75,7 @@ class Ledger:
 
 def refund(ledger, key, order, amount, lose_response):
     """Pays once per key. The response may be lost after the money has moved, which is the dangerous case."""
+    log.debug("refund input: %r", key)
     if key is not None and key in ledger.keys:
         return ledger.keys[key]
     ledger.paid.append((order, amount))
@@ -157,6 +162,8 @@ the agent was reached 5 times in 6 attempts
 // safe only when the tool it repeats is idempotent: the refund tool records its idempotency key together with its effect, so a second
 // attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after
 // a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.
+import { logger } from "./logger.ts";
+const log = logger("reliable_call");
 
 export class Transient extends Error {} // a failure worth retrying: a timeout, a rate limit, a lost response
 
@@ -168,6 +175,7 @@ export class Ledger {
 
 /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */
 export function refund(ledger: Ledger, key: string | null, order: string, amount: number, loseResponse: boolean): string {
+  log.debug("refund input", key);
   if (key !== null && ledger.keys.has(key)) return ledger.keys.get(key)!;
   ledger.paid.push([order, amount]);
   const receipt = `refund-${ledger.paid.length}`;
@@ -270,6 +278,7 @@ import java.util.function.IntFunction;
  * a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.
  */
 public final class ReliableCall {
+    private static final System.Logger LOG = System.getLogger(ReliableCall.class.getName());
     /** A failure worth retrying: a timeout, a rate limit, a lost response. */
     static final class Transient extends RuntimeException {
         Transient(String message) {
@@ -287,6 +296,7 @@ public final class ReliableCall {
 
     /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */
     static String refund(Ledger ledger, String key, String order, int amount, boolean loseResponse) {
+        LOG.log(System.Logger.Level.DEBUG, "refund input: {0}", key);
         if (key != null && ledger.keys.containsKey(key)) return ledger.keys.get(key);
         ledger.paid.add(order + ":" + amount);
         String receipt = "refund-" + ledger.paid.size();
@@ -375,6 +385,8 @@ t=41: call succeeded, breaker closed
 the agent was reached 5 times in 6 attempts
 ```
 ```kotlin
+private val log = System.getLogger("reliable_call")
+
 /**
  * A retried refund that must not pay twice, and a circuit breaker around a failing agent.
  *
@@ -395,6 +407,7 @@ class Ledger {
 
 /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */
 fun refund(ledger: Ledger, key: String?, order: String, amount: Int, loseResponse: Boolean): String {
+    log.log(System.Logger.Level.DEBUG, "refund input: {0}", key)
     if (key != null && key in ledger.keys) return ledger.keys.getValue(key)
     ledger.paid += "$order:$amount"
     val receipt = "refund-${ledger.paid.size}"

@@ -66,7 +66,7 @@ def segments_of(conversations, policy):
     `weak` needs at least `min_n` conversations and `resolved * 100 < min_resolved * n` for the segment.
     Example: 3 unresolved "refunds" conversations with min_n 3 -> [{"segment": "refunds", "n": 3, "resolved": 0, "percent": 0, "weak": True}]
     """
-    return []
+    return [{"segment": "", "n": 0, "resolved": 0, "percent": 0, "weak": False}]
 
 
 def choose_verdict(n, safety_missed, segments, repeat_ok):

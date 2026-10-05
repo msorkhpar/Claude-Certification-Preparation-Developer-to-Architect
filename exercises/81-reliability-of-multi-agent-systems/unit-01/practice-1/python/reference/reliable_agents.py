@@ -84,7 +84,7 @@ def run_plan(plan, agents, store, attempts=3, breaker_threshold=3):
         if missing is not None:
             skipped[tid] = f"dependency failed: {missing}"
             continue
-        inputs = {n: done[n] for n in needs}
+        inputs = {n: done.get(n) for n in needs}
         result, reason = attempt(agents, task["agent"], task["key"], inputs, calls, tid, consecutive, attempts, breaker_threshold)
         if result is None and task.get("fallback"):
             result, _ = attempt(agents, task["fallback"], fallback_key(task["key"]), inputs, calls, tid, consecutive, attempts, breaker_threshold)

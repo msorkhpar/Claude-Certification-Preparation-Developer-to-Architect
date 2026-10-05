@@ -56,6 +56,10 @@ interactions, and multi-agent systems use about 15× more tokens than chats". Th
 the lowest rung a task can stand on and prices it with the article's multipliers. The multipliers are the articles' reported figures, not
 a measurement of your workload, and the rule is the course's own teaching model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 MULTIPLIER = {"plain call": 1, "augmented call": 1, "agent": 4, "multi-agent": 15}  # a workflow costs one chat per step
 
 TASKS = [
@@ -70,6 +74,7 @@ TASKS = [
 
 def choose_pattern(task):
     """The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost."""
+    log.debug("choose_pattern input: %r", task)
     if task["one_step"]:
         return "augmented call" if task["needs_external"] else "plain call"
     if task["steps_known"]:
@@ -110,6 +115,8 @@ trivia round-up: agent, cost 0.08, value 0.05, pays: False
 // interactions, and multi-agent systems use about 15× more tokens than chats". This file turns those two statements into a rule that picks
 // the lowest rung a task can stand on and prices it with the article's multipliers. The multipliers are the articles' reported figures, not
 // a measurement of your workload, and the rule is the course's own teaching model.
+import { logger } from "./logger.ts";
+const log = logger("pattern_ladder");
 
 export type Task = { name: string; one_step: boolean; steps: number; needs_external: boolean; steps_known: boolean; independent_parts: boolean; value: number; chat_cost: number };
 
@@ -126,6 +133,7 @@ export const TASKS: Task[] = [
 
 /** The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost. */
 export function choosePattern(task: Task): string {
+  log.debug("choosePattern input", task);
   if (task.one_step) return task.needs_external ? "augmented call" : "plain call";
   if (task.steps_known) return "workflow";
   if (task.independent_parts && task.value >= MULTIPLIER["multi-agent"] * task.chat_cost) return "multi-agent";
@@ -170,6 +178,7 @@ import java.util.Map;
  * a measurement of your workload, and the rule is the course's own teaching model.
  */
 public final class PatternLadder {
+    private static final System.Logger LOG = System.getLogger(PatternLadder.class.getName());
     record Task(String name, boolean oneStep, int steps, boolean needsExternal, boolean stepsKnown, boolean independentParts, double value, double chatCost) {}
 
     static final Map<String, Integer> MULTIPLIER = Map.of("plain call", 1, "augmented call", 1, "agent", 4, "multi-agent", 15); // a workflow costs one chat per step
@@ -184,6 +193,7 @@ public final class PatternLadder {
 
     /** The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost. */
     static String choosePattern(Task task) {
+        LOG.log(System.Logger.Level.DEBUG, "choosePattern input: {0}", task);
         if (task.oneStep()) return task.needsExternal() ? "augmented call" : "plain call";
         if (task.stepsKnown()) return "workflow";
         if (task.independentParts() && task.value() >= MULTIPLIER.get("multi-agent") * task.chatCost()) return "multi-agent";
@@ -213,6 +223,8 @@ market research brief: multi-agent, cost 0.30, value 25.00, pays: True
 trivia round-up: agent, cost 0.08, value 0.05, pays: False
 ```
 ```kotlin
+private val log = System.getLogger("pattern_ladder")
+
 /**
  * The pattern ladder: which rung a task needs, and whether its value pays for the rung.
  *
@@ -239,11 +251,14 @@ val TASKS = listOf(
 )
 
 /** The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost. */
-fun choosePattern(task: Task): String = when {
-    task.oneStep -> if (task.needsExternal) "augmented call" else "plain call"
-    task.stepsKnown -> "workflow"
-    task.independentParts && task.value >= MULTIPLIER.getValue("multi-agent") * task.chatCost -> "multi-agent"
-    else -> "agent"
+fun choosePattern(task: Task): String {
+    log.log(System.Logger.Level.DEBUG, "choosePattern input: {0}", task)
+    return when {
+        task.oneStep -> if (task.needsExternal) "augmented call" else "plain call"
+        task.stepsKnown -> "workflow"
+        task.independentParts && task.value >= MULTIPLIER.getValue("multi-agent") * task.chatCost -> "multi-agent"
+        else -> "agent"
+    }
 }
 
 fun cost(task: Task, pattern: String): Double = (if (pattern == "workflow") task.steps else MULTIPLIER.getValue(pattern)) * task.chatCost

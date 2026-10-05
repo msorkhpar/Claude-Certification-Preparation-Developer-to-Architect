@@ -55,6 +55,10 @@ Claude Sonnet 5.5). The prompting guide says to put long documents "near the top
 the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the
 breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 MIN_CACHEABLE = 512  # tokens, Claude Sonnet 5.5
 
 POLICY = "Refunds above 200 are approved by a supervisor. Gift cards are never refunded in cash. " * 26
@@ -72,6 +76,7 @@ def tokens(text):
 
 def assemble(modules, variables):
     """Static modules first, in the order given, then the dynamic ones with their variables filled in."""
+    log.debug("assemble input: %r", modules)
     ordered = [m for m in modules if m["static"]] + [m for m in modules if not m["static"]]
     blocks = [{"name": m["name"], "static": m["static"], "text": m["text"].format(**variables) if not m["static"] else m["text"]} for m in ordered]
     prefix = sum(tokens(b["text"]) for b in blocks if b["static"])
@@ -117,6 +122,8 @@ without the policy: breakpoint None because 21 tokens is under 512
 // Claude Sonnet 5.5). The prompting guide says to put long documents "near the top of your prompt, above your query". This file orders
 // the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the
 // breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.
+import { logger } from "./logger.ts";
+const log = logger("prompt_budget");
 
 export type Module = { name: string; static: boolean; text: string };
 export type Prompt = { blocks: Module[]; tokens: number; prefix_tokens: number; breakpoint: number | null };
@@ -137,6 +144,7 @@ const fill = (text: string, variables: Record<string, string>) => text.replace(/
 
 /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */
 export function assemble(modules: Module[], variables: Record<string, string>): Prompt {
+  log.debug("assemble input", modules);
   const ordered = [...modules.filter((m) => m.static), ...modules.filter((m) => !m.static)];
   const blocks = ordered.map((m) => ({ ...m, text: m.static ? m.text : fill(m.text, variables) }));
   const prefix = blocks.filter((b) => b.static).reduce((sum, b) => sum + tokens(b.text), 0);
@@ -189,6 +197,7 @@ import java.util.Map;
  * breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.
  */
 public final class PromptBudget {
+    private static final System.Logger LOG = System.getLogger(PromptBudget.class.getName());
     record Module(String name, boolean isStatic, String text) {}
 
     /** blocks in order, the estimated tokens, the tokens of the static prefix and the index of the breakpoint (null when there is none). */
@@ -216,6 +225,7 @@ public final class PromptBudget {
 
     /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */
     static Prompt assemble(List<Module> modules, Map<String, String> variables) {
+        LOG.log(System.Logger.Level.DEBUG, "assemble input: {0}", modules);
         List<Module> blocks = new ArrayList<>();
         for (Module m : modules) if (m.isStatic()) blocks.add(m);
         for (Module m : modules) if (!m.isStatic()) blocks.add(new Module(m.name(), false, fill(m.text(), variables)));
@@ -272,6 +282,8 @@ after a policy edit: prefix identical: False
 without the policy: breakpoint None because 21 tokens is under 512
 ```
 ```kotlin
+private val log = System.getLogger("prompt_budget")
+
 /**
  * A prompt assembled from modules in cache-friendly order, with a token budget and the cache breakpoint.
  *
@@ -303,6 +315,7 @@ private fun fill(text: String, variables: Map<String, String>): String = variabl
 
 /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */
 fun assemble(modules: List<Module>, variables: Map<String, String>): Prompt {
+    log.log(System.Logger.Level.DEBUG, "assemble input: {0}", modules)
     val blocks = modules.filter { it.isStatic } + modules.filter { !it.isStatic }.map { it.copy(text = fill(it.text, variables)) }
     val prefix = blocks.filter { it.isStatic }.sumOf { tokens(it.text) }
     val lastStatic = blocks.indexOfLast { it.isStatic }

@@ -24,7 +24,7 @@ fun percent(correct: Int, total: Int): Int = 0
  * least `minN` documents of the kind and `correct * 100 >= target * n` for it.
  * Example: 9 of 10 typed documents with minN 5 and target 90 -> [Segment("typed", 10, 9, 90, true)]
  */
-fun segmentsOf(runs: List<Run>, policy: Policy): List<Segment> = emptyList()
+fun segmentsOf(runs: List<Run>, policy: Policy): List<Segment> = listOf(Segment("", 0, 0, 0, false))
 
 /**
  * TODO 3 of 6 (unlocks m1 and e6): count the failure shapes in documents.

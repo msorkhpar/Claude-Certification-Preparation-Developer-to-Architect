@@ -72,7 +72,7 @@ export function countEscalations(conversations: Conversation[]): [number, number
  * Example: 3 unresolved "refunds" conversations with min_n 3 -> [{ segment: "refunds", n: 3, resolved: 0, percent: 0, weak: true }]
  */
 export function segmentsOf(conversations: Conversation[], policy: Policy): Segment[] {
-  return [];
+  return [{ segment: "", n: 0, resolved: 0, percent: 0, weak: false }];
 }
 
 /**

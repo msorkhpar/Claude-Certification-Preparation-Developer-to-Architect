@@ -54,6 +54,10 @@ are retried, what the document does not hold goes to a person, and the accuracy 
 The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
 (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 DOCS = {
     "d1": ("typed", "Vendor: Acme Ltd. Lines: 10.00 20.00. Total: 30.00"),
     "d2": ("typed", "Vendor: Borealis Co. Lines: 40.00 5.00. Total: 45.00"),
@@ -94,6 +98,7 @@ def validate(record, text):
 
 def extract(doc_id, text):
     """One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried."""
+    log.debug("extract input: %r", text)
     retried, replies = [], REPLIES[doc_id]
     for attempt in (1, 2):
         record = replies[min(attempt, len(replies)) - 1]
@@ -153,6 +158,8 @@ automate: typed
 //
 // The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
 // (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("extraction_run");
 export type Rec = { vendor: string | null; lines: number[]; total: number | null; conflict: boolean };
 export type Err = [kind: string, field: string];
 export type Extracted = { id: string; attempts: number; record: Rec; errors: Err[]; retried: string[]; status: string };
@@ -190,6 +197,7 @@ export function validate(record: Rec, text: string): Err[] {
 
 /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
 export function extract(docId: string, text: string): Extracted {
+  log.debug("extract input", text);
   let retried: string[] = [];
   const replies = REPLIES[docId];
   let record = replies[0];
@@ -258,6 +266,7 @@ import java.util.stream.Collectors;
  * (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
  */
 public final class ExtractionRun {
+    private static final System.Logger LOG = System.getLogger(ExtractionRun.class.getName());
     record Doc(String kind, String text) {}
 
     record Rec(String vendor, List<Integer> lines, Integer total, boolean conflict) {}
@@ -307,6 +316,7 @@ public final class ExtractionRun {
 
     /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
     static Extracted extract(String docId, String text) {
+        LOG.log(System.Logger.Level.DEBUG, "extract input: {0}", text);
         List<String> retried = List.of();
         List<Rec> replies = REPLIES.get(docId);
         Rec record = replies.get(0);
@@ -380,6 +390,8 @@ by kind: typed 2/2, scanned 1/2, handwritten 0/2
 automate: typed
 ```
 ```kotlin
+private val log = System.getLogger("extraction_run")
+
 /**
  * An extraction run in miniature: a scripted model reads six documents, every record is validated for what a schema cannot check, only the errors a second look can fix
  * are retried, what the document does not hold goes to a person, and the accuracy is reported on every document and not only on the validated ones.
@@ -426,6 +438,7 @@ fun validate(record: Rec, text: String): List<Err> {
 
 /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
 fun extract(docId: String, text: String): Extracted {
+    log.log(System.Logger.Level.DEBUG, "extract input: {0}", text)
     var retried = listOf<String>()
     val replies = REPLIES.getValue(docId)
     var record = replies[0]

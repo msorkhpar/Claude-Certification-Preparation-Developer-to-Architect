@@ -100,7 +100,7 @@ fun runPlan(plan: List<Map<String, Any?>>, agents: Map<String, Agent>, store: Mu
             skipped[tid] = "dependency failed: $missing"
             continue
         }
-        val inputs = needs.associateWith { done.getValue(it) }
+        val inputs = needs.associateWith { done[it] ?: "" }
         var (result, reason) = attempt(agents, task["agent"] as String, task["key"] as String, inputs, calls, tid, consecutive, attempts, breakerThreshold)
         if (result == null && task["fallback"] != null) {
             result = attempt(agents, task["fallback"] as String, fallbackKey(task["key"] as String), inputs, calls, tid, consecutive, attempts, breakerThreshold).first
