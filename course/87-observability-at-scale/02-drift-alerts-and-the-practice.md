@@ -590,10 +590,10 @@ The practice is in [`exercises/87-observability-at-scale`](../../exercises/87-ob
    - **d**: Watch only the metrics that moved down, since a rise just means that the product is used more
 
 2. A team pages its on-call engineer whenever a single minute of tool errors passes the threshold. The pages come nightly and are mostly noise. Which change fits?
-   - **a**: Raise the threshold until the nightly pages stop, so that only the very large outages are ever reported again
-   - **b**: Average the error rate over each full day so that a single spike cannot cross the line
-   - **c**: Send the alert to a shared channel that people read in the morning, in place of paging anybody at night
-   - **d**: Fire only when several windows in a row are over the line
+   - **a**: Raise the threshold until the nightly pages stop coming
+   - **b**: Average the error rate over a full day before comparing
+   - **c**: Send the alert to a channel that is read in the morning
+   - **d**: Fire only when several windows in a row cross the line
 
 <details>
 <summary>Answer key</summary>
@@ -620,10 +620,10 @@ This quiz covers both pages of the module.
    - **d**: One central log store that every service writes to, in place of the separate stores that each of them has now
 
 3. After each team added the conversation id as a metric label, the metrics bill tripled, and the dashboards are used no differently. Which fix fits?
-   - **a**: Move the metrics to a much larger store and carry on with the labels that the teams have added
-   - **b**: Remove the id from the whole system, since single conversations are rarely worth reading
-   - **c**: Store a random tenth of the metric points, so that the number of series that must be kept falls
-   - **d**: Keep the value out of the series and put it in traces and events
+   - **a**: Move the metrics to a larger store and keep the labels
+   - **b**: Remove the id from the whole system, traces and all
+   - **c**: Store a random tenth of the metric points to cut the series
+   - **d**: Move the value from the series to traces and events
 
 <details>
 <summary>Answer key</summary>

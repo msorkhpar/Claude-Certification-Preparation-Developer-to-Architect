@@ -61,10 +61,10 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **d**: Move the task to the smallest available model, which answers quickly enough to fit
 
 2. Scenario: Pylon Software's four teams each hold a separate key, and finance cannot say which team spent what. The platform team proposes an internal gateway. What will the gateway achieve by itself?
-   - **a**: A lower token bill for the teams, since requests now pass through a central point, and less waste
-   - **b**: One shared point for credentials, routing, budgets and usage records, since all traffic passes it
-   - **c**: Faster answers for the teams, since the gateway adds capacity to the shared model, and fewer errors
-   - **d**: Better quality for the teams, because the gateway improves the prompts it forwards, and fewer refusals
+   - **a**: A smaller token bill for each team, since every request now passes one central point
+   - **b**: One place for credentials, routes, budgets and usage records, since all traffic passes it
+   - **c**: Faster answers on every call, since the gateway adds capacity of its own to the model
+   - **d**: Better answers on every call, since the gateway rewrites the prompts it forwards
 
 <details>
 <summary>Answer key</summary>

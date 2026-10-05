@@ -365,10 +365,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 54. Scenario: An architect at Dalby Foods shows the sponsor only the option they recommend, and the sponsor asks why nobody considered the simple thing. Which two statements does the page support? (Select two.)
    - **a**: Four or more alternatives belong in the record, the weak ones among them
-   - **b**: Each alternative has a monthly cost, a verdict on the service levels, a status and a reason
-   - **c**: A longer argument for the recommended option is the cure
+   - **b**: Every alternative gets a cost, a service-level verdict, a status and a reason
+   - **c**: A longer and more detailed argument for the recommended option is the cure
    - **d**: Two alternatives suffice, the recommended one and its nearest rival
-   - **e**: Every option the vendor ever listed belongs in the record, ranked by novelty
+   - **e**: Every option the vendor has ever listed belongs in the record, ranked by novelty
 
 55. Scenario: Two months after launch, the review at Brandt Telecom finds that a new customer segment has appeared and a threshold no longer fits. A manager reads this as proof that the original design failed. How does the page frame it?
    - **a**: As a reason to freeze the design until the next sponsor review
@@ -392,7 +392,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: The vendor that supplies the underlying model to the assistant
    - **b**: The executive sponsor who approved the work and funds it
    - **c**: A role reachable by phone, such as the billing operations manager
-   - **d**: A committee that reviews every incident at its weekly meeting
+   - **d**: A committee that reviews every incident at its regular weekly meeting
 
 59. Scenario: A launch review at Garston Retail runs the rubric on a design that promises "fast replies" with no figure, though an owner and the needed accuracy are stated. What does the rubric record?
    - **a**: A medium finding for no latency number, so the verdict is revise

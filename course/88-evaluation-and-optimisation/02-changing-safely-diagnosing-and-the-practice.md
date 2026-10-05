@@ -662,10 +662,10 @@ The practice is in [`exercises/88-evaluation-and-optimisation`](../../exercises/
 ## Quiz
 
 1. A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team conclude?
-   - **a**: Adopt the new prompt now, because five points is the larger number and both arms have the same size
+   - **a**: Adopt the new prompt, since five points is the larger number
    - **b**: Too small a sample to tell, so gather the planned numbers
-   - **c**: Run the same 80 cases again and average the two results, to get a steadier estimate
-   - **d**: Extend the test only if the new prompt is behind, and stop at once if it is ahead
+   - **c**: Rerun the same 80 cases and average the two results
+   - **d**: Extend the test only if the new prompt is behind
 
 2. A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate do?
    - **a**: Ship it to everyone, because the overall totals are equal and the gains in one segment cover the losses in another
@@ -686,10 +686,10 @@ The practice is in [`exercises/88-evaluation-and-optimisation`](../../exercises/
 This quiz covers both pages of the module.
 
 1. A reply to a policy question is confident and wrong. The right passage was not among the chunks the model was given. Which first step fits?
-   - **a**: Lower the temperature so that the wording of the answers stops varying between runs
-   - **b**: Move the question to a larger model, which is more likely to know what the policy says than the current one is
+   - **a**: Lower the temperature so the wording stops varying
+   - **b**: Move the question to a larger model that knows more
    - **c**: Inspect the index and how the documents are split
-   - **d**: Add more examples of confident replies to the prompt, so that the style is consistent
+   - **d**: Add examples of confident replies to the prompt
 
 2. A team's check for its research agent demands exactly three searches in a fixed order, and it fails runs that reach the right answer by another route. What should the check judge instead?
    - **a**: Whether the runs repeated the same steps, because identical steps prove reliability
@@ -698,9 +698,9 @@ This quiz covers both pages of the module.
    - **d**: The final text, without any look at how it was reached
 
 3. A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. What does the research team's experience suggest?
-   - **a**: Test on the examples that sit in the prompt, since those are already written down
-   - **b**: Wait until the full set has been built and checked, because a small set of examples cannot show a change at all
-   - **c**: Keep judging by feel until launch, and begin to measure once real users arrive
+   - **a**: Test on the examples written in the prompt
+   - **b**: Wait until the full set has been built
+   - **c**: Judge by feel until launch, then measure
    - **d**: Start now with a small set of real queries
 
 <details>

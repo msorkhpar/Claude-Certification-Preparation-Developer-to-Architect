@@ -661,9 +661,9 @@ model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
 
 1. Two versions of a support assistant both score 92 percent on the evaluation set. One of them gets refund answers wrong far more often, and a wrong refund answer costs twenty times a wrong status answer. What should the report show?
    - **a**: Accuracy by type of case, with each mistake priced
-   - **b**: The overall accuracy of each version alone, since equal scores mean that the versions are equal
-   - **c**: The average latency of each version, because speed is the thing that users notice first
-   - **d**: The number of cases in the set, since a larger set makes the score fair to both versions
+   - **b**: The overall accuracy alone, as the two scores are equal
+   - **c**: The average latency, as users notice speed before all else
+   - **d**: The size of the set, as a larger set makes the score fair
 
 2. A team grades a research assistant's free-form reports only with exact-match checks, and the score barely moves when the quality of the reports visibly changes. Which addition fits best?
    - **a**: A longer answer key, so that more phrasings of each answer count as a match

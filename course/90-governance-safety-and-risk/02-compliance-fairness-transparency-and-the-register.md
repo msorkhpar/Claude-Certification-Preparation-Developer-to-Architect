@@ -424,10 +424,10 @@ This quiz covers both pages of the module.
    - **d**: Move the screening into the system prompt so that it cannot be down
 
 2. Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. What does the second page say about that claim?
-   - **a**: A small group cannot be measured, so the average is the only usable figure
-   - **b**: A headline figure masks a failing segment
-   - **c**: The group's score should be dropped when it is below the volume needed
-   - **d**: The system passes because the model was tested on a broad set before launch
+   - **a**: A small group cannot be measured, so the average stands
+   - **b**: A headline figure masks the segment that fails
+   - **c**: The group's score is dropped below the needed volume
+   - **d**: The system passes, as its launch test was broad
 
 3. Scenario: An auditor asks a team to prove that a refund over a set amount was approved by a person. The team has an audit entry for the refund with a request id, an outcome of human and a character count. What do they have?
    - **a**: Nothing, because a record without the content is not admissible
@@ -439,7 +439,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. An input control holds a high-consequence call when it fails. *b* is ruled out because retention does not close the gap: "A screen that is down and lets a request through is the opening an attacker waits for". *a* is ruled out because the first page puts the monitor in the layers that watch "afterwards", so "an output control cannot stop a tool call that already happened". *d* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip".
-2. **b**. The page measures fairness as a gap per group and warns that an average hides one. *a* is ruled out because "the groups must be defined where they can be measured" and a group that can be labelled can be reported. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so dropping the score hides it. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
+2. **b**. The page measures fairness as a gap per group and warns that an average hides one. *a* is ruled out because "The groups must be defined where they can be measured", and a language group can be labelled and so reported. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so dropping the score hides it. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
 3. **d**. The record shows the step happened without a copy of the data. *b* is ruled out because "Content that was never stored cannot be breached, subpoenaed by accident or kept past a deletion request". *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", which names no amount or approver. *a* is ruled out because the design keeps "proof of what happened", and the page does not tie proof to stored content.
 
 </details>
