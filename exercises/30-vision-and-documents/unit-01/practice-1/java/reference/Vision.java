@@ -5,6 +5,7 @@ import java.util.Map;
 
 /** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */
 final class Vision {
+    private static final System.Logger LOG = System.getLogger(Vision.class.getName());
     private Vision() {}
 
     static final int MIB = 1024 * 1024;
@@ -69,6 +70,27 @@ final class Vision {
         return kind.equals("url") ? map("type", "url", "url", value) : map("type", "file", "file_id", value);
     }
 
+    private static int maxCount(int context) {
+        return context < 1_000_000 ? 100 : 600;
+    }
+
+    private static int maxImageSize(boolean cloud) {
+        return (cloud ? 5 : 10) * MIB;
+    }
+
+    private static boolean isMany(int images, int pdfs, boolean cloud) {
+        return images + (cloud ? pdfs : 0) > 20;
+    }
+
+    private static List<Object> imageBlocks(Map<String, Object> item, int n, int imageCount, boolean exact) {
+        List<Object> blocks = new ArrayList<>();
+        if (imageCount > 1) blocks.add(map("type", "text", "text", "Image " + n + ":"));
+        Map<String, Object> block = map("type", "image", "source", sourceOf(item));
+        if (exact) block.put("transformations", map("oversized_image", "error"));
+        blocks.add(block);
+        return blocks;
+    }
+
     private static int num(Map<String, Object> item, String key) {
         return ((Number) item.get(key)).intValue();
     }
@@ -78,6 +100,7 @@ final class Vision {
     }
 
     static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question, boolean exact, String platform) {
+        LOG.log(System.Logger.Level.DEBUG, "planRequest input: {0}", items);
         if (!MODELS.containsKey(model)) throw new RequestError("model", "unknown model " + model);
         String tier = (String) MODELS.get(model)[0];
         int context = (Integer) MODELS.get(model)[1];
@@ -93,11 +116,11 @@ final class Vision {
             }
             total += num(it, "size");
         }
-        int limit = context < 1_000_000 ? 100 : 600;
+        int limit = maxCount(context);
         if (images > limit) throw new RequestError("items", "too many images for " + model);
         if (pages > limit) throw new RequestError("items", "too many PDF pages for " + model);
         if (total > 32L * MIB) throw new RequestError("items", "the request would be larger than 32 MiB");
-        boolean many = images + (cloud ? pdfs : 0) > 20;
+        boolean many = isMany(images, pdfs, cloud);
         int tokens = 0;
         List<Object> resized = new ArrayList<>();
         for (int i = 0; i < items.size(); i++) {
@@ -110,7 +133,7 @@ final class Vision {
             int w = num(it, "width"), h = num(it, "height");
             if (!IMAGE_TYPES.contains(it.get("media_type"))) throw new RequestError("items[" + i + "].media_type", it.get("media_type") + " is not a supported image format");
             if (w > 8000 || h > 8000) throw new RequestError("items[" + i + "].dimensions", "an image may not exceed 8000 x 8000 pixels");
-            if (num(it, "size") > (cloud ? 5 : 10) * MIB) throw new RequestError("items[" + i + "].size", "the image is too large");
+            if (num(it, "size") > maxImageSize(cloud)) throw new RequestError("items[" + i + "].size", "the image is too large");
             if (many && Math.max(w, h) > 2000) throw new RequestError("items[" + i + "].dimensions", "with more than 20 images, no side may exceed 2000 pixels");
             int[] seen = resizedSize(w, h, tier);
             if (seen[0] != w || seen[1] != h) {
@@ -124,10 +147,7 @@ final class Vision {
         for (Map<String, Object> it : items) {
             if (it.get("kind").equals("image")) {
                 n++;
-                if (images > 1) content.add(map("type", "text", "text", "Image " + n + ":"));
-                Map<String, Object> block = map("type", "image", "source", sourceOf(it));
-                if (exact) block.put("transformations", map("oversized_image", "error"));
-                content.add(block);
+                content.addAll(imageBlocks(it, n, images, exact));
             } else {
                 content.add(map("type", "document", "source", sourceOf(it)));
             }

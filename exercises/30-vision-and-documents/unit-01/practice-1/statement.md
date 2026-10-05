@@ -16,6 +16,27 @@ them. Nothing here touches the network: the planner only builds and checks a req
 | `RequestError` | what your code throws, before any call, for a request the API would reject; `field` names the part |
 | item | `{"kind": "image" or "pdf", "name", "media_type", "size", "source": "base64", "url" or "file", "value"}`; an image also has `width` and `height` in pixels, a PDF has `pages`. `size` is the payload size in bytes. `value` is the base64 text, the URL or the file id |
 
+## What is already written, and what you write
+
+The starter is a working planner with eight gaps cut out of it. Everything that is plumbing is written and correct: the tables, the
+`RequestError`, `resized_size` with its search, and the whole of `plan_request` with its checks in order. Each gap is a small function
+with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a
+neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of
+the file (`log.debug(...)`); a run shows the lines under the failing case. Write them in this order (the other languages use the
+camel-case forms, and TypeScript, Java and Kotlin keep the helpers private to the file):
+
+1. `visual_tokens` unlocks `e1` and `e7`: one token per 28 x 28 pixel patch.
+2. `image_cost_usd` unlocks `e7`: tokens times the model's price per million, rounded.
+3. `to_original_coordinates` unlocks `e7`: clamp into the resized size, then scale onto the original.
+4. `_max_count` unlocks `e2` and `e5`: 100 or 600 images or PDF pages, by the context window.
+5. `_max_image_size` unlocks `e2` and `e6`: 10 MiB, or 5 MiB on bedrock and vertex.
+6. `_many` unlocks `e3`: more than twenty image blocks, PDFs counted on bedrock and vertex.
+7. `_image_blocks` unlocks `m1` and `e4`: the `Image n:` label and the image block, with the `transformations` entry when `exact`.
+8. `_source` unlocks `m1`, `e5` and `e6`: the base64, url or file source of an item.
+
+About ten lines in all. The list below describes the whole planner; the parts you do not write are there so you can see how your
+functions are used.
+
 ## What to write
 
 - `visual_tokens(width, height)`: one visual token per 28 by 28 pixel patch, so `ceil(width / 28) * ceil(height / 28)`.

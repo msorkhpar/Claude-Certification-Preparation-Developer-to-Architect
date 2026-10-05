@@ -1,6 +1,9 @@
 """The loop around the computer use tool, against a toy screen. See ../../statement.md."""
 import copy
+import logging
 import math
+
+log = logging.getLogger(__name__)
 
 TOOLSET = "computer_toolset_20260801"
 CLICKS = ("left_click", "right_click", "middle_click", "double_click", "triple_click")
@@ -13,10 +16,12 @@ def render(screen, width, height):
 
 
 def scale_for(width, height):
+    """The factor that shrinks a screen to what the model may be sent."""
     return min(1.0, 1568 / max(width, height), math.sqrt(1_150_000 / (width * height)))
 
 
 def scaled_size(width, height):
+    """The size of the screenshot the model is sent, as (width, height)."""
     scale = scale_for(width, height)
     return (int(width * scale), int(height * scale))
 
@@ -38,15 +43,51 @@ def _inside(shot, point):
     return isinstance(point, (list, tuple)) and len(point) == 2 and 0 <= point[0] < shot[0] and 0 <= point[1] < shot[1]
 
 
+def _risk_error(name, element, confirm):
+    """The error text when a click on this element needs a person and does not get one, else None."""
+    if not element or element.get("risk", "none") == "none": return None
+    if confirm is None or not confirm({"action": name, "element": element["id"], "risk": element["risk"]}): return f"Declined: {element['id']} needs a person's confirmation ({element['risk']})"
+    return None
+
+
+def _valid_region(shot, region):
+    """Is this zoom region a list of four numbers inside the scaled screenshot, with x0 < x1 and y0 < y1?"""
+    return (isinstance(region, (list, tuple)) and len(region) == 4 and _inside(shot, region[:2]) and 0 < region[2] <= shot[0] and 0 < region[3] <= shot[1]
+            and region[0] < region[2] and region[1] < region[3])
+
+
+def _valid_key(args):
+    """Is this the input of a key press: a non-empty text and a repeat that is an integer from 1 to 100?"""
+    repeat = args.get("repeat", 1)
+    return bool(args.get("text")) and isinstance(repeat, int) and 1 <= repeat <= 100
+
+
+def _valid_scroll(args):
+    """Is this the input of a scroll: a direction of up, down, left or right and an integer amount of at least 1?"""
+    return args.get("scroll_direction") in ("up", "down", "left", "right") and isinstance(args.get("scroll_amount"), int) and args.get("scroll_amount") >= 1
+
+
+def _to_replace(images, keep):
+    """The images to replace by a note: all but the newest `keep` (all of them when keep is 0)."""
+    return images[:-keep] if keep > 0 else images
+
+
+def _final_status(stop):
+    """The status the loop ends with for a stop reason, or None when the loop goes on (pause_turn)."""
+    if stop == "pause_turn": return None
+    if stop == "refusal": return "refused"
+    return "done" if stop in ("end_turn", "stop_sequence") else "truncated"
+
+
 def perform(screen, name, args, scale, confirm=None):
     """Run one action. Returns (content, is_error): the text or image blocks for the result and whether it failed."""
+    log.debug("perform input: %r %r", name, args)
     shot = scaled_size(screen["width"], screen["height"])
     if name == "screenshot":
         return ([{"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": render(screen, *shot)}}], False)
     if name == "zoom":
         region = args.get("region")
-        if not (isinstance(region, (list, tuple)) and len(region) == 4 and _inside(shot, region[:2]) and 0 < region[2] <= shot[0] and 0 < region[3] <= shot[1]
-                and region[0] < region[2] and region[1] < region[3]):
+        if not _valid_region(shot, region):
             return (f"Invalid zoom region: {region}", True)
         x0, y0 = to_screen(region[0], region[1], scale, screen)
         x1, y1 = to_screen(region[2], region[3], scale, screen)
@@ -60,9 +101,9 @@ def perform(screen, name, args, scale, confirm=None):
         else:
             sx, sy = to_screen(point[0], point[1], scale, screen)
         element = _element_at(screen, sx, sy)
-        if element and element.get("risk", "none") != "none":
-            if confirm is None or not confirm({"action": name, "element": element["id"], "risk": element["risk"]}):
-                return (f"Declined: {element['id']} needs a person's confirmation ({element['risk']})", True)
+        declined = _risk_error(name, element, confirm)
+        if declined:
+            return (declined, True)
         screen["cursor"] = [sx, sy]
         screen["log"].append((name, element["id"] if element else None))
         return (f"Clicked {element['id'] if element else 'nothing'}", False)
@@ -74,8 +115,7 @@ def perform(screen, name, args, scale, confirm=None):
         screen["log"].append(("type", text))
         return (f"Typed {len(text)} characters", False)
     if name == "key":
-        repeat = args.get("repeat", 1)
-        if not args.get("text") or not isinstance(repeat, int) or not 1 <= repeat <= 100:
+        if not _valid_key(args):
             return ("key needs a text and a repeat from 1 to 100", True)
         screen["log"].append(("key", args["text"]))
         return (f"Pressed {args['text']}", False)
@@ -86,7 +126,7 @@ def perform(screen, name, args, scale, confirm=None):
         return (f"Waited {duration}s", False)
     if name == "scroll":
         direction, amount = args.get("scroll_direction"), args.get("scroll_amount")
-        if direction not in ("up", "down", "left", "right") or not isinstance(amount, int) or amount < 1:
+        if not _valid_scroll(args):
             return ("scroll needs a direction and a positive amount", True)
         screen["log"].append(("scroll", direction))
         return (f"Scrolled {direction} {amount}", False)
@@ -106,7 +146,7 @@ def prune_screenshots(messages, keep=3):
     out = copy.deepcopy(messages)
     images = [(m, b, i) for m in out if isinstance(m["content"], list) for b in m["content"] if b.get("type") == "tool_result"
               and isinstance(b.get("content"), list) for i, c in enumerate(b["content"]) if c.get("type") == "image"]
-    for _, block, i in (images[:-keep] if keep > 0 else images):
+    for _, block, i in _to_replace(images, keep):
         block["content"][i] = {"type": "text", "text": "[screenshot removed]"}
     return out
 
@@ -136,8 +176,6 @@ def run_computer_loop(ask, screen, model="claude-sonnet-5-5", max_turns=10, conf
                         failed = True
                 results.append(result)
             messages.append({"role": "user", "content": results})
-        elif stop == "refusal":
-            return {"status": "refused", "turns": turn, "messages": messages}
-        elif stop != "pause_turn":
-            return {"status": "done" if stop in ("end_turn", "stop_sequence") else "truncated", "turns": turn, "messages": messages}
+        elif _final_status(stop):
+            return {"status": _final_status(stop), "turns": turn, "messages": messages}
     return {"status": "max_turns", "turns": max_turns, "messages": messages}

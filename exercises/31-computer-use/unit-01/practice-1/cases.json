@@ -64,11 +64,17 @@
     }
   },
   "plants": {
-    "wrong-unscaled-click": {
+    "wrong-scale-no-edge-cap": {
       "caught_by": [
-        "m1"
+        "e1"
       ],
-      "defect": "uses the model's coordinates as screen coordinates without scaling them back"
+      "defect": "leaves the longest-side limit out of the scale, so a very wide screen is not shrunk"
+    },
+    "wrong-no-clamp": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "scales a point back without keeping it inside the screen"
     },
     "wrong-no-confirm": {
       "caught_by": [
@@ -82,17 +88,35 @@
       ],
       "defect": "keeps running the actions of a batch after one has failed"
     },
-    "wrong-result-per-message": {
+    "wrong-key-repeat-unbounded": {
       "caught_by": [
-        "m1"
+        "e4"
       ],
-      "defect": "sends each tool result in a user message of its own"
+      "defect": "accepts a key repeat above 100"
     },
-    "wrong-screenshot-full-size": {
+    "wrong-wait-unbounded": {
       "caught_by": [
-        "e7"
+        "e4"
       ],
-      "defect": "sends the screenshot at the full screen size instead of the scaled size"
+      "defect": "accepts a wait longer than 300 seconds"
+    },
+    "wrong-scroll-zero": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "accepts a scroll amount of zero"
+    },
+    "wrong-extra-turn": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "makes one model call more than the turn limit"
+    },
+    "wrong-pause-ends": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "ends the run on a pause_turn instead of calling again"
     },
     "wrong-prune-oldest-kept": {
       "caught_by": [
@@ -100,11 +124,31 @@
       ],
       "defect": "keeps the oldest screenshots and removes the newest"
     },
-    "wrong-extra-turn": {
+    "wrong-prune-keep-zero": {
       "caught_by": [
-        "e5"
+        "e6"
       ],
-      "defect": "makes one model call more than the turn limit"
+      "defect": "keeps every screenshot when keep is 0 and all are to be removed"
+    },
+    "wrong-zoom-full-size": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "sends a zoom at the screenshot size instead of the size of its region"
+    },
+    "wrong-screenshot-full-size": {
+      "caught_by": [
+        "m1",
+        "e7"
+      ],
+      "defect": "sends the screenshot at the full screen size instead of the scaled size"
+    },
+    "wrong-result-per-message": {
+      "caught_by": [
+        "m1",
+        "e3"
+      ],
+      "defect": "sends each tool result in a user message of its own"
     }
   }
 }

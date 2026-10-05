@@ -23,6 +23,29 @@ screen is a map in memory and the model is a function that you call.
 A `tool_use` block of the toolset looks like `{"type": "tool_use", "id", "name": "left_click", "toolset_name": "computer", "input":
 {"coordinate": [x, y]}}`. Coordinates in `input` are pixels on the screenshot the model was sent.
 
+## What is already written, and what you write
+
+The starter is a working executor and loop with nine small gaps cut out of it. The plumbing is written and correct: the `render`
+stub, the element lookup, the click, `type`, `wait`, `mouse_move` and `cursor_position` handling, the batch that stops after a failed
+action, the copying of the conversation and the loop itself. Each gap is one small function with its signature, a comment that says
+what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails
+the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (the starter's `perform`
+already logs its input); a run shows the logged lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin
+names are the camel-case forms):
+
+1. `scale_for` unlocks `e1`, `e7` and `m1`: the factor that shrinks the screen.
+2. `scaled_size` unlocks `e7` and `m1`: the size of the screenshot the model is sent.
+3. `to_screen` unlocks `e1`, `e2` and `m1`: scale a point back, round half to even, clamp.
+4. `_risk_error` unlocks `e2`: the confirmation a risky click needs.
+5. `_valid_region` unlocks `e4`: which zoom regions are valid.
+6. `_valid_key` unlocks `e4`: the text and the repeat of a key press.
+7. `_valid_scroll` unlocks `e4`: the direction and the amount of a scroll.
+8. `_to_replace` unlocks `e6`: which screenshots become a note (Java and Kotlin: `removeCount`, how many).
+9. `_final_status` unlocks `e5`: the status each stop reason ends the loop with.
+
+About twenty lines in all (Python and TypeScript fewer). The section below describes the whole executor and loop; the parts you do not write
+are there so you can see how your functions are used.
+
 ## What to write
 
 - `scale_for(width, height)`: `min(1, 1568 / longest side, sqrt(1,150,000 / (width * height)))`. `scaled_size(width, height)` is

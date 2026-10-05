@@ -2,6 +2,8 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
+private val log = System.getLogger("vision")
+
 /** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */
 
 const val MIB = 1024 * 1024
@@ -61,9 +63,25 @@ private fun sourceOf(item: Map<String, Any?>): Map<String, Any?> {
     }
 }
 
+private fun maxCount(context: Int): Int = if (context < 1_000_000) 100 else 600
+
+private fun maxImageSize(cloud: Boolean): Int = (if (cloud) 5 else 10) * MIB
+
+private fun isMany(images: Int, pdfs: Int, cloud: Boolean): Boolean = images + (if (cloud) pdfs else 0) > 20
+
+private fun imageBlocks(item: Map<String, Any?>, n: Int, imageCount: Int, exact: Boolean): List<Map<String, Any?>> {
+    val blocks = mutableListOf<Map<String, Any?>>()
+    if (imageCount > 1) blocks.add(mapOf("type" to "text", "text" to "Image $n:"))
+    val block = linkedMapOf<String, Any?>("type" to "image", "source" to sourceOf(item))
+    if (exact) block["transformations"] = mapOf("oversized_image" to "error")
+    blocks.add(block)
+    return blocks
+}
+
 private fun num(item: Map<String, Any?>, key: String) = (item[key] as Number).toInt()
 
 fun planRequest(model: String, items: List<Map<String, Any?>>, question: String, exact: Boolean = false, platform: String = "api"): Map<String, Any?> {
+    log.log(System.Logger.Level.DEBUG, "planRequest input: {0}", items)
     val spec = MODELS[model] ?: throw RequestError("model", "unknown model $model")
     val (tier, context, _) = spec
     if (question.isBlank()) throw RequestError("question", "the question must be a non-empty string")
@@ -71,11 +89,11 @@ fun planRequest(model: String, items: List<Map<String, Any?>>, question: String,
     val images = items.count { it["kind"] == "image" }
     val pdfs = items.count { it["kind"] == "pdf" }
     val pages = items.filter { it["kind"] == "pdf" }.sumOf { num(it, "pages") }
-    val limit = if (context < 1_000_000) 100 else 600
+    val limit = maxCount(context)
     if (images > limit) throw RequestError("items", "too many images for $model")
     if (pages > limit) throw RequestError("items", "too many PDF pages for $model")
     if (items.sumOf { num(it, "size").toLong() } > 32L * MIB) throw RequestError("items", "the request would be larger than 32 MiB")
-    val many = images + (if (cloud) pdfs else 0) > 20
+    val many = isMany(images, pdfs, cloud)
     var tokens = 0
     val resized = mutableListOf<Any?>()
     items.forEachIndexed { i, it ->
@@ -88,7 +106,7 @@ fun planRequest(model: String, items: List<Map<String, Any?>>, question: String,
         val h = num(it, "height")
         if (it["media_type"] !in IMAGE_TYPES) throw RequestError("items[$i].media_type", "${it["media_type"]} is not a supported image format")
         if (w > 8000 || h > 8000) throw RequestError("items[$i].dimensions", "an image may not exceed 8000 x 8000 pixels")
-        if (num(it, "size") > (if (cloud) 5 else 10) * MIB) throw RequestError("items[$i].size", "the image is too large")
+        if (num(it, "size") > maxImageSize(cloud)) throw RequestError("items[$i].size", "the image is too large")
         if (many && max(w, h) > 2000) throw RequestError("items[$i].dimensions", "with more than 20 images, no side may exceed 2000 pixels")
         val seen = resizedSize(w, h, tier)
         if (seen != Pair(w, h)) {
@@ -102,10 +120,7 @@ fun planRequest(model: String, items: List<Map<String, Any?>>, question: String,
     for (it in items) {
         if (it["kind"] == "image") {
             n++
-            if (images > 1) content.add(mapOf("type" to "text", "text" to "Image $n:"))
-            val block = linkedMapOf<String, Any?>("type" to "image", "source" to sourceOf(it))
-            if (exact) block["transformations"] = mapOf("oversized_image" to "error")
-            content.add(block)
+            content.addAll(imageBlocks(it, n, images, exact))
         } else {
             content.add(mapOf("type" to "document", "source" to sourceOf(it)))
         }

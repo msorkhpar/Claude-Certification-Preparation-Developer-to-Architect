@@ -1,4 +1,6 @@
 // The loop around the computer use tool, against a toy screen. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("computer");
 export const TOOLSET = "computer_toolset_20260801";
 export const CLICKS = ["left_click", "right_click", "middle_click", "double_click", "triple_click"];
 export const NOT_EXECUTED = "Not executed: an earlier computer action in this turn failed.";
@@ -16,10 +18,12 @@ function roundHalfEven(x: number): number {
   return floor % 2 === 0 ? floor : floor + 1;
 }
 
+/** The factor that shrinks a screen to what the model may be sent. */
 export function scaleFor(width: number, height: number): number {
   return Math.min(1.0, 1568 / Math.max(width, height), Math.sqrt(1_150_000 / (width * height)));
 }
 
+/** The size of the screenshot the model is sent, as [width, height]. */
 export function scaledSize(width: number, height: number): [number, number] {
   const scale = scaleFor(width, height);
   return [Math.trunc(width * scale), Math.trunc(height * scale)];
@@ -40,13 +44,49 @@ function inside(shot: number[], point: any): boolean {
   return Array.isArray(point) && point.length === 2 && point[0] >= 0 && point[0] < shot[0] && point[1] >= 0 && point[1] < shot[1];
 }
 
+/** The error text when a click on this element needs a person and does not get one, else null. */
+function riskError(name: string, element: { id: string; risk: string } | undefined, confirm?: ((action: Record<string, unknown>) => boolean) | null): string | null {
+  if (!element || (element.risk ?? "none") === "none") return null;
+  if (!confirm || !confirm({ action: name, element: element.id, risk: element.risk })) return `Declined: ${element.id} needs a person's confirmation (${element.risk})`;
+  return null;
+}
+
+/** Is this zoom region four numbers inside the scaled screenshot, with x0 < x1 and y0 < y1? */
+function validRegion(shot: number[], r: any): boolean {
+  return Array.isArray(r) && r.length === 4 && inside(shot, r.slice(0, 2)) && r[2] > 0 && r[2] <= shot[0] && r[3] > 0 && r[3] <= shot[1] && r[0] < r[2] && r[1] < r[3];
+}
+
+/** Is this the input of a key press: a non-empty text and a repeat that is an integer from 1 to 100? */
+function validKey(args: Record<string, any>): boolean {
+  const repeat = args.repeat ?? 1;
+  return Boolean(args.text) && Number.isInteger(repeat) && repeat >= 1 && repeat <= 100;
+}
+
+/** Is this the input of a scroll: a direction of up, down, left or right and an integer amount of at least 1? */
+function validScroll(args: Record<string, any>): boolean {
+  return ["up", "down", "left", "right"].includes(args.scroll_direction) && Number.isInteger(args.scroll_amount) && args.scroll_amount >= 1;
+}
+
+/** The images to replace by a note: all but the newest `keep` (all of them when keep is 0). */
+function toReplace<T>(images: T[], keep: number): T[] {
+  return keep > 0 ? images.slice(0, Math.max(images.length - keep, 0)) : images;
+}
+
+/** The status the loop ends with for a stop reason, or null when the loop goes on (pause_turn). */
+function finalStatus(stop: string): string | null {
+  if (stop === "pause_turn") return null;
+  if (stop === "refusal") return "refused";
+  return stop === "end_turn" || stop === "stop_sequence" ? "done" : "truncated";
+}
+
 /** Run one action. Returns [content, isError]: the text or image blocks for the result and whether it failed. */
 export function perform(screen: Screen, name: string, args: Record<string, any>, scale: number, confirm?: ((action: Record<string, unknown>) => boolean) | null): [any, boolean] {
+  log.debug("perform input", name, args);
   const shot = scaledSize(screen.width, screen.height);
   if (name === "screenshot") return [[{ type: "image", source: { type: "base64", media_type: "image/png", data: render(screen, shot[0], shot[1]) } }], false];
   if (name === "zoom") {
     const r = args.region;
-    if (!(Array.isArray(r) && r.length === 4 && inside(shot, r.slice(0, 2)) && r[2] > 0 && r[2] <= shot[0] && r[3] > 0 && r[3] <= shot[1] && r[0] < r[2] && r[1] < r[3])) return [`Invalid zoom region: ${JSON.stringify(r)}`, true];
+    if (!validRegion(shot, r)) return [`Invalid zoom region: ${JSON.stringify(r)}`, true];
     const [x0, y0] = toScreen(r[0], r[1], scale, screen);
     const [x1, y1] = toScreen(r[2], r[3], scale, screen);
     return [[{ type: "image", source: { type: "base64", media_type: "image/png", data: render(screen, x1 - x0, y1 - y0) } }], false];
@@ -58,9 +98,8 @@ export function perform(screen: Screen, name: string, args: Record<string, any>,
     else if (!inside(shot, point)) return [`Coordinate ${JSON.stringify(point)} is outside the screenshot`, true];
     else [sx, sy] = toScreen(point[0], point[1], scale, screen);
     const element = elementAt(screen, sx, sy);
-    if (element && (element.risk ?? "none") !== "none") {
-      if (!confirm || !confirm({ action: name, element: element.id, risk: element.risk })) return [`Declined: ${element.id} needs a person's confirmation (${element.risk})`, true];
-    }
+    const declined = riskError(name, element, confirm);
+    if (declined) return [declined, true];
     screen.cursor = [sx, sy];
     screen.log.push([name, element ? element.id : null]);
     return [`Clicked ${element ? element.id : "nothing"}`, false];
@@ -72,8 +111,7 @@ export function perform(screen: Screen, name: string, args: Record<string, any>,
     return [`Typed ${[...args.text].length} characters`, false];
   }
   if (name === "key") {
-    const repeat = args.repeat ?? 1;
-    if (!args.text || !Number.isInteger(repeat) || repeat < 1 || repeat > 100) return ["key needs a text and a repeat from 1 to 100", true];
+    if (!validKey(args)) return ["key needs a text and a repeat from 1 to 100", true];
     screen.log.push(["key", args.text]);
     return [`Pressed ${args.text}`, false];
   }
@@ -84,7 +122,7 @@ export function perform(screen: Screen, name: string, args: Record<string, any>,
   }
   if (name === "scroll") {
     const direction = args.scroll_direction, amount = args.scroll_amount;
-    if (!["up", "down", "left", "right"].includes(direction) || !Number.isInteger(amount) || amount < 1) return ["scroll needs a direction and a positive amount", true];
+    if (!validScroll(args)) return ["scroll needs a direction and a positive amount", true];
     screen.log.push(["scroll", direction]);
     return [`Scrolled ${direction} ${amount}`, false];
   }
@@ -107,7 +145,7 @@ export function pruneScreenshots(messages: any[], keep = 3): any[] {
       if (b.type === "tool_result" && Array.isArray(b.content)) b.content.forEach((c: any, i: number) => { if (c.type === "image") images.push([b, i]); });
     }
   }
-  for (const [block, i] of keep > 0 ? images.slice(0, Math.max(images.length - keep, 0)) : images) block.content[i] = { type: "text", text: "[screenshot removed]" };
+  for (const [block, i] of toReplace(images, keep)) block.content[i] = { type: "text", text: "[screenshot removed]" };
   return out;
 }
 
@@ -139,10 +177,8 @@ export function runComputerLoop(ask: (request: any) => any, screen: Screen, mode
         results.push(result);
       }
       messages.push({ role: "user", content: results });
-    } else if (stop === "refusal") {
-      return { status: "refused", turns: turn, messages };
-    } else if (stop !== "pause_turn") {
-      return { status: stop === "end_turn" || stop === "stop_sequence" ? "done" : "truncated", turns: turn, messages };
+    } else if (finalStatus(stop)) {
+      return { status: finalStatus(stop), turns: turn, messages };
     }
   }
   return { status: "max_turns", turns: maxTurns, messages };

@@ -1,4 +1,6 @@
 // Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("context");
 export type Block = Record<string, any>;
 export type Message = { role: "user" | "assistant"; content: string | Block[] };
 export type Problem = { block: number; citation: number; problem: string };
@@ -37,12 +39,18 @@ function startsTurn(message: Message): boolean {
 
 /** The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one. */
 export function splitTurns(messages: Message[]): Message[][] {
+  log.debug("splitTurns input", messages);
   const turns: Message[][] = [];
   for (const message of messages) {
     if (startsTurn(message) || turns.length === 0) turns.push([]);
     turns[turns.length - 1].push(message);
   }
   return turns;
+}
+
+/** Replace the content of every result but the newest `keep` with the placeholder. */
+function clearOldest(results: Block[], keep: number, placeholder: string): void {
+  for (const b of results.slice(0, Math.max(results.length - keep, 0))) b.content = placeholder;
 }
 
 /** Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder. */
@@ -52,29 +60,51 @@ export function clearToolResults(messages: Message[], keep = 2, exclude: string[
   for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === "tool_use") names.set(b.id, b.name);
   const results: Block[] = [];
   for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === "tool_result" && !exclude.includes(names.get(b.tool_use_id) ?? "")) results.push(b);
-  for (const b of results.slice(0, Math.max(results.length - keep, 0))) b.content = placeholder;
+  clearOldest(results, keep, placeholder);
   return out;
+}
+
+/** The turns of `rest` that remain: the oldest are dropped while the conversation is over budget, the newest always stays. */
+function trim(pinned: Message[][], rest: Message[][], budget: number): Message[][] {
+  while (rest.length > 1 && countTokens([...pinned, ...rest].flat()) > budget) rest = rest.slice(1);
+  return rest;
 }
 
 /** Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too. */
 export function window(messages: Message[], budget: number, pin = false): Message[] {
   const turns = splitTurns(messages);
   const pinned = pin ? turns.slice(0, 1) : [];
-  let rest = pin ? turns.slice(1) : turns;
-  while (rest.length > 1 && countTokens([...pinned, ...rest].flat()) > budget) rest = rest.slice(1);
+  const rest = trim(pinned, pin ? turns.slice(1) : turns, budget);
   return [...pinned, ...rest].flat();
+}
+
+/** Whether compaction has nothing to do: the conversation fits, or there are no more turns than `keepTurns`. */
+function leaveAlone(messages: Message[], turns: Message[][], budget: number, keepTurns: number): boolean {
+  return countTokens(messages) <= budget || turns.length <= keepTurns;
+}
+
+/** The first kept message with the summary block placed before its own blocks. */
+function withSummary(kept: Message[], summary: string): Message {
+  return { role: kept[0].role, content: [{ type: "text", text: `${SUMMARY_OPEN}${summary}${SUMMARY_CLOSE}` }, ...blocksOf(kept[0])] };
 }
 
 /** When the conversation is over budget, replace everything before the newest `keepTurns` turns by one summary. */
 export function compact(messages: Message[], budget: number, summarise: (older: Message[]) => string, keepTurns = 1): Message[] {
-  if (countTokens(messages) <= budget) return [...messages];
   const turns = splitTurns(messages);
-  if (turns.length <= keepTurns) return [...messages];
+  if (leaveAlone(messages, turns, budget, keepTurns)) return [...messages];
   const older = turns.slice(0, -keepTurns).flat();
   const kept = turns.slice(-keepTurns).flat();
   const summary = summarise(older);
-  const first: Message = { role: kept[0].role, content: [{ type: "text", text: `${SUMMARY_OPEN}${summary}${SUMMARY_CLOSE}` }, ...blocksOf(kept[0])] };
-  return [first, ...kept.slice(1)];
+  return [withSummary(kept, summary), ...kept.slice(1)];
+}
+
+/** The problem of a citation whose document exists, or null when it can be trusted. */
+function spanProblem(text: string, cite: Block): string | null {
+  const start = cite.start_char_index;
+  const end = cite.end_char_index;
+  if (start < 0 || end <= start || end > text.length) return "bad_range";
+  if (text.slice(start, end) !== cite.cited_text) return "text_mismatch";
+  return null;
 }
 
 /** One problem per citation that cannot be trusted, in order. */
@@ -85,17 +115,20 @@ export function verifyCitations(blocks: Block[], documents: Doc[]): Problem[] {
       let problem: string | null = null;
       if (cite.type !== "char_location") problem = "unsupported_type";
       else if (!(cite.document_index >= 0 && cite.document_index < documents.length)) problem = "unknown_document";
-      else {
-        const text = documents[cite.document_index].text;
-        const start = cite.start_char_index;
-        const end = cite.end_char_index;
-        if (start < 0 || end <= start || end > text.length) problem = "bad_range";
-        else if (text.slice(start, end) !== cite.cited_text) problem = "text_mismatch";
-      }
+      else problem = spanProblem(documents[cite.document_index].text, cite);
       if (problem) problems.push({ block: i, citation: j, problem });
     });
   });
   return problems;
+}
+
+/** Give a new key the next number; true when the key was new. */
+function numberFor(numbers: Map<string, number>, key: string): boolean {
+  if (!numbers.has(key)) {
+    numbers.set(key, numbers.size + 1);
+    return true;
+  }
+  return false;
 }
 
 /** The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order. */
@@ -107,8 +140,7 @@ export function footnotes(blocks: Block[], documents: Doc[]): string {
     out += block.text;
     for (const cite of block.citations ?? []) {
       const key = `${cite.document_index}:${cite.start_char_index}:${cite.end_char_index}`;
-      if (!numbers.has(key)) {
-        numbers.set(key, numbers.size + 1);
+      if (numberFor(numbers, key)) {
         sources.push(`[${numbers.get(key)}] ${documents[cite.document_index].title}: "${cite.cited_text}"`);
       }
       out += `[${numbers.get(key)}]`;

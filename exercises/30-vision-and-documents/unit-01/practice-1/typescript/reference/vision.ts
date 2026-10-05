@@ -1,4 +1,6 @@
 // Planning a request that carries images and PDFs. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("vision");
 export const MIB = 1024 * 1024;
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 // model id -> [resolution tier, context window in tokens, input price in dollars per million tokens]. Given.
@@ -66,18 +68,39 @@ function sourceOf(item: Item): Record<string, unknown> {
   return item.source === "url" ? { type: "url", url: item.value } : { type: "file", file_id: item.value };
 }
 
+function maxCount(context: number): number {
+  return context < 1_000_000 ? 100 : 600;
+}
+
+function maxImageSize(cloud: boolean): number {
+  return (cloud ? 5 : 10) * MIB;
+}
+
+function isMany(images: number, pdfs: number, cloud: boolean): boolean {
+  return images + (cloud ? pdfs : 0) > 20;
+}
+
+function imageBlocks(item: Item, n: number, imageCount: number, exact: boolean): Record<string, unknown>[] {
+  const blocks: Record<string, unknown>[] = [];
+  if (imageCount > 1) blocks.push({ type: "text", text: `Image ${n}:` });
+  const block: Record<string, unknown> = { type: "image", source: sourceOf(item) };
+  if (exact) block.transformations = { oversized_image: "error" };
+  return [...blocks, block];
+}
+
 export function planRequest(model: string, items: Item[], question: string, exact = false, platform = "api") {
+  log.debug("planRequest input", items);
   if (!(model in MODELS)) throw new RequestError("model", `unknown model ${model}`);
   const [tier, context] = MODELS[model];
   if (typeof question !== "string" || question.trim() === "") throw new RequestError("question", "the question must be a non-empty string");
   const cloud = platform === "bedrock" || platform === "vertex";
   const images = items.filter((it) => it.kind === "image");
   const pdfs = items.filter((it) => it.kind === "pdf");
-  const limit = context < 1_000_000 ? 100 : 600;
+  const limit = maxCount(context);
   if (images.length > limit) throw new RequestError("items", `too many images for ${model}`);
   if (pdfs.reduce((n, it) => n + (it.pages as number), 0) > limit) throw new RequestError("items", `too many PDF pages for ${model}`);
   if (items.reduce((n, it) => n + it.size, 0) > 32 * MIB) throw new RequestError("items", "the request would be larger than 32 MiB");
-  const many = images.length + (cloud ? pdfs.length : 0) > 20;
+  const many = isMany(images.length, pdfs.length, cloud);
   let tokens = 0;
   const resized: string[] = [];
   items.forEach((it, i) => {
@@ -89,7 +112,7 @@ export function planRequest(model: string, items: Item[], question: string, exac
     const [w, h] = [it.width as number, it.height as number];
     if (!IMAGE_TYPES.includes(it.media_type)) throw new RequestError(`items[${i}].media_type`, `${it.media_type} is not a supported image format`);
     if (w > 8000 || h > 8000) throw new RequestError(`items[${i}].dimensions`, "an image may not exceed 8000 x 8000 pixels");
-    if (it.size > (cloud ? 5 : 10) * MIB) throw new RequestError(`items[${i}].size`, "the image is too large");
+    if (it.size > maxImageSize(cloud)) throw new RequestError(`items[${i}].size`, "the image is too large");
     if (many && Math.max(w, h) > 2000) throw new RequestError(`items[${i}].dimensions`, "with more than 20 images, no side may exceed 2000 pixels");
     const seen = resizedSize(w, h, tier);
     if (seen[0] !== w || seen[1] !== h) {
@@ -103,10 +126,7 @@ export function planRequest(model: string, items: Item[], question: string, exac
   for (const it of items) {
     if (it.kind === "image") {
       n++;
-      if (images.length > 1) content.push({ type: "text", text: `Image ${n}:` });
-      const block: Record<string, unknown> = { type: "image", source: sourceOf(it) };
-      if (exact) block.transformations = { oversized_image: "error" };
-      content.push(block);
+      content.push(...imageBlocks(it, n, images.length, exact));
     } else {
       content.push({ type: "document", source: sourceOf(it) });
     }

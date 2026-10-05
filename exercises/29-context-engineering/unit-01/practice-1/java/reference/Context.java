@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 /** Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md. Messages and blocks are JSON-like maps. */
 final class Context {
+    private static final System.Logger LOG = System.getLogger(Context.class.getName());
     private Context() {}
 
     static final String SUMMARY_OPEN = "<summary>\n";
@@ -68,6 +69,7 @@ final class Context {
 
     /** The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one. */
     static List<List<Map<String, Object>>> splitTurns(List<Map<String, Object>> messages) {
+        LOG.log(System.Logger.Level.DEBUG, "splitTurns input: {0}", messages);
         List<List<Map<String, Object>>> turns = new ArrayList<>();
         for (Map<String, Object> message : messages) {
             if (startsTurn(message) || turns.isEmpty()) turns.add(new ArrayList<>());
@@ -80,6 +82,11 @@ final class Context {
         List<Map<String, Object>> out = new ArrayList<>();
         for (List<Map<String, Object>> turn : turns) out.addAll(turn);
         return out;
+    }
+
+    /** Replace the content of every result but the newest keep with the placeholder. */
+    private static void clearOldest(List<Map<String, Object>> results, int keep, String placeholder) {
+        for (int i = 0; i < Math.max(results.size() - keep, 0); i++) results.get(i).put("content", placeholder);
     }
 
     static List<Map<String, Object>> clearToolResults(List<Map<String, Object>> messages) {
@@ -108,8 +115,19 @@ final class Context {
                 }
             }
         }
-        for (int i = 0; i < Math.max(results.size() - keep, 0); i++) results.get(i).put("content", placeholder);
+        clearOldest(results, keep, placeholder);
         return out;
+    }
+
+    /** The turns of rest that remain: the oldest are dropped while the conversation is over budget, the newest always stays. */
+    private static List<List<Map<String, Object>>> trim(List<List<Map<String, Object>>> pinned, List<List<Map<String, Object>>> rest, int budget) {
+        while (rest.size() > 1) {
+            List<List<Map<String, Object>>> all = new ArrayList<>(pinned);
+            all.addAll(rest);
+            if (countTokens(flatten(all)) <= budget) break;
+            rest.remove(0);
+        }
+        return rest;
     }
 
     static List<Map<String, Object>> window(List<Map<String, Object>> messages, int budget) {
@@ -120,16 +138,23 @@ final class Context {
     static List<Map<String, Object>> window(List<Map<String, Object>> messages, int budget, boolean pin) {
         List<List<Map<String, Object>>> turns = splitTurns(messages);
         List<List<Map<String, Object>>> pinned = pin ? new ArrayList<>(turns.subList(0, Math.min(1, turns.size()))) : new ArrayList<>();
-        List<List<Map<String, Object>>> rest = new ArrayList<>(pin ? turns.subList(Math.min(1, turns.size()), turns.size()) : turns);
-        while (rest.size() > 1) {
-            List<List<Map<String, Object>>> all = new ArrayList<>(pinned);
-            all.addAll(rest);
-            if (countTokens(flatten(all)) <= budget) break;
-            rest.remove(0);
-        }
+        List<List<Map<String, Object>>> rest = trim(pinned, new ArrayList<>(pin ? turns.subList(Math.min(1, turns.size()), turns.size()) : turns), budget);
         List<List<Map<String, Object>>> all = new ArrayList<>(pinned);
         all.addAll(rest);
         return flatten(all);
+    }
+
+    /** Whether compaction has nothing to do: the conversation fits, or there are no more turns than keepTurns. */
+    private static boolean leaveAlone(List<Map<String, Object>> messages, List<List<Map<String, Object>>> turns, int budget, int keepTurns) {
+        return countTokens(messages) <= budget || turns.size() <= keepTurns;
+    }
+
+    /** The first kept message with the summary block placed before its own blocks. */
+    private static Map<String, Object> withSummary(List<Map<String, Object>> kept, String summary) {
+        List<Map<String, Object>> content = new ArrayList<>();
+        content.add(map("type", "text", "text", SUMMARY_OPEN + summary + SUMMARY_CLOSE));
+        content.addAll(blocksOf(kept.get(0)));
+        return map("role", kept.get(0).get("role"), "content", content);
     }
 
     static List<Map<String, Object>> compact(List<Map<String, Object>> messages, int budget, Function<List<Map<String, Object>>, String> summarise) {
@@ -138,19 +163,24 @@ final class Context {
 
     /** When the conversation is over budget, replace everything before the newest keepTurns turns by one summary. */
     static List<Map<String, Object>> compact(List<Map<String, Object>> messages, int budget, Function<List<Map<String, Object>>, String> summarise, int keepTurns) {
-        if (countTokens(messages) <= budget) return new ArrayList<>(messages);
         List<List<Map<String, Object>>> turns = splitTurns(messages);
-        if (turns.size() <= keepTurns) return new ArrayList<>(messages);
+        if (leaveAlone(messages, turns, budget, keepTurns)) return new ArrayList<>(messages);
         List<Map<String, Object>> older = flatten(turns.subList(0, turns.size() - keepTurns));
         List<Map<String, Object>> kept = flatten(turns.subList(turns.size() - keepTurns, turns.size()));
         String summary = summarise.apply(older);
-        List<Map<String, Object>> content = new ArrayList<>();
-        content.add(map("type", "text", "text", SUMMARY_OPEN + summary + SUMMARY_CLOSE));
-        content.addAll(blocksOf(kept.get(0)));
         List<Map<String, Object>> out = new ArrayList<>();
-        out.add(map("role", kept.get(0).get("role"), "content", content));
+        out.add(withSummary(kept, summary));
         out.addAll(kept.subList(1, kept.size()));
         return out;
+    }
+
+    /** The problem of a citation whose document exists, or null when it can be trusted. */
+    private static String spanProblem(String text, Map<String, Object> cite) {
+        int start = ((Number) cite.get("start_char_index")).intValue();
+        int end = ((Number) cite.get("end_char_index")).intValue();
+        if (start < 0 || end <= start || end > text.length()) return "bad_range";
+        if (!text.substring(start, end).equals(cite.get("cited_text"))) return "text_mismatch";
+        return null;
     }
 
     /** One {block, citation, problem} per citation that cannot be trusted, in order. */
@@ -167,20 +197,22 @@ final class Context {
                     problem = "unsupported_type";
                 } else {
                     int doc = ((Number) cite.get("document_index")).intValue();
-                    if (doc < 0 || doc >= documents.size()) {
-                        problem = "unknown_document";
-                    } else {
-                        String text = (String) documents.get(doc).get("text");
-                        int start = ((Number) cite.get("start_char_index")).intValue();
-                        int end = ((Number) cite.get("end_char_index")).intValue();
-                        if (start < 0 || end <= start || end > text.length()) problem = "bad_range";
-                        else if (!text.substring(start, end).equals(cite.get("cited_text"))) problem = "text_mismatch";
-                    }
+                    if (doc < 0 || doc >= documents.size()) problem = "unknown_document";
+                    else problem = spanProblem((String) documents.get(doc).get("text"), cite);
                 }
                 if (problem != null) problems.add(map("block", i, "citation", j, "problem", problem));
             }
         }
         return problems;
+    }
+
+    /** Give a new key the next number; true when the key was new. */
+    private static boolean numberFor(Map<String, Integer> numbers, String key) {
+        if (!numbers.containsKey(key)) {
+            numbers.put(key, numbers.size() + 1);
+            return true;
+        }
+        return false;
     }
 
     /** The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order. */
@@ -195,8 +227,7 @@ final class Context {
             if (citations == null) continue;
             for (Map<String, Object> cite : citations) {
                 String key = cite.get("document_index") + ":" + cite.get("start_char_index") + ":" + cite.get("end_char_index");
-                if (!numbers.containsKey(key)) {
-                    numbers.put(key, numbers.size() + 1);
+                if (numberFor(numbers, key)) {
                     int doc = ((Number) cite.get("document_index")).intValue();
                     sources.add("[" + numbers.get(key) + "] " + documents.get(doc).get("title") + ": \"" + cite.get("cited_text") + "\"");
                 }

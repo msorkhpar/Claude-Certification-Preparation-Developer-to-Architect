@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 /** The loop around the computer use tool, against a toy screen. See ../../statement.md. Screens, messages and replies are JSON-like maps. */
 final class Computer {
+    private static final System.Logger LOG = System.getLogger(Computer.class.getName());
     private Computer() {}
 
     static final String TOOLSET = "computer_toolset_20260801";
@@ -32,10 +33,12 @@ final class Computer {
         return "png:" + width + "x" + height + ":" + log(screen).size();
     }
 
+    /** The factor that shrinks a screen to what the model may be sent. */
     static double scaleFor(int width, int height) {
         return Math.min(1.0, Math.min(1568.0 / Math.max(width, height), Math.sqrt(1_150_000.0 / ((double) width * height))));
     }
 
+    /** The size of the screenshot the model is sent, as {width, height}. */
     static int[] scaledSize(int width, int height) {
         double scale = scaleFor(width, height);
         return new int[] {(int) (width * scale), (int) (height * scale)};
@@ -74,16 +77,53 @@ final class Computer {
         return o instanceof Integer || o instanceof Long;
     }
 
+    /** The error text when a click on this element needs a person and does not get one, else null. */
+    static String riskError(String name, Map<String, Object> element, Function<Map<String, Object>, Boolean> confirm) {
+        if (element == null || "none".equals(element.getOrDefault("risk", "none"))) return null;
+        if (confirm == null || !Boolean.TRUE.equals(confirm.apply(map("action", name, "element", element.get("id"), "risk", element.get("risk"))))) return "Declined: " + element.get("id") + " needs a person's confirmation (" + element.get("risk") + ")";
+        return null;
+    }
+
+    /** Is this zoom region four numbers inside the scaled screenshot, with x0 < x1 and y0 < y1? */
+    static boolean validRegion(int[] shot, Object r) {
+        return r instanceof List<?> l && l.size() == 4 && inside(shot, l.subList(0, 2)) && l.get(2) instanceof Number x1 && l.get(3) instanceof Number y1
+                && x1.doubleValue() > 0 && x1.doubleValue() <= shot[0] && y1.doubleValue() > 0 && y1.doubleValue() <= shot[1]
+                && ((Number) l.get(0)).doubleValue() < x1.doubleValue() && ((Number) l.get(1)).doubleValue() < y1.doubleValue();
+    }
+
+    /** Is this the input of a key press: a non-empty text and a repeat that is an integer from 1 to 100? */
+    static boolean validKey(Map<String, Object> args) {
+        Object repeat = args.getOrDefault("repeat", 1);
+        return args.get("text") instanceof String s && !s.isEmpty() && isInt(repeat) && num(repeat) >= 1 && num(repeat) <= 100;
+    }
+
+    /** Is this the input of a scroll: a direction of up, down, left or right and an integer amount of at least 1? */
+    static boolean validScroll(Map<String, Object> args) {
+        return List.of("up", "down", "left", "right").contains(args.get("scroll_direction")) && isInt(args.get("scroll_amount")) && num(args.get("scroll_amount")) >= 1;
+    }
+
+    /** How many of the oldest images to replace by a note: all but the newest keep (all of them when keep is 0). */
+    static int removeCount(int total, int keep) {
+        return keep > 0 ? Math.max(total - keep, 0) : total;
+    }
+
+    /** The status the loop ends with for a stop reason, or null when the loop goes on (pause_turn). */
+    static String finalStatus(Object stop) {
+        if ("pause_turn".equals(stop)) return null;
+        if ("refusal".equals(stop)) return "refused";
+        return "end_turn".equals(stop) || "stop_sequence".equals(stop) ? "done" : "truncated";
+    }
+
     /** Run one action. Returns the content for the result and whether it failed. */
     @SuppressWarnings("unchecked")
     static Outcome perform(Map<String, Object> screen, String name, Map<String, Object> args, double scale, Function<Map<String, Object>, Boolean> confirm) {
+        LOG.log(System.Logger.Level.DEBUG, "perform input: {0}", name + " " + args);
         int[] shot = scaledSize(num(screen.get("width")), num(screen.get("height")));
         if (name.equals("screenshot")) return image(render(screen, shot[0], shot[1]));
         if (name.equals("zoom")) {
             Object r = args.get("region");
-            if (!(r instanceof List<?> l && l.size() == 4 && inside(shot, l.subList(0, 2)) && l.get(2) instanceof Number x1 && l.get(3) instanceof Number y1
-                    && x1.doubleValue() > 0 && x1.doubleValue() <= shot[0] && y1.doubleValue() > 0 && y1.doubleValue() <= shot[1]
-                    && ((Number) l.get(0)).doubleValue() < x1.doubleValue() && ((Number) l.get(1)).doubleValue() < y1.doubleValue())) return error("Invalid zoom region: " + r);
+            if (!validRegion(shot, r)) return error("Invalid zoom region: " + r);
+            List<?> l = (List<?>) r;
             int[] a = toScreen(((Number) l.get(0)).doubleValue(), ((Number) l.get(1)).doubleValue(), scale, screen);
             int[] b = toScreen(((Number) l.get(2)).doubleValue(), ((Number) l.get(3)).doubleValue(), scale, screen);
             return image(render(screen, b[0] - a[0], b[1] - a[1]));
@@ -104,10 +144,8 @@ final class Computer {
                 sy = s[1];
             }
             Map<String, Object> element = elementAt(screen, sx, sy);
-            if (element != null && !"none".equals(element.getOrDefault("risk", "none"))) {
-                if (confirm == null || !Boolean.TRUE.equals(confirm.apply(map("action", name, "element", element.get("id"), "risk", element.get("risk")))))
-                    return error("Declined: " + element.get("id") + " needs a person's confirmation (" + element.get("risk") + ")");
-            }
+            String declined = riskError(name, element, confirm);
+            if (declined != null) return error(declined);
             List<Object> cursor = (List<Object>) screen.get("cursor");
             cursor.set(0, sx);
             cursor.set(1, sy);
@@ -123,9 +161,8 @@ final class Computer {
                 return new Outcome("Typed " + text.codePointCount(0, text.length()) + " characters", false);
             }
             case "key" -> {
-                Object repeat = args.getOrDefault("repeat", 1);
-                Object text = args.get("text");
-                if (!(text instanceof String s) || s.isEmpty() || !isInt(repeat) || num(repeat) < 1 || num(repeat) > 100) return error("key needs a text and a repeat from 1 to 100");
+                if (!validKey(args)) return error("key needs a text and a repeat from 1 to 100");
+                String s = (String) args.get("text");
                 log(screen).add(java.util.Arrays.asList("key", s));
                 return new Outcome("Pressed " + s, false);
             }
@@ -136,7 +173,7 @@ final class Computer {
             }
             case "scroll" -> {
                 Object direction = args.get("scroll_direction"), amount = args.get("scroll_amount");
-                if (!List.of("up", "down", "left", "right").contains(direction) || !isInt(amount) || num(amount) < 1) return error("scroll needs a direction and a positive amount");
+                if (!validScroll(args)) return error("scroll needs a direction and a positive amount");
                 log(screen).add(java.util.Arrays.asList("scroll", direction));
                 return new Outcome("Scrolled " + direction + " " + amount, false);
             }
@@ -188,7 +225,7 @@ final class Computer {
                 }
             }
         }
-        int upTo = keep > 0 ? Math.max(images.size() - keep, 0) : images.size();
+        int upTo = removeCount(images.size(), keep);
         for (int k = 0; k < upTo; k++) ((List<Object>) images.get(k)[0]).set((Integer) images.get(k)[1], map("type", "text", "text", "[screenshot removed]"));
         return out;
     }
@@ -229,10 +266,8 @@ final class Computer {
                     results.add(result);
                 }
                 messages.add(map("role", "user", "content", results));
-            } else if ("refusal".equals(stop)) {
-                return map("status", "refused", "turns", turn, "messages", messages);
-            } else if (!"pause_turn".equals(stop)) {
-                return map("status", "end_turn".equals(stop) || "stop_sequence".equals(stop) ? "done" : "truncated", "turns", turn, "messages", messages);
+            } else if (finalStatus(stop) != null) {
+                return map("status", finalStatus(stop), "turns", turn, "messages", messages);
             }
         }
         return map("status", "max_turns", "turns", maxTurns, "messages", messages);
