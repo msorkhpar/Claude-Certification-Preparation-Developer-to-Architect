@@ -40,7 +40,10 @@ exists so you can see the effect, with a seeded generator so every run prints th
 <!-- example: m1-sampler tabs: python,typescript,java,kotlin -->
 ```python
 """A toy next-token sampler. It is not Claude: it only shows what temperature does."""
+import logging
 import math
+
+log = logging.getLogger(__name__)
 
 TOKENS = ["blue", " clear", " falling", "green"]
 LOGITS = [4.0, 2.5, 1.0, -1.0]
@@ -106,6 +109,9 @@ T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
 ```
 ```typescript
 // A toy next-token sampler. It is not Claude: it only shows what temperature does.
+import { logger } from "./logger.ts";
+const log = logger("sampler");
+
 export const TOKENS = ["blue", " clear", " falling", "green"];
 export const LOGITS = [4.0, 2.5, 1.0, -1.0];
 
@@ -177,6 +183,7 @@ import java.util.stream.Collectors;
 
 /** A toy next-token sampler. It is not Claude: it only shows what temperature does. */
 public final class Sampler {
+    private static final System.Logger LOG = System.getLogger(Sampler.class.getName());
     static final String[] TOKENS = {"blue", " clear", " falling", "green"};
     static final double[] LOGITS = {4.0, 2.5, 1.0, -1.0};
 
@@ -257,6 +264,8 @@ T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
 ```
 ```kotlin
 import kotlin.math.exp
+
+private val log = System.getLogger("sampler")
 
 /** A toy next-token sampler. It is not Claude: it only shows what temperature does. */
 val TOKENS = listOf("blue", " clear", " falling", "green")

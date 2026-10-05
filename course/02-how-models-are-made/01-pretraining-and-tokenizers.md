@@ -77,7 +77,10 @@ merges, not Claude's tokenizer.
 <!-- example: m2-toy-bpe tabs: python,typescript,java,kotlin -->
 ```python
 """A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words."""
+import logging
 from collections import Counter
+
+log = logging.getLogger(__name__)
 
 
 def train(corpus, merges):
@@ -137,6 +140,9 @@ lowish  -> low | i | s | h
 ```
 ```typescript
 // A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words.
+import { logger } from "./logger.ts";
+const log = logger("bpe");
+
 export type Pair = [string, string];
 
 function merge(word: string[], pair: Pair): string[] {
@@ -215,6 +221,7 @@ import java.util.Map;
 
 /** A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words. */
 public final class Bpe {
+    private static final System.Logger LOG = System.getLogger(Bpe.class.getName());
     record Rule(String left, String right) {}
 
     /** Learn merge rules: repeatedly join the most frequent adjacent pair (ties: first seen). */
@@ -285,6 +292,8 @@ widest  -> w | i | d | est
 lowish  -> low | i | s | h
 ```
 ```kotlin
+private val log = System.getLogger("bpe")
+
 /** A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words. */
 data class Rule(val left: String, val right: String)
 
