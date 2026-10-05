@@ -14,16 +14,15 @@ PRACTICES[f"{X}/35-the-claude-agent-sdk/unit-01/practice-1"] = {
         ("e7", "edge", "denied calls are counted and the run still ends with a result"),
     ],
     "plants": {
-        "wrong-auto-approve": (["e1"], "lists the read tools in allowed_tools, so they run without the permission callback ever being asked"),
+        "wrong-rm-not-disallowed": (["e1"], "leaves the rm pattern out of the disallowed tools the options send to the CLI"),
         "wrong-edit-in-readonly": (["e2"], "lets Write and Edit through in read-only mode"),
         "wrong-env-variants": (["e2"], "protects .env but not .env.local or other .env files"),
         "wrong-chaining-allowed": (["e3"], "allows a command that chains another with a semicolon or a pipe when it starts with a safe word"),
         "wrong-danger-no-interrupt": (["e3"], "denies sudo and rm -rf without interrupting the run"),
         "wrong-push-substring": (["e4"], "blocks any command that merely starts a word with git push, such as git pushd"),
-        "wrong-no-turn-limit": (["e6"], "leaves max turns unset, so the run is not capped"),
         "wrong-raises-after-error-result": (["e6"], "lets the error that follows an error result escape, so a run that hit its limit has no summary"),
         "wrong-hides-crash": (["e6"], "swallows every error, so a process that died before any result looks like a run that ended"),
-        "wrong-status-unmapped": (["e5"], "reports the raw result subtype instead of the course status for the turn limit"),
+        "wrong-status-unmapped": (["e5"], "reports the raw result subtype instead of the course status for a run that failed while executing"),
         "wrong-denied-capped": (["e7"], "counts at most one denied call however many the run had"),
     },
 }
