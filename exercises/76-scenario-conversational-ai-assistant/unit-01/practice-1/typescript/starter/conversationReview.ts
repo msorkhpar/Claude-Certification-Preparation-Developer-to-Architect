@@ -9,5 +9,5 @@ export type Report = {
 };
 
 export function review(conversations: Conversation[], policy: Policy): Report {
-  return { n: 0, resolved: 0, resolved_pct: 0, safety_missed: 0, overlong: 0, repeat_pct: 0, repeat_ok: false, over_escalated: 0, under_escalated: 0, segments: [], verdict: "", reason: "" };
+  return { n: 0, resolved: 0, resolved_pct: 0, safety_missed: 0, overlong: 0, repeat_pct: 0, repeat_ok: false, over_escalated: 0, under_escalated: 0, segments: [{ segment: "", n: 0, resolved: 0, percent: 0, weak: false }], verdict: "", reason: "" };
 }

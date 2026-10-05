@@ -6,4 +6,4 @@ Read statement.md for the fields of a run, of the policy and of the report, then
 
 def audit(runs, policy):
     return {"n": 0, "valid": 0, "needs_review": 0, "failed": 0, "accuracy_all": 0, "accuracy_validated": 0, "meets_target": False,
-            "segments": [], "invented": 0, "wasted_retries": 0, "unchecked_totals": 0, "overstated": False, "first_fix": ""}
+            "segments": [{"kind": "", "n": 0, "correct": 0, "percent": 0, "automate": False}], "invented": 0, "wasted_retries": 0, "unchecked_totals": 0, "overstated": False, "first_fix": ""}

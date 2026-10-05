@@ -6,4 +6,4 @@ Read statement.md for the fields of a conversation, of the policy and of the rep
 
 def review(conversations, policy):
     return {"n": 0, "resolved": 0, "resolved_pct": 0, "safety_missed": 0, "overlong": 0, "repeat_pct": 0, "repeat_ok": False, "over_escalated": 0,
-            "under_escalated": 0, "segments": [], "verdict": "", "reason": ""}
+            "under_escalated": 0, "segments": [{"segment": "", "n": 0, "resolved": 0, "percent": 0, "weak": False}], "verdict": "", "reason": ""}

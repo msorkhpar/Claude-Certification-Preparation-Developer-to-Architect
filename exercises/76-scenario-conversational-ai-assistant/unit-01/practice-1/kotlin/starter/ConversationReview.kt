@@ -11,4 +11,4 @@ data class Report(
     val underEscalated: Int, val segments: List<Segment>, val verdict: String, val reason: String,
 )
 
-fun review(conversations: List<Conversation>, policy: Policy): Report = Report(0, 0, 0, 0, 0, 0, false, 0, 0, listOf(), "", "")
+fun review(conversations: List<Conversation>, policy: Policy): Report = Report(0, 0, 0, 0, 0, 0, false, 0, 0, listOf(Segment("", 0, 0, 0, false)), "", "")

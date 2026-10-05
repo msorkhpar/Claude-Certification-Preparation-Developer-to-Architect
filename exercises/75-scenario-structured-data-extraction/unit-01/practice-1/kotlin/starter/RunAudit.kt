@@ -11,4 +11,4 @@ data class Report(
     val segments: List<Segment>, val invented: Int, val wastedRetries: Int, val uncheckedTotals: Int, val overstated: Boolean, val firstFix: String,
 )
 
-fun audit(runs: List<Run>, policy: Policy): Report = Report(0, 0, 0, 0, 0, 0, false, listOf(), 0, 0, 0, false, "")
+fun audit(runs: List<Run>, policy: Policy): Report = Report(0, 0, 0, 0, 0, 0, false, listOf(Segment("", 0, 0, 0, false)), 0, 0, 0, false, "")
