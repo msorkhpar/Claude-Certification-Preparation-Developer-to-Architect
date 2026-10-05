@@ -61,6 +61,9 @@ The example is the one from the first page. Its second half is this page: the la
 
 The cases, counts and timings are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domain 4) and the Claude documentation pages on defining success, developing tests, reducing hallucinations and reducing latency, read on 2026-10-04. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 COSTS = {"order status": 1, "refund": 20, "policy": 5, "complaint": 10}
 GROUPS = [("order status", 30), ("refund", 8), ("policy", 10), ("complaint", 4)]
 
@@ -116,6 +119,7 @@ def ab_verdict(x1, n1, x2, n2, min_n=200):
 
 def shadow_gate(rows, protected):
     """Ship only when no protected segment lost a right answer and the new version lost fewer than it gained."""
+    log.debug("shadow_gate input: %r", rows)
     lost = [s for s, old_ok, new_ok in rows if old_ok and not new_ok]
     gained = [s for s, old_ok, new_ok in rows if new_ok and not old_ok]
     blocked = sorted({s for s in lost if s in protected})
@@ -191,6 +195,8 @@ diagnose, passes only on a stronger model: model mismatch
 model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("eval_report");
 /**
  * Evaluation decisions for a system that changes: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits.
  *
@@ -255,6 +261,7 @@ export function abVerdict(x1: number, n1: number, x2: number, n2: number, minN =
 
 /** Ship only when no protected segment lost a right answer and the new version lost fewer than it gained. */
 export function shadowGate(rows: Row[], protectedSegments: Set<string>): { decision: string; lost: number; gained: number; blocked: string[] } {
+  log.debug("shadowGate input", rows);
   const lost = rows.filter(([, o, n]) => o && !n).map((r) => r[0]);
   const gained = rows.filter(([, o, n]) => n && !o).length;
   const blocked = [...new Set(lost.filter((s) => protectedSegments.has(s)))].sort();
@@ -340,6 +347,7 @@ import java.util.TreeSet;
  * The cases, counts and timings are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domain 4) and the Claude documentation pages on defining success, developing tests, reducing hallucinations and reducing latency, read on 2026-10-04. Nothing here calls a model.
  */
 public class EvalReport {
+    private static final System.Logger LOG = System.getLogger(EvalReport.class.getName());
     record Row(String segment, boolean oldOk, boolean newOk) {}
 
     record Line(String segment, int cases, int right, int percent, int cost) {}
@@ -413,6 +421,7 @@ public class EvalReport {
 
     /** Ship only when no protected segment lost a right answer and the new version lost fewer than it gained. */
     static Gate shadowGate(List<Row> rows, Set<String> protectedSegments) {
+        LOG.log(System.Logger.Level.DEBUG, "shadowGate input: {0}", rows);
         int lost = 0;
         int gained = 0;
         TreeSet<String> blocked = new TreeSet<>();
@@ -503,6 +512,9 @@ model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
  *
  * The cases, counts and timings are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domain 4) and the Claude documentation pages on defining success, developing tests, reducing hallucinations and reducing latency, read on 2026-10-04. Nothing here calls a model.
  */
+
+private val log = System.getLogger("eval_report")
+
 data class Row(val segment: String, val oldOk: Boolean, val newOk: Boolean)
 
 data class Line(val segment: String, val cases: Int, val right: Int, val percent: Int, val cost: Int)
@@ -567,6 +579,7 @@ fun abVerdict(x1: Int, n1: Int, x2: Int, n2: Int, minN: Int = 200): String {
 
 /** Ship only when no protected segment lost a right answer and the new version lost fewer than it gained. */
 fun shadowGate(rows: List<Row>, protectedSegments: Set<String>): Gate {
+    log.log(System.Logger.Level.DEBUG, "shadowGate input: {0}", rows)
     val lost = rows.filter { it.oldOk && !it.newOk }.map { it.segment }
     val gained = rows.count { it.newOk && !it.oldOk }
     val blocked = lost.filter { it in protectedSegments }.toSortedSet().toList()

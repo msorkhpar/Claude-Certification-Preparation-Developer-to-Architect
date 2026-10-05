@@ -21,7 +21,7 @@ PRACTICES[f"{X}/88-evaluation-and-optimisation/unit-01/practice-1"] = {
         "wrong-percentile-unsorted": (["e2"], "reads the percentile from the values in the order they arrived"),
         "wrong-ab-min-ignored": (["e3"], "gives a verdict on a handful of cases"),
         "wrong-ab-always-new": (["e4"], "names the new version as better whenever it clears the bar, even when it is worse"),
-        "wrong-ab-90-percent": (["e4"], "uses the 90 percent bar and calls a difference that could be chance"),
+        "wrong-ab-90-percent": (["e3", "e4"], "uses the 90 percent bar and calls a difference that could be chance"),
         "wrong-gate-net-only": (["e5"], "ships a version that lost a right answer in a protected segment because it gained as many elsewhere"),
         "wrong-gate-protected-only": (["e5"], "ships a version that lost more answers than it gained in segments that are not protected"),
         "wrong-diagnose-grounding-late": (["e6"], "checks the format before it asks whether the answer is supported by the evidence"),

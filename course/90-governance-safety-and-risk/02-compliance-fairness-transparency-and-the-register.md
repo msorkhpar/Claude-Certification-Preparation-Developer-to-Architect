@@ -53,6 +53,9 @@ The example is the router from the first page, and its second half is this page:
 
 The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 from collections import namedtuple
 
 Action = namedtuple("Action", "name consequence")
@@ -62,6 +65,7 @@ AUTO_CONFIDENCE = 95
 
 def route(action, answer, source, screen_up, confidence_min=AUTO_CONFIDENCE):
     """Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed."""
+    log.debug("route input: %r", action)
     if not screen_up and action.consequence == "high":
         return "hold: screen down"
     flag = "" if screen_up else " (unscreened)"
@@ -124,6 +128,8 @@ audit record: request=r-1001, action=issue_refund, consequence=high, outcome=hum
 erasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("control_chain");
 /**
  * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.
  *
@@ -136,6 +142,7 @@ export const AUTO_CONFIDENCE = 95;
 
 /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
 export function route(action: Action, answer: Answer, source: string, screenUp: boolean, confidenceMin = AUTO_CONFIDENCE): string {
+  log.debug("route input", action);
   if (!screenUp && action.consequence === "high") return "hold: screen down";
   const flag = screenUp ? "" : " (unscreened)";
   if (!source.includes(answer.quote)) return "hold: unsupported" + flag;
@@ -206,6 +213,7 @@ import java.util.stream.Collectors;
  * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
  */
 public class ControlChain {
+    private static final System.Logger LOG = System.getLogger(ControlChain.class.getName());
     record Action(String name, String consequence) {}
 
     record Answer(String text, int confidence, String quote) {}
@@ -218,6 +226,7 @@ public class ControlChain {
 
     /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
     static String route(Action action, Answer answer, String source, boolean screenUp, int confidenceMin) {
+        LOG.log(System.Logger.Level.DEBUG, "route input: {0}", action);
         if (!screenUp && action.consequence().equals("high")) return "hold: screen down";
         String flag = screenUp ? "" : " (unscreened)";
         if (!source.contains(answer.quote())) return "hold: unsupported" + flag;
@@ -298,6 +307,9 @@ erasure removed 2 of 3 mappings; the audit entries stay, with 1 token still link
  *
  * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
  */
+
+private val log = System.getLogger("control_chain")
+
 data class Action(val name: String, val consequence: String)
 
 data class Answer(val text: String, val confidence: Int, val quote: String)
@@ -310,6 +322,7 @@ const val AUTO_CONFIDENCE = 95
 
 /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
 fun route(action: Action, answer: Answer, source: String, screenUp: Boolean, confidenceMin: Int = AUTO_CONFIDENCE): String {
+    log.log(System.Logger.Level.DEBUG, "route input: {0}", action)
     if (!screenUp && action.consequence == "high") return "hold: screen down"
     val flag = if (screenUp) "" else " (unscreened)"
     if (answer.quote !in source) return "hold: unsupported$flag"

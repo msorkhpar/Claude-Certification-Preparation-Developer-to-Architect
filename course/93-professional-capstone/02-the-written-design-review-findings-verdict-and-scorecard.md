@@ -82,6 +82,9 @@ The example is the claims assistant of the first page, and the review of this pa
 
 The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.
 """
+import logging
+
+log = logging.getLogger(__name__)
 import re
 from collections import namedtuple
 
@@ -122,6 +125,7 @@ def retrieve(question, allowed, index):
 
 def handle(request, index):
     """One request through the chain; the outcome says why a request was held."""
+    log.debug("handle input: %r", request)
     sent, _ = tokenise(request.text)
     chunk = retrieve(sent, request.allowed, index)
     if chunk is None:
@@ -191,6 +195,8 @@ release with refunds protected: no-go: protected segment lost answers: refund
 release after the refund fix: go: lost 0, gained 3
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("claims_assistant");
 /**
  * A claims assistant on one page of code: identifiers swapped for tokens before anything is sent, retrieval that filters by the reader's rights first and refuses stale evidence, a source check, a route to a person, a trace that holds no content, and a release gate that protects the costly segment.
  *
@@ -235,6 +241,7 @@ export function retrieve(question: string, allowed: Set<string>, index: Chunk[])
 
 /** One request through the chain; the outcome says why a request was held. */
 export function handle(request: Request, index: Chunk[]): [string, Trace] {
+  log.debug("handle input", request);
   const [sent] = tokenise(request.text);
   const chunk = retrieve(sent, request.allowed, index);
   let outcome: string;
@@ -324,6 +331,7 @@ import java.util.stream.Collectors;
  * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.
  */
 public class ClaimsAssistant {
+    private static final System.Logger LOG = System.getLogger(ClaimsAssistant.class.getName());
     record Chunk(String id, String doc, int version, String text) {}
 
     record Request(String id, String text, Set<String> allowed, String consequence, String quote, int confidence) {}
@@ -389,6 +397,7 @@ public class ClaimsAssistant {
 
     /** One request through the chain; the outcome says why a request was held. */
     static Handled handle(Request request, List<Chunk> index) {
+        LOG.log(System.Logger.Level.DEBUG, "handle input: {0}", request);
         String sent = tokenise(request.text()).sent();
         Chunk chunk = retrieve(sent, request.allowed(), index);
         String outcome;
@@ -467,6 +476,9 @@ release after the refund fix: go: lost 0, gained 3
  *
  * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.
  */
+
+private val log = System.getLogger("claims_assistant")
+
 data class Chunk(val id: String, val doc: String, val version: Int, val text: String)
 
 data class Request(val id: String, val text: String, val allowed: Set<String>, val consequence: String, val quote: String, val confidence: Int)
@@ -507,6 +519,7 @@ fun retrieve(question: String, allowed: Set<String>, index: List<Chunk>): Chunk?
 
 /** One request through the chain; the outcome says why a request was held. */
 fun handle(request: Request, index: List<Chunk>): Handled {
+    log.log(System.Logger.Level.DEBUG, "handle input: {0}", request)
     val sent = tokenise(request.text).sent
     val chunk = retrieve(sent, request.allowed, index)
     val outcome = when {
