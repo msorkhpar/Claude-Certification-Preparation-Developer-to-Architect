@@ -399,7 +399,7 @@ These are the answers that sound sensible and fail in an agent that builds tools
 ## Quiz
 
 1. A generated tool declares that it reads files, and its code fetches a web page. What does the gate in this module's practice do?
-   - **a**: Approves it with a gate, since reading and fetching are both low-risk effects here
+   - **a**: Approves it, since reading and fetching are both low-risk effects here
    - **b**: Refuses it, since the proposal never mentioned that effect
    - **c**: Sends it back for a better description, since the declaration was incomplete
    - **d**: Runs it once in a container to see whether the fetch succeeds as intended
@@ -419,7 +419,7 @@ These are the answers that sound sensible and fail in an agent that builds tools
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Code that does more than it declared is refused. *a* is ruled out because the difference is the finding: "the gate compares what the code does with what was declared and refuses the difference". *c* is ruled out because a refusal is not a revision: "Code that does more than it declared". *d* is ruled out because nothing proposed is run to find out: "Containment is the environment's job."
+1. **b**. Code that does more than it declared is refused. *a* is ruled out because the difference is the finding: "the gate compares what the code does with what was declared and refuses the difference". *c* is ruled out because the finding is a refusal and not a request for a better description: "Compare what the code does with the permissions declared, and refuse the difference". *d* is ruled out because nothing proposed is run to find out: "Containment is the environment's job."
 2. **a**. The scan is the cheap first check. *b* is ruled out because the container holds no secrets: "The lesson for a team that runs generated code itself is the same, and it is a list of absences: no network, no secrets, no shared state, a short life and limits on time and memory." *c* is ruled out because the scan finds only what its authors thought of: "A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it." *d* is ruled out because the scan still does useful work: "The scan is useful for what it does well: it refuses the obvious".
 3. **c**. A result is checked before the agent uses it. *a* is ruled out because a result that does not match is not passed on: "a result that does not match its schema is rejected before the agent sees it". *b* is ruled out because the check does not repair data: "Treat the result as data and check it against its schema". *d* is ruled out because the approval covers one proposal: "the approval covers the proposal that was reviewed and not a later version".
 
