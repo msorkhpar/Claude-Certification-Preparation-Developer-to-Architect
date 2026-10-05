@@ -11,6 +11,28 @@ here, so the Java and Kotlin tests start it as a process too. The rest are files
 of the documented rules (`examples/39-hook-gate`, in your language); the Java and Kotlin tests read JSON with Jackson and the YAML front matter with
 its YAML module. Nothing here starts Claude Code or touches the network.
 
+## What is already written, and what you write
+
+The starter is the working plugin with ten gaps cut out. The structure of every file is written; the hook script keeps its parsing of
+shell commands, chaining, `sh -c` and the structured answer. Each gap is marked: a small function in `scripts/guard.py` with its signature,
+a comment that says what it receives and returns with one example and the cases it unlocks, or a `TODO` value or comment in a file. A gap
+returns a neutral value, so the starter runs and fails the cases on an assertion. The hook script has a logger: `log` at the top of the
+file, and a `log.debug` of the command it checks. A run of the tests shows the lines under a failing case, so debug a gap by logging its
+input with that line. Write them in this order:
+
+1. `is_forced_recursive_rm` in `scripts/guard.py` unlocks `m1`: which `rm` calls are recursive and forced.
+2. `pipes_download_into_shell` unlocks `m1`: a download piped into a shell.
+3. `protected_pattern` unlocks `e1`: which protected pattern a path contains.
+4. `read_event` unlocks `e2`: reading the event, or None for an event that cannot be read.
+5. `hooks/hooks.json` unlocks `e3`: the `matcher` and the `command` of the one handler.
+6. `skills/release-notes/SKILL.md` unlocks `e4`: `description`, `allowed-tools` and the instructions.
+7. `skills/publish/SKILL.md` unlocks `e4`: the invocation rule, `allowed-tools` and the body with `$ARGUMENTS`.
+8. `agents/changelog-reviewer.md` unlocks `e5`: the front matter and the instructions.
+9. `.claude-plugin/plugin.json` unlocks `e6`: `version`, `description` and the dependency.
+10. `.claude/settings.json` unlocks `e7`: the marketplace and the enabled plugin.
+
+About twenty lines in all. The list below describes the whole plugin; the parts you do not write are there so you can see how your parts are used.
+
 ## What to write
 
 - `scripts/guard.py`, a `PreToolUse` hook. It reads one event, a JSON object with `tool_name` and `tool_input`.

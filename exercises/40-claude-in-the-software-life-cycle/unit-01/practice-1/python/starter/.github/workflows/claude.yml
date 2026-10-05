@@ -2,10 +2,29 @@ name: Claude
 on:
   issue_comment:
     types: [created]
+  pull_request_review_comment:
+    types: [created]
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
 jobs:
   claude:
+    # GAP 1 (unlocks m1): start the runner only for comments that mention @claude.
+    # Add `if: contains(github.event.comment.body, '@claude')` here, on the job.
     runs-on: ubuntu-latest
+    # GAP 2 (unlocks e4): bound the time of a run. Example: timeout-minutes: 20 (30 or less).
+    # GAP 3 (unlocks m1): this job writes. Give contents, pull-requests, issues and id-token the value write.
+    # Example: `issues: write` on its own line under permissions.
+    permissions:
+      contents: read
+      actions: read
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      # GAP 4 (unlocks m1): use the stable v1 action, and read the key from the secrets context.
+      # Example: anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
       - uses: anthropics/claude-code-action@beta
         with:
-          anthropic_api_key: sk-ant-api03-REPLACEMEREPLACEME
+          anthropic_api_key: replace-with-a-secret-reference
+          # GAP 5 (unlocks e4): cap the turns. Example: claude_args: --max-turns 8 (10 or fewer).

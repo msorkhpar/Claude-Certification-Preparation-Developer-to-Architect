@@ -1,6 +1,8 @@
 // Diagnose a failure from a trace. See ../../statement.md.
 export type Event = Record<string, any>;
 export type Diagnosis = { index: number; type: string; origin: string; recovery: string; recovered: boolean };
+import { logger } from "../logger.ts";
+const log = logger("diagnose");
 type Triple = [string, string, string];
 
 const HTTP: Record<number, Triple> = {
@@ -22,16 +24,22 @@ const STOP: Record<string, Triple> = {
   pause_turn: ["paused", "integration", "continue_turn"],
 };
 
-function http(event: Event): Triple {
-  const status: number = event.status ?? 0;
-  if (status === 429) {
-    if (event.headers && "retry-after" in event.headers) return ["rate_limit", "service", "wait_retry_after"];
-    if (event.error_code === "enforced_spend_limit_reached") return ["spend_cap", "account", "wait_for_reset"];
-    return ["rate_limit", "service", "retry_backoff"];
-  }
-  if (status === 400 && String(event.message ?? "").toLowerCase().includes("spend limit")) return ["spend_limit", "account", "raise_limit"];
+function rateLimit(event: Event): Triple {
+  if (event.headers && "retry-after" in event.headers) return ["rate_limit", "service", "wait_retry_after"];
+  if (event.error_code === "enforced_spend_limit_reached") return ["spend_cap", "account", "wait_for_reset"];
+  return ["rate_limit", "service", "retry_backoff"];
+}
+
+function byStatus(status: number): Triple {
   if (status in HTTP) return HTTP[status];
   return status >= 500 ? HTTP[500] : HTTP[400];
+}
+
+function http(event: Event): Triple {
+  const status: number = event.status ?? 0;
+  if (status === 429) return rateLimit(event);
+  if (status === 400 && String(event.message ?? "").toLowerCase().includes("spend limit")) return ["spend_limit", "account", "raise_limit"];
+  return byStatus(status);
 }
 
 function hasJsonObject(text: string): boolean {
@@ -46,6 +54,23 @@ function hasJsonObject(text: string): boolean {
   }
 }
 
+function emptyOrigin(lastBlocks: string[]): Triple {
+  const at = lastBlocks.indexOf("tool_result");
+  if (at >= 0 && lastBlocks.slice(at).includes("text")) return ["empty_response", "integration", "remove_text_after_tool_result"];
+  return ["empty_response", "model", "add_continue_prompt"];
+}
+
+function toolFailure(event: Event, tools: string[] | null): Triple | null {
+  const kind = event.kind;
+  if (kind === "tool_call" && tools !== null && !tools.includes(event.name)) return ["unknown_tool", "model", "return_error_result"];
+  if (kind === "tool_result" && event.exception) return ["tool_exception", "integration", "fix_tool_code"];
+  return null;
+}
+
+function recoveredAfter(trace: Event[], i: number): boolean {
+  return trace.slice(i + 1).some((e) => e.kind === "response" && e.status === 200 && e.stop_reason === "end_turn" && e.content && e.content.length > 0);
+}
+
 function classify(event: Event, tools: string[] | null, lastBlocks: string[]): Triple | null {
   const kind = event.kind;
   if (kind === "error") return http(event);
@@ -53,14 +78,10 @@ function classify(event: Event, tools: string[] | null, lastBlocks: string[]): T
   if (kind === "response" && event.status === 200) {
     const reason: string = event.stop_reason;
     if (reason in STOP) return STOP[reason];
-    if (reason === "end_turn" && !(event.content && event.content.length)) {
-      const at = lastBlocks.indexOf("tool_result");
-      if (at >= 0 && lastBlocks.slice(at).includes("text")) return ["empty_response", "integration", "remove_text_after_tool_result"];
-      return ["empty_response", "model", "add_continue_prompt"];
-    }
+    if (reason === "end_turn" && !(event.content && event.content.length)) return emptyOrigin(lastBlocks);
   }
-  if (kind === "tool_call" && tools !== null && !tools.includes(event.name)) return ["unknown_tool", "model", "return_error_result"];
-  if (kind === "tool_result" && event.exception) return ["tool_exception", "integration", "fix_tool_code"];
+  const failed = toolFailure(event, tools);
+  if (failed) return failed;
   if (kind === "parse" && event.ok === false) {
     return hasJsonObject(String(event.text ?? "")) ? ["parse_failure", "integration", "extract_json"] : ["parse_failure", "model", "validate_and_retry"];
   }
@@ -69,6 +90,7 @@ function classify(event: Event, tools: string[] | null, lastBlocks: string[]): T
 
 /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */
 export function diagnose(trace: Event[]): Diagnosis {
+  log.debug("diagnose input", trace);
   let tools: string[] | null = null;
   let lastBlocks: string[] = [];
   for (let i = 0; i < trace.length; i++) {
@@ -80,7 +102,7 @@ export function diagnose(trace: Event[]): Diagnosis {
     }
     const found = classify(event, tools, lastBlocks);
     if (found) {
-      const recovered = trace.slice(i + 1).some((e) => e.kind === "response" && e.status === 200 && e.stop_reason === "end_turn" && e.content && e.content.length > 0);
+      const recovered = recoveredAfter(trace, i);
       return { index: i, type: found[0], origin: found[1], recovery: found[2], recovered };
     }
   }

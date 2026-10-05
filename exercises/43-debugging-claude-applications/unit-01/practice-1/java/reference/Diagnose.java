@@ -4,6 +4,7 @@ import java.util.Map;
 
 /** Diagnose a failure from a trace. See ../../statement.md. */
 final class Diagnose {
+    private static final System.Logger LOG = System.getLogger(Diagnose.class.getName());
     private static final Map<Integer, String[]> HTTP = Map.of(
         400, new String[] {"invalid_request", "integration", "fix_request"},
         401, new String[] {"authentication", "account", "fix_credentials"},
@@ -27,16 +28,21 @@ final class Diagnose {
         return m;
     }
 
-    private static String[] http(Map<String, Object> event) {
-        int status = event.get("status") instanceof Number n ? n.intValue() : 0;
-        if (status == 429) {
-            if (event.get("headers") instanceof Map<?, ?> h && h.containsKey("retry-after")) return new String[] {"rate_limit", "service", "wait_retry_after"};
-            if ("enforced_spend_limit_reached".equals(event.get("error_code"))) return new String[] {"spend_cap", "account", "wait_for_reset"};
-            return new String[] {"rate_limit", "service", "retry_backoff"};
-        }
-        if (status == 400 && String.valueOf(event.getOrDefault("message", "")).toLowerCase().contains("spend limit")) return new String[] {"spend_limit", "account", "raise_limit"};
+    private static String[] rateLimit(Map<String, Object> event) {
+        if (event.get("headers") instanceof Map<?, ?> h && h.containsKey("retry-after")) return new String[] {"rate_limit", "service", "wait_retry_after"};
+        if ("enforced_spend_limit_reached".equals(event.get("error_code"))) return new String[] {"spend_cap", "account", "wait_for_reset"};
+        return new String[] {"rate_limit", "service", "retry_backoff"};
+    }
+
+    private static String[] byStatus(int status) {
         if (HTTP.containsKey(status)) return HTTP.get(status);
         return status >= 500 ? HTTP.get(500) : HTTP.get(400);
+    }
+    private static String[] http(Map<String, Object> event) {
+        int status = event.get("status") instanceof Number n ? n.intValue() : 0;
+        if (status == 429) return rateLimit(event);
+        if (status == 400 && String.valueOf(event.getOrDefault("message", "")).toLowerCase().contains("spend limit")) return new String[] {"spend_limit", "account", "raise_limit"};
+        return byStatus(status);
     }
 
     private static boolean hasJsonObject(String text) {
@@ -47,6 +53,27 @@ final class Diagnose {
         } catch (RuntimeException e) {
             return false;
         }
+    }
+
+    private static String[] emptyOrigin(List<String> lastBlocks) {
+        int at = lastBlocks.indexOf("tool_result");
+        if (at >= 0 && lastBlocks.subList(at, lastBlocks.size()).contains("text")) return new String[] {"empty_response", "integration", "remove_text_after_tool_result"};
+        return new String[] {"empty_response", "model", "add_continue_prompt"};
+    }
+
+    private static String[] toolFailure(Map<String, Object> event, List<String> tools) {
+        Object kind = event.get("kind");
+        if ("tool_call".equals(kind) && tools != null && !tools.contains(event.get("name"))) return new String[] {"unknown_tool", "model", "return_error_result"};
+        if ("tool_result".equals(kind) && event.get("exception") instanceof String s && !s.isEmpty()) return new String[] {"tool_exception", "integration", "fix_tool_code"};
+        return null;
+    }
+
+    private static boolean recoveredAfter(List<Map<String, Object>> trace, int i) {
+        for (Map<String, Object> e : trace.subList(i + 1, trace.size())) {
+            if ("response".equals(e.get("kind")) && e.get("status") instanceof Number n && n.intValue() == 200 && "end_turn".equals(e.get("stop_reason"))
+                && e.get("content") instanceof List<?> c && !c.isEmpty()) return true;
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -62,17 +89,12 @@ final class Diagnose {
                 if (event.get("status") instanceof Number n && n.intValue() == 200) {
                     String reason = (String) event.get("stop_reason");
                     if (reason != null && STOP.containsKey(reason)) return STOP.get(reason);
-                    if ("end_turn".equals(reason) && !(event.get("content") instanceof List<?> c && !c.isEmpty())) {
-                        int at = lastBlocks.indexOf("tool_result");
-                        if (at >= 0 && lastBlocks.subList(at, lastBlocks.size()).contains("text")) return new String[] {"empty_response", "integration", "remove_text_after_tool_result"};
-                        return new String[] {"empty_response", "model", "add_continue_prompt"};
-                    }
+                    if ("end_turn".equals(reason) && !(event.get("content") instanceof List<?> c && !c.isEmpty())) return emptyOrigin(lastBlocks);
                 }
                 return null;
             case "tool_call":
-                return tools != null && !tools.contains(event.get("name")) ? new String[] {"unknown_tool", "model", "return_error_result"} : null;
             case "tool_result":
-                return event.get("exception") instanceof String s && !s.isEmpty() ? new String[] {"tool_exception", "integration", "fix_tool_code"} : null;
+                return toolFailure(event, tools);
             case "parse":
                 if (Boolean.FALSE.equals(event.get("ok"))) {
                     return hasJsonObject(String.valueOf(event.getOrDefault("text", ""))) ? new String[] {"parse_failure", "integration", "extract_json"}
@@ -87,6 +109,7 @@ final class Diagnose {
     /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */
     @SuppressWarnings("unchecked")
     static Map<String, Object> diagnose(List<Map<String, Object>> trace) {
+        LOG.log(System.Logger.Level.DEBUG, "diagnose input: {0}", trace);
         List<String> tools = null, lastBlocks = List.of();
         for (int i = 0; i < trace.size(); i++) {
             Map<String, Object> event = trace.get(i);
@@ -97,11 +120,7 @@ final class Diagnose {
             }
             String[] found = classify(event, tools, lastBlocks);
             if (found != null) {
-                boolean recovered = false;
-                for (Map<String, Object> e : trace.subList(i + 1, trace.size())) {
-                    if ("response".equals(e.get("kind")) && e.get("status") instanceof Number n && n.intValue() == 200 && "end_turn".equals(e.get("stop_reason"))
-                        && e.get("content") instanceof List<?> c && !c.isEmpty()) recovered = true;
-                }
+                boolean recovered = recoveredAfter(trace, i);
                 return map("index", i, "type", found[0], "origin", found[1], "recovery", found[2], "recovered", recovered);
             }
         }

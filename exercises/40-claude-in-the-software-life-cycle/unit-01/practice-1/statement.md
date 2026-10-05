@@ -11,9 +11,24 @@ languages. The files are YAML and Markdown, and the Java and Kotlin tests read t
 
 ## The project
 
-`starter/` holds a mention workflow that someone started: it uses the `@beta` version of the action, holds an API key written into the
-file, and has none of the limits. `prompts/triage.md` has no version, `prompts/CHANGELOG.md` already has the `1.1.0` entry, and
-`CLAUDE.md` says `TODO`.
+`starter/` is the working project with eleven gaps cut out of it (marked `GAP n` in comments, each with one example and the cases it
+unlocks). Everything else is written and correct: the triggers, the concurrency groups, the checkout steps, the review workflow's
+permissions and triggers. The files are configuration, not code, so there is no `log` line to add: when a case fails, the test
+message names the file and the rule, and a run shows it under the failing case. About fourteen lines in all.
+
+## What is already written, and what you write
+
+1. `.github/workflows/claude.yml`, the job `if` unlocks `m1`: start the runner only for `@claude` comments.
+2. `claude.yml`, the job `timeout-minutes` unlocks `e4`.
+3. `claude.yml`, the job `permissions` unlocks `m1`: `contents`, `pull-requests`, `issues` and `id-token` all `write`.
+4. `claude.yml`, the action step unlocks `m1`: `@v1` and the key read from `secrets.ANTHROPIC_API_KEY` (the starter has the beta action and a placeholder).
+5. `claude.yml`, `claude_args` with `--max-turns` unlocks `e4`.
+6. `.github/workflows/review.yml`, `plugin_marketplaces`, `plugins` and `prompt` unlock `e1`.
+7. `review.yml`, the `--allowedTools` part of `claude_args` unlocks `e1`.
+8. `CLAUDE.md`, the Git workflow bullets unlock `e3`.
+9. `REVIEW.md`, a second bullet under Always check unlocks `e3`.
+10. `REVIEW.md`, the bullets under Skip unlock `e3`.
+11. `prompts/triage.md` gets a `version`, and `prompts/CHANGELOG.md` gets its entry: together they unlock `e2`. `e5` passes as long as no file holds a key, a personal path or an address.
 
 ## What to write
 

@@ -48,6 +48,7 @@ PRACTICES[f"{X}/39-extending-claude-code/unit-02/practice-1"] = {
         "wrong-entry-name-mismatch": (["m1", "e1", "e3", "e4", "e6", "e7"], "lists the plugin under a name that differs from the name in its own manifest"),
         "wrong-dotdot-source": (["m1", "e4"], "writes the relative source with .. so that it leaves the marketplace"),
         "wrong-reserved-marketplace-name": (["e1", "e6"], "calls the marketplace by an official Anthropic marketplace name"),
+        "wrong-official-plugin-name": (["e1"], "lists a fourth plugin whose name passes as an official one"),
         "wrong-hooks-without-wrapper": (["e2"], "writes the event map without the top-level hooks key, so the file fails to load"),
         "wrong-hook-script-path": (["e2"], "finds the guard script by a path relative to the working directory instead of the plugin root"),
         "wrong-version-in-both": (["e3"], "sets the version in the manifest and again in the marketplace entry"),

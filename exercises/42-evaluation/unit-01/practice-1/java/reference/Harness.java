@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 
 /** An eval harness. See ../../statement.md. */
 final class Harness {
+    private static final System.Logger LOG = System.getLogger(Harness.class.getName());
+
     private static Map<String, Object> map(Object... kv) {
         Map<String, Object> m = new LinkedHashMap<>();
         for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);
@@ -37,8 +39,23 @@ final class Harness {
             + "1: Not at all " + criterion + "\n5: Perfectly " + criterion + "\nOutput only the number.";
     }
 
+    private static Map<String, Object> fieldResult(Map<String, Object> obj, Map<String, Object> check) {
+        if (!obj.containsKey((String) check.get("field"))) return verdict(false, "missing field");
+        return verdict(Objects.equals(obj.get((String) check.get("field")), check.get("equals")), "mismatch");
+    }
+
+    private static Integer parseScore(String reply) {
+        String text = reply == null ? "" : reply.strip();
+        return text.matches("[1-5]") ? Integer.parseInt(text) : null;
+    }
+
+    private static Map<String, Object> judged(int score, long threshold) {
+        return score >= threshold ? map("passed", true, "reason", "ok", "score", score) : map("passed", false, "reason", "below threshold", "score", score);
+    }
+
     /** Grade one output against the case's check: {"passed", "reason"} (and "score" for a judge check). */
     static Map<String, Object> grade(Map<String, Object> c, String output, Function<String, String> judge) {
+        LOG.log(System.Logger.Level.DEBUG, "grade input: {0}", output);
         Map<String, Object> check = asMap(c.get("check"));
         String kind = (String) check.get("type");
         switch (kind) {
@@ -55,8 +72,7 @@ final class Harness {
                 }
                 if (!(data instanceof Map<?, ?>)) return verdict(false, "not json");
                 Map<String, Object> obj = asMap(data);
-                if (!obj.containsKey((String) check.get("field"))) return verdict(false, "missing field");
-                return verdict(Objects.equals(obj.get((String) check.get("field")), check.get("equals")), "mismatch");
+                return fieldResult(obj, check);
             }
             case "judge": {
                 if (judge == null) return map("passed", false, "reason", "ungradable", "score", null);
@@ -66,14 +82,35 @@ final class Harness {
                 } catch (RuntimeException e) {
                     return map("passed", false, "reason", "ungradable", "score", null);
                 }
-                String text = reply == null ? "" : reply.strip();
-                if (!text.matches("[1-5]")) return map("passed", false, "reason", "ungradable", "score", null);
-                int score = Integer.parseInt(text);
+                Integer score = parseScore(reply);
+                if (score == null) return map("passed", false, "reason", "ungradable", "score", null);
                 long threshold = check.get("threshold") instanceof Number n ? n.longValue() : 4;
-                return score >= threshold ? map("passed", true, "reason", "ok", "score", score) : map("passed", false, "reason", "below threshold", "score", score);
+                return judged(score, threshold);
             }
             default:
                 return verdict(false, "ungradable");
+        }
+    }
+
+    private static Map<String, Object> runOnce(Function<String, String> model, Function<String, String> judge, Map<String, Object> c) {
+        String output;
+        try { output = model.apply((String) c.get("input")); } catch (RuntimeException e) { return map("passed", false, "reason", "model error"); }
+        return grade(c, output, judge);
+    }
+
+    private static Map<String, Object> outcome(List<Map<String, Object>> runs) {
+        boolean passed = runs.stream().allMatch(r -> (Boolean) r.get("passed"));
+        boolean mixed = runs.stream().anyMatch(r -> (Boolean) r.get("passed")) && !passed;
+        String reason = "ok";
+        if (!passed) reason = (String) runs.stream().filter(r -> !(Boolean) r.get("passed")).findFirst().get().get("reason");
+        return map("passed", passed, "mixed", mixed, "reason", reason);
+    }
+
+    private static void countTags(Map<String, Object> byTag, List<?> tags, boolean passed) {
+        for (Object tag : tags) {
+            Map<String, Object> row = asMap(byTag.computeIfAbsent((String) tag, k -> map("passed", 0, "total", 0)));
+            row.put("total", (Integer) row.get("total") + 1);
+            row.put("passed", (Integer) row.get("passed") + (passed ? 1 : 0));
         }
     }
 
@@ -85,34 +122,26 @@ final class Harness {
         int passedCount = 0;
         for (Map<String, Object> c : cases) {
             List<Map<String, Object>> runs = new ArrayList<>();
-            for (int i = 0; i < repeats; i++) {
-                String output;
-                try {
-                    output = model.apply((String) c.get("input"));
-                } catch (RuntimeException e) {
-                    runs.add(map("passed", false, "reason", "model error"));
-                    continue;
-                }
-                runs.add(grade(c, output, judge));
-            }
-            boolean passed = runs.stream().allMatch(r -> (Boolean) r.get("passed"));
-            boolean mixed = runs.stream().anyMatch(r -> (Boolean) r.get("passed")) && !passed;
-            String reason = "ok";
-            if (!passed) reason = (String) runs.stream().filter(r -> !(Boolean) r.get("passed")).findFirst().get().get("reason");
+            for (int i = 0; i < repeats; i++) runs.add(runOnce(model, judge, c));
+            Map<String, Object> outcome = outcome(runs);
+            boolean passed = (Boolean) outcome.get("passed");
+            boolean mixed = (Boolean) outcome.get("mixed");
+            String reason = (String) outcome.get("reason");
             results.add(map("id", c.get("id"), "passed", passed, "reason", reason, "flaky", mixed));
             if (mixed) flaky.add(c.get("id"));
             if (passed) passedCount++;
-            if (c.get("tags") instanceof List<?> tags) {
-                for (Object tag : tags) {
-                    Map<String, Object> row = asMap(byTag.computeIfAbsent((String) tag, k -> map("passed", 0, "total", 0)));
-                    row.put("total", (Integer) row.get("total") + 1);
-                    row.put("passed", (Integer) row.get("passed") + (passed ? 1 : 0));
-                }
-            }
+            if (c.get("tags") instanceof List<?> tags) countTags(byTag, tags, passed);
         }
         int total = results.size();
         return map("total", total, "passed", passedCount, "pass_rate", total == 0 ? 0.0 : (double) passedCount / total,
             "results", results, "by_tag", byTag, "flaky", flaky);
+    }
+
+    private static boolean tagFailed(Object row, double minimum) {
+        if (row == null) return true;
+        double total = ((Number) asMap(row).get("total")).doubleValue();
+        double passed = ((Number) asMap(row).get("passed")).doubleValue();
+        return total == 0 || passed / total < minimum;
     }
 
     /** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */
@@ -122,14 +151,7 @@ final class Harness {
         if (criteria.get("tags") instanceof Map<?, ?> tags) {
             Map<String, Object> byTag = asMap(report.get("by_tag"));
             for (Map.Entry<String, Object> e : asMap(tags).entrySet()) {
-                Object row = byTag.get(e.getKey());
-                if (row == null) {
-                    failures.add("tag:" + e.getKey());
-                    continue;
-                }
-                double total = ((Number) asMap(row).get("total")).doubleValue();
-                double passed = ((Number) asMap(row).get("passed")).doubleValue();
-                if (total == 0 || passed / total < ((Number) e.getValue()).doubleValue()) failures.add("tag:" + e.getKey());
+                if (tagFailed(byTag.get(e.getKey()), ((Number) e.getValue()).doubleValue())) failures.add("tag:" + e.getKey());
             }
         }
         if (criteria.get("max_flaky") instanceof Number max && asList(report.get("flaky")).size() > max.longValue()) failures.add("flaky");
@@ -142,9 +164,7 @@ final class Harness {
         return out;
     }
 
-    /** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */
-    static Map<String, Object> compare(Map<String, Object> baseline, Map<String, Object> current) {
-        Map<String, Boolean> before = outcomes(baseline), now = outcomes(current);
+    private static List<List<Object>> changes(Map<String, Boolean> before, Map<String, Boolean> now) {
         List<Object> regressions = new ArrayList<>(), fixed = new ArrayList<>(), added = new ArrayList<>(), removed = new ArrayList<>();
         for (String id : now.keySet()) {
             if (!before.containsKey(id)) added.add(id);
@@ -152,6 +172,14 @@ final class Harness {
             else if (!before.get(id) && now.get(id)) fixed.add(id);
         }
         for (String id : before.keySet()) if (!now.containsKey(id)) removed.add(id);
+        return List.of(regressions, fixed, added, removed);
+    }
+
+    /** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */
+    static Map<String, Object> compare(Map<String, Object> baseline, Map<String, Object> current) {
+        Map<String, Boolean> before = outcomes(baseline), now = outcomes(current);
+        List<List<Object>> diff = changes(before, now);
+        List<Object> regressions = diff.get(0), fixed = diff.get(1), added = diff.get(2), removed = diff.get(3);
         double delta = ((Number) current.get("pass_rate")).doubleValue() - ((Number) baseline.get("pass_rate")).doubleValue();
         return map("regressions", regressions, "fixed", fixed, "added", added, "removed", removed, "pass_rate_delta", delta,
             "ok", regressions.isEmpty() && removed.isEmpty());

@@ -13,6 +13,28 @@ The Java and Kotlin folders give you `Json` (parse text into maps, lists, string
 Python and TypeScript have JSON built in. A case, a report and every result are plain data: a map with string keys in every language.
 Integers read from JSON are `Long` in Java and Kotlin; your code must accept any `Number` where a number is read.
 
+## What is already written, and what you write
+
+The starter is a working harness with nine small gaps cut out of it. The plumbing is written and correct: `judge_prompt`, the regex and
+JSON parsing steps of `grade`, the loop of `run_eval`, the report, and `meets` and `compare` around the helpers. Each gap is a small function
+with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value,
+so the starter runs and fails the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file
+(`grade` already logs its output at debug level); a run shows the logged lines under the failing case. Write them in this order (the Java and
+Kotlin names are the camel-case forms):
+
+1. `_norm` unlocks `e1`: the form in which an exact check compares two texts.
+2. `_field_result` unlocks `e2`: the field check on a parsed JSON object, with the same typed value.
+3. `_parse_score` unlocks `e3`: a judge reply that is exactly one digit from 1 to 5.
+4. `_judged` unlocks `e3`: pass at the threshold, `below threshold` under it.
+5. `_run_once` unlocks `e4`: a model that raises an error fails its own case and the run goes on.
+6. `_outcome` unlocks `e7`: passed, flaky and reason from the runs of one case.
+7. `_count_tags` unlocks `e5`: one case counted under each of its tags.
+8. `_tag_failed` unlocks `e5`: whether a tag misses its minimum rate, including a tag no case carries.
+9. `_changes` unlocks `e6`: regressions, fixed, added and removed cases of two runs.
+
+About twenty lines in all. The sections below describe the whole harness; the parts you do not write are there so you can see how your
+functions are used.
+
 ## What to write
 
 Names are written in Python style; TypeScript uses camelCase (`runEval`). Java and Kotlin put the functions on `Harness`
