@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("extraction");
 /** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. */
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "other", "unclear"];
@@ -40,6 +42,7 @@ function checkSemantics(record: any, err: (kind: string, field: string, message:
 }
 
 export function validate(record: any, document: string, required: string[] = []): any[] {
+  log.debug("validate input", record);
   const errors: any[] = [];
   const err = (kind: string, field: string, message: string) => errors.push({ kind, field, message });
   if (typeof record !== "object" || record === null || Array.isArray(record)) return [{ kind: "syntax", field: "$", message: "the record is not an object" }];

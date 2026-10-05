@@ -1,6 +1,9 @@
 """An injection-resistant tool gate. See ../../statement.md."""
+import logging
 import json
 import re
+
+log = logging.getLogger(__name__)
 
 TOOLS = {"read_file", "write_file", "bash", "fetch", "send_email"}
 SIGNALS = {
@@ -26,6 +29,7 @@ def wrap_untrusted(tool_use_id, source, content):
     Example: wrap_untrusted("t1", "web page", "hi")
       -> {"type": "tool_result", "tool_use_id": "t1", "content": '{"source":"web page","trust":"untrusted","content":"hi"}'}
     """
+    log.debug("wrap_untrusted input: %r", content)
     return {"type": "tool_result", "tool_use_id": tool_use_id, "content": content}
 
 

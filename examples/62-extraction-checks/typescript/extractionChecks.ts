@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("extraction_checks");
 /**
  * What a schema does not give an extraction pipeline: a field the document may lack, checks of meaning, a retry that carries feedback, and an accuracy figure that does not hide the failures.
  *

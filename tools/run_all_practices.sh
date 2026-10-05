@@ -4,6 +4,7 @@
 # usage: tools/run_all_practices.sh <runner image id>        (cwd = repository root)
 IMG=$1; W=$(pwd); PD=exercises/06-prompting-fundamentals/unit-01/practice-1
 mkdir -p "$W/.survey-out"
+python3 tools/make_harness.py --modules '^06-' || exit 2
 python3 tools/make_plants.py --modules '^06-' || exit 2   # the wrong-* folders are generated, never committed
 VARIANTS="starter reference wrong-task-first wrong-empty-sections wrong-missing-variable-silent wrong-blank-task-accepted wrong-no-escape wrong-fill-documents"
 if [ ! -d "$W/.survey-out/gradle/gradle-9.8.0" ]; then

@@ -4,7 +4,10 @@ The rules are the exam guide's for tasks 4.3 and 4.4 and the Claude documentatio
 nullable so the model is not pushed to invent a value; a retry helps with format and structure and cannot supply what the source does not hold; a request that forces a tool is rejected by the current models, which use
 `auto` with strict tool use. The "model" below is a script of fixed replies: it shows the pipeline's decisions, not what a real model would answer.
 """
+import logging
 import json
+
+log = logging.getLogger(__name__)
 
 DOC = "Invoice from Acme Tools.\nItems: 100.00 + 20.50\nTotal due: 130.00 EUR"
 NO_FORCING = {"claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"}
@@ -20,6 +23,7 @@ def scripted_value(document, nullable):
 
 def check(record, document):
     """Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document."""
+    log.debug("check input: %r", record)
     problems = []
     if abs(sum(record["items"]) - record["total"]) > 0.005:
         problems.append(f"total: the items add up to {sum(record['items'])}, not {record['total']}")

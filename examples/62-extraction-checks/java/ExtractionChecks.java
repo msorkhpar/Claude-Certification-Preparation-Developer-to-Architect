@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * `auto` with strict tool use. The "model" below is a script of fixed replies: it shows the pipeline's decisions, not what a real model would answer.
  */
 public final class ExtractionChecks {
+    private static final System.Logger LOG = System.getLogger(ExtractionChecks.class.getName());
     static final String DOC = "Invoice from Acme Tools.\nItems: 100.00 + 20.50\nTotal due: 130.00 EUR";
     static final Set<String> NO_FORCING = Set.of("claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1");
 
@@ -47,6 +48,7 @@ public final class ExtractionChecks {
 
     /** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
     static List<String> check(Invoice record, String document) {
+        LOG.log(System.Logger.Level.DEBUG, "check input: {0}", record);
         List<String> problems = new ArrayList<>();
         double sum = 0;
         for (double item : record.items()) sum += item;

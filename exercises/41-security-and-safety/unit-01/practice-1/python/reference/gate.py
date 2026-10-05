@@ -1,6 +1,9 @@
 """An injection-resistant tool gate. See ../../statement.md."""
+import logging
 import json
 import re
+
+log = logging.getLogger(__name__)
 
 TOOLS = {"read_file", "write_file", "bash", "fetch", "send_email"}
 SIGNALS = {
@@ -19,6 +22,7 @@ def screen(text):
 
 def wrap_untrusted(tool_use_id, source, content):
     """A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged."""
+    log.debug("wrap_untrusted input: %r", content)
     signals = screen(content)
     if signals:
         return {"type": "tool_result", "tool_use_id": tool_use_id, "is_error": True,

@@ -1,5 +1,7 @@
 import java.util.Base64
 
+private val log = System.getLogger("toolset")
+
 /** Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md. Tools are JSON-like maps. */
 
 private val NAME = Regex("[A-Za-z0-9_-]{1,128}")
@@ -69,6 +71,7 @@ private fun listAndHintRules(name: String, properties: Map<String, Any?>, hints:
 }
 
 fun lintTool(tool: Map<String, Any?>): List<String>? {
+    log.log(System.Logger.Level.DEBUG, "lintTool input: {0}", tool)
     val found = sortedSetOf<String>()
     val name = str(tool["name"])
     val description = str(tool["description"])

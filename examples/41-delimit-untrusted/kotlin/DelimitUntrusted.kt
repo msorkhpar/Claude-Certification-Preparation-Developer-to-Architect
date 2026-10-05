@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("delimit_untrusted")
+
 /**
  * Untrusted text, kept apart from your instructions: JSON encoding in a tool result, a system prompt that states the policy, and a screen.
  *
@@ -38,6 +40,7 @@ fun toolResult(toolUseId: String, source: String, body: String): Map<String, Any
 
 /** Screen first: a flagged body is withheld and the attempt is named, instead of reaching the model. */
 fun quarantine(toolUseId: String, source: String, body: String): Map<String, Any> {
+    log.log(System.Logger.Level.DEBUG, "quarantine input: {0}", body)
     val signals = screen(body)
     if (signals.isNotEmpty()) {
         return linkedMapOf(

@@ -4,13 +4,17 @@ No model is called. The rules are the course's own and small: a description of t
 neighbouring tool, a description on every parameter, and a pair of descriptions that overlap too much. Checked on 2026-10-03 against the "Define tools"
 page of the Claude API documentation and the "Writing tools for agents" article.
 """
+import logging
 import base64
 import re
+
+log = logging.getLogger(__name__)
 
 OVERLAP = 0.6
 
 
 def lint(tool):
+    log.debug("lint input: %r", tool)
     text = tool["description"].lower()
     found = []
     if not any(p in text for p in ("do not use", "not for", "instead of")):

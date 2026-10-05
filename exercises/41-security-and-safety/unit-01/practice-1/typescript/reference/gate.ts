@@ -1,4 +1,6 @@
 // An injection-resistant tool gate. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("gate");
 export type Args = Record<string, unknown>;
 export type Decision = { decision: "allow" | "ask" | "deny"; reason: string };
 
@@ -18,6 +20,7 @@ export function screen(text: string): string[] {
 
 /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */
 export function wrapUntrusted(toolUseId: string, source: string, content: string) {
+  log.debug("wrapUntrusted input", content);
   const signals = screen(content);
   if (signals.length) {
     return { type: "tool_result", tool_use_id: toolUseId, is_error: true, content: `Content from ${source} withheld: possible prompt injection (${signals.join(", ")})` } as Record<string, unknown>;

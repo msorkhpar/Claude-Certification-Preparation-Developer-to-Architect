@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 /** An injection-resistant tool gate. See ../../statement.md. */
 final class Gate {
+    private static final System.Logger LOG = System.getLogger(Gate.class.getName());
     private static final Set<String> TOOLS = Set.of("read_file", "write_file", "bash", "fetch", "send_email");
     private static final Map<String, Pattern> SIGNALS = new LinkedHashMap<>();
     private static final String[] SHELL_TRICKS = {";", "&", "|", ">", "<", "`", "$(", "\n"};
@@ -37,6 +38,7 @@ final class Gate {
 
     /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */
     static Map<String, Object> wrapUntrusted(String toolUseId, String source, String content) {
+        LOG.log(System.Logger.Level.DEBUG, "wrapUntrusted input: {0}", content);
         List<String> signals = screen(content);
         if (!signals.isEmpty()) {
             return map("type", "tool_result", "tool_use_id", toolUseId, "is_error", true,

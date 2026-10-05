@@ -1,5 +1,8 @@
 """An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
 CURRENCIES = ("USD", "EUR", "GBP", "other", "unclear")
 KEYS = ("vendor", "currency", "currency_detail", "line_items", "stated_total", "calculated_total", "conflict_detected", "provenance")
 RETRYABLE = ("syntax", "semantic", "ungrounded")
@@ -32,6 +35,7 @@ def _check_semantics(record, err):
 
 
 def validate(record, document, required=()):
+    log.debug("validate input: %r", record)
     errors = []
 
     def err(kind, field, message):

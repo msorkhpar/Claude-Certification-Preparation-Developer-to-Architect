@@ -1,3 +1,4 @@
+private val log = System.getLogger("gate")
 /** An injection-resistant tool gate. See ../../statement.md. */
 class Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<String>) {
     private val root = resolve("/", root)
@@ -23,6 +24,7 @@ class Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<S
 
         /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */
         fun wrapUntrusted(toolUseId: String, source: String, content: String): Map<String, Any?> {
+            log.log(System.Logger.Level.DEBUG, "wrapUntrusted input: {0}", content)
             val found = screen(content)
             if (found.isNotEmpty()) {
                 return linkedMapOf("type" to "tool_result", "tool_use_id" to toolUseId, "is_error" to true,

@@ -1,4 +1,6 @@
 // An injection-resistant tool gate. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("gate");
 export type Args = Record<string, unknown>;
 export type Decision = { decision: "allow" | "ask" | "deny"; reason: string };
 
@@ -18,6 +20,7 @@ export function screen(text: string): string[] {
 
 /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */
 export function wrapUntrusted(toolUseId: string, source: string, content: string): Record<string, unknown> {
+  log.debug("wrapUntrusted input", content);
   // TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.
   // Receives the tool use id, where the text came from and the text. Returns a tool_result object. Clean text becomes one line of
   // compact JSON (JSON.stringify) with the keys source, trust ("untrusted") and content, in that order. When `screen` finds a signal,

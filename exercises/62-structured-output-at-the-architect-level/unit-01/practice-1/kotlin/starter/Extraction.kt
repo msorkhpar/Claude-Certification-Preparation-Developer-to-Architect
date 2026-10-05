@@ -1,3 +1,4 @@
+private val log = System.getLogger("extraction")
 /** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */
 
 val CURRENCIES = listOf("USD", "EUR", "GBP", "other", "unclear")
@@ -44,6 +45,7 @@ private fun checkSemantics(record: Map<String, Any?>, errors: MutableList<Map<St
 
 @Suppress("UNCHECKED_CAST")
 fun validate(record: Map<String, Any?>, document: String, required: List<String> = emptyList()): List<Map<String, Any?>>? {
+    log.log(System.Logger.Level.DEBUG, "validate input: {0}", record)
     val errors = mutableListOf<Map<String, Any?>>()
     for (key in KEYS) if (key !in record) errors += err("syntax", key, "is missing")
     if (errors.isNotEmpty()) return errors
