@@ -18,7 +18,7 @@ There is no official conversion from a mock percentage to a result. The real exa
 
 ## What it covers
 
-The mock has **63 questions**, the number of items on the real exam. They are spread by the Professional blueprint's weights (each domain's weight times 63, rounded so that the total stays 63) and grouped by domain here for easy scoring; the real exam mixes them. The share column is the count divided by 63, set beside the official weight so that you can see the split matches.
+The mock has **63 questions**, the number of items the published guide lists (check the current guide before booking). They are spread by the Professional blueprint's weights (each domain's weight times 63, rounded so that the total stays 63) and grouped by domain here for easy scoring; the real exam mixes them. The share column is the count divided by 63, set beside the official weight so that you can see the split matches.
 
 | Questions | Domain | Weight | Count | Share of this mock | Drawn from modules |
 |---|---|---|---|---|---|

@@ -18,7 +18,7 @@ There is no official conversion from a mock percentage to a result. **Pass or fa
 
 ## What it covers
 
-The real exam draws four scenarios from a bank of six and sets 60 items on them. This mock follows that shape with S1, S3, S5 and S6, fifteen questions each, grouped by scenario here for easy scoring; the real exam mixes the order. The questions on the two scenarios beyond the exam's six (modules 76 and 77) sit in the nearest official scenario, since the bank has no other.
+The published guide lists six scenarios, describes a sitting of four of them and 60 items (check the current guide before booking). This mock follows that shape with S1, S3, S5 and S6, fifteen questions each, grouped by scenario here for easy scoring; the real exam mixes the order. The questions on the two scenarios beyond the exam's six (modules 76 and 77) sit in the nearest official scenario, since the bank has no other.
 
 | Questions | Scenario | Count |
 |---|---|---|

@@ -15,7 +15,7 @@ Level 3 gave you every topic of the Architect exam and eight scenario capstones.
 
 ### The exam in numbers
 
-The exam has 60 items and lasts 120 minutes, which is two minutes an item. The result is a scaled score from 100 to 1,000, with 720 to pass, reported as pass or fail with the percent correct in each domain. The domain percentages are not used for the result, which depends on the total scaled score: a weak domain can be carried by the others, and a strong domain does not rescue a weak total. The items are multiple-choice or multiple-response, and each item says how many answers to select.
+The published guide lists 60 items and 120 minutes of exam time, which is two minutes an item (the item count was not confirmed on an official page on 2026-10-05, so check the current guide). The result is a scaled score from 100 to 1,000, with 720 to pass, reported as pass or fail with the percent correct in each domain. The domain percentages are not used for the result, which depends on the total scaled score: a weak domain can be carried by the others, and a strong domain does not rescue a weak total. The items are multiple-choice or multiple-response, and each item says how many answers to select.
 
 The questions sit inside scenarios. A sitting draws four of six settings, so you will not meet all six, and you cannot know which four. The six are a customer support resolution agent, code generation with Claude Code, a multi-agent research system, developer productivity, Claude Code in continuous integration, and structured data extraction. Level 3 teaches each as a capstone (modules 70 to 75) and adds two settings beyond the six (modules 76 and 77), which practise the same decisions in new surroundings.
 
