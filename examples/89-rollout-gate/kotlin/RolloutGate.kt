@@ -1,6 +1,8 @@
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val log = System.getLogger("rollout_gate")
+
 /**
  * Moving a system to a new model at scale: the calendar of retirements, the settings a new model refuses, a gate that a regression suite must pass, and a staged roll-out with a way back.
  *
@@ -62,6 +64,7 @@ fun percentile(values: List<Int>, p: Int): Int {
 
 /** A go needs every check to pass; every check that fails adds a reason, in a fixed order. */
 fun gate(cases: List<Case>, protectedSegments: Set<String>, maxCostUp: Int, maxP95: Int): Verdict {
+    log.log(System.Logger.Level.DEBUG, "gate input: {0}", cases)
     val reasons = mutableListOf<String>()
     val failed = cases.filter { it.mustPass && !it.newOk }.map { it.id }.sorted()
     if (failed.isNotEmpty()) reasons.add("must-pass failed: " + failed.joinToString(", "))

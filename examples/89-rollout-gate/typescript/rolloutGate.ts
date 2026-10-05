@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("rollout_gate");
 /**
  * Moving a system to a new model at scale: the calendar of retirements, the settings a new model refuses, a gate that a regression suite must pass, and a staged roll-out with a way back.
  *
@@ -61,6 +63,7 @@ export function percentile(values: number[], p: number): number {
 
 /** A go needs every check to pass; every check that fails adds a reason, in a fixed order. */
 export function gate(cases: Case[], protectedSegments: Set<string>, maxCostUp: number, maxP95: number): { decision: string; reasons: string[] } {
+  log.debug("gate input", cases);
   const reasons: string[] = [];
   const failed = cases.filter((c) => c.mustPass && !c.newOk).map((c) => c.id).sort();
   if (failed.length) reasons.push("must-pass failed: " + failed.join(", "));

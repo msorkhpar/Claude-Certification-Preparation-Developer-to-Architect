@@ -3,6 +3,9 @@
  *
  * The cases, counts and timings are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domain 4) and the Claude documentation pages on defining success, developing tests, reducing hallucinations and reducing latency, read on 2026-10-04. Nothing here calls a model.
  */
+
+private val log = System.getLogger("eval_report")
+
 data class Row(val segment: String, val oldOk: Boolean, val newOk: Boolean)
 
 data class Line(val segment: String, val cases: Int, val right: Int, val percent: Int, val cost: Int)
@@ -67,6 +70,7 @@ fun abVerdict(x1: Int, n1: Int, x2: Int, n2: Int, minN: Int = 200): String {
 
 /** Ship only when no protected segment lost a right answer and the new version lost fewer than it gained. */
 fun shadowGate(rows: List<Row>, protectedSegments: Set<String>): Gate {
+    log.log(System.Logger.Level.DEBUG, "shadowGate input: {0}", rows)
     val lost = rows.filter { it.oldOk && !it.newOk }.map { it.segment }
     val gained = rows.count { it.newOk && !it.oldOk }
     val blocked = lost.filter { it in protectedSegments }.toSortedSet().toList()

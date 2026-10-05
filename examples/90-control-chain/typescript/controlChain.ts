@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("control_chain");
 /**
  * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.
  *
@@ -10,6 +12,7 @@ export const AUTO_CONFIDENCE = 95;
 
 /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
 export function route(action: Action, answer: Answer, source: string, screenUp: boolean, confidenceMin = AUTO_CONFIDENCE): string {
+  log.debug("route input", action);
   if (!screenUp && action.consequence === "high") return "hold: screen down";
   const flag = screenUp ? "" : " (unscreened)";
   if (!source.includes(answer.quote)) return "hold: unsupported" + flag;

@@ -1,6 +1,9 @@
 """Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md."""
+import logging
 from collections import namedtuple
 from datetime import date
+
+log = logging.getLogger(__name__)
 
 Case = namedtuple("Case", "id segment must_pass old_ok new_ok old_cost new_cost new_ms")
 Request = namedtuple("Request", "model temperature top_p top_k thinking tool_choice strict prefill")
@@ -9,21 +12,25 @@ TARGET = "claude-sonnet-5-5"
 
 
 def days_until(today, when):
+    """Whole days from one ISO date to another, negative when it has passed (written for you)."""
     return (date.fromisoformat(when) - date.fromisoformat(today)).days
 
 
 def percentile(values, p):
+    """Nearest-rank percentile, 0 for no values (written for you)."""
     ordered = sorted(values)
     return ordered[(p * len(ordered) + 99) // 100 - 1] if ordered else 0
 
 
+def _status_line(days, name, tentative):
+    level = "retired" if days < 0 else "urgent" if days <= 14 else "migrate now" if days <= 60 else "watch"
+    return f"{name}: {days} days, {level}{' (tentative)' if tentative else ''}"
+
+
 def retirement_status(models, today):
+    log.debug("retirement_status input: %r", models)
     rows = sorted((days_until(today, when), name, tentative) for name, when, tentative in models)
-    out = []
-    for days, name, tentative in rows:
-        level = "retired" if days < 0 else "urgent" if days <= 14 else "migrate now" if days <= 60 else "watch"
-        out.append(f"{name}: {days} days, {level}{' (tentative)' if tentative else ''}")
-    return out
+    return [_status_line(days, name, tentative) for days, name, tentative in rows]
 
 
 def migrate_request(request, target=TARGET):
@@ -33,13 +40,7 @@ def migrate_request(request, target=TARGET):
     for field in ("temperature", "top_p", "top_k"):
         if getattr(request, field) is not None:
             changes.append(f"removed {field}")
-    thinking = request.thinking
-    if thinking == "budget":
-        thinking = "adaptive"
-        changes.append("thinking budget replaced by adaptive thinking; sweep the effort")
-    elif thinking == "disabled":
-        thinking = "between_tools"
-        changes.append("thinking disabled replaced by between_tools")
+    thinking = _migrate_thinking(request.thinking, changes)
     tool_choice, strict = request.tool_choice, request.strict
     if tool_choice in ("any", "tool"):
         tool_choice, strict = "auto", True
@@ -49,26 +50,49 @@ def migrate_request(request, target=TARGET):
     return Request(target, None, None, None, thinking, tool_choice, strict, False), changes
 
 
-def gate(cases, protected, max_cost_up, max_p95):
-    reasons = []
+def _migrate_thinking(thinking, changes):
+    if thinking == "budget":
+        changes.append("thinking budget replaced by adaptive thinking; sweep the effort")
+        return "adaptive"
+    if thinking == "disabled":
+        changes.append("thinking disabled replaced by between_tools")
+        return "between_tools"
+    return thinking
+
+
+def _must_pass(cases):
     failed = sorted(c.id for c in cases if c.must_pass and not c.new_ok)
-    if failed:
-        reasons.append("must-pass failed: " + ", ".join(failed))
-    lost = [c for c in cases if c.old_ok and not c.new_ok]
-    gained = [c for c in cases if c.new_ok and not c.old_ok]
-    hit = sorted({c.segment for c in lost if c.segment in protected})
-    if hit:
-        reasons.append("protected segment lost answers: " + ", ".join(hit))
-    if len(lost) > len(gained):
-        reasons.append(f"net loss: lost {len(lost)}, gained {len(gained)}")
+    return ["must-pass failed: " + ", ".join(failed)] if failed else []
+
+
+def _protected(cases, protected):
+    hit = sorted({c.segment for c in cases if c.old_ok and not c.new_ok and c.segment in protected})
+    return ["protected segment lost answers: " + ", ".join(hit)] if hit else []
+
+
+def _net_loss(cases):
+    lost, gained = sum(1 for c in cases if c.old_ok and not c.new_ok), sum(1 for c in cases if c.new_ok and not c.old_ok)
+    return [f"net loss: lost {lost}, gained {gained}"] if lost > gained else []
+
+
+def _cost(cases, max_cost_up):
     old_total, new_total = sum(c.old_cost for c in cases), sum(c.new_cost for c in cases)
     up = (new_total - old_total) * 100 // old_total if old_total > 0 and new_total > old_total else 0
-    if up > max_cost_up:
-        reasons.append(f"cost up {up}% over the {max_cost_up}% limit")
+    return [f"cost up {up}% over the {max_cost_up}% limit"] if up > max_cost_up else []
+
+
+def _latency(cases, max_p95):
     p95 = percentile([c.new_ms for c in cases], 95)
-    if p95 > max_p95:
-        reasons.append(f"p95 latency {p95} ms over the {max_p95} ms limit")
-    return {"decision": "no-go" if reasons else "go", "reasons": reasons}
+    return [f"p95 latency {p95} ms over the {max_p95} ms limit"] if p95 > max_p95 else []
+
+
+def _decision(reasons):
+    return "no-go" if reasons else "go"
+
+
+def gate(cases, protected, max_cost_up, max_p95):
+    reasons = _must_pass(cases) + _protected(cases, protected) + _net_loss(cases) + _cost(cases, max_cost_up) + _latency(cases, max_p95)
+    return {"decision": _decision(reasons), "reasons": reasons}
 
 
 def rollout_step(stage, requests, errors, min_requests, max_errors_per_1000):

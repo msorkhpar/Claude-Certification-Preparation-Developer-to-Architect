@@ -4,6 +4,21 @@ A team brings a design to the architecture board: a claims assistant that reads 
 
 Names are Python's (`launch_review`, `verdict`, `scorecard`, `needed_accuracy`); TypeScript has the camel-case names (`launchReview`, `neededAccuracy`); Java has the same camel-case names as static methods of `LaunchReview`; Kotlin has top-level functions. The flags are a set of strings and the numbers are a map from a name to a whole number; a missing number counts as 0.
 
+## What is already written, and what you write
+
+The starter is a working review with eight gaps cut out of it. The plumbing is written: the `add` function that records a finding, the call of every domain's rules in turn, and the rules of the domains P2, P6 and P7. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `_p1_rules` unlocks `e1`, `e4` and `e7`: the three rules of domain P1.
+2. `_p3_rules` unlocks `e4` and `e8`: the four rules of domain P3.
+3. `_p4_rules` unlocks `e1`, `e3` and `e4`: the four rules of domain P4.
+4. `_p5_rules` unlocks `e4`, `e7` and `e8`: the five rules of domain P5.
+5. `_order` unlocks `e3`: severity, then domain, then rule id.
+6. `verdict` unlocks `e1` and `e2`: reject, revise or approve.
+7. `scorecard` unlocks `e5`: the seven domain counts.
+8. `needed_accuracy` unlocks `m1` and `e6`: the break-even accuracy, rounded up on the cost side.
+
+About twenty lines in all. The sections below describe the whole review.
+
 ## What to write
 
 - `launch_review(flags, numbers)` returns the findings, each a string `<severity> <domain> <rule>` such as `high P1 missing-feedback`. The findings run from high to medium to low, then by domain (P1 to P7), then by rule id in alphabetical order. The 22 rules are in the table below.

@@ -15,6 +15,21 @@ A utility wants an assistant that helps its billing agents decide whether a disp
 | Measured accuracy | credit 63 percent, complaint 91 percent, status 98 percent, on 100 cases each |
 | Options priced | People decide every dispute 315,000 a month and meets the service levels; the model decides every dispute 300,000 and misses them; the model drafts and a person decides every item 150,000 and meets them; routing by confidence with a person on the rest 80,000 and meets them |
 
+## What is already written, and what you write
+
+The record exists as a draft with the title, the eight headings and the case table in place; there is no code to write and no function to log from, because the tests read the document. You fill the gaps below, in this order, and each unlocks the cases named:
+
+1. **Summary for the sponsor** is a `TODO` line: write it, at most 80 words, with the monthly cost and one decision asked for (`m1` for the filled section, `e8` for the words, the cost and the ask).
+2. **Decision statement** is one thin sentence: add the volume, the latency, the two costs and the accountable role (`e1`).
+3. **Options considered** recommends the newest option and leaves a rejection without a reason, with two options missing: fix the status column, add the reasons and the missing options (`e2`).
+4. **Recommendation and trade-offs** is a `TODO` line: state the break-even rule and the monthly cost of the recommended option (`e3`).
+5. **Accuracy by segment** has one row without a failure shape: add the other two segments, the costliest first, with a shape and a handling that follows the break-even (`e5`).
+6. **Service levels** promises 5000 ms with no measure and an owner of `TBD`: correct the targets and name a measure and an owner on every row (`e4`).
+7. **Pilot to scale** has one assumption with no test and no trigger: complete it and add three more, each stop trigger holding a number (`e6`).
+8. **Hand-off and monitoring** is a `TODO` line: name the owner, the runbook, at least two monitors and the rollback to the previous model (`e7`).
+
+The sections below describe the whole record.
+
 ## What to write
 
 `docs/design-record.md` has a title and these eight sections, as level 2 headings, in this order:

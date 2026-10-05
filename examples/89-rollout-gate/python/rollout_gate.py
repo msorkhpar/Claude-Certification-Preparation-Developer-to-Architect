@@ -2,6 +2,9 @@
 
 The cases, costs, timings and counts are invented. The model names and dates are the ones the Claude documentation listed on 2026-10-04; the rules about settings are those of its migration guide for Claude Sonnet 5.5. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 from collections import namedtuple
 from datetime import date
 
@@ -61,6 +64,7 @@ def percentile(values, p):
 
 def gate(cases, protected, max_cost_up, max_p95):
     """A go needs every check to pass; every check that fails adds a reason, in a fixed order."""
+    log.debug("gate input: %r", cases)
     reasons = []
     failed = sorted(c.id for c in cases if c.must_pass and not c.new_ok)
     if failed:

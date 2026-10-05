@@ -2,6 +2,9 @@
 
 The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 from collections import namedtuple
 
 Sla = namedtuple("Sla", "name limit direction unit")
@@ -20,6 +23,7 @@ def break_even(error_cost, review_cost):
 
 def sla_line(sla, measured):
     """A service level is met at its limit exactly, and a miss says by how much."""
+    log.debug("sla_line input: %r", sla)
     met = measured <= sla.limit if sla.direction == "max" else measured >= sla.limit
     verdict = "met" if met else f"missed by {abs(measured - sla.limit)} {sla.unit}"
     word = "limit" if sla.direction == "max" else "floor"

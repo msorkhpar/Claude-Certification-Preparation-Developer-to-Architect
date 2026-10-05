@@ -3,6 +3,9 @@
  *
  * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
  */
+
+private val log = System.getLogger("tradeoff_brief")
+
 data class Sla(val name: String, val limit: Int, val direction: String, val unit: String)
 
 data class Segment(val name: String, val right: Int, val total: Int, val errorCost: Int)
@@ -17,6 +20,7 @@ fun breakEven(errorCost: Int, reviewCost: Int): Int = 100 - (100 * reviewCost + 
 
 /** A service level is met at its limit exactly, and a miss says by how much. */
 fun slaLine(sla: Sla, measured: Int): String {
+    log.log(System.Logger.Level.DEBUG, "slaLine input: {0}", sla)
     val met = if (sla.direction == "max") measured <= sla.limit else measured >= sla.limit
     val verdict = if (met) "met" else "missed by ${Math.abs(measured - sla.limit)} ${sla.unit}"
     val word = if (sla.direction == "max") "limit" else "floor"

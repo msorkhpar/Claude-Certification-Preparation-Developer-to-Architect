@@ -2,6 +2,9 @@
 
 The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 from collections import namedtuple
 
 Action = namedtuple("Action", "name consequence")
@@ -11,6 +14,7 @@ AUTO_CONFIDENCE = 95
 
 def route(action, answer, source, screen_up, confidence_min=AUTO_CONFIDENCE):
     """Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed."""
+    log.debug("route input: %r", action)
     if not screen_up and action.consequence == "high":
         return "hold: screen down"
     flag = "" if screen_up else " (unscreened)"

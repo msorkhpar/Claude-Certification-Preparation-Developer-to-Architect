@@ -12,6 +12,7 @@ import java.util.TreeSet;
  * The cases, counts and timings are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domain 4) and the Claude documentation pages on defining success, developing tests, reducing hallucinations and reducing latency, read on 2026-10-04. Nothing here calls a model.
  */
 public class EvalReport {
+    private static final System.Logger LOG = System.getLogger(EvalReport.class.getName());
     record Row(String segment, boolean oldOk, boolean newOk) {}
 
     record Line(String segment, int cases, int right, int percent, int cost) {}
@@ -85,6 +86,7 @@ public class EvalReport {
 
     /** Ship only when no protected segment lost a right answer and the new version lost fewer than it gained. */
     static Gate shadowGate(List<Row> rows, Set<String> protectedSegments) {
+        LOG.log(System.Logger.Level.DEBUG, "shadowGate input: {0}", rows);
         int lost = 0;
         int gained = 0;
         TreeSet<String> blocked = new TreeSet<>();

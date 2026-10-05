@@ -3,6 +3,9 @@
  *
  * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.
  */
+
+private val log = System.getLogger("claims_assistant")
+
 data class Chunk(val id: String, val doc: String, val version: Int, val text: String)
 
 data class Request(val id: String, val text: String, val allowed: Set<String>, val consequence: String, val quote: String, val confidence: Int)
@@ -43,6 +46,7 @@ fun retrieve(question: String, allowed: Set<String>, index: List<Chunk>): Chunk?
 
 /** One request through the chain; the outcome says why a request was held. */
 fun handle(request: Request, index: List<Chunk>): Handled {
+    log.log(System.Logger.Level.DEBUG, "handle input: {0}", request)
     val sent = tokenise(request.text).sent
     val chunk = retrieve(sent, request.allowed, index)
     val outcome = when {

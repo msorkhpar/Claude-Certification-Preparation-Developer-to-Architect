@@ -2,6 +2,9 @@
 
 The cases, counts and timings are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domain 4) and the Claude documentation pages on defining success, developing tests, reducing hallucinations and reducing latency, read on 2026-10-04. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 COSTS = {"order status": 1, "refund": 20, "policy": 5, "complaint": 10}
 GROUPS = [("order status", 30), ("refund", 8), ("policy", 10), ("complaint", 4)]
 
@@ -57,6 +60,7 @@ def ab_verdict(x1, n1, x2, n2, min_n=200):
 
 def shadow_gate(rows, protected):
     """Ship only when no protected segment lost a right answer and the new version lost fewer than it gained."""
+    log.debug("shadow_gate input: %r", rows)
     lost = [s for s, old_ok, new_ok in rows if old_ok and not new_ok]
     gained = [s for s, old_ok, new_ok in rows if new_ok and not old_ok]
     blocked = sorted({s for s in lost if s in protected})

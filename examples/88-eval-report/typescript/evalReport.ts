@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("eval_report");
 /**
  * Evaluation decisions for a system that changes: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits.
  *
@@ -62,6 +64,7 @@ export function abVerdict(x1: number, n1: number, x2: number, n2: number, minN =
 
 /** Ship only when no protected segment lost a right answer and the new version lost fewer than it gained. */
 export function shadowGate(rows: Row[], protectedSegments: Set<string>): { decision: string; lost: number; gained: number; blocked: string[] } {
+  log.debug("shadowGate input", rows);
   const lost = rows.filter(([, o, n]) => o && !n).map((r) => r[0]);
   const gained = rows.filter(([, o, n]) => n && !o).length;
   const blocked = [...new Set(lost.filter((s) => protectedSegments.has(s)))].sort();

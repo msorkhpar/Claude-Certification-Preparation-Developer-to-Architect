@@ -3,6 +3,9 @@
  *
  * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
  */
+
+private val log = System.getLogger("control_chain")
+
 data class Action(val name: String, val consequence: String)
 
 data class Answer(val text: String, val confidence: Int, val quote: String)
@@ -15,6 +18,7 @@ const val AUTO_CONFIDENCE = 95
 
 /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
 fun route(action: Action, answer: Answer, source: String, screenUp: Boolean, confidenceMin: Int = AUTO_CONFIDENCE): String {
+    log.log(System.Logger.Level.DEBUG, "route input: {0}", action)
     if (!screenUp && action.consequence == "high") return "hold: screen down"
     val flag = if (screenUp) "" else " (unscreened)"
     if (answer.quote !in source) return "hold: unsupported$flag"

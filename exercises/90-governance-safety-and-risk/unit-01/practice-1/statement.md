@@ -2,6 +2,19 @@
 
 A claims assistant drafts replies, answers policy questions and can issue refunds and close accounts. Its governance is written down in four files, and the draft of them is wrong in several places: a screen lets a request through when it is down, a refund has no person in front of it, an answer goes out unreviewed at a confidence of 80, the audit log keeps the text of every prompt for two years, and the risk register has two rows, no owner and a control that does not exist. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The numbers the tests check (a confidence of at least 95, a floor of at least 90 days, an erasure within 30 days) are this course's design values, to be tuned to your own error costs and your own legal advice. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files.
 
+## What is already written, and what you write
+
+The four files exist as a working draft: the controls, the routing, the retention settings and the register are all there, in the right shape, and the tests read them. You change values and fill in cells; there is no code to write and no function to log from. The draft is wrong in six places, and each one unlocks the cases named:
+
+1. The input screen and the refund approval proceed when they fail, and `untrusted-content` is not defined: fix `on_failure` and add the control (`m1`; the missing control is also needed by `e4`).
+2. `human_review` is empty: give each high-consequence action a review control that exists, has the tier `high` and holds (`e1`).
+3. The routing sends at a confidence of 80, lets a high-consequence action run on its own and sends an unsupported answer: correct the three values (`e2`).
+4. The audit window has a floor of 30 days, keeps entries for 730, stores content and lets the ceiling purge a hold: correct the five values (`e3`).
+5. The register has two rows, no owner and a control that does not fit: add the two missing rows and name a control and an owner in each (`e4`).
+6. The register has a `TODO` where the disclosure sentence belongs, and erasure keeps the map and takes 90 days: write the sentence (`e5`) and correct the erasure block (`e6`).
+
+About a dozen small edits in all. The sections below describe the whole set of files.
+
 ## What to write
 
 The project folder holds four files.

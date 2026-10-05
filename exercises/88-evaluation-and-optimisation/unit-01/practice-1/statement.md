@@ -4,6 +4,20 @@ A team reports one accuracy figure for its assistant and ships whatever raises i
 
 Names are Python's (`segment_table`, `percentile`, `ab_verdict`, `shadow_gate`, `diagnose`, `choose_model`); TypeScript has the camel-case names (`segmentTable`, `abVerdict`, `shadowGate`, `chooseModel`); Java has the same camel-case names as static methods of `EvalKit`; Kotlin has top-level functions. Python and TypeScript use tuples and arrays: a graded case is `(segment, correct)`, a line of the report is `(segment, cases, right, percent, cost)`, a case run on both versions is `(segment, old_ok, new_ok)` and a model option is `(name, accuracy, p95, cost)`. Java and Kotlin use the records and data classes shown in the starter (`Result`, `Line`, `Paired`, `Gate`, `Option`). The function `pct` (whole percent, half up, integers only) is already written.
 
+## What is already written, and what you write
+
+The starter is a working kit with seven small gaps cut out of it. The grouping of the cases by segment, the counting of lost, gained and protected cases and the plumbing of every function are written, and so is `pct`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):
+
+1. `_error_cost` unlocks `m1` and `e1`: the wrong answers times the segment's cost, 1 when it has none.
+2. `_order` unlocks `m1` and `e1`: the costliest segment first, ties by name.
+3. `percentile` unlocks `e2`: the nearest-rank value of unsorted input.
+4. `ab_verdict` unlocks `e3` and `e4`: the minimum size, the degenerate pools and the 95 percent test.
+5. `_decision` unlocks `e5`: ship or hold from the protected losses, the losses and the gains.
+6. `diagnose` unlocks `e6`: the order of the questions.
+7. `choose_model` unlocks `e7`: the cheapest option inside both limits.
+
+About twenty lines in all. The sections below describe the whole kit.
+
 ## What to write
 
 - `segment_table(results, costs)` groups the graded cases by segment and returns one line per segment: its cases, its right answers, `pct` of them, and the cost of its errors, which is the number of wrong answers times the segment's entry in `costs` (1 when the segment has no entry). The lines are ordered by cost, the highest first, and by segment name when costs are equal. No results give no lines.
