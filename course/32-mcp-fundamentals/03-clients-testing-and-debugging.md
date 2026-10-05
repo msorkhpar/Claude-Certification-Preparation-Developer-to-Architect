@@ -66,23 +66,23 @@ The practice is in `exercises/32-mcp-fundamentals/unit-01/practice-1/statement.m
    - **d**: Reinstall the host application, since a corrupt cache hides tools
 
 2. A stdio server started by a host cannot find credentials that work in the developer's shell. Which documented behavior explains it?
-   - **a**: Only a limited subset is inherited, so extra variables go in the config
-   - **b**: Credentials are read from the shell only when the transport used is HTTP
-   - **c**: The server receives its variables only after the first tool call has arrived
-   - **d**: The host wipes the whole environment on purpose, to keep secrets away from servers
+   - **a**: Only some variables are inherited, so the rest go in an env key of the configuration
+   - **b**: Credentials are read from the shell only over HTTP, so stdio servers never receive them
+   - **c**: Variables arrive only after the first tool call, so startup always sees none
+   - **d**: The whole environment is wiped, so no server can read any variable
 
 3. A CI job must exercise a server without a browser and print machine-readable results. Which Inspector client fits?
-   - **a**: The web one, run headless with the default settings
-   - **b**: The terminal-UI one, since it prints results as JSON
-   - **c**: The scriptable command-line mode, built for pipelines
-   - **d**: None, because the Inspector can only run interactively
+   - **a**: The web one, because it is the default and the richest surface
+   - **b**: The terminal one, because it needs no browser and prints JSON
+   - **c**: The CLI one, because it is built for shell pipelines
+   - **d**: Any of the three, because they all connect the same way
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says the guide's connection checks include "Test standalone with Inspector", and the guide calls the Inspector the "first stop" for debugging. *d* is ruled out because the documented checks look at the server and the logs, such as "Verify server process is running", and none of them is to reinstall the host. *b* is ruled out because the steps go through logs, the process and "Test standalone with Inspector" before anything is rewritten. *c* is ruled out because "Local MCP servers should not log messages to stdout (standard out), as this will interfere with protocol operation."
 2. **a**. The page quotes the guide: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically (the exact set is platform-dependent)." *d* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them, not none. *b* is ruled out because the fix is to "set an env key in the host's configuration", whatever the transport. *c* is ruled out because the variables are fixed when the process is launched: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically".
-3. **c**. The page's table says the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents." *a* is ruled out because the web one is "A full graphical inspector in the browser. The default, and the richest surface." *b* is ruled out because the terminal one is "An interactive terminal UI, for when a browser isn't available or wanted." *d* is ruled out because the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents."
+3. **c**. The page's table says the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents." *a* is ruled out because the web one is "A full graphical inspector in the browser. The default, and the richest surface." *b* is ruled out because the terminal one is "An interactive terminal UI, for when a browser isn't available or wanted." *d* is ruled out because only the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents.", while the other two are graphical or interactive, even though every client behind the Inspector "connects the same way".
 
 </details>
 
@@ -106,7 +106,7 @@ This quiz covers all three pages of the module.
    - **a**: All four, since they share one specification and release together
    - **b**: Only the Kotlin library, because it is the newest of the four
    - **c**: Only the Java library, which the documentation ranks in its top tier overall
-   - **d**: Only the Python library; the other three stop at an earlier revision
+   - **d**: Only the Python library, because the other three stop at an earlier revision
 
 4. A query matches no stored entries. How does the course's notes server answer?
    - **a**: With a tool error that tells the model to ask the user for a new query
