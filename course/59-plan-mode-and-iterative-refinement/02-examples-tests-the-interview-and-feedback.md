@@ -405,9 +405,9 @@ This module has no practice. Its decisions are judged by the quiz, since the cho
    - **d**: A request to reproduce the previous version with small changes
 
 2. The requirements of a large feature are unclear, and the developer is present at the keyboard. How should the work start?
-   - **a**: Let Claude question them, then record a spec for a fresh session
-   - **b**: Write one long prompt that covers every possibility
-   - **c**: Have Claude pick the likeliest design and build it at once
+   - **a**: Let Claude question them, then record a spec for later
+   - **b**: Write one long prompt that covers every case, then build
+   - **c**: Have Claude pick the likeliest design, then build it
    - **d**: Ask for the implementation, then repair whatever was misunderstood
 
 <details>

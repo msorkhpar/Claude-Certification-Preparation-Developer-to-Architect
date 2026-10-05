@@ -145,9 +145,9 @@ and they differ by role only because the people relying differ.
    areas, not individuals. *d* is ruled out because the rule is "classify first, remove identifiers before
    analysis", and leaving names out of the findings does not keep them out of the upload. *b* is ruled out because
    "Donor and beneficiary records are sensitive", so ten full records are still exposure. *c* is ruled out because
-   "High-volume, low-stakes drafting suits a faster, cheaper model", and the tier chosen does not change the class
+   "high-volume, low-stakes drafting suits a faster, cheaper model", and the tier chosen does not change the class
    of the data.
-2. **d**. A reply that states a date is a promise the owner holds, so each date is checked against the actual policy. *b* is ruled out because the check is "that a confident reply to a customer is not invented", so confidence proves nothing. *c* is ruled out because "A small owner has no one else to catch the error", and asking the same tool whether it is right does not check the policy. *a* is ruled out because "High-volume, low-stakes drafting suits a faster, cheaper model" with a spot check, so stopping altogether is not needed.
+2. **d**. A reply that states a date is a promise the owner holds, so each date is checked against the actual policy. *b* is ruled out because the check is "that a confident reply to a customer is not invented", so confidence proves nothing. *c* is ruled out because "A small owner has no one else to catch the error", and asking the same tool whether it is right does not check the policy. *a* is ruled out because "high-volume, low-stakes drafting suits a faster, cheaper model" with a spot check, so stopping altogether is not needed.
 3. **b**. Delegate production and keep authorship, the page's guidance for makers. *a* is ruled out because the maker keeps "the part that makes the work theirs", and a whole story signed by the maker is not that. *c* is ruled out because "Disclosure matters more here than in many fields", and presenting AI work as unaided is the opposite. *d* is ruled out because "For a maker the distinctive voice is the product", and the visual direction is part of it.
 
 </details>
@@ -198,7 +198,7 @@ This quiz covers both pages of the module.
    merged afterwards. *a* is ruled out because "the best answer anonymises or aggregates first and checks results",
    and twenty complete records are still personal data. *d* is ruled out because "Donor and beneficiary records are
    sensitive" and the rule is to "classify first, remove identifiers before analysis", which a promise from the tool
-   does not replace. *c* is ruled out because "High-volume, low-stakes drafting suits a faster, cheaper model" is
+   does not replace. *c* is ruled out because "high-volume, low-stakes drafting suits a faster, cheaper model" is
    about cost, and the data class is unchanged by the tier.
 3. **a**. Where a setting has a rule, follow it; where it has none, say what you did, and a maker delegates
    production while keeping authorship. *d* is ruled out because the page says that when a setting has no rule, "say
