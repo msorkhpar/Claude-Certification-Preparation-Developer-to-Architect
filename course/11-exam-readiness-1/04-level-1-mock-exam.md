@@ -50,48 +50,48 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Give each item an indexed tag, declare it data, and ask for the index cited
    - **d**: Use one tag for all four files and ask for the page number cited
 
-2. A local charity asks Claude to draft a fundraising email and receives text that is correct but generic and in a flat voice. Which emphasis does the course give for a drafting task?
+2. A local charity asks Claude to draft a fundraising email and receives text that is accurate but could have been written for any charity. Which emphasis does the course give for a drafting task?
    - **a**: Breadth first, many options and judgment kept for a second pass
    - **b**: Named references, claims tied to them and gaps declared in the text
    - **c**: The material and the question, with proof shown for each finding
-   - **d**: The reader, the tone, the length and a sample of the style wanted
+   - **d**: The audience, the tone and an example of the style wanted
 
-3. A director's request to Claude names the deliverable, its length and its readers, and gives the steps to follow, but says nothing about how Claude should behave. The drafts agree with everything she proposes. Which two statements fit? (Select two.)
-   - **a**: A sample of the target is the missing piece before any draft helps
-   - **b**: Its manner is the part left out
-   - **c**: The process is missing because no approach was named
-   - **d**: Permission to push back belongs in that part
-   - **e**: The product is unclear because its form and readers are absent
+3. A director's request to Claude names the deliverable, its length and its readers, and gives the steps to follow, but is silent on how Claude should behave. The drafts endorse every proposal the director makes. Which two statements fit? (Select two.)
+   - **a**: A sample of the target style is the missing piece
+   - **b**: The performance part is the one that is absent
+   - **c**: The process part is the one that is absent
+   - **d**: That part should say whether the assistant may disagree
+   - **e**: The product part is the one that is unclear
 
-4. A user pastes a 25-page report beneath a single line of instruction and gets weak, unfocused answers. She also wants Claude to treat the pasted text only as something to read. Which change fits best?
-   - **a**: Add a role such as world-class analyst to sharpen the focus
+4. A user pastes a 25-page report beneath a single line of instruction and gets weak, unfocused answers. The user also needs any instruction hidden inside the report to be ignored. Which change fits best?
+   - **a**: Add a role such as world-class analyst and ask for tighter focus
    - **b**: Wrap the material in tags, place it first and end with the question
    - **c**: Repeat the instruction in the middle of the report as well as at the top
    - **d**: Move the report above the instructions and let its position mark it as data
 
-5. A team lead wants a quick test of whether a prompt is clear enough before it goes live. Which working rule from the course fits?
+5. A team lead wants a quick check that a prompt says enough before it goes live. Which working rule from the course fits?
    - **a**: Imagine handing it to a capable colleague new to the project
-   - **b**: Run it once and accept it when the reply sounds fluent and confident
-   - **c**: Ask Claude to rate the prompt's clarity on a scale from one to ten
-   - **d**: Check that it holds a role line and several adjectives about quality
+   - **b**: Run it on one typical input and accept it if the reply reads well
+   - **c**: Ask Claude to score the prompt from one to ten for completeness
+   - **d**: Check that it opens with a role line and carries quality adjectives
 
 6. A team needs replies in a rarely seen house format of three labelled lines, including a fallback line for tickets that fit no category, and instructions alone give inconsistent layouts. Which prompting approach fits best?
-   - **a**: Several varied samples, one of them covering the unclassifiable case
+   - **a**: Several varied samples, with one for the unclassifiable case
    - **b**: One sample taken from an unrelated task, shown after the instructions
    - **c**: Three near-identical easy samples, to keep the layout consistent
    - **d**: A longer written description of the layout, with no samples attached
 
 7. A support lead adds "You are a licensed pharmacist" to a prompt, expecting dependable medication advice from the replies. Which statement about that line is accurate?
-   - **a**: It changes the voice and focus, but truth still needs checking
-   - **b**: It replaces the need for a task line in the prompt
-   - **c**: It makes the answers medically reliable for any patient
-   - **d**: It acts as a safeguard, so protected facts stay protected
+   - **a**: It changes the voice and focus of the answers
+   - **b**: It stands in for a task line in the prompt
+   - **c**: It lets the answers be trusted without a check
+   - **d**: It works as a safeguard on protected facts
 
-8. A manager types "Write something about our Q3 results" and receives a generic paragraph with no figures. The board pack is due within the hour. Which revision best fixes the request?
+8. A manager types "Write something about our Q3 results" and receives a generic paragraph with no specifics. The board pack is due within the hour. Which revision best fixes the request?
    - **a**: Name the readers, the form, the numbers to use and how to treat gaps
    - **b**: Add that the result must be concise, thorough, clear and professional
-   - **c**: Add a role such as senior analyst and leave the rest as it is
-   - **d**: Run the request three times and keep the best-sounding result
+   - **c**: Add a role such as senior analyst and leave the rest unchanged
+   - **d**: Run the request three times and keep the best-sounding draft
 
 9. A summary of a supplier contract is correct in every sentence, yet the manager later finds a penalty clause missing. Which two statements describe the shortfall? (Select two.)
    - **a**: The draft passed on accuracy but failed on coverage
@@ -109,7 +109,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 11. A team lead skims Claude Tag's summary of a long thread, and also forwards a note that Claude drafted to a customer. How much reading does the page ask for in each case?
    - **a**: A light pass for both the digest and the note
    - **b**: A close read for both the digest and the note
-   - **c**: A close read for the digest and a light pass for the note to the customer
+   - **c**: A close read for the digest, a light pass for the note to the customer
    - **d**: A light pass for the digest, a careful look at anything sent outside
 
 12. A test asserts that a Claude reply matches a stored string exactly. It passes today and fails tomorrow for the same input. What is the best interpretation?
@@ -138,10 +138,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **e**: Check figures and quotations first
 
 16. An analyst asks Claude for the reasons a new policy will succeed, and the reply gives only supporters' views. The memo goes to a review committee. What is the best next step?
-   - **a**: Ask Claude whether its own answer was biased and accept a no
-   - **b**: Add a line saying that an AI drafted the memo for the committee
-   - **c**: Reword the request to ask for the strongest case on each side
-   - **d**: Move to a larger tier, whose answers lean less toward one view
+   - **a**: Ask Claude whether its answer was biased and accept the reply
+   - **b**: Add a line to the memo saying that an AI drafted it
+   - **c**: Reword the request to ask for the leading argument on each side
+   - **d**: Switch to a larger tier and ask the same question again
 
 17. A finance team plans to use Claude for Excel to produce the reconciliation that its auditors will rely on, and to send the result with no further checks. What does the add-in page say about this plan?
    - **a**: It is fine provided the workbook includes its macros for the whole reconciliation
@@ -161,11 +161,11 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Inline replies for both audiences, with artifacts kept for code alone
    - **d**: Machine-readable results for the ingest step, a brief inline note for leadership
 
-20. A communications assistant has Claude draft a press note that goes out under the organisation's name within the hour. It holds a remark attributed to the chief executive and three figures. What should be checked first?
-   - **a**: Spelling and tone, which colleagues will proofread anyway
-   - **b**: The quote and the statistics, against their originals
-   - **c**: Whether Claude says it is confident about each claim
-   - **d**: Whether a second Claude draft repeats the same claims
+20. A communications assistant has Claude draft a press note that goes out under the organisation's name within the hour. It reports what the chief executive said and gives three percentages. What should be checked first?
+   - **a**: Spelling and tone, read through line by line by a colleague
+   - **b**: The quotation and the statistics, against their originals
+   - **c**: Each claim, against the confidence Claude states for it
+   - **d**: Each claim, against a second draft from Claude
 
 21. A team runs Claude Haiku 4.5 on questions about product launches from mid-2025, and the answers are thin. Which fact from the models overview best accounts for this?
    - **a**: Its window is smaller than the others', so the later material no longer fits
@@ -173,7 +173,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Its training data cutoff is later than its reliable one, so it knows every event fully
    - **d**: All tiers share the same dates, so switching tier could not change the result
 
-22. A retailer will draft about 5,000 short order-status replies an hour, and a few each hour need delicate judgment. Speed and cost matter most. What is the best opening move? 
+22. A retailer will draft about 5,000 short order-status replies an hour, and a few each hour need delicate judgment. Speed and cost matter most. What is the best opening move?
    - **a**: Use the middle tier until the invoices arrive, then decide
    - **b**: Use the most capable tier for every reply to protect quality
    - **c**: Use the fast, cheap tier first and send hard cases higher
@@ -185,10 +185,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: They apply only in the terminal, since the files are read from a shell prompt
    - **d**: They apply only after being exported once into each of the other tools
 
-24. An analyst switches on Research mode to look up the notice period stated in a single contract that she has open. What does the course say about this choice?
-   - **a**: It is wasteful and adds sources to check, since one text answers it
-   - **b**: It is the right choice, since contracts always need many linked searches
-   - **c**: It is the right choice, since citations make each answer easier to trust
+24. An analyst switches on Research mode to look up the notice period stated in a single contract that is already open. What does the course say about this choice?
+   - **a**: It is more than the task needs, since one text answers it
+   - **b**: It is the right choice, since contracts need many linked searches
+   - **c**: It is needed, since a notice period must be confirmed from web sources
    - **d**: It is blocked, since Research cannot read a document that is already open
 
 25. A long conversation in the app starts contradicting decisions made hours earlier, though no error appears. The lead wants the project to continue with every decision kept. Which action fits?
@@ -198,10 +198,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Paste the whole earlier transcript into a new chat
 
 26. A strategist must compare twelve vendors using public sources and wants cited findings by tomorrow, with several rounds of investigation expected. Which feature fits best?
-   - **a**: Research mode, with the web lookup setting enabled
-   - **b**: A Project holding the vendors' brochures and no web access
-   - **c**: A plain chat reply, whose citations arrive with every answer
-   - **d**: An artifact that renders the comparison as a dashboard first
+   - **a**: Research mode, with web search enabled
+   - **b**: A Project loaded with each vendor's brochures
+   - **c**: A plain chat, asked for sources in each reply
+   - **d**: An artifact that lays the comparison out as a dashboard
 
 27. A team lists what to weigh before picking a model for a new feature. Which set matches the start of the "Choosing the right model" page?
    - **a**: What the task needs, the answer speed required, the cost, and the effort setting
@@ -209,11 +209,11 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Capabilities, speed, price and the cloud platform that hosts the model
    - **d**: Latency, accuracy, safety and the vendor's retirement dates in the tables
 
-28. A user tells Claude about her project in an incognito chat and finds that the next chat has no trace of it. Which two statements are correct? (Select two.)
-   - **a**: A Project would have remembered everything she said
+28. A user tells Claude about a project in an incognito chat and finds that the next chat has no trace of it. Which two statements are correct? (Select two.)
+   - **a**: A Project would have remembered everything the user said
    - **b**: The weights should have updated after the exchange
    - **c**: The behaviour is intended and not a fault
-   - **d**: Memory failed because the exchange was too short
+   - **d**: Incognito chats can only be started inside a Project
    - **e**: That mode excludes the conversation from memory and history by design
 
 29. An FP&A analyst must trace how a revenue figure in a long workbook is derived before presenting it. Which capability of the Excel add-in helps most directly?
@@ -223,10 +223,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Macro execution that recalculates the whole workbook automatically
 
 30. A sales team's lead has one skill for proposal layouts that works well and now wants the team's connectors and several other playbooks packaged for a regular role. What does the course suggest?
-   - **a**: Upload every playbook as a separate skill and leave the connectors out
-   - **b**: Prove the first piece by testing, then grow it into a shared plugin
-   - **c**: Build the plugin first, then test each skill after the team starts using it
-   - **d**: Keep one skill and put the connectors into the Project's instructions
+   - **a**: Upload each playbook as its own skill and leave the connectors out
+   - **b**: Test the first piece, then scale it into a shared plugin
+   - **c**: Build the whole plugin first and test each skill after rollout
+   - **d**: Keep the one skill and put the connectors in the Project's instructions
 
 31. A small charity asks Claude for a first draft of a grant application and receives polished text in a corporate voice that misses the funder's priorities. Which two statements fit the course's guidance for this audience? (Select two.)
    - **a**: The request should give only a word limit and a deadline, judged on form alone
@@ -315,7 +315,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: A review date written on each document that the Project holds
    - **d**: A single source of record, mirrored by the workspace or synced directly
 
-45. A coordinator builds a small published artifact where parents of pupils enter their children's dietary needs, and it keeps data. What should she check before inviting people?
+45. A coordinator builds a small published artifact where parents of pupils enter their children's dietary needs, and it keeps data. What should the coordinator check before inviting people?
    - **a**: Whether its storage is personal or visible to every user
    - **b**: Whether the artifact runs past fifteen lines, which decides its storage
    - **c**: Whether each visitor has the creator's plan, with usage billed to it
@@ -327,12 +327,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: No, since the mix is still identifying, so generalise it further
    - **d**: Yes, since coding is the strongest technique on the list of methods in use
 
-47. A member of a Team plan finds that memory and a particular connector are missing from her settings, while a friend at another company has both. Which two statements explain it? (Select two.)
+47. A member of a Team plan finds that memory and a particular connector are missing from their settings, while a friend at another company has both. Which two statements explain it? (Select two.)
    - **a**: The source system blocks anything absent from a personal allow list
-   - **b**: Claude hides tools from users it judges inexperienced
+   - **b**: Features stay hidden until each member opts in individually
    - **c**: The account owners switch features on or off
    - **d**: Individuals cannot override those switches
-   - **e**: Her manager can override any setting in her own workspace
+   - **e**: A line manager can override any setting in a member's workspace
 
 48. A team on a commercial plan asks whether Anthropic may use its inputs to build better models, and how long chats are kept. Which answer is accurate?
    - **a**: They are used unless an owner opts out, and they are then kept for up to five years
@@ -352,14 +352,14 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Replace each name with a code and keep the key list in the same file
    - **d**: Upload everything and ask for a summary that leaves out personal details
 
-51. A manager lets Cowork reach her entire documents drive to save time, and it holds tax returns and exported passwords. Which two changes fit? (Select two.)
+51. A manager lets Cowork reach an entire documents drive to save time, and it holds tax returns and exported passwords. Which two changes fit? (Select two.)
    - **a**: Use manual approval for sensitive material
    - **b**: Connect a dedicated folder with only the needed items
    - **c**: Keep the access but ask Claude to ignore the sensitive items
    - **d**: Keep the access and rely on the cloud sandbox
    - **e**: Keep the access but switch to automatic approval for speed
 
-52. A professional asks Claude in Chrome to shortlist conference venues while her banking site is open in another tab, and she has ten minutes before a call. Which habit best limits harm?
+52. A professional asks Claude in Chrome to shortlist conference venues while a banking site is open in another tab, with ten minutes left before a call. Which habit best limits harm?
    - **a**: Rely on the classifiers, which screen each action
    - **b**: Leave the bank tab open but ask Claude to skip it
    - **c**: Switch on Skip all approvals, with no prompt interrupting the task
@@ -474,16 +474,16 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    budget". *d* is ruled out because "the cheapest model for everything under-serves exactly the cases that need
    depth".
 23. **a**. Each surface connects to the same underlying Claude Code engine, so memory files, settings and MCP servers work across all of them (module 3, page 2). *b* is ruled out because Claude Code keeps "settings that travel with the repository across its surfaces". *c* is ruled out because Claude Code is "available in the terminal, IDE extensions, a desktop app and the browser". *d* is ruled out because "your repo's CLAUDE.md files, settings, and MCP servers work across all of them", with no export step.
-24. **a**. Do not use Research for a question that one document answers (module 7, page 2). *b* is ruled out because "Use Research when the question is open and broad". *c* is ruled out because "a citation shows where an answer came from, not that the source is right". *d* is ruled out because Research "draws on connected internal sources" as well as the web.
+24. **a**. Do not use Research for a question that one document answers (module 7, page 2). *b* is ruled out because "Use Research when the question is open and broad". *c* is ruled out because "Do not use it for a question that one document answers, or one you can check in a minute" (module 7, page 2). *d* is ruled out because Research "draws on connected internal sources" as well as the web.
 25. **c**. A fresh start with a summary keeps the useful context and drops the rot (module 1, page 1). *a* is ruled
    out because "accuracy and recall degrade, a phenomenon known as context rot", and a restatement inside the same long conversation leaves the degraded context in place. *b* is ruled out because "Larger windows raise the ceiling; they do not
    remove the need to decide what goes in". *d* is ruled out because "more context isn't automatically better", and
    the whole transcript brings the rot with it.
 26. **a**. Research runs many linked searches with citations and needs web search on (module 7, page 2). *b* is ruled out because a Project suits "Recurring work with fixed rules and reference files". *c* is ruled out because plain chat is for "A one-off question, a draft, a quick comparison". *d* is ruled out because an artifact is for "A document, deck, dashboard or small tool to hand to someone", not for gathering sources.
 27. **a**. The page starts with four criteria: capabilities (what the task needs), speed, cost and effort (module 3, page 1). *b* is ruled out because the page starts with "capabilities (what the task needs)", and brand and release date are not among its criteria. *c* is ruled out because the page ends its list with "cost (development and production), and effort", and names no hosting platform. *d* is ruled out because the page's criteria include "cost (development and production)", which this set leaves out.
-28. **c and e**. Incognito chats "keep a conversation out of memory and history" on purpose (modules 7 and 10). *a* is ruled out because "Each project has its own separate memory space and dedicated project summary". *b* is ruled out because "Weights are fixed at inference time". *d* is ruled out because "per-chat memory switches and organisation settings are controls", so the missing trace follows a setting and not the length of the exchange.
+28. **c and e**. Incognito chats "keep a conversation out of memory and history" on purpose (modules 7 and 10). *a* is ruled out because "Each project has its own separate memory space and dedicated project summary". *b* is ruled out because "Weights are fixed at inference time". *d* is ruled out because "Incognito chats are available only outside Projects" (module 7, page 1), so one cannot be started inside a Project.
 29. **c**. The add-in answers with clickable cell-level citations (module 8, page 2). *b* is ruled out because it is "Not recommended for final client deliverables without human review". *d* is ruled out because "Macros and VBA, and data tables, are unsupported". *a* is ruled out because "Claude can read and write only files that are open at that moment".
-30. **b**. The Academy lesson recommends starting with one skill, testing it and then scaling to a plugin you share (module 8, page 1). *a* is ruled out because "a plugin bundles skills, connectors and sub-agents around a job". *c* is ruled out because "A recurring task repeats its mistakes unattended", so an untested plugin repeats its flaws for the whole team. *d* is ruled out because "Where a skill is one playbook, a plugin is several, plus the connectors they depend on".
+30. **b**. The Academy lesson recommends starting with one skill, testing it and then scaling to a plugin you share (module 8, page 1). *a* is ruled out because "a plugin bundles skills, connectors and sub-agents around a job". *c* is ruled out because the lesson recommends "starting with one skill, testing it and then scaling to a plugin you share" (module 8, page 1), so testing comes before the plugin and not after rollout. *d* is ruled out because "Where a skill is one playbook, a plugin is several, plus the connectors they depend on".
 31. **b and c**. A non-profit describes the funder's criteria, its mission and voice, the audience and the facts that must appear, and avoids "Stacking adjectives instead of constraints" (module 9, page 2). *a* is ruled out because "If they would need to ask you a question before starting, the model needs the answer in the prompt", and a newcomer would first ask what the funder wants. *d* is ruled out because a string of adjectives like "Be concise, thorough, clear and professional" "gives conflicting, unverifiable demands". *e* is ruled out because the officer checks "whether a draft overstates what the programme achieved".
 32. **a**. A rule that fits in one line belongs in code (module 4, page 2). *b* is ruled out because code is "Cheaper, faster, deterministic, testable". *c* is ruled out because "A prompt is a request, not a guarantee", and a sample leaves the rest unchecked. *d* is ruled out because "If you can write the rule, write it; add a model only for the cases the rule cannot express".
 33. **b**. The pattern is least reach, least action, and most visibility to the right people (module 8, page 3). *a* is ruled out because "Prefer a surface and an approval mode where a person confirms the consequential steps". *c* is ruled out because "Picking the most powerful surface" is named as a trap. *d* is ruled out because "Ignoring who sees the result" is named as a trap.
@@ -522,7 +522,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    reusable on its own". *c* is ruled out because "Their use counts against their own plan limits, not the
    creator's". *d* is ruled out because "each person connects their own apps even in a shared artifact".
 46. **c**. A rare combination can identify a person without a name, so the data is generalised further (module 10, page 1). *a* is ruled out because the page says "a rare job title, a small town and an exact date can identify a person without a name". *b* is ruled out because the page states "Pseudonymised data is still personal data under many rules". *d* is ruled out because the list of techniques runs from strongest to weakest, and it starts with "Aggregate. Send totals and trends, not rows".
-47. **c and d**. "Owners enable connectors, memory, skills and other features for the organisation; members cannot use what is off" (module 10, page 2). *a* is ruled out because "an owner must enable connectors for the organisation before members can use them". *b* is ruled out because access follows "Single sign-on, automatic provisioning, role-based access" set by the organisation, not a judgement by Claude about the user. *e* is ruled out because "the people who run the organisation hold settings that individuals cannot override".
+47. **c and d**. "Owners enable connectors, memory, skills and other features for the organisation; members cannot use what is off" (module 10, page 2). *a* is ruled out because "an owner must enable connectors for the organisation before members can use them". *b* is ruled out because "Owners enable connectors, memory, skills and other features for the organisation; members cannot use what is off" (module 10, page 2), so no member can opt in alone. *e* is ruled out because "the people who run the organisation hold settings that individuals cannot override".
 48. **d**. Commercial products are not used to train models by default, and data is deleted within 30 days by
    default (module 10, page 1). *a* is ruled out because "By default Anthropic does not use inputs or outputs from
    commercial products to train models". *b* is ruled out because "Inputs and outputs are deleted within 30 days by
