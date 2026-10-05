@@ -9,6 +9,19 @@ Kotlin; pick your language folder, open `starter/` and edit the file there.
 Names are Python's (`add_finding`, `render_scratchpad`, `build_manifest`, `resume_plan`, `resume_prompt`, `compact_command`); TypeScript has the camel-case names; Java has the same
 camel-case names as static methods of `Recovery` with the records the starter defines (`Finding`, `AgentEntry`, `Manifest`, `Action`); Kotlin has top-level functions and data classes.
 
+## What is already written, and what you write
+
+The starter is a working exploration recovery helper with six gaps cut out of it. Everything that is plumbing is written and correct: the records, the order of the areas, the sorting of the manifest and the join of the lines. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. One finding per area and fact (unlocks `m1`): a finding whose area and fact are already recorded is not added again; the first one stays, in first-seen order, and the list given is never changed.
+2. The grouping by area (unlocks `e1`): the scratchpad has one `## area` block per area, in first-seen order, and each block lists only the findings of that area as `- fact (location)`.
+3. The bad manifest input (unlocks `e2`): two agents with the same name, or an agent with a status other than `done`, `running` or `failed`, are refused with an error.
+4. The resume actions (unlocks `e3`, `e4`, `e5`): an agent whose state file is missing is restarted from scratch (`restart`); a finished agent with its state file is reused (`reuse`) and not run again; a running or failed agent with a state file is resumed from it (`resume`).
+5. The resume prompt (unlocks `e6`): the prompt is the task, then a blank line, `State from the last run:`, one `- line` per state line and `Continue from the first unfinished step.`, and nothing else; with no state lines it is the task alone.
+6. The compact command (unlocks `e7`): `/compact` alone when there is nothing to keep, otherwise `/compact Focus on ` and the things to keep joined with `, `.
+
+`m1` needs gap 1. About fourteen lines in all. The steps below describe the whole helper, so you can see how your gaps are used.
+
 ## What to write
 
 - `add_finding(findings, area, fact, location)` returns a new list (the input is not changed). A finding is `{area, fact, location}`. The same `fact` in the same `area` is recorded once, whatever

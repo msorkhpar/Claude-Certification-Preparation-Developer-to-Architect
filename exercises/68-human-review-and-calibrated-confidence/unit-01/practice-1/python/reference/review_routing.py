@@ -1,5 +1,9 @@
 """Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 IRREVERSIBLE = ("delete_records", "send_payment", "close_account")
 
 
@@ -8,6 +12,7 @@ def _percent(correct, total):
 
 
 def accuracy_by(records):
+    log.debug("accuracy_by input: %r", records)
     groups = {}
     for r in records:
         c, t = groups.get(f"{r['doc_type']}/{r['field']}", (0, 0))

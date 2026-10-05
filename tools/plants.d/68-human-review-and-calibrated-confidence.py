@@ -12,6 +12,8 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-id-order": [('key=lambda e: (0 if e["conflict"] else e["confidence"], e["id"])', 'key=lambda e: e["id"]')],
         "wrong-ignores-capacity": [('"review": queue[:capacity], "backlog": queue[capacity:]', '"review": queue, "backlog": []')],
         "wrong-irreversible-by-amount": [('"human" if action in IRREVERSIBLE or amount > limit else "auto"', '"human" if amount > limit else "auto"')],
+        "wrong-percent-floors": [('return (200 * correct + total) // (2 * total)', 'return (100 * correct) // total')],
+        "wrong-fallback-threshold": [('            return t\n    return None', '            return t\n    return max((c for c, _ in labeled), default=None)')],
     }),
     "typescript": ("reviewRouting.ts", {
         "wrong-overall-percent": [("segment: name, correct: c, total: t, percent: percent(c, t) }", "segment: name, correct: c, total: t, percent: percent(correct, total) }")],
@@ -23,6 +25,8 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-id-order": [(".sort((a, b) => priority(a) - priority(b) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));", ".sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));")],
         "wrong-ignores-capacity": [("review: queue.slice(0, capacity), backlog: queue.slice(capacity),", "review: queue, backlog: [],")],
         "wrong-irreversible-by-amount": [("return IRREVERSIBLE.includes(action) || amount > limit ?", "return amount > limit ?")],
+        "wrong-percent-floors": [('Math.floor((200 * correct + total) / (2 * total))', 'Math.floor((100 * correct) / total)')],
+        "wrong-fallback-threshold": [('if (100 * right >= target * kept.length) return t;\n  }\n  return null;', 'if (100 * right >= target * kept.length) return t;\n  }\n  return labeled.length ? Math.max(...labeled.map(([c]) => c)) : null;')],
     }),
     "java": ("ReviewRouting.java", {
         "wrong-overall-percent": [("e.getValue()[1], percent(e.getValue()[0], e.getValue()[1])));", "e.getValue()[1], percent(correct, total)));")],
@@ -34,6 +38,8 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-id-order": [("candidates.sort(Comparator.<Extraction>comparingInt(e -> e.conflict() ? 0 : e.confidence()).thenComparing(Extraction::id));", "candidates.sort(Comparator.comparing(Extraction::id));")],
         "wrong-ignores-capacity": [("int cut = Math.min(capacity, queue.size());", "int cut = queue.size();")],
         "wrong-irreversible-by-amount": [("return IRREVERSIBLE.contains(action) || amount > limit ?", "return amount > limit ?")],
+        "wrong-percent-floors": [('return (200 * correct + total) / (2 * total);', 'return (100 * correct) / total;')],
+        "wrong-fallback-threshold": [('if (100 * right >= target * kept) return t;\n        }\n        return null;', 'if (100 * right >= target * kept) return t;\n        }\n        return levels.isEmpty() ? null : java.util.Collections.max(levels);')],
     }),
     "kotlin": ("ReviewRouting.kt", {
         "wrong-overall-percent": [("rs.size, percent(rs.count { it.correct }, rs.size)) }", "rs.size, percent(correct, total)) }")],
@@ -45,6 +51,8 @@ PLANTS[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] = {
         "wrong-id-order": [(".sortedWith(compareBy({ if (it.conflict) 0 else it.confidence }, { it.id }))", ".sortedBy { it.id }")],
         "wrong-ignores-capacity": [("Routing(queue.take(capacity), queue.drop(capacity),", "Routing(queue, emptyList(),")],
         "wrong-irreversible-by-amount": [('= if (action in IRREVERSIBLE || amount > limit) "human"', '= if (amount > limit) "human"')],
+        "wrong-percent-floors": [('(200 * correct + total) / (2 * total)', '(100 * correct) / total')],
+        "wrong-fallback-threshold": [('if (100 * kept.count { it.correct } >= target * kept.size) return t\n    }\n    return null', 'if (100 * kept.count { it.correct } >= target * kept.size) return t\n    }\n    return labeled.maxOfOrNull { it.confidence }')],
     }),
 }
 

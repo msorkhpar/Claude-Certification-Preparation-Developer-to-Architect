@@ -8,6 +8,7 @@ import java.util.Set;
 
 /** Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md. */
 final class Ledger {
+    private static final System.Logger LOG = System.getLogger(Ledger.class.getName());
     private Ledger() {}
 
     static final List<String> REQUIRED = List.of("claim", "value", "source", "date");
@@ -46,6 +47,7 @@ final class Ledger {
     }
 
     static List<Entry> merge(List<Finding> findings) {
+        LOG.log(System.Logger.Level.DEBUG, "merge input: {0}", findings);
         for (int i = 0; i < findings.size(); i++) {
             List<String> missing = checkFinding(findings.get(i));
             if (!missing.isEmpty()) throw new IllegalArgumentException("finding " + i + " is missing " + String.join(", ", missing));

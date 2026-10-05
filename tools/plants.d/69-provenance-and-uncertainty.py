@@ -13,6 +13,9 @@ PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
         "wrong-unknown-kind-accepted": [('    if kind not in KINDS:\n        raise ValueError(f"unknown content type {kind}")\n', "")],
         "wrong-no-table": [('    if kind == "financial":', "    if False:")],
         "wrong-conflict-unmarked": [('    if entry["status"] == "conflict":\n        text += " The sources disagree."\n    elif', '    if False:\n        text += " The sources disagree."\n    elif')],
+        "wrong-conflict-keeps-one": [('        out.append({"claim": claim, "status": status, "values": values})', '        out.append({"claim": claim, "status": status, "values": values[:1] if status == "conflict" else values})')],
+        "wrong-changed-unordered": [('\n            values.sort(key=lambda v: min(s["date"] for s in v["sources"]))', '')],
+        "wrong-changed-also-contested": [('        elif e["status"] == "changed":\n            note["changed"].append(e["claim"])', '        elif e["status"] == "changed":\n            note["changed"].append(e["claim"])\n            note["contested"].append(e["claim"])')],
     }),
     "typescript": ("ledger.ts", {
         "wrong-first-wins": [("    return { claim, status, values };", "    return { claim, status, values: values.slice(0, 1) };")],
@@ -25,6 +28,9 @@ PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
         "wrong-unknown-kind-accepted": [("  if (!KINDS.includes(kind)) throw new Error(`unknown content type ${kind}`);\n", "")],
         "wrong-no-table": [('  if (kind === "financial") return', '  if (false) return')],
         "wrong-conflict-unmarked": [('  if (entry.status === "conflict") text += " The sources disagree.";', '  if (false) text += " The sources disagree.";')],
+        "wrong-conflict-keeps-one": [('    return { claim, status, values };', '    return { claim, status, values: status === "conflict" ? values.slice(0, 1) : values };')],
+        "wrong-changed-unordered": [('\n        values.sort((a, b) => (earliest(a) < earliest(b) ? -1 : earliest(a) > earliest(b) ? 1 : 0));', '')],
+        "wrong-changed-also-contested": [('else if (e.status === "changed") note.changed.push(e.claim);', 'else if (e.status === "changed") { note.changed.push(e.claim); note.contested.push(e.claim); }')],
     }),
     "java": ("Ledger.java", {
         "wrong-first-wins": [("            out.add(new Entry(claim, status, values));", "            out.add(new Entry(claim, status, values.subList(0, 1)));")],
@@ -37,6 +43,9 @@ PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
         "wrong-unknown-kind-accepted": [('        if (!KINDS.contains(kind)) throw new IllegalArgumentException("unknown content type " + kind);\n', "")],
         "wrong-no-table": [('        if (kind.equals("financial")) {', "        if (false) {")],
         "wrong-conflict-unmarked": [('        if (entry.status().equals("conflict")) text += " The sources disagree.";', '        if (false) text += " The sources disagree.";')],
+        "wrong-conflict-keeps-one": [('out.add(new Entry(claim, status, values));', 'out.add(new Entry(claim, status, status.equals("conflict") ? values.subList(0, 1) : values));')],
+        "wrong-changed-unordered": [('\n                values.sort(Comparator.comparing(Ledger::earliest));', '')],
+        "wrong-changed-also-contested": [('else if (e.status().equals("changed")) changed.add(e.claim());', 'else if (e.status().equals("changed")) { changed.add(e.claim()); contested.add(e.claim()); }')],
     }),
     "kotlin": ("Ledger.kt", {
         "wrong-first-wins": [("val values = group.map { it.value!! }.distinct().map { value ->", "val values = group.map { it.value!! }.distinct().take(1).map { value ->")],
@@ -49,5 +58,8 @@ PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
         "wrong-unknown-kind-accepted": [('    require(kind in KINDS) { "unknown content type $kind" }\n', "")],
         "wrong-no-table": [('        "financial" -> (listOf', '        "financial-x" -> (listOf')],
         "wrong-conflict-unmarked": [('"conflict" -> " The sources disagree."', '"conflict" -> ""')],
+        "wrong-conflict-keeps-one": [('-> Entry(claim, "conflict", values)', '-> Entry(claim, "conflict", values.take(1))')],
+        "wrong-changed-unordered": [('Entry(claim, "changed", values.sortedBy { v -> v.sources.minOf { it.date } })', 'Entry(claim, "changed", values)')],
+        "wrong-changed-also-contested": [('merged.filter { it.status == "conflict" }.map { it.claim },', 'merged.filter { it.status == "conflict" || it.status == "changed" }.map { it.claim },')],
     }),
 }

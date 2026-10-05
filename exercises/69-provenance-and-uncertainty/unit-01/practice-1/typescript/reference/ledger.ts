@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("ledger");
 /** Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md. */
 
 export const REQUIRED = ["claim", "value", "source", "date"];
@@ -8,6 +10,7 @@ export function checkFinding(finding: Record<string, any>): string[] {
 }
 
 export function merge(findings: any[]): any[] {
+  log.debug("merge input", findings);
   findings.forEach((f, i) => {
     const missing = checkFinding(f);
     if (missing.length > 0) throw new Error(`finding ${i} is missing ${missing.join(", ")}`);

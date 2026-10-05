@@ -1,5 +1,7 @@
 /** What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md. */
 
+private val log = System.getLogger("recovery")
+
 val STATUSES = listOf("done", "running", "failed")
 
 data class Finding(val area: String, val fact: String, val location: String)
@@ -17,6 +19,7 @@ fun renderScratchpad(findings: List<Finding>): String =
     findings.map { it.area }.distinct().joinToString("\n\n") { area -> "## $area\n" + findings.filter { it.area == area }.joinToString("\n") { "- ${it.fact} (${it.location})" } }
 
 fun buildManifest(agents: List<AgentEntry>): Manifest {
+    log.log(System.Logger.Level.DEBUG, "buildManifest input: {0}", agents)
     require(agents.map { it.name }.toSet().size == agents.size) { "duplicate agent name" }
     for (a in agents) require(a.status in STATUSES) { "unknown status ${a.status}" }
     return Manifest(1, agents.sortedBy { it.name })

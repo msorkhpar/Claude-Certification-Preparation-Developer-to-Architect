@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 
 /** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */
 final class ErrorFlow {
+    private static final System.Logger LOG = System.getLogger(ErrorFlow.class.getName());
     private ErrorFlow() {}
 
     static final Map<String, List<String>> ALTERNATIVES = Map.of(
@@ -27,6 +28,7 @@ final class ErrorFlow {
     }
 
     static Outcome searchWithRecovery(String query, BiFunction<String, Integer, Reply> call, int maxAttempts) {
+        LOG.log(System.Logger.Level.DEBUG, "searchWithRecovery input: {0}", query);
         int attempts = 0;
         while (true) {
             attempts += 1;

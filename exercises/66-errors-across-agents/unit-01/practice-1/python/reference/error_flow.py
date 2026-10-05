@@ -1,5 +1,9 @@
 """How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 ALTERNATIVES = {
     "timeout": ["retry later", "try a narrower query"],
     "unavailable": ["use a cached source", "try another provider"],
@@ -10,6 +14,7 @@ TRANSIENT = ("timeout", "unavailable")
 
 
 def search_with_recovery(query, call, max_attempts=2):
+    log.debug("search_with_recovery input: %r", query)
     attempts = 0
     while True:
         attempts += 1

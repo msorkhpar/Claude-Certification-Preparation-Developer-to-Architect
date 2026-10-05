@@ -8,6 +8,21 @@ the rendering of each kind of content in a fitting form. The model is not called
 Names are Python's (`check_finding`, `merge`, `coverage_note`, `render`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `Ledger` with the records the
 starter defines (`Finding`, `Src`, `Val`, `Entry`, `Gap`, `Coverage`); Kotlin has top-level functions and data classes. Dates are ISO text (`2024-05-01`) and compare as text.
 
+## What is already written, and what you write
+
+The starter is a working ledger of claims with eight gaps cut out of it. Everything that is plumbing is written and correct: the grouping of findings by claim and by value, the refusal of a finding that fails the check, the first rows of the coverage note, the table and prose headers and the refusal of an unknown content type. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The required fields (unlocks `e1`): a finding is missing a field of REQUIRED (`claim`, `value`, `source`, `date`) when it is absent, empty or only blanks; the check returns the names of the missing fields in that order.
+2. Every source once (unlocks `m1`): a claim's value keeps each pair of source and date once, even when two findings repeat it, in the order they came.
+3. Agreed, changed or in conflict (unlocks `e2`, `e3`): one value is `agreed`; several values with two of them from the same date are a `conflict` that keeps both; several values from different dates are a `changed` claim, ordered by the earliest date of each value.
+4. The well supported claims (unlocks `e4`): an agreed claim whose value has two or more different sources is well supported; one with a single source is listed apart as `single_source`; changed and contested claims have their own lists.
+5. The gaps (unlocks `e5`): a planned claim that has no finding is a gap, with the reason given for it or `no source found`.
+6. The financial table (unlocks `e6`): financial data is a table: the header `| Source | Date | Value |`, the separator `|---|---|---|` and one row per source with its value.
+7. The technical list (unlocks `e8`): technical findings are a list: the claim and a colon, then one `- value (source, date)` line per source.
+8. The disagreement in the news (unlocks `e7`): news is prose; when the sources disagree it ends with `The sources disagree.`, and when the figures come from different dates with `The figures are from different dates.`.
+
+`m1` needs gap 2. About seventeen lines in all. The steps below describe the whole ledger, so you can see how your gaps are used.
+
 ## What to write
 
 - A finding is `{claim, value, source, date}`. `check_finding(finding)` returns the names of the required fields that are missing or blank (only spaces counts as blank), in the order `claim`, `value`,

@@ -12,6 +12,7 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
         "wrong-ignore-missing-file": [('        if a["state_file"] not in existing_files:\n            action = "restart"\n        elif', '        if False:\n            action = "restart"\n        elif')],
         "wrong-no-continue-line": [(r'"\nContinue from the first unfinished step."', '""')],
         "wrong-compact-without-focus": [('"/compact" if not keep else "/compact Focus on " + ", ".join(keep)', '"/compact"')],
+        "wrong-reuse-needs-company": [('elif a["status"] == "done":', 'elif a["status"] == "done" and len(manifest["agents"]) > 1:')],
     }),
     "typescript": ("recovery.ts", {
         "wrong-duplicate-findings": [("  if (findings.some((f) => f.area === area && f.fact === fact)) return [...findings];\n", "")],
@@ -23,6 +24,7 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
         "wrong-ignore-missing-file": [('if (!existingFiles.has(a.state_file)) action = "restart";', 'if (false) action = "restart";')],
         "wrong-no-continue-line": [('"\\nContinue from the first unfinished step."', '""')],
         "wrong-compact-without-focus": [('keep.length === 0 ? "/compact" : "/compact Focus on " + keep.join(", ")', '"/compact"')],
+        "wrong-reuse-needs-company": [('else if (a.status === "done") action = "reuse";', 'else if (a.status === "done" && manifest.agents.length > 1) action = "reuse";')],
     }),
     "java": ("Recovery.java", {
         "wrong-duplicate-findings": [("        for (Finding f : findings) if (f.area().equals(area) && f.fact().equals(fact)) return out;\n", "")],
@@ -34,6 +36,7 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
         "wrong-ignore-missing-file": [('if (!existingFiles.contains(a.stateFile())) action = "restart";', 'if (false) action = "restart";')],
         "wrong-no-continue-line": [('"\\nContinue from the first unfinished step."', '""')],
         "wrong-compact-without-focus": [('return keep.isEmpty() ? "/compact" : "/compact Focus on " + String.join(", ", keep);', 'return "/compact";')],
+        "wrong-reuse-needs-company": [('else if (a.status().equals("done")) action = "reuse";', 'else if (a.status().equals("done") && manifest.agents().size() > 1) action = "reuse";')],
     }),
     "kotlin": ("Recovery.kt", {
         "wrong-duplicate-findings": [("if (findings.any { it.area == area && it.fact == fact }) findings.toList() else findings + Finding(area, fact, location)", "findings + Finding(area, fact, location)")],
@@ -45,5 +48,6 @@ PLANTS[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
         "wrong-ignore-missing-file": [('a.stateFile !in existingFiles -> "restart"', 'false -> "restart"')],
         "wrong-no-continue-line": [('"\\nContinue from the first unfinished step."', '""')],
         "wrong-compact-without-focus": [('if (keep.isEmpty()) "/compact" else "/compact Focus on " + keep.joinToString(", ")', '"/compact"')],
+        "wrong-reuse-needs-company": [('a.status == "done" -> "reuse"', 'a.status == "done" && manifest.agents.size > 1 -> "reuse"')],
     }),
 }

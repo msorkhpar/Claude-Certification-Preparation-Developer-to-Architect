@@ -4,6 +4,10 @@ The exam guide (task 5.4) describes crash recovery as agents that export structu
 restarts. The Claude Code documentation (read 2026-10-04) says that subagents explore in a separate context and report back summaries, and that a context window which fills up degrades Claude's work. Below, a dictionary
 stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 MANIFEST = "state/manifest.txt"
 TRANSCRIPT_CHARS = {"auth": 3200, "billing": 2400, "search": 1600}
 

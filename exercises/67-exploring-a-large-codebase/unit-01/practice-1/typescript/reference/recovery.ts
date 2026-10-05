@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("recovery");
 /** What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md. */
 
 export const STATUSES = ["done", "running", "failed"];
@@ -15,6 +17,7 @@ export function renderScratchpad(findings: any[]): string {
 }
 
 export function buildManifest(agents: any[]): any {
+  log.debug("buildManifest input", agents);
   const names = agents.map((a) => a.name);
   if (new Set(names).size !== names.length) throw new Error("duplicate agent name");
   for (const a of agents) if (!STATUSES.includes(a.status)) throw new Error(`unknown status ${a.status}`);

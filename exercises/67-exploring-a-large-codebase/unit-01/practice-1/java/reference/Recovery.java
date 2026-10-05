@@ -6,6 +6,7 @@ import java.util.Set;
 
 /** What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md. */
 final class Recovery {
+    private static final System.Logger LOG = System.getLogger(Recovery.class.getName());
     private Recovery() {}
 
     static final List<String> STATUSES = List.of("done", "running", "failed");
@@ -38,6 +39,7 @@ final class Recovery {
     }
 
     static Manifest buildManifest(List<AgentEntry> agents) {
+        LOG.log(System.Logger.Level.DEBUG, "buildManifest input: {0}", agents);
         Set<String> names = new HashSet<>();
         for (AgentEntry a : agents) if (!names.add(a.name())) throw new IllegalArgumentException("duplicate agent name");
         for (AgentEntry a : agents) if (!STATUSES.contains(a.status())) throw new IllegalArgumentException("unknown status " + a.status());

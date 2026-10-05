@@ -1,5 +1,9 @@
 """What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 STATUSES = ("done", "running", "failed")
 
 
@@ -22,6 +26,7 @@ def render_scratchpad(findings):
 
 
 def build_manifest(agents):
+    log.debug("build_manifest input: %r", agents)
     names = [a["name"] for a in agents]
     if len(set(names)) != len(names):
         raise ValueError("duplicate agent name")

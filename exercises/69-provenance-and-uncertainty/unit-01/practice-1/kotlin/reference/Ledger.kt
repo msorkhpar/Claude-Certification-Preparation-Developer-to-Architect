@@ -1,5 +1,7 @@
 /** Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md. */
 
+private val log = System.getLogger("ledger")
+
 val REQUIRED = listOf("claim", "value", "source", "date")
 val KINDS = listOf("financial", "news", "technical")
 
@@ -25,6 +27,7 @@ private fun field(f: Finding, name: String): String = when (name) {
 fun checkFinding(finding: Finding): List<String> = REQUIRED.filter { field(finding, it).isBlank() }
 
 fun merge(findings: List<Finding>): List<Entry> {
+    log.log(System.Logger.Level.DEBUG, "merge input: {0}", findings)
     findings.forEachIndexed { i, f ->
         val missing = checkFinding(f)
         require(missing.isEmpty()) { "finding $i is missing ${missing.joinToString(", ")}" }

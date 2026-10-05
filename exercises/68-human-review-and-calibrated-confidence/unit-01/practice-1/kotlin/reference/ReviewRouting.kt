@@ -1,5 +1,7 @@
 /** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */
 
+private val log = System.getLogger("review_routing")
+
 val IRREVERSIBLE = listOf("delete_records", "send_payment", "close_account")
 
 data class Rec(val docType: String, val field: String, val correct: Boolean)
@@ -19,6 +21,7 @@ data class Routing(val review: List<String>, val backlog: List<String>, val auto
 private fun percent(correct: Int, total: Int): Int = (200 * correct + total) / (2 * total)
 
 fun accuracyBy(records: List<Rec>): List<Seg> {
+    log.log(System.Logger.Level.DEBUG, "accuracyBy input: {0}", records)
     val groups = records.groupBy { "${it.docType}/${it.field}" }.toSortedMap()
     val correct = records.count { it.correct }
     val total = records.size

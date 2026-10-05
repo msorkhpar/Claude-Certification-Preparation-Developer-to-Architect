@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("state_manifest");
 /**
  * Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.
  *

@@ -11,6 +11,7 @@ import java.util.Map;
  * their outcomes are invented for the illustration; nothing here calls a model or a search tool.
  */
 public final class ErrorContext {
+    private static final System.Logger LOG = System.getLogger(ErrorContext.class.getName());
     /** kind is ok, timeout or permission */
     record Outcome(String kind, List<String> items) {}
 

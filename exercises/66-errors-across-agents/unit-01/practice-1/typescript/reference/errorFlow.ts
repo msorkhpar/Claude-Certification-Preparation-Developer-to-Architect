@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("error_flow");
 /** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */
 
 export const ALTERNATIVES: Record<string, string[]> = {
@@ -9,6 +11,7 @@ export const ALTERNATIVES: Record<string, string[]> = {
 export const TRANSIENT = ["timeout", "unavailable"];
 
 export function searchWithRecovery(query: string, call: (query: string, attempt: number) => any, maxAttempts = 2): any {
+  log.debug("searchWithRecovery input", query);
   let attempts = 0;
   for (;;) {
     attempts += 1;
