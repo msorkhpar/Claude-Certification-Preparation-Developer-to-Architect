@@ -31,6 +31,9 @@ after=$(cat exercises/*/tests/quiz.json | sha256sum)
 python3 tools/test_check_revision.py >/dev/null || { echo "check_revision planted-defect tests failed"; exit 1; }
 python3 tools/check_revision.py || exit 1
 python3 tools/check_coverage.py || exit 1
+# the offline caches the Java and Kotlin editions need (the practices run before the example warm-up in l2_run_all.sh, so warm them first; idempotent)
+"$HEAVY" ccp-survey sh -c "tools/l2_prepare_caches.sh $IMG && tools/l2_prepare_gradle.sh $IMG && tools/l2_prepare_jvm_examples.sh $IMG" > .survey-out/gate-prepare.txt 2>&1
+rc=$?; echo "cache preparation rc=$rc"; [ $rc -eq 0 ] || { tail -20 .survey-out/gate-prepare.txt; exit 1; }
 "$HEAVY" ccp-survey tools/l2_run_all.sh "$IMG" > .survey-out/gate-run.txt 2>&1
 rc=$?; echo "heavy job rc=$rc"; [ $rc -eq 0 ] || { tail -20 .survey-out/gate-run.txt; exit 1; }
 bad=$(grep -E '^example .* (tests|run) rc=[1-9]|^jvm examples .* rc=[1-9]' .survey-out/gate-run.txt)

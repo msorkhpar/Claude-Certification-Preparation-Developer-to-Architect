@@ -36,15 +36,15 @@ PRACTICES[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
     ],
     "plants": {
         "wrong-guarantee-needs-no-knowledge": (["e1", "m1"], "treats a rule as a hook only when no instruction text goes with it, so a rule with a convention is left to a sentence"),
-        "wrong-server-skipped-when-noisy": (["e2"], "sends an outside system to a subagent when the work is also noisy"),
-        "wrong-scope-ignored": (["e3", "m1"], "puts a path-scoped convention in the always-loaded file"),
-        "wrong-one-reason-for-skills": (["e3", "m1"], "gives a repeatable procedure the reason code of a reference"),
-        "wrong-plugin-at-one-repo": (["e4"], "makes a plugin even when only one repository needs the setup"),
+        "wrong-server-skipped-when-noisy": (["e2", "m1"], "sends an outside system to a subagent when the work is also noisy"),
+        "wrong-scope-ignored": (["e3", "e4", "m1"], "puts a path-scoped convention in the always-loaded file"),
+        "wrong-one-reason-for-skills": (["e3", "e4", "m1"], "gives a repeatable procedure the reason code of a reference"),
+        "wrong-plugin-at-one-repo": (["e1", "e2", "e3", "e4", "m1"], "makes a plugin even when only one repository needs the setup"),
         "wrong-plugin-for-conventions": (["e4", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
         "wrong-api-provided-schema-ignored": (["e5", "m1"], "writes your own tool in an application even when the platform supplies the schema"),
         "wrong-api-server-without-remote": (["e5"], "uses the connector in an application when no remote server exists"),
         "wrong-no-validation": (["e6"], "accepts a knowledge kind it does not know"),
-        "wrong-fallthrough-skill": (["m1", "e3", "e6"], "answers a situation that needs nothing special with a skill"),
+        "wrong-fallthrough-skill": (["e3", "e4", "e6", "m1"], "answers a situation that needs nothing special with a skill"),
     },
 }
 
@@ -265,9 +265,9 @@ PRACTICES[f"{X}/39-extending-claude-code/unit-02/practice-1"] = {
         ("e8", "edge", "no file is left unfinished or holds a personal path an address or a key"),
     ],
     "plants": {
-        "wrong-entry-name-mismatch": (["m1"], "lists the plugin under a name that differs from the name in its own manifest"),
-        "wrong-dotdot-source": (["m1"], "writes the relative source with .. so that it leaves the marketplace"),
-        "wrong-reserved-marketplace-name": (["e1"], "calls the marketplace by an official Anthropic marketplace name"),
+        "wrong-entry-name-mismatch": (["m1", "e1", "e3", "e4", "e6", "e7"], "lists the plugin under a name that differs from the name in its own manifest"),
+        "wrong-dotdot-source": (["m1", "e4"], "writes the relative source with .. so that it leaves the marketplace"),
+        "wrong-reserved-marketplace-name": (["e1", "e6"], "calls the marketplace by an official Anthropic marketplace name"),
         "wrong-hooks-without-wrapper": (["e2"], "writes the event map without the top-level hooks key, so the file fails to load"),
         "wrong-hook-script-path": (["e2"], "finds the guard script by a path relative to the working directory instead of the plugin root"),
         "wrong-version-in-both": (["e3"], "sets the version in the manifest and again in the marketplace entry"),

@@ -104,8 +104,8 @@ def test_e5_in_an_application_the_platform_may_supply_the_schema_and_only_a_remo
 
 def test_e6_an_unknown_value_is_an_error_and_a_missing_key_takes_its_default():
     assert choose({}) == {"mechanism": "builtin-tool", "reason": "built-in-covers"}, '{}'
-    assert refused({"surface": 'cli'}), "{"surface": "cli"} must be an error"
-    assert refused({"knowledge": 'tips'}), "{"knowledge": "tips"} must be an error"
-    assert refused({"repos": 0}), "{"repos": 0} must be an error"
-    assert refused({"repos": -1}), "{"repos": -1} must be an error"
-    assert refused({"surface": 'api', "knowledge": 'tips'}), "{"surface": "api", "knowledge": "tips"} must be an error"
+    assert refused({"surface": 'cli'}), '{"surface": "cli"} must be an error'
+    assert refused({"knowledge": 'tips'}), '{"knowledge": "tips"} must be an error'
+    assert refused({"repos": 0}), '{"repos": 0} must be an error'
+    assert refused({"repos": -1}), '{"repos": -1} must be an error'
+    assert refused({"surface": 'api', "knowledge": 'tips'}), '{"surface": "api", "knowledge": "tips"} must be an error'
