@@ -15,8 +15,13 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // Three situations from the scenario bank, described by a few features.
+        Map<String, Map<String, Object>> situations = new java.util.LinkedHashMap<>();
+        situations.put("a rule that must never be broken", Map.of("guarantee", true, "knowledge", "convention"));
+        situations.put("a database that needs a connection", Map.of("external_system", true));
+        situations.put("work that must run while the laptop is closed", Map.of("timing", "interval", "presence", "away"));
+        for (var entry : situations.entrySet()) {
+            System.out.println(entry.getKey() + ": " + ExtensionChoice.choose(entry.getValue()));
+        }
     }
 }

@@ -15,8 +15,21 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        String secret = "s3cret";
+        Map<String, Object> meta = Map.of("io.modelcontextprotocol/protocolVersion", "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities", Map.of("elicitation", Map.of(), "sampling", Map.of()));
+        Map<String, Object> base = Map.of("name", "deploy", "arguments", Map.of("service", "api", "env", "production"), "_meta", meta);
+
+        // Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.
+        Map<String, Object> first = Mrtr.callTool(base, secret, "alice", 1000);
+        System.out.println("first call: " + first.get("resultType") + " | asks for: " + (first.get("inputRequests") instanceof Map<?, ?> m ? m.keySet() : "[]"));
+        System.out.println("state is a string: " + (first.get("requestState") instanceof String));
+
+        // Round trip 2: the client retries the same call with the answer and echoes the state back.
+        Map<String, Object> retry = new java.util.HashMap<>(base);
+        retry.put("inputResponses", Map.of("confirm", Map.of("action", "accept", "content", Map.of("confirm", true))));
+        retry.put("requestState", first.get("requestState"));
+        Map<String, Object> second = Mrtr.callTool(retry, secret, "alice", 1010);
+        System.out.println("second call: " + second.get("resultType") + " | asks for: " + (second.get("inputRequests") instanceof Map<?, ?> m2 ? m2.keySet() : "[]"));
     }
 }

@@ -15,8 +15,21 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.
+        List<Doc> corpus = List.of(
+            new Doc("refunds", "Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the "
+                + "original payment method within five business days. Digital goods are not refundable after download."),
+            new Doc("shipping", "Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business "
+                + "days, express delivery takes one day."));
+        List<Chunk> chunks = Retrieval.buildChunks(corpus, 14, 4);
+        System.out.println("chunks: " + chunks.stream().map(Chunk::id).toList());
+
+        String query = "free shipping threshold";
+        for (String mode : List.of("bm25", "embedding", "hybrid")) {
+            System.out.println(mode + " top 3: " + Retrieval.retrieve(chunks, query, mode, 3));
+        }
+
+        // Recall@3 over one question whose answer we know.
+        System.out.println("hybrid recall@3: " + (chunks.isEmpty() ? null : Retrieval.evaluate(chunks, List.of(new Query(query, List.of("shipping"))), "hybrid", 3)));
     }
 }

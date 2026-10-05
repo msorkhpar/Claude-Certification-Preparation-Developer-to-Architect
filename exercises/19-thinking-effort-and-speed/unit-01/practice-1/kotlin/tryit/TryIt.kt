@@ -9,7 +9,17 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    val sonnet = "claude-sonnet-5-5"
+    val haiku = "claude-haiku-4-5-20251001"
+
+    // What the application wants, turned into the request parameters one model accepts.
+    println("sonnet adaptive: ${buildParams(sonnet, 4096, mapOf("thinking" to mapOf("type" to "adaptive"), "effort" to "medium"))}")
+    println("haiku budget: ${buildParams(haiku, 4096, mapOf("thinking" to mapOf("type" to "enabled", "budget_tokens" to 2048)))}")
+
+    // A combination the API would answer with a 400 is refused, naming the parameter.
+    try {
+        println("haiku with effort: ${buildParams(haiku, 4096, mapOf("effort" to "high"))}")
+    } catch (err: RejectedRequest) {
+        println("refused: ${err.param}")
+    }
 }

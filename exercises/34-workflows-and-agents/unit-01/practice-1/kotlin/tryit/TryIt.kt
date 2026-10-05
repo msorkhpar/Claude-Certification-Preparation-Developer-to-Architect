@@ -9,7 +9,22 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    val plan = """["research the topic", "draft the outline", "check the facts"]"""
+
+    // A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.
+    val model: Ask = { prompt ->
+        when {
+            prompt.startsWith("Plan") -> plan
+            prompt.startsWith("Subtask") -> "done: " + prompt.lines().first().removePrefix("Subtask: ")
+            else -> "FINAL"
+        }
+    }
+
+    // The orchestrator asks for a plan, runs one worker per subtask, then combines the results.
+    val result = orchestrate(model, "Write a guide")
+
+    println("status: ${result["status"]} | fallback: ${result["fallback"]} | calls: ${result["calls"]}")
+    println("plan: ${result["plan"]}")
+    println("results: ${result["results"]}")
+    println("answer: ${result["answer"]}")
 }

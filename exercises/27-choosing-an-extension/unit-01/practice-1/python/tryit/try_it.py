@@ -4,8 +4,14 @@ import logging
 # Turn the logger up, so the `log.debug` lines of your code show under the printed lines.
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 
-from extension_choice import Thing
+from extension_choice import choose
 
-# A stand-in for the API, like the one the tests use for the first main case m1.
-# TODO: copy that setup here, call the class on the statement's example, then print the results:
-# print("history size:", ...)
+# Three situations from the scenario bank, described by a few features.
+situations = {
+    "a rule that must never be broken": {"guarantee": True, "knowledge": "convention"},
+    "a database that needs a connection": {"external_system": True},
+    "work that must run while the laptop is closed": {"timing": "interval", "presence": "away"},
+}
+for name, features in situations.items():
+    choice = choose(features)
+    print(f"{name}: {choice}")

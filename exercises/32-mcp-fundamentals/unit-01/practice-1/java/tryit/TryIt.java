@@ -15,8 +15,13 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // The tool functions of the server are plain static methods, so you can call them here without starting a client.
+        // (The tests start the server as a separate process and connect the SDK's client to it.)
+        var saved = NotesServer.addNote(Map.of("title", "Plan", "text", "ship it"));
+        System.out.println("add_note: " + ((io.modelcontextprotocol.spec.McpSchema.TextContent) saved.content().get(0)).text());
+        var found = NotesServer.searchNotes(Map.of("query", "ship"));
+        System.out.println("search_notes: " + ((io.modelcontextprotocol.spec.McpSchema.TextContent) found.content().get(0)).text());
+        System.out.println("count resource: " + NotesServer.countText(NotesServer.NOTES.size()));
+        System.out.println("note 1 resource: " + NotesServer.noteText("1"));
     }
 }

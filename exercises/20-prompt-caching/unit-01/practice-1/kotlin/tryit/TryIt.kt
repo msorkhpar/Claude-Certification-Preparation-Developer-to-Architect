@@ -9,7 +9,22 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    fun block(id: String, section: String, tokens: Int, vararg extra: Pair<String, Any?>): Map<String, Any?> =
+        mapOf("id" to id, "section" to section, "tokens" to tokens) + extra
+
+    // A request whose blocks arrive in the wrong order: the volatile date sits first, in the system prompt.
+    val blocks = listOf(
+        block("date", "system", 20, "volatile" to true),
+        block("tools", "tools", 2000),
+        block("rules", "system", 3000, "breakpoint" to true),
+        block("manual", "messages", 6000, "breakpoint" to true),
+        block("question", "messages", 40),
+    )
+    try {
+        val plan = planRequest(blocks, 1024)
+        println("order: ${plan.map { it["id"] }}")
+        println("cache per block: ${plan.map { "${it["id"]}=${it["cache"]}" }}")
+    } catch (err: PlanError) {
+        println("plan error: ${err.message}")
+    }
 }

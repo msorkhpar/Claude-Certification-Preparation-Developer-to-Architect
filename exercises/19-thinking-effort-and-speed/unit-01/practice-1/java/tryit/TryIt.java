@@ -15,8 +15,18 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        String sonnet = "claude-sonnet-5-5";
+        String haiku = "claude-haiku-4-5-20251001";
+
+        // What the application wants, turned into the request parameters one model accepts.
+        System.out.println("sonnet adaptive: " + Params.buildParams(sonnet, 4096, Map.of("thinking", Map.of("type", "adaptive"), "effort", "medium")));
+        System.out.println("haiku budget: " + Params.buildParams(haiku, 4096, Map.of("thinking", Map.of("type", "enabled", "budget_tokens", 2048))));
+
+        // A combination the API would answer with a 400 is refused, naming the parameter.
+        try {
+            System.out.println("haiku with effort: " + Params.buildParams(haiku, 4096, Map.of("effort", "high")));
+        } catch (RejectedRequest err) {
+            System.out.println("refused: " + err.param());
+        }
     }
 }

@@ -9,7 +9,13 @@ fun main() {
     val handler = ConsoleHandler().apply { level = Level.ALL }
     Logger.getLogger("").apply { level = Level.ALL; addHandler(handler) }
 
-    // A stand-in for the API, like the one the tests use for the first main case m1.
-    // TODO: copy that setup here, call the class on the statement's example, then print the results:
-    // println("history size: ${...}")
+    // Three situations from the scenario bank, described by a few features.
+    val situations = linkedMapOf<String, Map<String, Any>>(
+        "a rule that must never be broken" to mapOf("guarantee" to true, "knowledge" to "convention"),
+        "a database that needs a connection" to mapOf("external_system" to true),
+        "work that must run while the laptop is closed" to mapOf("timing" to "interval", "presence" to "away"),
+    )
+    for ((name, features) in situations) {
+        println("$name: ${choose(features)}")
+    }
 }

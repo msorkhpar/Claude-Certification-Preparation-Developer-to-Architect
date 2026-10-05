@@ -10,7 +10,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 sourceSets {
-    main { java.setSrcDirs(listOf(solution, "tryit")) }
+    main { java.setSrcDirs(listOf(solution)) }
     test { java.setSrcDirs(listOf("tests")) }
 }
 layout.buildDirectory.set(file("../.build-java/$solution"))
@@ -19,6 +19,3 @@ tasks.test {
     systemProperty("config.dir", layout.projectDirectory.dir(solution).asFile.absolutePath)
     testLogging { events("passed", "failed"); showExceptions = true; exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT }
 }
-
-// Run: the reader's own try-it file, with the logger turned up (no tests, no grade): gradle -Psolution=reference tryIt
-tasks.register<JavaExec>("tryIt") { classpath = sourceSets["main"].runtimeClasspath; mainClass.set("TryIt") }

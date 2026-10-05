@@ -15,8 +15,26 @@ public class TryIt {
         root.setLevel(Level.ALL);
         root.addHandler(handler);
 
-        // A stand-in for the API, like the one the tests use for the first main case m1.
-        // TODO: copy that setup here, call the class on the statement's example, then print the results:
-        // System.out.println("history size: " + ...);
+        // Two images and a question: the planner puts the images first, each labelled, and the question last.
+        List<Map<String, Object>> items = List.of(
+            img("chart", 1000, 1000, "image/png", "base64", "AAAA"),
+            img("photo", 200, 200, "image/jpeg", "url", "https://example.invalid/p.jpg"));
+        try {
+            Map<String, Object> plan = Vision.planRequest("claude-opus-5-5", items, "What changed?");
+            if (plan != null && plan.get("content") instanceof List<?> content) {
+                for (Object block : content) {
+                    Map<?, ?> b = (Map<?, ?>) block;
+                    System.out.println("block: " + b.get("type") + " " + (b.get("text") == null ? "" : b.get("text")));
+                }
+            }
+            System.out.println("image tokens: " + (plan == null ? null : plan.get("image_tokens")));
+            System.out.println("resized: " + (plan == null ? null : plan.get("resized")));
+        } catch (RequestError err) {
+            System.out.println("refused: " + err.getMessage());
+        }
+    }
+
+    private static Map<String, Object> img(String name, int w, int h, String mediaType, String source, String value) {
+        return Map.of("kind", "image", "name", name, "media_type", mediaType, "width", w, "height", h, "size", 1000, "source", source, "value", value);
     }
 }
