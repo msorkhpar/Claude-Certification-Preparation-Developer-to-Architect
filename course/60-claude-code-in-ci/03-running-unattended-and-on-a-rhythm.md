@@ -54,7 +54,7 @@ The `/loop` bundled skill re-runs a prompt while the session stays open. What yo
 - "No catch-up for missed fires": a task that came due during a long turn fires once when Claude is idle, not once per missed interval.
 - Recurring tasks "expire 7 days after creation". The task fires one last time, then deletes itself.
 - On `--resume` or `--continue` the scheduled tasks come back, except expired ones and one-shot tasks whose time has passed, and a self-paced loop isn't restored on resume, so it is started again. Background shell commands and monitors are never restored.
-- Loops on a fixed interval "keep running until you cancel them" like any other scheduled task, or until seven days elapse.
+- Loops on a fixed interval "keep running until you cancel them" like any other scheduled task. A self-paced loop ends when you press `Esc` while it waits, or when Claude stops it once the task is done.
 - `CLAUDE_CODE_DISABLE_CRON=1` turns the whole scheduler off.
 
 ### Routines and desktop tasks: schedules that outlive the session
@@ -216,10 +216,10 @@ The practice is in [`exercises/60-claude-code-in-ci/unit-02`](../../exercises/60
    - **d**: A routine that starts a fresh cloud session each hour
 
 3. An engineer starts `/loop 20m /verify`. At the first fire Claude replied in general terms and nothing was exercised. What is the cause?
-   - **a**: The interval is too short for a loop to launch any skill, bundled or custom, at all
-   - **b**: That bundled skill forbids model invocation, the only kind a scheduled prompt runs
-   - **c**: A loop re-runs prompts only and never starts a bundled skill, whatever its settings
-   - **d**: The session was not restored after the first fire, so the loop lost its task entirely
+   - **a**: Twenty minutes is too short an interval for a loop to launch a skill
+   - **b**: That skill blocks model invocation, which a scheduled run requires
+   - **c**: A loop re-runs plain prompts and never starts a bundled skill
+   - **d**: The loop lost its task when the session was not restored
 
 <details>
 <summary>Answer key</summary>

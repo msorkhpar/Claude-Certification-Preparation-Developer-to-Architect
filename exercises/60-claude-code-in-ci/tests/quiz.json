@@ -102,14 +102,14 @@
       "scope": "module",
       "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?",
       "options": {
-        "a": "The file is too long, so cut it until it fits the prompt",
-        "b": "Headless runs read the file only on the first push of a branch",
-        "c": "The rules need a `paths` header before a headless run applies them",
-        "d": "That mode skips it, so supply it with `--append-system-prompt-file`"
+        "a": "The file is too long, so trim it until it fits the prompt",
+        "b": "The file loads only on a branch's first push, so push once",
+        "c": "The rules lack a `paths` header, so add one to each",
+        "d": "The mode skips the file, so pass it in with a flag"
       },
       "key": "d",
       "explanation": {
-        "d": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand.",
+        "d": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand, with `--append-system-prompt-file`.",
         "a": "Ruled out because length is not the issue: \"In a bare run the file is passed explicitly\" and otherwise it is not read at all.",
         "b": "Ruled out because \"A CI run does not remember the last one\", and no first-push behaviour exists.",
         "c": "Ruled out because no header is involved, and \"a bare run without it reviews with no criteria at all, and nothing says so\"."
@@ -178,10 +178,10 @@
       "scope": "page",
       "stem": "An engineer starts `/loop 20m /verify`. At the first fire Claude replied in general terms and nothing was exercised. What is the cause?",
       "options": {
-        "a": "The interval is too short for a loop to launch any skill, bundled or custom, at all",
-        "b": "That bundled skill forbids model invocation, the only kind a scheduled prompt runs",
-        "c": "A loop re-runs prompts only and never starts a bundled skill, whatever its settings",
-        "d": "The session was not restored after the first fire, so the loop lost its task entirely"
+        "a": "Twenty minutes is too short an interval for a loop to launch a skill",
+        "b": "That skill blocks model invocation, which a scheduled run requires",
+        "c": "A loop re-runs plain prompts and never starts a bundled skill",
+        "d": "The loop lost its task when the session was not restored"
       },
       "key": "b",
       "explanation": {
