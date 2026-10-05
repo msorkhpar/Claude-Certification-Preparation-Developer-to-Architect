@@ -27,7 +27,7 @@
       "stem": "A team adds a hook with the matcher `src/payments/*` to review every write under that folder. The hook never fires. What is the best fix?",
       "options": {
         "a": "Switch the matcher to a regular expression that also lists every file in the folder",
-        "b": "Raise the timeout so that the matcher has time to evaluate the paths",
+        "b": "Raise the timeout of the hook",
         "c": "Attach it to the file-editing tools and test the path inside the callback",
         "d": "Move the hook to the PostToolUse event, which evaluates paths after the write"
       },
@@ -48,7 +48,7 @@
         "a": "A longer system prompt that teaches the model each vendor's date format by example",
         "b": "A PostToolUse hook that supplies one readable format as the replacement output",
         "c": "A PreToolUse hook that refuses any call whose answer is hard to read for the agent",
-        "d": "A larger model for the support agent, since comparison is a reasoning task for it"
+        "d": "A larger model for the support agent"
       },
       "key": "b",
       "explanation": {
@@ -86,14 +86,14 @@
         "a": "Exit 2 does not block in the SDK, so the hook must return a denial",
         "b": "Post hooks may not fire at all, so the limit needs a much longer timeout",
         "c": "The money has already moved by then, so the control belongs ahead of the call",
-        "d": "The limit is read from the output, so it should be read from the input instead"
+        "d": "The matcher cannot see amounts, so the limit should be written into the matcher"
       },
       "key": "c",
       "explanation": {
         "c": "A post hook runs after the effect.",
         "a": "Ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it \"Shows stderr to Claude; the tool already ran\".",
         "b": "Ruled out because the turn-limit case is a different one: \"Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute\".",
-        "d": "Ruled out because the field read is not the fault: \"A control that must prevent an effect therefore belongs in `PreToolUse`\"."
+        "d": "Ruled out because a matcher carries no limit: \"Matchers only match tool names, not file paths or other arguments.\" The amount is read inside the hook, and the fault is the event: \"A control that must prevent an effect therefore belongs in `PreToolUse`\"."
       }
     },
     {
@@ -102,7 +102,7 @@
       "scope": "module",
       "stem": "On Claude Code v2.1.210 or later, a PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?",
       "options": {
-        "a": "A normal result, because the operation went ahead while the gate was still waiting",
+        "a": "A normal result, and the operation goes ahead",
         "b": "A message that no reply arrived before the deadline, and the operation is withheld",
         "c": "A rejection from a person, and the whole run stops until someone responds to it",
         "d": "Nothing at all, and the turn simply waits until the gate finally gives its answer"

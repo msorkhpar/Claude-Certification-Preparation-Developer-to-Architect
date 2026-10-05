@@ -118,7 +118,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **a**: A longer system prompt that teaches the model each vendor's date format by example
    - **b**: A PostToolUse hook that supplies one readable format as the replacement output
    - **c**: A PreToolUse hook that refuses any call whose answer is hard to read for the agent
-   - **d**: A larger model for the support agent, since comparison is a reasoning task for it
+   - **d**: A larger model for the support agent
 
 4. A team commits a git-push guard to the project's `.claude/settings.json`. Its batch service runs the SDK with `setting_sources=[]` and a callback hook for refunds. A push attempt from the service is not blocked. Why?
    - **a**: The callback hook overrides every command hook that the settings define
@@ -142,10 +142,10 @@ This quiz covers both pages of the module.
    - **a**: Exit 2 does not block in the SDK, so the hook must return a denial
    - **b**: Post hooks may not fire at all, so the limit needs a much longer timeout
    - **c**: The money has already moved by then, so the control belongs ahead of the call
-   - **d**: The limit is read from the output, so it should be read from the input instead
+   - **d**: The matcher cannot see amounts, so the limit should be written into the matcher
 
 2. On Claude Code v2.1.210 or later, a PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?
-   - **a**: A normal result, because the operation went ahead while the gate was still waiting
+   - **a**: A normal result, and the operation goes ahead
    - **b**: A message that no reply arrived before the deadline, and the operation is withheld
    - **c**: A rejection from a person, and the whole run stops until someone responds to it
    - **d**: Nothing at all, and the turn simply waits until the gate finally gives its answer
@@ -159,7 +159,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A post hook runs after the effect. *a* is ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it "Shows stderr to Claude; the tool already ran". *b* is ruled out because the turn-limit case is a different one: "Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute". *d* is ruled out because the field read is not the fault: "A control that must prevent an effect therefore belongs in `PreToolUse`".
+1. **c**. A post hook runs after the effect. *a* is ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it "Shows stderr to Claude; the tool already ran". *b* is ruled out because the turn-limit case is a different one: "Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute". *d* is ruled out because a matcher carries no limit: "Matchers only match tool names, not file paths or other arguments." The amount is read inside the hook, and the fault is the event: "A control that must prevent an effect therefore belongs in `PreToolUse`".
 2. **b**. A timed-out gate is the safe case: nothing runs and the model is told. *a* is ruled out because the tool is not run: "Claude Code doesn't run the tool call". *c* is ruled out because the model gets a result and the turn goes on: "Claude receives a tool result stating the hook didn't respond before its timeout". *d* is ruled out because a callback past its timeout is stopped: "Claude Code cancels it and discards its output".
 3. **d**. Callbacks are not a pipeline. *a* is ruled out because the order of registration does not set the order of completion: "all matching hooks run in parallel". *b* is ruled out because a delay guesses at an order that nothing fixes: "completion order is non-deterministic". *c* is ruled out because the callbacks are not ranked: "Two hooks cannot be a pipeline."
 
