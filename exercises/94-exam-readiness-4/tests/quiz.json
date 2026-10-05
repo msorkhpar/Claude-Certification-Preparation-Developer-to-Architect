@@ -116,7 +116,7 @@
       "key": "b",
       "explanation": {
         "b": "The key must name the intention and be made once, before the first call, from what identifies the task (module 81, page 1). The page says \"A new key for each attempt turns the retry into a new refund\", which is the flaw here.",
-        "a": "Ruled out because \"A new key for each attempt turns the retry into a new refund\".",
+        "a": "Ruled out because \"The key is made once, before the first call, from what identifies the task (the order and the action), and it is stored with the task\".",
         "c": "Ruled out because the flaw is that the value changes between attempts, and \"The key names the intention, not the attempt\".",
         "d": "Ruled out because the page says \"Record the key together with the effect\", in one transaction."
       }
@@ -128,9 +128,9 @@
       "stem": "Scenario: A runner at Oaken Labs treats every tool error alike, with five attempts and growing pauses, and a call refused for lack of permission uses all five. Which rule belongs in its design?",
       "options": {
         "a": "Give every attempt a fresh idempotency key, so the tool sees each as new",
-        "b": "Open the breaker for the agent, making every later task skip the tool",
+        "b": "Open the breaker for the agent and have every later task skip the tool",
         "c": "Classify faults: repeat passing ones up to a cap, fail permanent ones at once",
-        "d": "Raise the attempts to ten with longer pauses, the fault outlasting the wait"
+        "d": "Raise the attempts to ten with longer pauses to outlast the fault"
       },
       "key": "c",
       "explanation": {
@@ -147,7 +147,7 @@
       "stem": "Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?",
       "options": {
         "a": "It reverts to refusing requests at once until a further pause has passed",
-        "b": "It resets its count of failures, allowing the next three calls",
+        "b": "It resets its count of failures and allows the next three calls",
         "c": "It closes and lets all traffic back through again",
         "d": "It stays half-open and lets further probes through one after another"
       },
@@ -155,7 +155,7 @@
       "explanation": {
         "a": "A failed probe opens the breaker again: \"A success closes it; a failure opens it again\" (module 81, page 1). The agent is not reached until the next probe, which saves calls in a long outage.",
         "b": "Ruled out because \"A success resets the count, so scattered failures do not open it\", which concerns the closed state.",
-        "c": "Ruled out because \"A success closes it\", and nothing here succeeded.",
+        "c": "Ruled out because only a success closes the breaker, and the open state is the one in which \"Calls are refused at once, without reaching the agent\".",
         "d": "Ruled out because \"One probe call goes through\", and a failure sends the breaker back to open."
       }
     },
@@ -165,10 +165,10 @@
       "scope": "level",
       "stem": "Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which two statements does the capstone support? (Select two.)",
       "options": {
-        "a": "One agent holding every tool suits it, a single agent being simpler to audit",
+        "a": "One agent holding every tool suits it and is simpler to audit",
         "b": "A coordinated crew would cost about 15 times a chat, and the value does not pay it",
-        "c": "One plain call with all the policy text pasted in suits it, the route being simple",
-        "d": "A team of agents suits it, the documents being many and changing often",
+        "c": "One plain call with all the policy text pasted in suits it and keeps the route simple",
+        "d": "A team of agents suits it and handles many documents that change often",
         "e": "A small fixed workflow around a retrieval-backed call suits the known path"
       },
       "key": [
@@ -180,7 +180,7 @@
         "e": "The capstone sets the rung: \"an augmented call with a small fixed workflow, not an agent, because the path is known\", and it notes \"A team of agents would cost about 15 times a chat, and the value does not pay it\" (module 93, page 1).",
         "a": "Ruled out because autonomous agents come with \"higher costs, and the potential for compounding errors\".",
         "c": "Ruled out because the design needs \"The index is replaced when a document changes\", and pasted text goes stale.",
-        "d": "Ruled out because the capstone chooses \"an augmented call with a small fixed workflow, not an agent, because the path is known\"."
+        "d": "Ruled out because the ladder reaches a team only when \"it becomes a team only when the parts are independent and the value pays for the team\", and reading many documents that change often is not that."
       },
       "select": 2
     },
@@ -199,7 +199,7 @@
       "explanation": {
         "b": "The chain removes first and ranks after: \"a question that shares nothing with any readable document gets no evidence\" (module 93, page 1).",
         "a": "Ruled out because \"Documents the reader may not read are removed first, then the rest are ranked\".",
-        "c": "Ruled out because \"a question that shares nothing with any readable document gets no evidence\", so no chunk is returned.",
+        "c": "Ruled out because \"the rest are ranked by the words they share with the question\", so a document that shares no word is never ranked and no chunk is returned.",
         "d": "Ruled out because \"an answer whose quote is missing is held as unsupported\", and the chain never sends it out with a flag."
       }
     },
@@ -266,10 +266,10 @@
       "scope": "level",
       "stem": "Scenario: Hollin Labs upgrades its assistant to a newer release and copies across a prompt sentence that fixed an over-eager habit on the older one. Nobody has tested the sentence on the release. Which two steps does the page support? (Select two.)",
       "options": {
-        "a": "Keep the line, models in one family behaving alike under the same wording",
+        "a": "Keep the line and trust that models in one family behave alike",
         "b": "Treat the technique as measured on the old model until re-checked against your own evals",
         "c": "Keep the line and add a second one that repeats it in stronger words",
-        "d": "Drop every line that fixed a habit, new models needing no such lines",
+        "d": "Drop every line that fixed a habit and trust that new models need none",
         "e": "Run the evaluation set on the new model and see whether the results back the line"
       },
       "key": [
@@ -311,15 +311,15 @@
       "stem": "Scenario: Isle Travel's legacy caller times out after 2,000 ms. The assistant's slow case, the 95th percentile, is 1,500 ms, and the team adds a safety margin of 600 ms. How should the gateway deliver the answer?",
       "options": {
         "a": "Synchronously, since the median call fits well inside the limit",
-        "b": "Synchronously, since the slow case alone is under the timeout",
+        "b": "By raising the caller's timeout, since that changes nothing in the gateway",
         "c": "By accept-and-poll, since the tail figure with its buffer is over the caller's limit",
         "d": "By accept-and-poll only if the caller asks for the result to be delayed, which it rarely does"
       },
       "key": "c",
       "explanation": {
         "c": "The gateway \"compares the slow case (the 95th-percentile time plus a safety margin) with the caller's timeout\" (module 84, page 2); 2,100 ms is over 2,000 ms.",
-        "a": "Ruled out because the comparison uses the tail and not the median: \"the 95th-percentile time plus a safety margin\".",
-        "b": "Ruled out because the comparison is made with \"the 95th-percentile time plus a safety margin\", and the slow case alone is not the figure.",
+        "a": "Ruled out because a median hides the slow case: \"The example's twelve timings have a mean of 1,441 ms, a median of 980 ms and a 95th percentile of 4,800 ms\".",
+        "b": "Ruled out because \"Raising the legacy system's timeout is often not possible and moves the problem into a system nobody owns\".",
         "d": "Ruled out because the choice is the gateway's: \"If it does not, the gateway uses accept-and-poll\"."
       }
     },
@@ -339,7 +339,7 @@
         "c": "The edge is exact: \"A budget that is not positive blocks\" (module 84, page 2).",
         "a": "Ruled out because admission is decided against the budget: \"A request that would bring the spend to more than the budget blocks\".",
         "b": "Ruled out because a warning belongs to the case \"Reaching 80 percent warns\", and a zero budget is blocked before that.",
-        "d": "Ruled out because the rule has no free first request, and \"A budget that is not positive blocks\"."
+        "d": "Ruled out because the rule has no free first request, and eighty percent is a point of warning and not of blocking: \"Reaching 80 percent warns, and exactly 80 percent warns\"."
       }
     },
     {
@@ -375,8 +375,8 @@
       "key": "d",
       "explanation": {
         "d": "A gateway does not guess: \"A row whose model has no price is refused, because a gateway never guesses a price\" (module 84, page 2).",
-        "a": "Ruled out because \"a gateway never guesses a price\", and an average is a guess.",
-        "b": "Ruled out because \"A row whose model has no price is refused\", which names the problem, and a skipped row understates the bill.",
+        "a": "Ruled out because showback is computed \"at the price of the row's model\", and an average of other models is not that price.",
+        "b": "Ruled out because \"Each team sees what it spent\", and a skipped row would hide spend from the team that incurred it.",
         "c": "Ruled out because \"Every token kind has its own price\", and a price of zero makes the usage free in the report."
       }
     },
@@ -386,10 +386,10 @@
       "scope": "level",
       "stem": "Scenario: Quay Retail's assistant must give each branch's refund total for February. The figures sit in a table, and the team has cut the table into text chunks, after which the model adds the numbers by eye and gets them wrong. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A longer chunk size brings every branch's rows together, fixing the sums",
-        "b": "An embedding index over the rows matches each figure by meaning, giving the totals",
+        "a": "A longer chunk size brings every branch's rows together and fixes the sums",
+        "b": "An embedding index over the rows matches each figure by meaning and gives the totals",
         "c": "Slicing the rows into fragments leaves the sums to guesswork",
-        "d": "A keyword index on the word refund finds every row, giving the totals",
+        "d": "A keyword index on the word refund finds every row and gives the totals",
         "e": "A database query issued through a tool sums and filters exactly"
       },
       "key": [
@@ -399,7 +399,7 @@
       "explanation": {
         "c": "When the answer lives in a table or a database the mechanism is a structured query run by a tool, which is \"Exact, and able to total or filter\", while cutting the table \"adds numbers by eye\" is the failure it avoids (module 85, page 1).",
         "e": "When the answer lives in a table or a database the mechanism is a structured query run by a tool, which is \"Exact, and able to total or filter\", while cutting the table \"adds numbers by eye\" is the failure it avoids (module 85, page 1).",
-        "a": "Ruled out because the failure the page names is \"The table is cut into chunks and the model adds numbers by eye\".",
+        "a": "Ruled out because \"the cut follows the structure of the data\" and not a length, and longer chunks would still leave the model adding numbers by eye.",
         "b": "Ruled out because embedding models \"can miss crucial exact matches\", and add nothing up.",
         "d": "Ruled out because a keyword index \"matches the exact string\", and it does not total or filter."
       },
@@ -412,7 +412,7 @@
       "stem": "Scenario: Fallow Utilities' retrieval returns a chunk that reads only \"The charge is waived for the first month\", and users cannot tell which plan it belongs to. Which repair does the page support?",
       "options": {
         "a": "Return twenty chunks for every question, to make the plan's name turn up in one",
-        "b": "Cut the text into smaller windows, each chunk then holding fewer unrelated words",
+        "b": "Cut the text into smaller windows and let each chunk hold fewer unrelated words",
         "c": "Ask the model to guess the plan from the rest of the conversation when it answers",
         "d": "Put the document title and section name in front of each piece before indexing"
       },
@@ -579,7 +579,7 @@
         "b": "Content is opened narrowly: \"allow one by name only for a stated purpose and a limited time\" (module 87, page 1).",
         "a": "Ruled out because \"Telemetry is a copy of your users' data in a place with a different audience\".",
         "c": "Ruled out because the records \"Keep ids, counts, timings, names of models and tools, and statuses\", and a private copy of the prompts is an ungoverned store of content.",
-        "d": "Ruled out because the page says \"Drop the content fields, and allow one by name only for a stated purpose and a limited time\", so a stated purpose may open one."
+        "d": "Ruled out because the remedy on the page was to see the failure and not to ask for a description of it: \"Adding full production tracing let us diagnose why agents failed and fix issues systematically\"."
       }
     },
     {
@@ -588,7 +588,7 @@
       "scope": "level",
       "stem": "Scenario: Sable Cargo changed its model on purpose last Tuesday, and its cost per answer rose by 35 percent against the stored reference. The drift check pages the on-call engineer. What does the page advise?",
       "options": {
-        "a": "Keep the old baseline for a year, the rise never being forgotten, whatever else changes in between",
+        "a": "Keep the old baseline for a year and compare every later change against that stored reference",
         "b": "Raise the tolerance until the page stops",
         "c": "Turn the cost metric off until the next planned change has been decided",
         "d": "Reset the baseline at the switch that was chosen and treat other moves as findings"
@@ -634,7 +634,7 @@
       "key": "c",
       "explanation": {
         "c": "The documentation says of model grading: \"Test to ensure reliability first then scale\", and the page adds \"Check that agreement before you trust the grader\" (module 88, page 1).",
-        "a": "Ruled out because the documentation says \"Test to ensure reliability first then scale\", and full volume is the scale step.",
+        "a": "Ruled out because \"Human evaluation catches what automation misses\", so a grader switched on unchecked at full volume leaves its misses unseen.",
         "b": "Ruled out because exact match \"rejects a correct report that is worded differently\".",
         "d": "Ruled out because human grading is \"slow and expensive. Avoid if possible\", and \"Human review of every output does not scale\"."
       }
@@ -667,8 +667,8 @@
         "a": "Add trials until the lead reaches five points, then ship",
         "b": "Quitting on a lead gives false wins",
         "c": "Gather the sample that was planned before reading the result",
-        "d": "Run the same 300 trials again, a repeat being expected to confirm the lead",
-        "e": "Stop now, the larger number being the better version"
+        "d": "Run the same 300 trials again and expect the repeat to confirm the lead",
+        "e": "Stop now and ship the version with the larger number"
       },
       "key": [
         "b",
@@ -697,7 +697,7 @@
       "key": "d",
       "explanation": {
         "d": "The page says \"A mean hides the tail\", and \"For streamed answers the time to the first token is the number users feel\" (module 88, page 2).",
-        "a": "Ruled out because \"A mean hides the tail\", and a mean of the fastest half hides it even further.",
+        "a": "Ruled out because the page's own figures show how far the slow case lies from the rest: \"a mean of 1,441 ms, a median of 980 ms and a 95th percentile of 4,800 ms\", and the fastest half lies below even the median.",
         "b": "Ruled out because the maximum is one case, whereas \"the slowest five in a hundred requests are the ones users complain about\".",
         "c": "Ruled out because length is something to trim later: \"Cut tokens where the evals say it is safe\", and it does not tell the report what users feel."
       }
@@ -830,7 +830,7 @@
       "options": {
         "a": "Retry the whole run three times, keeping the end-of-run write",
         "b": "Persist each outcome as soon as it is done, so a retry takes only the rest",
-        "c": "Catch the crash in the runner, making the end always reached",
+        "c": "Catch the crash in the runner and always reach the end of the run",
         "d": "Put the first nine results into the prompt of the tenth task"
       },
       "key": "b",
@@ -886,10 +886,10 @@
       "stem": "Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)",
       "options": {
         "a": "Add a line to the system prompt telling the model to disregard names",
-        "b": "Switch the layer off, a pattern that misses names giving false comfort",
+        "b": "Switch the layer off and drop the false comfort of a pattern that misses names",
         "c": "Plant identifiers of every kind in tests and verify that none gets into the request",
         "d": "Add a stronger detector, or keep the free text away from the provider",
-        "e": "Accept the gap, names carrying no risk once the addresses are gone"
+        "e": "Accept the gap and treat names as harmless once the addresses are gone"
       },
       "key": [
         "c",
@@ -920,7 +920,7 @@
         "d": "The route checks the source before the score: \"An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99\" (module 90, page 1).",
         "a": "Ruled out because \"confidence is not evidence\", and a model can be certain and wrong.",
         "b": "Ruled out because review is for answers the source supports: \"a low-consequence action goes out unreviewed only at a confidence of at least 95, and below it goes to review\".",
-        "c": "Ruled out because the example holds the answer: \"An answer whose quote is not in the source is held\", and a note would still send the unsupported text out."
+        "c": "Ruled out because the register pairs this failure with \"a grounding check on the output (hold when unsupported)\", and a note would still send the unsupported text out."
       }
     },
     {
@@ -938,8 +938,8 @@
       "explanation": {
         "a": "The design treats a refusal as an outcome: \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model\" (module 90, page 1).",
         "b": "Ruled out because \"the stop_details fields can be null\", so the user-facing message comes from the application.",
-        "c": "Ruled out because the page names two recoveries, with \"or the request is retried on a different model\" as the second, and sampling is neither.",
-        "d": "Ruled out because the page says \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues\", not resent."
+        "c": "Ruled out because \"Models released after Claude Opus 4.6 do not support setting temperature\", and a sampling setting is not one of the two recoveries of the page.",
+        "d": "Ruled out because \"Re-sending a refused request to the same model usually results in another refusal\"."
       }
     },
     {
@@ -958,7 +958,7 @@
         "c": "The injection control has several parts: \"untrusted content only in tool results, JSON-encoded; screen tool output; least privilege\" (module 90, page 1). The narrow right limits what a hidden line can do.",
         "a": "Ruled out because \"a line in a prompt is a request, and a control is a step the model cannot skip\".",
         "b": "Ruled out because pattern lists belong to the input layer, and the page says \"A screen with a small model reduces risk and does not remove it\".",
-        "d": "Ruled out because untrusted content belongs \"only in tool results\", and not among the instructions."
+        "d": "Ruled out because for untrusted text placed in the system prompt \"The model then has no marker that the text is third-party data\"."
       }
     },
     {
@@ -1001,7 +1001,7 @@
       "explanation": {
         "a": "The register's test is mechanical: \"a row with a control that does not exist is a wish\" (module 90, page 2).",
         "b": "Ruled out because \"every control in the register is a control in the design\".",
-        "c": "Ruled out because \"A row with no owner has nobody to call; a row with a control that does not exist is a wish\", and the two faults are separate.",
+        "c": "Ruled out because a row needs \"a control that is defined in the design, a named owner and the residual risk in words\", and an owner alone leaves the control missing.",
         "d": "Ruled out because \"the residual column says what is left\" once a control works, and a control that does not exist leaves the whole risk."
       }
     },
@@ -1101,7 +1101,7 @@
       "key": "c",
       "explanation": {
         "c": "The page asks for argument: \"A rejected option has a reason in a sentence\" (module 91, page 1).",
-        "a": "Ruled out because a rejected option \"has a reason in a sentence\", and one word is not a sentence.",
+        "a": "Ruled out because \"the most expensive option and the slowest to answer\" is a reason that \"can be argued with\", and one word cannot be.",
         "b": "Ruled out because \"An option that misses a service level is not a candidate, however cheap\", and the reason is a checkable fact about the option, not a budget name.",
         "d": "Ruled out because the reader's question is \"why not the simple thing\", and a name does not answer it."
       }
@@ -1133,7 +1133,7 @@
       "options": {
         "a": "Short of the floor by 5, counted in the unit of the target",
         "b": "Failed, with the gap left unstated in the report",
-        "c": "Met, the measurement being within a rounding margin",
+        "c": "Met, with the measurement inside a rounding margin",
         "d": "Short by 5 percent of the monthly availability"
       },
       "key": "a",
@@ -1160,7 +1160,7 @@
         "b": "The page gives the habit: \"change a promise through the same channel that made it, with a reason, before the date it matters\" (module 91, page 2).",
         "a": "Ruled out because the page says \"Say early what the design cannot promise\".",
         "c": "Ruled out because \"Promise what you measure and measure what you promise\", and the average hides the costly segment.",
-        "d": "Ruled out because a change must go \"through the same channel that made it\", and the sponsor was promised the number."
+        "d": "Ruled out because the sponsor's own channel is \"A regular review of the segments, the saving and the open risks, with the decisions it needs\", and a target moved in a sprint plan never reaches it."
       }
     },
     {
@@ -1207,10 +1207,10 @@
       "scope": "level",
       "stem": "Scenario: A platform team caps effort at high in managed settings. A project file sets medium and a user file sets max. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "The project file's cap is ignored, only managed settings being allowed to set one",
+        "a": "The project file's cap is ignored and only managed settings may set one",
         "b": "The most restrictive setting wins, so the lowest of the three values is in force",
-        "c": "Max is in force, the user file being read last",
-        "d": "High is in force, managed settings outranking every other level for this key",
+        "c": "Max is in force and the user file is read last",
+        "d": "High is in force and managed settings outrank every other level for this key",
         "e": "Nobody can loosen the organisation's ceiling, though a developer may tighten it"
       },
       "key": [
@@ -1220,7 +1220,7 @@
       "explanation": {
         "b": "The page gives the rule: \"when several levels set a cap, the lowest applies, so a developer may lower the organisation's cap and nobody can raise it\" (module 92, page 1).",
         "e": "The page gives the rule: \"when several levels set a cap, the lowest applies, so a developer may lower the organisation's cap and nobody can raise it\" (module 92, page 1).",
-        "a": "Ruled out because \"when several levels set a cap, the lowest applies\".",
+        "a": "Ruled out because the cap is one of the few \"security exceptions in which a stricter lower value counts\", so the project file's value is weighed and not ignored.",
         "c": "Ruled out because \"a cap of `xhigh` or `max` in the managed file would be no cap at all for the levels it was meant to hold back\".",
         "d": "Ruled out because the key is one of the two that go the other way, where \"a stricter value is always welcome\"."
       },
@@ -1241,7 +1241,7 @@
       "explanation": {
         "d": "The page gives the lookup: \"`/status` shows the `Setting sources` line, which names the managed source Claude Code selected, and `claude doctor` lists what it dropped\" (module 92, page 1).",
         "a": "Ruled out because a fresh settings file would hide the evidence, and the answer is \"a lookup and not a guess\".",
-        "b": "Ruled out because the lookup needs the line that \"names the managed source Claude Code selected\", and a model choice or a sign-out shows none.",
+        "b": "Ruled out because the usual reasons for a policy that \"does nothing\" are \"it is in a file the key does not read, a higher level sets the same key, or a lock removed the lower entry on purpose\", and neither a model choice nor a sign-out shows which applies.",
         "c": "Ruled out because the answer is \"a lookup and not a guess\", and a command that fetches a policy does not say what was dropped."
       }
     },
@@ -1252,16 +1252,16 @@
       "stem": "Scenario: Hart Media's platform team writes a managed MCP allowlist entry that gives both a server name and its address, believing two keys make the entry stricter. What does the page say about such an entry?",
       "options": {
         "a": "It is invalid",
-        "b": "It is valid, but only the address is read when both keys are set",
+        "b": "It is valid, and a developer's own list may widen it",
         "c": "It is valid for a deny list, and invalid for an allow list only",
-        "d": "It is valid and stricter"
+        "d": "It is valid, and the same server may also sit in the deny list"
       },
       "key": "a",
       "explanation": {
         "a": "The page states the shape: \"Each entry has exactly one of `serverName`, `serverCommand` or `serverUrl`: an entry with two keys is invalid\" (module 92, page 2).",
-        "b": "Ruled out because the page gives no preference between keys, and states that \"Each entry has exactly one of\".",
+        "b": "Ruled out because \"only the managed `allowedMcpServers` list applies and a developer's own list cannot widen it\".",
         "c": "Ruled out because the rule is about the entry itself, and \"A denied server wins over an allowed one\" is a different rule about two lists.",
-        "d": "Ruled out because \"an entry with two keys is invalid\", and it is not stricter."
+        "d": "Ruled out because \"the same server never appears in both lists\", so a server on the allowed list cannot also be denied."
       }
     },
     {
@@ -1308,17 +1308,17 @@
       "scope": "level",
       "stem": "Scenario: A design at Tamsin Rail passes each customer message straight to a model with no check on its length, its content or its source, and it has a good processing stage, an output check and a feedback loop. What does the four-stage review record?",
       "options": {
-        "a": "No finding, the three stages present being the strong ones",
+        "a": "No finding for the design, which has three strong stages",
         "b": "A medium finding for the missing input side, which asks for revision",
-        "c": "A low finding, an input stage being addable after launch",
+        "c": "A low finding for the missing input side, which can be fixed after launch",
         "d": "A high finding for the missing input side, which rejects it"
       },
       "key": "d",
       "explanation": {
         "d": "The input stage holds where requests come from, how they are validated and bounded and what is stripped, and a design that sends raw text straight to the model lacks it, which is a high finding (module 80, page 1). The rubric rejects on any high finding. The page puts it as \"Where requests come from, how they are validated and bounded, what is stripped before the model sees it\".",
-        "a": "Ruled out because the stem lists the other stages as present, and the page asks \"how they are validated and bounded\" of the input side alone.",
-        "b": "Ruled out because a design that skips \"how they are validated and bounded\" is a high finding and not a medium one.",
-        "c": "Ruled out because the page asks \"what is stripped before the model sees it\" before launch, not after."
+        "a": "Ruled out because the stem lists the other stages as present, and the rubric raises a high finding when \"A stage is empty or absent\", whichever other stages are strong.",
+        "b": "Ruled out because a missing stage is a high rule and \"any `high` gives `reject`, otherwise any `medium` gives `revise`\", so it cannot stop at a medium finding.",
+        "c": "Ruled out because a low finding \"is recorded and does not hold the design back\", and a missing input stage is not a matter to improve later."
       }
     },
     {
@@ -1337,7 +1337,7 @@
         "b": "A person can only hold the line when the design makes the review real, which means they see the evidence and not only the model's verdict (module 79, page 2). The page warns that the interface must not turn review into \"a click-through\". The page puts it as \"they see the evidence, not only the model's verdict\".",
         "a": "Ruled out because the page says \"people who receive output directly are told that AI helped produce it\", and the handler is not one of them.",
         "c": "Ruled out because the page ties the target to \"an item is worth reviewing when its expected error cost exceeds the review cost\", and not to keeping handlers busy.",
-        "d": "Ruled out because the page asks that \"they see the evidence, not only the model's verdict\", and a repeat adds none."
+        "d": "Ruled out because the usage policy asks that \"a qualified professional in that field must review the content or decision prior to dissemination or finalization\", and a second model is not a person."
       }
     },
     {
@@ -1373,7 +1373,7 @@
       "key": "d",
       "explanation": {
         "d": "A control that must always hold is enforced in code, because the model's behaviour is probabilistic (module 79, page 2). The page adds that \"a regulatory control never rests on the model alone\", whatever the test score was.",
-        "a": "Ruled out because a description is text to the model, and \"a regulatory control never rests on the model alone\".",
+        "a": "Ruled out because the page says to \"Enforce in code any control that must always hold, such as a spending limit or a mandatory approval\", and a tool description is only text the model reads.",
         "b": "Ruled out because the page says \"Probabilistic behaviour cannot give a guarantee, however high the measured accuracy\".",
         "c": "Ruled out because people are kept for \"decisions that carry accountability, cannot be undone or fall under a rule that demands a human\", whereas a control that must always hold is enforced in code."
       }
@@ -1417,7 +1417,7 @@
         "b": "For disputes the design is an assistant that gathers the file for the person, and the example concludes \"No decision calls for a team of agents\" (module 79, page 1). The page says \"The model prepares the file; a qualified person decides.\"",
         "e": "For disputes the design is an assistant that gathers the file for the person, and the example concludes \"No decision calls for a team of agents\" (module 79, page 1). The page says \"The model prepares the file; a qualified person decides.\"",
         "a": "Ruled out because \"Automate decisions that are reversible, cheap to get wrong and easy to audit afterwards\".",
-        "c": "Ruled out because \"The model prepares the file; a qualified person decides.\"",
+        "c": "Ruled out because a team of agents fits only where \"The parts are independent, the volume of reading exceeds one context and the value pays for the cost\", and here a person decides each dispute anyway.",
         "d": "Ruled out because \"Only then does autonomy earn its price\", and a fixed order suits only a path known in advance."
       },
       "select": 2
@@ -1430,14 +1430,14 @@
       "options": {
         "a": "The share of customers reached in a new way by the assistant each month",
         "b": "Spend per finished task including review and rework, against a human baseline",
-        "c": "The model's token rate per second across all the requests served",
+        "c": "The 95th percentile latency across all the requests the assistant serves",
         "d": "The count of hours saved for each person each week, summed across the whole team"
       },
       "key": "b",
       "explanation": {
         "b": "The cost pillar claims that work costs less in total, and its measure is the cost per completed task against the human baseline, counting tokens, review time and rework and not model price alone (module 79, page 1). The page puts it as \"Counts tokens, review time and rework, not model price alone\".",
         "a": "Ruled out because that is the transformation pillar, \"Share of customers served in a new way\".",
-        "c": "Ruled out because the page counts \"tokens, review time and rework, not model price alone\".",
+        "c": "Ruled out because a latency figure belongs to another pillar, whose measure is \"95th percentile latency, availability, accuracy by case type\", and it says nothing of cost per task.",
         "d": "Ruled out because that is the productivity pillar, \"Hours saved per person per week\", which claims a different kind of value."
       }
     },
@@ -1447,11 +1447,11 @@
       "scope": "level",
       "stem": "Scenario: A research run at Pike Biotech crashes after a payment tool acts but before the run writes its result to the store. The next run starts from the store. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A fresh identifier is minted, a new run being a new intention",
-        "b": "The unsaved task is retried under the identifier already recorded for it",
+        "a": "A fresh identifier is minted for the new run, with a new key",
+        "b": "The unsaved task is retried under its recorded identifier",
         "c": "Results are written at the end of the run, so a crash is never half done",
         "d": "The vendor's endpoint returns the first receipt and does not pay again",
-        "e": "The task is skipped, its effect having already happened"
+        "e": "The task is skipped and counted as done"
       },
       "key": [
         "b",
@@ -1462,7 +1462,7 @@
         "d": "A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The page says \"The checkpoint and the idempotency key cover the two halves of the same gap.\"",
         "a": "Ruled out because \"The key names the intention, not the attempt.\"",
         "c": "Ruled out because \"Write on success, immediately.\"",
-        "e": "Ruled out because \"The checkpoint and the idempotency key cover the two halves of the same gap.\""
+        "e": "Ruled out because \"A run that starts with a store takes every task found there as done\", and this task's result never reached the store, so it is run again under its key."
       },
       "select": 2
     },
@@ -1480,7 +1480,7 @@
       "key": "a",
       "explanation": {
         "a": "A subagent sees only what it is given, so the lead writes the task like a brief, with the objective, the output format, the tools and sources, and the boundaries (module 80, page 2). That keeps \"two subagents do not research the same thing or leave a gap between them\".",
-        "b": "Ruled out because the page asks for a brief, whereas stacking words leaves the boundaries open, so two subagents \"research the same thing or leave a gap between them\".",
+        "b": "Ruled out because \"the lead must put everything the task needs into the task description\", and adjectives about thoroughness add none of it.",
         "c": "Ruled out because \"Give every subagent the whole conversation so nothing is lost\" is the page's trap, since the subagent's small context is why it exists.",
         "d": "Ruled out because \"A subagent starts with only what it is given.\""
       }
@@ -1494,7 +1494,7 @@
         "a": "The end of the policy is trimmed until the request fits",
         "b": "The request is sent anyway and the model discards the surplus",
         "c": "Building stops rather than a truncated policy being sent",
-        "d": "The lowest-priority static block is dropped, every block having a rank",
+        "d": "The lowest-priority static block is dropped like the dynamic ones",
         "e": "Rule-bearing blocks are never dropped, whatever the ceiling"
       },
       "key": [
@@ -1505,8 +1505,8 @@
         "c": "The static modules are never dropped, and when only they remain and still exceed the budget the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\".",
         "e": "The static modules are never dropped, and when only they remain and still exceed the budget the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\".",
         "a": "Ruled out because \"When the request is too long, truncate the end of the system prompt\" is rejected, because \"static modules hold the rules and are never cut\".",
-        "b": "Ruled out because \"A silent truncation would be worse than a refusal.\"",
-        "d": "Ruled out because \"each dynamic module has a priority\", and the static ones have none to lose."
+        "b": "Ruled out because \"a request that exceeds a budget must lose something\" and the page says to \"Decide beforehand what: each dynamic module has a priority\", so the cut is made before sending and not left to the model.",
+        "d": "Ruled out because \"The static modules are never dropped, since they hold the rules\"."
       },
       "select": 2
     },
@@ -1564,7 +1564,7 @@
         "a": "Below the model's minimum the marking \"has no effect and does not report an error\", so the cache stays inactive and shows up only in the bill (module 82, page 1).",
         "b": "Ruled out because \"A cache that was never active shows up only in the bill\", so nothing was written that could expire.",
         "c": "Ruled out because the check is \"to read the usage figures the API returns for cache writes and cache reads\", and not to change the call type.",
-        "d": "Ruled out because the marking \"does not report an error\" below the minimum, so there is none to miss."
+        "d": "Ruled out because \"A cache that was never active shows up only in the bill\", so the logs hold no error to find."
       }
     },
     {
@@ -1573,7 +1573,7 @@
       "scope": "level",
       "stem": "Scenario: Perrin Cloud's assembler holds two dynamic modules of equal priority, a long customer history and a long list of offers, and the request is over budget by a little. Which module does it drop first?",
       "options": {
-        "a": "Neither module, both holding equal priority",
+        "a": "Neither module is dropped at all",
         "b": "The one that sits later in the final sequence",
         "c": "The one that the caller names first in the request",
         "d": "The one that holds more tokens in its current form"
@@ -1581,7 +1581,7 @@
       "key": "b",
       "explanation": {
         "b": "Equal priorities are broken by position, and the later module goes first (module 82, page 1). The page's rule is that \"the assembler drops the lowest first, and among equal priorities the later one\".",
-        "a": "Ruled out because the rule leaves no tie unbroken: \"among equal priorities the later one\" goes.",
+        "a": "Ruled out because \"a request that exceeds a budget must lose something\", and a tie in priority is settled by position and not by dropping nothing.",
         "c": "Ruled out because \"The order is the same every time\", and \"callers cannot\" decide it.",
         "d": "Ruled out because the page orders the cut by rank and not by size: \"each dynamic module has a priority\"."
       }
@@ -1601,7 +1601,7 @@
       "explanation": {
         "a": "The tier a task needs is found by evaluating the task, not by reading a model's name, and it can change when a model is replaced (module 82, page 2). The page adds that price \"can only rank models that are already right\".",
         "b": "Ruled out because the page says the needed tier \"can change when a model is replaced\".",
-        "c": "Ruled out because price \"cannot make a model wrong, it can only rank models that are already right\".",
+        "c": "Ruled out because the page says price does \"Nothing alone; it ranks the models that remain\", so it cannot show what a model can do.",
         "d": "Ruled out because \"Use the largest model for every workload\" is rejected, because the requirement is a rung, a speed limit and a price."
       }
     },
@@ -1651,7 +1651,7 @@
       "options": {
         "a": "It redacts prompts by default and so changes nothing",
         "b": "It reveals tool inputs alone, and nothing else in the payload at all",
-        "c": "It exposes all other content too, payloads holding the conversation",
+        "c": "It exposes all other content too, including the whole conversation",
         "d": "It stays off in a project file unless the repository sets it"
       },
       "key": "c",
@@ -1668,10 +1668,10 @@
       "scope": "level",
       "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the free-text procedure that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A keyword index with a larger k is the fit, more results reaching more links",
-        "b": "A cached prompt that holds the whole rulebook is the fit, nothing then being missed",
+        "a": "A keyword index with a larger k is the fit",
+        "b": "A cached prompt that holds the whole rulebook is the fit",
         "c": "An agent that searches issues one query after another",
-        "d": "A structured query run by a tool is the fit, each lookup being a record",
+        "d": "A structured query run by a tool is the fit",
         "e": "A single top-k list cannot follow a chain"
       },
       "key": [
@@ -1701,7 +1701,7 @@
       "key": "b",
       "explanation": {
         "b": "The page states the cost plainly: the gateway becomes infrastructure the organisation operates, and it has to forward what its clients send as they change (module 86, page 1). The page puts it as \"The tradeoff is that the gateway becomes infrastructure your organization operates\".",
-        "a": "Ruled out because \"The tradeoff is that the gateway becomes infrastructure your organization operates.\"",
+        "a": "Ruled out because the gateway is \"a proxy your organization runs between the clients and the provider\", which is a service to operate and not a file and a guide.",
         "c": "Ruled out because the page says \"the provider key stays server-side; developers hold gateway credentials instead\".",
         "d": "Ruled out because \"every decision, the refusals included, leaves a record\", so the logs are a gain and not a cost."
       }
@@ -1740,7 +1740,7 @@
       "explanation": {
         "d": "Metrics are counts, so dropping a random share of points gives a wrong rate, and the lever for cost is fewer labels with many values (module 87, page 2). The page puts it as \"metrics are counts, and a missing count is a wrong count\".",
         "a": "Ruled out because the page rejects \"a random sample of metric points\" for every use of a rate.",
-        "b": "Ruled out because \"metrics are counts, and a missing count is a wrong count\".",
+        "b": "Ruled out because the page puts the cost in labels: \"Metrics are cheap to keep and costly when a label has many values\", so thinning the points is not what makes them dear.",
         "c": "Ruled out because the example keeps traces by rule: \"Tail-based sampling decides when the trace is complete\"."
       }
     },
@@ -1753,8 +1753,8 @@
         "a": "Lower the number of results returned, to push the old leaflet out of the top",
         "b": "Drop a revised source's earlier copy before loading its replacement",
         "c": "Delete the records of retired sources",
-        "d": "Run the same job twice a night, a second pass catching the leaflet",
-        "e": "Re-embed every chunk with the same model, vectors being able to drift"
+        "d": "Run the same job twice a night",
+        "e": "Re-embed every chunk with the same model before each run"
       },
       "key": [
         "b",
@@ -1765,7 +1765,7 @@
         "c": "A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). For a withdrawn document \"the removal is a correctness and, for personal data, a compliance matter, not a tidiness one\".",
         "a": "Ruled out because the old chunk \"competes with the new one for a place in the top results\".",
         "d": "Ruled out because \"A re-index that runs less often than the documents change leaves old text in the index between runs\".",
-        "e": "Ruled out because \"Vectors made by two models are not in one space\"."
+        "e": "Ruled out because \"Nothing in a document refresh touches the model, its sampling settings or the size of its window\", so re-embedding with the same model leaves the withdrawn text where it was."
       },
       "select": 2
     },
@@ -1784,7 +1784,7 @@
       "explanation": {
         "b": "Where the tool set is small, loading everything is the better design, with no extra step and nothing to tune (module 86, page 2). The documentation lists \"10 or more tools\" and \"tool definitions consume more than 10k tokens\" as the signs for search.",
         "a": "Ruled out because deferring pays on \"a large or growing\" set, and here it adds a round trip when the needed tool is absent.",
-        "c": "Ruled out because the threshold the documentation lists is \"10 or more tools\", and six is far below it.",
+        "c": "Ruled out because the documentation puts the drop at \"Claude's ability to pick the right tool degrades once you exceed 30–50 available tools\", and six is far below that.",
         "d": "Ruled out because the documentation says standard calling is \"a better fit when you have fewer than 10 tools, every tool is used in every request, or your tool definitions are small\"."
       }
     },
@@ -1822,7 +1822,7 @@
       "explanation": {
         "d": "The retries rule keeps a trace in which one tool was called three times or more, a sign of a loop that eventually succeeded (module 87, page 1). It ranks below error and slow and above feedback and the sample. The page puts it as \"one tool was called three times or more, a sign of a loop that eventually succeeded\".",
         "a": "Ruled out because the rule keeps \"the rest, kept by a share of their ids\", and this trace has a reason of its own.",
-        "b": "Ruled out because the example's reason is \"one tool was called three times or more, a sign of a loop that eventually succeeded\".",
+        "b": "Ruled out because the page lists the reasons apart: \"error: any span failed\" is one, and a retried call belongs to the retries reason, for a loop that eventually succeeded.",
         "c": "Ruled out because \"The example keeps a trace for the first of these reasons, in this order\", so a success earns a place only as part of the sample."
       }
     },
@@ -1859,9 +1859,9 @@
       "key": "c",
       "explanation": {
         "c": "The audit compares what an agent holds with what its role needs and returns four lists: tools to remove, needed tools it lacks, risky ones named first, and dormant ones to review (module 86, page 2). A review that only removes will break the role. The page puts it as \"The needed tools the agent lacks are listed too\".",
-        "a": "Ruled out because the audit returns four things, and \"The needed tools the agent lacks are listed too\".",
+        "a": "Ruled out because \"a review that only removes will break the role\", and a review that stops at removal is not complete.",
         "b": "Ruled out because \"Logging and confirmation prompts are compensating controls\", and they do not replace the audit of what is held and needed.",
-        "d": "Ruled out because a role's needs come first: \"since a review that only removes will break the role\"."
+        "d": "Ruled out because the audit \"compares what an agent holds with what its role needs\", so the role is the reference and the shortfall is reported and not edited away."
       }
     },
     {
@@ -1880,7 +1880,7 @@
         "b": "The common path stays loaded so that most requests never search, and the long tail is deferred, where a search costs less than the definitions would on every request (module 86, page 2). The page names a floor of three to five loaded tools. The page puts it as \"most frequently used tools non-deferred so Claude can call them without searching first\".",
         "a": "Ruled out because \"Shorten every tool description to save tokens\" fails because it \"trades selection quality for tokens\".",
         "c": "Ruled out because \"Past the 30 to 50 tools\" accuracy falls, so loading all 120 trades one cost for another.",
-        "d": "Ruled out because the page says \"Keep your 3–5 most frequently used tools non-deferred so Claude can call them without searching first.\""
+        "d": "Ruled out because \"when the tool that is needed is not loaded, the model calls the search first, and that is a round trip\", and deferring the common tools makes that happen on most requests."
       }
     },
     {
@@ -1889,11 +1889,11 @@
       "scope": "level",
       "stem": "Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "Release to half of users, a large exposure giving the clearest data",
-        "b": "An A/B test on all users comes first, it alone predicting reaction",
+        "a": "Release to half of users, which gives the clearest data",
+        "b": "An A/B test on all users comes first and alone predicts reaction",
         "c": "Exposure to real users follows once the shadow run says the change is safe to show",
         "d": "A shadow run exposes no user to a degradation",
-        "e": "Compare average segment accuracies, averages summarising the change"
+        "e": "Compare average segment accuracies, which summarise the change"
       },
       "key": [
         "c",
@@ -1903,7 +1903,7 @@
         "c": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, and \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show\" (module 88, page 2).",
         "d": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, and \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show\" (module 88, page 2).",
         "a": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it, so that is not a gate.\"",
-        "b": "Ruled out because \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show.\"",
+        "b": "Ruled out because only a shadow run \"keeps the answers away from users\", whereas an A/B test \"sends live traffic to two versions at random\", so on all users it cannot come first.",
         "e": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price.\""
       },
       "select": 2
@@ -1922,7 +1922,7 @@
       "key": "c",
       "explanation": {
         "c": "A refused gate with a retirement date in 40 days becomes a work list with an owner for each reason (module 89, page 2). The page adds that the gate \"says what must be fixed or accepted first\".",
-        "a": "Ruled out because the page says \"The gate does not decide the migration: the calendar does, and the gate says what must be fixed or accepted first.\"",
+        "a": "Ruled out because for a must-pass case \"If any fails, the change is refused\", and a note in the release does not change that.",
         "b": "Ruled out because \"Re-weighting a failed case turns a rule into a preference\".",
         "d": "Ruled out because \"watching a known failure in production makes customers the test\"."
       }
@@ -1960,7 +1960,7 @@
       "key": "b",
       "explanation": {
         "b": "The floor comes first: a prompt that works well without model or prompt constraints shows what top performance looks like, and latency reduction follows (module 88, page 2). The documentation warns that reducing it prematurely can hide that. The page puts it as \"Trying to reduce latency prematurely might prevent you from discovering what top performance looks like\".",
-        "a": "Ruled out because \"Trying to reduce latency prematurely might prevent you from discovering what top performance looks like.\"",
+        "a": "Ruled out because \"Optimisation is a search for the cheapest and fastest system that still meets the floor, so the floor comes first.\" A check of quality afterwards on a sample comes too late.",
         "c": "Ruled out because \"A mean hides the tail\", and \"the slowest five in a hundred requests are the ones users complain about\".",
         "d": "Ruled out because the order is \"first engineer a prompt that works well\", and two changes at once blur which one moved a score."
       }
@@ -1979,9 +1979,9 @@
       "key": "a",
       "explanation": {
         "a": "The check is the nearest-rank 95th percentile, and a single slow case among forty does not block the change while three do (module 89, page 2). The example uses the percentile and not the worst case. The page puts it as \"A single slow case among forty does not block the change, and three do\".",
-        "b": "Ruled out because the check is \"the percentile and not the worst case\", and the mean hides the tail.",
+        "b": "Ruled out because \"A mean hides the tail\", and the slowest five in a hundred are what the check is for.",
         "c": "Ruled out because the page lists \"Latency. The tail, by the nearest-rank 95th percentile of the new timings\" as a check of the gate.",
-        "d": "Ruled out because \"A single slow case among forty does not block the change, and three do.\""
+        "d": "Ruled out because \"The example's check is the percentile and not the worst case\", so one slow case does not break it."
       }
     },
     {
@@ -2036,7 +2036,7 @@
       "key": "d",
       "explanation": {
         "d": "A release gate needs a number for each dimension that can fail it, and for security that number is the share of injection or leak attempts that got through, on attack cases (module 88, page 1). The page lists five dimensions: accuracy, latency, cost, safety and security. The page puts it as \"the share of injection or leak attempts that got through, on attack cases\".",
-        "a": "Ruled out because the security measure is \"the share of injection or leak attempts that got through, on attack cases\", and not an opinion poll.",
+        "a": "Ruled out because \"A criterion must be one you can fail\", and a monthly average of ratings sets no number that can fail a release on hostile inputs.",
         "b": "Ruled out because the guide lists five dimensions, and \"Safety\" and \"Security\" are separate from \"Accuracy: the share of cases answered correctly, by case type\".",
         "c": "Ruled out because \"Latency: a percentile and not a mean\", and speed says nothing of what got through."
       }
@@ -2062,7 +2062,7 @@
         "d": "On this model max_tokens covers thinking plus text, and \"thinking tokens are billed as output tokens\", so a limit sized for the old model cuts replies short (module 89, page 1). The checklist says to \"Recount tokens and re-baseline cost\".",
         "a": "Ruled out because \"a request with no `thinking` field runs with adaptive thinking\".",
         "b": "Ruled out because the page says \"Read content blocks by `type`\", which is a different failure from a cut-off reply.",
-        "e": "Ruled out because \"thinking tokens are billed as output tokens\", and a lower cap would cut more replies short."
+        "e": "Ruled out because \"a budget that cannot change is a decision to stay on a model whose date is fixed\", and a lower cap would cut more replies short."
       },
       "select": 2
     },
@@ -2110,9 +2110,9 @@
       "scope": "level",
       "stem": "Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "One arrangement covers both, zero retention implying the agreement",
-        "b": "Neither matters, de-identified input removing the duty",
-        "c": "Both are offered there, the platform sharing the Claude API's policy",
+        "a": "One arrangement covers both, and zero retention implies the agreement",
+        "b": "Neither matters, and de-identified input removes the duty",
+        "c": "Both are offered there, and the platform shares the Claude API's policy",
         "d": "The agreement-based one is offered on the first-party API alone",
         "e": "Storing nothing and holding a contract are two different arrangements"
       },
@@ -2123,7 +2123,7 @@
       "explanation": {
         "d": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting that applies to the Claude API only (module 83, page 1). The page says \"Zero data retention and HIPAA readiness are different things\".",
         "e": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting that applies to the Claude API only (module 83, page 1). The page says \"Zero data retention and HIPAA readiness are different things\".",
-        "a": "Ruled out because the page contrasts them: \"Zero data retention and HIPAA readiness are different things\".",
+        "a": "Ruled out because the two are obtained differently: zero retention is requested from Anthropic, while HIPAA readiness needs \"The business associate agreement signed and the setting enabled\".",
         "b": "Ruled out because \"Neither arrangement removes the need to de-identify\".",
         "c": "Ruled out because HIPAA readiness applies to \"The Claude API only, not Claude Platform on AWS or Microsoft Foundry\"."
       },
@@ -2143,7 +2143,7 @@
       "key": "c",
       "explanation": {
         "c": "Transparency has two duties: tell people AI helped, and show the basis, which means the quote the grounding check used, the document version and the way to reach a person (module 90, page 2). The page puts it as \"A trace that holds ids and sizes can show which document supported an answer without holding the answer\".",
-        "a": "Ruled out because \"A trace that holds ids and sizes can show which document supported an answer without holding the answer.\"",
+        "a": "Ruled out because the log holds \"request id, action, consequence, outcome and the size of the text, and never the text itself\".",
         "b": "Ruled out because \"confidence is not evidence\", and a model can be certain and wrong.",
         "d": "Ruled out because \"Two duties travel together\", and the second is to let a reader see the basis of an answer."
       }
@@ -2164,7 +2164,7 @@
         "a": "The layers answer different attackers and mistakes, so a design with all its controls on one layer has a gap on the others (module 90, page 1). The review adds an output control, an action control and a monitor. The page puts it as \"An input control cannot catch a confident wrong answer\".",
         "b": "Ruled out because \"the model is told in the system prompt\" is \"a weak instance of one layer\".",
         "c": "Ruled out because \"an output control cannot stop a tool call that already happened\", and the reverse holds for input.",
-        "d": "Ruled out because \"An input control cannot catch a confident wrong answer\"."
+        "d": "Ruled out because \"A design with all its controls on one layer has a gap on the others\", and the two failures in testing fall on the other layers."
       }
     },
     {
@@ -2183,7 +2183,7 @@
         "c": "Purging follows the same precision as the check: an entry is removed only when it is more than the ceiling old, so one exactly at the ceiling stays (module 83, page 2). A retention equal to a limit is acceptable. The page puts it as \"an entry is removed only when it is more than the ceiling old\".",
         "a": "Ruled out because a hold is a separate matter: \"an entry under a legal hold is never removed, whatever its age\".",
         "b": "Ruled out because the page treats a ceiling as a limit, and \"a retention equal to a limit as acceptable\".",
-        "d": "Ruled out because \"an entry is removed only when it is more than the ceiling old\"."
+        "d": "Ruled out because the window allows \"the days actually kept, which lie between them, the ceiling itself allowed\", so a record at exactly 365 days is within it."
       }
     },
     {
@@ -2211,9 +2211,9 @@
       "scope": "level",
       "stem": "Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. Which two statements follow the page's rule? (Select two.)",
       "options": {
-        "a": "Every reply is held until the check returns, a failed control having to stop work",
+        "a": "Every reply is held until the check returns",
         "b": "The outage counts as a pass and leaves no trace",
-        "c": "The input screen is switched off too, two checks being down together",
+        "c": "The input screen is switched off as well",
         "d": "The record keeps the gap visible",
         "e": "Replies go on carrying a mark that the guard did not run"
       },
@@ -2224,7 +2224,7 @@
       "explanation": {
         "d": "\"Only an output or monitor control of the ordinary tier may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
         "e": "\"Only an output or monitor control of the ordinary tier may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
-        "a": "Ruled out because \"Only an output or monitor control of the ordinary tier may proceed with a flag.\"",
+        "a": "Ruled out because for an ordinary output control \"the answers themselves are still checked by other controls\", so a flag is enough and a hold is not needed.",
         "b": "Ruled out because the page wants the gap to show \"so that the gap shows in the record\".",
         "c": "Ruled out because \"a control on the input or the action layer, and any control of the high tier, holds.\""
       },
@@ -2246,7 +2246,7 @@
         "a": "Counting refusals per user feeds the response to repeat offenders: tell the user the action violates the usage policy and throttle or end the access (module 90, page 1). A refusal is an outcome the application handles. The page puts it as \"Counting refusals per user also feeds the response to repeat offenders that the jailbreak page describes\".",
         "b": "Ruled out because the page treats a refusal as an outcome with a branch: \"the context is reset (the turn that caused it removed or rephrased)\".",
         "c": "Ruled out because \"the `stop_details` fields can be null, so the user-facing message comes from the application\".",
-        "d": "Ruled out because \"Counting refusals per user also feeds the response to repeat offenders that the jailbreak page describes\"."
+        "d": "Ruled out because \"The design treats it as an outcome with its own branch\", and a count that is ignored has none."
       }
     },
     {
@@ -2364,7 +2364,7 @@
       "key": "b",
       "explanation": {
         "b": "The record is reviewed at each stage of the roll-out, and each review may change the design: a new segment appears, a threshold moves, a model is replaced (module 91, page 2). Iteration is the part of the design that was planned for. The page puts it as \"a new segment appears, a threshold moves, a model is replaced\".",
-        "a": "Ruled out because the page treats a changed threshold as expected, and \"a new segment appears, a threshold moves, a model is replaced\".",
+        "a": "Ruled out because \"The guide lists five phases: discovery, design, handoff, monitoring and iteration\", and a freeze would stop the design before the last phase.",
         "c": "Ruled out because the record \"is reviewed at each stage of the roll-out, and each review is allowed to change the design\".",
         "d": "Ruled out because \"Iteration is not a failure of the design; it is the part of the design that was planned for.\""
       }
@@ -2385,7 +2385,7 @@
         "a": "Discovery asks what exists today, such as the cost and quality of the current way, because without a baseline no saving can be shown (module 91, page 1). The page's example is 315,000 a month with people alone. The page puts it as \"Without a baseline no saving can be shown\".",
         "b": "Ruled out because the page lists that separately: \"A role that can be telephoned\".",
         "c": "Ruled out because that question concerns the target, \"A measure, a threshold, an owner\", and the saving needs the figure for the current way.",
-        "d": "Ruled out because that question sets limits on the design, and \"Without a baseline no saving can be shown.\""
+        "d": "Ruled out because that question asks for \"Data that may not leave a region, actions that need a person\", which sets limits and gives no figure to measure a saving against."
       }
     },
     {
@@ -2455,7 +2455,7 @@
         "b": "That individual figure is unreachable",
         "c": "The organisation limit is a safety net that makes the other figures optional",
         "d": "The three shares sum to the grand total exactly",
-        "e": "Nothing is wrong, the member being allowed to exceed a group's limit with the organisation's consent"
+        "e": "Nothing is wrong, and a member may exceed a group's limit with consent"
       },
       "key": [
         "b",
@@ -2466,7 +2466,7 @@
         "d": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2).",
         "a": "Ruled out because \"a total of exactly 20000 passes and 20001 does not\".",
         "c": "Ruled out because \"make the groups add up exactly\", because the organisation limit decides first otherwise.",
-        "e": "Ruled out because \"a member limit above a group's own makes the member limit a number that can never be reached\"."
+        "e": "Ruled out because \"a member's limit is no higher than the smallest group's\", so a figure above the group's cannot stand."
       },
       "select": 2
     },
@@ -2486,7 +2486,7 @@
         "c": "Server-managed settings apply to everyone in the organisation, and a different policy for one group means a different file or profile deployed to that group (module 92, page 1). They are fetched at startup and refreshed hourly. The page puts it as \"per-group policy is not yet supported there\".",
         "a": "Ruled out because it \"is edited by an Owner or Primary Owner, not by any administrator\".",
         "b": "Ruled out because \"a policy belongs in managed settings, and the shared file holds what the team agrees for itself\".",
-        "d": "Ruled out because the page says \"per-group policy is not yet supported there\"."
+        "d": "Ruled out because server-managed settings are applied to everyone: \"It applies to everyone in the organisation\"."
       }
     },
     {
@@ -2505,7 +2505,7 @@
         "a": "An empty list blocks every source, the official marketplace included, so allow nothing and allow ours are different lists (module 92, page 2). The company's own repository must be listed to be allowed. The page puts it as \"An empty list blocks every source, the official one included\".",
         "b": "Ruled out because the allowlist is \"an allowlist of the sources plugins may come from\", and an empty one lists none.",
         "c": "Ruled out because \"Allow all plugins from the official marketplace and block the rest\" is rejected, because an empty list blocks the official one too.",
-        "d": "Ruled out because the page says \"An empty list blocks every source, the official one included\", so allowing nothing and allowing ours differ."
+        "d": "Ruled out because \"The practice's policy lists one: the company's own marketplace repository\", and an empty list names none, so the firm's source is refused too."
       }
     },
     {
@@ -2522,7 +2522,7 @@
       "key": "b",
       "explanation": {
         "b": "Contribution metrics need the GitHub app and are not available for organisations with zero data retention enabled, so the team checks that before promising them (module 92, page 2). The page puts it as \"are not available for organisations with zero data retention enabled\".",
-        "a": "Ruled out because the baseline is a need of targets, whereas contribution metrics \"are not available for organisations with zero data retention enabled\".",
+        "a": "Ruled out because the baseline is collected before the launch: \"the plan takes four weeks of data before the rollout\".",
         "c": "Ruled out because \"Lines and suggestions accepted are reported and not targeted.\"",
         "d": "Ruled out because \"a member's use draws from a seat allowance\", which concerns spend and not metrics."
       }
