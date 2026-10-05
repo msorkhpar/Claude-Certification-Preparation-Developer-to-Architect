@@ -286,9 +286,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 40. Scenario S6. A record has the currency other and no currency_detail. How does the pipeline classify it?
    - **a**: As a semantic error, since the value is plausible but unchecked
-   - **b**: As a syntax error, because the pair is the contract
+   - **b**: As a syntax error, since the pair comes incomplete
    - **c**: As valid, since other is a member of the enum
-   - **d**: As an absent value that goes straight to review untried
+   - **d**: As an absent value, since it goes to review untried
 
 41. Scenario S6. A batch's results file lists entries in a different order from the requests. How should the pipeline pair each result with its request?
    - **a**: By position, since results mirror the sequence in which the entries were sent to the batch service

@@ -130,7 +130,7 @@ This quiz covers both pages of the module.
    - **a**: Take the Read tool out of the definitions of all six delegates
    - **b**: Set bypassPermissions in each agent definition of the six delegates
    - **c**: Run the six one after another instead of side by side
-   - **d**: Pre-approve those lookups in a PreToolUse hook, or in inherited rules
+   - **d**: Answer those lookups once, in a PreToolUse hook or inherited rules
 
 <details>
 <summary>Answer key</summary>

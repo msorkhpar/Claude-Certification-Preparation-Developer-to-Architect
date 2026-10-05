@@ -498,13 +498,13 @@ claude-sonnet-5-5, two extraction tools: {'tool_choice': 'auto', 'check_reply': 
    - **a**: The type check rejects it at validation
    - **b**: Strict mode rejects it once the tool sets `strict`
    - **c**: The required-field check rejects it as inconsistent
-   - **d**: No check in the contract rejects it
+   - **d**: Only a check in your own code rejects it
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value. *a* is ruled out because a length limit "would not tell a real number from an invented one". *c* is ruled out because "a required field pushes the model to fabricate a value", and the instruction adds to the pressure. *d* is ruled out because a default that looks like data is a problem because "downstream code cannot tell it from a real value".
-2. **d**. The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not. *a* is ruled out because "A strict schema makes the first kind rare and does nothing about the second", and both numbers pass a type check. *b* is ruled out because strict schemas "do not prevent semantic errors", and this record already matches its shape. *c* is ruled out because "the guarantee is about shape", which covers presence of fields and not agreement between them.
+2. **d**. The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not, so the check that catches it is "Your code: checks that read the record against the source". *a* is ruled out because "A strict schema makes the first kind rare and does nothing about the second", and both numbers pass a type check. *b* is ruled out because strict schemas "do not prevent semantic errors", and this record already matches its shape. *c* is ruled out because "the guarantee is about shape", which covers presence of fields and not agreement between them.
 
 </details>
 

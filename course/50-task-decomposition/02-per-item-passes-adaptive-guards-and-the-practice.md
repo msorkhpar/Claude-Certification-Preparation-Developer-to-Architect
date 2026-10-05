@@ -98,7 +98,7 @@ These are the wrong answers that the exam's scenarios offer for this task statem
    - **a**: The complete text of each module, laid side by side for comparison
    - **b**: The findings of the earlier passes, with no account of the modules
    - **c**: The changed lines of every module, copied out of each pass
-   - **d**: A name and a short summary for each, listing what it offers and what it expects
+   - **d**: A short summary per unit of what it offers and what it expects
 
 <details>
 <summary>Answer key</summary>

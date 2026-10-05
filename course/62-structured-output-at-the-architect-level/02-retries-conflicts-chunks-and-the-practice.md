@@ -494,16 +494,16 @@ The practice is in [`exercises/62-structured-output-at-the-architect-level`](../
    - **d**: Mark the document failed once the retry limit is reached
 
 2. A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?
-   - **a**: It excludes every failure
+   - **a**: It excludes every failure from its base
    - **b**: It understates accuracy for the passing set
    - **c**: It counts each one twice, once per rule
-   - **d**: It is correct as stated
+   - **d**: It counts reviewed documents as passed
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. A flagged conflict is information about a bad source, and a second look finds the same difference. *a* is ruled out because "a second look will find the same difference", so the retry cannot change the outcome. *b* is ruled out because "A record that carries a difference and says so is a correct record of a bad document", and replacing the printed value hides what it says. *d* is ruled out because this record is not invalid, since "a document that is still invalid after the last one is marked failed" applies to errors that are retried.
-2. **a**. The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong. *b* is ruled out because the report "divides by the documents that passed", so it overstates and does not understate. *c* is ruled out because it "leaves out the documents that went to review or failed", and nothing is counted twice. *d* is ruled out because "The first number is true and answers a different question".
+2. **a**. The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong. *b* is ruled out because the filtered figure is the higher one: "accuracy over the validated is 5 of 6, 0.83, and accuracy over all documents is 5 of 10, 0.5". *c* is ruled out because it "leaves out the documents that went to review or failed", and nothing is counted twice. *d* is ruled out because the report "divides by the documents that passed, which are the easy ones".
 
 </details>
 

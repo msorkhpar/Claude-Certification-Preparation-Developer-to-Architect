@@ -101,7 +101,7 @@ This quiz covers both pages of the module.
    - **a**: Discard the three and report the subject as having no findings
    - **b**: Present the three to readers as the subject's complete answer
    - **c**: Wait and rerun the lookup until all ten items have arrived
-   - **d**: Use them, mark the topic as partly evidenced and say what is lacking
+   - **d**: Keep them, flagged as partly evidenced, with the gap stated
 
 <details>
 <summary>Answer key</summary>

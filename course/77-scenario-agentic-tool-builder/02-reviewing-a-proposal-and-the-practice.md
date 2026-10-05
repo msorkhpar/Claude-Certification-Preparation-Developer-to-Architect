@@ -92,7 +92,7 @@ This quiz covers both pages of the module.
    - **a**: Nothing, because a container makes every tool safe to run
    - **b**: Nothing checks what the code does against what was declared
    - **c**: The container's memory limit, which the gate cannot read
-   - **d**: The agent's description of the tool, which a container cannot read
+   - **d**: The tool's network access, which the container cannot limit
 
 3. Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. Which record satisfies the audit part of the design?
    - **a**: A file that the agent keeps and updates for itself after every one of its runs
@@ -110,7 +110,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **a**. An undeclared effect is refused. *c* is ruled out because the gate approves only what was declared: "Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page." *b* is ruled out because an undeclared effect is one of the refusals and not a matter of the description: "Three things refuse a proposal." and "Its code shows a permission that the proposal did not declare" *d* is ruled out because a declared read does not cover the write the code shows: "Its code shows a permission that the proposal did not declare", and a refusal wins: "A proposal with a refusal is refused, whatever else is true of it."
-2. **b**. The container holds the run, and only the gate compares the code with its declaration. *a* is ruled out because a container is only one of the five jobs: "Containment is the environment's job." *c* is ruled out because the gate reads and flags the limits: "a timeout above the limit and a memory request above the limit". *d* is ruled out because the gate reads the description: "a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema".
+2. **b**. The container holds the run, and only the gate compares the code with its declaration. *a* is ruled out because a container is only one of the five jobs: "Containment is the environment's job." *c* is ruled out because the gate reads and flags the limits: "a timeout above the limit and a memory request above the limit". *d* is ruled out because the container already closes it (page 1): "The container has no internet access".
 3. **d**. The audit is kept out of the agent's reach. *a* is ruled out because an editable file is not an audit: "A log that the agent can edit is not an audit." *b* is ruled out because a summary by the agent is its own account: "The record has to be written by the gate and the runner and kept where the agent has no write access". *c* is ruled out because the agent can write where the log is kept: "kept where the agent has no write access".
 4. **c**. A name may be 64 characters. *a* is ruled out because the length is allowed: "A name may be 64 characters long, and 65 is too long." *b* is ruled out because the gate checks the form and not the model's taste: "Four things only send it back: a name that is not in the fixed form". *d* is ruled out because the description has its own minimum: "The description needs at least the minimum number of words, and exactly the minimum is enough."
 
