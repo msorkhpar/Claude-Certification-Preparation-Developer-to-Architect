@@ -103,7 +103,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 3. An agent mapped a service of twelve modules on Friday. Over the weekend a developer rewrote two of them. On Monday the team resumes the session. What should the first prompt add?
    - **a**: A request to survey the whole service from scratch
-   - **b**: The two changed paths and a request to re-read them
+   - **b**: The paths that differ, with a request to re-read them
    - **c**: Nothing at all, since the earlier read still holds
    - **d**: The full text of both changed modules, pasted inline
 
