@@ -575,7 +575,7 @@ B: the task needs four lookups, then the model ends its turn
 ```
 <!-- /example -->
 
-Read the output line by line. In scenario A the stop-reason loop makes two model calls and runs the tool, and the text-marker loop stops after one call with no tool run, having reported `done` for work it never did. In scenario B the stop-reason loop finishes in five calls under a generous cap. With a cap of three it stops with `max_turns` and an empty text, which tells the caller that it is not an answer. The fixed-count loop of three also stops after three calls, but it says `done`, and its text is empty: nothing in its report says that it was cut off. Both languages print the same lines.
+Read the output line by line. In scenario A the stop-reason loop makes two model calls and runs the tool, and the text-marker loop stops after one call with no tool run, having reported `done` for work it never did. In scenario B the stop-reason loop finishes in five calls under a generous cap. With a cap of three it stops with `max_turns` and an empty text, which tells the caller that it is not an answer. The fixed-count loop of three also stops after three calls, but it says `done`, and its text is empty: nothing in its report says that it was cut off. All four languages print the same lines.
 
 ## Traps
 
@@ -594,10 +594,10 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: Call the model a fixed number of times, large enough for the longest case
 
 2. An insurance agent handles claims that take between three and nine tool calls. Its loop calls the model four times and returns whatever the fourth reply says. Longer claims are returned as unfinished half-answers marked as complete. Which change fits best?
-   - **a**: Remove every limit so that no claim is ever cut off before it has finished
-   - **b**: Raise the count to nine so that even the longest claim fits inside the loop itself
-   - **c**: End on each response's stop value, and add a roomy ceiling with its own outcome
-   - **d**: Ask the model to write the number of steps still needed at the end of each reply
+   - **a**: Remove every limit, so that no claim is ever cut off before it has finished
+   - **b**: Raise the count to nine, so that even the longest claim fits inside the loop
+   - **c**: End on the stop value, and add a roomy ceiling with its own outcome
+   - **d**: Ask the model to write the steps still needed, at the end of each reply
 
 <details>
 <summary>Answer key</summary>
