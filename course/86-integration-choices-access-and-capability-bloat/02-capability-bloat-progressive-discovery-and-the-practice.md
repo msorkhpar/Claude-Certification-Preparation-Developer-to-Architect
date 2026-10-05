@@ -617,7 +617,7 @@ refund asked by a user who may only read: agent's rights alone -> allow; user's 
 
 ### The practice: capability design as code
 
-The practice is in [`exercises/86-integration-choices-access-and-capability-bloat`](../../exercises/86-integration-choices-access-and-capability-bloat/unit-01/practice-1/statement.md). You write the audit of an agent's tools, the plan for loading definitions with its thresholds and its floor and ceiling on the loaded set, the choice of mechanism, the authorization of a call by the user's and the agent's rights, and a gateway that decides in order and keeps a record of every decision. It is graded in Python, TypeScript, Java and Kotlin; the statement lists eight cases, each saying what you should see when it works.
+The practice is in [`exercises/86-integration-choices-access-and-capability-bloat`](../../exercises/86-integration-choices-access-and-capability-bloat/unit-01/practice-1/statement.md). You write the audit of an agent's tools, the plan for loading definitions with its thresholds and its floor and ceiling on the loaded set, the choice of mechanism, the authorisation of a call by the user's and the agent's rights, and a gateway that decides in order and keeps a record of every decision. It is graded in Python, TypeScript, Java and Kotlin; the statement lists eight cases, each saying what you should see when it works.
 
 ## Traps
 
@@ -629,7 +629,7 @@ The practice is in [`exercises/86-integration-choices-access-and-capability-bloa
 
 1. A support agent can read tickets, draft replies, pay customers back and permanently close user profiles. Staff only ever read tickets and draft replies. Applying least privilege, which change reduces risk most?
    - **a**: Record every repayment and closure so that misuse can be audited later
-   - **b**: Strip the repayment and account-closure capabilities from its configuration altogether
+   - **b**: Remove the repayment and closure capabilities from its configuration
    - **c**: Keep every capability but ask for a confirmation before each repayment and closure
    - **d**: Replace the agent with a larger model that follows instructions more reliably
 
