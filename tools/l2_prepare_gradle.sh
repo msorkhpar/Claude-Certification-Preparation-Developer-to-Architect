@@ -9,6 +9,8 @@ if [ ! -d "$W/.survey-out/gradle/gradle-9.8.0" ]; then
   (cd "$W/.survey-out/gradle" && unzip -q g.zip)
 fi
 FIRST=$(python3 tools/l2_practices.py list | cut -d' ' -f1 | while read -r p; do [ -d "$p/kotlin" ] && echo "$p" && break; done)   # the first practice that has a Kotlin edition
-if [ ! -d "$W/.survey-out/gradle/home/caches" ]; then   # one online warm-up resolves the pinned plugin and JUnit
+tools/l2_gradle_cache.sh verify; CACHE_RC=$?   # checksum manifest of the downloaded libraries and the finished transforms; 3 = repaired, warm again
+if [ ! -d "$W/.survey-out/gradle/home/caches" ] || [ "$CACHE_RC" = 3 ]; then   # one online warm-up resolves the pinned plugin and JUnit
   tools/run_practice.sh "$IMG" kotlin "$FIRST" reference online
+  tools/l2_gradle_cache.sh manifest
 fi
