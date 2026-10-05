@@ -11,6 +11,27 @@ Names are Python's (`validate`, `extract_document`, `merge_chunks`, `accuracy`, 
 `requestChoice`); Java has the same camel-case names as static methods of `Extraction`; Kotlin has top-level functions. Results are maps and lists, as the starters show.
 The model reply is a function `call_model(document, feedback)`.
 
+## What is already written, and what you write
+
+The starter is a working pipeline with ten gaps cut out of it. Everything that is plumbing is written and correct: the type and enum checks of
+`validate`, the loop of `extract_document` with its retry limit and feedback, the chunk merge, the counting of `accuracy` and the model list. Each
+gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap
+returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin
+names are the camel-case forms):
+
+1. `_quote_found` unlocks `e1`: a quote supports a value only when it is a non-empty string found in the document.
+2. `_currency_ok` unlocks `e6`: the currency values the schema allows.
+3. `_detail_missing` unlocks `e6`: `other` needs a detail.
+4. `_retryable` unlocks `e2`, `e3` and `e4`: which errors a second look can fix.
+5. `_status` unlocks `m1`, `e3` and `e5`: `valid`, `needs_review` or `failed`.
+6. `_is_unset` unlocks `e7`: a merged field with no real value yet.
+7. `_is_conflict` unlocks `e7`: two chunks that disagree, recorded once.
+8. `_report` unlocks `e8`: accuracy over every document and over the validated ones.
+9. `_forced_choice` unlocks `e9`: the tool choice for a model that accepts a forced one.
+10. `_check_semantics` unlocks `e5`: the sum of the line items and the stated total.
+
+About fifteen lines in all. The sections below describe the whole pipeline, so you can see how your functions are used.
+
 ## What to write
 
 A record has the keys `vendor` (a string or `null`), `currency` (`USD`, `EUR`, `GBP`, `other` or `unclear`), `currency_detail` (a string, required when the currency is

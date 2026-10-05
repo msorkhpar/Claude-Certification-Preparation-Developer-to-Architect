@@ -38,6 +38,36 @@ private fun exampleOk(example: Any?, properties: Map<String, Any?>, required: Li
     return given.all { (key, value) -> key in properties && valid(value, obj(properties[key])) }
 }
 
+private fun nameRules(name: String): Set<String> {
+    val found = sortedSetOf<String>()
+    if (!NAME.matches(name)) found.add("bad-name")
+    if (name.lowercase() in VAGUE) found.add("vague-name")
+    return found
+}
+
+private fun descriptionRules(description: String): Set<String> {
+    val found = sortedSetOf<String>()
+    val low = description.lowercase()
+    if (Regex("[.!?](?:\\s|$)").findAll(description).count() < 3) found.add("short-description")
+    if (listOf("do not use", "not for", "instead of").none { low.contains(it) }) found.add("no-boundary")
+    return found
+}
+
+private fun parameterRules(properties: Map<String, Any?>, required: List<*>): Set<String> {
+    val found = sortedSetOf<String>()
+    val specs = properties.values.map { obj(it) }
+    if (specs.any { str(it["description"]).isBlank() }) found.add("param-undescribed")
+    if (required.any { str(it) !in properties }) found.add("required-unknown")
+    return found
+}
+
+private fun listAndHintRules(name: String, properties: Map<String, Any?>, hints: Map<String, Any?>): Set<String> {
+    val found = sortedSetOf<String>()
+    if (startsWithAny(name, READ_PREFIXES) && !(properties.containsKey("limit") && properties.containsKey("cursor"))) found.add("list-unbounded")
+    if ((hints["readOnlyHint"] == true && startsWithAny(name, WRITE_PREFIXES)) || (hints["destructiveHint"] == false && startsWithAny(name, DELETE_PREFIXES))) found.add("hint-contradicts-name")
+    return found
+}
+
 fun lintTool(tool: Map<String, Any?>): List<String>? {
     val found = sortedSetOf<String>()
     val name = str(tool["name"])
@@ -45,25 +75,24 @@ fun lintTool(tool: Map<String, Any?>): List<String>? {
     val schema = obj(tool["input_schema"])
     val properties = obj(schema["properties"])
     val required = (schema["required"] as? List<*>) ?: emptyList<Any?>()
-    val low = description.lowercase()
     val specs = properties.values.map { obj(it) }
-    if (!NAME.matches(name)) found.add("bad-name")
-    if (name.lowercase() in VAGUE) found.add("vague-name")
-    if (Regex("[.!?](?:\\s|$)").findAll(description).count() < 3) found.add("short-description")
-    if (!low.contains("use when")) found.add("no-use-when")
-    if (listOf("do not use", "not for", "instead of").none { low.contains(it) }) found.add("no-boundary")
-    if (specs.any { str(it["description"]).isBlank() }) found.add("param-undescribed")
-    if (required.any { str(it) !in properties }) found.add("required-unknown")
+    found.addAll(nameRules(name))
+    found.addAll(descriptionRules(description))
+    if (!description.lowercase().contains("use when")) found.add("no-use-when")
+    found.addAll(parameterRules(properties, required))
     if (specs.any { str(it["type"]) == "string" && !it.containsKey("enum") && Regex("one of|either").containsMatchIn(str(it["description"]).lowercase()) }) found.add("open-set")
     if (properties.entries.any { (key, spec) -> Regex("reasoning|thinking").containsMatchIn((key + " " + str(obj(spec)["description"])).lowercase()) }) found.add("reasoning-param")
     if ((tool["input_examples"] as? List<*>)?.any { !exampleOk(it, properties, required) } == true) found.add("bad-example")
-    if (startsWithAny(name, READ_PREFIXES) && !(properties.containsKey("limit") && properties.containsKey("cursor"))) found.add("list-unbounded")
-    val hints = obj(tool["annotations"])
-    if ((hints["readOnlyHint"] == true && startsWithAny(name, WRITE_PREFIXES)) || (hints["destructiveHint"] == false && startsWithAny(name, DELETE_PREFIXES))) found.add("hint-contradicts-name")
+    found.addAll(listAndHintRules(name, properties, obj(tool["annotations"])))
     return found.toList()
 }
 
 private fun words(text: Any?): Set<String> = Regex("[a-z]{3,}").findAll(str(text).lowercase()).map { it.value }.toSet()
+
+private fun similar(wa: Set<String>, wb: Set<String>): Boolean {
+    val union = wa + wb
+    return union.isNotEmpty() && wa.count { it in wb }.toDouble() / union.size >= OVERLAP
+}
 
 fun lintToolSet(tools: List<Map<String, Any?>>, maxTools: Int = 20): List<List<String>>? {
     val found = linkedSetOf<List<String>>()
@@ -76,8 +105,7 @@ fun lintToolSet(tools: List<Map<String, Any?>>, maxTools: Int = 20): List<List<S
             val b = tools[j]
             val wa = words(a["description"])
             val wb = words(b["description"])
-            val union = wa + wb
-            if (str(a["name"]) != str(b["name"]) && union.isNotEmpty() && wa.count { it in wb }.toDouble() / union.size >= OVERLAP) {
+            if (str(a["name"]) != str(b["name"]) && similar(wa, wb)) {
                 found.add(listOf(str(a["name"]), "overlap:" + str(b["name"])))
                 found.add(listOf(str(b["name"]), "overlap:" + str(a["name"])))
             }
@@ -101,14 +129,23 @@ private fun decode(cursor: String, total: Int): Int {
     return offset
 }
 
-fun pageResults(items: List<String>, cursor: String? = null, limit: Int = 10, maxChars: Int = 2000): Map<String, Any?>? {
+private fun checkLimit(limit: Int): Int {
     if (limit < 1) throw IllegalArgumentException("limit must be a whole number of at least 1")
     val size = minOf(limit, MAX_LIMIT)
+    return size
+}
+
+private fun overCap(page: List<String>, used: Int, item: String, maxChars: Int): Boolean {
+    return page.isNotEmpty() && used + item.length > maxChars
+}
+
+fun pageResults(items: List<String>, cursor: String? = null, limit: Int = 10, maxChars: Int = 2000): Map<String, Any?>? {
+    val size = checkLimit(limit)
     val offset = if (cursor == null) 0 else decode(cursor, items.size)
     val page = mutableListOf<String>()
     var used = 0
     for (item in items.subList(offset, minOf(items.size, offset + size))) {
-        if (page.isNotEmpty() && used + item.length > maxChars) break
+        if (overCap(page, used, item, maxChars)) break
         page.add(item)
         used += item.length
     }

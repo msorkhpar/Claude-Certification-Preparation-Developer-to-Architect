@@ -46,7 +46,7 @@ def redact(text):
 
     def card(m):
         digits = re.sub(r"[ -]", "", m.group(0))
-        return "[CARD]" if 13 <= len(digits) <= 19 and _luhn(digits) else m.group(0)
+        return "[CARD]" if _is_card(digits) else m.group(0)
 
     return re.sub(r"\b(?:[0-9][ -]?){12,18}[0-9]\b", card, text, flags=re.A)
 
@@ -69,6 +69,18 @@ def _is_secret(path):
     parts = path.replace("\\", "/").split("/")
     base = parts[-1]
     return (base == ".env" or (base.startswith(".env.") and base != ".env.example") or "secrets" in parts[:-1] or base.endswith((".pem", ".key")))
+
+
+def _command_allowed(words):
+    if not words or words[0] not in ("ls", "cat", "pytest", "git"):
+        return False
+    if words[0] == "git":
+        return len(words) > 1 and words[1] in ("status", "diff", "log")
+    return True
+
+
+def _is_card(digits):
+    return 13 <= len(digits) <= 19 and _luhn(digits)
 
 
 def _result(decision, reason="ok"):
@@ -130,7 +142,7 @@ class Gate:
             return _result("deny", "dangerous command")
         if any(t in command for t in SHELL_TRICKS):
             return _result("deny", "chaining or redirection")
-        if not words or words[0] not in ("ls", "cat", "pytest", "git") or (words[0] == "git" and (len(words) < 2 or words[1] not in ("status", "diff", "log"))):
+        if not _command_allowed(words):
             return _result("deny", "command not allowed")
         if any(_is_secret(w) for w in words[1:] if not w.startswith("-")):
             return _result("deny", "secret file")
@@ -154,9 +166,12 @@ class Gate:
     def _email(self, args):
         to = str(args.get("to", ""))
         domain = to.rsplit("@", 1)[-1].lower() if "@" in to else ""
+        text = f"{args.get('subject', '')}\n{args.get('body', '')}"
+        return self._email_decision(domain, text)
+
+    def _email_decision(self, domain, text):
         if domain not in self.allowed_email_domains:
             return _result("deny", "recipient not allowed")
-        text = f"{args.get('subject', '')}\n{args.get('body', '')}"
         if redact(text) != text:
             return _result("deny", "sensitive data in the body")
         if self._tainted:

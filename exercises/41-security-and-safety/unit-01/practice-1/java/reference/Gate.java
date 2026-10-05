@@ -65,7 +65,7 @@ final class Gate {
         StringBuilder out = new StringBuilder();
         while (m.find()) {
             String digits = m.group().replaceAll("[ -]", "");
-            m.appendReplacement(out, Matcher.quoteReplacement(digits.length() >= 13 && digits.length() <= 19 && luhn(digits) ? "[CARD]" : m.group()));
+            m.appendReplacement(out, Matcher.quoteReplacement(isCard(digits) ? "[CARD]" : m.group()));
         }
         m.appendTail(out);
         return out.toString();
@@ -88,6 +88,16 @@ final class Gate {
         String base = parts.get(parts.size() - 1);
         return base.equals(".env") || (base.startsWith(".env.") && !base.equals(".env.example")) || parts.subList(0, parts.size() - 1).contains("secrets")
                 || base.endsWith(".pem") || base.endsWith(".key");
+    }
+
+    private static boolean commandAllowed(List<String> words) {
+        if (words.isEmpty() || !Set.of("ls", "cat", "pytest", "git").contains(words.get(0))) return false;
+        if (words.get(0).equals("git")) return words.size() > 1 && Set.of("status", "diff", "log").contains(words.get(1));
+        return true;
+    }
+
+    private static boolean isCard(String digits) {
+        return digits.length() >= 13 && digits.length() <= 19 && luhn(digits);
     }
 
     private static Map<String, Object> result(String decision, String reason) {
@@ -160,10 +170,7 @@ final class Gate {
             if (base.equals("sudo") || base.equals("rm")) return result("deny", "dangerous command");
         }
         for (String t : SHELL_TRICKS) if (command.contains(t)) return result("deny", "chaining or redirection");
-        if (words.isEmpty() || !Set.of("ls", "cat", "pytest", "git").contains(words.get(0))
-                || (words.get(0).equals("git") && (words.size() < 2 || !Set.of("status", "diff", "log").contains(words.get(1))))) {
-            return result("deny", "command not allowed");
-        }
+        if (!commandAllowed(words)) return result("deny", "command not allowed");
         for (String w : words.subList(1, words.size())) if (!w.startsWith("-") && isSecret(w)) return result("deny", "secret file");
         if (words.get(0).equals("pytest") && tainted) return result("ask", "untrusted content in this session");
         return allow();
@@ -186,8 +193,12 @@ final class Gate {
     private Map<String, Object> email(Map<String, Object> args) {
         String to = String.valueOf(args.getOrDefault("to", ""));
         String domain = to.contains("@") ? to.substring(to.lastIndexOf('@') + 1).toLowerCase(Locale.ROOT) : "";
-        if (!allowedEmailDomains.contains(domain)) return result("deny", "recipient not allowed");
         String text = args.getOrDefault("subject", "") + "\n" + args.getOrDefault("body", "");
+        return emailDecision(domain, text);
+    }
+
+    private Map<String, Object> emailDecision(String domain, String text) {
+        if (!allowedEmailDomains.contains(domain)) return result("deny", "recipient not allowed");
         if (!redact(text).equals(text)) return result("deny", "sensitive data in the body");
         if (tainted) return result("deny", "a person must send it");
         return allow();

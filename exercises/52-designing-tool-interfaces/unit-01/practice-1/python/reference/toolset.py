@@ -35,6 +35,43 @@ def _example_ok(example, properties, required):
     return all(name in properties and _valid(value, properties[name]) for name, value in example.items())
 
 
+def _name_rules(name):
+    found = set()
+    if not NAME.fullmatch(name):
+        found.add("bad-name")
+    if name.lower() in VAGUE:
+        found.add("vague-name")
+    return found
+
+
+def _description_rules(description):
+    found = set()
+    low = description.lower()
+    if len(re.findall(r"[.!?](?:\s|$)", description)) < 3:
+        found.add("short-description")
+    if not any(phrase in low for phrase in ("do not use", "not for", "instead of")):
+        found.add("no-boundary")
+    return found
+
+
+def _parameter_rules(properties, required):
+    found = set()
+    if any(not str((spec or {}).get("description") or "").strip() for spec in properties.values()):
+        found.add("param-undescribed")
+    if any(item not in properties for item in required):
+        found.add("required-unknown")
+    return found
+
+
+def _list_and_hint_rules(name, properties, hints):
+    found = set()
+    if name.startswith(READ_PREFIXES) and not ("limit" in properties and "cursor" in properties):
+        found.add("list-unbounded")
+    if (hints.get("readOnlyHint") is True and name.startswith(WRITE_PREFIXES)) or (hints.get("destructiveHint") is False and name.startswith(DELETE_PREFIXES)):
+        found.add("hint-contradicts-name")
+    return found
+
+
 def lint_tool(tool):
     """The rules one tool breaks, sorted and without repeats."""
     found = set()
@@ -43,37 +80,27 @@ def lint_tool(tool):
     schema = tool.get("input_schema") or {}
     properties = schema.get("properties") or {}
     required = schema.get("required") or []
-    low = description.lower()
-    if not NAME.fullmatch(name):
-        found.add("bad-name")
-    if name.lower() in VAGUE:
-        found.add("vague-name")
-    if len(re.findall(r"[.!?](?:\s|$)", description)) < 3:
-        found.add("short-description")
-    if "use when" not in low:
+    found |= _name_rules(name)
+    found |= _description_rules(description)
+    if "use when" not in description.lower():
         found.add("no-use-when")
-    if not any(phrase in low for phrase in ("do not use", "not for", "instead of")):
-        found.add("no-boundary")
-    if any(not str((spec or {}).get("description") or "").strip() for spec in properties.values()):
-        found.add("param-undescribed")
-    if any(item not in properties for item in required):
-        found.add("required-unknown")
+    found |= _parameter_rules(properties, required)
     if any((spec or {}).get("type") == "string" and "enum" not in spec and re.search(r"one of|either", str(spec.get("description") or "").lower()) for spec in properties.values()):
         found.add("open-set")
     if any(re.search(r"reasoning|thinking", key.lower() + " " + str((spec or {}).get("description") or "").lower()) for key, spec in properties.items()):
         found.add("reasoning-param")
     if any(not _example_ok(example, properties, required) for example in tool.get("input_examples") or []):
         found.add("bad-example")
-    if name.startswith(READ_PREFIXES) and not ("limit" in properties and "cursor" in properties):
-        found.add("list-unbounded")
-    hints = tool.get("annotations") or {}
-    if (hints.get("readOnlyHint") is True and name.startswith(WRITE_PREFIXES)) or (hints.get("destructiveHint") is False and name.startswith(DELETE_PREFIXES)):
-        found.add("hint-contradicts-name")
+    found |= _list_and_hint_rules(name, properties, tool.get("annotations") or {})
     return sorted(found)
 
 
 def _words(text):
     return set(re.findall(r"[a-z]{3,}", str(text).lower()))
+
+
+def _similar(wa, wb):
+    return bool(wa | wb) and len(wa & wb) / len(wa | wb) >= OVERLAP
 
 
 def lint_tool_set(tools, max_tools=20):
@@ -84,7 +111,7 @@ def lint_tool_set(tools, max_tools=20):
     for i, a in enumerate(tools):
         for b in tools[i + 1:]:
             wa, wb = _words(a.get("description")), _words(b.get("description"))
-            if a.get("name") != b.get("name") and wa | wb and len(wa & wb) / len(wa | wb) >= OVERLAP:
+            if a.get("name") != b.get("name") and _similar(wa, wb):
                 found |= {(a.get("name"), f"overlap:{b.get('name')}"), (b.get("name"), f"overlap:{a.get('name')}")}
     if len(tools) > max_tools:
         found.add(("*", "too-many-tools"))
@@ -106,15 +133,24 @@ def _decode(cursor, total):
     return offset
 
 
-def page_results(items, cursor=None, limit=10, max_chars=2000):
-    """One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on."""
+def _check_limit(limit):
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
         raise ValueError("limit must be a whole number of at least 1")
     limit = min(limit, MAX_LIMIT)
+    return limit
+
+
+def _over_cap(page, used, item, max_chars):
+    return bool(page) and used + len(item) > max_chars
+
+
+def page_results(items, cursor=None, limit=10, max_chars=2000):
+    """One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on."""
+    limit = _check_limit(limit)
     offset = 0 if cursor is None else _decode(cursor, len(items))
     page, used = [], 0
     for item in items[offset:offset + limit]:
-        if page and used + len(item) > max_chars:
+        if _over_cap(page, used, item, max_chars):
             break
         page.append(item)
         used += len(item)
