@@ -144,10 +144,10 @@ This quiz covers both pages of the module.
 
 1. A new engineer asks which stage of making a Claude model is behind its skill at carrying on any text, and which
    is behind its polite replies to questions. Which pairing is right?
-   - **a**: Pretraining gave next-word prediction; later tuning and human rankings gave the helpful manner
+   - **a**: Pretraining gave next-word prediction; human-ranked tuning gave helpfulness
    - **b**: Feedback training gave next-word prediction; pretraining gave the helpful manner
-   - **c**: Tuning on curated examples gave both, and pretraining only supplied the vocabulary
-   - **d**: Pretraining gave both, since a larger corpus makes a raw model follow instructions
+   - **c**: Tuning on curated examples gave both; pretraining only supplied the vocabulary
+   - **d**: Pretraining gave both; a larger corpus is enough to make a raw model obey
 
 2. A localisation lead budgets translation runs by word count, then finds that one paragraph needs noticeably more tokens in one language than in another. Which explanation fits best?
    - **a**: That language was added by later fine-tuning, which re-cut its text into extra pieces
@@ -157,9 +157,9 @@ This quiz covers both pages of the module.
 
 3. A reviewer waves through a number in a report because the assistant is described as built to tell the
    truth. Which reply is the soundest?
-   - **a**: Training on written principles removed unsupported claims, so a skim of the figure is enough
-   - **b**: That is a training goal, not a guarantee, so the figure needs checking
-   - **c**: The model reports high confidence, so asking it to re-check is the control
+   - **a**: Written principles removed unsupported claims, so a skim of the figure is enough
+   - **b**: Training aims at honesty without promising it, so the figure still needs checking
+   - **c**: The model states high confidence, so asking it to re-check is the control
    - **d**: A prompt can demand truthfulness, so add that line and skip the check
 
 4. A team is automating four chores. Which one should be done by a deterministic program instead of the model
