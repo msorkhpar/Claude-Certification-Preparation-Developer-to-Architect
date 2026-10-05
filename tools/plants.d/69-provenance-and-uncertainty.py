@@ -1,0 +1,53 @@
+# Planted wrong solutions of module 69-provenance-and-uncertainty: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
+    "python": ("ledger.py", {
+        "wrong-first-wins": [('        out.append({"claim": claim, "status": status, "values": values})', '        out.append({"claim": claim, "status": status, "values": values[:1]})')],
+        "wrong-ignores-dates": [('        elif any(a["value"] != b["value"] and a["date"] == b["date"] for a in group for b in group):', "        elif True:")],
+        "wrong-sources-collapsed": [('            if pair not in entry["sources"]:', '            if not entry["sources"]:')],
+        "wrong-date-optional": [('return [f for f in REQUIRED if not str(finding.get(f, "")).strip()]', 'return [f for f in REQUIRED if f != "date" and not str(finding.get(f, "")).strip()]')],
+        "wrong-accepts-incomplete": [("    for i, f in enumerate(findings):\n        missing = check_finding(f)\n        if missing:\n            raise ValueError(f\"finding {i} is missing {', '.join(missing)}\")\n", "")],
+        "wrong-gaps-hidden": [('    note["gaps"] = [{"claim": c, "reason": unavailable.get(c, "no source found")} for c in planned if c not in have]', '    note["gaps"] = []')],
+        "wrong-single-source-supported": [('elif len({s["source"] for s in e["values"][0]["sources"]}) >= 2:', 'elif len({s["source"] for s in e["values"][0]["sources"]}) >= 1:')],
+        "wrong-unknown-kind-accepted": [('    if kind not in KINDS:\n        raise ValueError(f"unknown content type {kind}")\n', "")],
+        "wrong-no-table": [('    if kind == "financial":', "    if False:")],
+        "wrong-conflict-unmarked": [('    if entry["status"] == "conflict":\n        text += " The sources disagree."\n    elif', '    if False:\n        text += " The sources disagree."\n    elif')],
+    }),
+    "typescript": ("ledger.ts", {
+        "wrong-first-wins": [("    return { claim, status, values };", "    return { claim, status, values: values.slice(0, 1) };")],
+        "wrong-ignores-dates": [('      if (same) status = "conflict";', '      if (true) status = "conflict";')],
+        "wrong-sources-collapsed": [("if (!entry.sources.some((s) => s.source === f.source && s.date === f.date)) entry.sources.push", "if (entry.sources.length === 0) entry.sources.push")],
+        "wrong-date-optional": [('return REQUIRED.filter((f) => String(finding[f] ?? "").trim() === "");', 'return REQUIRED.filter((f) => f !== "date" && String(finding[f] ?? "").trim() === "");')],
+        "wrong-accepts-incomplete": [("  findings.forEach((f, i) => {\n    const missing = checkFinding(f);\n    if (missing.length > 0) throw new Error(`finding ${i} is missing ${missing.join(\", \")}`);\n  });\n", "")],
+        "wrong-gaps-hidden": [('  note.gaps = planned.filter((c) => !have.has(c)).map((c) => ({ claim: c, reason: unavailable[c] ?? "no source found" }));', "  note.gaps = [];")],
+        "wrong-single-source-supported": [("else if (new Set(e.values[0].sources.map((s: any) => s.source)).size >= 2)", "else if (new Set(e.values[0].sources.map((s: any) => s.source)).size >= 1)")],
+        "wrong-unknown-kind-accepted": [("  if (!KINDS.includes(kind)) throw new Error(`unknown content type ${kind}`);\n", "")],
+        "wrong-no-table": [('  if (kind === "financial") return', '  if (false) return')],
+        "wrong-conflict-unmarked": [('  if (entry.status === "conflict") text += " The sources disagree.";', '  if (false) text += " The sources disagree.";')],
+    }),
+    "java": ("Ledger.java", {
+        "wrong-first-wins": [("            out.add(new Entry(claim, status, values));", "            out.add(new Entry(claim, status, values.subList(0, 1)));")],
+        "wrong-ignores-dates": [("} else if (group.stream().anyMatch(a -> group.stream().anyMatch(b -> !a.value().equals(b.value()) && a.date().equals(b.date())))) {", "} else if (true) {")],
+        "wrong-sources-collapsed": [("if (!sources.get(at).contains(pair)) sources.get(at).add(pair);", "if (sources.get(at).isEmpty()) sources.get(at).add(pair);")],
+        "wrong-date-optional": [("for (String name : REQUIRED) if (field(finding, name).isBlank()) missing.add(name);", 'for (String name : REQUIRED) if (!name.equals("date") && field(finding, name).isBlank()) missing.add(name);')],
+        "wrong-accepts-incomplete": [('        for (int i = 0; i < findings.size(); i++) {\n            List<String> missing = checkFinding(findings.get(i));\n            if (!missing.isEmpty()) throw new IllegalArgumentException("finding " + i + " is missing " + String.join(", ", missing));\n        }\n', "")],
+        "wrong-gaps-hidden": [('        for (String c : planned) if (!have.contains(c)) gaps.add(new Gap(c, unavailable.getOrDefault(c, "no source found")));\n', "")],
+        "wrong-single-source-supported": [(".distinct().count() >= 2) well.add", ".distinct().count() >= 1) well.add")],
+        "wrong-unknown-kind-accepted": [('        if (!KINDS.contains(kind)) throw new IllegalArgumentException("unknown content type " + kind);\n', "")],
+        "wrong-no-table": [('        if (kind.equals("financial")) {', "        if (false) {")],
+        "wrong-conflict-unmarked": [('        if (entry.status().equals("conflict")) text += " The sources disagree.";', '        if (false) text += " The sources disagree.";')],
+    }),
+    "kotlin": ("Ledger.kt", {
+        "wrong-first-wins": [("val values = group.map { it.value!! }.distinct().map { value ->", "val values = group.map { it.value!! }.distinct().take(1).map { value ->")],
+        "wrong-ignores-dates": [('group.any { a -> group.any { b -> a.value != b.value && a.date == b.date } } -> Entry(claim, "conflict", values)', 'true -> Entry(claim, "conflict", values)')],
+        "wrong-sources-collapsed": [(".map { Src(it.source!!, it.date!!) }.distinct()", ".map { Src(it.source!!, it.date!!) }.take(1)")],
+        "wrong-date-optional": [("REQUIRED.filter { field(finding, it).isBlank() }", 'REQUIRED.filter { it != "date" && field(finding, it).isBlank() }')],
+        "wrong-accepts-incomplete": [('    findings.forEachIndexed { i, f ->\n        val missing = checkFinding(f)\n        require(missing.isEmpty()) { "finding $i is missing ${missing.joinToString(", ")}" }\n    }\n', "")],
+        "wrong-gaps-hidden": [('planned.filter { it !in have }.map { Gap(it, unavailable[it] ?: "no source found") },', "emptyList(),")],
+        "wrong-single-source-supported": [(".distinct().size >= 2 }", ".distinct().size >= 1 }"), (".distinct().size < 2 }", ".distinct().size < 1 }")],
+        "wrong-unknown-kind-accepted": [('    require(kind in KINDS) { "unknown content type $kind" }\n', "")],
+        "wrong-no-table": [('        "financial" -> (listOf', '        "financial-x" -> (listOf')],
+        "wrong-conflict-unmarked": [('"conflict" -> " The sources disagree."', '"conflict" -> ""')],
+    }),
+}

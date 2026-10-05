@@ -1,0 +1,45 @@
+# Planted wrong solutions of module 65-escalation-and-ambiguity: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
+    "python": ("escalation.py", {
+        "wrong-investigate-first": [('    if case.get("asked_for_person", False):', '    if case.get("asked_for_person", False) and not case.get("policy_covers", True):')],
+        "wrong-angry-escalates": [('    if case.get("asked_for_person", False):', '    if case.get("asked_for_person", False) or case.get("sentiment", "calm") == "angry":')],
+        "wrong-low-confidence-escalates": [('    if case.get("attempts_without_progress", 0) >= max_attempts:', '    if case.get("attempts_without_progress", 0) >= max_attempts or case.get("confidence", 100) < 50:')],
+        "wrong-picks-first-match": [('    if case.get("matches", 1) > 1:', "    if False:")],
+        "wrong-policy-gap-resolved": [('    if not case.get("policy_covers", True):', "    if False:")],
+        "wrong-no-acknowledgement": [('case.get("sentiment", "calm") != "calm")', "False)")],
+        "wrong-clarify-all-fields": [('field != "id" and len({m.get(field) for m in matches}) > 1', 'field != "id"')],
+        "wrong-handoff-transcript": [(r'    return "\n".join(lines)', r'    return "\n".join(lines + [case.get("transcript", "")])')],
+    }),
+    "typescript": ("escalation.ts", {
+        "wrong-investigate-first": [("if (c.asked_for_person ?? false) return", "if ((c.asked_for_person ?? false) && !(c.policy_covers ?? true)) return")],
+        "wrong-angry-escalates": [("if (c.asked_for_person ?? false) return", 'if ((c.asked_for_person ?? false) || c.sentiment === "angry") return')],
+        "wrong-low-confidence-escalates": [("if ((c.attempts_without_progress ?? 0) >= maxAttempts) return", "if ((c.attempts_without_progress ?? 0) >= maxAttempts || (c.confidence ?? 100) < 50) return")],
+        "wrong-picks-first-match": [("if ((c.matches ?? 1) > 1) return", "if (false) return")],
+        "wrong-policy-gap-resolved": [("if (!(c.policy_covers ?? true)) return", "if (false) return")],
+        "wrong-no-acknowledgement": [('(c.sentiment ?? "calm") !== "calm")', "false)")],
+        "wrong-clarify-all-fields": [(" && new Set(matches.map((m) => m[field])).size > 1", "")],
+        "wrong-handoff-transcript": [('return lines.join("\\n");', 'return lines.concat(c.transcript ?? "").join("\\n");')],
+    }),
+    "java": ("Escalation.java", {
+        "wrong-investigate-first": [("if (c.askedForPerson()) return", "if (c.askedForPerson() && !c.policyCovers()) return")],
+        "wrong-angry-escalates": [("if (c.askedForPerson()) return", 'if (c.askedForPerson() || c.sentiment().equals("angry")) return')],
+        "wrong-low-confidence-escalates": [("if (c.attemptsWithoutProgress() >= maxAttempts) return", "if (c.attemptsWithoutProgress() >= maxAttempts || c.confidence() < 50) return")],
+        "wrong-picks-first-match": [("if (c.matches() > 1) return", "if (false) return")],
+        "wrong-policy-gap-resolved": [("if (!c.policyCovers()) return", "if (false) return")],
+        "wrong-no-acknowledgement": [('!c.sentiment().equals("calm"))', "false)")],
+        "wrong-clarify-all-fields": [("if (values.size() > 1) out.add(field);", "out.add(field);")],
+        "wrong-handoff-transcript": [('return String.join("\\n", lines);', 'return String.join("\\n", lines) + c.transcript();')],
+    }),
+    "kotlin": ("Escalation.kt", {
+        "wrong-investigate-first": [("c.askedForPerson -> ", "c.askedForPerson && !c.policyCovers -> ")],
+        "wrong-angry-escalates": [("c.askedForPerson -> ", 'c.askedForPerson || c.sentiment == "angry" -> ')],
+        "wrong-low-confidence-escalates": [("c.attemptsWithoutProgress >= maxAttempts -> ", "c.attemptsWithoutProgress >= maxAttempts || c.confidence < 50 -> ")],
+        "wrong-picks-first-match": [("c.matches > 1 -> ", "false -> ")],
+        "wrong-policy-gap-resolved": [("!c.policyCovers -> ", "false -> ")],
+        "wrong-no-acknowledgement": [('c.sentiment != "calm")', "false)")],
+        "wrong-clarify-all-fields": [('field != "id" && matches.map { it[field] }.toSet().size > 1', 'field != "id"')],
+        "wrong-handoff-transcript": [(').joinToString("\\n")', ').joinToString("\\n") + c.transcript')],
+    }),
+}
