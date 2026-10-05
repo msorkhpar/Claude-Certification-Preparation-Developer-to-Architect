@@ -33,7 +33,7 @@ Two safeguards live here. A shared or local file cannot set `defaultMode` to `au
 
 ### Permission rules
 
-A rule names a tool and optionally a pattern, and it has one of three effects. "Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." So "An allow rule can't carve an exception out of a deny rule": a broad deny of `Bash(aws *)` blocks `aws s3 ls` even when a narrower allow names it. A call that no rule matches falls to the mode: in Manual, a read runs and anything else asks.
+A rule names a tool and optionally a pattern, and it has one of three effects. "Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." So "An allow rule can't carve an exception out of a deny rule": a broad deny of `Bash(aws *)` blocks `aws s3 ls` even when a narrower allow names it. A call that no rule matches falls to the mode: in Manual, a read runs and anything else asks. The Agent SDK page of module 35 lists the mode as its own step between the ask and allow rules; for a mode that only falls through, such as the default, the result is the same.
 
 The shapes to know:
 
