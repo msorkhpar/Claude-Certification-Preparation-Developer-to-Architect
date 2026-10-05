@@ -70,3 +70,31 @@ Fix:
 - Level 1 mock 1 item 31: it asks "Which two statements" but three options are noun phrases; make
   every option a statement.
 Keep each item's key, its domain, the count per domain and the "Select two" items' form unchanged.
+
+### cloud-r2-l1, -l2, -l3, -l4 (second pass, one level each)
+
+Start by reading the `open` list of the first-pass hand-backs for your level
+(`docs/process/rounds/cloud-readthrough-l<N>.handback.json`) and, for the mock items, of
+`cloud-mock-polish.handback.json`. Those lists are your task list.
+
+Scope: every `course/<module>/*.md` of your level **including** that level's mock exam and pool pages
+(Level 1: module 11; Level 2: module 44; Level 3: module 78; Level 4: module 94), and their
+`quiz.json` files.
+
+1. **Product claims.** For each claim the first pass left unverified, check it against the official
+   documentation (docs.claude.com, code.claude.com, support.claude.com, anthropic.com, and the
+   official SDK repositories). Fix the sentence if the documentation says otherwise; if the
+   documentation is silent, soften the sentence to what it does say. Do not name or link the
+   documentation page in the course. List each claim in `fixed` or `open` with the URL you checked
+   (the URL goes only in the hand-back, never in a course file).
+2. **Sentences quoted by mock items.** When you change a lesson sentence that a mock item or pool item
+   quotes, update that item's quote and rule-out in the same commit. If the quoting item belongs to
+   another level, do not change the sentence; list it under `open`.
+3. **Weak quiz items.** Rework the items the first pass listed as weak, loose rule-outs or key-longest:
+   new options where needed, every wrong option ruled out by a passage on the page (add a short passage
+   to the page when the page lacks one, inside the 10% length limit).
+4. **Small items** from the lists: consistent spelling within a level, a missing scenario label, a
+   module named without its number, gendered pronouns for unnamed people (use they/them).
+Keep keys, domains, counts per domain and the "Select two" form of mock items unchanged.
+Out of scope: `exercises/`, `examples/` and `tools/` (list any practice or example mismatch under
+`open`).
