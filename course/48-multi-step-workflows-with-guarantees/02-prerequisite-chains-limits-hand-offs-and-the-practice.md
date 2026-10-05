@@ -91,7 +91,7 @@ These are the wrong answers that the exam's options for this task statement offe
 3. A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?
    - **a**: The lock should have waited for ten failures instead of three
    - **b**: The route to a person depended on the same safeguard that had tripped
-   - **c**: The turn limit should have been set a lot lower, so that the loop ended sooner
+   - **c**: The turn limit should have been set a lot lower
    - **d**: The model should have been asked to hand the case over on its own
 
 4. A refund over the limit is escalated with the full chat transcript attached, and reviewers spend minutes finding what was verified and what was blocked. Which change helps most?
@@ -103,7 +103,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because the lock is not the fault: "a successful check resets the count, so ordinary typing mistakes do not lock anyone out". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because the model has no route to a person while escalation sits behind the prerequisite: "if every tool is behind the prerequisite, a blocked agent can only loop."
+3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because the number of failures is not what looped the chat, and a lock is needed at all: without it, "a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries". The loop came from the dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because asking does not open a route: handing over is a tool call, and it only works when "one tool outside the gate, `escalate`, which is always allowed" exists.
 4. **d**. The gate holds the facts, and a record answers the reviewer's questions in a fixed place. *b* is ruled out because "A summary written by the model can leave out what went wrong." *c* is ruled out because a record carries only what is needed: "identifiers and amounts, not the whole order contents". *a* is ruled out because the model is again choosing what the reviewer sees: "The gate's state is the source for what was verified, looked up and refunded; the model's account of them is not."
 
 </details>
@@ -112,21 +112,21 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. What should the gate's state say next?
-   - **a**: Customers A and B are both verified, because the new check adds evidence
-   - **b**: Customer A is still verified, since an earlier check succeeded
-   - **c**: No one is cleared, so every protected step is refused again
+1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. This desk's rule is that a failed check wipes whatever an earlier success had set. What should the gate's state say next?
+   - **a**: Customers A and B are both verified at the same time
+   - **b**: Customer A is still verified from the earlier check
+   - **c**: No one is cleared and every protected step is refused again
    - **d**: Customer A stays verified until the model confirms which one is meant
 
 2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes "damaged" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?
    - **a**: Keep extending the keyword list until the valid claims finally pass through it
    - **b**: Let the model weigh the evidence, and keep steps, amounts and limits as rules
-   - **c**: Move the refund limit into the prompt as well, so that the gate has fewer rules
-   - **d**: Drop the ownership check altogether, so that more claims reach the model
+   - **c**: Move the refund limit and the order of steps into the prompt as well
+   - **d**: Drop the ownership check altogether and send more claims onward
 
 3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?
    - **a**: A judge model that grades every single conversation for the order of its steps in it
-   - **b**: A larger live sample, since zero in five hundred proves the rate is zero
+   - **b**: A larger live sample of several thousand conversations
    - **c**: The same live run with the verification rule written in capitals
    - **d**: Direct checks that make the forbidden call and assert it never hits the backend
 

@@ -56,7 +56,7 @@ The practice takes the wait as a function that you call (`sleep(ms)`), so the te
 
 ### Recover locally, propagate what is left
 
-The guide's second skill is about where recovery happens. A tool, or a subagent, that meets a transient failure retries it itself; the coordinator does not need to hear about a busy service that recovered. What it does need to hear about is what could not be recovered, in a form it can use: the category, what was attempted, and whatever partial results exist. The result of the practice's `run_tool` does that on failure: category, retry flag, message, number of attempts and the arguments. Module 46 showed the coordinator's side (a failing subagent must not stop the others), and the later module on error propagation deepens the whole path; this module's contribution is that the reply the tool builds is already what the coordinator needs. The two opposite mistakes in the guide's sample are the generic status that hides the context and the empty reply marked as a success that hides the failure.
+The guide's second skill is about where recovery happens. A tool, or a subagent, that meets a transient failure retries it itself; the coordinator does not need to hear about a busy service that recovered. What it does need to hear about is what could not be recovered, in a form it can use: the category, what was attempted, and whatever partial results exist. The result of the practice's `run_tool` does that on failure: category, retry flag, message, number of attempts and the arguments. Module 46 showed the coordinator's side (a failing subagent must not stop the others), and module 66 (errors across agents) deepens the whole path; this module's contribution is that the reply the tool builds is already what the coordinator needs. The two opposite mistakes in the guide's sample are the generic status that hides the context and the empty reply marked as a success that hides the failure.
 
 A validation failure follows the same principle on a smaller scale. When a call is invalid, the documentation notes that Claude "will retry 2-3 times with corrections before apologizing to the user", and it advises that "your best bet during development is to try the request again with more-detailed `description` values". A message that names the field and gives an example value ("amount must be a positive whole number, for example 40") turns those retries into one correction.
 
@@ -79,16 +79,16 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?
-   - **a**: Issuing a refund that carries no idempotency key at all
+   - **a**: Issuing a refund that has no idempotency key
    - **b**: Emailing the customer a confirmation of the refund
-   - **c**: Creating a ticket without any key attached to it
+   - **c**: Creating a support ticket for the case
    - **d**: Looking up the order record by its order number
 
 2. A refund call times out, and the tool reports that its outcome is unknown. What should the agent do next?
    - **a**: Read the records kept for the order, then decide whether any work remains
-   - **b**: Send the payment again under a fresh key straight away so that it surely goes through
+   - **b**: Send the payment again under a fresh key straight away
    - **c**: Tell the customer that the attempt failed and invite them to begin a new request
-   - **d**: Mark the case as resolved, because the service usually processes whatever it receives
+   - **d**: Mark the case as resolved and assume the service processed it
 
 <details>
 <summary>Answer key</summary>
@@ -109,23 +109,23 @@ This quiz covers both pages of the module.
    - **d**: A failure marked as a validation problem, asking for a smaller number to be tried
 
 2. Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. The web search subagent retries a timeout twice and the service stays down. What should it hand the coordinator?
-   - **a**: A short note that the lookup service was unavailable, sent once every retry is spent
-   - **b**: An empty set of results marked as a success, so that the run is never interrupted
-   - **c**: The kind of failure, the query that ran, any partial findings and other routes to try
-   - **d**: The timeout itself, passed up unhandled so that the whole research workflow ends
+   - **a**: A single line stating that the lookup service was unavailable, and no more
+   - **b**: An empty set of results marked as a success, with no mention of the timeout
+   - **c**: The failure kind, the query run, partial findings and alternative routes
+   - **d**: The unhandled timeout, which stops the coordinator and every other subagent
 
 3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice, and customers are being refunded twice after timeouts. Which change to the wrapper is best?
-   - **a**: Retry nothing at all, so that every failure goes to a person for review
-   - **b**: Retry five times instead of twice, so that fewer timeouts reach the customer
-   - **c**: Retry after a longer fixed pause, so that a late answer arrives before the next call
-   - **d**: Repeat only calls known to be harmless, so that no payment is ever sent again
+   - **a**: Retry nothing, and route every failure to a person for review
+   - **b**: Retry five times instead of twice, with a longer wait between attempts
+   - **c**: Retry after a fixed pause long enough for a late answer to arrive
+   - **d**: Repeat only reads and writes that carry an idempotency key
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A business rule is understood and refused, and the shopper can be told why. *a* is ruled out because a rule answers the same way every time: "a validation, permission or business failure gives the same answer every time". *c* is ruled out because the refusal must come back flagged: "a business-rule violation comes back with retriable: false". *d* is ruled out because the amount was valid and a rule refused it: "The request is understood and refused by a rule".
 2. **c**. The coordinator needs the context to choose a recovery. *a* is ruled out because a generic status hides what the coordinator needs: "The two opposite mistakes in the guide's sample are the generic status that hides the context". *b* is ruled out because "an empty list marked as a success tells the agent that the search found nothing". *d* is ruled out because the other subagents can go on: "a failing subagent must not stop the others".
-3. **d**. Only a call known to be harmless is safe to repeat. *a* is ruled out because many failures do pass on their own: "most failures in a network are transient". *b* is ruled out because more attempts multiply the duplicates: "a refund sent twice refunds twice". *c* is ruled out because a pause does not tell whether the first call worked: "A timeout after sending is not a failure of the effect; it is the absence of news".
+3. **d**. "A retry is safe when repeating the call cannot do harm", which holds for a read and for a write whose key makes the service "perform the action once however often it receives the key". *a* is ruled out because recovery belongs at the tool: "Recover locally and pass up what cannot be resolved". *b* is ruled out because more attempts multiply the duplicates: "a refund sent twice refunds twice". *c* is ruled out because a pause does not tell whether the first call worked: "A timeout after sending is not a failure of the effect; it is the absence of news".
 
 </details>
 

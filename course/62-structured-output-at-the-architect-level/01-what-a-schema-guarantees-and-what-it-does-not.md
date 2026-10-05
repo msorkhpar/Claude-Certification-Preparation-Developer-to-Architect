@@ -495,16 +495,16 @@ claude-sonnet-5-5, two extraction tools: {'tool_choice': 'auto', 'check_reply': 
    - **d**: Set a default of `unknown` in the schema for that field
 
 2. A strict schema is in force, and one record lists line items that add up to 120.50 beside a total of 130.00. Which statement holds?
-   - **a**: A type check catches it, because a total is just a number in the record
-   - **b**: Strict mode catches it as soon as the tool definition sets `strict`
-   - **c**: Required fields must agree with each other, so the validator rejects it
-   - **d**: Nothing in the contract catches it: shape is promised, meaning is not
+   - **a**: The type check rejects it at validation
+   - **b**: Strict mode rejects it once the tool sets `strict`
+   - **c**: The required-field check rejects it as inconsistent
+   - **d**: No check in the contract rejects it
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value. *a* is ruled out because a length limit "would not tell a real number from an invented one". *c* is ruled out because "a required field pushes the model to fabricate a value", and the instruction adds to the pressure. *d* is ruled out because a default that looks like data is a problem because "downstream code cannot tell it from a real value".
-2. **d**. The guide says strict schemas do not prevent semantic errors, and a sum is one. *a* is ruled out because "A strict schema makes the first kind rare and does nothing about the second", and both numbers pass a type check. *b* is ruled out because strict schemas "do not prevent semantic errors", and this record already matches its shape. *c* is ruled out because "the guarantee is about shape", which covers presence of fields and not agreement between them.
+2. **d**. The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not. *a* is ruled out because "A strict schema makes the first kind rare and does nothing about the second", and both numbers pass a type check. *b* is ruled out because strict schemas "do not prevent semantic errors", and this record already matches its shape. *c* is ruled out because "the guarantee is about shape", which covers presence of fields and not agreement between them.
 
 </details>
 

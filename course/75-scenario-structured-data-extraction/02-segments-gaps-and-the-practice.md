@@ -48,8 +48,8 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 ## Quiz
 
 1. A kind of document has exactly the minimum number of documents that the policy sets, and every one of them is correct. What does the audit decide about it?
-   - **a**: Keep a person on it, since the minimum has to be passed and not only met
-   - **b**: Automate it, as the evidence needed is reached and not exceeded
+   - **a**: Keep a person on it until the minimum is passed and not only met
+   - **b**: Automate it, with the evidence needed reached and not exceeded
    - **c**: Wait for the run to meet the target before looking at this kind again
    - **d**: Automate it only after an independent instance has rated each of the records
 
@@ -82,7 +82,7 @@ This quiz covers both pages of the module.
    - **a**: Both kinds are ready, since the overall figure of the whole set is above the target
    - **b**: Neither kind is ready, since the weaker kind drags the figure of the stronger one down
    - **c**: The smaller kind is ready and the larger is not, since fewer forms mean fewer errors
-   - **d**: The larger kind qualifies, while the smaller lacks both sample size and accuracy
+   - **d**: The larger kind is ready and the smaller is not, since only the larger meets both conditions
 
 2. Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. A colleague asks why the audit counts an unchecked total only in documents accepted as valid. What is the answer?
    - **a**: A reviewed case was seen by someone, and a failed one never went out
@@ -92,7 +92,7 @@ This quiz covers both pages of the module.
 
 3. Scenario S6, structured data extraction, in which a pipeline validates every record and sends the doubtful ones to a person. The example's by-kind line reads typed 2/2, scanned 1/2 and handwritten 0/2, under a policy of at least two documents and a target of 100 percent. Why is only the typed kind listed for automation?
    - **a**: It is the only kind that has a total printed in every one of its documents
-   - **b**: It meets the minimum and the goal, while the others fall short on accuracy
+   - **b**: It has a large enough sample and a high enough accuracy
    - **c**: It was the first kind to appear in the run, and the list stops after the first
    - **d**: It is the kind with the most documents behind it in the whole run
 

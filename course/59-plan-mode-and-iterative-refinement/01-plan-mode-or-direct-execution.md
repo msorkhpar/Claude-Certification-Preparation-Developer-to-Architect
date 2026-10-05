@@ -403,14 +403,14 @@ messages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]
 ## Quiz
 
 1. A developer must replace a logging library that appears in forty-five source files, and two target designs would both work. How should the session begin?
-   - **a**: Straight to editing, so that the first files show which design works
-   - **b**: Researching in plan mode, then settling the approach before any edit
+   - **a**: Straight to editing, starting with a few of the files
+   - **b**: Plan mode first, with the approach settled before any edit
    - **c**: Straight to editing, then a plan once ten files are done
-   - **d**: In plan mode only if the library touches a security-sensitive area
+   - **d**: Plan mode only if the library is security-sensitive
 
 2. A stack trace points at one function that divides by zero when a list is empty. How should the fix be handled?
-   - **a**: In plan mode, because every bug fix needs an approved plan
-   - **b**: In plan mode, because dividing is a risky operation
+   - **a**: In plan mode, with a plan approved before any bug fix
+   - **b**: In plan mode, with the division reviewed as a risky operation
    - **c**: After an interview about the feature that owns the function
    - **d**: Directly, then confirm with a test of that edge case
 

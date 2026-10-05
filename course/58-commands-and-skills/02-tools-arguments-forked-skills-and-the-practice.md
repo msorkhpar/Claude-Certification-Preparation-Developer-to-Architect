@@ -800,7 +800,7 @@ This quiz covers both pages of the module.
    - **a**: `disable-model-invocation: true`
    - **b**: `allowed-tools: Bash(git log *) Bash(git show *)`
    - **c**: `user-invocable: false`
-   - **d**: `argument-hint: [system-name]` with `context: fork`
+   - **d**: `context: fork`
 
 2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. The team's review skill must be unable to change files for the turn that runs it. Which header line does that?
    - **a**: `allowed-tools: Read Grep Glob`
@@ -817,7 +817,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. It hides the skill from the person and leaves it available to Claude, which suits background knowledge. *a* is ruled out because it does the opposite, so that only the person starts it and "the full skill loads only when you invoke it". *b* is ruled out because a pre-approval for git commands says nothing about who may start the skill, since the field "Pre-approves the listed tools for the turn that invokes the skill". *d* is ruled out because `argument-hint` "only shows the expected shape in autocomplete", and a fork would give a background note no task.
+1. **c**. It hides the skill from the person and leaves it available to Claude, which suits background knowledge. *a* is ruled out because it does the opposite, so that only the person starts it and "the full skill loads only when you invoke it". *b* is ruled out because a pre-approval for git commands says nothing about who may start the skill, since the field "Pre-approves the listed tools for the turn that invokes the skill". *d* is ruled out because "The subagent doesn't see your conversation history", so a fork would run a background note as a task with nothing to do.
 2. **b**. A bare name in the removal field takes the tool out of the pool while the skill is active. *a* is ruled out because the pre-approval field "does not restrict which tools are available". *c* is ruled out because `argument-hint` "only shows the expected shape in autocomplete". *d* is ruled out because "only a bare name removes a tool", so the scoped entry leaves editing in place.
 3. **d**. The placeholder received the input, so it is substituted and nothing is added. *a* is ruled out because the placeholder takes "All arguments, as typed" and is replaced in the text. *b* is ruled out because a blank arises only for a named placeholder without an argument, since an indexed one "stays in the content unchanged", and here the input is given. *c* is ruled out because the extra line appears only when "no placeholder receives them", and this one did.
 

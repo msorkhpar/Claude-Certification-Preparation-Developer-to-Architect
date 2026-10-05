@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "A multi-user app keeps one conversation per customer. After a restart it must return each customer to the right earlier conversation, not just the latest one. What does the code store for each customer?",
       "options": {
-        "a": "`continue` enabled for the customer's directory",
-        "b": "A display name passed to `resume` in the SDK",
+        "a": "A `continue` flag, with one working directory for each customer",
+        "b": "A display name for each customer, passed to `resume` in the SDK",
         "c": "The session id from the last result message",
-        "d": "A fork of the first session per customer"
+        "d": "A fork of the first session, created for each customer"
       },
       "key": "c",
       "explanation": {
         "c": "Resume needs a specific id, and the result carries it on every result.",
         "b": "Ruled out because \"Resume takes a specific session ID\", not a display name; the guide's `--resume <session-name>` is a command-line form, and the SDK guide passes an id.",
-        "a": "Ruled out because continue \"Works well when your app runs one conversation at a time\", and this app runs one per customer.",
+        "a": "Ruled out because \"**Continue** finds the most recent session in the current directory\", so a customer would get the latest conversation only and never an earlier one.",
         "d": "Ruled out because \"Fork is different: it creates a new session that starts with a copy of the original's history\", which is a second conversation and not a return to the first."
       }
     },
@@ -83,10 +83,10 @@
       "scope": "module",
       "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. An engineer resumes a very large session on a Pro plan in Claude Code after a two-hour break. What should they expect from the first request?",
       "options": {
-        "a": "A replay of the tools the session called, to refresh their results",
-        "b": "A warm cache, because a resumed session keeps its earlier requests",
-        "c": "A cache miss, so all of the history is read again one time",
-        "d": "An automatic fork, so that the earlier thread is left unchanged"
+        "a": "A re-run of the session's tool calls, refreshing their results",
+        "b": "A warm cache that still holds the earlier requests",
+        "c": "A cache miss, with the full history processed once more",
+        "d": "A fork of the session, made automatically on resume"
       },
       "key": "c",
       "explanation": {
@@ -121,10 +121,10 @@
       "scope": "module",
       "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?",
       "options": {
-        "a": "Fork the session, so that the stale results stay in the original",
-        "b": "Start a new session that carries the earlier transcript as context",
-        "c": "Continue the most recent session in the directory without a note",
-        "d": "Resume the session, with a first prompt that lists the five paths"
+        "a": "Fork the session and keep the stale results in the original",
+        "b": "Start a new session and carry the earlier transcript into it",
+        "c": "Continue the most recent session in the directory and add no note",
+        "d": "Resume the session and name the five stale paths in its first prompt"
       },
       "key": "d",
       "explanation": {

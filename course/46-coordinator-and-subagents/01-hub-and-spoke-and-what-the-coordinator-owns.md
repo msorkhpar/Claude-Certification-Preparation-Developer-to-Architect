@@ -501,8 +501,8 @@ These are the wrong answers that the exam's options for this task statement offe
 
 2. A team plans a multi-agent design for a feature whose planning, coding and verifying steps all draw on the same evolving sources, with the user steering between steps. Which choice fits best?
    - **a**: Run the three steps as parallel subagents to cut the total waiting time
-   - **b**: Give each step to its own subagent so that every context stays clean and small
-   - **c**: Stay in one conversation, since the phases lean on shared context
+   - **b**: Give each step to its own subagent
+   - **c**: Stay in one conversation throughout
    - **d**: Add a coordinator that merges what the three step-agents produce at the end
 
 <details>

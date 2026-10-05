@@ -26,10 +26,10 @@
       "scope": "page",
       "stem": "A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?",
       "options": {
-        "a": "Fix one subtask per directory in advance, then run them in order",
-        "b": "Ask the model to plan every test in advance, then run the plan to its end",
+        "a": "List the directories, give each one a test task, then run the tasks in order",
+        "b": "Write the whole test plan first, order it by file size, then run it to its end",
         "c": "Map the structure and rank by impact, then re-plan as dependencies appear",
-        "d": "Pick the largest files first, then write tests for them until time runs out"
+        "d": "Take the largest files first, write tests for them, then continue down the list"
       },
       "key": "c",
       "explanation": {
@@ -45,9 +45,9 @@
       "scope": "page",
       "stem": "In an adaptive investigation the step chooser keeps proposing \"list the test files\", which was already done, and the loop hits its step limit each time. What is the best change?",
       "options": {
-        "a": "Double the step limit so that the planner has room to move on by itself",
+        "a": "Double the step limit and let the planner move on by itself",
         "b": "Halt with a stuck status once a task repeats, and name the repeated one",
-        "c": "Remove the planner's history so that every request is judged on its own",
+        "c": "Remove the planner's history and judge every request on its own",
         "d": "Let the worker skip the repeated subtask silently and carry on with the next"
       },
       "key": "b",
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A large review runs one pass per module and then a final pass across modules. What should the final pass receive?",
       "options": {
-        "a": "The full text of every module, so that it can read the code that it compares",
-        "b": "The findings of the earlier passes together with the diff of the whole change",
-        "c": "The diff of the whole change, because the modules are in the repository already",
+        "a": "The complete text of each module, laid side by side for comparison",
+        "b": "The findings of the earlier passes, with no account of the modules",
+        "c": "The changed lines of every module, copied out of each pass",
         "d": "A name and a short summary for each, listing what it offers and what it expects"
       },
       "key": "d",
       "explanation": {
         "d": "Summaries are the interface between the passes.",
         "a": "Ruled out because the text would bring the overload back: \"the one overloaded request that the split removed\".",
-        "b": "Ruled out because the diff is the text that this pass is not given, and findings alone say nothing about what the files offer: \"what the file offers (the functions and types others use, with their parameters)\".",
-        "c": "Ruled out because the final pass needs each file's conclusions: \"The cross pass needs what each file pass concluded about what the file offers\"."
+        "b": "Ruled out because findings alone say nothing about what the files offer: \"what the file offers (the functions and types others use, with their parameters)\".",
+        "c": "Ruled out because copied text brings the problem back: \"A summary that copies the file brings the problem back.\""
       }
     },
     {
@@ -83,10 +83,10 @@
       "scope": "module",
       "stem": "A platform team runs one fixed checklist (lint, test, report) over forty unrelated systems. A colleague wants an adaptive planner for each because it is more capable. What is the best answer?",
       "options": {
-        "a": "Use it, because a planner improves on a fixed checklist of steps in every respect",
+        "a": "Use it on each system",
         "b": "Use one planner for the forty of them in a single shared session instead",
-        "c": "Use the plain sequence on each, as the steps are known and none affects another",
-        "d": "Use a pass for each plus a cross pass, because that many items need a cross pass"
+        "c": "Use the plain sequence on each",
+        "d": "Use a pass for each plus a cross pass"
       },
       "key": "c",
       "explanation": {
@@ -103,28 +103,28 @@
       "stem": "A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?",
       "options": {
         "a": "Ask it to restate the goal more carefully before each step",
-        "b": "Plan every step up front, so that no drift is possible",
+        "b": "Plan every step up front and run the plan unchanged",
         "c": "Give it the result of each action, such as a test run",
-        "d": "Switch to a fixed chain, which cannot drift from the code"
+        "d": "Switch to a fixed chain that runs the same steps every time"
       },
       "key": "c",
       "explanation": {
         "c": "The planner needs ground truth from each step, not its own earlier guesses.",
         "a": "Ruled out because the source of the drift is what it is shown: \"a plan that is made from the model's own previous guesses drifts\".",
         "b": "Ruled out because an up-front plan has no results to use: \"the plan is made before any ground truth exists\".",
-        "d": "Ruled out because an open-ended job in a fixed chain gives \"a pipeline that marches through steps that no longer make sense\", and ground truth, not a chain, cures the drift."
+        "d": "Ruled out because a chain has no planner to drift and no way to use what a step found: \"If step two finds that step three is pointless, the chain runs step three.\""
       }
     },
     {
       "id": "02-per-item-passes-adaptive-guards-and-the-practice#m3",
       "page": "02-per-item-passes-adaptive-guards-and-the-practice.md",
       "scope": "module",
-      "stem": "A source file has four thousand lines, which is too long for one pass. How should it be handled?",
+      "stem": "A source file has four thousand lines, which is too long for one pass. By the practice's own rule for long files, how should it be handled?",
       "options": {
-        "a": "Send its first part only, because the beginning of a file is the most important",
+        "a": "Send its first part only and skip the remainder",
         "b": "Summarise the file in one sentence and use the sentence in its place",
-        "c": "Send the whole file anyway, because splitting loses what connects its separate parts",
-        "d": "Inspect it in labelled parts, and let the joined summaries carry what spans them"
+        "c": "Send the whole file anyway and trust the pass to keep its parts connected",
+        "d": "Cut it into labelled parts and join their summaries into one entry"
       },
       "key": "d",
       "explanation": {

@@ -402,24 +402,24 @@ These are the answers that sound sensible and fail in an agent that builds tools
    - **a**: Approves it, since reading and fetching are both low-risk effects here
    - **b**: Refuses it, since the proposal never mentioned that effect
    - **c**: Sends it back for a better description, since the declaration was incomplete
-   - **d**: Runs it once in a container to see whether the fetch succeeds as intended
+   - **d**: Holds it for a person to approve, since a fetch is a risky effect
 
 2. A team runs generated tools in a container that has no network access, no secrets and a short lifetime. A colleague says that the code scan is therefore unnecessary. What is the best reply?
    - **a**: It is a cheap first check for the obvious, and the surroundings hold back the rest
-   - **b**: The scan is unnecessary only when the container is also given the secrets it needs to work
-   - **c**: The scan is the real protection, and the container only adds some speed to each run
-   - **d**: The scan is unnecessary, since containers make generated tools safe whatever their code does
+   - **b**: It is unnecessary only when the container is also given the secrets it needs to work
+   - **c**: It is the real protection, and the container only adds some speed to each run
+   - **d**: It is unnecessary, and the container alone makes generated tools safe whatever their code does
 
 3. In the example, a tool that was approved by the reviewer returns a result without the field that its schema promised. What happens to the result?
-   - **a**: It is passed to the agent with a warning attached to the front of the result
-   - **b**: It is filled with a default and passed on, so that the run can continue
-   - **c**: It is refused before the agent uses it, and the audit records a rejection
+   - **a**: It is passed to the agent with a warning attached to the front of it
+   - **b**: It is filled with a default and passed on to let the run continue
+   - **c**: It is refused before the agent ever sees it
    - **d**: It is rejected, and the reviewer's approval is withdrawn for every later tool in the run
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Code that does more than it declared is refused. *a* is ruled out because the difference is the finding: "the gate compares what the code does with what was declared and refuses the difference". *c* is ruled out because the finding is a refusal and not a request for a better description: "Compare what the code does with the permissions declared, and refuse the difference". *d* is ruled out because nothing proposed is run to find out: "Containment is the environment's job."
+1. **b**. Code that does more than it declared is refused. *a* is ruled out because the difference is the finding: "the gate compares what the code does with what was declared and refuses the difference". *c* is ruled out because the finding is a refusal and not a request for a better description: "Compare what the code does with the permissions declared, and refuse the difference". *d* is ruled out because the network is denied by policy and not held for a person: "The third asks for the network, which the policy denies, so it is refused whatever its code says."
 2. **a**. The scan is the cheap first check. *b* is ruled out because the container holds no secrets: "The lesson for a team that runs generated code itself is the same, and it is a list of absences: no network, no secrets, no shared state, a short life and limits on time and memory." *c* is ruled out because the scan finds only what its authors thought of: "A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it." *d* is ruled out because the scan still does useful work: "The scan is useful for what it does well: it refuses the obvious".
 3. **c**. A result is checked before the agent uses it. *a* is ruled out because a result that does not match is not passed on: "a result that does not match its schema is rejected before the agent sees it". *b* is ruled out because the check does not repair data: "Treat the result as data and check it against its schema". *d* is ruled out because the approval covers one proposal: "the approval covers the proposal that was reviewed and not a later version".
 

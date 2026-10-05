@@ -89,7 +89,7 @@ Adapted from the sample questions of the Claude Certified Architect, Foundations
 
 The answer to each is B, C and A in that order, and the reasoning, with the page that teaches it:
 
-- **Sample 1** asks where a shared definition lives, and the cue is "every developer who clones". A folder in the project is committed and reaches every clone, while a home folder is personal (module 58). The memory file holds instructions and context, not command definitions, and no settings array of commands exists.
+- **Sample 1** asks where a shared definition lives, and the cue is "every developer who clones". A folder in the project is committed and reaches every clone, while a home folder is personal (module 58). The memory file holds instructions and context, not command definitions, and the guide names the project's commands folder, not a settings array, as the shared place.
 - **Sample 2** is a pipeline with no person. The documented way to run without one is the print flag (module 60). There is no headless environment variable and no flag that turns a run into a batch, and an empty input is a workaround that does not change how the tool runs.
 - **Sample 3** is a status that claims more than the run did. The subagents worked within their assignments, so the fault is in the claim, and a status must come from coverage (modules 66 and 72). A longer summary does not repair it, an empty list hides the gap, and a longer timeout is a different question.
 

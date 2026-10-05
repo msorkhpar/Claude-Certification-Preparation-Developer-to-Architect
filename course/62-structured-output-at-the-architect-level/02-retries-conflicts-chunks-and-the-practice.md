@@ -494,10 +494,10 @@ The practice is in [`exercises/62-structured-output-at-the-architect-level`](../
    - **d**: Mark the document failed once the retry limit is reached
 
 2. A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?
-   - **a**: It leaves out the failures, so it flatters the system
-   - **b**: It is too low, because a passed document is always correct
-   - **c**: It counts each document twice, once per validation rule
-   - **d**: It is right, since only passed documents have a verdict
+   - **a**: It excludes every failure
+   - **b**: It understates accuracy for the passing set
+   - **c**: It counts each one twice, once per rule
+   - **d**: It is correct as stated
 
 <details>
 <summary>Answer key</summary>
@@ -512,16 +512,16 @@ The practice is in [`exercises/62-structured-output-at-the-architect-level`](../
 This quiz covers both pages of the module.
 
 1. Scenario S6, structured data extraction. A 300-page contract is cut into chunks, and the per-chunk results are merged. Two chunks give different vendor names. Which merge rule fits?
-   - **a**: Take the later value, since it was read with more context
-   - **b**: Keep the first value, note the clash and send it to a person
-   - **c**: Take the longer name, since it carries more detail
-   - **d**: Drop the field from the merged result to avoid a wrong value
+   - **a**: Take the value from the later chunk
+   - **b**: Record both and send them for review
+   - **c**: Take the longer of the two names
+   - **d**: Drop the field from the merged result
 
 2. Scenario S6, structured data extraction. A team extracts invoice fields. Each failed extraction gets two more attempts. One failure is a currency written outside the allowed list, and another is a purchase order number that the document does not contain but downstream needs. Which handling is right?
-   - **a**: Send the first back with its error, and route the second to review untried
-   - **b**: Send both back with their errors until each field has a value
-   - **c**: Send neither back and mark both documents failed at once
-   - **d**: Route the first to review and send the second back with a stricter, firmer prompt
+   - **a**: Return the first with its error, review the second
+   - **b**: Return both with their errors until each is filled
+   - **c**: Reject both documents at once
+   - **d**: Review the first, return the second with a firmer prompt
 
 3. Scenario S6, structured data extraction. A team extracts invoice fields with a strict schema through a forced tool, and caches a long instruction block and a 200-page document. For some requests it switches `tool_choice` from `any` to `auto` and back, and costs run above plan. What explains it?
    - **a**: Each change also discards the stored tool definitions and the system prompt text

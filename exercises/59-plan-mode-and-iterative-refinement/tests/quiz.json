@@ -7,10 +7,10 @@
       "scope": "page",
       "stem": "A developer must replace a logging library that appears in forty-five source files, and two target designs would both work. How should the session begin?",
       "options": {
-        "a": "Straight to editing, so that the first files show which design works",
-        "b": "Researching in plan mode, then settling the approach before any edit",
+        "a": "Straight to editing, starting with a few of the files",
+        "b": "Plan mode first, with the approach settled before any edit",
         "c": "Straight to editing, then a plan once ten files are done",
-        "d": "In plan mode only if the library touches a security-sensitive area"
+        "d": "Plan mode only if the library is security-sensitive"
       },
       "key": "b",
       "explanation": {
@@ -26,8 +26,8 @@
       "scope": "page",
       "stem": "A stack trace points at one function that divides by zero when a list is empty. How should the fix be handled?",
       "options": {
-        "a": "In plan mode, because every bug fix needs an approved plan",
-        "b": "In plan mode, because dividing is a risky operation",
+        "a": "In plan mode, with a plan approved before any bug fix",
+        "b": "In plan mode, with the division reviewed as a risky operation",
         "c": "After an interview about the feature that owns the function",
         "d": "Directly, then confirm with a test of that edge case"
       },
@@ -83,9 +83,9 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A scheduled job starts Claude Code with `-p` and `--permission-mode plan`. What happens when Claude tries to edit a source file?",
       "options": {
-        "a": "It goes ahead, because a headless run skips permission modes",
-        "b": "It is refused, since the mode's restrictions hold without a terminal too",
-        "c": "It goes ahead, because a scheduled run counts as pre-approved",
+        "a": "It goes ahead, with permission modes skipped",
+        "b": "It is refused, with the mode still in force",
+        "c": "It goes ahead, with the scheduled run pre-approved",
         "d": "It prompts the job's owner by email for approval"
       },
       "key": "b",
@@ -102,10 +102,10 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a sort order that also breaks pagination, a misspelled label and a null date. How should the three be sent?",
       "options": {
-        "a": "All three in one message, so that the context is shared",
+        "a": "All three together in one message",
         "b": "Three separate messages, one for each problem",
         "c": "The label first, then everything else in a second message",
-        "d": "The linked pair together, the other two one after another"
+        "d": "The linked pair together, then each other one"
       },
       "key": "d",
       "explanation": {
@@ -121,14 +121,14 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug in three attempts, and each correction added more history to the session. What should the developer do?",
       "options": {
-        "a": "Send a fourth correction that repeats the earlier ones more and more forcefully",
-        "b": "Ask Claude to ignore the earlier attempts and carry on in the same thread",
-        "c": "Clear everything and restart with a prompt carrying the broken checks and the lessons",
-        "d": "Switch to plan mode in the same thread and repeat the request"
+        "a": "Send a fourth correction that repeats the earlier ones",
+        "b": "Ask Claude to ignore the earlier attempts in the same thread",
+        "c": "Clear the context and restart with a better prompt",
+        "d": "Switch to plan mode in the same thread"
       },
       "key": "c",
       "explanation": {
-        "c": "After more than two failed corrections the documented fix is to clear the context and write a better first prompt.",
+        "c": "After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons.",
         "a": "Ruled out because \"after two failed corrections the context is cluttered with failed approaches\", and repeating adds to the clutter.",
         "b": "Ruled out because an instruction does not remove history from the context, and \"a clean session with a better prompt does better\".",
         "d": "Ruled out because \"Corrections accumulate in the context\", and a mode switch in the same thread keeps them all."

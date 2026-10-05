@@ -26,14 +26,14 @@
       "scope": "page",
       "stem": "A strict schema is in force, and one record lists line items that add up to 120.50 beside a total of 130.00. Which statement holds?",
       "options": {
-        "a": "A type check catches it, because a total is just a number in the record",
-        "b": "Strict mode catches it as soon as the tool definition sets `strict`",
-        "c": "Required fields must agree with each other, so the validator rejects it",
-        "d": "Nothing in the contract catches it: shape is promised, meaning is not"
+        "a": "The type check rejects it at validation",
+        "b": "Strict mode rejects it once the tool sets `strict`",
+        "c": "The required-field check rejects it as inconsistent",
+        "d": "No check in the contract rejects it"
       },
       "key": "d",
       "explanation": {
-        "d": "The guide says strict schemas do not prevent semantic errors, and a sum is one.",
+        "d": "The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not.",
         "a": "Ruled out because \"A strict schema makes the first kind rare and does nothing about the second\", and both numbers pass a type check.",
         "b": "Ruled out because strict schemas \"do not prevent semantic errors\", and this record already matches its shape.",
         "c": "Ruled out because \"the guarantee is about shape\", which covers presence of fields and not agreement between them."
@@ -64,10 +64,10 @@
       "scope": "page",
       "stem": "A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?",
       "options": {
-        "a": "It leaves out the failures, so it flatters the system",
-        "b": "It is too low, because a passed document is always correct",
-        "c": "It counts each document twice, once per validation rule",
-        "d": "It is right, since only passed documents have a verdict"
+        "a": "It excludes every failure",
+        "b": "It understates accuracy for the passing set",
+        "c": "It counts each one twice, once per rule",
+        "d": "It is correct as stated"
       },
       "key": "a",
       "explanation": {
@@ -83,10 +83,10 @@
       "scope": "module",
       "stem": "Scenario S6, structured data extraction. A 300-page contract is cut into chunks, and the per-chunk results are merged. Two chunks give different vendor names. Which merge rule fits?",
       "options": {
-        "a": "Take the later value, since it was read with more context",
-        "b": "Keep the first value, note the clash and send it to a person",
-        "c": "Take the longer name, since it carries more detail",
-        "d": "Drop the field from the merged result to avoid a wrong value"
+        "a": "Take the value from the later chunk",
+        "b": "Record both and send them for review",
+        "c": "Take the longer of the two names",
+        "d": "Drop the field from the merged result"
       },
       "key": "b",
       "explanation": {
@@ -102,10 +102,10 @@
       "scope": "module",
       "stem": "Scenario S6, structured data extraction. A team extracts invoice fields. Each failed extraction gets two more attempts. One failure is a currency written outside the allowed list, and another is a purchase order number that the document does not contain but downstream needs. Which handling is right?",
       "options": {
-        "a": "Send the first back with its error, and route the second to review untried",
-        "b": "Send both back with their errors until each field has a value",
-        "c": "Send neither back and mark both documents failed at once",
-        "d": "Route the first to review and send the second back with a stricter, firmer prompt"
+        "a": "Return the first with its error, review the second",
+        "b": "Return both with their errors until each is filled",
+        "c": "Reject both documents at once",
+        "d": "Review the first, return the second with a firmer prompt"
       },
       "key": "a",
       "explanation": {

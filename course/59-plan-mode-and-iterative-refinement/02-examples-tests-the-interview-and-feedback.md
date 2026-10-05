@@ -423,29 +423,29 @@ This module has no practice. Its decisions are judged by the quiz, since the cho
 This quiz covers both pages of the module.
 
 1. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A scheduled job starts Claude Code with `-p` and `--permission-mode plan`. What happens when Claude tries to edit a source file?
-   - **a**: It goes ahead, because a headless run skips permission modes
-   - **b**: It is refused, since the mode's restrictions hold without a terminal too
-   - **c**: It goes ahead, because a scheduled run counts as pre-approved
+   - **a**: It goes ahead, with permission modes skipped
+   - **b**: It is refused, with the mode still in force
+   - **c**: It goes ahead, with the scheduled run pre-approved
    - **d**: It prompts the job's owner by email for approval
 
 2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a sort order that also breaks pagination, a misspelled label and a null date. How should the three be sent?
-   - **a**: All three in one message, so that the context is shared
+   - **a**: All three together in one message
    - **b**: Three separate messages, one for each problem
    - **c**: The label first, then everything else in a second message
-   - **d**: The linked pair together, the other two one after another
+   - **d**: The linked pair together, then each other one
 
 3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug in three attempts, and each correction added more history to the session. What should the developer do?
-   - **a**: Send a fourth correction that repeats the earlier ones more and more forcefully
-   - **b**: Ask Claude to ignore the earlier attempts and carry on in the same thread
-   - **c**: Clear everything and restart with a prompt carrying the broken checks and the lessons
-   - **d**: Switch to plan mode in the same thread and repeat the request
+   - **a**: Send a fourth correction that repeats the earlier ones
+   - **b**: Ask Claude to ignore the earlier attempts in the same thread
+   - **c**: Clear the context and restart with a better prompt
+   - **d**: Switch to plan mode in the same thread
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Plan mode keeps its blocks in runs that have no interactive terminal. *a* is ruled out because "Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal". *c* is ruled out because the exception is narrow: "in an interactive terminal session where bypass permissions are available the blocks are not enforced". *d* is ruled out because "Edits stay blocked until you approve the plan", and a headless run has no approval channel.
 2. **d**. Problems that interact travel together and independent ones go one at a time. *a* is ruled out because "Independent problems, such as a typo in a label and a null date, go one after another". *b* is ruled out because the sort order and pagination interact, and "fixing one in isolation can undo the other". *c* is ruled out because that groups the independent date with the interacting pair, while the example "groups issues by their interacts_with links".
-3. **c**. After more than two failed corrections the documented fix is to clear the context and write a better first prompt. *a* is ruled out because "after two failed corrections the context is cluttered with failed approaches", and repeating adds to the clutter. *b* is ruled out because an instruction does not remove history from the context, and "a clean session with a better prompt does better". *d* is ruled out because "Corrections accumulate in the context", and a mode switch in the same thread keeps them all.
+3. **c**. After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons. *a* is ruled out because "after two failed corrections the context is cluttered with failed approaches", and repeating adds to the clutter. *b* is ruled out because an instruction does not remove history from the context, and "a clean session with a better prompt does better". *d* is ruled out because "Corrections accumulate in the context", and a mode switch in the same thread keeps them all.
 
 </details>
 

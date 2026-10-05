@@ -64,27 +64,27 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. An agent keeps answering documentation questions with Grep on the checkout, although the team's documentation server has a search tool whose description reads `Searches docs`. What is the best fix?
-   - **a**: Make the documentation server load at the start so the definition is visible
-   - **b**: Say when it beats pattern matching and what comes back, main point first
-   - **c**: Remove the competing tool so that only the documentation tool remains
-   - **d**: Lengthen the description past the cut-off so that no detail is left out
+   - **a**: Make the documentation server load at the start of each session
+   - **b**: Open its text with when to prefer it over pattern matching
+   - **c**: Remove the competing tool from the agent's list of tools
+   - **d**: Lengthen the text until it covers every detail of the tool
 
 2. A support agent calls three listing tools before each database question, only to learn which tables exist. Which change cuts those calls?
-   - **a**: Attach the schemas as a resource that can be mentioned in the prompt
-   - **b**: Raise the output limit so that each listing returns more rows at once
-   - **c**: Mark the listing tools as read-only so that they can run side by side
-   - **d**: Move the database server into the user scope so that it loads everywhere
+   - **a**: Expose the schemas as a resource mentioned in the prompt
+   - **b**: Raise the output limit on the listing tools to return more rows
+   - **c**: Mark the listing tools read-only and let them run side by side
+   - **d**: Move the database server into the user scope to load everywhere
 
 3. A team gives the agent its whole orders database through one MCP tool that runs any SQL it is given, and the job is to report on open orders. What is the architectural concern?
-   - **a**: A result above the limit is lost, so the agent never sees the rows
-   - **b**: The description is cut at the limit, so the agent cannot use it
-   - **c**: Access cannot be narrowed, because one entry point covers every task
-   - **d**: Tool search hides the definition until a person asks for it
+   - **a**: An oversized result is lost, and the agent never sees any of the rows
+   - **b**: The description is cut at the limit, and the agent cannot use it
+   - **c**: Access stays all-or-nothing, with no permission rule to scope it
+   - **d**: Tool search hides the definition, and the agent cannot find it
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The description is what the model chooses by, so it must say when to prefer the tool, with the point first. *a* is ruled out because loading at the start only makes the definition visible: "makes the definition visible and does not say when to prefer it". *c* is ruled out because "Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout". *d* is ruled out because "Claude Code truncates each tool description and each server's instructions at 2,048 characters by default".
+1. **b**. The description is what the model chooses by, so it must say when to prefer the tool, with the point first and the boundary against the competing tool near the start. *a* is ruled out because loading at the start only makes the definition visible: "makes the definition visible and does not say when to prefer it". *c* is ruled out because "Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout". *d* is ruled out because "Claude Code truncates each tool description and each server's instructions at 2,048 characters by default".
 2. **a**. A catalog is wanted before work starts, and a resource can be attached to the prompt so that no discovery calls are needed. *b* is ruled out because "The limit concerns the size of one result and does nothing for the number of calls". *c* is ruled out because a hint "does not change this: it describes the tool to a client and does not tell the model what exists". *d* is ruled out because "it decides where a server loads and not what it exposes".
 3. **c**. A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope. *a* is ruled out because an oversized result is kept: "Claude Code saves it to a file and replaces it in the conversation with a message that names the file path". *b* is ruled out because truncation is handled by wording: "put critical details near the start". *d* is ruled out because a definition is found by the model and not by a person: "a definition is loaded when Claude needs it".
 
@@ -102,8 +102,8 @@ This quiz covers both pages of the module.
 
 2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A CI job runs `claude -p` on a fresh clone, and a pull request has added a server to `.mcp.json` that nobody on the team has seen. What happens when the job starts?
    - **a**: It stays pending until a person approves it in an interactive session
-   - **b**: It is skipped, because an unattended run has no trust dialog to accept
-   - **c**: It loads without asking, since the run has no person to approve it
+   - **b**: It is skipped, and the job runs without that server
+   - **c**: It loads without asking and is available in that run
    - **d**: It loads only if the repository's own settings file approves it in advance
 
 3. Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file, and sessions start with crowded context. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?

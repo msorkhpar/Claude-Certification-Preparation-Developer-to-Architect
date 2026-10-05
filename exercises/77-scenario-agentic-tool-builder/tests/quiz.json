@@ -10,14 +10,14 @@
         "a": "Approves it, since reading and fetching are both low-risk effects here",
         "b": "Refuses it, since the proposal never mentioned that effect",
         "c": "Sends it back for a better description, since the declaration was incomplete",
-        "d": "Runs it once in a container to see whether the fetch succeeds as intended"
+        "d": "Holds it for a person to approve, since a fetch is a risky effect"
       },
       "key": "b",
       "explanation": {
         "b": "Code that does more than it declared is refused.",
         "a": "Ruled out because the difference is the finding: \"the gate compares what the code does with what was declared and refuses the difference\".",
         "c": "Ruled out because the finding is a refusal and not a request for a better description: \"Compare what the code does with the permissions declared, and refuse the difference\".",
-        "d": "Ruled out because nothing proposed is run to find out: \"Containment is the environment's job.\""
+        "d": "Ruled out because the network is denied by policy and not held for a person: \"The third asks for the network, which the policy denies, so it is refused whatever its code says.\""
       }
     },
     {
@@ -27,9 +27,9 @@
       "stem": "A team runs generated tools in a container that has no network access, no secrets and a short lifetime. A colleague says that the code scan is therefore unnecessary. What is the best reply?",
       "options": {
         "a": "It is a cheap first check for the obvious, and the surroundings hold back the rest",
-        "b": "The scan is unnecessary only when the container is also given the secrets it needs to work",
-        "c": "The scan is the real protection, and the container only adds some speed to each run",
-        "d": "The scan is unnecessary, since containers make generated tools safe whatever their code does"
+        "b": "It is unnecessary only when the container is also given the secrets it needs to work",
+        "c": "It is the real protection, and the container only adds some speed to each run",
+        "d": "It is unnecessary, and the container alone makes generated tools safe whatever their code does"
       },
       "key": "a",
       "explanation": {
@@ -45,9 +45,9 @@
       "scope": "page",
       "stem": "In the example, a tool that was approved by the reviewer returns a result without the field that its schema promised. What happens to the result?",
       "options": {
-        "a": "It is passed to the agent with a warning attached to the front of the result",
-        "b": "It is filled with a default and passed on, so that the run can continue",
-        "c": "It is refused before the agent uses it, and the audit records a rejection",
+        "a": "It is passed to the agent with a warning attached to the front of it",
+        "b": "It is filled with a default and passed on to let the run continue",
+        "c": "It is refused before the agent ever sees it",
         "d": "It is rejected, and the reviewer's approval is withdrawn for every later tool in the run"
       },
       "key": "c",
@@ -64,10 +64,10 @@
       "scope": "page",
       "stem": "A proposal has a forbidden call in its code and a description of a single line. What does the gate decide, and what does the report list?",
       "options": {
-        "a": "A revision request, since the short text is the first problem the gate meets",
+        "a": "A revision request, with the short text as the first problem the gate meets",
         "b": "A refusal, with the weakness of the text still noted beside it",
-        "c": "An approval behind a gate, since the forbidden call may be removed later in the run",
-        "d": "A refusal, with the finding dropped because a refused tool is never revised"
+        "c": "An approval behind a gate, with the forbidden call to be removed later in the run",
+        "d": "A refusal, with the findings dropped from the report"
       },
       "key": "b",
       "explanation": {
@@ -86,7 +86,7 @@
         "a": "Flags it, since a limit should leave some room below it for safety",
         "b": "Flags it, since only a request below the limit counts as safe to run",
         "c": "Accepts the figure, since a request that reaches the ceiling has not passed it",
-        "d": "Accepts it, but only after a person has signed the proposal off"
+        "d": "Accepts it, since a person will sign the proposal off afterwards"
       },
       "key": "c",
       "explanation": {
@@ -104,8 +104,8 @@
       "options": {
         "a": "It goes through the gate again as a new proposal",
         "b": "It runs behind a gate if the old version had been gated as well",
-        "c": "It runs, because the approval covers every version of that tool",
-        "d": "It is refused, because a tool may be approved once and never changed"
+        "c": "It runs, with the approval covering every version of that tool",
+        "d": "It is refused, with a tool allowed to be approved once and never changed"
       },
       "key": "a",
       "explanation": {
@@ -124,14 +124,14 @@
         "a": "Refuses it, since an effect nobody mentioned cannot be approved on its behalf",
         "b": "Sends it back for a revision of the description, since the declaration is thin",
         "c": "Approves it behind a gate, since the policy already covers writes",
-        "d": "Approves it outright, since a read is declared and the write is minor"
+        "d": "Approves it outright, since the proposal declares a permission that the policy allows"
       },
       "key": "a",
       "explanation": {
         "a": "An undeclared effect is refused.",
         "c": "Ruled out because the gate approves only what was declared: \"Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page.\"",
-        "b": "Ruled out because a refusal is not a revision: \"The first group is about trust: the proposal contradicts itself or the rules.\"",
-        "d": "Ruled out because the gap is the finding: \"A proposal with a refusal is refused, whatever else is true of it.\""
+        "b": "Ruled out because an undeclared effect is one of the refusals and not a matter of the description: \"Three things refuse a proposal.\" and \"Its code shows a permission that the proposal did not declare\"",
+        "d": "Ruled out because a declared read does not cover the write the code shows: \"Its code shows a permission that the proposal did not declare\", and a refusal wins: \"A proposal with a refusal is refused, whatever else is true of it.\""
       }
     },
     {
@@ -140,16 +140,16 @@
       "scope": "module",
       "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A team proposes to run generated tools in a container and to drop the gate, because the container limits the damage. Which gap remains?",
       "options": {
-        "a": "Nothing, since a container makes every tool safe to run",
+        "a": "Nothing, because a container makes every tool safe to run",
         "b": "Nothing checks what the code does against what was declared",
-        "c": "The container's speed, which is lower than that of a direct run",
+        "c": "The container's memory limit, which the gate cannot read",
         "d": "The agent's description of the tool, which a container cannot read"
       },
       "key": "b",
       "explanation": {
         "b": "The container holds the run, and only the gate compares the code with its declaration.",
         "a": "Ruled out because a container is only one of the five jobs: \"Containment is the environment's job.\"",
-        "c": "Ruled out because speed is not the gap: \"the example is about the decisions around a run\".",
+        "c": "Ruled out because the gate reads and flags the limits: \"a timeout above the limit and a memory request above the limit\".",
         "d": "Ruled out because the gate reads the description: \"a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema\"."
       }
     },
@@ -181,7 +181,7 @@
         "a": "Flags it, since the longest name has to leave a spare character",
         "b": "Flags it, because names this long are hard for the model to choose",
         "c": "Accepts it, as it sits at the ceiling for such labels and not above it",
-        "d": "Accepts it only if the description is also at least 64 words"
+        "d": "Accepts it, since the description also has at least 64 words"
       },
       "key": "c",
       "explanation": {

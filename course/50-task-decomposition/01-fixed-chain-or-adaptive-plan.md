@@ -7,7 +7,7 @@
 
 Checked on 2026-10-03 against Anthropic's engineering article on building effective agents, the Claude Code documentation page "Best practices for Claude Code", and the exam guide for the Architect Foundations exam (version 1.0, July 2026). The example runs offline in Python and TypeScript with hand-written stand-ins for the model, so it shows how the control flow behaves and nothing about how a model would review code. This page builds on module 34 (the workflow patterns), module 46 (the coordinator) and module 48 (steps that must happen in order).
 
-> **Exam guide and current product.** *What the guide states, and so what the exam keys:* there are two ways to break a complex job down, a fixed sequential pipeline (prompt chaining) and a dynamic decomposition that generates subtasks from what each step discovers. A large review is split into a local pass for each file and a separate cross-file pass, "to avoid attention dilution". An open-ended task such as adding tests to a legacy codebase is mapped first, then the high-impact areas are found, then a prioritised plan is made that adapts as dependencies appear. *What the current documentation says (checked 2026-10-03):* the same two shapes are two of several patterns in Anthropic's article (it also names parallel sections, voting and an evaluator that gives feedback in a loop). The mechanism it gives for keeping each call small is that Claude's context fills up and "performance degrades as it fills", which is the documented counterpart of the guide's word "dilution". Claude Code has a built-in `/batch` command that splits a change across 5 to 30 subagents, each in its own worktree. The exam keys the guide's two-way framing; an option that names a third pattern is right only if it answers the scenario's constraint better.
+> **Exam guide and current product.** *What the guide states, and so what the exam keys:* there are two ways to break a complex job down, a fixed sequential pipeline (prompt chaining) and a dynamic decomposition that generates subtasks from what each step discovers. A large review is split into a local pass for each file and a separate cross-file pass, "to avoid attention dilution". An open-ended task such as adding tests to a legacy codebase is mapped first, then the high-impact areas are found, then a prioritised plan is made that adapts as dependencies appear. *What the current documentation says (checked 2026-10-03):* the same two shapes are two of several patterns in Anthropic's article (it also names parallel sections, voting and an evaluator that gives feedback in a loop). The mechanism it gives for keeping each call small is that Claude's context fills up and "performance degrades as it fills", which is the documented counterpart of the guide's word "dilution". Claude Code has a bundled `/batch` skill that splits a change into 5 to 30 independent units, each given to a background subagent in its own worktree. The exam keys the guide's two-way framing; an option that names a third pattern is right only if it answers the scenario's constraint better.
 
 ## Why it matters
 
@@ -451,10 +451,10 @@ The exam's answer options for this task statement follow a pattern. These are th
    - **d**: Keep the single request and add an instruction to treat every file with equal care
 
 2. A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?
-   - **a**: Fix one subtask per directory in advance, then run them in order
-   - **b**: Ask the model to plan every test in advance, then run the plan to its end
+   - **a**: List the directories, give each one a test task, then run the tasks in order
+   - **b**: Write the whole test plan first, order it by file size, then run it to its end
    - **c**: Map the structure and rank by impact, then re-plan as dependencies appear
-   - **d**: Pick the largest files first, then write tests for them until time runs out
+   - **d**: Take the largest files first, write tests for them, then continue down the list
 
 <details>
 <summary>Answer key</summary>

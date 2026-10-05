@@ -91,14 +91,14 @@ This quiz covers both pages of the module.
    - **c**: Fill the closed gap with a plausible summary drawn from the model's own general knowledge
    - **d**: Carry on with the other three and log the closed topic as a gap, with a way to reopen it
 
-2. A subagent stops at its maxTurns limit after doing good work. What does the parent receive, and what can it do?
-   - **a**: An error that discards the output, so that the task has to be started again
-   - **b**: Nothing at all until the user raises the limit and runs it again
-   - **c**: The output so far, flagged as partial, and the option to resume it later
-   - **d**: The output with no flag at all, which looks like a finished answer
+2. Scenario S3, multi-agent research system. A subagent stops at its maxTurns limit after doing good work. What does the parent receive?
+   - **a**: An error, with the output discarded and the task started again
+   - **b**: Nothing, until the user raises the limit and runs it again
+   - **c**: The output flagged as partial, which a later resume continues
+   - **d**: The output without a flag, which looks like a finished answer
 
 3. Scenario S3, multi-agent research system. During a run on one subject, a subagent's source stops answering after supplying three of the ten items that were expected. What should the coordinator do with the three?
-   - **a**: Discard the three, since a partial answer is judged too unreliable to use at all
+   - **a**: Discard the three and report the subject as having no findings
    - **b**: Present the three to readers as the subject's complete answer
    - **c**: Wait and rerun the lookup until all ten items have arrived
    - **d**: Use them, mark the topic as partly evidenced and say what is lacking

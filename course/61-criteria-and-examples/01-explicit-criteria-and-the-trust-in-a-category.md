@@ -423,10 +423,10 @@ naming: reviewed 3, precision 0.0, switch off: False
    - **d**: Spell out which patterns to flag and which to leave alone
 
 2. One category of findings was dismissed in two thirds of its first twenty reviews, and developers have begun skipping the other remarks too. What does the guide recommend for that category?
-   - **a**: Switch it off for now while its prompt and examples improve
-   - **b**: Delete it from the criteria for good
-   - **c**: Keep it and mark every one of its findings as low severity at once
-   - **d**: Keep it and attach a confidence score to each finding
+   - **a**: Pause it while its prompt and examples improve
+   - **b**: Remove it from the criteria for good
+   - **c**: Keep it, with every finding marked low severity
+   - **d**: Keep it, with a confidence score on each finding
 
 <details>
 <summary>Answer key</summary>

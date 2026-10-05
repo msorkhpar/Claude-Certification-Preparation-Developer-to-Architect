@@ -29,7 +29,7 @@ All tool names are written the same way in rules: `ToolName(specifier)`. The spe
 Four consequences follow, and each is a trap.
 
 1. **A path rule for `Write` is never consulted.** "`Edit(path)` rules govern all built-in tools that write files, including `Write` and `NotebookEdit`; a `Write(path)` rule is never matched by the file permission checks." Write the rule as `Edit(...)`.
-2. **Reading rules cover the search tools.** One `Read(secrets/**)` rule applies to Read, Grep and Glob. A rule is written under the name of its family, and the example's `rule_tool` gives the name a call is checked under.
+2. **Reading rules cover the search tools.** One `Read(secrets/**)` rule applies to Read, Grep and Glob (for the search tools the documentation calls it a best-effort application). A rule is written under the name of its family, and the example's `rule_tool` gives the name a call is checked under.
 3. **A read denial also stops writes.** "A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there, because both tools change content Claude has to be able to read back." And the other direction: "An `Edit(...)` allow rule also grants read access to the same path, so you don't need a matching `Read(...)` rule." So one `Read` deny is the way to protect a folder fully, and an `Edit` deny alone protects it from writes only.
 4. **Deny is checked before ask and allow.** "If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode." Because of the order, an explorer can be given a broad allow and a narrow deny, and the deny wins.
 
@@ -47,7 +47,7 @@ Three controls look alike and do different things.
 | `tools` (and omitting a tool from it) | Decides which tools exist |
 | `disallowedTools` / `disallowed_tools` with a bare name | Removes the tool from Claude's context; a scoped rule such as `Bash(rm *)` leaves the tool and denies matching calls |
 
-The documentation spells out the first: "Other tools not listed here still exist, and calls to them that need approval fall through to the permission mode and `canUseTool`", and for `bypassPermissions`: "Setting `allowed_tools=["Read"]` alongside `permission_mode="bypassPermissions"` still approves every tool, including `Bash`, `Write`, and `Edit`." The reason is the order: "Other unlisted tools are not matched by any allow rule and fall through to the permission mode, where `bypassPermissions` approves them." For a locked-down agent, pair the list with `dontAsk`, which denies what would prompt (module 38), not with `bypassPermissions`, or take the tools away. A subagent's own `tools` list is the same idea for the agents of module 47: it lists what the subagent has, and a subagent that lists `Glob` or `Grep` and leaves out `Bash` has them back even on macOS and Linux.
+The documentation spells out the first: "Other tools not listed here still exist, and calls to them that need approval fall through to the permission mode and `canUseTool`", and for `bypassPermissions`: "Setting `allowed_tools=["Read"]` alongside `permission_mode="bypassPermissions"` still approves every tool, including `Bash`, `Write`, and `Edit`." The reason is the order: "Other unlisted tools are not matched by any allow rule and fall through to the permission mode, where `bypassPermissions` approves them." For a locked-down agent, pair the list with `dontAsk`, which denies what would prompt (module 38; calls that need no approval, such as file reads in the working directories, still run), not with `bypassPermissions`, or take the tools away. A subagent's own `tools` list is the same idea for the agents of module 47: it lists what the subagent has, and a subagent that lists `Glob` or `Grep` and leaves out `Bash` has them back even on macOS and Linux.
 
 A skill's `allowed-tools` is a pre-approval in the same sense, which the guide's wording hides (see the box above). Skills are the subject of modules 57 and 58; the point here is that no list of allowed tools is a wall.
 
@@ -93,7 +93,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **a**: Hook matchers apply only to tools that come from MCP servers
    - **b**: Hooks cannot observe the search tools on any platform
    - **c**: Its lookups run through the shell tool, so only a Bash entry sees them
-   - **d**: A matcher takes the parenthesized rule form, so a bare tool name never fires
+   - **d**: A matcher takes the parenthesised rule form, so a bare tool name never fires
 
 <details>
 <summary>Answer key</summary>
@@ -107,9 +107,9 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants it unable to open, search or alter the folder `secrets/`. Which single entry in the settings file achieves it?
+1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to every built-in tool. Which single entry in the settings file does it?
    - **a**: `Edit(secrets/**)` under deny
-   - **b**: `Write(secrets/**)` under deny
+   - **b**: `Grep(secrets/**)` under deny
    - **c**: `Bash(cat secrets/*)` under deny
    - **d**: `Read(secrets/**)` under deny
 
@@ -120,15 +120,15 @@ This quiz covers both pages of the module.
    - **d**: Look up each file name through a content search instead
 
 3. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked to investigate how authentication works, it reads hundreds of files, and its answers get worse as the run goes on. What fixes it?
-   - **a**: Read the whole repository once and summarise it, so that nothing is missed
-   - **b**: Raise the turn limit so that the agent can finish reading before it answers
-   - **c**: Start from a search for entry points and follow imports one hop at a time
-   - **d**: List every file name in the repository first, then open each of them
+   - **a**: Read the whole repository once and write a summary of it
+   - **b**: Raise the turn limit and let the agent finish its reading
+   - **c**: Search for entry points, then follow imports a hop at a time
+   - **d**: List every file name in the repository, then open each of them
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "a `Write(path)` rule is never matched by the file permission checks". *c* is ruled out because a scoped Bash rule matches calls "as written", and other spellings "fall through to the permission mode", so it stops neither the search tools nor a different spelling.
+1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "A rule is written under the name of its family" and the example prints "Grep as Read", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open. *c* is ruled out because a scoped Bash rule matches calls "as written", and other spellings "fall through to the permission mode", so it stops neither the search tools nor a different spelling.
 2. **a**. A capped result is a window, and a narrower request brings the rest into view. *b* is ruled out because "Results are sorted by modification time and capped at 100 files", so the same request returns the same window. *c* is ruled out because "Claude sees a truncation flag in the result and can narrow the pattern", which says the set is incomplete. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
 3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because reading everything is the failure itself: "The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context." *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because a name search returns a capped list and opening each file repeats the first failure: "Claude sees a truncation flag in the result and can narrow the pattern".
 

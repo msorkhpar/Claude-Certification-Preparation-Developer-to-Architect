@@ -52,22 +52,22 @@ These are the answers that sound sensible and fail in an agent that builds tools
 ## Quiz
 
 1. A proposal has a forbidden call in its code and a description of a single line. What does the gate decide, and what does the report list?
-   - **a**: A revision request, since the short text is the first problem the gate meets
+   - **a**: A revision request, with the short text as the first problem the gate meets
    - **b**: A refusal, with the weakness of the text still noted beside it
-   - **c**: An approval behind a gate, since the forbidden call may be removed later in the run
-   - **d**: A refusal, with the finding dropped because a refused tool is never revised
+   - **c**: An approval behind a gate, with the forbidden call to be removed later in the run
+   - **d**: A refusal, with the findings dropped from the report
 
 2. A policy allows a timeout of at most 10 seconds, and a proposal asks for exactly 10. What does the gate do?
    - **a**: Flags it, since a limit should leave some room below it for safety
    - **b**: Flags it, since only a request below the limit counts as safe to run
    - **c**: Accepts the figure, since a request that reaches the ceiling has not passed it
-   - **d**: Accepts it, but only after a person has signed the proposal off
+   - **d**: Accepts it, since a person will sign the proposal off afterwards
 
 3. A reviewer approved a tool last week. Today the agent submits a changed version with an added write. What happens?
    - **a**: It goes through the gate again as a new proposal
    - **b**: It runs behind a gate if the old version had been gated as well
-   - **c**: It runs, because the approval covers every version of that tool
-   - **d**: It is refused, because a tool may be approved once and never changed
+   - **c**: It runs, with the approval covering every version of that tool
+   - **d**: It is refused, with a tool allowed to be approved once and never changed
 
 <details>
 <summary>Answer key</summary>
@@ -86,12 +86,12 @@ This quiz covers both pages of the module.
    - **a**: Refuses it, since an effect nobody mentioned cannot be approved on its behalf
    - **b**: Sends it back for a revision of the description, since the declaration is thin
    - **c**: Approves it behind a gate, since the policy already covers writes
-   - **d**: Approves it outright, since a read is declared and the write is minor
+   - **d**: Approves it outright, since the proposal declares a permission that the policy allows
 
 2. Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A team proposes to run generated tools in a container and to drop the gate, because the container limits the damage. Which gap remains?
-   - **a**: Nothing, since a container makes every tool safe to run
+   - **a**: Nothing, because a container makes every tool safe to run
    - **b**: Nothing checks what the code does against what was declared
-   - **c**: The container's speed, which is lower than that of a direct run
+   - **c**: The container's memory limit, which the gate cannot read
    - **d**: The agent's description of the tool, which a container cannot read
 
 3. Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. Which record satisfies the audit part of the design?
@@ -104,13 +104,13 @@ This quiz covers both pages of the module.
    - **a**: Flags it, since the longest name has to leave a spare character
    - **b**: Flags it, because names this long are hard for the model to choose
    - **c**: Accepts it, as it sits at the ceiling for such labels and not above it
-   - **d**: Accepts it only if the description is also at least 64 words
+   - **d**: Accepts it, since the description also has at least 64 words
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. An undeclared effect is refused. *c* is ruled out because the gate approves only what was declared: "Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page." *b* is ruled out because a refusal is not a revision: "The first group is about trust: the proposal contradicts itself or the rules." *d* is ruled out because the gap is the finding: "A proposal with a refusal is refused, whatever else is true of it."
-2. **b**. The container holds the run, and only the gate compares the code with its declaration. *a* is ruled out because a container is only one of the five jobs: "Containment is the environment's job." *c* is ruled out because speed is not the gap: "the example is about the decisions around a run". *d* is ruled out because the gate reads the description: "a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema".
+1. **a**. An undeclared effect is refused. *c* is ruled out because the gate approves only what was declared: "Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page." *b* is ruled out because an undeclared effect is one of the refusals and not a matter of the description: "Three things refuse a proposal." and "Its code shows a permission that the proposal did not declare" *d* is ruled out because a declared read does not cover the write the code shows: "Its code shows a permission that the proposal did not declare", and a refusal wins: "A proposal with a refusal is refused, whatever else is true of it."
+2. **b**. The container holds the run, and only the gate compares the code with its declaration. *a* is ruled out because a container is only one of the five jobs: "Containment is the environment's job." *c* is ruled out because the gate reads and flags the limits: "a timeout above the limit and a memory request above the limit". *d* is ruled out because the gate reads the description: "a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema".
 3. **d**. The audit is kept out of the agent's reach. *a* is ruled out because an editable file is not an audit: "A log that the agent can edit is not an audit." *b* is ruled out because a summary by the agent is its own account: "The record has to be written by the gate and the runner and kept where the agent has no write access". *c* is ruled out because the agent can write where the log is kept: "kept where the agent has no write access".
 4. **c**. A name may be 64 characters. *a* is ruled out because the length is allowed: "A name may be 64 characters long, and 65 is too long." *b* is ruled out because the gate checks the form and not the model's taste: "Four things only send it back: a name that is not in the fixed form". *d* is ruled out because the description has its own minimum: "The description needs at least the minimum number of words, and exactly the minimum is enough."
 

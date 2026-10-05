@@ -126,10 +126,10 @@ These are the wrong answers that the exam's options for this task statement offe
 This quiz covers both pages of the module.
 
 1. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. An engineer resumes a very large session on a Pro plan in Claude Code after a two-hour break. What should they expect from the first request?
-   - **a**: A replay of the tools the session called, to refresh their results
-   - **b**: A warm cache, because a resumed session keeps its earlier requests
-   - **c**: A cache miss, so all of the history is read again one time
-   - **d**: An automatic fork, so that the earlier thread is left unchanged
+   - **a**: A re-run of the session's tool calls, refreshing their results
+   - **b**: A warm cache that still holds the earlier requests
+   - **c**: A cache miss, with the full history processed once more
+   - **d**: A fork of the session, made automatically on resume
 
 2. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A forked agent rewrote several modules in the shared working copy. The team wants that copy exactly as it stood before the run, and wants to keep the fork's conversation. What provides this?
    - **a**: Resuming the original session, which brings its files back
@@ -138,10 +138,10 @@ This quiz covers both pages of the module.
    - **d**: Checkpointing, which snapshots the edits and reverts them
 
 3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?
-   - **a**: Fork the session, so that the stale results stay in the original
-   - **b**: Start a new session that carries the earlier transcript as context
-   - **c**: Continue the most recent session in the directory without a note
-   - **d**: Resume the session, with a first prompt that lists the five paths
+   - **a**: Fork the session and keep the stale results in the original
+   - **b**: Start a new session and carry the earlier transcript into it
+   - **c**: Continue the most recent session in the directory and add no note
+   - **d**: Resume the session and name the five stale paths in its first prompt
 
 <details>
 <summary>Answer key</summary>

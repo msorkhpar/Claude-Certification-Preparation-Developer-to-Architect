@@ -96,7 +96,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 
 4. A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact. Which change fits best?
-   - **a**: Keep only the first source of every repeated fact, so that answers stay short
+   - **a**: Keep only the first source of every repeated fact
    - **b**: Ask the synthesizer to cite sources by recalling where each figure appeared
    - **c**: Write the source into each claim sentence, in brackets right after the text
    - **d**: Return each claim and its origin as separate fields, and combine on claims
@@ -115,21 +115,21 @@ These are the wrong answers that the exam's options for this task statement offe
 This quiz covers both pages of the module.
 
 1. A CI coordinator runs in bypassPermissions, and its reviewer definition lists only the tools Read and Grep. A teammate fears that the reviewer can still do anything, because the mode skips prompts. Which limit remains?
-   - **a**: Nothing at all, because the mode removes every restriction on the tree
+   - **a**: Nothing at all
    - **b**: The permission mode in its own definition, which overrides the parent's mode entirely
-   - **c**: Its own capability set, since whatever is left out is absent from its session
+   - **c**: Its own capability set
    - **d**: The parent's allowed tools, which cap what the mode may approve
 
 2. The final answer of a coordinator paraphrases a subagent's findings and drops the line numbers that the user needs. Which fix fits best?
-   - **a**: Raise the subagent's turn limit so that its report becomes much longer and fuller
+   - **a**: Raise the subagent's turn limit by a large margin and rerun it
    - **b**: Tell the parent to keep the report verbatim, or read the tool result directly
-   - **c**: Remove the return-format line from the brief so that the report is less rigid
-   - **d**: Switch the subagent to a larger model so that its summaries keep more of the detail
+   - **c**: Remove the return-format line from the brief and let it write freely
+   - **d**: Switch the subagent to a larger model with a longer context window
 
 3. Six delegates run side by side, and each asks for approval before reading files, which floods the operator. Which design fits best?
-   - **a**: Take the Read tool out of the definitions, so that nothing can ever prompt
-   - **b**: Set bypassPermissions in each agent definition, so that none of them asks again
-   - **c**: Run the six one after another, so that only one asks at any given time
+   - **a**: Take the Read tool out of the definitions of all six delegates
+   - **b**: Set bypassPermissions in each agent definition of the six delegates
+   - **c**: Run the six one after another instead of side by side
    - **d**: Pre-approve those lookups in a PreToolUse hook, or in inherited rules
 
 <details>

@@ -814,10 +814,10 @@ This quiz covers all three pages of the module.
    - **d**: Lower the number of turns so that the session decides faster
 
 2. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?
-   - **a**: The file is too long, so cut it until it fits the prompt
-   - **b**: Headless runs read the file only on the first push of a branch
-   - **c**: The rules need a `paths` header before a headless run applies them
-   - **d**: That mode skips it, so supply it with `--append-system-prompt-file`
+   - **a**: The file is too long, so trim it until it fits the prompt
+   - **b**: The file loads only on a branch's first push, so push once
+   - **c**: The rules lack a `paths` header, so add one to each
+   - **d**: The mode skips the file, so pass it in with a flag
 
 3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?
    - **a**: It passes and posts no comment
@@ -829,7 +829,7 @@ This quiz covers all three pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. An independent run sees the change without the reasoning that produced it. *a* is ruled out because the writing session is "less effective at reviewing its own changes", and more effort does not remove the bias. *b* is ruled out because a reviewer "sees only the diff and the criteria you give it, not the reasoning that produced the change". *d* is ruled out because "the independent run is a separate invocation, not a second pass in the same conversation".
-2. **d**. Bare mode skips CLAUDE.md, so the criteria must be passed in by hand. *a* is ruled out because length is not the issue: "In a bare run the file is passed explicitly" and otherwise it is not read at all. *b* is ruled out because "A CI run does not remember the last one", and no first-push behaviour exists. *c* is ruled out because no header is involved, and "a bare run without it reviews with no criteria at all, and nothing says so".
+2. **d**. Bare mode skips CLAUDE.md, so the criteria must be passed in by hand, with `--append-system-prompt-file`. *a* is ruled out because length is not the issue: "In a bare run the file is passed explicitly" and otherwise it is not read at all. *b* is ruled out because "A CI run does not remember the last one", and no first-push behaviour exists. *c* is ruled out because no header is involved, and "a bare run without it reviews with no criteria at all, and nothing says so".
 3. **a**. The high finding is dropped with its category and the low one falls below the floor, so nothing is kept. *b* is ruled out because "categories the team disabled are dropped", so the high style finding cannot fail the job. *c* is ruled out because "findings below a floor are dropped", and a low finding is below a medium floor. *d* is ruled out because only "a kept finding at a failing severity" fails the job, and a disabled category is dropped before that.
 
 </details>

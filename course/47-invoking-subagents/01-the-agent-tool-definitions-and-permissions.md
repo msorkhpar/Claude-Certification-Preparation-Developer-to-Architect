@@ -267,15 +267,15 @@ These are the wrong answers that the exam's options for this task statement offe
 
 1. A team gives its security-review subagent the one-word blurb "Helper." The coordinator keeps reviewing code itself and never delegates. Which change makes delegation likely?
    - **a**: Rewrite the description to state when this specialist should be called
-   - **b**: Raise the agent's turn limit so that starting it is worth the extra effort
+   - **b**: Raise the agent's turn limit for each run it starts
    - **c**: Move the review instructions from the description into the agent's own prompt
-   - **d**: Set the nesting depth to three so that the model is allowed to delegate at all
+   - **d**: Set the nesting depth to three levels below the main agent
 
 2. A dashboard counts delegations by looking for calls to the Agent tool in the message stream. Replayed logs from earlier runs show subagent reports, yet the dashboard reports zero delegations. What fixes it?
    - **a**: Read the tools list of the init message, where the tool is always named Agent
    - **b**: Look for the subagent's name in the assistant's text blocks
    - **c**: Also match the former name Task in each spawn's blocks
-   - **d**: Add Agent to the allowed tools so that its calls show up in the stream
+   - **d**: Add Agent to the allowed tools
 
 <details>
 <summary>Answer key</summary>

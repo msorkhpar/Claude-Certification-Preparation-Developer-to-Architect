@@ -359,7 +359,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 2. A team adds a hook with the matcher `src/payments/*` to review every write under that folder. The hook never fires. What is the best fix?
    - **a**: Switch the matcher to a regular expression that also lists every file in the folder
-   - **b**: Raise the timeout so that the matcher has time to evaluate the paths
+   - **b**: Raise the timeout of the hook
    - **c**: Attach it to the file-editing tools and test the path inside the callback
    - **d**: Move the hook to the PostToolUse event, which evaluates paths after the write
 

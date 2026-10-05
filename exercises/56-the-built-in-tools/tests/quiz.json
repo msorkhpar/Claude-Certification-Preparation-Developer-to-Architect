@@ -67,7 +67,7 @@
         "a": "Hook matchers apply only to tools that come from MCP servers",
         "b": "Hooks cannot observe the search tools on any platform",
         "c": "Its lookups run through the shell tool, so only a Bash entry sees them",
-        "d": "A matcher takes the parenthesized rule form, so a bare tool name never fires"
+        "d": "A matcher takes the parenthesised rule form, so a bare tool name never fires"
       },
       "key": "c",
       "explanation": {
@@ -81,10 +81,10 @@
       "id": "02-permissions-exploring-a-codebase-and-the-practice#m1",
       "page": "02-permissions-exploring-a-codebase-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants it unable to open, search or alter the folder `secrets/`. Which single entry in the settings file achieves it?",
+      "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to every built-in tool. Which single entry in the settings file does it?",
       "options": {
         "a": "`Edit(secrets/**)` under deny",
-        "b": "`Write(secrets/**)` under deny",
+        "b": "`Grep(secrets/**)` under deny",
         "c": "`Bash(cat secrets/*)` under deny",
         "d": "`Read(secrets/**)` under deny"
       },
@@ -92,7 +92,7 @@
       "explanation": {
         "d": "A read denial stops reading and searching, and writes at the same path.",
         "a": "Ruled out because \"`Edit(path)` rules govern all built-in tools that write files\", which leaves reading and searching open.",
-        "b": "Ruled out because \"a `Write(path)` rule is never matched by the file permission checks\".",
+        "b": "Ruled out because \"A rule is written under the name of its family\" and the example prints \"Grep as Read\", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open.",
         "c": "Ruled out because a scoped Bash rule matches calls \"as written\", and other spellings \"fall through to the permission mode\", so it stops neither the search tools nor a different spelling."
       }
     },
@@ -121,10 +121,10 @@
       "scope": "module",
       "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked to investigate how authentication works, it reads hundreds of files, and its answers get worse as the run goes on. What fixes it?",
       "options": {
-        "a": "Read the whole repository once and summarise it, so that nothing is missed",
-        "b": "Raise the turn limit so that the agent can finish reading before it answers",
-        "c": "Start from a search for entry points and follow imports one hop at a time",
-        "d": "List every file name in the repository first, then open each of them"
+        "a": "Read the whole repository once and write a summary of it",
+        "b": "Raise the turn limit and let the agent finish its reading",
+        "c": "Search for entry points, then follow imports a hop at a time",
+        "d": "List every file name in the repository, then open each of them"
       },
       "key": "c",
       "explanation": {

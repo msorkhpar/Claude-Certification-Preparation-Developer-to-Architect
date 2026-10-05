@@ -900,7 +900,7 @@
       "explanation": {
         "b": "The page states it (module 67, page 2): \"It writes an agent's entry when the agent starts, so that a crash leaves a trace of work that began and has nothing to show.\"",
         "a": "Ruled out because an entry exists while the work runs, its status being one of three: \"its status (`running`, `done`, `failed`)\"",
-        "c": "Ruled out because a crash gives no warning: \"A crash does not warn.\"",
+        "c": "Ruled out because the entry cannot wait for a last message that a crash prevents: \"It is written as the agent learns and not only at the end, so that a crash half-way leaves something.\"",
         "d": "Ruled out because the manifest is read first on restart, so it cannot wait for the end: \"the one thing the coordinator reads first\""
       }
     },
@@ -1134,14 +1134,14 @@
         "a": "Nothing, and every field still arrives in the result",
         "b": "Checking is weaker, and null passes where a real value belongs",
         "c": "Parsing fails whenever one of the fields is left empty or missing",
-        "d": "The model stops filling any entry with real data at all"
+        "d": "The model refuses the whole document whenever one field has no value"
       },
       "key": "b",
       "explanation": {
         "b": "The page states it (module 62, page 1): \"Do not make every field nullable; nullability is for values that can really be absent, since a required field with a valid value is a stronger check.\"",
         "a": "Ruled out because a null in a key field has a price: \"a null in one of them sends the document to review instead of passing it\"",
         "c": "Ruled out because a field may be missing from the source and then be nullable: \"a field that may be missing from the source is optional or nullable\"",
-        "d": "Ruled out because null is an honest answer for a missing value and not a refusal to fill the rest: \"so that `null` is a valid and honest answer\""
+        "d": "Ruled out because a schema cannot express a refusal, and a missing value is answered with null: \"refuse, which a schema cannot express, or fill the field\" and \"so that `null` is a valid and honest answer\""
       }
     },
     {
@@ -1595,7 +1595,7 @@
       "explanation": {
         "d": "The page states it (module 56, page 2): \"a `Write(path)` rule is never matched by the file permission checks\".",
         "a": "Ruled out because the edit rules do cover file tools, so a deny is not limited to shell commands: \"`Edit(path)` rules govern all built-in tools that write files, including `Write` and `NotebookEdit`\"",
-        "b": "Ruled out because a read deny is the strongest rule for such a folder: \"A `Read` deny is the one rule that stops reading, searching and writing.\"",
+        "b": "Ruled out because no folder is exempt, and a read deny is the rule that protects such a folder fully: \"A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there\"",
         "c": "Ruled out because a matching deny is enforced, so the failure is the spelling and not an option the model has: \"If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode.\""
       }
     },
@@ -1854,14 +1854,14 @@
         "a": "Abort the whole run and treat the rest as unreliable",
         "b": "Log it with its message, carry on with the rest, and exclude it from the last step",
         "c": "Retry that one forever until it succeeds, then continue",
-        "d": "Give the last step an empty summary for it, keeping the count complete in the report"
+        "d": "Give the last step an empty summary for that pass and report all twelve passes as covered"
       },
       "key": "b",
       "explanation": {
         "b": "The page states it (module 50, page 2): \"The practice records it (path and message) and goes on with the others, and it leaves the failed file out of the cross pass.\"",
         "a": "Ruled out because a failure belongs to its item: \"a failure in one is a fact about that file\"",
         "c": "Ruled out because a loop with no bound never ends: \"A loop with no bound turns a service outage into a run that never ends.\"",
-        "d": "Ruled out because only reviewed items reach the last pass: \"The cross pass sees only the files that were reviewed\""
+        "d": "Ruled out because only reviewed items reach the last pass, and an empty summary would read as a clean file: \"The cross pass sees only the files that were reviewed, because a summary that is empty or invented would be read as \"nothing to report\"\" and the result must not read as full coverage: \"so that nobody reads a quiet report as full coverage\""
       }
     },
     {
@@ -1999,7 +1999,7 @@
       "explanation": {
         "b": "The page states it (module 62, page 1): \"A record with `other` and no detail is a syntax error, because the pair is the contract.\"",
         "a": "Ruled out because semantic errors are about meaning: \"a vendor in the currency field\"",
-        "c": "Ruled out because being a member of the enum is not enough, since the value is meant to come with its detail: \"`other` plus a detail field for a value the enum did not foresee\"",
+        "c": "Ruled out because being a member of the enum is not enough, since the value is meant to come with its detail: \"`other` plus a detail field for a value the enum did not foresee: the currency `other` with `currency_detail: \"CHF\"`\"",
         "d": "Ruled out because absence is another case: \"A required value that the model reports as absent is not retried: the document goes to review\""
       }
     },
@@ -2249,8 +2249,8 @@
       "scope": "level",
       "stem": "Scenario S1. A lookup finds no orders for a customer. The customer exists, but no purchase was made in the period that was searched. Which reply is right?",
       "options": {
-        "a": "An error result flagged as not found, leaving the agent to try another route through the other service",
-        "b": "An empty string, leaving the agent to decide what it means",
+        "a": "An error result flagged as not found, which sends the agent to another route through the other service",
+        "b": "An empty string, which leaves the agent to decide what it means",
         "c": "A successful response saying that nothing matched the identifier and the date range",
         "d": "A transient error with retry set, in case the index is catching up"
       },
@@ -2436,7 +2436,7 @@
         "b": "Custom commands have been merged into skills, and when a skill and a command file share a name the skill wins (module 71, page 1). Existing command files keep working. The page puts it as \"when a skill and a command file share a name the skill wins\".",
         "a": "Ruled out because one name leads to one definition: \"A skill beats a command file of the same name.\"",
         "c": "Ruled out because \"the existing command files keep working\", and the name resolves to the skill.",
-        "d": "Ruled out because the product direction runs from commands to skills: \"Custom commands have been merged into skills.\""
+        "d": "Ruled out because an older file gets no priority on a clash, and the skill wins: \"when a skill and a command file share a name the skill wins\"; the older files keep working only where no skill shares the name."
       }
     },
     {
@@ -2474,7 +2474,7 @@
         "d": "In a paths glob the double star crosses folders and the single star stays inside one, so src/api/*.ts misses a file one level deeper (module 71, page 1). The page's example is src/api/**/*.ts for every TypeScript file below src/api/. The page puts it as \"** crosses folders and * stays inside one\".",
         "a": "Ruled out because a `paths` entry is \"A `paths` entry is a glob\", and globs match by pattern.",
         "b": "Ruled out because the page's example is \"`src/api/**/*.ts` reaches every TypeScript file below `src/api/`\", which needs the double star.",
-        "c": "Ruled out because the documentation's table shows \"`src/**/*` for all files under `src/`\", so reaching a folder takes the double star and not a single one."
+        "c": "Ruled out because a single star does not cross folders: \"`**` crosses folders and `*` stays inside one\", and the documentation's table shows \"`src/**/*` for all files under `src/`\"."
       }
     },
     {
@@ -2510,8 +2510,8 @@
       "key": "a",
       "explanation": {
         "a": "Examples of input and output give the work a target: two or three cases with their expected results say what a paragraph of description leaves open, and the page's example is one valid address, one invalid and one edge (module 71, page 2). The page puts it as \"Two or three cases with their expected results say what a paragraph of description leaves open\".",
-        "b": "Ruled out because \"Claude stops when the work looks done\", and a plan adds no check to stop against.",
-        "c": "Ruled out because more prose gives no check either: \"'looks done' is the only signal available\".",
+        "b": "Ruled out because a plan changes the order and not the target: \"Plan mode tells Claude to research and propose changes without making them\", while \"Claude stops when the work looks done\".",
+        "c": "Ruled out because a paragraph is what leaves the cases open: \"say what a paragraph of description leaves open\".",
         "d": "Ruled out because the first recommendation is \"Give Claude a check it can run: tests, a build, a screenshot to compare.\""
       }
     },
@@ -2523,14 +2523,14 @@
       "options": {
         "a": "Keep the whole-file write if the file is under a hundred lines",
         "b": "Use the edit tool, since replacing everything lets damage slip through unseen",
-        "c": "Use the shell with a stream editor, since it avoids both of the other file tools",
+        "c": "Use the search tool, since it can find the line and also replace it",
         "d": "Keep the whole-file write, since it never fails to match"
       },
       "key": "b",
       "explanation": {
         "b": "Write overwrites with the full content, so an accidental change elsewhere goes unseen, and for partial changes to an existing file the page says to use Edit (module 56, page 1). The page puts it as \"Write overwrites with the full content, so an accidental change elsewhere goes unseen\".",
         "a": "Ruled out because the page gives no size exception: \"For partial changes to an existing file, use Edit.\"",
-        "c": "Ruled out because the shell is a poor edit path: \"Each command is a separate process\".",
+        "c": "Ruled out because the search tool only reads: the table gives `Grep` the job \"Searches file contents\", and the replacing job to Edit: \"Replaces one exact string with another in a file\".",
         "d": "Ruled out because the page names the cost of a whole-file write: \"A wrong tool choice costs tokens and, with Write, risks the rest of the file.\""
       }
     },
@@ -2851,7 +2851,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "Claude Code ships a read-only explorer itself, and a project subagent of your own is the way to give the same shape the project's documentation server too, with a tools line that lists only reading and searching tools (module 73, page 1). The page puts it as \"a project subagent of your own is the way to give the same shape the project's documentation server too\".",
+        "c": "Claude Code ships a read-only explorer itself, and a project subagent of your own can have the same read-only shape and be given the project's documentation server as well, with a tools line that lists only reading and searching tools (module 73, page 1). The page puts it as \"a project subagent of your own can have the same read-only shape and be given the project's documentation server as well\".",
         "a": "Ruled out because the built-in helper is \"a read-only agent for file discovery, code search and codebase exploration\", with no word of the team's own servers.",
         "b": "Ruled out because \"the root file loads in every session and costs context each time\".",
         "d": "Ruled out because \"A sentence in the prompt is a request that the model weighs; the `tools` line is a list the subagent cannot go beyond.\""
@@ -2873,7 +2873,7 @@
         "c": "When a run fails, re-running it repeats the cost with no reason to expect a different result, so the job reports the failure and a person decides (module 74, page 1). The page puts it as \"When a run fails, re-running it repeats the cost with no reason to expect a different result\".",
         "a": "Ruled out because \"A longer job timeout only lets a loop run longer.\"",
         "b": "Ruled out because \"A green job that said nothing is the failure the gate prevents\".",
-        "d": "Ruled out because \"a permission error or an invalid query fails again the same way\", so a repeat is no cure."
+        "d": "Ruled out because a headless run needs an end and not an open-ended repeat: \"A run with no person must end by itself\", and a repeat brings \"no reason to expect a different result\"."
       }
     },
     {
@@ -2909,8 +2909,8 @@
       "key": "a",
       "explanation": {
         "a": "A reviewer should not be the author: a fresh context improves code review since Claude will not be biased toward code it just wrote, so the review runs as its own session (module 74, page 2). The page puts it as \"A fresh context improves code review since Claude won't be biased toward code it just wrote\".",
-        "b": "Ruled out because the page asks that \"In a pipeline that means the review runs as its own session\", and does not say that sessions are interactive only.",
-        "c": "Ruled out because the earlier findings are a separate need: \"Giving the run the earlier findings\" keeps the comments useful.",
+        "b": "Ruled out because the page asks that \"In a pipeline that means the review runs as its own session\", and does not say that sessions are interactive only; the pipeline description sets \"`session` is `fresh`\".",
+        "c": "Ruled out because the earlier findings are a separate need that the run is given on top of a fresh session: \"The second thing a review needs is memory of its own earlier output\" and \"`context` includes `prior_findings`\".",
         "d": "Ruled out because the page gives authorship and not billing as the problem: \"A reviewer should not be the author.\""
       }
     },
@@ -2922,15 +2922,15 @@
       "options": {
         "a": "It needs a larger window to hold three results at once during the final merge",
         "b": "It would hide real bugs found only occasionally, through the filter",
-        "c": "It triples the cost without any change in what is found",
-        "d": "It lets authors skip the review when two runs disagree"
+        "c": "It reports the same issues every time, so the filter changes nothing",
+        "d": "It repeats the integration pass, which already compares the results of runs"
       },
       "key": "b",
       "explanation": {
         "b": "Keeping only what two of three runs agree on would hide real bugs that are found only now and then (module 74, page 2). The remedy that fits the cause is to divide the work into a pass for each file and an integration pass. The page puts it as \"would hide real bugs that are found only now and then\".",
         "a": "Ruled out because \"A larger context window does not fix attention quality.\"",
-        "c": "Ruled out because the filter does change what is found: \"Keeping only the issues that two of three runs agree on would hide real bugs\".",
-        "d": "Ruled out because \"Run the review three times and keep what two of three runs agree on\" is rejected because agreement hides a real bug."
+        "c": "Ruled out because runs differ, which is why the filter drops some bugs: \"the same pattern may be flagged in one file and approved in another\" and \"real bugs that are found only now and then\".",
+        "d": "Ruled out because the integration pass is about files and not about runs: \"A separate integration pass then looks at what crosses files\"."
       }
     },
     {

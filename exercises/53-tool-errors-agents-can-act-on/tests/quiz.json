@@ -7,10 +7,10 @@
       "scope": "page",
       "stem": "A refund tool meets a slow card service, and each time it answers with the text \"Operation failed\". The agent tries three more times and then apologises, though a colleague could have settled the case. Which change helps most?",
       "options": {
-        "a": "Raise the number of automatic attempts from three to ten before the agent gives up on the case",
-        "b": "Add a line to the prompt that asks the agent to work out which failures deserve another attempt",
-        "c": "Reply with the kind of problem, whether another try is useful, and the next step",
-        "d": "Return an empty reply so that the agent moves on to its next step without stopping"
+        "a": "Raise the attempts from three to ten, with a longer wait between them",
+        "b": "Add a prompt rule on retries and a second rule on when to give up",
+        "c": "Reply with a category, a retry flag and a message that says what to do",
+        "d": "Return an empty list marked as a success and let the run continue"
       },
       "key": "c",
       "explanation": {
@@ -45,9 +45,9 @@
       "scope": "page",
       "stem": "After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?",
       "options": {
-        "a": "Issuing a refund that carries no idempotency key at all",
+        "a": "Issuing a refund that has no idempotency key",
         "b": "Emailing the customer a confirmation of the refund",
-        "c": "Creating a ticket without any key attached to it",
+        "c": "Creating a support ticket for the case",
         "d": "Looking up the order record by its order number"
       },
       "key": "d",
@@ -65,9 +65,9 @@
       "stem": "A refund call times out, and the tool reports that its outcome is unknown. What should the agent do next?",
       "options": {
         "a": "Read the records kept for the order, then decide whether any work remains",
-        "b": "Send the payment again under a fresh key straight away so that it surely goes through",
+        "b": "Send the payment again under a fresh key straight away",
         "c": "Tell the customer that the attempt failed and invite them to begin a new request",
-        "d": "Mark the case as resolved, because the service usually processes whatever it receives"
+        "d": "Mark the case as resolved and assume the service processed it"
       },
       "key": "a",
       "explanation": {
@@ -102,10 +102,10 @@
       "scope": "module",
       "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. The web search subagent retries a timeout twice and the service stays down. What should it hand the coordinator?",
       "options": {
-        "a": "A short note that the lookup service was unavailable, sent once every retry is spent",
-        "b": "An empty set of results marked as a success, so that the run is never interrupted",
-        "c": "The kind of failure, the query that ran, any partial findings and other routes to try",
-        "d": "The timeout itself, passed up unhandled so that the whole research workflow ends"
+        "a": "A single line stating that the lookup service was unavailable, and no more",
+        "b": "An empty set of results marked as a success, with no mention of the timeout",
+        "c": "The failure kind, the query run, partial findings and alternative routes",
+        "d": "The unhandled timeout, which stops the coordinator and every other subagent"
       },
       "key": "c",
       "explanation": {
@@ -121,15 +121,15 @@
       "scope": "module",
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice, and customers are being refunded twice after timeouts. Which change to the wrapper is best?",
       "options": {
-        "a": "Retry nothing at all, so that every failure goes to a person for review",
-        "b": "Retry five times instead of twice, so that fewer timeouts reach the customer",
-        "c": "Retry after a longer fixed pause, so that a late answer arrives before the next call",
-        "d": "Repeat only calls known to be harmless, so that no payment is ever sent again"
+        "a": "Retry nothing, and route every failure to a person for review",
+        "b": "Retry five times instead of twice, with a longer wait between attempts",
+        "c": "Retry after a fixed pause long enough for a late answer to arrive",
+        "d": "Repeat only reads and writes that carry an idempotency key"
       },
       "key": "d",
       "explanation": {
-        "d": "Only a call known to be harmless is safe to repeat.",
-        "a": "Ruled out because many failures do pass on their own: \"most failures in a network are transient\".",
+        "d": "\"A retry is safe when repeating the call cannot do harm\", which holds for a read and for a write whose key makes the service \"perform the action once however often it receives the key\".",
+        "a": "Ruled out because recovery belongs at the tool: \"Recover locally and pass up what cannot be resolved\".",
         "b": "Ruled out because more attempts multiply the duplicates: \"a refund sent twice refunds twice\".",
         "c": "Ruled out because a pause does not tell whether the first call worked: \"A timeout after sending is not a failure of the effect; it is the absence of news\"."
       }
