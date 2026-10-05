@@ -57,6 +57,9 @@ The example is the one from the first page. Its second half is this page: a suit
 
 The cases, costs, timings and counts are invented. The model names and dates are the ones the Claude documentation listed on 2026-10-04; the rules about settings are those of its migration guide for Claude Sonnet 5.5. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 from collections import namedtuple
 from datetime import date
 
@@ -116,6 +119,7 @@ def percentile(values, p):
 
 def gate(cases, protected, max_cost_up, max_p95):
     """A go needs every check to pass; every check that fails adds a reason, in a fixed order."""
+    log.debug("gate input: %r", cases)
     reasons = []
     failed = sorted(c.id for c in cases if c.must_pass and not c.new_ok)
     if failed:
@@ -207,6 +211,8 @@ roll-out at 25% with 50000 requests and 400 errors: rollback to 0
 roll-out at 100% with 50000 requests and 10 errors: complete
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("rollout_gate");
 /**
  * Moving a system to a new model at scale: the calendar of retirements, the settings a new model refuses, a gate that a regression suite must pass, and a staged roll-out with a way back.
  *
@@ -270,6 +276,7 @@ export function percentile(values: number[], p: number): number {
 
 /** A go needs every check to pass; every check that fails adds a reason, in a fixed order. */
 export function gate(cases: Case[], protectedSegments: Set<string>, maxCostUp: number, maxP95: number): { decision: string; reasons: string[] } {
+  log.debug("gate input", cases);
   const reasons: string[] = [];
   const failed = cases.filter((c) => c.mustPass && !c.newOk).map((c) => c.id).sort();
   if (failed.length) reasons.push("must-pass failed: " + failed.join(", "));
@@ -362,6 +369,7 @@ import java.util.TreeSet;
  * The cases, costs, timings and counts are invented. The model names and dates are the ones the Claude documentation listed on 2026-10-04; the rules about settings are those of its migration guide for Claude Sonnet 5.5. Nothing here calls a model.
  */
 public class RolloutGate {
+    private static final System.Logger LOG = System.getLogger(RolloutGate.class.getName());
     record Case(String id, String segment, boolean mustPass, boolean oldOk, boolean newOk, int oldCost, int newCost, int newMs) {}
 
     record Request(String model, Double temperature, Double topP, Double topK, String thinking, String toolChoice, boolean strict, boolean prefill) {}
@@ -432,6 +440,7 @@ public class RolloutGate {
 
     /** A go needs every check to pass; every check that fails adds a reason, in a fixed order. */
     static Verdict gate(List<Case> cases, Set<String> protectedSegments, int maxCostUp, int maxP95) {
+        LOG.log(System.Logger.Level.DEBUG, "gate input: {0}", cases);
         List<String> reasons = new ArrayList<>();
         TreeSet<String> failed = new TreeSet<>();
         TreeSet<String> hit = new TreeSet<>();
@@ -527,6 +536,8 @@ roll-out at 100% with 50000 requests and 10 errors: complete
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val log = System.getLogger("rollout_gate")
+
 /**
  * Moving a system to a new model at scale: the calendar of retirements, the settings a new model refuses, a gate that a regression suite must pass, and a staged roll-out with a way back.
  *
@@ -588,6 +599,7 @@ fun percentile(values: List<Int>, p: Int): Int {
 
 /** A go needs every check to pass; every check that fails adds a reason, in a fixed order. */
 fun gate(cases: List<Case>, protectedSegments: Set<String>, maxCostUp: Int, maxP95: Int): Verdict {
+    log.log(System.Logger.Level.DEBUG, "gate input: {0}", cases)
     val reasons = mutableListOf<String>()
     val failed = cases.filter { it.mustPass && !it.newOk }.map { it.id }.sorted()
     if (failed.isNotEmpty()) reasons.add("must-pass failed: " + failed.joinToString(", "))

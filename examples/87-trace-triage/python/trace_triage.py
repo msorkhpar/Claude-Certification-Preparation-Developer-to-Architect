@@ -3,7 +3,10 @@
 The traces, metrics and events are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domains 3 and 4), Anthropic's article on its multi-agent research system
 and the Claude Code monitoring documentation, read on 2026-10-04. Nothing here calls a model.
 """
+import logging
 from collections import namedtuple
+
+log = logging.getLogger(__name__)
 
 Span = namedtuple("Span", "id parent kind name status ms note")
 CONTENT = {"prompt", "response", "tool_input", "tool_output"}
@@ -37,6 +40,7 @@ def keep_reason(trace_id, spans, rate, feedback=False, slow_ms=5000):
 
 def root_cause(spans):
     """The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed."""
+    log.debug("root_cause input: %r", spans)
     by_id = {s.id: s for s in spans}
     failed = [s for s in spans if s.status == "error"]
     if failed:

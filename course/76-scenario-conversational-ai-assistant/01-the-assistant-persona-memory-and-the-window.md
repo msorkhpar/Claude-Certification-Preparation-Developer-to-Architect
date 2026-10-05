@@ -64,7 +64,10 @@ that fit, and a memory that crosses sessions is read per customer and marked whe
 The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
 a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
 """
+import logging
 from datetime import date
+
+log = logging.getLogger(__name__)
 
 RISK = ("hurt myself", "end my life", "emergency")
 ASKS_FOR_PERSON = ("human", "a person", "an agent")
@@ -73,6 +76,7 @@ STORE = {"ada": [("address", "12 Elm Road", "2026-09-20"), ("plan", "Plus", "202
 
 def route(message, misses=0):
     """Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers."""
+    log.debug("route input: %r", message)
     text = message.lower()
     if any(phrase in text for phrase in RISK):
         return "handoff:safety"
@@ -134,12 +138,15 @@ recall bob on 2026-10-04: nothing stored
 //
 // The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
 // a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("assistant_turns");
 const RISK = ["hurt myself", "end my life", "emergency"];
 const ASKS_FOR_PERSON = ["human", "a person", "an agent"];
 const STORE: Record<string, [key: string, value: string, saved: string][]> = { ada: [["address", "12 Elm Road", "2026-09-20"], ["plan", "Plus", "2025-12-01"]] };
 
 /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
 export function route(message: string, misses = 0): string {
+  log.debug("route input", message);
   const text = message.toLowerCase();
   if (RISK.some((p) => text.includes(p))) return "handoff:safety";
   if (ASKS_FOR_PERSON.some((p) => text.includes(p))) return "handoff:requested";
@@ -209,6 +216,7 @@ import java.util.stream.Collectors;
  * a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
  */
 public final class AssistantTurns {
+    private static final System.Logger LOG = System.getLogger(AssistantTurns.class.getName());
     record Saved(String key, String value, String saved) {}
 
     record Window(List<String> kept, int dropped, List<String> facts) {}
@@ -221,6 +229,7 @@ public final class AssistantTurns {
 
     /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
     static String route(String message, int misses) {
+        LOG.log(System.Logger.Level.DEBUG, "route input: {0}", message);
         String text = message.toLowerCase();
         if (RISK.stream().anyMatch(text::contains)) return "handoff:safety";
         if (ASKS_FOR_PERSON.stream().anyMatch(text::contains)) return "handoff:requested";
@@ -279,6 +288,8 @@ recall bob on 2026-10-04: nothing stored
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val log = System.getLogger("assistant_turns")
+
 /**
  * The turn logic of a conversational assistant in miniature: a message is routed in code before the model sees it, the window keeps the pinned facts and the newest turns
  * that fit, and a memory that crosses sessions is read per customer and marked when it is old.
@@ -298,6 +309,7 @@ val STORE = mapOf("ada" to listOf(Saved("address", "12 Elm Road", "2026-09-20"),
 
 /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
 fun route(message: String, misses: Int = 0): String {
+    log.log(System.Logger.Level.DEBUG, "route input: {0}", message)
     val text = message.lowercase()
     return when {
         RISK.any { it in text } -> "handoff:safety"

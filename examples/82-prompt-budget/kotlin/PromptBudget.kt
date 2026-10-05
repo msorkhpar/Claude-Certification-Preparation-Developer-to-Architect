@@ -1,3 +1,5 @@
+private val log = System.getLogger("prompt_budget")
+
 /**
  * A prompt assembled from modules in cache-friendly order, with a token budget and the cache breakpoint.
  *
@@ -29,6 +31,7 @@ private fun fill(text: String, variables: Map<String, String>): String = variabl
 
 /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */
 fun assemble(modules: List<Module>, variables: Map<String, String>): Prompt {
+    log.log(System.Logger.Level.DEBUG, "assemble input: {0}", modules)
     val blocks = modules.filter { it.isStatic } + modules.filter { !it.isStatic }.map { it.copy(text = fill(it.text, variables)) }
     val prefix = blocks.filter { it.isStatic }.sumOf { tokens(it.text) }
     val lastStatic = blocks.indexOfLast { it.isStatic }

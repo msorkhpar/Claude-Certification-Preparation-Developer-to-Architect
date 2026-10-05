@@ -6,6 +6,10 @@ Build and Scale tiers below are the documented figures for Claude Sonnet 5.5, an
 Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and
 limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 TIERS = [("Start", 1000, 2_000_000, 400_000), ("Build", 5000, 5_000_000, 1_000_000), ("Scale", 10_000, 10_000_000, 2_000_000)]  # name, RPM, ITPM, OTPM
 CENTS_PER_MTOK = {"input": 200, "cache_write": 250, "cache_read": 20, "output": 1000}
 
@@ -30,6 +34,7 @@ def smallest_tier(need, tiers):
 
 def monthly_cents(workload, requests, batch_percent):
     """Cents per month. The share of requests sent through the Batch API is billed at half price in every category."""
+    log.debug("monthly_cents input: %r", workload)
     per_request = sum(workload[k] * CENTS_PER_MTOK[k] for k in CENTS_PER_MTOK)  # cents times tokens, per million
     return requests * per_request * (200 - batch_percent) // (200 * 1_000_000)
 

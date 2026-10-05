@@ -83,6 +83,10 @@ The model is a script of the calls it asks for, in the shapes of the tool_use bl
 runs the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own
 design, not an Anthropic interface.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 LIMIT = 10_000  # cents: a refund above it is a person's decision
 STALL = 3       # the same call this many times in a row is no progress
 
@@ -209,6 +213,9 @@ no progress           outcome=escalated refused=- retries=0 refunds=- backend=lo
 // The model is a script of the calls it asks for, in the shapes of the tool_use blocks of module 26, without the client: this example is about the code that
 // runs the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own
 // design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("support_desk");
+
 export const LIMIT = 10_000; // cents: a refund above it is a person's decision
 export const STALL = 3; // the same call this many times in a row is no progress
 
@@ -345,6 +352,7 @@ import java.util.TreeMap;
  * design, not an Anthropic interface.
  */
 public final class SupportDesk {
+    private static final System.Logger LOG = System.getLogger(SupportDesk.class.getName());
     static final int LIMIT = 10_000; // cents: a refund above it is a person's decision
     static final int STALL = 3; // the same call this many times in a row is no progress
 
@@ -496,6 +504,8 @@ no progress           outcome=escalated refused=- retries=0 refunds=- backend=lo
   handoff: trigger=stalled verified=yes customer=C3 orders=- refunds=- refused=-
 ```
 ```kotlin
+private val log = System.getLogger("support_desk")
+
 /**
  * A support agent's whole control surface in one dispatcher: the identity gate, errors the loop can act on, a stall guard and the three escalation triggers.
  *

@@ -53,13 +53,17 @@ This file is a teaching model of that design, not a compliance control: patterns
 that mean nothing to the model, the vault that maps tokens back stays in the caller, and the audit entry records sizes and counts, never
 the prompt. The patterns do not find names, and the output shows that gap on purpose. No model is called.
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 PATTERNS = [("EMAIL", re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")), ("MEMBER", re.compile(r"\bM-\d{6}\b"))]
 
 
 def tokenise(text, vault):
     """Replaces every match by a token; the same value always gets the same token. `vault` maps value to token and stays local."""
+    log.debug("tokenise input: %r", text)
     for label, pattern in PATTERNS:
         def swap(match):
             value = match.group(0)
@@ -115,10 +119,14 @@ gap: the name survives tokenising: True
 // that mean nothing to the model, the vault that maps tokens back stays in the caller, and the audit entry records sizes and counts, never
 // the prompt. The patterns do not find names, and the output shows that gap on purpose. No model is called.
 
+import { logger } from "./logger.ts";
+const log = logger("deidentify");
+
 export const PATTERNS: Array<[string, RegExp]> = [["EMAIL", /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g], ["MEMBER", /\bM-\d{6}\b/g]];
 
 /** Replaces every match by a token; the same value always gets the same token. `vault` maps value to token and stays local. */
 export function tokenise(text: string, vault: Map<string, string>): string {
+  log.debug("tokenise input", text);
   for (const [label, pattern] of PATTERNS) {
     text = text.replace(pattern, (value) => {
       if (!vault.has(value)) vault.set(value, `<${label}_${[...vault.values()].filter((t) => t.startsWith(`<${label}_`)).length + 1}>`);
@@ -179,6 +187,7 @@ import java.util.regex.Pattern;
  * the prompt. The patterns do not find names, and the output shows that gap on purpose. No model is called.
  */
 public final class Deidentify {
+    private static final System.Logger LOG = System.getLogger(Deidentify.class.getName());
     record Kind(String label, Pattern pattern) {}
 
     /** What the log keeps: the request id, the size of the prompt, how many distinct identifiers were tokenised. Never the prompt. */
@@ -190,6 +199,7 @@ public final class Deidentify {
 
     /** Replaces every match by a token; the same value always gets the same token. {@code vault} maps value to token and stays local. */
     static String tokenise(String text, Map<String, String> vault) {
+        LOG.log(System.Logger.Level.DEBUG, "tokenise input: {0}", text);
         String out = text;
         for (Kind kind : PATTERNS) {
             Matcher m = kind.pattern().matcher(out);
@@ -247,6 +257,8 @@ raw values in the entry: False
 gap: the name survives tokenising: True
 ```
 ```kotlin
+private val log = System.getLogger("deidentify")
+
 /**
  * Tokenise identifiers before a model call, restore them locally, and log an audit entry that holds no content.
  *
@@ -263,6 +275,7 @@ data class Audit(val requestId: String, val chars: Int, val tokensIssued: Int, v
 
 /** Replaces every match by a token; the same value always gets the same token. `vault` maps value to token and stays local. */
 fun tokenise(text: String, vault: MutableMap<String, String>): String {
+    log.log(System.Logger.Level.DEBUG, "tokenise input: {0}", text)
     var out = text
     for ((label, pattern) in PATTERNS) {
         out = pattern.replace(out) { match ->

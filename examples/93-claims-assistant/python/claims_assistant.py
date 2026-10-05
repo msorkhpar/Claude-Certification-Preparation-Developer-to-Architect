@@ -2,6 +2,9 @@
 
 The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.
 """
+import logging
+
+log = logging.getLogger(__name__)
 import re
 from collections import namedtuple
 
@@ -42,6 +45,7 @@ def retrieve(question, allowed, index):
 
 def handle(request, index):
     """One request through the chain; the outcome says why a request was held."""
+    log.debug("handle input: %r", request)
     sent, _ = tokenise(request.text)
     chunk = retrieve(sent, request.allowed, index)
     if chunk is None:

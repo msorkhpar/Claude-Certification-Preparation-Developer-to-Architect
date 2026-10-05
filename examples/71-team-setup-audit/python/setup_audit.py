@@ -4,9 +4,12 @@ The projects are two small folders of plain files, project-before and project-af
 documented behaviour (checked 2026-10-04): a rule file under .claude/rules/ with a paths list loads when Claude works with a matching file and one without paths loads
 at launch; a command file under .claude/commands/ in the project is shared through version control; permission rules sit in .claude/settings.json. Nothing here starts Claude Code.
 """
+import logging
 import json
 import re
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve().parent.parent
 

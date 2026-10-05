@@ -2,6 +2,9 @@
 
 The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 LEVELS = ["managed", "command line", "local", "project", "user"]
 MANAGED_ONLY = {"allowManagedPermissionRulesOnly", "allowManagedHooksOnly", "allowManagedMcpServersOnly", "strictKnownMarketplaces", "disableSideloadFlags"}
 EFFORT = ["low", "medium", "high", "xhigh", "max"]
@@ -9,6 +12,7 @@ EFFORT = ["low", "medium", "high", "xhigh", "max"]
 
 def effective(layers):
     """The settings Claude Code applies, and a note for every entry that was ignored and why."""
+    log.debug("effective input: %r", layers)
     managed = layers.get("managed", {})
     lock_rules = managed.get("allowManagedPermissionRulesOnly") is True
     lock_mcp = managed.get("allowManagedMcpServersOnly") is True

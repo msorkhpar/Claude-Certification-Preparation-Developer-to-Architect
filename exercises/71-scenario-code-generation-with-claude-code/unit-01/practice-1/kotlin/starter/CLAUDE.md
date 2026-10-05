@@ -1,3 +1,4 @@
+<!-- TODO 7 of 8 (unlocks e1 and e6): cut this file to what every task needs, in at most 25 lines, point to the rules, `/review` and `docs/working-modes.md`, and remove the personal path. -->
 # Dispatch app
 
 ## General

@@ -3,6 +3,10 @@
 The numbers are invented for the example, and the sizes of tool definitions are the example's own. The rules are those of the Claude Certified Architect - Professional exam guide (domain 3), the Claude documentation page
 "Tool search tool", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 CATALOG = {"read_ticket": ("read", 160), "draft_reply": ("draft", 220), "issue_refund": ("money", 240), "delete_account": ("destroy", 210)}
 RISKY = {"money", "destroy"}
 SERVER_TOOLS = {"github": ["create_issue", "search_code", "get_pr", "list_prs", "merge_pr", "comment", "list_repos", "get_file"], "slack": ["post_message", "search", "list_channels", "get_thread", "react", "upload"],
@@ -16,6 +20,7 @@ POLICY = {"credentials": {"key-a": "support", "key-b": "research"}, "models": {"
 
 def audit(holds, needs, catalog):
     """Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation."""
+    log.debug("audit input: %r", holds)
     remove = [t for t in holds if t not in needs]
     return {"remove": remove, "risky": [t for t in remove if catalog[t][0] in RISKY], "missing": [t for t in needs if t not in holds]}
 

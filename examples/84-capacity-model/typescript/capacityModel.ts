@@ -6,6 +6,9 @@
 // Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and
 // limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.
 
+import { logger } from "./logger.ts";
+const log = logger("capacity_model");
+
 export type Workload = { rpm: number; input: number; cache_write: number; cache_read: number; output: number }; // tokens per request, requests per minute
 export type Need = { rpm: number; itpm: number; otpm: number };
 
@@ -29,6 +32,7 @@ export function smallestTier(need: Need, tiers: Array<[string, number, number, n
 
 /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */
 export function monthlyCents(w: Workload, requests: number, batchPercent: number): number {
+  log.debug("monthlyCents input", w);
   const perRequest = w.input * CENTS_PER_MTOK.input + w.cache_write * CENTS_PER_MTOK.cache_write + w.cache_read * CENTS_PER_MTOK.cache_read + w.output * CENTS_PER_MTOK.output;
   return Math.floor((requests * perRequest * (200 - batchPercent)) / (200 * 1_000_000));
 }

@@ -9,6 +9,19 @@ Names are Python's (`route`, `admit`, `showback`, `delivery`); TypeScript has th
 Numbers are whole numbers (money in cents, tokens, seconds, percent), so that every language gives the same figures. Maps and lists are JSON-like, as the starters show. A refusal is
 `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`).
 
+## What is already written, and what you write
+
+The starter is a working gateway with six gaps cut out of it. Everything that is plumbing is written and correct: the grouping of rows by team, the ordering of the showback and the rows of the result. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, `null`, `0`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):
+
+1. `_chosen_model` unlocks `m1` and `e6`: the model the policy picks for a request, with a pin honoured only when allowed.
+2. `route` unlocks `e1`: the model once the budget status is known (refused when blocked, cheaper when warned).
+3. `admit` unlocks `e2`: allow, warn or block against the budget.
+4. `_cost` unlocks `e3`: what one row of tokens costs, and the refusal of a model without a price.
+5. `_to_cents` unlocks `e4`: a team's total rounded to a cent, once.
+6. `delivery` unlocks `e5`: sync or accept-and-poll.
+
+About fifteen lines in all. The sections below describe the whole gateway.
+
 ## What to write
 
 - `route(request, policy, status)`: `request` is `{task, model}` (`model` is an optional pin), `policy` is `{allowed, routes, default, cheaper}`, `status` is the result of `admit`.

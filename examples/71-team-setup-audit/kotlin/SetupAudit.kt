@@ -3,6 +3,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
 
+private val log = System.getLogger("setup_audit")
+
 /**
  * Audit a team's Claude Code setup for the exam's code generation scenario: which instructions load for which files, who gets the shared command and what is protected.
  *

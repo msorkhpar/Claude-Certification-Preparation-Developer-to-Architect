@@ -40,5 +40,10 @@ PRACTICES[f"{X}/93-professional-capstone/unit-01/practice-1"] = {
         "wrong-scorecard-no-p7": (['e5', 'e9', 'm1'], "leaves domain P7 out of the scorecard"),
         "wrong-ceil-floor": (["e6"], "rounds the review cost percent down"),
         "wrong-no-floor-at-zero": (["e6"], "returns a negative accuracy when a check costs more than an error"),
+        "wrong-rollback-medium": (["e1"], "grades a missing way back as medium and not high"),
+        "wrong-volatile-low": (["e3"], "grades a volatile prefix as low, so it sorts among the low findings"),
+        "wrong-scorecard-known-rules": (["e5"], "counts in the scorecard only the findings whose rule id has a hyphen"),
+        "wrong-stale-medium": (["e8"], "grades an index that is not replaced on change as medium and not high"),
+        "wrong-report-truncated": (["e9"], "returns at most 21 findings"),
     },
 }

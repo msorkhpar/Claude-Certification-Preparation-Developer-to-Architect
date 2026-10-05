@@ -51,6 +51,10 @@ The example holds the rules of this page and the next as code: an audit of a sup
 The numbers are invented for the example, and the sizes of tool definitions are the example's own. The rules are those of the Claude Certified Architect - Professional exam guide (domain 3), the Claude documentation page
 "Tool search tool", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 CATALOG = {"read_ticket": ("read", 160), "draft_reply": ("draft", 220), "issue_refund": ("money", 240), "delete_account": ("destroy", 210)}
 RISKY = {"money", "destroy"}
 SERVER_TOOLS = {"github": ["create_issue", "search_code", "get_pr", "list_prs", "merge_pr", "comment", "list_repos", "get_file"], "slack": ["post_message", "search", "list_channels", "get_thread", "react", "upload"],
@@ -64,6 +68,7 @@ POLICY = {"credentials": {"key-a": "support", "key-b": "research"}, "models": {"
 
 def audit(holds, needs, catalog):
     """Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation."""
+    log.debug("audit input: %r", holds)
     remove = [t for t in holds if t not in needs]
     return {"remove": remove, "risky": [t for t in remove if catalog[t][0] in RISKY], "missing": [t for t in needs if t not in holds]}
 
@@ -163,6 +168,9 @@ refund asked by a user who may only read: agent's rights alone -> allow; user's 
   records kept: 4, denials among them: 3
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("capability_audit");
+
 /**
  * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.
  *
@@ -190,6 +198,7 @@ export const POLICY: Policy = {
 
 /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */
 export function audit(holds: string[], needs: string[], catalog: Record<string, [string, number]>) {
+  log.debug("audit input", holds);
   const remove = holds.filter((t) => !needs.includes(t));
   return { remove, risky: remove.filter((t) => RISKY.has(catalog[t][0])), missing: needs.filter((t) => !holds.includes(t)) };
 }
@@ -304,6 +313,7 @@ import java.util.Set;
  * "Tool search tool", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.
  */
 public final class CapabilityAudit {
+    private static final System.Logger LOG = System.getLogger(CapabilityAudit.class.getName());
     private CapabilityAudit() {}
 
     /** A tool's access class and the size of its definition in tokens. */
@@ -344,6 +354,7 @@ public final class CapabilityAudit {
 
     /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */
     static Audit audit(List<String> holds, List<String> needs, Map<String, Tool> catalog) {
+        LOG.log(System.Logger.Level.DEBUG, "audit input: {0}", holds);
         List<String> remove = holds.stream().filter(t -> !needs.contains(t)).toList();
         return new Audit(remove, remove.stream().filter(t -> RISKY.contains(catalog.get(t).access())).toList(), needs.stream().filter(t -> !holds.contains(t)).toList());
     }
@@ -461,6 +472,8 @@ refund asked by a user who may only read: agent's rights alone -> allow; user's 
   records kept: 4, denials among them: 3
 ```
 ```kotlin
+private val log = System.getLogger("capability_audit")
+
 /**
  * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.
  *
@@ -501,6 +514,7 @@ val POLICY = Policy(
 
 /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */
 fun audit(holds: List<String>, needs: List<String>, catalog: Map<String, Tool>): Audit {
+    log.log(System.Logger.Level.DEBUG, "audit input: {0}", holds)
     val remove = holds.filter { it !in needs }
     return Audit(remove, remove.filter { catalog.getValue(it).access in RISKY }, needs.filter { it !in holds })
 }

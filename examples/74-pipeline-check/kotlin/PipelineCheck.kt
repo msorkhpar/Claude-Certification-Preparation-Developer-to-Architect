@@ -3,6 +3,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
 
+private val log = System.getLogger("pipeline_check")
+
 /**
  * Check the design of a CI pipeline that uses Claude: which calls wait for a person, how a pull request is reviewed, and what each run is allowed to do.
  *

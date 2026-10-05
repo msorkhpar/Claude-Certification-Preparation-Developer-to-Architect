@@ -1,14 +1,20 @@
 """The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md."""
+import logging
+
+log = logging.getLogger(__name__)
+
+
+def _chosen_model(request, policy):
+    wanted = request.get("model")
+    return wanted if wanted in policy["allowed"] else policy["routes"].get(request["task"], policy["default"])
 
 
 def route(request, policy, status):
+    log.debug("route input: %r", request)
     if status == "block":
         return None
-    wanted = request.get("model")
-    model = wanted if wanted in policy["allowed"] else policy["routes"].get(request["task"], policy["default"])
-    if status == "warn":
-        model = policy["cheaper"].get(model, model)
-    return model
+    model = _chosen_model(request, policy)
+    return policy["cheaper"].get(model, model) if status == "warn" else model
 
 
 def admit(spend, budget, estimate):
@@ -22,14 +28,22 @@ def admit(spend, budget, estimate):
     return "allow"
 
 
+def _cost(row, prices):
+    if row["model"] not in prices:
+        raise ValueError(f"unknown model: {row['model']}")
+    p = prices[row["model"]]
+    return row["input"] * p["input"] + row["cache_read"] * p["cache_read"] + row["output"] * p["output"]
+
+
+def _to_cents(value):
+    return (value + 500_000) // 1_000_000
+
+
 def showback(rows, prices):
     totals = {}
     for r in rows:
-        if r["model"] not in prices:
-            raise ValueError(f"unknown model: {r['model']}")
-        p = prices[r["model"]]
-        totals[r["team"]] = totals.get(r["team"], 0) + r["input"] * p["input"] + r["cache_read"] * p["cache_read"] + r["output"] * p["output"]
-    result = [{"team": team, "cents": (value + 500_000) // 1_000_000} for team, value in totals.items()]
+        totals[r["team"]] = totals.get(r["team"], 0) + _cost(r, prices)
+    result = [{"team": team, "cents": _to_cents(value)} for team, value in totals.items()]
     return sorted(result, key=lambda x: (-x["cents"], x["team"]))
 
 

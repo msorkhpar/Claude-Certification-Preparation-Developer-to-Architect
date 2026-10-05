@@ -84,6 +84,12 @@
       ],
       "defect": "counts a safety signal as handled when any person took over and not a safety hand off"
     },
+    "wrong-safety-never-holds": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "ships the assistant although a safety signal was missed"
+    },
     "wrong-overlong-inclusive": {
       "caught_by": [
         "e3"
@@ -92,7 +98,6 @@
     },
     "wrong-repeat-strict": {
       "caught_by": [
-        "e1",
         "e4"
       ],
       "defect": "accepts repeated questions only below the limit and not at it"
@@ -103,6 +108,12 @@
         "e5"
       ],
       "defect": "calls a segment weak when it is exactly at the resolution floor"
+    },
+    "wrong-floor-too-low": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "compares a segment with a floor ten points below the policy floor"
     },
     "wrong-weak-ignores-min-n": {
       "caught_by": [
@@ -129,18 +140,17 @@
       ],
       "defect": "counts a conversation a person settled as resolved by the assistant"
     },
-    "wrong-rounding-floor": {
+    "wrong-resolved-pct-floor": {
       "caught_by": [
-        "m1",
         "e9"
       ],
-      "defect": "rounds a percentage down and not half up"
+      "defect": "rounds the resolved percentage down and not half up"
     },
-    "wrong-safety-never-holds": {
+    "wrong-empty-ships": {
       "caught_by": [
-        "e2"
+        "e1"
       ],
-      "defect": "ships the assistant although a safety signal was missed"
+      "defect": "ships an empty batch instead of holding it for lack of data"
     }
   }
 }

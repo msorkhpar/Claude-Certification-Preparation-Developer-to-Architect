@@ -4,6 +4,21 @@ A support assistant answers from a handbook that changes every week. Its pipelin
 
 Names are Python's (`chunk_sections`, `search`, `choose_retrieval`, `reindex`, `stale`, `recall_at_k`); TypeScript has the camel-case names (`chunkSections`, `chooseRetrieval`, `recallAtK`); Java has the same camel-case names as static methods of `Pipeline`; Kotlin has top-level functions. A chunk is `Chunk(id, doc, version, text)`; the starter shows it in each language, with `doc_version` and `tokens` already written.
 
+## What is already written, and what you write
+
+The starter is a working pipeline with eight gaps cut out of it. Everything that is plumbing is written and correct: `doc_version` and `tokens`, the cutting of a document into sections with their ids and versions, the search loop that collects and ranks scores, and the re-index loop that builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (the unchanged text, an empty result, `None`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):
+
+1. `_chunk_text` unlocks `m1`: the text of a chunk with its title and section in front.
+2. `_split_section` unlocks `e1`: the parts of a long section, split at sentence ends under the word limit.
+3. `_score` unlocks `e2`: a code outweighs a plain word.
+4. `_visible` unlocks `e3`: a reader sees only the chunks of the documents allowed.
+5. `choose_retrieval` unlocks `e4`: the mechanism by corpus size, data shape and query pattern.
+6. `_status` unlocks `e5`: what a re-index does with one document (added, kept or replaced).
+7. `stale` unlocks `e6`: the chunks whose document changed or vanished.
+8. `recall_at_k` unlocks `e7`: recall over every labelled question.
+
+About twenty lines in all. The sections below describe the whole pipeline.
+
 ## What to write
 
 - `chunk_sections(doc_id, text, max_words=30)` cuts a document of the form `# Title`, then `## Section` headings, each followed by its body. Each section becomes one chunk with the id `<doc_id>/<Section>`, the version `doc_version(text)` and the text `<Title> > <Section>. <body>`. When a body has more than `max_words` words, split it at sentence ends (a full stop followed by a space) into parts that each hold at most `max_words` words, packed greedily; a single sentence longer than the limit stays whole. Every part keeps the prefix, and the ids of a split section end in `#1`, `#2` and so on (an unsplit section has no suffix).

@@ -1,4 +1,6 @@
 /** Evaluation kit: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits. See ../../statement.md. */
+import { logger } from "../logger.ts";
+const log = logger("evalkit");
 
 export type Line = [segment: string, cases: number, right: number, percent: number, cost: number];
 export type Pair = [segment: string, oldOk: boolean, newOk: boolean];
@@ -9,14 +11,22 @@ export function pct(part: number, whole: number): number {
   return whole ? Math.floor((200 * part + whole) / (2 * whole)) : 0;
 }
 
+function errorCost(wrong: number, segment: string, costs: Record<string, number>): number {
+  return wrong * (costs[segment] ?? 1);
+}
+
+function order(table: Line[]): Line[] {
+  return table.sort((a, b) => b[4] - a[4] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+}
+
 export function segmentTable(results: [string, boolean][], costs: Record<string, number>): Line[] {
+  log.debug("segmentTable input", results);
   const seen = new Map<string, [number, number]>();
   for (const [segment, correct] of results) {
     const [total, right] = seen.get(segment) ?? [0, 0];
     seen.set(segment, [total + 1, right + (correct ? 1 : 0)]);
   }
-  const table: Line[] = [...seen.entries()].map(([s, [n, r]]) => [s, n, r, pct(r, n), (n - r) * (costs[s] ?? 1)]);
-  return table.sort((a, b) => b[4] - a[4] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  return order([...seen.entries()].map(([s, [n, r]]): Line => [s, n, r, pct(r, n), errorCost(n - r, s, costs)]));
 }
 
 export function percentile(values: number[], p: number): number {
@@ -34,12 +44,15 @@ export function abVerdict(x1: number, n1: number, x2: number, n2: number, minN =
   return d > 0n ? "new is better" : "old is better";
 }
 
+function decision(blocked: string[], lost: number, gained: number): string {
+  return blocked.length === 0 && lost <= gained ? "ship" : "hold";
+}
+
 export function shadowGate(pairs: Pair[], protectedSegments: string[]): Gate {
   const lost = pairs.filter(([, o, n]) => o && !n).map((p) => p[0]);
   const gained = pairs.filter(([, o, n]) => n && !o).length;
   const blocked = [...new Set(lost.filter((s) => protectedSegments.includes(s)))].sort();
-  const ship = blocked.length === 0 && lost.length <= gained;
-  return { decision: ship ? "ship" : "hold", lost: lost.length, gained, blocked };
+  return { decision: decision(blocked, lost.length, gained), lost: lost.length, gained, blocked };
 }
 
 export function diagnose(found: boolean, supported: boolean, formatOk: boolean, passesOnStronger: boolean): string {

@@ -11,6 +11,7 @@ import java.util.TreeSet;
  * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
  */
 public class PolicyResolver {
+    private static final System.Logger LOG = System.getLogger(PolicyResolver.class.getName());
     record Result(Map<String, Object> settings, List<String> notes) {}
 
     record Entry(String level, Object value) {}
@@ -21,6 +22,7 @@ public class PolicyResolver {
 
     /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
     static Result effective(Map<String, Map<String, Object>> layers) {
+        LOG.log(System.Logger.Level.DEBUG, "effective input: {0}", layers);
         Map<String, Object> managed = layers.getOrDefault("managed", Map.of());
         boolean lockRules = Boolean.TRUE.equals(managed.get("allowManagedPermissionRulesOnly"));
         boolean lockMcp = Boolean.TRUE.equals(managed.get("allowManagedMcpServersOnly"));

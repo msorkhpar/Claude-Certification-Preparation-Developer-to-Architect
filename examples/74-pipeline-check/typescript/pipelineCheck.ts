@@ -5,9 +5,12 @@
 // without a person; the Message Batches API gives a discount and may take up to 24 hours with no latency guarantee, so it fits work nobody waits for; a review of many files at once is
 // better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls
 // Claude.
+import { logger } from "./logger.ts";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+const log = logger("pipeline_check");
+
 
 export const HERE = fileURLToPath(new URL("..", import.meta.url));
 const WRITERS = ["Bash", "Edit", "Write"];

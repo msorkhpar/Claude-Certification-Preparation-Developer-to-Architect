@@ -4,7 +4,10 @@ The corpus is four short documents. The "semantic" rankings are scripted: they s
 offers no embedding model and points to a provider). What the code shows is the design around that index. Read on 2026-10-04 against the Anthropic post on contextual retrieval and the Claude
 documentation page "Embeddings". Nothing here calls a model.
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 STOP = {"a", "an", "the", "is", "are", "can", "i", "what", "does", "do", "how", "my", "it", "of", "to", "for", "and", "or", "in", "when", "will", "be", "that", "this", "with", "by", "at"}
 DOCS = {
@@ -27,6 +30,7 @@ def chunk_fixed(doc_id, text, size):
 
 def chunk_sections(doc_id, text, context):
     """Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone."""
+    log.debug("chunk_sections input: %r", text)
     head, *sections = text.split("\n## ")
     title = head.removeprefix("# ")
     chunks = []

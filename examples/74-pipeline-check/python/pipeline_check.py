@@ -6,9 +6,12 @@ without a person; the Message Batches API gives a discount and may take up to 24
 better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls
 Claude.
 """
+import logging
 import json
 import shlex
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve().parent.parent
 WRITERS = ("Bash", "Edit", "Write")

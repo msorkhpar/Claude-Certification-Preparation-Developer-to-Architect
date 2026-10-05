@@ -5,6 +5,8 @@
 // Claude Sonnet 5.5). The prompting guide says to put long documents "near the top of your prompt, above your query". This file orders
 // the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the
 // breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.
+import { logger } from "./logger.ts";
+const log = logger("prompt_budget");
 
 export type Module = { name: string; static: boolean; text: string };
 export type Prompt = { blocks: Module[]; tokens: number; prefix_tokens: number; breakpoint: number | null };
@@ -25,6 +27,7 @@ const fill = (text: string, variables: Record<string, string>) => text.replace(/
 
 /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */
 export function assemble(modules: Module[], variables: Record<string, string>): Prompt {
+  log.debug("assemble input", modules);
   const ordered = [...modules.filter((m) => m.static), ...modules.filter((m) => !m.static)];
   const blocks = ordered.map((m) => ({ ...m, text: m.static ? m.text : fill(m.text, variables) }));
   const prefix = blocks.filter((b) => b.static).reduce((sum, b) => sum + tokens(b.text), 0);

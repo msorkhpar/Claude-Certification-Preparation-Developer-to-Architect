@@ -1,3 +1,5 @@
+private val log = System.getLogger("extraction_run")
+
 /**
  * An extraction run in miniature: a scripted model reads six documents, every record is validated for what a schema cannot check, only the errors a second look can fix
  * are retried, what the document does not hold goes to a person, and the accuracy is reported on every document and not only on the validated ones.
@@ -44,6 +46,7 @@ fun validate(record: Rec, text: String): List<Err> {
 
 /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
 fun extract(docId: String, text: String): Extracted {
+    log.log(System.Logger.Level.DEBUG, "extract input: {0}", text)
     var retried = listOf<String>()
     val replies = REPLIES.getValue(docId)
     var record = replies[0]

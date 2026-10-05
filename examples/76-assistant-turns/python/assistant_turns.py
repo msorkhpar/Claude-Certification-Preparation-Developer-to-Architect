@@ -4,7 +4,10 @@ that fit, and a memory that crosses sessions is read per customer and marked whe
 The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
 a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
 """
+import logging
 from datetime import date
+
+log = logging.getLogger(__name__)
 
 RISK = ("hurt myself", "end my life", "emergency")
 ASKS_FOR_PERSON = ("human", "a person", "an agent")
@@ -13,6 +16,7 @@ STORE = {"ada": [("address", "12 Elm Road", "2026-09-20"), ("plan", "Plus", "202
 
 def route(message, misses=0):
     """Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers."""
+    log.debug("route input: %r", message)
     text = message.lower()
     if any(phrase in text for phrase in RISK):
         return "handoff:safety"

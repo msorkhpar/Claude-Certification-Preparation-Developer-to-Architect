@@ -2,6 +2,21 @@
 
 A company is about to give three hundred developers Claude Code. The platform team has drafted the policy and the plan, and the draft is wrong in several places: the lock that makes managed permissions the only ones sits in a project file where it does nothing, plugins can come from anywhere, a managed default model is mistaken for a lock, the spend limits do not add up, and the adoption targets count lines and prompts. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The names of the settings are the documented ones of Claude Code (settings and managed-settings pages, read 2026-10-04); the numbers (an effort cap of at most `high`, a baseline of at least 4 weeks, group limits that add up to the organisation limit) are this course's design values. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files.
 
+## What is already written, and what you write
+
+The three files exist as a draft that a reader can open and that the tests can parse: the permission deny list, the model setting and the section headings are there. You change values and fill in sections; there is no code to write and no function to log from, because the tests read the files. The draft is wrong in these places, in this order, and each fix unlocks the cases named:
+
+1. The managed file does not lock permission rules or turn off bypass mode (`m1`; its deny list already protects the environment file).
+2. The project file holds the managed-only keys `allowManagedHooksOnly` and `strictKnownMarketplaces`, where they do nothing: move them to the managed file and set `allowManagedHooksOnly` to `true` there (`e1`).
+3. `strictKnownMarketplaces` is empty and `disableSideloadFlags` is missing: list the company's marketplace and set the flag (`e2`).
+4. There is no managed MCP allowlist: make it exclusive, give it valid entries and keep the denylist apart (`e3`).
+5. `model` is set with no `availableModels`, and `maxEffortLevel` is `max`: list the models, keep the default inside the list and cap the effort (`e4`).
+6. The Spend limits section has one sentence and no table: write the table of limits that add up, and say that usage credits are on (`e5`).
+7. The Adoption section sets activity as its targets and has no baseline: state the baseline and replace the targets with outcomes (`e6`).
+8. The Precedence section has the table of the five levels and a `TODO` where the note about groups belongs: write the note, in the words of the rules below (`e7`).
+
+The sections below describe the whole set of files.
+
 ## What to write
 
 The project folder holds three files.

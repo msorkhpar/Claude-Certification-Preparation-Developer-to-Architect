@@ -1,3 +1,5 @@
+private val log = System.getLogger("capacity_model")
+
 /**
  * A capacity and cost model for one workload: the limits it needs, the tier that gives them, and the monthly bill.
  *
@@ -31,6 +33,7 @@ fun smallestTier(need: Need, tiers: List<Tier>): String =
 
 /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */
 fun monthlyCents(w: Workload, requests: Long, batchPercent: Long): Long {
+    log.log(System.Logger.Level.DEBUG, "monthlyCents input: {0}", w)
     val perRequest = w.input * 200 + w.cacheWrite * 250 + w.cacheRead * 20 + w.output * 1000 // cents times tokens, per million
     return requests * perRequest * (200 - batchPercent) / (200 * 1_000_000L)
 }

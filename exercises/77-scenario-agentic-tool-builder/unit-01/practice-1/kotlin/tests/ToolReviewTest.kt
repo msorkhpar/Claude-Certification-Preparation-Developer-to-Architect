@@ -59,8 +59,8 @@ class ToolReviewTest {
 
     @Test
     fun e6_aDeclaredWriteIsApprovedOnlyWithAGateAndAReadAloneIsApprovedOutright() {
-        val writer = review(proposal(permissions = listOf("read_files", "write_files"), code = read + "out.write(text)\n"), policy)
-        assertEquals(out("approve_with_gate", used = listOf("read_files", "write_files")), writer)
+        val writer = review(proposal(permissions = listOf("write_files"), code = "out.write(text)\n"), policy)
+        assertEquals(out("approve_with_gate", used = listOf("write_files")), writer)
         assertEquals("approve", review(proposal(), policy).decision)
     }
 

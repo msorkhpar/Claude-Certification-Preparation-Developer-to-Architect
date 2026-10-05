@@ -3,6 +3,9 @@
  *
  * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
  */
+
+private val log = System.getLogger("policy_resolver")
+
 data class Result(val settings: Map<String, Any>, val notes: List<String>)
 
 val LEVELS = listOf("managed", "command line", "local", "project", "user")
@@ -11,6 +14,7 @@ val EFFORT = listOf("low", "medium", "high", "xhigh", "max")
 
 /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
 fun effective(layers: Map<String, Map<String, Any>>): Result {
+    log.log(System.Logger.Level.DEBUG, "effective input: {0}", layers)
     val managed = layers["managed"] ?: mapOf()
     val lockRules = managed["allowManagedPermissionRulesOnly"] == true
     val lockMcp = managed["allowManagedMcpServersOnly"] == true

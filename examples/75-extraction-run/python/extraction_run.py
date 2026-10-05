@@ -4,6 +4,10 @@ are retried, what the document does not hold goes to a person, and the accuracy 
 The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
 (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 DOCS = {
     "d1": ("typed", "Vendor: Acme Ltd. Lines: 10.00 20.00. Total: 30.00"),
     "d2": ("typed", "Vendor: Borealis Co. Lines: 40.00 5.00. Total: 45.00"),
@@ -44,6 +48,7 @@ def validate(record, text):
 
 def extract(doc_id, text):
     """One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried."""
+    log.debug("extract input: %r", text)
     retried, replies = [], REPLIES[doc_id]
     for attempt in (1, 2):
         record = replies[min(attempt, len(replies)) - 1]

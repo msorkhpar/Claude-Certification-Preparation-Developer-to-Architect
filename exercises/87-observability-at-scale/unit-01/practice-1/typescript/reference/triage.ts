@@ -1,4 +1,6 @@
 /** Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md. */
+import { logger } from "../logger.ts";
+const log = logger("triage");
 
 export type Span = { id: string; parent: string; kind: string; name: string; status: string; ms: number; note: string };
 export type Cause = { layer: string; name: string; why: string; path: string[] };
@@ -11,7 +13,8 @@ export function bucket(traceId: string): number {
   return h % 100;
 }
 
-export function keepTrace(traceId: string, spans: Span[], rate: number, feedback = false, slowMs = 5000): string {
+export function keepTrace(traceId: string, spans: Span[], rate: number, feedback = false, slowMs = 5000): string | null {
+  log.debug("keepTrace input", spans);
   if (spans.some((s) => s.status === "error")) return "error";
   if (spans[0].ms > slowMs) return "slow";
   const tools = spans.filter((s) => s.kind === "tool").map((s) => s.name);
@@ -20,12 +23,20 @@ export function keepTrace(traceId: string, spans: Span[], rate: number, feedback
   return bucket(traceId) < rate ? "sampled" : "dropped";
 }
 
+function deepest(failed: Span[]): Span {
+  const parents = new Set(failed.map((s) => s.parent));
+  return failed.find((s) => !parents.has(s.id))!;
+}
+
+function blamedRetrieval(spans: Span[]): Span | undefined {
+  return spans.find((s) => s.kind === "retrieval" && (s.note === "stale" || s.note === "no-hits"));
+}
+
 export function rootCause(spans: Span[]): Cause {
   const byId = new Map(spans.map((s) => [s.id, s]));
   const failed = spans.filter((s) => s.status === "error");
   if (failed.length > 0) {
-    const parents = new Set(failed.map((s) => s.parent));
-    const origin = failed.find((s) => !parents.has(s.id))!;
+    const origin = deepest(failed);
     const path: string[] = [];
     let cursor: Span | undefined = origin;
     while (cursor !== undefined) {
@@ -34,7 +45,8 @@ export function rootCause(spans: Span[]): Cause {
     }
     return { layer: origin.kind, name: origin.name, why: "failed", path: path.reverse() };
   }
-  for (const s of spans) if (s.kind === "retrieval" && (s.note === "stale" || s.note === "no-hits")) return { layer: "retrieval", name: s.name, why: s.note, path: [spans[0].name, s.name] };
+  const s = blamedRetrieval(spans);
+  if (s !== undefined) return { layer: "retrieval", name: s.name, why: s.note, path: [spans[0].name, s.name] };
   return { layer: "none", name: "", why: "no span failed", path: [] };
 }
 

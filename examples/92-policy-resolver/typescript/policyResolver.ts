@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("policy_resolver");
 /**
  * Which value does a developer's Claude Code actually use when a team, a person and an organisation all set the same key? A small resolver that applies the documented precedence, the keys only an organisation can set, the lists that merge and the locks that stop them merging.
  *
@@ -12,6 +14,7 @@ const EFFORT = ["low", "medium", "high", "xhigh", "max"];
 
 /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
 export function effective(layers: Layers): [Record<string, Value>, string[]] {
+  log.debug("effective input", layers);
   const managed = layers["managed"] ?? {};
   const lockRules = managed["allowManagedPermissionRulesOnly"] === true;
   const lockMcp = managed["allowManagedMcpServersOnly"] === true;

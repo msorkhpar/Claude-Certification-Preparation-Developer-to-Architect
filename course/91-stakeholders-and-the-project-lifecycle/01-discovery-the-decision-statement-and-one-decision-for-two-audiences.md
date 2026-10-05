@@ -64,6 +64,9 @@ The example is the brief and the figures behind it. It has the whole-percent rou
 
 The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 from collections import namedtuple
 
 Sla = namedtuple("Sla", "name limit direction unit")
@@ -82,6 +85,7 @@ def break_even(error_cost, review_cost):
 
 def sla_line(sla, measured):
     """A service level is met at its limit exactly, and a miss says by how much."""
+    log.debug("sla_line input: %r", sla)
     met = measured <= sla.limit if sla.direction == "max" else measured >= sla.limit
     verdict = "met" if met else f"missed by {abs(measured - sla.limit)} {sla.unit}"
     word = "limit" if sla.direction == "max" else "floor"
@@ -136,6 +140,8 @@ sponsor: Routing by confidence costs 80,000 a month against 315,000 for people a
 engineer: design=Routing by confidence; cost=80000; baseline=315000; saving=235000; weakest=credit 63% at 250 an error
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("tradeoff_brief");
 /**
  * One decision told to two audiences: the figures an engineer needs, the same figures in the words a sponsor decides with, and an honest check of each service level at its exact edge.
  *
@@ -158,6 +164,7 @@ export function breakEven(errorCost: number, reviewCost: number): number {
 
 /** A service level is met at its limit exactly, and a miss says by how much. */
 export function slaLine(sla: Sla, measured: number): string {
+  log.debug("slaLine input", sla);
   const met = sla.direction === "max" ? measured <= sla.limit : measured >= sla.limit;
   const verdict = met ? "met" : `missed by ${Math.abs(measured - sla.limit)} ${sla.unit}`;
   const word = sla.direction === "max" ? "limit" : "floor";
@@ -220,6 +227,7 @@ import java.util.List;
  * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
  */
 public class TradeoffBrief {
+    private static final System.Logger LOG = System.getLogger(TradeoffBrief.class.getName());
     record Sla(String name, int limit, String direction, String unit) {}
 
     record Segment(String name, int right, int total, int errorCost) {}
@@ -242,6 +250,7 @@ public class TradeoffBrief {
 
     /** A service level is met at its limit exactly, and a miss says by how much. */
     static String slaLine(Sla sla, int measured) {
+        LOG.log(System.Logger.Level.DEBUG, "slaLine input: {0}", sla);
         boolean met = sla.direction().equals("max") ? measured <= sla.limit() : measured >= sla.limit();
         String verdict = met ? "met" : "missed by " + Math.abs(measured - sla.limit()) + " " + sla.unit();
         String word = sla.direction().equals("max") ? "limit" : "floor";
@@ -302,6 +311,9 @@ engineer: design=Routing by confidence; cost=80000; baseline=315000; saving=2350
  *
  * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
  */
+
+private val log = System.getLogger("tradeoff_brief")
+
 data class Sla(val name: String, val limit: Int, val direction: String, val unit: String)
 
 data class Segment(val name: String, val right: Int, val total: Int, val errorCost: Int)
@@ -316,6 +328,7 @@ fun breakEven(errorCost: Int, reviewCost: Int): Int = 100 - (100 * reviewCost + 
 
 /** A service level is met at its limit exactly, and a miss says by how much. */
 fun slaLine(sla: Sla, measured: Int): String {
+    log.log(System.Logger.Level.DEBUG, "slaLine input: {0}", sla)
     val met = if (sla.direction == "max") measured <= sla.limit else measured >= sla.limit
     val verdict = if (met) "met" else "missed by ${Math.abs(measured - sla.limit)} ${sla.unit}"
     val word = if (sla.direction == "max") "limit" else "floor"

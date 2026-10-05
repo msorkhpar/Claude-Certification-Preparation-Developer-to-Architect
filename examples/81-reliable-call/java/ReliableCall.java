@@ -14,6 +14,7 @@ import java.util.function.IntFunction;
  * a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.
  */
 public final class ReliableCall {
+    private static final System.Logger LOG = System.getLogger(ReliableCall.class.getName());
     /** A failure worth retrying: a timeout, a rate limit, a lost response. */
     static final class Transient extends RuntimeException {
         Transient(String message) {
@@ -31,6 +32,7 @@ public final class ReliableCall {
 
     /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */
     static String refund(Ledger ledger, String key, String order, int amount, boolean loseResponse) {
+        LOG.log(System.Logger.Level.DEBUG, "refund input: {0}", key);
         if (key != null && ledger.keys.containsKey(key)) return ledger.keys.get(key);
         ledger.paid.add(order + ":" + amount);
         String receipt = "refund-" + ledger.paid.size();

@@ -7,6 +7,18 @@ is not configured. In this practice you correct the files. There is no program t
 documented ones of Claude Code (checked 2026-10-04) plus this course's own conventions for the note. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and
 edit the files there; each language folder holds its own copy of the files.
 
+## What is already written, and what you write
+
+The starter is the draft of the setup with five gaps cut out of it: the files exist and are wrong or empty. The `docs` server is written. Each gap is marked by a `TODO n of 5` comment in the file where the format allows one (`.mcp.json` and `settings.json` are JSON and take none) that says what is missing, with one example and the cases it unlocks. Delete the comment when the file is done. A file holds no program, so there is no logger to write here: the tests read the files and report the failing case with its message. Write them in this order:
+
+1. `.claude/agents/explorer.md` unlocks `m1` and `e2`: a read-only explorer that names only configured servers.
+2. `.claude/agents/scaffolder.md` unlocks `e3`: the tools of the scaffolder, with no `Bash`.
+3. `.claude/settings.json` unlocks `m1`, `e3`, `e4` and `e5`: the allow and deny rules.
+4. `.mcp.json` unlocks `e1`: the ticket address with a default and the token read from the environment.
+5. `docs/team-setup.md` unlocks `e6` and `e7`: the variables, the three sessions and no personal path.
+
+About ten lines in all. The sections below describe the whole setup.
+
 ## What to write
 
 The project folder holds five files.

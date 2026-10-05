@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
  */
 public final class ExtractionRun {
+    private static final System.Logger LOG = System.getLogger(ExtractionRun.class.getName());
     record Doc(String kind, String text) {}
 
     record Rec(String vendor, List<Integer> lines, Integer total, boolean conflict) {}
@@ -63,6 +64,7 @@ public final class ExtractionRun {
 
     /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
     static Extracted extract(String docId, String text) {
+        LOG.log(System.Logger.Level.DEBUG, "extract input: {0}", text);
         List<String> retried = List.of();
         List<Rec> replies = REPLIES.get(docId);
         Rec record = replies.get(0);

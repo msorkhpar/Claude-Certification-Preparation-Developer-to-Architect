@@ -12,6 +12,7 @@ import java.util.TreeSet;
  * The cases, costs, timings and counts are invented. The model names and dates are the ones the Claude documentation listed on 2026-10-04; the rules about settings are those of its migration guide for Claude Sonnet 5.5. Nothing here calls a model.
  */
 public class RolloutGate {
+    private static final System.Logger LOG = System.getLogger(RolloutGate.class.getName());
     record Case(String id, String segment, boolean mustPass, boolean oldOk, boolean newOk, int oldCost, int newCost, int newMs) {}
 
     record Request(String model, Double temperature, Double topP, Double topK, String thinking, String toolChoice, boolean strict, boolean prefill) {}
@@ -82,6 +83,7 @@ public class RolloutGate {
 
     /** A go needs every check to pass; every check that fails adds a reason, in a fixed order. */
     static Verdict gate(List<Case> cases, Set<String> protectedSegments, int maxCostUp, int maxP95) {
+        LOG.log(System.Logger.Level.DEBUG, "gate input: {0}", cases);
         List<String> reasons = new ArrayList<>();
         TreeSet<String> failed = new TreeSet<>();
         TreeSet<String> hit = new TreeSet<>();

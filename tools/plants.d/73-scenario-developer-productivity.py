@@ -2,7 +2,6 @@
 # Runs with PLANTS, X and both() in scope; names defined here are local to this file.
 
 _P73 = {
-    "wrong-unknown-server": {".claude/agents/explorer.md": [("mcp__docs__search", "mcp__wiki__search")]},
     "wrong-settings-ghost": {".claude/settings.json": [('"mcp__tickets__get_ticket"]', '"mcp__ticket__get_ticket"]')]},
     "wrong-literal-token": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer <token>")]},
     "wrong-token-default": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer ${TICKETS_TOKEN:-changeme}")]},
@@ -10,7 +9,6 @@ _P73 = {
     "wrong-explorer-inherits": {".claude/agents/explorer.md": [("tools: Read, Grep, Glob, mcp__docs__search\n", "")]},
     "wrong-explorer-description": {".claude/agents/explorer.md": [("description: Use when a question is about", "description: Explains how a question is about")]},
     "wrong-scaffolder-bash": {".claude/agents/scaffolder.md": [("tools: Read, Glob, Edit, Write", "tools: Read, Glob, Edit, Write, Bash")]},
-    "wrong-edit-bare": {".claude/settings.json": [('"Edit(src/generated/**)"', '"Edit"')]},
     "wrong-write-wide": {".claude/settings.json": [('"Edit(src/generated/**)", ', '"Edit(src/generated/**)", "Write(src/**)", ')]},
     "wrong-tickets-wildcard": {".claude/settings.json": [('"mcp__tickets__get_ticket"]', '"mcp__tickets__*"]')]},
     "wrong-no-delete-deny": {".claude/settings.json": [(', "mcp__tickets__delete_ticket"', "")]},

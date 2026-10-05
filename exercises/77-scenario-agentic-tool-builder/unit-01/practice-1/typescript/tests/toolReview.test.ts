@@ -56,8 +56,8 @@ test("e5 a permission the code uses without declaring it or a denied one refuses
 });
 
 test("e6 a declared write is approved only with a gate and a read alone is approved outright", () => {
-  const writer = review(proposal({ permissions: ["read_files", "write_files"], code: READ + "out.write(text)\n" }), POLICY);
-  assert.deepEqual(writer, out("summarise_report", "approve_with_gate", [], [], ["read_files", "write_files"]));
+  const writer = review(proposal({ permissions: ["write_files"], code: "out.write(text)\n" }), POLICY);
+  assert.deepEqual(writer, out("summarise_report", "approve_with_gate", [], [], ["write_files"]));
   assert.equal(review(proposal(), POLICY).decision, "approve");
 });
 

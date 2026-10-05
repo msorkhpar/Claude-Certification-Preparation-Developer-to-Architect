@@ -11,6 +11,7 @@ import java.util.Locale;
  * limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.
  */
 public final class CapacityModel {
+    private static final System.Logger LOG = System.getLogger(CapacityModel.class.getName());
     /** Tokens per request and requests per minute. */
     record Workload(long rpm, long input, long cacheWrite, long cacheRead, long output) {}
 
@@ -40,6 +41,7 @@ public final class CapacityModel {
 
     /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */
     static long monthlyCents(Workload w, long requests, long batchPercent) {
+        LOG.log(System.Logger.Level.DEBUG, "monthlyCents input: {0}", w);
         long perRequest = w.input() * 200 + w.cacheWrite() * 250 + w.cacheRead() * 20 + w.output() * 1000; // cents times tokens, per million
         return requests * perRequest * (200 - batchPercent) / (200 * 1_000_000L);
     }

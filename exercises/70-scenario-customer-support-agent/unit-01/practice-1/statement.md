@@ -11,6 +11,18 @@ Names are Python's (`audit`); TypeScript has the same name and the same snake-ca
 and `Report`; Kotlin has the top-level function `audit` and the data classes of the same names. In Java and Kotlin the fields are camel case (`needsHuman`,
 `refundCents`, `meetsTarget`, `overEscalated`, `underEscalated`, `skippedPrerequisite`, `wrongTool`, `overLimitRefunds`).
 
+## What is already written, and what you write
+
+The starter is a working audit with five gaps cut out of it. The plumbing is written and correct: the session count, the resolved, over- and under-escalated counts, and `audit` itself, which calls the gaps and builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):
+
+1. `skipped_prerequisite` unlocks `e2`: the order of the steps and the failed identity check.
+2. `has_wrong_tool` unlocks `e6`: a known right tool that differs from the tool used.
+3. `is_over_limit` unlocks `e3`: a refund that was made above the limit.
+4. `first_contact_rate` unlocks `e1` and `e5`: the rounded rate, and 0 for no sessions.
+5. `diagnose` unlocks `e4` and the diagnosis of `m1` and `e1`: the order of the fixes.
+
+About a dozen lines in all. The sections below describe the whole audit.
+
 ## What to write
 
 A step is one call the agent made: `tool`, `ok` (whether it succeeded) and `right_tool`, the tool it should have used (absent when the right tool is not known). A session has

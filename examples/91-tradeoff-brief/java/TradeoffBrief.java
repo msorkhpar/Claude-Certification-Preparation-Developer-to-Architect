@@ -8,6 +8,7 @@ import java.util.List;
  * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
  */
 public class TradeoffBrief {
+    private static final System.Logger LOG = System.getLogger(TradeoffBrief.class.getName());
     record Sla(String name, int limit, String direction, String unit) {}
 
     record Segment(String name, int right, int total, int errorCost) {}
@@ -30,6 +31,7 @@ public class TradeoffBrief {
 
     /** A service level is met at its limit exactly, and a miss says by how much. */
     static String slaLine(Sla sla, int measured) {
+        LOG.log(System.Logger.Level.DEBUG, "slaLine input: {0}", sla);
         boolean met = sla.direction().equals("max") ? measured <= sla.limit() : measured >= sla.limit();
         String verdict = met ? "met" : "missed by " + Math.abs(measured - sla.limit()) + " " + sla.unit();
         String word = sla.direction().equals("max") ? "limit" : "floor";

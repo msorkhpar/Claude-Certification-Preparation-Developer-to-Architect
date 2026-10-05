@@ -5,6 +5,8 @@
 // interactions, and multi-agent systems use about 15× more tokens than chats". This file turns those two statements into a rule that picks
 // the lowest rung a task can stand on and prices it with the article's multipliers. The multipliers are the articles' reported figures, not
 // a measurement of your workload, and the rule is the course's own teaching model.
+import { logger } from "./logger.ts";
+const log = logger("pattern_ladder");
 
 export type Task = { name: string; one_step: boolean; steps: number; needs_external: boolean; steps_known: boolean; independent_parts: boolean; value: number; chat_cost: number };
 
@@ -21,6 +23,7 @@ export const TASKS: Task[] = [
 
 /** The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost. */
 export function choosePattern(task: Task): string {
+  log.debug("choosePattern input", task);
   if (task.one_step) return task.needs_external ? "augmented call" : "plain call";
   if (task.steps_known) return "workflow";
   if (task.independent_parts && task.value >= MULTIPLIER["multi-agent"] * task.chat_cost) return "multi-agent";

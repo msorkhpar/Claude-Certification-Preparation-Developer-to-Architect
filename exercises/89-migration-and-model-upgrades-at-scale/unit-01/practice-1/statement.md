@@ -4,6 +4,22 @@ A team moves its product to a newer model the week before the old one retires. I
 
 Names are Python's (`retirement_status`, `migrate_request`, `gate`, `rollout_step`); TypeScript has the camel-case names (`retirementStatus`, `migrateRequest`, `rolloutStep`); Java has the same camel-case names as static methods of `Rollout`; Kotlin has top-level functions. A case is `Case(id, segment, must_pass, old_ok, new_ok, old_cost, new_cost, new_ms)` and a request is `Request(model, temperature, top_p, top_k, thinking, tool_choice, strict, prefill)`; the starter shows both in each language, with `days_until` and `percentile` (nearest rank) already written. A model is a `(name, retirement date, tentative)` triple, where the date is ISO text (`2026-11-30`) and tentative says that the date may still move later.
 
+## What is already written, and what you write
+
+The starter is a working kit with nine small gaps cut out of it. The plumbing is written: the data types, `days_until`, `percentile`, the sorting of the calendar, the sampling and tool-choice parts of the migration and the assembly of the gate from its checks. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `_status_line` unlocks `e7`: one calendar line, with its level and the tentative mark.
+2. `_migrate_thinking` unlocks `e8`: the thinking setting and the change that names it.
+3. `_must_pass` unlocks `e1`: the failed must-pass ids, sorted.
+4. `_protected` unlocks `e2`: the protected segments that lost answers.
+5. `_net_loss` unlocks `e3`: more losses than gains, with both counts.
+6. `_cost` unlocks `e4`: the cost rise in whole percent against the limit.
+7. `_latency` unlocks `e5`: the 95th percentile against the limit.
+8. `_decision` unlocks `m1`: go with no reasons, no-go otherwise.
+9. `rollout_step` unlocks `e6`: hold, roll back, complete or advance.
+
+About twenty lines in all. The sections below describe the whole kit.
+
 ## What to write
 
 - `retirement_status(models, today)` returns one line per model, `<name>: <days> days, <level>`, with ` (tentative)` added when the date is tentative. Days come from `days_until(today, date)` and are negative once the date has passed. The level is `retired` below zero, `urgent` up to 14 days, `migrate now` up to 60 days and `watch` beyond. The lines run from the fewest days left to the most, ties by name.

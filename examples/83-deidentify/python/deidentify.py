@@ -6,13 +6,17 @@ This file is a teaching model of that design, not a compliance control: patterns
 that mean nothing to the model, the vault that maps tokens back stays in the caller, and the audit entry records sizes and counts, never
 the prompt. The patterns do not find names, and the output shows that gap on purpose. No model is called.
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 PATTERNS = [("EMAIL", re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")), ("MEMBER", re.compile(r"\bM-\d{6}\b"))]
 
 
 def tokenise(text, vault):
     """Replaces every match by a token; the same value always gets the same token. `vault` maps value to token and stays local."""
+    log.debug("tokenise input: %r", text)
     for label, pattern in PATTERNS:
         def swap(match):
             value = match.group(0)

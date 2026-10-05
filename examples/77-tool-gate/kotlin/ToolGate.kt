@@ -1,3 +1,5 @@
+private val log = System.getLogger("tool_gate")
+
 /**
  * An approval gate for tools that an agent proposes, in miniature: the proposal is decided from the permissions it asks for, a reviewer answers the ones that need a person,
  * an approved tool runs and its result is checked against the schema it declared, and every step leaves a line in an audit log.
@@ -23,6 +25,7 @@ val REVIEWER = mapOf("write_summary" to true, "tidy_up" to false) // the person'
 
 /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
 fun decide(permissions: List<String>): Decision {
+    log.log(System.Logger.Level.DEBUG, "decide input: {0}", permissions)
     val denied = permissions.filter { it in DENIED }
     if (denied.isNotEmpty()) return Decision("refused", denied)
     val gated = permissions.filter { it in NEEDS_APPROVAL }

@@ -12,6 +12,7 @@ import java.util.Map;
  * a measurement of your workload, and the rule is the course's own teaching model.
  */
 public final class PatternLadder {
+    private static final System.Logger LOG = System.getLogger(PatternLadder.class.getName());
     record Task(String name, boolean oneStep, int steps, boolean needsExternal, boolean stepsKnown, boolean independentParts, double value, double chatCost) {}
 
     static final Map<String, Integer> MULTIPLIER = Map.of("plain call", 1, "augmented call", 1, "agent", 4, "multi-agent", 15); // a workflow costs one chat per step
@@ -26,6 +27,7 @@ public final class PatternLadder {
 
     /** The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost. */
     static String choosePattern(Task task) {
+        LOG.log(System.Logger.Level.DEBUG, "choosePattern input: {0}", task);
         if (task.oneStep()) return task.needsExternal() ? "augmented call" : "plain call";
         if (task.stepsKnown()) return "workflow";
         if (task.independentParts() && task.value() >= MULTIPLIER.get("multi-agent") * task.chatCost()) return "multi-agent";

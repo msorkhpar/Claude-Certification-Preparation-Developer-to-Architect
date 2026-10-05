@@ -4,6 +4,22 @@ A platform team gives every agent every tool, lets all of them load at once, con
 
 Names are Python's (`audit`, `plan_loading`, `choose_mechanism`, `authorize`, `gateway`); TypeScript has the camel-case names (`planLoading`, `chooseMechanism`); Java has the same camel-case names as static methods of `Capability`; Kotlin has top-level functions. The starter shows the types of each language: Python and TypeScript use plain dictionaries and objects, Java and Kotlin use records and data classes (`Agent`, `Tool`, `AuditResult`, `Plan`, `Request`, `Policy`, `Outcome`).
 
+## What is already written, and what you write
+
+The starter is a working capability design with ten small gaps cut out of it. Everything that is plumbing is written and correct: the assembly of the audit, the plan of what loads up front, and the gateway that looks up the team and builds its answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (an empty list, the input unchanged, `None`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):
+
+1. `_remove` and 2. `_risky` unlock `m1`: the tools to take away and the risky ones among them.
+3. `_dormant` unlocks `e1`: held, needed tools nobody used.
+4. `_clamp` unlocks `e3`: the number of tools kept loaded, between three and five.
+5. `_defers` unlocks `e2`: whether the definitions are deferred (ten tools, or over ten thousand tokens).
+6. `_ranked` unlocks `e3`: the tools to load first, the most used first and by name among equals.
+7. `choose_mechanism` unlocks `e4`: the mechanism by counterpart, path and number of clients.
+8. `authorize` unlocks `e5`: whose rights a tool call uses.
+9. `_verdict` unlocks `e6`: the decision and reason, checking credential, model, tool and rate in that order.
+10. `_record` unlocks `e7`: the record of a decision, with no content.
+
+About twenty lines in all. The sections below describe the whole design.
+
 ## What to write
 
 - `audit(agent, catalog)` compares what an agent holds with what its role needs. `agent` has `holds` (a list of tool names), `needs` (a list) and `used` (tool name to the number of calls). `catalog` maps each tool to its `access` class (`read`, `draft`, `money` or `destroy`). Return `remove` (the held tools that are not needed, in the order held), `risky` (those of them whose access is `money` or `destroy`), `missing` (the needed tools that are not held, in the order needed) and `dormant` (the held tools that are needed and have no calls). A dormant tool is reported and never removed.

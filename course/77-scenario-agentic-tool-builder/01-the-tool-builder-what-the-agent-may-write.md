@@ -58,6 +58,10 @@ an approved tool runs and its result is checked against the schema it declared, 
 The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
 The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 DENIED = ("network", "run_process")
 NEEDS_APPROVAL = ("write_files",)
 SCHEMA = {"headline": str, "rows": int}
@@ -74,6 +78,7 @@ REVIEWER = {"write_summary": True, "tidy_up": False}  # the person's answers, by
 
 def decide(permissions):
     """Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic."""
+    log.debug("decide input: %r", permissions)
     denied = [p for p in permissions if p in DENIED]
     if denied:
         return "refused", denied
@@ -134,6 +139,8 @@ audit: 4 proposals, 1 ran, 1 rejected, 1 refused, 1 declined
 //
 // The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
 // The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("tool_gate");
 const DENIED = ["network", "run_process"];
 const NEEDS_APPROVAL = ["write_files"];
 const SCHEMA: Record<string, string> = { headline: "string", rows: "number" };
@@ -151,6 +158,7 @@ const REVIEWER: Record<string, boolean> = { write_summary: true, tidy_up: false 
 
 /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
 export function decide(permissions: string[]): [string, string[]] {
+  log.debug("decide input", permissions);
   const denied = permissions.filter((p) => DENIED.includes(p));
   if (denied.length > 0) return ["refused", denied];
   const gated = permissions.filter((p) => NEEDS_APPROVAL.includes(p));
@@ -218,6 +226,7 @@ import java.util.Map;
  * The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
  */
 public final class ToolGate {
+    private static final System.Logger LOG = System.getLogger(ToolGate.class.getName());
     record Proposal(String name, List<String> permissions, Map<String, Object> result) {}
 
     record Decision(String decision, List<String> why) {}
@@ -235,6 +244,7 @@ public final class ToolGate {
 
     /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
     static Decision decide(List<String> permissions) {
+        LOG.log(System.Logger.Level.DEBUG, "decide input: {0}", permissions);
         List<String> denied = permissions.stream().filter(DENIED::contains).toList();
         if (!denied.isEmpty()) return new Decision("refused", denied);
         List<String> gated = permissions.stream().filter(NEEDS_APPROVAL::contains).toList();
@@ -293,6 +303,8 @@ tidy_up: needs_approval -> declined
 audit: 4 proposals, 1 ran, 1 rejected, 1 refused, 1 declined
 ```
 ```kotlin
+private val log = System.getLogger("tool_gate")
+
 /**
  * An approval gate for tools that an agent proposes, in miniature: the proposal is decided from the permissions it asks for, a reviewer answers the ones that need a person,
  * an approved tool runs and its result is checked against the schema it declared, and every step leaves a line in an audit log.
@@ -318,6 +330,7 @@ val REVIEWER = mapOf("write_summary" to true, "tidy_up" to false) // the person'
 
 /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
 fun decide(permissions: List<String>): Decision {
+    log.log(System.Logger.Level.DEBUG, "decide input: {0}", permissions)
     val denied = permissions.filter { it in DENIED }
     if (denied.isNotEmpty()) return Decision("refused", denied)
     val gated = permissions.filter { it in NEEDS_APPROVAL }

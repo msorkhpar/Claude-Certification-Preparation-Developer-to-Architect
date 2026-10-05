@@ -15,6 +15,20 @@ Names are Python's (`run_plan`, `Transient`, `Fatal`); TypeScript has `runPlan`;
 - An agent is a function `(key, inputs) -> string`, where `inputs` maps each needed id to its result. It may raise `Transient` (worth retrying), `Fatal` (not) or anything else.
 - `store` is the checkpoint: a map from task id to result, owned by the caller and updated by the runner.
 
+## What is already written, and what you write
+
+The starter is a working runner with seven gaps cut out of it. The loop over the tasks, the single call to an agent (`call_once`, which turns a transient or fatal failure into a status and lets any other exception through), the inputs a task receives and the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `breaker_open` unlocks `e4`: whether an agent has failed its threshold of calls in a row.
+2. `record_outcome` unlocks `e4`: a success resets the count, a failure adds one.
+3. `attempt` unlocks `m1`, `e1`, `e2` and `e4`: the call with the same key, the retry limit, the fatal failure and the open breaker.
+4. `missing_dependency` unlocks `e3`: the first dependency that did not finish.
+5. `fallback_key` unlocks `e5`: the fallback's own key.
+6. `should_resume` unlocks `e6`: a task the store already holds is not run again.
+7. `checkpoint` unlocks `m1`, `e5`, `e6` and `e7`: a finished result is written at once, a degraded one is not.
+
+About fifteen lines in all.
+
 ## What to write
 
 `run_plan(plan, agents, store, attempts, breaker_threshold)` runs the tasks in order and returns a map with `done` (id to result), `failed` (id to reason), `skipped` (id to reason),

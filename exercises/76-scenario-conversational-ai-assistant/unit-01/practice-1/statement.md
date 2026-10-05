@@ -9,6 +9,21 @@ capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotl
 Names are Python's (`review`); TypeScript has the same name and the same snake-case fields. Java has the static method `ConversationReview.review` and the records `Conversation`, `Policy`,
 `Segment` and `Report` with camel-case fields (`neededPerson`, `maxTurns`, `resolvedPct`); Kotlin has the top-level function `review` and the data classes of the same names.
 
+## What is already written, and what you write
+
+The starter is a working review with eight gaps cut out of it. The reading of the policy, the repeated count and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `percent` unlocks `e9` (and the figures of `m1` and `e1`): the whole percentage, rounded half up.
+2. `settled` unlocks `e8`: whether the assistant settled a conversation alone.
+3. `count_safety_missed` unlocks `e2`: risk signals that did not reach a person as a safety hand-off.
+4. `count_overlong` unlocks `e3`: conversations above the turn limit that nobody took over.
+5. `is_repeat_ok` unlocks `e4` (and `e1`): the repeated-question limit, met at the limit.
+6. `count_escalations` unlocks `e7`: over- and under-escalation.
+7. `segments_of` unlocks `e5` and `e6`: the segments and when one is weak.
+8. `choose_verdict` unlocks `e1`, `e2` and the verdict of `m1`: the hold or ship decision and its reason.
+
+About fifteen lines in all.
+
 ## What to write
 
 A conversation is `{id, segment, turns, resolved, handoff, needed_person, repeated, risk}`: `handoff` is `none`, `requested` (the customer asked for a person), `safety` (a signal of risk was

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.
  */
 public class ClaimsAssistant {
+    private static final System.Logger LOG = System.getLogger(ClaimsAssistant.class.getName());
     record Chunk(String id, String doc, int version, String text) {}
 
     record Request(String id, String text, Set<String> allowed, String consequence, String quote, int confidence) {}
@@ -81,6 +82,7 @@ public class ClaimsAssistant {
 
     /** One request through the chain; the outcome says why a request was held. */
     static Handled handle(Request request, List<Chunk> index) {
+        LOG.log(System.Logger.Level.DEBUG, "handle input: {0}", request);
         String sent = tokenise(request.text()).sent();
         Chunk chunk = retrieve(sent, request.allowed(), index);
         String outcome;

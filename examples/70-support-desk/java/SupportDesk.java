@@ -12,6 +12,7 @@ import java.util.TreeMap;
  * design, not an Anthropic interface.
  */
 public final class SupportDesk {
+    private static final System.Logger LOG = System.getLogger(SupportDesk.class.getName());
     static final int LIMIT = 10_000; // cents: a refund above it is a person's decision
     static final int STALL = 3; // the same call this many times in a row is no progress
 

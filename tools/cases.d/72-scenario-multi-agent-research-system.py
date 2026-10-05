@@ -13,7 +13,7 @@ PRACTICES[f"{X}/72-scenario-multi-agent-research-system/unit-01/practice-1"] = {
         ("e6", "edge", "claims sources and scopes come out in a fixed order without duplicates"),
     ],
     "plants": {
-        "wrong-complete-by-errors": (["e1", "e5"], "calls the run complete when there are no errors, although a scope was never researched"),
+        "wrong-empty-run-complete": (["e1"], "calls a run with no results complete"),
         "wrong-conflict-first-wins": (["e3"], "keeps the first value of a claim and drops the other source"),
         "wrong-partial-covers": (["e4"], "counts a scope with only partial results as covered"),
         "wrong-empty-covers": (["e5"], "counts a scope whose result holds no findings as covered"),
@@ -21,7 +21,7 @@ PRACTICES[f"{X}/72-scenario-multi-agent-research-system/unit-01/practice-1"] = {
         "wrong-resolved-error-kept": (["e4"], "keeps the error of a scope that a later result covered"),
         "wrong-sources-duplicated": (["e6"], "lists the same source twice for one claim"),
         "wrong-claims-unsorted": (["e6"], "returns the claims in the order they arrived"),
-        "wrong-note-silent": (["e1", "e2", "e5"], "writes an all-clear note whatever is missing"),
+        "wrong-note-drops-query": (["e2"], "leaves the query out of the note for a scope whose search failed"),
         "wrong-partial-flag-any": (["e4"], "flags a claim as partial when any of its findings was partial"),
     },
 }

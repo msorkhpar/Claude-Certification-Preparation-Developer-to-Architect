@@ -12,6 +12,7 @@ import java.util.Map;
  * breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.
  */
 public final class PromptBudget {
+    private static final System.Logger LOG = System.getLogger(PromptBudget.class.getName());
     record Module(String name, boolean isStatic, String text) {}
 
     /** blocks in order, the estimated tokens, the tokens of the static prefix and the index of the breakpoint (null when there is none). */
@@ -39,6 +40,7 @@ public final class PromptBudget {
 
     /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */
     static Prompt assemble(List<Module> modules, Map<String, String> variables) {
+        LOG.log(System.Logger.Level.DEBUG, "assemble input: {0}", modules);
         List<Module> blocks = new ArrayList<>();
         for (Module m : modules) if (m.isStatic()) blocks.add(m);
         for (Module m : modules) if (!m.isStatic()) blocks.add(new Module(m.name(), false, fill(m.text(), variables)));

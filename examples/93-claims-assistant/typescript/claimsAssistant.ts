@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("claims_assistant");
 /**
  * A claims assistant on one page of code: identifiers swapped for tokens before anything is sent, retrieval that filters by the reader's rights first and refuses stale evidence, a source check, a route to a person, a trace that holds no content, and a release gate that protects the costly segment.
  *
@@ -42,6 +44,7 @@ export function retrieve(question: string, allowed: Set<string>, index: Chunk[])
 
 /** One request through the chain; the outcome says why a request was held. */
 export function handle(request: Request, index: Chunk[]): [string, Trace] {
+  log.debug("handle input", request);
   const [sent] = tokenise(request.text);
   const chunk = retrieve(sent, request.allowed, index);
   let outcome: string;

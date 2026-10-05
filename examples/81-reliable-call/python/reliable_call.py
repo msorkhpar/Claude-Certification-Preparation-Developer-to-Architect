@@ -6,6 +6,10 @@ safe only when the tool it repeats is idempotent: the refund tool records its id
 attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after
 a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 
 
 class Transient(Exception):
@@ -22,6 +26,7 @@ class Ledger:
 
 def refund(ledger, key, order, amount, lose_response):
     """Pays once per key. The response may be lost after the money has moved, which is the dangerous case."""
+    log.debug("refund input: %r", key)
     if key is not None and key in ledger.keys:
         return ledger.keys[key]
     ledger.paid.append((order, amount))

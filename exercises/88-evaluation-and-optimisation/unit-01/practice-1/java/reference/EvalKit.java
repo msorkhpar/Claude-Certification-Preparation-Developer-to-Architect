@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 /** Evaluation kit: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits. See ../../statement.md. */
 final class EvalKit {
+    private static final System.Logger LOG = System.getLogger(EvalKit.class.getName());
     private EvalKit() {}
 
     /** One graded case: its segment and whether the answer was right. */
@@ -25,11 +26,22 @@ final class EvalKit {
     /** A model option: its name, accuracy in percent, 95th-percentile latency in ms and cost. */
     record Option(String name, int accuracy, int p95, int cost) {}
 
+    /** Whole percent, half up, integers only (written for you). */
     static int pct(int part, int whole) {
         return whole != 0 ? (200 * part + whole) / (2 * whole) : 0;
     }
 
+    static int errorCost(int wrong, String segment, Map<String, Integer> costs) {
+        return wrong * costs.getOrDefault(segment, 1);
+    }
+
+    static List<Line> order(List<Line> table) {
+        table.sort(Comparator.comparingInt((Line l) -> -l.cost()).thenComparing(Line::segment));
+        return table;
+    }
+
     static List<Line> segmentTable(List<Result> results, Map<String, Integer> costs) {
+        LOG.log(System.Logger.Level.DEBUG, "segmentTable input: {0}", results);
         Map<String, int[]> seen = new LinkedHashMap<>();
         for (Result r : results) {
             int[] counts = seen.computeIfAbsent(r.segment(), k -> new int[2]);
@@ -37,9 +49,8 @@ final class EvalKit {
             if (r.correct()) counts[1]++;
         }
         List<Line> table = new ArrayList<>();
-        seen.forEach((s, c) -> table.add(new Line(s, c[0], c[1], pct(c[1], c[0]), (c[0] - c[1]) * costs.getOrDefault(s, 1))));
-        table.sort(Comparator.comparingInt((Line l) -> -l.cost()).thenComparing(Line::segment));
-        return table;
+        seen.forEach((s, c) -> table.add(new Line(s, c[0], c[1], pct(c[1], c[0]), errorCost(c[0] - c[1], s, costs))));
+        return order(table);
     }
 
     static int percentile(List<Integer> values, int p) {
@@ -63,6 +74,10 @@ final class EvalKit {
         return d > 0 ? "new is better" : "old is better";
     }
 
+    static String decision(List<String> blocked, int lost, int gained) {
+        return blocked.isEmpty() && lost <= gained ? "ship" : "hold";
+    }
+
     static Gate shadowGate(List<Paired> pairs, Set<String> protectedSegments) {
         int lost = 0;
         int gained = 0;
@@ -74,8 +89,7 @@ final class EvalKit {
             }
             if (p.newOk() && !p.oldOk()) gained++;
         }
-        boolean ship = blocked.isEmpty() && lost <= gained;
-        return new Gate(ship ? "ship" : "hold", lost, gained, new ArrayList<>(blocked));
+        return new Gate(decision(new ArrayList<>(blocked), lost, gained), lost, gained, new ArrayList<>(blocked));
     }
 
     static String diagnose(boolean found, boolean supported, boolean formatOk, boolean passesOnStronger) {

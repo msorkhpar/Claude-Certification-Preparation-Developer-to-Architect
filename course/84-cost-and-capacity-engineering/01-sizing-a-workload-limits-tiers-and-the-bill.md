@@ -72,6 +72,10 @@ Build and Scale tiers below are the documented figures for Claude Sonnet 5.5, an
 Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and
 limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 TIERS = [("Start", 1000, 2_000_000, 400_000), ("Build", 5000, 5_000_000, 1_000_000), ("Scale", 10_000, 10_000_000, 2_000_000)]  # name, RPM, ITPM, OTPM
 CENTS_PER_MTOK = {"input": 200, "cache_write": 250, "cache_read": 20, "output": 1000}
 
@@ -96,6 +100,7 @@ def smallest_tier(need, tiers):
 
 def monthly_cents(workload, requests, batch_percent):
     """Cents per month. The share of requests sent through the Batch API is billed at half price in every category."""
+    log.debug("monthly_cents input: %r", workload)
     per_request = sum(workload[k] * CENTS_PER_MTOK[k] for k in CENTS_PER_MTOK)  # cents times tokens, per million
     return requests * per_request * (200 - batch_percent) // (200 * 1_000_000)
 
@@ -132,6 +137,9 @@ monthly bill with caching and 30 percent batch: $14,790.00
 // Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and
 // limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.
 
+import { logger } from "./logger.ts";
+const log = logger("capacity_model");
+
 export type Workload = { rpm: number; input: number; cache_write: number; cache_read: number; output: number }; // tokens per request, requests per minute
 export type Need = { rpm: number; itpm: number; otpm: number };
 
@@ -155,6 +163,7 @@ export function smallestTier(need: Need, tiers: Array<[string, number, number, n
 
 /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */
 export function monthlyCents(w: Workload, requests: number, batchPercent: number): number {
+  log.debug("monthlyCents input", w);
   const perRequest = w.input * CENTS_PER_MTOK.input + w.cache_write * CENTS_PER_MTOK.cache_write + w.cache_read * CENTS_PER_MTOK.cache_read + w.output * CENTS_PER_MTOK.output;
   return Math.floor((requests * perRequest * (200 - batchPercent)) / (200 * 1_000_000));
 }
@@ -196,6 +205,7 @@ import java.util.Locale;
  * limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.
  */
 public final class CapacityModel {
+    private static final System.Logger LOG = System.getLogger(CapacityModel.class.getName());
     /** Tokens per request and requests per minute. */
     record Workload(long rpm, long input, long cacheWrite, long cacheRead, long output) {}
 
@@ -225,6 +235,7 @@ public final class CapacityModel {
 
     /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */
     static long monthlyCents(Workload w, long requests, long batchPercent) {
+        LOG.log(System.Logger.Level.DEBUG, "monthlyCents input: {0}", w);
         long perRequest = w.input() * 200 + w.cacheWrite() * 250 + w.cacheRead() * 20 + w.output() * 1000; // cents times tokens, per million
         return requests * perRequest * (200 - batchPercent) / (200 * 1_000_000L);
     }
@@ -252,6 +263,8 @@ monthly bill without caching: $38,800.00
 monthly bill with caching and 30 percent batch: $14,790.00
 ```
 ```kotlin
+private val log = System.getLogger("capacity_model")
+
 /**
  * A capacity and cost model for one workload: the limits it needs, the tier that gives them, and the monthly bill.
  *
@@ -285,6 +298,7 @@ fun smallestTier(need: Need, tiers: List<Tier>): String =
 
 /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */
 fun monthlyCents(w: Workload, requests: Long, batchPercent: Long): Long {
+    log.log(System.Logger.Level.DEBUG, "monthlyCents input: {0}", w)
     val perRequest = w.input * 200 + w.cacheWrite * 250 + w.cacheRead * 20 + w.output * 1000 // cents times tokens, per million
     return requests * perRequest * (200 - batchPercent) / (200 * 1_000_000L)
 }

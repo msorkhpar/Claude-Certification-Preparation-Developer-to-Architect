@@ -5,9 +5,12 @@ documented behaviour (checked 2026-10-04): the project's .mcp.json holds the ser
 mcp__<server>__<tool> in permission rules and in a subagent's tools field; a subagent that omits tools inherits every tool available to subagents; project subagents live in
 .claude/agents/. Nothing here starts Claude Code or an MCP server.
 """
+import logging
 import json
 import re
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve().parent.parent
 SECRET_KEY = re.compile(r"token|key|secret|authorization", re.I)

@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("tradeoff_brief");
 /**
  * One decision told to two audiences: the figures an engineer needs, the same figures in the words a sponsor decides with, and an honest check of each service level at its exact edge.
  *
@@ -20,6 +22,7 @@ export function breakEven(errorCost: number, reviewCost: number): number {
 
 /** A service level is met at its limit exactly, and a miss says by how much. */
 export function slaLine(sla: Sla, measured: number): string {
+  log.debug("slaLine input", sla);
   const met = sla.direction === "max" ? measured <= sla.limit : measured >= sla.limit;
   const verdict = met ? "met" : `missed by ${Math.abs(measured - sla.limit)} ${sla.unit}`;
   const word = sla.direction === "max" ? "limit" : "floor";

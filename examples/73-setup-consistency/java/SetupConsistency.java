@@ -20,6 +20,7 @@ import java.util.stream.Stream;
  * .claude/agents/. Nothing here starts Claude Code or an MCP server.
  */
 public final class SetupConsistency {
+    private static final System.Logger LOG = System.getLogger(SetupConsistency.class.getName());
     static final Path HERE = Path.of("..").toAbsolutePath().normalize();
     private static final Pattern SECRET_KEY = Pattern.compile("token|key|secret|authorization", Pattern.CASE_INSENSITIVE);
     private static final ObjectMapper JSON = new ObjectMapper();

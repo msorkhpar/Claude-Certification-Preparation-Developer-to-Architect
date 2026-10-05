@@ -7,6 +7,21 @@ paths the tests check are the documented ones of Claude Code (checked 2026-10-04
 `.claude/settings.json`; the limit of 25 lines for the root file and the modes table are this course's own conventions. It is in Python, TypeScript, Java and Kotlin; pick your language folder,
 open `starter/` and edit the files there; each language folder holds its own copy of the files.
 
+## What is already written, and what you write
+
+The starter is the draft of the setup with eight gaps cut out of it. The rule file `.claude/rules/docs.md` is finished and is the model for the front matter of the others. The bodies of the four convention rules and of the review command are written; they only lack their front matter. Each gap is marked by a `TODO n of 8` comment in the file (the settings file takes none, because JSON has no comments) that says what is missing, with one example and the cases it unlocks. Delete the comment when the file is done. A file holds no program, so there is no logger to write here: the tests read the files and report the failing case with its message. Write them in this order:
+
+1. `.claude/rules/components.md` unlocks `m1` and `e5`: the `paths` list for `src/ui`.
+2. `.claude/rules/handlers.md` unlocks `m1` and `e5`: the `paths` list for `server/handlers`.
+3. `.claude/rules/database.md` unlocks `m1` and `e5`: the `paths` list for `server/db`.
+4. `.claude/rules/tests.md` unlocks `m1` and `e5`: the `paths` list for the `.spec.ts` and `.spec.tsx` files.
+5. `.claude/commands/review.md` unlocks `e2`: the front matter with a `description` and the read-only `allowed-tools`.
+6. `.claude/settings.json` unlocks `e3`: deny the environment file and approve no whole tool.
+7. `CLAUDE.md` unlocks `e1` and `e6`: the short root file, without the personal path.
+8. `docs/working-modes.md` unlocks `e4`: the mode of each row.
+
+About a dozen lines in all. The sections below describe the whole setup.
+
 ## What to write
 
 The project folder holds `CLAUDE.md`, `.claude/rules/`, `.claude/commands/review.md`, `.claude/settings.json` and `docs/working-modes.md`. The sample files the tests use are

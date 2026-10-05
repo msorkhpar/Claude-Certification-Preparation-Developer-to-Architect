@@ -1,3 +1,5 @@
+private val log = System.getLogger("research_run")
+
 /**
  * A multi-agent research run in miniature: a coordinator that checks its own decomposition, a search subagent whose failure comes back as structured context,
  * one retry through an alternative, a synthesis agent with a scoped verification tool, and a report that says what it could not cover.

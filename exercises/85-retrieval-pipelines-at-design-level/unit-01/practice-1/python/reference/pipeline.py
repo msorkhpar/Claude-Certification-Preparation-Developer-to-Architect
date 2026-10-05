@@ -1,6 +1,9 @@
 """A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md."""
+import logging
 import re
 from collections import namedtuple
+
+log = logging.getLogger(__name__)
 
 Chunk = namedtuple("Chunk", "id doc version text")
 STOP = {"a", "an", "the", "is", "are", "can", "i", "what", "does", "do", "how", "my", "it", "of", "to", "for", "and", "or", "in", "when", "will", "be", "that", "this", "with", "by", "at"}
@@ -15,34 +18,52 @@ def tokens(text):
     return [t for t in re.findall(r"[a-z0-9]+(?:-[a-z0-9]+)*", text.lower()) if t not in STOP]
 
 
+def _chunk_text(title, name, part):
+    return f"{title} > {name}. {part}"
+
+
+def _split_section(body, max_words):
+    parts, current = [], []
+    for sentence in re.split(r"(?<=\.) ", body):
+        if current and len(" ".join(current + [sentence]).split()) > max_words:
+            parts.append(" ".join(current))
+            current = []
+        current.append(sentence)
+    parts.append(" ".join(current))
+    return parts
+
+
 def chunk_sections(doc_id, text, max_words=30):
+    log.debug("chunk_sections input: %r", text)
     head, *sections = text.split("\n## ")
     title = head.removeprefix("# ")
     version = doc_version(text)
     chunks = []
     for section in sections:
         name, body = section.split("\n", 1)
-        parts, current = [], []
-        for sentence in re.split(r"(?<=\.) ", body):
-            if current and len(" ".join(current + [sentence]).split()) > max_words:
-                parts.append(" ".join(current))
-                current = []
-            current.append(sentence)
-        parts.append(" ".join(current))
+        parts = _split_section(body, max_words)
         for n, part in enumerate(parts, 1):
             suffix = "" if len(parts) == 1 else f"#{n}"
-            chunks.append(Chunk(f"{doc_id}/{name}{suffix}", doc_id, version, f"{title} > {name}. {part}"))
+            chunks.append(Chunk(f"{doc_id}/{name}{suffix}", doc_id, version, _chunk_text(title, name, part)))
     return chunks
 
 
+def _score(wanted, have):
+    return sum(3 if any(c.isdigit() for c in t) else 1 for t in wanted if t in have)
+
+
+def _visible(chunk, allowed_docs):
+    return allowed_docs is None or chunk.doc in allowed_docs
+
+
 def search(chunks, query, k=3, allowed_docs=None):
+    log.debug("search input: %r", query)
     wanted = set(tokens(query))
     scored = []
     for n, chunk in enumerate(chunks):
-        if allowed_docs is not None and chunk.doc not in allowed_docs:
+        if not _visible(chunk, allowed_docs):
             continue
-        have = set(tokens(chunk.text))
-        score = sum(3 if any(c.isdigit() for c in t) else 1 for t in wanted if t in have)
+        score = _score(wanted, set(tokens(chunk.text)))
         if score:
             scored.append((-score, n, chunk.id))
     return [chunk_id for _, _, chunk_id in sorted(scored)[:k]]
@@ -58,6 +79,12 @@ def choose_retrieval(corpus_tokens, shape, pattern):
     return {"identifier": "keyword index", "paraphrase": "embedding index"}.get(pattern, "hybrid index")
 
 
+def _status(old_chunks, text):
+    if not old_chunks:
+        return "added"
+    return "kept" if old_chunks[0].version == doc_version(text) else "replaced"
+
+
 def reindex(chunks, docs):
     old = {}
     for chunk in chunks:
@@ -65,12 +92,9 @@ def reindex(chunks, docs):
     report = {"added": [], "replaced": [], "removed": [d for d in old if d not in docs], "kept": []}
     result = []
     for doc_id, text in docs.items():
-        if doc_id in old and old[doc_id][0].version == doc_version(text):
-            report["kept"].append(doc_id)
-            result += old[doc_id]
-        else:
-            report["replaced" if doc_id in old else "added"].append(doc_id)
-            result += chunk_sections(doc_id, text)
+        status = _status(old.get(doc_id, []), text)
+        report[status].append(doc_id)
+        result += old[doc_id] if status == "kept" else chunk_sections(doc_id, text)
     return result, report
 
 

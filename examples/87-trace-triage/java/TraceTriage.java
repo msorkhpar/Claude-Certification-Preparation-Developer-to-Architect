@@ -16,6 +16,7 @@ import java.util.TreeSet;
  * and the Claude Code monitoring documentation, read on 2026-10-04. Nothing here calls a model.
  */
 public class TraceTriage {
+    private static final System.Logger LOG = System.getLogger(TraceTriage.class.getName());
     record Span(String id, String parent, String kind, String name, String status, int ms, String note) {}
 
     record Cause(String layer, String name, String why, List<String> path) {}
@@ -52,6 +53,7 @@ public class TraceTriage {
 
     /** The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed. */
     static Cause rootCause(List<Span> spans) {
+        LOG.log(System.Logger.Level.DEBUG, "rootCause input: {0}", spans);
         Map<String, Span> byId = new HashMap<>();
         for (Span s : spans) byId.put(s.id(), s);
         List<Span> failed = new ArrayList<>();

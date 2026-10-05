@@ -59,6 +59,9 @@ The example is the resolver: it takes five layers (managed, command line, local,
 
 The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
 LEVELS = ["managed", "command line", "local", "project", "user"]
 MANAGED_ONLY = {"allowManagedPermissionRulesOnly", "allowManagedHooksOnly", "allowManagedMcpServersOnly", "strictKnownMarketplaces", "disableSideloadFlags"}
 EFFORT = ["low", "medium", "high", "xhigh", "max"]
@@ -66,6 +69,7 @@ EFFORT = ["low", "medium", "high", "xhigh", "max"]
 
 def effective(layers):
     """The settings Claude Code applies, and a note for every entry that was ignored and why."""
+    log.debug("effective input: %r", layers)
     managed = layers.get("managed", {})
     lock_rules = managed.get("allowManagedPermissionRulesOnly") is True
     lock_mcp = managed.get("allowManagedMcpServersOnly") is True
@@ -165,6 +169,8 @@ model haiku: allowed
 without a lock the lists merge: Bash(git status), Edit(./notes/**)
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("policy_resolver");
 /**
  * Which value does a developer's Claude Code actually use when a team, a person and an organisation all set the same key? A small resolver that applies the documented precedence, the keys only an organisation can set, the lists that merge and the locks that stop them merging.
  *
@@ -179,6 +185,7 @@ const EFFORT = ["low", "medium", "high", "xhigh", "max"];
 
 /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
 export function effective(layers: Layers): [Record<string, Value>, string[]] {
+  log.debug("effective input", layers);
   const managed = layers["managed"] ?? {};
   const lockRules = managed["allowManagedPermissionRulesOnly"] === true;
   const lockMcp = managed["allowManagedMcpServersOnly"] === true;
@@ -281,6 +288,7 @@ import java.util.TreeSet;
  * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
  */
 public class PolicyResolver {
+    private static final System.Logger LOG = System.getLogger(PolicyResolver.class.getName());
     record Result(Map<String, Object> settings, List<String> notes) {}
 
     record Entry(String level, Object value) {}
@@ -291,6 +299,7 @@ public class PolicyResolver {
 
     /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
     static Result effective(Map<String, Map<String, Object>> layers) {
+        LOG.log(System.Logger.Level.DEBUG, "effective input: {0}", layers);
         Map<String, Object> managed = layers.getOrDefault("managed", Map.of());
         boolean lockRules = Boolean.TRUE.equals(managed.get("allowManagedPermissionRulesOnly"));
         boolean lockMcp = Boolean.TRUE.equals(managed.get("allowManagedMcpServersOnly"));
@@ -396,6 +405,9 @@ without a lock the lists merge: Bash(git status), Edit(./notes/**)
  *
  * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
  */
+
+private val log = System.getLogger("policy_resolver")
+
 data class Result(val settings: Map<String, Any>, val notes: List<String>)
 
 val LEVELS = listOf("managed", "command line", "local", "project", "user")
@@ -404,6 +416,7 @@ val EFFORT = listOf("low", "medium", "high", "xhigh", "max")
 
 /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
 fun effective(layers: Map<String, Map<String, Any>>): Result {
+    log.log(System.Logger.Level.DEBUG, "effective input: {0}", layers)
     val managed = layers["managed"] ?: mapOf()
     val lockRules = managed["allowManagedPermissionRulesOnly"] == true
     val lockMcp = managed["allowManagedMcpServersOnly"] == true

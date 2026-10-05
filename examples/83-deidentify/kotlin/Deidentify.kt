@@ -1,3 +1,5 @@
+private val log = System.getLogger("deidentify")
+
 /**
  * Tokenise identifiers before a model call, restore them locally, and log an audit entry that holds no content.
  *
@@ -14,6 +16,7 @@ data class Audit(val requestId: String, val chars: Int, val tokensIssued: Int, v
 
 /** Replaces every match by a token; the same value always gets the same token. `vault` maps value to token and stays local. */
 fun tokenise(text: String, vault: MutableMap<String, String>): String {
+    log.log(System.Logger.Level.DEBUG, "tokenise input: {0}", text)
     var out = text
     for ((label, pattern) in PATTERNS) {
         out = pattern.replace(out) { match ->
