@@ -1,13 +1,22 @@
 """Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md."""
 import json
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class ParseError(Exception):
     """No JSON object could be read from the model's text."""
 
 
+def _object_span(body):
+    """The index of the first { and of the last } in the text; -1 for a brace that is not there."""
+    return body.find("{"), body.rfind("}")
+
+
 def parse_json(text):
     """The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }."""
+    log.debug("parse_json input: %r", text)
     body = text
     fence = text.find("```")
     if fence != -1:
@@ -15,7 +24,7 @@ def parse_json(text):
         end = text.find("```", start if start != -1 else fence + 3)
         if start != -1 and end != -1:
             body = text[start + 1:end]
-    first, last = body.find("{"), body.rfind("}")
+    first, last = _object_span(body)
     if first == -1 or last < first:
         raise ParseError("no JSON object found in the reply")
     try:
@@ -43,6 +52,29 @@ TYPES = {
 }
 
 
+def _range_errors(schema, value, path):
+    """The problems of a number outside minimum and maximum."""
+    errors = []
+    if "minimum" in schema and value < schema["minimum"]:
+        errors.append({"path": path, "message": f"must be at least {schema['minimum']}"})
+    if "maximum" in schema and value > schema["maximum"]:
+        errors.append({"path": path, "message": f"must be at most {schema['maximum']}"})
+    return errors
+
+
+def _required_errors(schema, value, path):
+    """The problems of missing required keys."""
+    return [{"path": f"{path}.{key}", "message": "is required"} for key in schema.get("required", []) if key not in value]
+
+
+def _extra_errors(schema, value, path):
+    """The problems of keys the schema does not list, when additionalProperties is false."""
+    if schema.get("additionalProperties") is not False:
+        return []
+    properties = schema.get("properties", {})
+    return [{"path": f"{path}.{key}", "message": "is not allowed"} for key in value if key not in properties]
+
+
 def validate(schema, value, path="$"):
     """A list of {"path", "message"} for every way value breaks schema; empty when it conforms."""
     errors = []
@@ -52,22 +84,14 @@ def validate(schema, value, path="$"):
     if "enum" in schema and value not in schema["enum"]:
         errors.append({"path": path, "message": f"must be one of {schema['enum']}"})
     if _is_number(value):
-        if "minimum" in schema and value < schema["minimum"]:
-            errors.append({"path": path, "message": f"must be at least {schema['minimum']}"})
-        if "maximum" in schema and value > schema["maximum"]:
-            errors.append({"path": path, "message": f"must be at most {schema['maximum']}"})
+        errors += _range_errors(schema, value, path)
     if isinstance(value, dict):
-        for key in schema.get("required", []):
-            if key not in value:
-                errors.append({"path": f"{path}.{key}", "message": "is required"})
+        errors += _required_errors(schema, value, path)
         properties = schema.get("properties", {})
         for key, sub in properties.items():
             if key in value:
                 errors += validate(sub, value[key], f"{path}.{key}")
-        if schema.get("additionalProperties") is False:
-            for key in value:
-                if key not in properties:
-                    errors.append({"path": f"{path}.{key}", "message": "is not allowed"})
+        errors += _extra_errors(schema, value, path)
     if isinstance(value, list) and "items" in schema:
         for i, item in enumerate(value):
             errors += validate(schema["items"], item, f"{path}[{i}]")
@@ -88,24 +112,39 @@ def _feedback(errors):
     return f"Your reply was rejected:\n{lines}\nReturn the corrected JSON only."
 
 
+def _grounding_errors(value, document, evidence_fields):
+    """The quotes the document does not contain."""
+    errors = []
+    for name in evidence_fields:
+        quoted = value.get(name) if isinstance(value, dict) else None
+        if isinstance(quoted, str) and quoted not in document:
+            errors.append({"path": f"$.{name}", "message": "is not found in the document"})
+    return errors
+
+
+def _early_status(reply):
+    """"refused" or "truncated" for a reply that must not be retried, else None."""
+    if reply.get("stop_reason") == "refusal":
+        return "refused"
+    if reply.get("stop_reason") == "max_tokens":
+        return "truncated"
+    return None
+
+
 def extract(ask, document, schema, max_attempts=3, evidence_fields=()):
     """Ask, parse, validate and, on a problem, re-prompt with the errors, at most max_attempts calls."""
     messages = [{"role": "user", "content": _prompt(document, schema)}]
     errors = []
     for attempt in range(1, max_attempts + 1):
         reply = ask(messages)
-        if reply.get("stop_reason") == "refusal":
-            return {"status": "refused", "value": None, "attempts": attempt, "errors": []}
-        if reply.get("stop_reason") == "max_tokens":
-            return {"status": "truncated", "value": None, "attempts": attempt, "errors": []}
+        early = _early_status(reply)
+        if early:
+            return {"status": early, "value": None, "attempts": attempt, "errors": []}
         text = _text(reply)
         try:
             value = parse_json(text)
             errors = validate(schema, value)
-            for name in evidence_fields:
-                quoted = value.get(name) if isinstance(value, dict) else None
-                if isinstance(quoted, str) and quoted not in document:
-                    errors.append({"path": f"$.{name}", "message": "is not found in the document"})
+            errors += _grounding_errors(value, document, evidence_fields)
         except ParseError as err:
             value, errors = None, [{"path": "$", "message": str(err)}]
         if not errors:

@@ -4,6 +4,8 @@
 // them. Waiting between polls is recorded, not slept.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("batch_round_trip");
 
 export const MODEL = "claude-haiku-4-5-20251001";
 export const TICKETS: Record<string, string> = { "t-1": "My parcel never arrived.", "t-2": "How do I change my address?", "t-3": "Charge me twice? Refund please.", "t-4": "x".repeat(10) };

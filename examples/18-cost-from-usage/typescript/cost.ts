@@ -4,6 +4,8 @@
 // tokens, read from the Claude pricing page on 2026-10-02.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("cost");
 
 export const MODEL = "claude-sonnet-5-5";
 export const PRICES: Record<string, [number, number, number]> = {

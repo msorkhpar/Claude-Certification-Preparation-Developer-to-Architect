@@ -102,8 +102,11 @@ The reply is an illustrative, hand-written response in the API's shape (claude-o
 an omitted thinking block (the default display on this model: an empty `thinking` field and a signature) and the
 `output_tokens_details.thinking_tokens` breakdown the thinking page documents.
 """
+import logging
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-opus-5-5"
 PRICE_OUT = 20.0  # dollars per million output tokens, pricing page 2026-10-02
@@ -155,6 +158,8 @@ effort differs between the two requests: True
 // `output_tokens_details.thinking_tokens` breakdown the thinking page documents.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("thinking");
 
 export const MODEL = "claude-opus-5-5";
 const PRICE_OUT = 20.0; // dollars per million output tokens, pricing page 2026-10-02
@@ -226,6 +231,7 @@ import java.util.Map;
  * (`py` is the harness's formatter: it prints a value the way the Python edition does, so the output of the editions matches.)
  */
 public final class Thinking {
+    private static final System.Logger LOG = System.getLogger(Thinking.class.getName());
     static final String MODEL = "claude-opus-5-5";
     static final double PRICE_OUT = 20.0; // dollars per million output tokens, pricing page 2026-10-02
     static final Map<String, Object> THINKING_BLOCK = map("type", "thinking", "thinking", "", "signature", "illustrative-signature");
@@ -284,6 +290,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
+
+private val log = System.getLogger("thinking")
 
 /**
  * Adaptive thinking steered by effort: the request, the reply's blocks and what the thinking cost.

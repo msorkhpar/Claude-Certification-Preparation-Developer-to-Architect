@@ -5,6 +5,8 @@
 // tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("cache_hits");
 
 export const MODEL = "claude-sonnet-5-5";
 export const POLICY = "Refund policy clause: items may be returned within 14 days. ".repeat(40); // about 600 tokens

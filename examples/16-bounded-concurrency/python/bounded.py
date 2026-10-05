@@ -3,11 +3,14 @@
 The transport is scripted: every request takes 50 ms inside it, the reply is a label built from
 the ticket in the request, and ticket 7 is answered with a 429. The labels are illustrative.
 """
+import logging
 import asyncio
 
 
 from harness import scripted_async_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TICKETS = [f"ticket {n}" for n in range(1, 13)]

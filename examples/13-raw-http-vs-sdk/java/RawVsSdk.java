@@ -23,6 +23,7 @@ import java.util.TreeSet;
  * (`harness` is the course's stand-in: a scripted transport plugged into the SDK's own HttpClient hook.)
  */
 public final class RawVsSdk {
+    private static final System.Logger LOG = System.getLogger(RawVsSdk.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String URL = "https://api.anthropic.com/v1/messages";
     static final Map<String, Object> PAYLOAD = map("model", MODEL, "max_tokens", 64, "messages", List.of(map("role", "user", "content", "Capital of France?")));

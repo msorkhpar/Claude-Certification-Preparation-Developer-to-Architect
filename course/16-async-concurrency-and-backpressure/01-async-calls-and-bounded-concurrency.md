@@ -72,11 +72,14 @@ twelve twice, once unbounded and once behind a semaphore (a pool of workers in T
 The transport is scripted: every request takes 50 ms inside it, the reply is a label built from
 the ticket in the request, and ticket 7 is answered with a 429. The labels are illustrative.
 """
+import logging
 import asyncio
 
 
 from harness import scripted_async_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TICKETS = [f"ticket {n}" for n in range(1, 13)]
@@ -130,6 +133,8 @@ results keep input order: label for ticket 1 | label for ticket 6 | RateLimitErr
 // ticket in the request, and ticket 7 is answered with a 429. The labels are illustrative.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text, type Reply } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("bounded");
 
 const MODEL = "claude-sonnet-5-5";
 export const TICKETS = Array.from({ length: 12 }, (_, i) => `ticket ${i + 1}`);
@@ -213,6 +218,7 @@ import java.util.stream.IntStream;
  * Each ticket runs on its own virtual thread; the semaphore is what bounds them (the Java counterpart of asyncio.Semaphore).
  */
 public final class Bounded {
+    private static final System.Logger LOG = System.getLogger(Bounded.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final List<String> TICKETS = IntStream.rangeClosed(1, 12).mapToObj(n -> "ticket " + n).toList();
 
@@ -289,6 +295,8 @@ import java.util.concurrent.CompletionException
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import java.util.function.Function
+
+private val log = System.getLogger("bounded")
 
 /**
  * Twelve classification calls with the async SDK: unbounded, then bounded by a semaphore.

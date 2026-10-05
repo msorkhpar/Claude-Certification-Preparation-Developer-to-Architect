@@ -1,6 +1,8 @@
 import kotlin.math.ln
 import kotlin.math.sqrt
 
+private val log = System.getLogger("retrieval_recall")
+
 /**
  * A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.
  *

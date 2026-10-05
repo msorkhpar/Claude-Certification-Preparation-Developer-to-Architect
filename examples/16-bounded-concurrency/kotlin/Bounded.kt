@@ -14,6 +14,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import java.util.function.Function
 
+private val log = System.getLogger("bounded")
+
 /**
  * Twelve classification calls with the async SDK: unbounded, then bounded by a semaphore.
  *

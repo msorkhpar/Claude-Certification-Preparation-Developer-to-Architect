@@ -1,4 +1,8 @@
 // A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.
+import { logger } from "../logger.ts";
+
+const log = logger("retrieval");
+
 export type Chunk = { id: string; doc: string; text: string };
 export type Doc = { id: string; text: string };
 export type Query = { query: string; relevant: string[] };
@@ -33,7 +37,10 @@ export function embed(text: string): number[] {
 /** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */
 export function chunk(text: string, size: number, overlap: number): string[] {
   if (size < 1 || overlap < 0 || overlap >= size) throw new RangeError("size must be at least 1 and overlap must be in 0 .. size - 1");
-  const words = text.split(/\s+/).filter((w) => w.length > 0);
+  return windows(text.split(/\s+/).filter((w) => w.length > 0), size, overlap);
+}
+
+function windows(words: string[], size: number, overlap: number): string[] {
   const chunks: string[] = [];
   for (let start = 0; start < words.length; start += size - overlap) {
     chunks.push(words.slice(start, start + size).join(" "));
@@ -53,6 +60,11 @@ function ordered(scores: Map<string, number>): string[] {
   return [...scores].filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([id]) => id);
 }
 
+function termScore(tf: number, df: number, n: number, length: number, average: number, k1: number, b: number): number {
+  const idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));
+  return (idf * tf * (k1 + 1)) / (tf + k1 * (1 - b + (b * length) / average));
+}
+
 /** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */
 export function bm25Rank(chunks: Chunk[], query: string, indexText?: Record<string, string>, k1 = 1.5, b = 0.75): string[] {
   const docs = new Map([...texts(chunks, indexText)].map(([id, text]) => [id, tokenize(text)] as const));
@@ -67,12 +79,17 @@ export function bm25Rank(chunks: Chunk[], query: string, indexText?: Record<stri
     for (const term of terms) {
       const tf = tokens.filter((t) => t === term).length;
       if (tf === 0) continue;
-      const idf = Math.log(1 + (n - df.get(term)! + 0.5) / (df.get(term)! + 0.5));
-      score += (idf * tf * (k1 + 1)) / (tf + k1 * (1 - b + (b * tokens.length) / average));
+      score += termScore(tf, df.get(term)!, n, tokens.length, average, k1, b);
     }
     scores.set(id, score);
   }
   return ordered(scores);
+}
+
+function dot(a: number[], b: number[]): number {
+  let total = 0;
+  for (let i = 0; i < a.length; i++) total += a[i] * b[i];
+  return total;
 }
 
 /** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */
@@ -80,10 +97,7 @@ export function embeddingRank(chunks: Chunk[], query: string, indexText?: Record
   const q = embed(query);
   const scores = new Map<string, number>();
   for (const [id, text] of texts(chunks, indexText)) {
-    const v = embed(text);
-    let total = 0;
-    for (let i = 0; i < q.length; i++) total += q[i] * v[i];
-    scores.set(id, total);
+    scores.set(id, dot(q, embed(text)));
   }
   return ordered(scores);
 }
@@ -112,12 +126,18 @@ export function recallAtK(ids: string[], docOf: Record<string, string>, relevant
   return [...wanted].filter((d) => found.has(d)).length / wanted.size;
 }
 
+function indexedText(chunks: Chunk[], contexts?: Record<string, string>): Record<string, string> {
+  const indexText: Record<string, string> = {};
+  for (const c of chunks) if (contexts && c.id in contexts) indexText[c.id] = `${contexts[c.id]} ${c.text}`;
+  return indexText;
+}
+
 /** The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a sentence
  *  that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking. */
 export function retrieve(chunks: Chunk[], query: string, mode = "hybrid", k = 3, options: Options = {}): string[] {
   const { pool = 10, contexts, scorer } = options;
-  const indexText: Record<string, string> = {};
-  for (const c of chunks) if (contexts && c.id in contexts) indexText[c.id] = `${contexts[c.id]} ${c.text}`;
+  log.debug("retrieve input", { mode, k, query });
+  const indexText = indexedText(chunks, contexts);
   const lexical = bm25Rank(chunks, query, indexText);
   const semantic = embeddingRank(chunks, query, indexText);
   const ranked = mode === "bm25" ? lexical : mode === "embedding" ? semantic : fuse([lexical, semantic]);

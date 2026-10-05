@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * batch look-up before the results (the Python SDK makes one).
  */
 public final class BatchRoundTrip {
+    private static final System.Logger LOG = System.getLogger(BatchRoundTrip.class.getName());
     static final String MODEL = "claude-haiku-4-5-20251001";
     static final Map<String, String> TICKETS = new LinkedHashMap<>();
 

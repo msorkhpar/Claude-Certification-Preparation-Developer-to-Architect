@@ -3,6 +3,8 @@
 // The SDK sleeps a short exponential back-off between attempts (about 0.5 s, then about 1 s).
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text, type Reply } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("sdk_retries");
 
 const PARAMS = { model: "claude-sonnet-5-5", max_tokens: 16, messages: [{ role: "user" as const, content: "Hi" }] };
 

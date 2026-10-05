@@ -1,4 +1,7 @@
 // Build, split and read Message Batches. See ../../statement.md for the contract.
+import { logger } from "../logger.ts";
+const log = logger("batches");
+
 const CUSTOM_ID = /^[a-zA-Z0-9_-]{1,64}$/;
 const MAX_REQUESTS = 100_000;
 const MAX_BYTES = 256 * 1024 * 1024;
@@ -18,22 +21,35 @@ export class BatchError extends Error {
   }
 }
 
+function checkCustomId(id: unknown, seen: Set<string>): void {
+  if (typeof id !== "string" || !CUSTOM_ID.test(id)) throw new BatchError("custom_id", `${JSON.stringify(id)} is not 1 to 64 letters, digits, hyphens or underscores`);
+  if (seen.has(id)) throw new BatchError("custom_id", `${id} is used twice`);
+  seen.add(id);
+}
+
+function checkParams(params: Record<string, any>): void {
+  if ((params.max_tokens ?? 0) < 1) throw new BatchError("params.max_tokens", "must be at least 1 inside a batch");
+  if (params.stream) throw new BatchError("params.stream", "batch results are a file, not a stream");
+  if ("speed" in params) throw new BatchError("params.speed", "fast mode is not available in a batch");
+}
+
 export function buildRequests(items: Item[]): BatchRequest[] {
+  log.debug("buildRequests input", items);
   const seen = new Set<string>();
   const requests: BatchRequest[] = [];
   for (const { id, params } of items) {
-    if (typeof id !== "string" || !CUSTOM_ID.test(id)) throw new BatchError("custom_id", `${JSON.stringify(id)} is not 1 to 64 letters, digits, hyphens or underscores`);
-    if (seen.has(id)) throw new BatchError("custom_id", `${id} is used twice`);
-    seen.add(id);
-    if ((params.max_tokens ?? 0) < 1) throw new BatchError("params.max_tokens", "must be at least 1 inside a batch");
-    if (params.stream) throw new BatchError("params.stream", "batch results are a file, not a stream");
-    if ("speed" in params) throw new BatchError("params.speed", "fast mode is not available in a batch");
+    checkCustomId(id, seen);
+    checkParams(params);
     requests.push({ custom_id: id, params });
   }
   return requests;
 }
 
 const size = (request: BatchRequest) => Buffer.byteLength(JSON.stringify(request), "utf8");
+
+function mustStartNew(count: number, used: number, bytes: number, maxRequests: number, maxBytes: number): boolean {
+  return count > 0 && (count >= maxRequests || used + bytes > maxBytes);
+}
 
 export function splitBatches(requests: BatchRequest[], maxRequests = MAX_REQUESTS, maxBytes = MAX_BYTES): BatchRequest[][] {
   const batches: BatchRequest[][] = [];
@@ -42,7 +58,7 @@ export function splitBatches(requests: BatchRequest[], maxRequests = MAX_REQUEST
   for (const request of requests) {
     const bytes = size(request);
     if (bytes > maxBytes) throw new BatchError("size", `${request.custom_id} alone is larger than a batch may be`);
-    if (current.length > 0 && (current.length >= maxRequests || used + bytes > maxBytes)) {
+    if (mustStartNew(current.length, used, bytes, maxRequests, maxBytes)) {
       batches.push(current);
       current = [];
       used = 0;
@@ -54,15 +70,25 @@ export function splitBatches(requests: BatchRequest[], maxRequests = MAX_REQUEST
   return batches;
 }
 
+function keepResult(wanted: string[], byId: Map<string, any>, unknown: string[], record: { custom_id: string; result: any }): void {
+  if (!wanted.includes(record.custom_id)) unknown.push(record.custom_id);
+  else if (!byId.has(record.custom_id)) byId.set(record.custom_id, record.result);
+}
+
+function needsFix(errorType: string): boolean {
+  return errorType === "invalid_request_error";
+}
+
+function addUsage(usage: Record<string, number>, used: Record<string, number>): void {
+  for (const key of USAGE_KEYS) usage[key] += used[key] ?? 0;
+}
+
 export function collect(requests: BatchRequest[], resultLines: string[]) {
   const wanted = requests.map((r) => r.custom_id);
   const byId = new Map<string, any>();
   const unknown: string[] = [];
   for (const line of resultLines) {
-    if (!line.trim()) continue;
-    const record = JSON.parse(line);
-    if (!wanted.includes(record.custom_id)) unknown.push(record.custom_id);
-    else if (!byId.has(record.custom_id)) byId.set(record.custom_id, record.result);
+    if (line.trim()) keepResult(wanted, byId, unknown, JSON.parse(line));
   }
   const outcomes: Record<string, any>[] = [];
   const retry: string[] = [];
@@ -77,11 +103,11 @@ export function collect(requests: BatchRequest[], resultLines: string[]) {
       const message = result.message;
       const text = message.content.filter((b: any) => b.type === "text").map((b: any) => b.text ?? "").join("");
       outcomes.push({ custom_id: cid, status: "succeeded", text, usage: message.usage });
-      for (const key of USAGE_KEYS) usage[key] += message.usage[key] ?? 0;
+      addUsage(usage, message.usage);
     } else if (result.type === "errored") {
       const kind = result.error.error.type;
       outcomes.push({ custom_id: cid, status: "errored", error_type: kind });
-      (kind === "invalid_request_error" ? fix : retry).push(cid);
+      (needsFix(kind) ? fix : retry).push(cid);
     } else {
       // canceled or expired: the request never reached the model
       outcomes.push({ custom_id: cid, status: result.type });

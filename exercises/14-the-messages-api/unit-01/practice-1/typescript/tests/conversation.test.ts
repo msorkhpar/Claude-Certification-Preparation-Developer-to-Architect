@@ -66,7 +66,7 @@ test("e2 a failed call leaves no dangling user turn", () => {
   assert.deepEqual(send.bodies[2].messages.map((m: any) => m.role), ["user", "assistant", "user"]);
 });
 
-test("e3 stop reason is reported and max_tokens marks the reply truncated", () => {
+test("e3 stop reason is reported and max tokens marks the reply truncated", () => {
   const chat = new Conversation(new Script(answer("Complete."), answer("Cut o", "max_tokens"), answer("done", "stop_sequence")).call, "m", 64);
   const [first, second, third] = [chat.say("a"), chat.say("b"), chat.say("c")];
   assert.deepEqual([first.stopReason, first.truncated], ["end_turn", false]);
@@ -74,7 +74,7 @@ test("e3 stop reason is reported and max_tokens marks the reply truncated", () =
   assert.deepEqual([third.stopReason, third.truncated], ["stop_sequence", false]);
 });
 
-test("e4 system is a top-level field and stop sequences are passed on", () => {
+test("e4 system is a top level field and stop sequences are passed on", () => {
   const send = new Script(answer("x"), answer("y"));
   new Conversation(send.call, "m", 8, "Be brief.", ["END"]).say("hi");
   assert.equal(send.bodies.length, 1);

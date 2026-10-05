@@ -2,23 +2,41 @@ import java.util.Map;
 
 /** A retry policy for API calls. See ../../statement.md for the contract. */
 final class Retry {
+    private static final System.Logger LOG = System.getLogger(Retry.class.getName());
+
     private Retry() {}
 
     private static Map<?, ?> error(Response response) {
         return response.body() != null && response.body().get("error") instanceof Map<?, ?> e ? e : Map.of();
     }
 
+    private static boolean statusRetryable(int s) {
+        return s == 408 || s == 409 || s == 429 || s >= 500;
+    }
+
+    private static boolean spendCap(Response response) {
+        return error(response).get("details") instanceof Map<?, ?> d && "enforced_spend_limit_reached".equals(d.get("error_code"));
+    }
+
     private static boolean retryable(Response response) {
-        int s = response.status();
-        if (s == 408 || s == 409 || s == 429 || s >= 500) {
-            return !(error(response).get("details") instanceof Map<?, ?> d && "enforced_spend_limit_reached".equals(d.get("error_code")));
-        }
-        return false;
+        return statusRetryable(response.status()) && !spendCap(response);
+    }
+
+    private static String errorType(Response response) {
+        Object type = error(response).get("type");
+        return type == null ? "unknown" : String.valueOf(type);
+    }
+
+    private static String requestId(Response response) {
+        return response.headers().get("request-id");
     }
 
     private static CallFailed failure(Response response, int attempts) {
-        Object type = error(response).get("type");
-        return new CallFailed(response.status(), type == null ? "unknown" : String.valueOf(type), attempts, response.headers().get("request-id"));
+        return new CallFailed(response.status(), errorType(response), attempts, requestId(response));
+    }
+
+    private static CallFailed connectionFailure(int attempts) {
+        return new CallFailed(0, "connection_error", attempts, null);
     }
 
     private static double retryAfter(Response response) {
@@ -29,7 +47,12 @@ final class Retry {
         }
     }
 
+    private static double delayFor(int attempt, Policy policy) {
+        return policy.jitter().applyAsDouble(Math.min(policy.cap(), policy.baseDelay() * Math.pow(2, attempt - 1)));
+    }
+
     static Response callWithRetry(Send send, Sleep sleep, Policy policy) {
+        LOG.log(System.Logger.Level.DEBUG, "callWithRetry input: {0} {1} {2}", policy.maxAttempts(), policy.baseDelay(), policy.cap());
         for (int attempt = 1; ; attempt++) {
             double wait = 0.0;
             try {
@@ -38,10 +61,9 @@ final class Retry {
                 if (!retryable(response) || attempt >= policy.maxAttempts()) throw failure(response, attempt);
                 wait = retryAfter(response);
             } catch (TransportError e) {
-                if (attempt >= policy.maxAttempts()) throw new CallFailed(0, "connection_error", attempt, null);
+                if (attempt >= policy.maxAttempts()) throw connectionFailure(attempt);
             }
-            double delay = policy.jitter().applyAsDouble(Math.min(policy.cap(), policy.baseDelay() * Math.pow(2, attempt - 1)));
-            sleep.sleep(Math.max(delay, wait));
+            sleep.sleep(Math.max(delayFor(attempt, policy), wait));
         }
     }
 }

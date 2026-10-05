@@ -18,6 +18,7 @@ import java.util.Map;
  * reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.
  */
 public final class FrontDoors {
+    private static final System.Logger LOG = System.getLogger(FrontDoors.class.getName());
     static final List<Map<String, Object>> MESSAGES = List.of(map("role", "user", "content", "Capital of France?"));
     static final String PROJECT = "example-project", REGION = "us-east-1";
 

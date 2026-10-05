@@ -1,5 +1,8 @@
 """A tool loop against a scripted model. See ../../statement.md."""
 import json
+import logging
+
+log = logging.getLogger(__name__)
 
 FORCED_UNSUPPORTED = {"claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"}
 CHOICE_TYPES = {"auto", "any", "tool", "none"}
@@ -29,51 +32,81 @@ def _check_choice(tools, model, choice):
         raise RequestError("tool_choice.name", "names no tool in the request")
 
 
+def _missing_inputs(tool, tool_input):
+    """The keys listed in the tool's required list that the input lacks."""
+    return [k for k in tool["input_schema"].get("required", []) if k not in tool_input]
+
+
+def _result_content(out):
+    """The content of a tool result: a string as it is, any other value as JSON text."""
+    return out if isinstance(out, str) else json.dumps(out)
+
+
 def _run_one(tools, block):
     tool = next((t for t in tools if t["name"] == block["name"]), None)
     result = {"type": "tool_result", "tool_use_id": block["id"]}
     if tool is None:
         return {**result, "content": f"Unknown tool: {block['name']}", "is_error": True}
-    missing = [k for k in tool["input_schema"].get("required", []) if k not in block["input"]]
+    missing = _missing_inputs(tool, block["input"])
     if missing:
         return {**result, "content": f"Missing required input: {', '.join(missing)}", "is_error": True}
     try:
         out = tool["handler"](block["input"])
     except Exception as err:  # a tool that fails must not end the loop
         return {**result, "content": str(err), "is_error": True}
-    return {**result, "content": out if isinstance(out, str) else json.dumps(out)}
+    return {**result, "content": _result_content(out)}
 
 
 def _text(content):
     return "".join(b["text"] for b in content if b["type"] == "text")
 
 
+def _tool_results(tools, content):
+    """One tool_result per tool_use block of the reply, in order."""
+    return [_run_one(tools, b) for b in content if b["type"] == "tool_use"]
+
+
+def _final_status(stop):
+    """The status of a reply that ends the loop: done, refused or truncated."""
+    if stop in ("end_turn", "stop_sequence"):
+        return "done"
+    if stop == "refusal":
+        return "refused"
+    return "truncated"  # max_tokens, model_context_window_exceeded: the answer is cut off
+
+
+def _turn_numbers(max_turns):
+    """The turn numbers the loop may use."""
+    return range(1, max_turns + 1)
+
+
+def _sent_choice(tool_choice, turn):
+    """The tool_choice to send on this turn: a forced choice only on the first request."""
+    forced = tool_choice["type"] in ("any", "tool")
+    return {"type": "auto"} if forced and turn > 1 else tool_choice
+
+
 def run_agent(ask, tools, user_text, model="claude-sonnet-5-5", max_turns=8, tool_choice=None):
     """Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit."""
+    log.debug("run_agent input: %r", user_text)
     if tool_choice is not None:
         _check_choice(tools, model, tool_choice)
     definitions = [{k: v for k, v in t.items() if k != "handler"} for t in tools]
     messages = [{"role": "user", "content": user_text}]
     text, calls = "", 0
-    for turn in range(1, max_turns + 1):
+    for turn in _turn_numbers(max_turns):
         request = {"model": model, "max_tokens": 1024, "messages": list(messages), "tools": definitions}
         if tool_choice is not None:
-            forced = tool_choice["type"] in ("any", "tool")
-            request["tool_choice"] = {"type": "auto"} if forced and turn > 1 else tool_choice
+            request["tool_choice"] = _sent_choice(tool_choice, turn)
         reply = ask(request)
         calls = turn
         messages.append({"role": "assistant", "content": reply["content"]})
         text = _text(reply["content"])
         stop = reply["stop_reason"]
         if stop == "tool_use":
-            results = [_run_one(tools, b) for b in reply["content"] if b["type"] == "tool_use"]
-            messages.append({"role": "user", "content": results})
+            messages.append({"role": "user", "content": _tool_results(tools, reply["content"])})
         elif stop == "pause_turn":
             continue
-        elif stop in ("end_turn", "stop_sequence"):
-            return {"status": "done", "text": text, "turns": calls, "messages": messages}
-        elif stop == "refusal":
-            return {"status": "refused", "text": text, "turns": calls, "messages": messages}
-        else:  # max_tokens, model_context_window_exceeded: the answer is cut off
-            return {"status": "truncated", "text": text, "turns": calls, "messages": messages}
+        else:
+            return {"status": _final_status(stop), "text": text, "turns": calls, "messages": messages}
     return {"status": "max_turns", "text": text, "turns": calls, "messages": messages}

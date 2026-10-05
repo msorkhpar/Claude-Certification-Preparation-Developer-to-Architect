@@ -1,19 +1,103 @@
 {
   "practice": "13-one-rest-api-under-every-sdk/unit-01/practice-1",
   "name": "raw-client",
-  "tests": {"java": "RawClientTest", "kotlin": "RawClientTest"},
+  "tests": {
+    "java": "RawClientTest",
+    "kotlin": "RawClientTest"
+  },
   "cases": {
-    "m1": {"kind": "main", "python": "test_m1_request_has_method_url_three_headers_and_json_body", "typescript": "m1 request has method, url, three headers and a JSON body", "java": "m1_requestHasMethodUrlThreeHeadersAndJsonBody", "kotlin": "m1_requestHasMethodUrlThreeHeadersAndJsonBody"},
-    "e1": {"kind": "edge", "python": "test_e1_blank_or_absent_system_is_left_out_of_the_body", "typescript": "e1 blank or absent system is left out of the body", "java": "e1_blankOrAbsentSystemIsLeftOutOfTheBody", "kotlin": "e1_blankOrAbsentSystemIsLeftOutOfTheBody"},
-    "e2": {"kind": "edge", "python": "test_e2_bad_input_is_refused_before_anything_is_sent", "typescript": "e2 bad input is refused before anything is sent", "java": "e2_badInputIsRefusedBeforeAnythingIsSent", "kotlin": "e2_badInputIsRefusedBeforeAnythingIsSent"},
-    "e3": {"kind": "edge", "python": "test_e3_success_returns_the_message_and_text_joins_text_blocks_only", "typescript": "e3 success returns the message and text joins text blocks only", "java": "e3_successReturnsTheMessageAndTextJoinsTextBlocksOnly", "kotlin": "e3_successReturnsTheMessageAndTextJoinsTextBlocksOnly"},
-    "e4": {"kind": "edge", "python": "test_e4_an_error_reply_becomes_an_api_error_with_the_header_request_id", "typescript": "e4 an error reply becomes an ApiError with the header request id", "java": "e4_anErrorReplyBecomesAnApiErrorWithTheHeaderRequestId", "kotlin": "e4_anErrorReplyBecomesAnApiErrorWithTheHeaderRequestId"},
-    "e5": {"kind": "edge", "python": "test_e5_a_reply_that_is_not_json_still_gives_an_api_error", "typescript": "e5 a reply that is not JSON still gives an ApiError", "java": "e5_aReplyThatIsNotJsonStillGivesAnApiError", "kotlin": "e5_aReplyThatIsNotJsonStillGivesAnApiError"},
-    "e6": {"kind": "edge", "python": "test_e6_the_api_key_never_appears_in_an_error", "typescript": "e6 the API key never appears in an error", "java": "e6_theApiKeyNeverAppearsInAnError", "kotlin": "e6_theApiKeyNeverAppearsInAnError"}
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_request_has_method_url_three_headers_and_json_body",
+      "typescript": "m1 request has method url three headers and json body",
+      "java": "m1_requestHasMethodUrlThreeHeadersAndJsonBody",
+      "kotlin": "m1_requestHasMethodUrlThreeHeadersAndJsonBody"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_blank_or_absent_system_is_left_out_of_the_body",
+      "typescript": "e1 blank or absent system is left out of the body",
+      "java": "e1_blankOrAbsentSystemIsLeftOutOfTheBody",
+      "kotlin": "e1_blankOrAbsentSystemIsLeftOutOfTheBody"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_bad_input_is_refused_before_anything_is_sent",
+      "typescript": "e2 bad input is refused before anything is sent",
+      "java": "e2_badInputIsRefusedBeforeAnythingIsSent",
+      "kotlin": "e2_badInputIsRefusedBeforeAnythingIsSent"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_success_returns_the_message_and_text_joins_text_blocks_only",
+      "typescript": "e3 success returns the message and text joins text blocks only",
+      "java": "e3_successReturnsTheMessageAndTextJoinsTextBlocksOnly",
+      "kotlin": "e3_successReturnsTheMessageAndTextJoinsTextBlocksOnly"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_an_error_reply_becomes_an_api_error_with_the_header_request_id",
+      "typescript": "e4 an error reply becomes an api error with the header request id",
+      "java": "e4_anErrorReplyBecomesAnApiErrorWithTheHeaderRequestId",
+      "kotlin": "e4_anErrorReplyBecomesAnApiErrorWithTheHeaderRequestId"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_reply_that_is_not_json_still_gives_an_api_error",
+      "typescript": "e5 a reply that is not json still gives an api error",
+      "java": "e5_aReplyThatIsNotJsonStillGivesAnApiError",
+      "kotlin": "e5_aReplyThatIsNotJsonStillGivesAnApiError"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_api_key_never_appears_in_an_error",
+      "typescript": "e6 the api key never appears in an error",
+      "java": "e6_theApiKeyNeverAppearsInAnError",
+      "kotlin": "e6_theApiKeyNeverAppearsInAnError"
+    }
   },
   "plants": {
-    "wrong-no-version-header": {"caught_by": ["m1"], "defect": "leaves out the anthropic-version header"},
-    "wrong-body-id-first": {"caught_by": ["e4"], "defect": "prefers the request id in the body over the request-id header"},
-    "wrong-no-redaction": {"caught_by": ["e6"], "defect": "puts the server's message into the error without removing the API key"}
+    "wrong-no-version-header": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "leaves out the anthropic-version header"
+    },
+    "wrong-blank-system-kept": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "puts a blank system text into the body"
+    },
+    "wrong-zero-max-tokens-ok": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts max_tokens of zero"
+    },
+    "wrong-text-joined-with-space": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "joins the text blocks with a space"
+    },
+    "wrong-body-id-first": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "prefers the request id in the body over the request-id header"
+    },
+    "wrong-unknown-type-renamed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "names the error type of a reply that is not JSON error instead of unknown"
+    },
+    "wrong-no-redaction": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "puts the server's message into the error without removing the API key"
+    }
   }
 }

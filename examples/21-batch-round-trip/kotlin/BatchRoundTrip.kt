@@ -10,6 +10,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
 
+private val log = System.getLogger("batch_round_trip")
+
 /**
  * A Message Batch from submission to results, against a scripted server.
  *

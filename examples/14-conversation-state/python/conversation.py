@@ -3,11 +3,14 @@
 Three turns through the real SDK against a scripted transport. The replies are illustrative,
 hand-written Messages responses (claude-sonnet-5-5), not captures.
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 SYSTEM = "You answer in one short sentence."

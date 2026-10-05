@@ -74,10 +74,13 @@ with the raw events, and a second time with an `error` event in the middle.
 The stream is an illustrative, hand-written sequence of events in the API's framing
 (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport, sse_response
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PARAMS = dict(model=MODEL, max_tokens=128, messages=[{"role": "user", "content": "Weather in Paris?"}],
@@ -166,6 +169,8 @@ mid-stream error: APIStatusError overloaded_error
 // (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.
 import Anthropic from "@anthropic-ai/sdk";
 import { scriptedFetch } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("streaming");
 
 const MODEL = "claude-sonnet-5-5";
 export const PARAMS = {
@@ -274,6 +279,7 @@ import java.util.stream.Collectors;
  * The Java SDK reads the events itself and drops `ping` events, so a raw event list has no `ping` in it.
  */
 public final class Streaming {
+    private static final System.Logger LOG = System.getLogger(Streaming.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static MessageCreateParams params() {
@@ -413,6 +419,8 @@ import com.anthropic.models.messages.Tool
 import harness.Reply
 import harness.Scripted
 import harness.Scripted.map
+
+private val log = System.getLogger("streaming")
 
 /**
  * A streamed reply read three ways, from a scripted server-sent-event body.

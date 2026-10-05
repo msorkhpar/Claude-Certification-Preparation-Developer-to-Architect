@@ -3,6 +3,8 @@
 // The API gets a schema without numeric constraints (structured outputs do not support them); the program enforces them.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("structured_extraction");
 
 export const MODEL = "claude-sonnet-5-5";
 export const LOCAL_SCHEMA: any = {

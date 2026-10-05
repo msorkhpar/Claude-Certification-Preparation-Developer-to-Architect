@@ -3,8 +3,11 @@
 Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a
 hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.
 """
+import logging
 import math
 import re
+
+log = logging.getLogger(__name__)
 
 CORPUS = [
     ('refunds', 'Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the original payment method within five business days. Digital goods are not refundable after download.'),

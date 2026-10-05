@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("policy_review")
+
 /**
  * Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.
  *

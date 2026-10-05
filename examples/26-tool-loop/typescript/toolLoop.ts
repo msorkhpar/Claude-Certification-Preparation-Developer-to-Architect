@@ -2,6 +2,8 @@
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("tool_loop");
 
 export const MODEL = "claude-sonnet-5-5";
 export const TOOLS: Anthropic.Tool[] = [

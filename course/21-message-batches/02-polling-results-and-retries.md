@@ -95,12 +95,15 @@ The replies are illustrative, hand-written bodies in the shapes of the batch pro
 captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in
 them. Waiting between polls is recorded, not slept.
 """
+import logging
 import json
 
 import httpx2
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-haiku-4-5-20251001"
 TICKETS = {"t-1": "My parcel never arrived.", "t-2": "How do I change my address?", "t-3": "Charge me twice? Refund please.", "t-4": "x" * 10}
@@ -187,6 +190,8 @@ fix before resubmitting: ['t-4'] | resubmit unchanged: ['t-2']
 // them. Waiting between polls is recorded, not slept.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("batch_round_trip");
 
 export const MODEL = "claude-haiku-4-5-20251001";
 export const TICKETS: Record<string, string> = { "t-1": "My parcel never arrived.", "t-2": "How do I change my address?", "t-3": "Charge me twice? Refund please.", "t-4": "x".repeat(10) };
@@ -295,6 +300,7 @@ import java.util.stream.Collectors;
  * batch look-up before the results (the Python SDK makes one).
  */
 public final class BatchRoundTrip {
+    private static final System.Logger LOG = System.getLogger(BatchRoundTrip.class.getName());
     static final String MODEL = "claude-haiku-4-5-20251001";
     static final Map<String, String> TICKETS = new LinkedHashMap<>();
 
@@ -425,6 +431,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
+
+private val log = System.getLogger("batch_round_trip")
 
 /**
  * A Message Batch from submission to results, against a scripted server.

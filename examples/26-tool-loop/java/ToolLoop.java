@@ -31,6 +31,7 @@ import java.util.function.Function;
  * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
  */
 public final class ToolLoop {
+    private static final System.Logger LOG = System.getLogger(ToolLoop.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static Tool tool(String name, String description) {

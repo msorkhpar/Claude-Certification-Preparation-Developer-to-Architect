@@ -53,7 +53,7 @@ test("e2 the batch discount halves every part of the cost", () => {
   assert.equal(requestCost(HAIKU, { output_tokens: 1000 }, true), 2500);
 });
 
-test("e3 the router picks by cost and tier, not by the order of the catalog", () => {
+test("e3 the router picks by cost and tier not by the order of the catalog", () => {
   const rev = [...CATALOG].reverse();
   assert.equal(route(rev, { min_tier: 3, usage: { input_tokens: 500, output_tokens: 100 } }), OPUS.id);
   assert.equal(route(rev, { min_tier: 1, usage: { input_tokens: 500, output_tokens: 100 } }), HAIKU.id);

@@ -6,6 +6,7 @@ import java.util.Set;
 
 /** One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md. */
 final class Platforms {
+    private static final System.Logger LOG = System.getLogger(Platforms.class.getName());
     private Platforms() {}
 
     private static final String ANTHROPIC_VERSION = "2023-06-01";
@@ -24,6 +25,41 @@ final class Platforms {
 
     private static String family(String model) {
         return model.startsWith(HAIKU) ? HAIKU : model;
+    }
+
+    private static void checkBedrock(String model, String family, Map<String, Object> config) {
+        if (!BEDROCK_MODELS.contains(family)) throw new PlatformError("model", model + " is not served by Claude in Amazon Bedrock");
+        if (blank(config.get("region"))) throw new PlatformError("config", "a Bedrock request needs a region");
+    }
+
+    private static String bedrockModelId(String family) {
+        return "anthropic." + family;
+    }
+
+    private static String vertexModelId(String family) {
+        return family.equals(HAIKU) ? HAIKU_VERTEX : family;
+    }
+
+    private static String vertexHost(String endpoint, String family, String model) {
+        if (endpoint.equals("global")) return "aiplatform.googleapis.com";
+        if (endpoint.equals("us") || endpoint.equals("eu")) return "aiplatform." + endpoint + ".rep.googleapis.com";
+        if (!REGIONAL_VERTEX_MODELS.contains(family)) {
+            throw new PlatformError("endpoint", model + " is served on the global and multi-region endpoints, not on a specific region");
+        }
+        return endpoint + "-aiplatform.googleapis.com";
+    }
+
+    private static Map<String, Object> vertexBody(Map<String, Object> body) {
+        Map<String, Object> sent = copyBody(body);
+        sent.remove("model");
+        sent.put("anthropic_version", VERTEX_VERSION);
+        return sent;
+    }
+
+    private static List<String> lacking(String platform, List<String> features) {
+        List<String> out = new ArrayList<>();
+        for (String name : features) if (MISSING.get(platform).contains(name)) out.add(name);
+        return out;
     }
 
     @SuppressWarnings("unchecked")
@@ -67,6 +103,7 @@ final class Platforms {
     }
 
     static Map<String, Object> buildRequest(String platform, String model, Map<String, Object> body, Map<String, Object> config) {
+        LOG.log(System.Logger.Level.DEBUG, "buildRequest input: {0} {1} {2} {3}", platform, model, body, config);
         String family = family(model);
         switch (platform) {
             case "anthropic": {
@@ -75,33 +112,20 @@ final class Platforms {
                 return request("https://api.anthropic.com/v1/messages", versionHeaders(), sent);
             }
             case "bedrock": {
-                if (!BEDROCK_MODELS.contains(family)) throw new PlatformError("model", model + " is not served by Claude in Amazon Bedrock");
-                if (blank(config.get("region"))) throw new PlatformError("config", "a Bedrock request needs a region");
+                checkBedrock(model, family, config);
                 Map<String, Object> sent = copyBody(body);
-                sent.put("model", "anthropic." + family);
+                sent.put("model", bedrockModelId(family));
                 return request("https://bedrock-mantle." + config.get("region") + ".api.aws/anthropic/v1/messages", versionHeaders(), sent);
             }
             case "vertex": {
                 if (!VERTEX_MODELS.contains(family)) throw new PlatformError("model", model + " is not served on Google Vertex AI");
                 if (blank(config.get("project"))) throw new PlatformError("config", "a Vertex request needs a project");
                 String endpoint = config.get("endpoint") == null ? "global" : (String) config.get("endpoint");
-                String modelId = family.equals(HAIKU) ? HAIKU_VERTEX : family;
-                String path = "/v1/projects/" + config.get("project") + "/locations/" + endpoint + "/publishers/anthropic/models/" + modelId + ":rawPredict";
-                String host;
-                if (endpoint.equals("global")) host = "aiplatform.googleapis.com";
-                else if (endpoint.equals("us") || endpoint.equals("eu")) host = "aiplatform." + endpoint + ".rep.googleapis.com";
-                else {
-                    if (!REGIONAL_VERTEX_MODELS.contains(family)) {
-                        throw new PlatformError("endpoint", model + " is served on the global and multi-region endpoints, not on a specific region");
-                    }
-                    host = endpoint + "-aiplatform.googleapis.com";
-                }
-                Map<String, Object> sent = copyBody(body);
-                sent.remove("model");
-                sent.put("anthropic_version", VERTEX_VERSION);
+                String path = "/v1/projects/" + config.get("project") + "/locations/" + endpoint + "/publishers/anthropic/models/" + vertexModelId(family) + ":rawPredict";
+                String host = vertexHost(endpoint, family, model);
                 Map<String, Object> headers = new LinkedHashMap<>();
                 headers.put("content-type", "application/json");
-                return request("https://" + host + path, headers, sent);
+                return request("https://" + host + path, headers, vertexBody(body));
             }
             default:
                 throw new PlatformError("platform", "unknown platform " + platform);
@@ -112,8 +136,6 @@ final class Platforms {
         Set<String> missing = MISSING.get(platform);
         if (missing == null) throw new PlatformError("platform", "unknown platform " + platform);
         for (String name : features) if (!FEATURES.contains(name)) throw new PlatformError("feature", "unknown feature " + name);
-        List<String> out = new ArrayList<>();
-        for (String name : features) if (missing.contains(name)) out.add(name);
-        return out;
+        return lacking(platform, features);
     }
 }

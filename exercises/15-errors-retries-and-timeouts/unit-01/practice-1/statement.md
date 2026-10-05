@@ -4,6 +4,25 @@ Write the function that decides whether to try an API call again, and for how lo
 folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the file there. No test waits: the
 sleep is injected and the failures are scripted.
 
+## What is already written, and what you write
+
+The starter is a working retry policy with seven gaps cut out of it. The plumbing is written and correct: the given types, `call_with_retry` itself
+(the loop, the attempt count, the status check, the sleep and the decision to give up), and the way a retryable status and a spend cap combine. Each
+gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap
+returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the
+`log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and
+Kotlin names are the camel-case forms, with `delayFor` for `_delay`):
+
+1. `_status_retryable` unlocks `m1` and `e1`: which statuses may be tried again.
+2. `_spend_cap` unlocks `e4`: a 429 that says the spend limit is reached.
+3. `_error_type` unlocks `e1`, `e4` and `e6`: the API's error type, or `unknown`.
+4. `_request_id` unlocks `e1`, `e4` and `e6`: the `request-id` header.
+5. `_connection_failure` unlocks `e5`: status 0 and `connection_error`.
+6. `_retry_after` unlocks `e2`: the header as seconds.
+7. `_delay` unlocks `m1`, `e3` and `e5`: the doubling delay, the cap and the jitter applied last.
+
+`m1` needs gaps 1 and 7. A few lines each, about fifteen in all.
+
 ## The given types
 
 | Name | Meaning |

@@ -3,6 +3,8 @@
 // ticket in the request, and ticket 7 is answered with a 429. The labels are illustrative.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text, type Reply } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("bounded");
 
 const MODEL = "claude-sonnet-5-5";
 export const TICKETS = Array.from({ length: 12 }, (_, i) => `ticket ${i + 1}`);

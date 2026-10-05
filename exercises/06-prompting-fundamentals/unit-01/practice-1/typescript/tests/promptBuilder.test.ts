@@ -60,7 +60,7 @@ test("m1 full prompt has every section in order", () => {
   assert.equal(buildPrompt(FULL, VARS), EXPECTED);
 });
 
-test("e1 absent optional sections are omitted, not empty", () => {
+test("e1 absent optional sections are omitted not empty", () => {
   const out = buildPrompt({ task: "Say hi.", role: "  ", documents: [], constraints: [] });
   assert.equal(out, "<task>\nSay hi.\n</task>");
   assert.ok(!out.includes("<role>") && !out.includes("<documents>") && !out.includes("<constraints>"));

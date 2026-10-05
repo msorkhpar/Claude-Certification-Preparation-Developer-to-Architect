@@ -3,6 +3,8 @@
 // (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.
 import Anthropic from "@anthropic-ai/sdk";
 import { scriptedFetch } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("streaming");
 
 const MODEL = "claude-sonnet-5-5";
 export const PARAMS = {

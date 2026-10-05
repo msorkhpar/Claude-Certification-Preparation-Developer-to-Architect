@@ -16,6 +16,25 @@ direct API, for example `claude-opus-5-5` or `claude-haiku-4-5-20251001`), `body
 (without any credential) and `body`, and raises `PlatformError` (`field` names the offending part: `platform`, `model`,
 `config`, `endpoint` or `feature`). The four course models and `claude-sonnet-4-6` are the only models to handle.
 
+## What is already written, and what you write
+
+The starter is a working request builder with seven gaps cut out of it. Everything that is plumbing is written and correct: the constants and feature tables, `PlatformError`,
+the direct API request, the shape of the Bedrock and Vertex requests, the deep copy of the body, the check that the Vertex model and project are given, and the check that a platform
+and its features are known. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a
+neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use camel case without it
+(`checkBedrock`, `vertexHost`). Write them in this order:
+
+1. `_family` unlocks `e1`: a dated and an undated Haiku id are one family.
+2. `_check_bedrock` unlocks `e4` and `e6`: a model Bedrock does not serve and a missing region are refused.
+3. `_bedrock_model_id` unlocks `m1` and `e1`: `anthropic.` and the family.
+4. `_vertex_model_id` unlocks `e1`: the dated Haiku id in a Vertex URL.
+5. `_vertex_host` unlocks `m1` and `e3`: the host of a global, multi-region or regional endpoint, and which models a region serves.
+6. `_vertex_body` unlocks `e2`: no model, a version field, and the caller's body left alone.
+7. `_lacking` unlocks `e5`: the features a platform lacks.
+
+About a dozen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `build_request` already logs its input at debug level, and a
+run shows the logged lines under the failing case.
+
 ## `build_request`
 
 1. **Direct API:** `POST https://api.anthropic.com/v1/messages`, headers `anthropic-version: 2023-06-01` and

@@ -3,6 +3,8 @@
 // illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("raw_vs_sdk");
 
 const MODEL = "claude-sonnet-5-5";
 const URL = "https://api.anthropic.com/v1/messages";

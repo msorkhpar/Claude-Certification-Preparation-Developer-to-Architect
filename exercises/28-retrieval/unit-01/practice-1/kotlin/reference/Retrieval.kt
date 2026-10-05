@@ -2,6 +2,8 @@ import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.sqrt
 
+private val log = System.getLogger("retrieval")
+
 /** A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md. */
 
 private val WORD = Regex("[a-z0-9]+")
@@ -35,7 +37,10 @@ fun embed(text: String): DoubleArray {
 /** Windows of [size] words that start `size - overlap` words apart; the last window ends at the last word. */
 fun chunk(text: String, size: Int, overlap: Int): List<String> {
     require(size >= 1 && overlap >= 0 && overlap < size) { "size must be at least 1 and overlap must be in 0 .. size - 1" }
-    val words = text.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    return windows(text.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }, size, overlap)
+}
+
+private fun windows(words: List<String>, size: Int, overlap: Int): List<String> {
     val chunks = mutableListOf<String>()
     var start = 0
     while (start < words.size) {
@@ -56,6 +61,11 @@ private fun texts(chunks: List<Chunk>, indexText: Map<String, String>?): Map<Str
 private fun ordered(scores: Map<String, Double>): List<String> =
     scores.entries.sortedWith(compareByDescending<Map.Entry<String, Double>> { it.value }.thenBy { it.key }).filter { it.value > 0 }.map { it.key }
 
+private fun termScore(tf: Int, df: Int, n: Int, length: Int, average: Double, k1: Double, b: Double): Double {
+    val idf = ln(1 + (n - df + 0.5) / (df + 0.5))
+    return idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average))
+}
+
 /** Chunk ids by BM25 score (k1 = 1.5, b = 0.75), best first, ties by id, chunks with no word in common with the query left out. */
 fun bm25Rank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {
     val k1 = 1.5
@@ -72,12 +82,17 @@ fun bm25Rank(chunks: List<Chunk>, query: String, indexText: Map<String, String>?
         for (term in terms) {
             val tf = tokens.count { it == term }
             if (tf == 0) continue
-            val idf = ln(1 + (n - df.getValue(term) + 0.5) / (df.getValue(term) + 0.5))
-            score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * tokens.size / average))
+            score += termScore(tf, df.getValue(term), n, tokens.size, average, k1, b)
         }
         scores[id] = score
     }
     return ordered(scores)
+}
+
+private fun dot(a: DoubleArray, b: DoubleArray): Double {
+    var total = 0.0
+    for (i in a.indices) total += a[i] * b[i]
+    return total
 }
 
 /** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */
@@ -85,10 +100,7 @@ fun embeddingRank(chunks: List<Chunk>, query: String, indexText: Map<String, Str
     val q = embed(query)
     val scores = linkedMapOf<String, Double>()
     for ((id, text) in texts(chunks, indexText)) {
-        val v = embed(text)
-        var total = 0.0
-        for (i in q.indices) total += q[i] * v[i]
-        scores[id] = total
+        scores[id] = dot(q, embed(text))
     }
     return ordered(scores)
 }
@@ -115,10 +127,14 @@ fun recallAtK(ids: List<String>, docOf: Map<String, String>, relevant: List<Stri
     return wanted.count { it in found }.toDouble() / wanted.size
 }
 
+private fun indexedText(chunks: List<Chunk>, contexts: Map<String, String>?): Map<String, String> =
+    chunks.filter { contexts != null && it.id in contexts }.associate { it.id to "${contexts!![it.id]} ${it.text}" }
+
 /** The ids of the best k chunks. [mode] is bm25, embedding or hybrid (fusion of both). [contexts] maps chunk ids to a sentence
  *  that is indexed in front of the chunk's text; [scorer] reranks the first [pool] ids of the ranking. */
 fun retrieve(chunks: List<Chunk>, query: String, mode: String = "hybrid", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): List<String> {
-    val indexText = chunks.filter { contexts != null && it.id in contexts }.associate { it.id to "${contexts!![it.id]} ${it.text}" }
+    log.log(System.Logger.Level.DEBUG, "retrieve input: mode={0} k={1} query={2}", mode, k, query)
+    val indexText = indexedText(chunks, contexts)
     val lexical = bm25Rank(chunks, query, indexText)
     val semantic = embeddingRank(chunks, query, indexText)
     val ranked = when (mode) { "bm25" -> lexical; "embedding" -> semantic; else -> fuse(listOf(lexical, semantic)) }

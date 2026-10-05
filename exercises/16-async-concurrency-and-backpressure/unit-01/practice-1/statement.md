@@ -18,6 +18,22 @@ open `starter/` and edit the file there.
 It returns one **`Outcome`** per item, **in input order**: `ok` with a `value`, or not `ok` with the `error` that
 `work` raised. `Outcome` is given in the starter.
 
+## What is already written, and what you write
+
+The starter is the working pool with six small gaps cut out of it: the worker loop, the `Outcome` type, the lazy source and the final join are written and correct. Each gap
+is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so
+the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows
+the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`checkLimit`, `nextSlot`, `succeeded`, `failed`, `place`, `pool`).
+
+1. `_check_limit` unlocks `e4`: refuse a limit below 1.
+2. `_next_slot` unlocks `e5` and `m1`: take one item and reserve its slot, or report that the input is exhausted.
+3. `_succeeded` unlocks `m1`, `e1` and `e3`: the outcome of an item whose work returned.
+4. `_failed` unlocks `e2`: the outcome of an item whose work raised.
+5. `_place` unlocks `e1`: store an outcome in the slot of its item, so the list keeps the input order.
+6. `_pool` unlocks `m1` and `e5`: the `limit` workers that run side by side.
+
+About ten lines in all.
+
 ## Rules
 
 1. **Bounded.** No more than `limit` calls of `work` are running at any moment, and when there are enough items,

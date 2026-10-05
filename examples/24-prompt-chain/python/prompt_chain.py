@@ -2,10 +2,13 @@
 
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 """
+import logging
 import re
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 

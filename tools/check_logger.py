@@ -54,6 +54,8 @@ def main():
                     folder = p / lang / variant
                     if not folder.is_dir():
                         continue
+                    if not any(folder.glob("*" + EXT[lang])):
+                        continue   # a configuration practice: the files to write are data, there is no source file to declare a logger in
                     f = main_file(folder, lang, name)
                     if f is None and not any(folder.glob("*" + EXT[lang])):
                         continue   # a file-based practice (settings, markdown, scripts) has no logic file to declare a logger in

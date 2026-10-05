@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
  * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
  */
 public final class PromptChain {
+    private static final System.Logger LOG = System.getLogger(PromptChain.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     /** A versioned template: a system prompt and a user prompt with {{name}} placeholders. */

@@ -39,6 +39,22 @@ Return the `id` of the cheapest model that can take the task, or raise `NoModelE
 3. Price the usage on each remaining model with `request_cost` (with the task's `batch` flag) and take the lowest.
 4. On equal cost take the lower tier, then the smaller id. The order of the catalog never matters.
 
+## What is already written, and what you write
+
+The starter is a working cost model and router with six gaps cut out of it. The pricing sum, the rounding, the split of cache writes (`_writes`), the filtering and the call order of `route` are written and
+correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the
+starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case.
+The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`cacheCost`, `applyBatch`, `inputTokens`, `canTake`, `cheapest`, `requireChoice`).
+
+1. `_cache_cost` unlocks `e1`: the cost of cache writes and reads.
+2. `_apply_batch` unlocks `e2`: half off the whole sum for a batch.
+3. `_input_tokens` unlocks `e4`: the tokens a model must hold as input.
+4. `_can_take` unlocks `m1`, `e4` and `e5`: not deprecated, tier, context and output limit.
+5. `_cheapest` unlocks `m1`, `e3` and `e6`: the id of the lowest cost, ties to the lower tier then the smaller id.
+6. `_require_choice` unlocks `e5`: an empty choice raises `NoModelError`.
+
+About twenty lines in all.
+
 ## The cases
 
 | Id | What it checks |

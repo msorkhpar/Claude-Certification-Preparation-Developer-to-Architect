@@ -18,6 +18,8 @@ import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
 
+private val log = System.getLogger("tool_loop")
+
 /**
  * A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
  *

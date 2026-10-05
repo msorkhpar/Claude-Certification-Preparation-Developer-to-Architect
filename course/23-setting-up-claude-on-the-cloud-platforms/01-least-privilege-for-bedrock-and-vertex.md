@@ -101,6 +101,10 @@ The policies are written for this page (placeholder account-free ARNs and names)
 named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the
 predict permission (Google's IAM documentation, read 2026-10-02).
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 BROAD = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}
 NARROW = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["bedrock-mantle:CreateInference"],
                                                    "Resource": ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5"]}]}
@@ -167,6 +171,8 @@ custom role: 0 finding(s)
 // The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:
 // named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the
 // predict permission (Google's IAM documentation, read 2026-10-02).
+import { logger } from "./logger.ts";
+const log = logger("policy_review");
 export const BROAD = { Version: "2012-10-17", Statement: [{ Effect: "Allow", Action: "bedrock:*", Resource: "*" }] };
 export const NARROW = {
   Version: "2012-10-17",
@@ -237,6 +243,7 @@ import java.util.Map;
  * predict permission (Google's IAM documentation, read 2026-10-02).
  */
 public final class PolicyReview {
+    private static final System.Logger LOG = System.getLogger(PolicyReview.class.getName());
     static final String BROAD = """
         {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}""";
     static final String NARROW = """
@@ -318,6 +325,8 @@ custom role: 0 finding(s)
 ```
 ```kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
+
+private val log = System.getLogger("policy_review")
 
 /**
  * Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.

@@ -78,8 +78,11 @@ Both calls go through a scripted transport, so nothing leaves the container. The
 hand-written responses in the API's shapes (claude-sonnet-5-5), not captures. Prices are dollars per million
 tokens, read from the Claude pricing page on 2026-10-02.
 """
+import logging
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PRICES = {  # input, output, cache-read multiplier
@@ -141,6 +144,8 @@ the same usage on each model:
 // tokens, read from the Claude pricing page on 2026-10-02.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("cost");
 
 export const MODEL = "claude-sonnet-5-5";
 export const PRICES: Record<string, [number, number, number]> = {
@@ -227,6 +232,7 @@ import java.util.Map;
  * tokens, read from the Claude pricing page on 2026-10-02.
  */
 public final class Cost {
+    private static final System.Logger LOG = System.getLogger(Cost.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String SYSTEM = "You answer from the policy document.";
     static final String QUESTION = "Summarise the refund policy in two sentences.";
@@ -302,6 +308,8 @@ import harness.Scripted
 import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
+
+private val log = System.getLogger("cost")
 
 /**
  * Count tokens before sending, then price the reply from its usage object.

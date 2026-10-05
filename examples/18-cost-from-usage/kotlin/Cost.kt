@@ -7,6 +7,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 
+private val log = System.getLogger("cost")
+
 /**
  * Count tokens before sending, then price the reply from its usage object.
  *

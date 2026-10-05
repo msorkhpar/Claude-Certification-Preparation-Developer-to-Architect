@@ -25,6 +25,22 @@ you use a policy for real; the tests check the shape above and nothing else abou
 **`quotas.json`** is a quota request for Bedrock: `input_tpm` and `output_tpm` (tokens per minute) and
 `anthropic_approval` (true once Anthropic has approved more than the self-service ceiling).
 
+## What is already written, and what you write
+
+The starter holds the three files with their plumbing in place (the statement shape, the project, the caller and the platform field) and eight values cut out or left wrong. A
+file is data, so there is no code and no logger to write: run the tests, read the failing case, and the message under it names the value the test found. Fix them in this order:
+
+1. `bedrock-policy.json`: the `Action` is a wildcard where it should be one invoke action. Unlocks `m1` and `e1`.
+2. `bedrock-policy.json`: the `Resource` is `*` where it should be the one model ARN. Unlocks `m1` and `e2`.
+3. `bedrock-policy.json`: the `Version` is the 2008 language version. Unlocks `e3`.
+4. `vertex.json`: the role `id` is a predefined role. Unlocks `e4`.
+5. `vertex.json`: the role `permissions` hold a wildcard. Unlocks `e4`.
+6. `vertex.json`: the `endpoint` is the global one for EU-resident data. Unlocks `e5`.
+7. `vertex.json`: the `model` carries the Bedrock prefix. Unlocks `e6`.
+8. `quotas.json`: `input_tpm` and `output_tpm` are over the self-service ceiling. Unlocks `e7`.
+
+About five edited lines in all, the same in every language folder.
+
 ## The rules
 
 - The policy has the version `2012-10-17`, only `Allow` statements, and no `NotAction` or `NotResource`.
@@ -43,13 +59,13 @@ you use a policy for real; the tests check the shape above and nothing else abou
 
 | Id | What it checks |
 |---|---|
-| `m1` | The policy allows invoking one model in one region and nothing else |
-| `e1` | No action is a wildcard and every action is an invoke action |
-| `e2` | Every resource ARN names one documented region and one model |
+| `m1` | The policy has one statement that allows an invoke action on the one model in the one region |
+| `e1` | No action is a wildcard and every action is an invoke action, so nothing else is allowed |
+| `e2` | Every resource is a Bedrock model ARN with a documented region and no wildcard |
 | `e3` | Every statement allows, and the policy uses the current version |
 | `e4` | The Vertex role is a custom role that can only predict |
 | `e5` | The Vertex endpoint keeps the data where residency says and serves the model |
-| `e6` | Model ids use each platform's own form |
+| `e6` | Model ids use each platform's own form: `anthropic.` on Bedrock, a Vertex id on Vertex |
 | `e7` | The quota request stays under the self-service ceiling |
 
 Run the tests with the command in the language folder's `run.sh` (Python, TypeScript) or its build file.

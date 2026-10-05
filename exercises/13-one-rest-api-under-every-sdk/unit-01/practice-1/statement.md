@@ -16,6 +16,26 @@ request that would go on the wire and the way a reply, good or bad, becomes a va
 Java and Kotlin also get a small `Json` helper (`parse` and `stringify`) in the starter; Python and TypeScript use
 their standard JSON.
 
+## What is already written, and what you write
+
+The starter is a working client with eight gaps cut out of it. The plumbing is written and correct: the given types, `build_request` and
+`send_messages` themselves, the check for a good status, the JSON parsing of an error body and the way the parts become an `ApiError`. Each gap is a
+small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a
+neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line
+at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names
+are the camel-case forms, with `headersFor` for `_headers` and `bodyFor` for `_body`):
+
+1. `_validate` unlocks `e2`: bad input is refused.
+2. `_headers` unlocks `m1`: the three headers.
+3. `_body` unlocks `m1` and `e1`: the body, with `system` only when it is present.
+4. `_error_parts` unlocks `e4` and `e5`: the error type and message, or `unknown` and the trimmed text.
+5. `_pick_request_id` unlocks `e4`: the header's id before the body's.
+6. `_redact` unlocks `e6`: the key replaced by `[redacted]`.
+7. `_parse_message` unlocks `e3`: the parsed message of a good reply.
+8. `text_of` unlocks `e3`: the text blocks joined.
+
+`m1` needs gaps 2 and 3. A few lines each, about twenty in all.
+
 ## The three functions
 
 **`build_request(api_key, model, messages, max_tokens, system=None)`** (TypeScript `buildRequest`, Java

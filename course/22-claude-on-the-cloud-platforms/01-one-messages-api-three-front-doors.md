@@ -93,10 +93,13 @@ Each request is written out by hand and sent through a scripted transport, so no
 is signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The
 reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.
 """
+import logging
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 BASE = {"max_tokens": 64, "messages": [{"role": "user", "content": "Capital of France?"}]}
 PROJECT, REGION = "example-project", "us-east-1"
@@ -150,6 +153,8 @@ vertex    https://aiplatform.googleapis.com/v1/projects/example-project/location
 // is signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The
 // reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("front_doors");
 
 const BASE = { max_tokens: 64, messages: [{ role: "user", content: "Capital of France?" }] };
 const PROJECT = "example-project";
@@ -214,6 +219,7 @@ import java.util.Map;
  * reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.
  */
 public final class FrontDoors {
+    private static final System.Logger LOG = System.getLogger(FrontDoors.class.getName());
     static final List<Map<String, Object>> MESSAGES = List.of(map("role", "user", "content", "Capital of France?"));
     static final String PROJECT = "example-project", REGION = "us-east-1";
 
@@ -280,6 +286,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.ScriptedHttp
+
+private val log = System.getLogger("front_doors")
 
 /**
  * The same question sent to the direct API, to Claude in Amazon Bedrock and to Claude on Google Vertex AI.

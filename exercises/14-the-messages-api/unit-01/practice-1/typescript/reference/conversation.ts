@@ -1,4 +1,7 @@
 // A conversation client that keeps the state the API does not. See ../../statement.md for the contract.
+import { logger } from "../logger.ts";
+const log = logger("conversation");
+
 export type Body = Record<string, any>;
 export type Send = (body: Body) => Body;
 export type Reply = { text: string; stopReason: string; truncated: boolean };
@@ -20,24 +23,52 @@ export class Conversation {
     this.stopSequences = stopSequences;
   }
 
-  say(text: string): Reply {
+  checkText(text: string): void {
     if (typeof text !== "string" || text.trim() === "") throw new Error("a turn needs text");
-    this._history.push({ role: "user", content: text });
-    const body: Body = { model: this.model, max_tokens: this.maxTokens, messages: structuredClone(this._history) };
+  }
+
+  requestBody(): Body {
+    return { model: this.model, max_tokens: this.maxTokens, messages: structuredClone(this._history) };
+  }
+
+  optionalFields(body: Body): void {
     if (this.system && this.system.trim() !== "") body.system = this.system;
     if (this.stopSequences && this.stopSequences.length > 0) body.stop_sequences = [...this.stopSequences];
-    let response: Body;
+  }
+
+  sendOrRollBack(body: Body): Body {
     try {
-      response = this.send(body);
+      return this.send(body);
     } catch (err) {
       this._history.pop();
       throw err;
     }
-    this._history.push({ role: "assistant", content: response.content });
-    this._totals.input_tokens += response.usage?.input_tokens ?? 0;
-    this._totals.output_tokens += response.usage?.output_tokens ?? 0;
-    const replyText = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text ?? "").join("");
-    return { text: replyText, stopReason: response.stop_reason, truncated: response.stop_reason === "max_tokens" };
+  }
+
+  assistantTurn(response: Body): Body {
+    return { role: "assistant", content: response.content };
+  }
+
+  addUsage(usage: Body): void {
+    this._totals.input_tokens += usage?.input_tokens ?? 0;
+    this._totals.output_tokens += usage?.output_tokens ?? 0;
+  }
+
+  makeReply(response: Body): Reply {
+    const text = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text ?? "").join("");
+    return { text, stopReason: response.stop_reason, truncated: response.stop_reason === "max_tokens" };
+  }
+
+  say(text: string): Reply {
+    log.debug("say input", text);
+    this.checkText(text);
+    this._history.push({ role: "user", content: text });
+    const body = this.requestBody();
+    this.optionalFields(body);
+    const response = this.sendOrRollBack(body);
+    this._history.push(this.assistantTurn(response));
+    this.addUsage(response.usage);
+    return this.makeReply(response);
   }
 
   history(): any[] {

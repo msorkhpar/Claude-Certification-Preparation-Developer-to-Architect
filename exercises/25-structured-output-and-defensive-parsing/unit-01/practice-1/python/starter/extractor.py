@@ -1,20 +1,176 @@
 """Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md."""
+import json
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class ParseError(Exception):
     """No JSON object could be read from the model's text."""
 
 
+def _object_span(body):
+    """TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.
+
+    Receives the text. Returns (first, last): the index of the first `{` and of the last `}`, or -1 for a brace that is not there.
+    Example: _object_span('Sure! {"a": 1} Done.') -> (6, 13)
+    """
+    return -1, -1
+
+
 def parse_json(text):
-    # TODO: the JSON value in a reply: a code fence's body, else the span from the first { to the last }.
-    return None
+    """The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }."""
+    log.debug("parse_json input: %r", text)
+    body = text
+    fence = text.find("```")
+    if fence != -1:
+        start = text.find("\n", fence)
+        end = text.find("```", start if start != -1 else fence + 3)
+        if start != -1 and end != -1:
+            body = text[start + 1:end]
+    first, last = _object_span(body)
+    if first == -1 or last < first:
+        raise ParseError("no JSON object found in the reply")
+    try:
+        return json.loads(body[first:last + 1])
+    except ValueError as err:
+        raise ParseError(f"invalid JSON: {err}") from None
+
+
+def _is_integer(value):
+    """TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?
+
+    Receives any value. Returns True for an int that is not a bool and for a float with no fraction; False otherwise.
+    Example: _is_integer(2.0) -> True, _is_integer(2.5) -> False, _is_integer(True) -> False
+    """
+    return False
+
+
+def _is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+TYPES = {
+    "string": lambda v: isinstance(v, str),
+    "integer": _is_integer,
+    "number": _is_number,
+    "boolean": lambda v: isinstance(v, bool),
+    "array": lambda v: isinstance(v, list),
+    "object": lambda v: isinstance(v, dict),
+    "null": lambda v: v is None,
+}
+
+
+def _range_errors(schema, value, path):
+    """TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.
+
+    Receives the schema, a number and its path. Returns a list of {"path", "message"}: "must be at least <minimum>" first, then
+    "must be at most <maximum>", each only when the schema has that key and the value breaks it.
+    Example: _range_errors({"minimum": 0}, -1, "$.total") -> [{"path": "$.total", "message": "must be at least 0"}]
+    """
+    return []
+
+
+def _required_errors(schema, value, path):
+    """TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.
+
+    Receives the schema, an object (dict) and its path. Returns one {"path": "<path>.<key>", "message": "is required"} per key of the
+    schema's `required` list that the object lacks, in the schema's order.
+    Example: _required_errors({"required": ["a"]}, {}, "$") -> [{"path": "$.a", "message": "is required"}]
+    """
+    return []
+
+
+def _extra_errors(schema, value, path):
+    """TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.
+
+    Receives the schema, an object (dict) and its path. When the schema says `additionalProperties` is False, returns one
+    {"path": "<path>.<key>", "message": "is not allowed"} per key that is not in `properties`; otherwise an empty list.
+    Example: _extra_errors({"additionalProperties": False, "properties": {}}, {"x": 1}, "$") -> [{"path": "$.x", "message": "is not allowed"}]
+    """
+    return []
 
 
 def validate(schema, value, path="$"):
-    # TODO: a list of {"path", "message"}, one per way value breaks schema; empty when it conforms.
-    return None
+    """A list of {"path", "message"} for every way value breaks schema; empty when it conforms."""
+    errors = []
+    want = schema.get("type")
+    if want is not None and not TYPES[want](value):
+        return [{"path": path, "message": f"must be of type {want}"}]
+    if "enum" in schema and value not in schema["enum"]:
+        errors.append({"path": path, "message": f"must be one of {schema['enum']}"})
+    if _is_number(value):
+        errors += _range_errors(schema, value, path)
+    if isinstance(value, dict):
+        errors += _required_errors(schema, value, path)
+        properties = schema.get("properties", {})
+        for key, sub in properties.items():
+            if key in value:
+                errors += validate(sub, value[key], f"{path}.{key}")
+        errors += _extra_errors(schema, value, path)
+    if isinstance(value, list) and "items" in schema:
+        for i, item in enumerate(value):
+            errors += validate(schema["items"], item, f"{path}[{i}]")
+    return errors
+
+
+def _text(reply):
+    return "".join(block["text"] for block in reply["content"] if block["type"] == "text")
+
+
+def _prompt(document, schema):
+    return ("Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\n"
+            f"<schema>{json.dumps(schema)}</schema>\n<document>\n{document}\n</document>")
+
+
+def _feedback(errors):
+    """TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.
+
+    Receives the list of problems. Returns "Your reply was rejected:", then one "- <path>: <message>" line per problem, then
+    "Return the corrected JSON only.", each on its own line.
+    Example: [{"path": "$.total", "message": "must be of type number"}] -> "Your reply was rejected:\n- $.total: must be of type number\nReturn the corrected JSON only." 
+    """
+    return ""
+
+
+def _grounding_errors(value, document, evidence_fields):
+    """TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.
+
+    Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a
+    string that does not occur in the document, returns {"path": "$.<name>", "message": "is not found in the document"}.
+    Example: _grounding_errors({"quote": "x"}, "abc", ["quote"]) -> [{"path": "$.quote", "message": "is not found in the document"}]
+    """
+    return []
+
+
+def _early_status(reply):
+    """TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.
+
+    Receives a reply. Returns "refused" when its stop_reason is "refusal", "truncated" when it is "max_tokens", else None.
+    Example: _early_status({"stop_reason": "max_tokens"}) -> "truncated"
+    The starter says "truncated" for every reply, so it stops after one call; write the real rule.
+    """
+    return "truncated"
 
 
 def extract(ask, document, schema, max_attempts=3, evidence_fields=()):
-    # TODO: ask, parse, validate and, on a problem, re-prompt with the errors, at most max_attempts calls.
-    return None
+    """Ask, parse, validate and, on a problem, re-prompt with the errors, at most max_attempts calls."""
+    messages = [{"role": "user", "content": _prompt(document, schema)}]
+    errors = []
+    for attempt in range(1, max_attempts + 1):
+        reply = ask(messages)
+        early = _early_status(reply)
+        if early:
+            return {"status": early, "value": None, "attempts": attempt, "errors": []}
+        text = _text(reply)
+        try:
+            value = parse_json(text)
+            errors = validate(schema, value)
+            errors += _grounding_errors(value, document, evidence_fields)
+        except ParseError as err:
+            value, errors = None, [{"path": "$", "message": str(err)}]
+        if not errors:
+            return {"status": "ok", "value": value, "attempts": attempt, "errors": []}
+        if attempt < max_attempts:
+            messages = messages + [{"role": "assistant", "content": text}, {"role": "user", "content": _feedback(errors)}]
+    return {"status": "failed", "value": None, "attempts": max_attempts, "errors": errors}

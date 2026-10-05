@@ -107,11 +107,14 @@ stops at a refusal and at a cut-off reply without a second request.
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 The API gets a schema without numeric constraints (structured outputs do not support them); the program enforces them.
 """
+import logging
 import copy
 import json
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 LOCAL_SCHEMA = {
@@ -223,6 +226,8 @@ second call of document 2 sent: ['user', 'assistant', 'user'] | feedback: $.evid
 // The API gets a schema without numeric constraints (structured outputs do not support them); the program enforces them.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("structured_extraction");
 
 export const MODEL = "claude-sonnet-5-5";
 export const LOCAL_SCHEMA: any = {
@@ -363,6 +368,7 @@ import java.util.stream.Collectors;
  * The API gets a schema without numeric constraints (structured outputs do not support them); the program enforces them.
  */
 public final class StructuredExtraction {
+    private static final System.Logger LOG = System.getLogger(StructuredExtraction.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     private static final ObjectMapper JSON = new ObjectMapper();
     static final JsonNode LOCAL_SCHEMA = Scripted.tree("""
@@ -505,6 +511,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
+
+private val log = System.getLogger("structured_extraction")
 
 /**
  * Structured outputs plus the checks a schema cannot make, against a scripted model.

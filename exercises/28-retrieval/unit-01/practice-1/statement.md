@@ -22,6 +22,24 @@ is the real thing.
 | chunk | `{id: "<doc>#<n>", doc, text}` |
 | `scorer(query, text)` | a reranker: a number, higher is more relevant |
 
+## What is already written, and what you write
+
+The starter is a working pipeline with seven gaps cut out of it. Everything that is plumbing is written and correct: `tokenize`, the toy `embed`, the argument check of `chunk`,
+`build_chunks`, the BM25 bookkeeping (token counts, document frequencies, the average length, the loop over chunks and terms), `bm25_rank`, `embedding_rank`, the ordering helper that sorts scores best first with ties by id,
+`retrieve` with its modes and its pool, and `evaluate`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap
+returns a neutral value (an empty list, an empty dict, 0), so the starter runs and fails the cases on an assertion. The names below are Python's; TypeScript, Java and Kotlin have the camel-case forms
+(`windows`, `termScore`, `dot`, `fuse`, `rerank`, `recallAtK`, `indexedText`). Write them in this order:
+
+1. `_windows` unlocks `e1`: the windows over a list of words, ending at the last word.
+2. `_term_score` unlocks `e2`: the BM25 score of one term in one chunk, with its idf and its length normalisation.
+3. `_dot` unlocks `m1`: the dot product that `embedding_rank` ranks by.
+4. `fuse` unlocks `e3`: reciprocal rank fusion, ties by id.
+5. `rerank` unlocks `e4`: the ids ordered by the scorer, equal scores in input order, cut to `top_n`.
+6. `recall_at_k` unlocks `e5`: documents found among the first `k` chunks, each counted once.
+7. `_indexed_text` unlocks `e6`: the context sentence put in front of the chunk's text for indexing.
+
+`m1` needs all of them. About twenty lines in all. To see what a gap receives, log its input with the `log` line at the top of the file; `retrieve` already logs its own input, and a run shows the lines under the failing case.
+
 ## What to write
 
 - `chunk(text, size, overlap)`: split the text on whitespace into words and return windows of `size` words that start

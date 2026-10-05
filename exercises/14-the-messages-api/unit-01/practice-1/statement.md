@@ -3,6 +3,25 @@
 The Messages API is stateless: every request must carry the whole conversation. Write the client that keeps it.
 Pick your language folder (`python`, `typescript`, `java` or `kotlin`), open `starter/` and edit the file there.
 
+## What is already written, and what you write
+
+The starter is a working conversation client with eight gaps cut out of it. The plumbing is written and correct: the constructor, `say` itself (it
+calls the gaps in order), `totals` and `reset`. Each gap is a small method with its signature, a comment that says what it receives and returns with
+one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap
+receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this
+order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, `makeReply` for `_reply`):
+
+1. `_check_text` unlocks `e6`: a blank turn is refused.
+2. `_request_body` unlocks `m1` and `e5`: the body with a deep copy of the whole history.
+3. `_optional_fields` unlocks `e4`: the top-level `system` and the stop sequences.
+4. `_send_or_roll_back` unlocks `e2`: no dangling user turn when the call fails.
+5. `_assistant_turn` unlocks `m1`: the assistant turn with the content as received.
+6. `_add_usage` unlocks `e1`: the running totals.
+7. `_reply` unlocks `m1` and `e3`: the text, the stop reason and `truncated`.
+8. `history` unlocks `e5`: the turns as a copy.
+
+`m1` needs gaps 2, 5 and 7. A few lines each, about fifteen in all.
+
 ## The given types
 
 | Name | Meaning |

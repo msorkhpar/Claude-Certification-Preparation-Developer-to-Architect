@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * those waits instead of sleeping them.
  */
 public final class SdkRetries {
+    private static final System.Logger LOG = System.getLogger(SdkRetries.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static MessageCreateParams params() {

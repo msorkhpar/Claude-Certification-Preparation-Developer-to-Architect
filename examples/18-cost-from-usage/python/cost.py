@@ -4,8 +4,11 @@ Both calls go through a scripted transport, so nothing leaves the container. The
 hand-written responses in the API's shapes (claude-sonnet-5-5), not captures. Prices are dollars per million
 tokens, read from the Claude pricing page on 2026-10-02.
 """
+import logging
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PRICES = {  # input, output, cache-read multiplier
