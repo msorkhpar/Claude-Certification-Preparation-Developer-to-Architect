@@ -66,9 +66,9 @@ def stem_of(stem):
 
 QID = {"Quiz": "q", "Module quiz": "m", "Mock exam": "x"}
 # A mock question is checked against the prose of the modules up to the number given here (44 when a module is not listed).
-MOCK_SCOPE = {78: 77}
+MOCK_SCOPE = {78: 77, 94: 93}
 # Mock modules whose key explanation must name the page that answers it, as (module N, page M).
-NAMED_PAGE_MOCKS = ("44", "78")
+NAMED_PAGE_MOCKS = ("44", "78", "94")
 MIN_QUOTE_WORDS = 4
 MAX_STEM_OVERLAP = 0.5
 QUOTE = re.compile(r'"([^"]+)"')

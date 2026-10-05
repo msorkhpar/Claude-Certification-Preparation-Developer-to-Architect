@@ -1,0 +1,286 @@
+{
+  "practice": "93-professional-capstone/unit-01/practice-1",
+  "name": "launch_review",
+  "tests": {
+    "java": "LaunchReviewTest",
+    "kotlin": "LaunchReviewTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_design_that_sits_exactly_at_every_threshold_has_no_findings_and_is_approved",
+      "typescript": "m1 a design that sits exactly at every threshold has no findings and is approved",
+      "java": "m1_aDesignThatSitsExactlyAtEveryThresholdHasNoFindingsAndIsApproved",
+      "kotlin": "m1_aDesignThatSitsExactlyAtEveryThresholdHasNoFindingsAndIsApproved"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_missing_feedback_loop_a_filter_after_ranking_or_no_way_back_is_a_high_finding_and_the_design_is_rejected",
+      "typescript": "e1 a missing feedback loop a filter after ranking or no way back is a high finding and the design is rejected",
+      "java": "e1_aMissingFeedbackLoopAFilterAfterRankingOrNoWayBackIsAHighFindingAndTheDesignIsRejected",
+      "kotlin": "e1_aMissingFeedbackLoopAFilterAfterRankingOrNoWayBackIsAHighFindingAndTheDesignIsRejected"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_medium_findings_revise_the_design_and_low_findings_alone_approve_it",
+      "typescript": "e2 medium findings revise the design and low findings alone approve it",
+      "java": "e2_mediumFindingsReviseTheDesignAndLowFindingsAloneApproveIt",
+      "kotlin": "e2_mediumFindingsReviseTheDesignAndLowFindingsAloneApproveIt"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_findings_are_ordered_by_severity_then_domain_then_rule_id",
+      "typescript": "e3 findings are ordered by severity then domain then rule id",
+      "java": "e3_findingsAreOrderedBySeverityThenDomainThenRuleId",
+      "kotlin": "e3_findingsAreOrderedBySeverityThenDomainThenRuleId"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_each_numeric_threshold_passes_exactly_at_its_value_and_fails_one_step_beyond",
+      "typescript": "e4 each numeric threshold passes exactly at its value and fails one step beyond",
+      "java": "e4_eachNumericThresholdPassesExactlyAtItsValueAndFailsOneStepBeyond",
+      "kotlin": "e4_eachNumericThresholdPassesExactlyAtItsValueAndFailsOneStepBeyond"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_scorecard_counts_the_findings_of_each_domain_from_P1_to_P7",
+      "typescript": "e5 the scorecard counts the findings of each domain from P1 to P7",
+      "java": "e5_theScorecardCountsTheFindingsOfEachDomainFromP1ToP7",
+      "kotlin": "e5_theScorecardCountsTheFindingsOfEachDomainFromP1ToP7"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_accuracy_a_design_needs_is_the_break_even_rounded_up_from_the_two_costs",
+      "typescript": "e6 the accuracy a design needs is the break even rounded up from the two costs",
+      "java": "e6_theAccuracyADesignNeedsIsTheBreakEvenRoundedUpFromTheTwoCosts",
+      "kotlin": "e6_theAccuracyADesignNeedsIsTheBreakEvenRoundedUpFromTheTwoCosts"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_rules_that_depend_on_a_second_fact_fire_only_when_both_hold",
+      "typescript": "e7 rules that depend on a second fact fire only when both hold",
+      "java": "e7_rulesThatDependOnASecondFactFireOnlyWhenBothHold",
+      "kotlin": "e7_rulesThatDependOnASecondFactFireOnlyWhenBothHold"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_retrieval_and_privacy_flaws_are_high_findings_in_domains_P3_and_P5",
+      "typescript": "e8 retrieval and privacy flaws are high findings in domains P3 and P5",
+      "java": "e8_retrievalAndPrivacyFlawsAreHighFindingsInDomainsP3AndP5",
+      "kotlin": "e8_retrievalAndPrivacyFlawsAreHighFindingsInDomainsP3AndP5"
+    },
+    "e9": {
+      "kind": "edge",
+      "python": "test_e9_a_design_with_every_flaw_gets_all_22_findings_and_a_scorecard_that_adds_up",
+      "typescript": "e9 a design with every flaw gets all 22 findings and a scorecard that adds up",
+      "java": "e9_aDesignWithEveryFlawGetsAll22FindingsAndAScorecardThatAddsUp",
+      "kotlin": "e9_aDesignWithEveryFlawGetsAll22FindingsAndAScorecardThatAddsUp"
+    }
+  },
+  "plants": {
+    "wrong-feedback-rule-dropped": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e9"
+      ],
+      "defect": "does not flag a design with no feedback loop"
+    },
+    "wrong-autonomy-ignores-path": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags an agent even when the path is not known to be fixed"
+    },
+    "wrong-team-price-15": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags a team whose value is exactly at the break-even of 15 chats"
+    },
+    "wrong-tool-tokens-10000": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags tool definitions of exactly 10000 tokens"
+    },
+    "wrong-deferral-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags a large tool set although tool search defers it"
+    },
+    "wrong-eval-20": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags an evaluation set of exactly 20 cases as small"
+    },
+    "wrong-stages-3": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags a roll-out of exactly three stages as a big bang"
+    },
+    "wrong-retain-floor": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags a retention of exactly the floor"
+    },
+    "wrong-retain-ceiling": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags a retention of exactly the ceiling"
+    },
+    "wrong-filter-rule-dropped": {
+      "caught_by": [
+        "e1",
+        "e8",
+        "e9"
+      ],
+      "defect": "does not flag a filter applied after ranking"
+    },
+    "wrong-stale-rule-dropped": {
+      "caught_by": [
+        "e8",
+        "e9"
+      ],
+      "defect": "does not flag an index with no replacement on change"
+    },
+    "wrong-rights-rule-dropped": {
+      "caught_by": [
+        "e8",
+        "e9"
+      ],
+      "defect": "does not flag an agent that holds the rights and not the user"
+    },
+    "wrong-pii-always": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags identifiers reaching the model for every design"
+    },
+    "wrong-residency-always": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags unmet residency for every design"
+    },
+    "wrong-irreversible-medium": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "grades an irreversible action with no person as medium"
+    },
+    "wrong-human-step-ignored": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e7",
+        "e8",
+        "m1"
+      ],
+      "defect": "flags every irreversible action even with a human step"
+    },
+    "wrong-team-size-10": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags a team of exactly 10 without managed settings"
+    },
+    "wrong-sla-and": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "flags a service level only when both numbers are missing"
+    },
+    "wrong-owner-rule-dropped": {
+      "caught_by": [
+        "e2",
+        "e3",
+        "e9"
+      ],
+      "defect": "does not flag a design with no accountable owner"
+    },
+    "wrong-order-by-domain": {
+      "caught_by": [
+        "e3",
+        "e8",
+        "e9"
+      ],
+      "defect": "orders findings by domain and not by severity first"
+    },
+    "wrong-verdict-any-finding": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "revises a design that has only low findings"
+    },
+    "wrong-scorecard-no-p7": {
+      "caught_by": [
+        "e5",
+        "e9",
+        "m1"
+      ],
+      "defect": "leaves domain P7 out of the scorecard"
+    },
+    "wrong-ceil-floor": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "rounds the review cost percent down"
+    },
+    "wrong-no-floor-at-zero": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "returns a negative accuracy when a check costs more than an error"
+    }
+  }
+}

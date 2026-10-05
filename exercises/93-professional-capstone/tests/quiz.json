@@ -1,0 +1,138 @@
+{
+  "module": "93-professional-capstone",
+  "quizzes": [
+    {
+      "id": "01-a-claims-assistant-end-to-end-across-the-seven-domains#q1",
+      "page": "01-a-claims-assistant-end-to-end-across-the-seven-domains.md",
+      "scope": "page",
+      "stem": "Scenario: Larch Mutual's assistant answers a coverage question with a limit of 3,000, and the current policy says 5,000. Latency and the model version have not changed since the documents were refreshed. Where does the investigation start?",
+      "options": {
+        "a": "The retrieval step, to see whether a superseded chunk was returned",
+        "b": "The model, to see whether its weights were updated by the vendor",
+        "c": "The sampling temperature, to see whether it was lowered by a release",
+        "d": "The context window, to see whether the prompt was cut short"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A confident wrong answer after a refresh points to stale evidence.",
+        "b": "Ruled out because a confident wrong answer after a refresh \"points to the retrieval step, where a stale chunk is the usual cause\".",
+        "c": "Ruled out because \"Fix the wrong answer in the prompt; the model got it wrong\" is the tempting lever the exam rejects.",
+        "d": "Ruled out because the stem leaves latency and version unchanged, and the page says \"check the version of the evidence before the model\"."
+      }
+    },
+    {
+      "id": "01-a-claims-assistant-end-to-end-across-the-seven-domains#q2",
+      "page": "01-a-claims-assistant-end-to-end-across-the-seven-domains.md",
+      "scope": "page",
+      "stem": "Scenario: A change to the retrieval step gains three answers in a minor segment and loses one in the segment where an error costs 250. The totals favour the change. What does the gate return?",
+      "options": {
+        "a": "Release it, because the gains outnumber the losses",
+        "b": "Release it, with a note asking the owner to review the lost case",
+        "c": "Refuse it, naming the area where the damage fell",
+        "d": "Refuse it, because every loss blocks every change"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A loss in a protected segment is a veto whatever the gains.",
+        "a": "Ruled out because \"a loss in a protected segment is a veto whatever the gains elsewhere\".",
+        "b": "Ruled out because the gate returns a decision and not a note, and the page says it \"says no-go and names the segment\".",
+        "d": "Ruled out because the gate refuses a change when it \"loses one in the refund segment, which is protected\", and a loss elsewhere is weighed against the gains."
+      }
+    },
+    {
+      "id": "02-the-written-design-review-findings-verdict-and-scorecard#q1",
+      "page": "02-the-written-design-review-findings-verdict-and-scorecard.md",
+      "scope": "page",
+      "stem": "Scenario: A review of a pilot finds one medium finding, a missing owner, and two low findings, a small evaluation set and an unstated accuracy. There is no high finding. What does the review conclude?",
+      "options": {
+        "a": "Approve it, since no finding is serious enough to stop the pilot",
+        "b": "Return it for revision, since the ladder calls for one here",
+        "c": "Reject it, since the findings differ in kind and several are present",
+        "d": "Approve it, since the two low findings outnumber the medium one"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "With no high finding and a medium one, the review asks for a revision.",
+        "a": "Ruled out because \"revise if none is high and any is medium\", so a medium finding stops an approval.",
+        "c": "Ruled out because \"reject if any finding is high\" and none is.",
+        "d": "Ruled out because \"A fixed ladder keeps a pile of small findings from becoming a rejection\", and by the same ladder a pile of small findings cannot outweigh a medium one."
+      }
+    },
+    {
+      "id": "02-the-written-design-review-findings-verdict-and-scorecard#q2",
+      "page": "02-the-written-design-review-findings-verdict-and-scorecard.md",
+      "scope": "page",
+      "stem": "Scenario: A reviewer proposes to write the findings grouped by domain, P1 first, because the course is organised in that order. What is the objection?",
+      "options": {
+        "a": "The sponsor reads the domains in another order, so the list would confuse",
+        "b": "Two reviewers would still produce different lists from the same design",
+        "c": "The domains do not match the rules that the review applies",
+        "d": "The blocking items would be buried among the milder ones"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "A list ordered only by domain hides the blocking items.",
+        "a": "Ruled out because the order is chosen for the reader of the findings, and the page says \"The sponsor stops at the verdict and the scorecard\".",
+        "b": "Ruled out because \"Two reviewers must produce the same list\", and a fixed order by domain and rule id also gives the same list.",
+        "c": "Ruled out because the page says of the rules \"Each is a fact about the design or a number with a threshold\", and the table gives every one a domain from P1 to P7."
+      }
+    },
+    {
+      "id": "02-the-written-design-review-findings-verdict-and-scorecard#m1",
+      "page": "02-the-written-design-review-findings-verdict-and-scorecard.md",
+      "scope": "module",
+      "stem": "Scenario: A proposal uses a team of agents for a task whose steps are known in advance and whose value equals ten chats. The designer says the team is more flexible. What does the review record?",
+      "options": {
+        "a": "One medium item under P1, so it goes back for revision",
+        "b": "One high item under P1, so it is rejected",
+        "c": "Two medium items under P1, so it goes back for revision",
+        "d": "Two low items under P1, so it is approved"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "The path is known, so the team is unneeded, and a value of ten is below fifteen, which makes two medium rules fire.",
+        "a": "Ruled out because the first page's cost rule gives a second item: \"A team of agents would cost about 15 times a chat\".",
+        "b": "Ruled out because \"reject if any finding is high\", and neither rule is high.",
+        "d": "Ruled out because the rule table lists \"an agent or a team is used where the path is known\" as medium and not low."
+      }
+    },
+    {
+      "id": "02-the-written-design-review-findings-verdict-and-scorecard#m2",
+      "page": "02-the-written-design-review-findings-verdict-and-scorecard.md",
+      "scope": "module",
+      "stem": "Scenario: A review is run on two proposals that differ in one number: the first has an evaluation set of 20 cases and the second has 19. What differs in the outcome?",
+      "options": {
+        "a": "Both are flagged, and the thinner suite more severely",
+        "b": "Only the thinner suite is flagged, with a low item under P4",
+        "c": "Neither is flagged, since the threshold is only a guide",
+        "d": "Only the fuller suite is flagged, with a medium item under P4"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The edge is met at 20 and missed at 19, and the rule is low.",
+        "a": "Ruled out because the table lists the rule as low for \"fewer than 20 evaluation cases\", whatever the shortfall.",
+        "c": "Ruled out because \"One step past any of them is a finding\".",
+        "d": "Ruled out because \"an evaluation set of exactly 20 cases passes\", so the fuller suite has no finding."
+      }
+    },
+    {
+      "id": "02-the-written-design-review-findings-verdict-and-scorecard#m3",
+      "page": "02-the-written-design-review-findings-verdict-and-scorecard.md",
+      "scope": "module",
+      "stem": "Scenario: A pipeline sends customer email addresses to the model in the prompt, and the audit log stores every prompt. Which description of the result fits?",
+      "options": {
+        "a": "Two blocking items, so the pipeline is rejected twice over",
+        "b": "Two items that ask for revision and nothing that blocks",
+        "c": "One minor item that is only recorded and one that blocks",
+        "d": "One blocking item and one that asks for revision, both in the same domain"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "Identifiers reaching the model is high and the audit log keeping content is medium, both in P5.",
+        "a": "Ruled out because the table lists \"the audit log stores content\" as medium, which asks for revision.",
+        "b": "Ruled out because the table lists \"identifiers go to the model\" as high, which blocks.",
+        "c": "Ruled out because the low bullet reads \"It is recorded and does not hold the design back\", and neither flaw is low."
+      }
+    }
+  ]
+}
