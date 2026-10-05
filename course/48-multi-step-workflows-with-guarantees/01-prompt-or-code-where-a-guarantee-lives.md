@@ -532,7 +532,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 1. A gate in a support agent's dispatcher refuses a refund because no identity has been verified. What should the dispatcher send back to the model?
    - **a**: A flagged failure result that names the missing step
-   - **b**: Nothing, because an unanswered call simply ends the turn
+   - **b**: Nothing, leaving the call unanswered
    - **c**: A generic error that says only that the call failed
    - **d**: The refund's result after running the verification itself
 
@@ -540,13 +540,13 @@ These are the wrong answers that the exam's options for this task statement offe
    - **a**: Later tools can stay blocked until verification returns a result
    - **b**: Text written before the call changes the order in which the tools run
    - **c**: Later turns are unconstrained, so a refund can still follow a failed check
-   - **d**: The forced choice makes the system prompt uncached, so the cost rises
+   - **d**: The forced choice discards the cached tool definitions and system prompt
 
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Every call needs an answer, and an error that names the missing step lets the model do it and try again. *b* is ruled out because the API requires a result: "Tool result blocks must immediately follow their corresponding tool use blocks in the message history." *c* is ruled out because the documentation's advice is to "include what went wrong and what Claude should try next". *d* is ruled out because the model must obtain the code from the customer: "the gate refuses and says what is missing".
-2. **c**. A forced choice applies to the request that sets it, and nothing carries it to later calls. *b* is ruled out because the model writes no text before a forced call: "the API prefills the assistant message to force a tool to be used". *a* is ruled out because keeping later tools blocked until verification returns is what a gate does, not what a forced choice does: "An order between steps is a property of the program that runs them." *d* is ruled out because the system prompt stays cached: "tool definitions and system prompts remain cached".
+2. **c**. A forced choice applies to the request that sets it, and nothing carries it to later calls. *b* is ruled out because the model writes no text before a forced call: "the API prefills the assistant message to force a tool to be used". *a* is ruled out because keeping later tools blocked until verification returns is what a gate does, not what a forced choice does: "An order between steps is a property of the program that runs them." *d* is ruled out because the page says that a changed `tool_choice` invalidates "cached message blocks", "while tool definitions and system prompts remain cached".
 
 </details>

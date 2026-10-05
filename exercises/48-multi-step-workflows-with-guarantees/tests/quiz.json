@@ -8,7 +8,7 @@
       "stem": "A gate in a support agent's dispatcher refuses a refund because no identity has been verified. What should the dispatcher send back to the model?",
       "options": {
         "a": "A flagged failure result that names the missing step",
-        "b": "Nothing, because an unanswered call simply ends the turn",
+        "b": "Nothing, leaving the call unanswered",
         "c": "A generic error that says only that the call failed",
         "d": "The refund's result after running the verification itself"
       },
@@ -29,14 +29,14 @@
         "a": "Later tools can stay blocked until verification returns a result",
         "b": "Text written before the call changes the order in which the tools run",
         "c": "Later turns are unconstrained, so a refund can still follow a failed check",
-        "d": "The forced choice makes the system prompt uncached, so the cost rises"
+        "d": "The forced choice discards the cached tool definitions and system prompt"
       },
       "key": "c",
       "explanation": {
         "c": "A forced choice applies to the request that sets it, and nothing carries it to later calls.",
         "b": "Ruled out because the model writes no text before a forced call: \"the API prefills the assistant message to force a tool to be used\".",
         "a": "Ruled out because keeping later tools blocked until verification returns is what a gate does, not what a forced choice does: \"An order between steps is a property of the program that runs them.\"",
-        "d": "Ruled out because the system prompt stays cached: \"tool definitions and system prompts remain cached\"."
+        "d": "Ruled out because the page says that a changed `tool_choice` invalidates \"cached message blocks\", \"while tool definitions and system prompts remain cached\"."
       }
     },
     {
@@ -47,15 +47,15 @@
       "options": {
         "a": "The lock should have waited for ten failures instead of three",
         "b": "The route to a person depended on the same safeguard that had tripped",
-        "c": "The turn limit should have been set a lot lower, so that the loop ended sooner",
+        "c": "The turn limit should have been set a lot lower",
         "d": "The model should have been asked to hand the case over on its own"
       },
       "key": "b",
       "explanation": {
         "b": "An escape route must not sit behind a prerequisite that may be what failed.",
-        "a": "Ruled out because the lock is not the fault: \"a successful check resets the count, so ordinary typing mistakes do not lock anyone out\".",
+        "a": "Ruled out because the number of failures is not what looped the chat, and a lock is needed at all: without it, \"a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries\". The loop came from the dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\".",
         "c": "Ruled out because a lower limit only shortens a dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\".",
-        "d": "Ruled out because the model has no route to a person while escalation sits behind the prerequisite: \"if every tool is behind the prerequisite, a blocked agent can only loop.\""
+        "d": "Ruled out because asking does not open a route: handing over is a tool call, and it only works when \"one tool outside the gate, `escalate`, which is always allowed\" exists."
       }
     },
     {
@@ -81,11 +81,11 @@
       "id": "02-prerequisite-chains-limits-hand-offs-and-the-practice#m1",
       "page": "02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. What should the gate's state say next?",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. This desk's rule is that a failed check wipes whatever an earlier success had set. What should the gate's state say next?",
       "options": {
-        "a": "Customers A and B are both verified, because the new check adds evidence",
-        "b": "Customer A is still verified, since an earlier check succeeded",
-        "c": "No one is cleared, so every protected step is refused again",
+        "a": "Customers A and B are both verified at the same time",
+        "b": "Customer A is still verified from the earlier check",
+        "c": "No one is cleared and every protected step is refused again",
         "d": "Customer A stays verified until the model confirms which one is meant"
       },
       "key": "c",
@@ -104,8 +104,8 @@
       "options": {
         "a": "Keep extending the keyword list until the valid claims finally pass through it",
         "b": "Let the model weigh the evidence, and keep steps, amounts and limits as rules",
-        "c": "Move the refund limit into the prompt as well, so that the gate has fewer rules",
-        "d": "Drop the ownership check altogether, so that more claims reach the model"
+        "c": "Move the refund limit and the order of steps into the prompt as well",
+        "d": "Drop the ownership check altogether and send more claims onward"
       },
       "key": "b",
       "explanation": {
@@ -122,7 +122,7 @@
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?",
       "options": {
         "a": "A judge model that grades every single conversation for the order of its steps in it",
-        "b": "A larger live sample, since zero in five hundred proves the rate is zero",
+        "b": "A larger live sample of several thousand conversations",
         "c": "The same live run with the verification rule written in capitals",
         "d": "Direct checks that make the forbidden call and assert it never hits the backend"
       },
