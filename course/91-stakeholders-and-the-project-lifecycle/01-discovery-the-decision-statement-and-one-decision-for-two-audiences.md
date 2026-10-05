@@ -5,7 +5,7 @@
 
 **After this page you can** run a discovery that ends in numbers and an owner instead of adjectives, write the decision statement a design aims at, compare at least four options and recommend the cheapest one that meets the service levels, tell one decision in the words a sponsor decides with and in the figures an engineer builds with, and put both in one design record with a fixed set of sections.
 
-Checked on 2026-10-04 against the Claude Certified Architect, Professional exam guide (version 1.0, domain 6), and by running the example and the practice offline in the course container. The documentation pages of the Claude platform and of Claude Code give no guidance on discovery, stakeholders or design records, and nothing on this page claims that they do. Nothing here called a model, and the figures are invented for a utility's billing-dispute assistant. This page deepens module 12 (from a business need to a testable spec) and module 79 (the decision statement and the break-even accuracy) to a decision that other people must approve and build. Service levels, feedback and the lifecycle are the second page.
+Checked on 2026-10-04 against the Claude Certified Architect, Professional exam guide (version 1.0, domain 6), and by running the example and the practice offline in the course container. The documentation pages of the Claude platform and of Claude Code give no guidance on discovery, stakeholders or design records, and nothing on this page claims that they do. Nothing here calls a model, and the figures are invented for a utility's billing-dispute assistant. This page deepens module 12 (from a business need to a testable spec) and module 79 (the decision statement and the break-even accuracy) to a decision that other people must approve and build. Service levels, feedback and the lifecycle are the second page.
 
 > **Exam guide and current product.** *What the guide states:* domain 6 asks the candidate to "Conduct structured discovery and requirement gathering", to "Communicate architectural decisions and trade-offs" and to "Document architectures and provide implementation guidance". *What the current product's documentation says (pages read 2026-10-04):* nothing on these tasks; they concern people and not the platform. The structure below (the discovery questions, the eight sections of the record, the limit of 80 words for the sponsor) is the course's own design, taught as the exam's strategy: the guide names the tasks and does not give a template.
 
@@ -398,7 +398,7 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 2. Scenario: Hugo must brief a sponsor who will decide in one meeting on whether a pilot goes ahead. His draft is six pages of tables, ending with the break-even derivation. What should the first page of the record hold?
    - **a**: The derivation of the break-even, which is the reason for every later number
    - **b**: The table by segment, so the sponsor sees the accuracy figures before anything else
-   - **c**: A short summary in plain words: the cost, the risk and the decision requested
+   - **c**: A short summary in plain words, covering the cost, the risk and the decision requested
    - **d**: The list of the model's settings, so the sponsor can confirm the configuration
 
 <details>
