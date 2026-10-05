@@ -1240,7 +1240,7 @@ PRACTICES[f"{X}/75-scenario-structured-data-extraction/unit-01/practice-1"] = {
         ("e8", "edge", "percentages are whole numbers rounded half up"),
     ],
     "plants": {
-        "wrong-validated-denominator": (["m1", "e5"], "divides the correct documents by the valid ones and calls that the accuracy of the run"),
+        "wrong-validated-denominator": (["m1", "e5", "e7"], "divides the correct documents by the valid ones and calls that the accuracy of the run"),
         "wrong-target-strict": (["e2"], "requires the accuracy to be above the target and not at it"),
         "wrong-segment-strict": (["e4"], "automates a kind only when its accuracy is above the target and not at it"),
         "wrong-min-n-strict": (["m1", "e3"], "automates a kind only when it has more documents than the minimum and not at least that many"),

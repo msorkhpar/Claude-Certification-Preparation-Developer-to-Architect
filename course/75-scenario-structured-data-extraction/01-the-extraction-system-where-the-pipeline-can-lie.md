@@ -48,6 +48,432 @@ The example runs six documents through a scripted model. Two are typed, two are 
 
 <!-- example: m75-extraction-run tabs: python,typescript,java,kotlin -->
 ```python
+"""An extraction run in miniature: a scripted model reads six documents, every record is validated for what a schema cannot check, only the errors a second look can fix
+are retried, what the document does not hold goes to a person, and the accuracy is reported on every document and not only on the validated ones.
+
+The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
+(a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
+"""
+DOCS = {
+    "d1": ("typed", "Vendor: Acme Ltd. Lines: 10.00 20.00. Total: 30.00"),
+    "d2": ("typed", "Vendor: Borealis Co. Lines: 40.00 5.00. Total: 45.00"),
+    "d3": ("scanned", "Lines: 8.00 2.00. Total: 10.00"),
+    "d4": ("scanned", "Vendor: Corvid Inc. Lines: 12.00 8.00."),
+    "d5": ("handwritten", "Vendor: Dunmore. Lines: 6.00 6.00. Total: 12.50"),
+    "d6": ("handwritten", "Lines: 3.00. Total: 3.00"),
+}
+LABELS = {"d1": ("Acme Ltd", 3000), "d2": ("Borealis Co", 4500), "d3": (None, 1000), "d4": ("Corvid Inc", 2000), "d5": ("Dunmore", 1200), "d6": (None, 300)}
+
+
+def rec(vendor, lines, total, conflict=False):
+    return {"vendor": vendor, "lines": lines, "total": total, "conflict": conflict}
+
+
+# what the scripted model returns on the first and on the second attempt (a missing second reply repeats the first)
+REPLIES = {
+    "d1": [rec("Acme Ltd", [1000, 2000], 3000)],
+    "d2": [rec("Borealis Co", [4000, 500], 5400), rec("Borealis Co", [4000, 500], 4500)],
+    "d3": [rec("Globex", [800, 200], 1000), rec(None, [800, 200], 1000)],
+    "d4": [rec("Corvid Inc", [1200, 800], None)],
+    "d5": [rec("Dunmore", [600, 600], 1250, conflict=True)],
+    "d6": [rec("Hollis", [300], 300)],
+}
+
+
+def validate(record, text):
+    """What a schema cannot check: a vendor the document never names, totals that disagree, a required total that is missing."""
+    errors = []
+    if record["vendor"] is not None and record["vendor"] not in text:
+        errors.append(("ungrounded", "vendor"))
+    if record["total"] is None:
+        errors.append(("absent", "total"))
+    elif record["total"] != sum(record["lines"]) and not record["conflict"]:
+        errors.append(("semantic", "total"))
+    return errors
+
+
+def extract(doc_id, text):
+    """One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried."""
+    retried, replies = [], REPLIES[doc_id]
+    for attempt in (1, 2):
+        record = replies[min(attempt, len(replies)) - 1]
+        errors = validate(record, text)
+        fixable = [e for e in errors if e[0] != "absent"]
+        if not fixable:
+            return {"id": doc_id, "attempts": attempt, "record": record, "errors": errors, "retried": retried,
+                    "status": "needs_review" if errors or record["conflict"] else "valid"}
+        retried = sorted({kind for kind, _ in fixable})
+    return {"id": doc_id, "attempts": 2, "record": record, "errors": errors, "retried": retried, "status": "failed"}
+
+
+def percent(correct, total):
+    return (200 * correct + total) // (2 * total) if total else 0
+
+
+def main():
+    results = []
+    for doc_id, (kind, text) in DOCS.items():
+        r = {**extract(doc_id, text), "kind": kind}
+        label = LABELS[doc_id]
+        r["correct"] = r["status"] == "valid" and (r["record"]["vendor"], r["record"]["total"]) == label
+        results.append(r)
+        note = f" (retried: {', '.join(r['retried'])})" if r["status"] == "valid" and r["retried"] else ""
+        if r["status"] == "needs_review":
+            note = " (conflict flagged)" if r["record"]["conflict"] else f" ({r['errors'][0][0]}: {r['errors'][0][1]}, not retried)"
+        if r["status"] == "failed":
+            note = f" ({', '.join(r['retried'])})"
+        print(f"{doc_id} {kind}: {r['status']} after {r['attempts']} attempt{'s' if r['attempts'] > 1 else ''}{note}")
+    valid = [r for r in results if r["status"] == "valid"]
+    right_valid, right = sum(r["correct"] for r in valid), sum(r["correct"] for r in results)
+    print(f"accuracy: validated only {right_valid} of {len(valid)} ({percent(right_valid, len(valid))}%), all documents {right} of {len(results)} ({percent(right, len(results))}%)")
+    kinds = list(dict.fromkeys(r["kind"] for r in results))
+    parts = [f"{k} {sum(r['correct'] for r in results if r['kind'] == k)}/{sum(1 for r in results if r['kind'] == k)}" for k in kinds]
+    print("by kind: " + ", ".join(parts))
+    ready = [k for k in kinds if sum(1 for r in results if r["kind"] == k) >= 2 and all(r["correct"] for r in results if r["kind"] == k)]
+    print("automate: " + (", ".join(ready) or "none"))
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+d1 typed: valid after 1 attempt
+d2 typed: valid after 2 attempts (retried: semantic)
+d3 scanned: valid after 2 attempts (retried: ungrounded)
+d4 scanned: needs_review after 1 attempt (absent: total, not retried)
+d5 handwritten: needs_review after 1 attempt (conflict flagged)
+d6 handwritten: failed after 2 attempts (ungrounded)
+accuracy: validated only 3 of 3 (100%), all documents 3 of 6 (50%)
+by kind: typed 2/2, scanned 1/2, handwritten 0/2
+automate: typed
+```
+```typescript
+// An extraction run in miniature: a scripted model reads six documents, every record is validated for what a schema cannot check, only the errors a second look can fix
+// are retried, what the document does not hold goes to a person, and the accuracy is reported on every document and not only on the validated ones.
+//
+// The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
+// (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
+export type Rec = { vendor: string | null; lines: number[]; total: number | null; conflict: boolean };
+export type Err = [kind: string, field: string];
+export type Extracted = { id: string; attempts: number; record: Rec; errors: Err[]; retried: string[]; status: string };
+
+export const DOCS: Record<string, [kind: string, text: string]> = {
+  d1: ["typed", "Vendor: Acme Ltd. Lines: 10.00 20.00. Total: 30.00"],
+  d2: ["typed", "Vendor: Borealis Co. Lines: 40.00 5.00. Total: 45.00"],
+  d3: ["scanned", "Lines: 8.00 2.00. Total: 10.00"],
+  d4: ["scanned", "Vendor: Corvid Inc. Lines: 12.00 8.00."],
+  d5: ["handwritten", "Vendor: Dunmore. Lines: 6.00 6.00. Total: 12.50"],
+  d6: ["handwritten", "Lines: 3.00. Total: 3.00"],
+};
+const LABELS: Record<string, [string | null, number]> = { d1: ["Acme Ltd", 3000], d2: ["Borealis Co", 4500], d3: [null, 1000], d4: ["Corvid Inc", 2000], d5: ["Dunmore", 1200], d6: [null, 300] };
+
+const rec = (vendor: string | null, lines: number[], total: number | null, conflict = false): Rec => ({ vendor, lines, total, conflict });
+
+// what the scripted model returns on the first and on the second attempt (a missing second reply repeats the first)
+export const REPLIES: Record<string, Rec[]> = {
+  d1: [rec("Acme Ltd", [1000, 2000], 3000)],
+  d2: [rec("Borealis Co", [4000, 500], 5400), rec("Borealis Co", [4000, 500], 4500)],
+  d3: [rec("Globex", [800, 200], 1000), rec(null, [800, 200], 1000)],
+  d4: [rec("Corvid Inc", [1200, 800], null)],
+  d5: [rec("Dunmore", [600, 600], 1250, true)],
+  d6: [rec("Hollis", [300], 300)],
+};
+
+/** What a schema cannot check: a vendor the document never names, totals that disagree, a required total that is missing. */
+export function validate(record: Rec, text: string): Err[] {
+  const errors: Err[] = [];
+  if (record.vendor !== null && !text.includes(record.vendor)) errors.push(["ungrounded", "vendor"]);
+  if (record.total === null) errors.push(["absent", "total"]);
+  else if (record.total !== record.lines.reduce((a, b) => a + b, 0) && !record.conflict) errors.push(["semantic", "total"]);
+  return errors;
+}
+
+/** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
+export function extract(docId: string, text: string): Extracted {
+  let retried: string[] = [];
+  const replies = REPLIES[docId];
+  let record = replies[0];
+  let errors: Err[] = [];
+  for (const attempt of [1, 2]) {
+    record = replies[Math.min(attempt, replies.length) - 1];
+    errors = validate(record, text);
+    const fixable = errors.filter(([kind]) => kind !== "absent");
+    if (fixable.length === 0) return { id: docId, attempts: attempt, record, errors, retried, status: errors.length > 0 || record.conflict ? "needs_review" : "valid" };
+    retried = [...new Set(fixable.map(([kind]) => kind))].sort();
+  }
+  return { id: docId, attempts: 2, record, errors, retried, status: "failed" };
+}
+
+const percent = (correct: number, total: number) => (total ? Math.floor((200 * correct + total) / (2 * total)) : 0);
+
+function main() {
+  const results = Object.entries(DOCS).map(([docId, [kind, text]]) => {
+    const r = extract(docId, text);
+    const label = LABELS[docId];
+    return { ...r, kind, correct: r.status === "valid" && r.record.vendor === label[0] && r.record.total === label[1] };
+  });
+  for (const r of results) {
+    let note = r.status === "valid" && r.retried.length > 0 ? ` (retried: ${r.retried.join(", ")})` : "";
+    if (r.status === "needs_review") note = r.record.conflict ? " (conflict flagged)" : ` (${r.errors[0][0]}: ${r.errors[0][1]}, not retried)`;
+    if (r.status === "failed") note = ` (${r.retried.join(", ")})`;
+    console.log(`${r.id} ${r.kind}: ${r.status} after ${r.attempts} attempt${r.attempts > 1 ? "s" : ""}${note}`);
+  }
+  const valid = results.filter((r) => r.status === "valid");
+  const rightValid = valid.filter((r) => r.correct).length;
+  const right = results.filter((r) => r.correct).length;
+  console.log(`accuracy: validated only ${rightValid} of ${valid.length} (${percent(rightValid, valid.length)}%), all documents ${right} of ${results.length} (${percent(right, results.length)}%)`);
+  const kinds = [...new Set(results.map((r) => r.kind))];
+  console.log("by kind: " + kinds.map((k) => `${k} ${results.filter((r) => r.kind === k && r.correct).length}/${results.filter((r) => r.kind === k).length}`).join(", "));
+  const ready = kinds.filter((k) => results.filter((r) => r.kind === k).length >= 2 && results.filter((r) => r.kind === k).every((r) => r.correct));
+  console.log("automate: " + (ready.join(", ") || "none"));
+}
+
+if (import.meta.main) main();
+```
+```text
+d1 typed: valid after 1 attempt
+d2 typed: valid after 2 attempts (retried: semantic)
+d3 scanned: valid after 2 attempts (retried: ungrounded)
+d4 scanned: needs_review after 1 attempt (absent: total, not retried)
+d5 handwritten: needs_review after 1 attempt (conflict flagged)
+d6 handwritten: failed after 2 attempts (ungrounded)
+accuracy: validated only 3 of 3 (100%), all documents 3 of 6 (50%)
+by kind: typed 2/2, scanned 1/2, handwritten 0/2
+automate: typed
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+/**
+ * An extraction run in miniature: a scripted model reads six documents, every record is validated for what a schema cannot check, only the errors a second look can fix
+ * are retried, what the document does not hold goes to a person, and the accuracy is reported on every document and not only on the validated ones.
+ *
+ * <p>The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
+ * (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
+ */
+public final class ExtractionRun {
+    record Doc(String kind, String text) {}
+
+    record Rec(String vendor, List<Integer> lines, Integer total, boolean conflict) {}
+
+    record Err(String kind, String field) {}
+
+    record Extracted(String id, int attempts, Rec record, List<Err> errors, List<String> retried, String status) {}
+
+    static final Map<String, Doc> DOCS = new LinkedHashMap<>();
+    static final Map<String, Rec> LABELS = new LinkedHashMap<>();
+    static final Map<String, List<Rec>> REPLIES = new LinkedHashMap<>();
+
+    static Rec rec(String vendor, List<Integer> lines, Integer total) {
+        return new Rec(vendor, lines, total, false);
+    }
+
+    static {
+        DOCS.put("d1", new Doc("typed", "Vendor: Acme Ltd. Lines: 10.00 20.00. Total: 30.00"));
+        DOCS.put("d2", new Doc("typed", "Vendor: Borealis Co. Lines: 40.00 5.00. Total: 45.00"));
+        DOCS.put("d3", new Doc("scanned", "Lines: 8.00 2.00. Total: 10.00"));
+        DOCS.put("d4", new Doc("scanned", "Vendor: Corvid Inc. Lines: 12.00 8.00."));
+        DOCS.put("d5", new Doc("handwritten", "Vendor: Dunmore. Lines: 6.00 6.00. Total: 12.50"));
+        DOCS.put("d6", new Doc("handwritten", "Lines: 3.00. Total: 3.00"));
+        LABELS.put("d1", rec("Acme Ltd", List.of(), 3000));
+        LABELS.put("d2", rec("Borealis Co", List.of(), 4500));
+        LABELS.put("d3", rec(null, List.of(), 1000));
+        LABELS.put("d4", rec("Corvid Inc", List.of(), 2000));
+        LABELS.put("d5", rec("Dunmore", List.of(), 1200));
+        LABELS.put("d6", rec(null, List.of(), 300));
+        // what the scripted model returns on the first and on the second attempt (a missing second reply repeats the first)
+        REPLIES.put("d1", List.of(rec("Acme Ltd", List.of(1000, 2000), 3000)));
+        REPLIES.put("d2", List.of(rec("Borealis Co", List.of(4000, 500), 5400), rec("Borealis Co", List.of(4000, 500), 4500)));
+        REPLIES.put("d3", List.of(rec("Globex", List.of(800, 200), 1000), rec(null, List.of(800, 200), 1000)));
+        REPLIES.put("d4", List.of(rec("Corvid Inc", List.of(1200, 800), null)));
+        REPLIES.put("d5", List.of(new Rec("Dunmore", List.of(600, 600), 1250, true)));
+        REPLIES.put("d6", List.of(rec("Hollis", List.of(300), 300)));
+    }
+
+    /** What a schema cannot check: a vendor the document never names, totals that disagree, a required total that is missing. */
+    static List<Err> validate(Rec record, String text) {
+        List<Err> errors = new ArrayList<>();
+        if (record.vendor() != null && !text.contains(record.vendor())) errors.add(new Err("ungrounded", "vendor"));
+        if (record.total() == null) errors.add(new Err("absent", "total"));
+        else if (record.total() != record.lines().stream().mapToInt(Integer::intValue).sum() && !record.conflict()) errors.add(new Err("semantic", "total"));
+        return errors;
+    }
+
+    /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
+    static Extracted extract(String docId, String text) {
+        List<String> retried = List.of();
+        List<Rec> replies = REPLIES.get(docId);
+        Rec record = replies.get(0);
+        List<Err> errors = List.of();
+        for (int attempt = 1; attempt <= 2; attempt++) {
+            record = replies.get(Math.min(attempt, replies.size()) - 1);
+            errors = validate(record, text);
+            List<Err> fixable = errors.stream().filter(e -> !e.kind().equals("absent")).toList();
+            if (fixable.isEmpty()) return new Extracted(docId, attempt, record, errors, retried, !errors.isEmpty() || record.conflict() ? "needs_review" : "valid");
+            retried = new TreeSet<>(fixable.stream().map(Err::kind).toList()).stream().toList();
+        }
+        return new Extracted(docId, 2, record, errors, retried, "failed");
+    }
+
+    static int percent(int correct, int total) {
+        return total > 0 ? (200 * correct + total) / (2 * total) : 0;
+    }
+
+    public static void main(String[] args) {
+        List<Extracted> results = new ArrayList<>();
+        List<String> kinds = new ArrayList<>();
+        List<Boolean> correct = new ArrayList<>();
+        for (var entry : DOCS.entrySet()) {
+            Extracted r = extract(entry.getKey(), entry.getValue().text());
+            Rec label = LABELS.get(entry.getKey());
+            results.add(r);
+            kinds.add(entry.getValue().kind());
+            correct.add(r.status().equals("valid") && java.util.Objects.equals(r.record().vendor(), label.vendor()) && r.record().total().equals(label.total()));
+            String note = r.status().equals("valid") && !r.retried().isEmpty() ? " (retried: " + String.join(", ", r.retried()) + ")" : "";
+            if (r.status().equals("needs_review")) note = r.record().conflict() ? " (conflict flagged)" : " (" + r.errors().get(0).kind() + ": " + r.errors().get(0).field() + ", not retried)";
+            if (r.status().equals("failed")) note = " (" + String.join(", ", r.retried()) + ")";
+            System.out.println(r.id() + " " + entry.getValue().kind() + ": " + r.status() + " after " + r.attempts() + " attempt" + (r.attempts() > 1 ? "s" : "") + note);
+        }
+        int valid = 0, rightValid = 0, right = 0;
+        for (int i = 0; i < results.size(); i++) {
+            if (results.get(i).status().equals("valid")) {
+                valid++;
+                if (correct.get(i)) rightValid++;
+            }
+            if (correct.get(i)) right++;
+        }
+        System.out.println("accuracy: validated only " + rightValid + " of " + valid + " (" + percent(rightValid, valid) + "%), all documents " + right + " of " + results.size() + " (" + percent(right, results.size()) + "%)");
+        List<String> order = new ArrayList<>(new LinkedHashSet<>(kinds));
+        List<String> parts = new ArrayList<>();
+        List<String> ready = new ArrayList<>();
+        for (String k : order) {
+            int n = 0, ok = 0;
+            for (int i = 0; i < kinds.size(); i++) {
+                if (kinds.get(i).equals(k)) {
+                    n++;
+                    if (correct.get(i)) ok++;
+                }
+            }
+            parts.add(k + " " + ok + "/" + n);
+            if (n >= 2 && ok == n) ready.add(k);
+        }
+        System.out.println("by kind: " + String.join(", ", parts));
+        System.out.println("automate: " + (ready.isEmpty() ? "none" : ready.stream().collect(Collectors.joining(", "))));
+    }
+}
+```
+```text
+d1 typed: valid after 1 attempt
+d2 typed: valid after 2 attempts (retried: semantic)
+d3 scanned: valid after 2 attempts (retried: ungrounded)
+d4 scanned: needs_review after 1 attempt (absent: total, not retried)
+d5 handwritten: needs_review after 1 attempt (conflict flagged)
+d6 handwritten: failed after 2 attempts (ungrounded)
+accuracy: validated only 3 of 3 (100%), all documents 3 of 6 (50%)
+by kind: typed 2/2, scanned 1/2, handwritten 0/2
+automate: typed
+```
+```kotlin
+/**
+ * An extraction run in miniature: a scripted model reads six documents, every record is validated for what a schema cannot check, only the errors a second look can fix
+ * are retried, what the document does not hold goes to a person, and the accuracy is reported on every document and not only on the validated ones.
+ *
+ * The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
+ * (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
+ */
+data class Doc(val kind: String, val text: String)
+
+data class Rec(val vendor: String?, val lines: List<Int>, val total: Int?, val conflict: Boolean = false)
+
+data class Err(val kind: String, val field: String)
+
+data class Extracted(val id: String, val attempts: Int, val record: Rec, val errors: List<Err>, val retried: List<String>, val status: String)
+
+val DOCS = linkedMapOf(
+    "d1" to Doc("typed", "Vendor: Acme Ltd. Lines: 10.00 20.00. Total: 30.00"),
+    "d2" to Doc("typed", "Vendor: Borealis Co. Lines: 40.00 5.00. Total: 45.00"),
+    "d3" to Doc("scanned", "Lines: 8.00 2.00. Total: 10.00"),
+    "d4" to Doc("scanned", "Vendor: Corvid Inc. Lines: 12.00 8.00."),
+    "d5" to Doc("handwritten", "Vendor: Dunmore. Lines: 6.00 6.00. Total: 12.50"),
+    "d6" to Doc("handwritten", "Lines: 3.00. Total: 3.00"),
+)
+val LABELS = mapOf("d1" to ("Acme Ltd" to 3000), "d2" to ("Borealis Co" to 4500), "d3" to (null to 1000), "d4" to ("Corvid Inc" to 2000), "d5" to ("Dunmore" to 1200), "d6" to (null to 300))
+
+// what the scripted model returns on the first and on the second attempt (a missing second reply repeats the first)
+val REPLIES = mapOf(
+    "d1" to listOf(Rec("Acme Ltd", listOf(1000, 2000), 3000)),
+    "d2" to listOf(Rec("Borealis Co", listOf(4000, 500), 5400), Rec("Borealis Co", listOf(4000, 500), 4500)),
+    "d3" to listOf(Rec("Globex", listOf(800, 200), 1000), Rec(null, listOf(800, 200), 1000)),
+    "d4" to listOf(Rec("Corvid Inc", listOf(1200, 800), null)),
+    "d5" to listOf(Rec("Dunmore", listOf(600, 600), 1250, conflict = true)),
+    "d6" to listOf(Rec("Hollis", listOf(300), 300)),
+)
+
+/** What a schema cannot check: a vendor the document never names, totals that disagree, a required total that is missing. */
+fun validate(record: Rec, text: String): List<Err> {
+    val errors = mutableListOf<Err>()
+    if (record.vendor != null && record.vendor !in text) errors += Err("ungrounded", "vendor")
+    if (record.total == null) errors += Err("absent", "total")
+    else if (record.total != record.lines.sum() && !record.conflict) errors += Err("semantic", "total")
+    return errors
+}
+
+/** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
+fun extract(docId: String, text: String): Extracted {
+    var retried = listOf<String>()
+    val replies = REPLIES.getValue(docId)
+    var record = replies[0]
+    var errors = listOf<Err>()
+    for (attempt in 1..2) {
+        record = replies[minOf(attempt, replies.size) - 1]
+        errors = validate(record, text)
+        val fixable = errors.filter { it.kind != "absent" }
+        if (fixable.isEmpty()) return Extracted(docId, attempt, record, errors, retried, if (errors.isNotEmpty() || record.conflict) "needs_review" else "valid")
+        retried = fixable.map { it.kind }.toSortedSet().toList()
+    }
+    return Extracted(docId, 2, record, errors, retried, "failed")
+}
+
+fun percent(correct: Int, total: Int): Int = if (total > 0) (200 * correct + total) / (2 * total) else 0
+
+fun main() {
+    val results = DOCS.map { (docId, doc) ->
+        val r = extract(docId, doc.text)
+        val label = LABELS.getValue(docId)
+        Triple(r, doc.kind, r.status == "valid" && r.record.vendor == label.first && r.record.total == label.second)
+    }
+    for ((r, kind, _) in results) {
+        var note = if (r.status == "valid" && r.retried.isNotEmpty()) " (retried: ${r.retried.joinToString(", ")})" else ""
+        if (r.status == "needs_review") note = if (r.record.conflict) " (conflict flagged)" else " (${r.errors[0].kind}: ${r.errors[0].field}, not retried)"
+        if (r.status == "failed") note = " (${r.retried.joinToString(", ")})"
+        println("${r.id} $kind: ${r.status} after ${r.attempts} attempt${if (r.attempts > 1) "s" else ""}$note")
+    }
+    val valid = results.filter { it.first.status == "valid" }
+    val rightValid = valid.count { it.third }
+    val right = results.count { it.third }
+    println("accuracy: validated only $rightValid of ${valid.size} (${percent(rightValid, valid.size)}%), all documents $right of ${results.size} (${percent(right, results.size)}%)")
+    val kinds = results.map { it.second }.distinct()
+    println("by kind: " + kinds.joinToString(", ") { k -> "$k ${results.count { it.second == k && it.third }}/${results.count { it.second == k }}" })
+    val ready = kinds.filter { k -> results.count { it.second == k } >= 2 && results.filter { it.second == k }.all { it.third } }
+    println("automate: " + ready.joinToString(", ").ifEmpty { "none" })
+}
+```
+```text
+d1 typed: valid after 1 attempt
+d2 typed: valid after 2 attempts (retried: semantic)
+d3 scanned: valid after 2 attempts (retried: ungrounded)
+d4 scanned: needs_review after 1 attempt (absent: total, not retried)
+d5 handwritten: needs_review after 1 attempt (conflict flagged)
+d6 handwritten: failed after 2 attempts (ungrounded)
+accuracy: validated only 3 of 3 (100%), all documents 3 of 6 (50%)
+by kind: typed 2/2, scanned 1/2, handwritten 0/2
+automate: typed
 ```
 <!-- /example -->
 

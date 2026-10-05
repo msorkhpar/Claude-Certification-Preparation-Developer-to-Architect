@@ -58,6 +58,297 @@ The example routes four messages, cuts a five-turn conversation to a twelve-word
 
 <!-- example: m76-assistant-turns tabs: python,typescript,java,kotlin -->
 ```python
+"""The turn logic of a conversational assistant in miniature: a message is routed in code before the model sees it, the window keeps the pinned facts and the newest turns
+that fit, and a memory that crosses sessions is read per customer and marked when it is old.
+
+The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
+a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
+"""
+from datetime import date
+
+RISK = ("hurt myself", "end my life", "emergency")
+ASKS_FOR_PERSON = ("human", "a person", "an agent")
+STORE = {"ada": [("address", "12 Elm Road", "2026-09-20"), ("plan", "Plus", "2025-12-01")]}
+
+
+def route(message, misses=0):
+    """Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers."""
+    text = message.lower()
+    if any(phrase in text for phrase in RISK):
+        return "handoff:safety"
+    if any(phrase in text for phrase in ASKS_FOR_PERSON):
+        return "handoff:requested"
+    if misses >= 2:
+        return "handoff:stalled"
+    return "answer"
+
+
+def window(turns, budget, facts):
+    """The pinned facts always stay; of the turns, the newest ones that fit the budget (counted in words) stay, as one block at the end."""
+    kept, used = [], 0
+    for turn in reversed(turns):
+        words = len(turn.split())
+        if used + words > budget:
+            break
+        kept.insert(0, turn)
+        used += words
+    return {"kept": kept, "dropped": len(turns) - len(kept), "facts": facts}
+
+
+def recall(user, today, max_age_days=30):
+    """The facts saved for this customer only, each marked current or to be verified when it is older than the limit."""
+    out = []
+    for key, value, saved in STORE.get(user, []):
+        age = (date.fromisoformat(today) - date.fromisoformat(saved)).days
+        out.append((key, value, "current" if age <= max_age_days else "verify"))
+    return out
+
+
+def main():
+    for message, misses in (("Where is my parcel?", 0), ("I want to talk to a human", 0), ("I feel like I might hurt myself", 0), ("what?", 2)):
+        print(f"route '{message}'" + (f" after {misses} misses" if misses else "") + f": {route(message, misses)}")
+    turns = ["Hello", "My parcel has not arrived", "It was due on Monday", "Can you check the order", "Order 1234 please"]
+    facts = ["order 1234: parcel due 2026-09-28", "address: 12 Elm Road"]
+    w = window(turns, 12, facts)
+    print(f"window: {len(turns)} turns, budget 12 words -> kept {len(w['kept'])}, dropped {w['dropped']}, facts kept {len(w['facts'])}")
+    for user in ("ada", "bob"):
+        found = recall(user, "2026-10-04")
+        print(f"recall {user} on 2026-10-04: " + (", ".join(f"{k}={v} ({s})" for k, v, s in found) or "nothing stored"))
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+route 'Where is my parcel?': answer
+route 'I want to talk to a human': handoff:requested
+route 'I feel like I might hurt myself': handoff:safety
+route 'what?' after 2 misses: handoff:stalled
+window: 5 turns, budget 12 words -> kept 2, dropped 3, facts kept 2
+recall ada on 2026-10-04: address=12 Elm Road (current), plan=Plus (verify)
+recall bob on 2026-10-04: nothing stored
+```
+```typescript
+// The turn logic of a conversational assistant in miniature: a message is routed in code before the model sees it, the window keeps the pinned facts and the newest turns
+// that fit, and a memory that crosses sessions is read per customer and marked when it is old.
+//
+// The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
+// a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
+const RISK = ["hurt myself", "end my life", "emergency"];
+const ASKS_FOR_PERSON = ["human", "a person", "an agent"];
+const STORE: Record<string, [key: string, value: string, saved: string][]> = { ada: [["address", "12 Elm Road", "2026-09-20"], ["plan", "Plus", "2025-12-01"]] };
+
+/** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
+export function route(message: string, misses = 0): string {
+  const text = message.toLowerCase();
+  if (RISK.some((p) => text.includes(p))) return "handoff:safety";
+  if (ASKS_FOR_PERSON.some((p) => text.includes(p))) return "handoff:requested";
+  if (misses >= 2) return "handoff:stalled";
+  return "answer";
+}
+
+/** The pinned facts always stay; of the turns, the newest ones that fit the budget (counted in words) stay, as one block at the end. */
+export function window(turns: string[], budget: number, facts: string[]) {
+  const kept: string[] = [];
+  let used = 0;
+  for (const turn of [...turns].reverse()) {
+    const words = turn.split(/\s+/).length;
+    if (used + words > budget) break;
+    kept.unshift(turn);
+    used += words;
+  }
+  return { kept, dropped: turns.length - kept.length, facts };
+}
+
+/** The facts saved for this customer only, each marked current or to be verified when it is older than the limit. */
+export function recall(user: string, today: string, maxAgeDays = 30): [string, string, string][] {
+  return (STORE[user] ?? []).map(([key, value, saved]) => {
+    const age = Math.round((Date.parse(today) - Date.parse(saved)) / 86400000);
+    return [key, value, age <= maxAgeDays ? "current" : "verify"];
+  });
+}
+
+function main() {
+  for (const [message, misses] of [["Where is my parcel?", 0], ["I want to talk to a human", 0], ["I feel like I might hurt myself", 0], ["what?", 2]] as [string, number][]) {
+    console.log(`route '${message}'` + (misses ? ` after ${misses} misses` : "") + `: ${route(message, misses)}`);
+  }
+  const turns = ["Hello", "My parcel has not arrived", "It was due on Monday", "Can you check the order", "Order 1234 please"];
+  const facts = ["order 1234: parcel due 2026-09-28", "address: 12 Elm Road"];
+  const w = window(turns, 12, facts);
+  console.log(`window: ${turns.length} turns, budget 12 words -> kept ${w.kept.length}, dropped ${w.dropped}, facts kept ${w.facts.length}`);
+  for (const user of ["ada", "bob"]) {
+    const found = recall(user, "2026-10-04");
+    console.log(`recall ${user} on 2026-10-04: ` + (found.map(([k, v, s]) => `${k}=${v} (${s})`).join(", ") || "nothing stored"));
+  }
+}
+
+if (import.meta.main) main();
+```
+```text
+route 'Where is my parcel?': answer
+route 'I want to talk to a human': handoff:requested
+route 'I feel like I might hurt myself': handoff:safety
+route 'what?' after 2 misses: handoff:stalled
+window: 5 turns, budget 12 words -> kept 2, dropped 3, facts kept 2
+recall ada on 2026-10-04: address=12 Elm Road (current), plan=Plus (verify)
+recall bob on 2026-10-04: nothing stored
+```
+```java
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * The turn logic of a conversational assistant in miniature: a message is routed in code before the model sees it, the window keeps the pinned facts and the newest turns
+ * that fit, and a memory that crosses sessions is read per customer and marked when it is old.
+ *
+ * <p>The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
+ * a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
+ */
+public final class AssistantTurns {
+    record Saved(String key, String value, String saved) {}
+
+    record Window(List<String> kept, int dropped, List<String> facts) {}
+
+    record Recalled(String key, String value, String status) {}
+
+    static final List<String> RISK = List.of("hurt myself", "end my life", "emergency");
+    static final List<String> ASKS_FOR_PERSON = List.of("human", "a person", "an agent");
+    static final Map<String, List<Saved>> STORE = Map.of("ada", List.of(new Saved("address", "12 Elm Road", "2026-09-20"), new Saved("plan", "Plus", "2025-12-01")));
+
+    /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
+    static String route(String message, int misses) {
+        String text = message.toLowerCase();
+        if (RISK.stream().anyMatch(text::contains)) return "handoff:safety";
+        if (ASKS_FOR_PERSON.stream().anyMatch(text::contains)) return "handoff:requested";
+        if (misses >= 2) return "handoff:stalled";
+        return "answer";
+    }
+
+    /** The pinned facts always stay; of the turns, the newest ones that fit the budget (counted in words) stay, as one block at the end. */
+    static Window window(List<String> turns, int budget, List<String> facts) {
+        List<String> kept = new ArrayList<>();
+        int used = 0;
+        for (int i = turns.size() - 1; i >= 0; i--) {
+            int words = turns.get(i).split("\\s+").length;
+            if (used + words > budget) break;
+            kept.add(0, turns.get(i));
+            used += words;
+        }
+        return new Window(kept, turns.size() - kept.size(), facts);
+    }
+
+    /** The facts saved for this customer only, each marked current or to be verified when it is older than the limit. */
+    static List<Recalled> recall(String user, String today, int maxAgeDays) {
+        return STORE.getOrDefault(user, List.of()).stream().map(s -> {
+            long age = ChronoUnit.DAYS.between(LocalDate.parse(s.saved()), LocalDate.parse(today));
+            return new Recalled(s.key(), s.value(), age <= maxAgeDays ? "current" : "verify");
+        }).toList();
+    }
+
+    public static void main(String[] args) {
+        String[] messages = {"Where is my parcel?", "I want to talk to a human", "I feel like I might hurt myself", "what?"};
+        int[] misses = {0, 0, 0, 2};
+        for (int i = 0; i < messages.length; i++) {
+            System.out.println("route '" + messages[i] + "'" + (misses[i] > 0 ? " after " + misses[i] + " misses" : "") + ": " + route(messages[i], misses[i]));
+        }
+        List<String> turns = List.of("Hello", "My parcel has not arrived", "It was due on Monday", "Can you check the order", "Order 1234 please");
+        List<String> facts = List.of("order 1234: parcel due 2026-09-28", "address: 12 Elm Road");
+        Window w = window(turns, 12, facts);
+        System.out.println("window: " + turns.size() + " turns, budget 12 words -> kept " + w.kept().size() + ", dropped " + w.dropped() + ", facts kept " + w.facts().size());
+        for (String user : List.of("ada", "bob")) {
+            String found = recall(user, "2026-10-04", 30).stream().map(r -> r.key() + "=" + r.value() + " (" + r.status() + ")").collect(Collectors.joining(", "));
+            System.out.println("recall " + user + " on 2026-10-04: " + (found.isEmpty() ? "nothing stored" : found));
+        }
+    }
+}
+```
+```text
+route 'Where is my parcel?': answer
+route 'I want to talk to a human': handoff:requested
+route 'I feel like I might hurt myself': handoff:safety
+route 'what?' after 2 misses: handoff:stalled
+window: 5 turns, budget 12 words -> kept 2, dropped 3, facts kept 2
+recall ada on 2026-10-04: address=12 Elm Road (current), plan=Plus (verify)
+recall bob on 2026-10-04: nothing stored
+```
+```kotlin
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+
+/**
+ * The turn logic of a conversational assistant in miniature: a message is routed in code before the model sees it, the window keeps the pinned facts and the newest turns
+ * that fit, and a memory that crosses sessions is read per customer and marked when it is old.
+ *
+ * The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
+ * a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
+ */
+data class Saved(val key: String, val value: String, val saved: String)
+
+data class Window(val kept: List<String>, val dropped: Int, val facts: List<String>)
+
+data class Recalled(val key: String, val value: String, val status: String)
+
+val RISK = listOf("hurt myself", "end my life", "emergency")
+val ASKS_FOR_PERSON = listOf("human", "a person", "an agent")
+val STORE = mapOf("ada" to listOf(Saved("address", "12 Elm Road", "2026-09-20"), Saved("plan", "Plus", "2025-12-01")))
+
+/** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
+fun route(message: String, misses: Int = 0): String {
+    val text = message.lowercase()
+    return when {
+        RISK.any { it in text } -> "handoff:safety"
+        ASKS_FOR_PERSON.any { it in text } -> "handoff:requested"
+        misses >= 2 -> "handoff:stalled"
+        else -> "answer"
+    }
+}
+
+/** The pinned facts always stay; of the turns, the newest ones that fit the budget (counted in words) stay, as one block at the end. */
+fun window(turns: List<String>, budget: Int, facts: List<String>): Window {
+    val kept = mutableListOf<String>()
+    var used = 0
+    for (turn in turns.reversed()) {
+        val words = turn.split(Regex("\\s+")).size
+        if (used + words > budget) break
+        kept.add(0, turn)
+        used += words
+    }
+    return Window(kept, turns.size - kept.size, facts)
+}
+
+/** The facts saved for this customer only, each marked current or to be verified when it is older than the limit. */
+fun recall(user: String, today: String, maxAgeDays: Int = 30): List<Recalled> =
+    (STORE[user] ?: listOf()).map {
+        val age = ChronoUnit.DAYS.between(LocalDate.parse(it.saved), LocalDate.parse(today))
+        Recalled(it.key, it.value, if (age <= maxAgeDays) "current" else "verify")
+    }
+
+fun main() {
+    for ((message, misses) in listOf("Where is my parcel?" to 0, "I want to talk to a human" to 0, "I feel like I might hurt myself" to 0, "what?" to 2)) {
+        println("route '$message'" + (if (misses > 0) " after $misses misses" else "") + ": ${route(message, misses)}")
+    }
+    val turns = listOf("Hello", "My parcel has not arrived", "It was due on Monday", "Can you check the order", "Order 1234 please")
+    val facts = listOf("order 1234: parcel due 2026-09-28", "address: 12 Elm Road")
+    val w = window(turns, 12, facts)
+    println("window: ${turns.size} turns, budget 12 words -> kept ${w.kept.size}, dropped ${w.dropped}, facts kept ${w.facts.size}")
+    for (user in listOf("ada", "bob")) {
+        val found = recall(user, "2026-10-04").joinToString(", ") { "${it.key}=${it.value} (${it.status})" }
+        println("recall $user on 2026-10-04: " + found.ifEmpty { "nothing stored" })
+    }
+}
+```
+```text
+route 'Where is my parcel?': answer
+route 'I want to talk to a human': handoff:requested
+route 'I feel like I might hurt myself': handoff:safety
+route 'what?' after 2 misses: handoff:stalled
+window: 5 turns, budget 12 words -> kept 2, dropped 3, facts kept 2
+recall ada on 2026-10-04: address=12 Elm Road (current), plan=Plus (verify)
+recall bob on 2026-10-04: nothing stored
 ```
 <!-- /example -->
 

@@ -52,6 +52,324 @@ The example decides four proposals from the permissions each asks for. The first
 
 <!-- example: m77-tool-gate tabs: python,typescript,java,kotlin -->
 ```python
+"""An approval gate for tools that an agent proposes, in miniature: the proposal is decided from the permissions it asks for, a reviewer answers the ones that need a person,
+an approved tool runs and its result is checked against the schema it declared, and every step leaves a line in an audit log.
+
+The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
+The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
+"""
+DENIED = ("network", "run_process")
+NEEDS_APPROVAL = ("write_files",)
+SCHEMA = {"headline": str, "rows": int}
+MAX_CHARS = 200
+
+PROPOSALS = [
+    {"name": "read_report", "permissions": ["read_files"], "result": {"headline": "Q3 up 4%", "rows": 12}},
+    {"name": "write_summary", "permissions": ["read_files", "write_files"], "result": {"headline": "Q3 up 4%"}},
+    {"name": "fetch_prices", "permissions": ["network"], "result": {"headline": "x", "rows": 1}},
+    {"name": "tidy_up", "permissions": ["write_files"], "result": {"headline": "x", "rows": 1}},
+]
+REVIEWER = {"write_summary": True, "tidy_up": False}  # the person's answers, by tool name
+
+
+def decide(permissions):
+    """Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic."""
+    denied = [p for p in permissions if p in DENIED]
+    if denied:
+        return "refused", denied
+    if any(p in NEEDS_APPROVAL for p in permissions):
+        return "needs_approval", [p for p in permissions if p in NEEDS_APPROVAL]
+    return "auto", []
+
+
+def check_output(result):
+    """The result of a tool is data to check before the agent uses it: every declared field, of its declared type, and no more than the limit of characters of text."""
+    problems = [f"missing: {field}" for field in SCHEMA if field not in result]
+    problems += [f"type: {field}" for field, kind in SCHEMA.items() if field in result and not isinstance(result[field], kind)]
+    if sum(len(v) for v in result.values() if isinstance(v, str)) > MAX_CHARS:
+        problems.append("too large")
+    return problems
+
+
+def main():
+    log = []
+    for proposal in PROPOSALS:
+        name = proposal["name"]
+        decision, why = decide(proposal["permissions"])
+        if decision == "refused":
+            print(f"{name}: refused ({', '.join(why)})")
+            log.append((name, "refused"))
+            continue
+        if decision == "needs_approval":
+            answer = REVIEWER[name]
+            print(f"{name}: needs_approval -> {'approved' if answer else 'declined'}")
+            if not answer:
+                log.append((name, "declined"))
+                continue
+        else:
+            print(f"{name}: auto")
+        problems = check_output(proposal["result"])
+        log.append((name, "ran" if not problems else "rejected"))
+        if problems:
+            print(f"  result of {name} rejected ({'; '.join(problems)})")
+    ran = sum(1 for _, s in log if s == "ran")
+    print(f"audit: {len(PROPOSALS)} proposals, {ran} ran, {sum(1 for _, s in log if s == 'rejected')} rejected, "
+          f"{sum(1 for _, s in log if s == 'refused')} refused, {sum(1 for _, s in log if s == 'declined')} declined")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+read_report: auto
+write_summary: needs_approval -> approved
+  result of write_summary rejected (missing: rows)
+fetch_prices: refused (network)
+tidy_up: needs_approval -> declined
+audit: 4 proposals, 1 ran, 1 rejected, 1 refused, 1 declined
+```
+```typescript
+// An approval gate for tools that an agent proposes, in miniature: the proposal is decided from the permissions it asks for, a reviewer answers the ones that need a person,
+// an approved tool runs and its result is checked against the schema it declared, and every step leaves a line in an audit log.
+//
+// The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
+// The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
+const DENIED = ["network", "run_process"];
+const NEEDS_APPROVAL = ["write_files"];
+const SCHEMA: Record<string, string> = { headline: "string", rows: "number" };
+const MAX_CHARS = 200;
+
+export type Proposal = { name: string; permissions: string[]; result: Record<string, unknown> };
+
+export const PROPOSALS: Proposal[] = [
+  { name: "read_report", permissions: ["read_files"], result: { headline: "Q3 up 4%", rows: 12 } },
+  { name: "write_summary", permissions: ["read_files", "write_files"], result: { headline: "Q3 up 4%" } },
+  { name: "fetch_prices", permissions: ["network"], result: { headline: "x", rows: 1 } },
+  { name: "tidy_up", permissions: ["write_files"], result: { headline: "x", rows: 1 } },
+];
+const REVIEWER: Record<string, boolean> = { write_summary: true, tidy_up: false }; // the person's answers, by tool name
+
+/** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
+export function decide(permissions: string[]): [string, string[]] {
+  const denied = permissions.filter((p) => DENIED.includes(p));
+  if (denied.length > 0) return ["refused", denied];
+  const gated = permissions.filter((p) => NEEDS_APPROVAL.includes(p));
+  if (gated.length > 0) return ["needs_approval", gated];
+  return ["auto", []];
+}
+
+/** The result of a tool is data to check before the agent uses it: every declared field, of its declared type, and no more than the limit of characters of text. */
+export function checkOutput(result: Record<string, unknown>): string[] {
+  const problems = Object.keys(SCHEMA).filter((f) => !(f in result)).map((f) => `missing: ${f}`);
+  for (const [field, kind] of Object.entries(SCHEMA)) if (field in result && typeof result[field] !== kind) problems.push(`type: ${field}`);
+  if (Object.values(result).reduce((n: number, v) => n + (typeof v === "string" ? v.length : 0), 0) > MAX_CHARS) problems.push("too large");
+  return problems;
+}
+
+function main() {
+  const log: [string, string][] = [];
+  for (const proposal of PROPOSALS) {
+    const name = proposal.name;
+    const [decision, why] = decide(proposal.permissions);
+    if (decision === "refused") {
+      console.log(`${name}: refused (${why.join(", ")})`);
+      log.push([name, "refused"]);
+      continue;
+    }
+    if (decision === "needs_approval") {
+      const answer = REVIEWER[name];
+      console.log(`${name}: needs_approval -> ${answer ? "approved" : "declined"}`);
+      if (!answer) {
+        log.push([name, "declined"]);
+        continue;
+      }
+    } else {
+      console.log(`${name}: auto`);
+    }
+    const problems = checkOutput(proposal.result);
+    log.push([name, problems.length === 0 ? "ran" : "rejected"]);
+    if (problems.length > 0) console.log(`  result of ${name} rejected (${problems.join("; ")})`);
+  }
+  const count = (s: string) => log.filter(([, status]) => status === s).length;
+  console.log(`audit: ${PROPOSALS.length} proposals, ${count("ran")} ran, ${count("rejected")} rejected, ${count("refused")} refused, ${count("declined")} declined`);
+}
+
+if (import.meta.main) main();
+```
+```text
+read_report: auto
+write_summary: needs_approval -> approved
+  result of write_summary rejected (missing: rows)
+fetch_prices: refused (network)
+tidy_up: needs_approval -> declined
+audit: 4 proposals, 1 ran, 1 rejected, 1 refused, 1 declined
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * An approval gate for tools that an agent proposes, in miniature: the proposal is decided from the permissions it asks for, a reviewer answers the ones that need a person,
+ * an approved tool runs and its result is checked against the schema it declared, and every step leaves a line in an audit log.
+ *
+ * <p>The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
+ * The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
+ */
+public final class ToolGate {
+    record Proposal(String name, List<String> permissions, Map<String, Object> result) {}
+
+    record Decision(String decision, List<String> why) {}
+
+    static final List<String> DENIED = List.of("network", "run_process");
+    static final List<String> NEEDS_APPROVAL = List.of("write_files");
+    static final int MAX_CHARS = 200;
+
+    static final List<Proposal> PROPOSALS = List.of(
+        new Proposal("read_report", List.of("read_files"), Map.of("headline", "Q3 up 4%", "rows", 12)),
+        new Proposal("write_summary", List.of("read_files", "write_files"), Map.of("headline", "Q3 up 4%")),
+        new Proposal("fetch_prices", List.of("network"), Map.of("headline", "x", "rows", 1)),
+        new Proposal("tidy_up", List.of("write_files"), Map.of("headline", "x", "rows", 1)));
+    static final Map<String, Boolean> REVIEWER = Map.of("write_summary", true, "tidy_up", false); // the person's answers, by tool name
+
+    /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
+    static Decision decide(List<String> permissions) {
+        List<String> denied = permissions.stream().filter(DENIED::contains).toList();
+        if (!denied.isEmpty()) return new Decision("refused", denied);
+        List<String> gated = permissions.stream().filter(NEEDS_APPROVAL::contains).toList();
+        if (!gated.isEmpty()) return new Decision("needs_approval", gated);
+        return new Decision("auto", List.of());
+    }
+
+    /** The result of a tool is data to check before the agent uses it: every declared field, of its declared type, and no more than the limit of characters of text. */
+    static List<String> checkOutput(Map<String, Object> result) {
+        List<String> problems = new ArrayList<>();
+        if (!result.containsKey("headline")) problems.add("missing: headline");
+        if (!result.containsKey("rows")) problems.add("missing: rows");
+        if (result.containsKey("headline") && !(result.get("headline") instanceof String)) problems.add("type: headline");
+        if (result.containsKey("rows") && !(result.get("rows") instanceof Integer)) problems.add("type: rows");
+        int chars = result.values().stream().filter(v -> v instanceof String).mapToInt(v -> ((String) v).length()).sum();
+        if (chars > MAX_CHARS) problems.add("too large");
+        return problems;
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> log = new LinkedHashMap<>();
+        for (Proposal proposal : PROPOSALS) {
+            String name = proposal.name();
+            Decision d = decide(proposal.permissions());
+            if (d.decision().equals("refused")) {
+                System.out.println(name + ": refused (" + String.join(", ", d.why()) + ")");
+                log.put(name, "refused");
+                continue;
+            }
+            if (d.decision().equals("needs_approval")) {
+                boolean answer = REVIEWER.get(name);
+                System.out.println(name + ": needs_approval -> " + (answer ? "approved" : "declined"));
+                if (!answer) {
+                    log.put(name, "declined");
+                    continue;
+                }
+            } else {
+                System.out.println(name + ": auto");
+            }
+            List<String> problems = checkOutput(proposal.result());
+            log.put(name, problems.isEmpty() ? "ran" : "rejected");
+            if (!problems.isEmpty()) System.out.println("  result of " + name + " rejected (" + String.join("; ", problems) + ")");
+        }
+        System.out.println("audit: " + PROPOSALS.size() + " proposals, " + log.values().stream().filter(s -> s.equals("ran")).count() + " ran, "
+            + log.values().stream().filter(s -> s.equals("rejected")).count() + " rejected, " + log.values().stream().filter(s -> s.equals("refused")).count() + " refused, "
+            + log.values().stream().filter(s -> s.equals("declined")).count() + " declined");
+    }
+}
+```
+```text
+read_report: auto
+write_summary: needs_approval -> approved
+  result of write_summary rejected (missing: rows)
+fetch_prices: refused (network)
+tidy_up: needs_approval -> declined
+audit: 4 proposals, 1 ran, 1 rejected, 1 refused, 1 declined
+```
+```kotlin
+/**
+ * An approval gate for tools that an agent proposes, in miniature: the proposal is decided from the permissions it asks for, a reviewer answers the ones that need a person,
+ * an approved tool runs and its result is checked against the schema it declared, and every step leaves a line in an audit log.
+ *
+ * The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
+ * The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
+ */
+data class Proposal(val name: String, val permissions: List<String>, val result: Map<String, Any>)
+
+data class Decision(val decision: String, val why: List<String>)
+
+val DENIED = listOf("network", "run_process")
+val NEEDS_APPROVAL = listOf("write_files")
+const val MAX_CHARS = 200
+
+val PROPOSALS = listOf(
+    Proposal("read_report", listOf("read_files"), mapOf("headline" to "Q3 up 4%", "rows" to 12)),
+    Proposal("write_summary", listOf("read_files", "write_files"), mapOf("headline" to "Q3 up 4%")),
+    Proposal("fetch_prices", listOf("network"), mapOf("headline" to "x", "rows" to 1)),
+    Proposal("tidy_up", listOf("write_files"), mapOf("headline" to "x", "rows" to 1)),
+)
+val REVIEWER = mapOf("write_summary" to true, "tidy_up" to false) // the person's answers, by tool name
+
+/** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
+fun decide(permissions: List<String>): Decision {
+    val denied = permissions.filter { it in DENIED }
+    if (denied.isNotEmpty()) return Decision("refused", denied)
+    val gated = permissions.filter { it in NEEDS_APPROVAL }
+    if (gated.isNotEmpty()) return Decision("needs_approval", gated)
+    return Decision("auto", listOf())
+}
+
+/** The result of a tool is data to check before the agent uses it: every declared field, of its declared type, and no more than the limit of characters of text. */
+fun checkOutput(result: Map<String, Any>): List<String> {
+    val problems = mutableListOf<String>()
+    if ("headline" !in result) problems += "missing: headline"
+    if ("rows" !in result) problems += "missing: rows"
+    if ("headline" in result && result["headline"] !is String) problems += "type: headline"
+    if ("rows" in result && result["rows"] !is Int) problems += "type: rows"
+    if (result.values.sumOf { if (it is String) it.length else 0 } > MAX_CHARS) problems += "too large"
+    return problems
+}
+
+fun main() {
+    val log = linkedMapOf<String, String>()
+    for (proposal in PROPOSALS) {
+        val name = proposal.name
+        val d = decide(proposal.permissions)
+        if (d.decision == "refused") {
+            println("$name: refused (${d.why.joinToString(", ")})")
+            log[name] = "refused"
+            continue
+        }
+        if (d.decision == "needs_approval") {
+            val answer = REVIEWER.getValue(name)
+            println("$name: needs_approval -> ${if (answer) "approved" else "declined"}")
+            if (!answer) {
+                log[name] = "declined"
+                continue
+            }
+        } else {
+            println("$name: auto")
+        }
+        val problems = checkOutput(proposal.result)
+        log[name] = if (problems.isEmpty()) "ran" else "rejected"
+        if (problems.isNotEmpty()) println("  result of $name rejected (${problems.joinToString("; ")})")
+    }
+    println("audit: ${PROPOSALS.size} proposals, ${log.values.count { it == "ran" }} ran, ${log.values.count { it == "rejected" }} rejected, ${log.values.count { it == "refused" }} refused, ${log.values.count { it == "declined" }} declined")
+}
+```
+```text
+read_report: auto
+write_summary: needs_approval -> approved
+  result of write_summary rejected (missing: rows)
+fetch_prices: refused (network)
+tidy_up: needs_approval -> declined
+audit: 4 proposals, 1 ran, 1 rejected, 1 refused, 1 declined
 ```
 <!-- /example -->
 
