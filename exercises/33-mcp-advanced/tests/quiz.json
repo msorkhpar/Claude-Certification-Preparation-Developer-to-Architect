@@ -84,9 +84,9 @@
       "stem": "An MCP server accepts a credential that was meant for another service and passes it unchanged to a downstream API. What does the specification say?",
       "options": {
         "a": "Allowed, since the downstream API validates the token on its own",
-        "b": "Allowed when the user has consented to the downstream call",
+        "b": "Allowed, once the user has consented to the downstream call",
         "c": "Required, so that the downstream API sees the original audience",
-        "d": "Forbidden: it takes only tokens that were issued for its own resources"
+        "d": "Forbidden, since only tokens minted for the receiver are honored"
       },
       "key": "d",
       "explanation": {
@@ -102,10 +102,10 @@
       "scope": "page",
       "stem": "A server issues a workflow identifier in a tool result and later acts on whoever presents it. Which attack does this invite?",
       "options": {
-        "a": "None, because MCP sessions already bind every handle to its caller",
-        "b": "Hijacking, since holding the handle is taken as proof of who is asking",
-        "c": "Scope inflation, since the handle carries more permissions than needed",
-        "d": "Cross-site scripting, since the identifier appears in a result"
+        "a": "None, because MCP sessions already bind each handle to its caller",
+        "b": "Hijacking, because having the handle is accepted as proof of identity",
+        "c": "Scope inflation, because the handle carries more permissions than needed",
+        "d": "Cross-site scripting, because the identifier is echoed back in a result"
       },
       "key": "b",
       "explanation": {
@@ -121,10 +121,10 @@
       "scope": "module",
       "stem": "A tool wants a person's confirmation, but the calling client declared only roots. What must the server avoid?",
       "options": {
-        "a": "Returning a normal result that reports the confirmation could not be requested",
-        "b": "Including any elicitation request, since the caller never announced support for it",
-        "c": "Ending the call with an error code, since failing is always forbidden",
-        "d": "Signing the state of the call, since the client may tamper with it"
+        "a": "Returning a normal result that says the confirmation could not be requested",
+        "b": "Including an elicitation request for a feature the caller never announced",
+        "c": "Ending the call with an error code that names the missing capability",
+        "d": "Signing the state of the call so that the client cannot tamper with it"
       },
       "key": "b",
       "explanation": {
@@ -159,7 +159,7 @@
       "scope": "module",
       "stem": "A load balancer sends consecutive calls of one client to different instances of an MCP server on the 2026-07-28 revision. What does the protocol need so that this works?",
       "options": {
-        "a": "No shared storage, since each call is self-contained",
+        "a": "A self-contained request that carries everything the handler requires",
         "b": "A sticky connection that keeps one client on the same instance",
         "c": "A resumable stream that another instance can pick up by its event id",
         "d": "A session identifier that each instance looks up in a common table"
