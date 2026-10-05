@@ -25,7 +25,7 @@ Claude Code reads settings from five places. In order of precedence, highest fir
 4. **Shared project.** The file in the repository that the team commits.
 5. **User.** A developer's settings for every project.
 
-A key set at a higher level overrides the same key set lower down. That sentence is the whole rule for ordinary keys, and the example applies it: the managed file sets `cleanupPeriodDays` to 7, the command line sets 14, and the effective value is 7. The managed level is not a default that a developer may change: no user, project or local value overrides it, with one exception: a managed `model` is only a default, as the lock section below shows.
+A key set at a higher level overrides the same key set lower down. That sentence is the whole rule for ordinary keys, and the example applies it: the managed file sets `cleanupPeriodDays` to 7, the command line sets 14, and the effective value is 7. The managed level is not a default that a developer may change: no user, project or local value overrides it, with two exceptions that the sections below show: a managed `model` is only a default, and a few security keys take the stricter value.
 
 ### Lists merge, except where a lock stops them
 
