@@ -5,6 +5,8 @@
 // safe only when the tool it repeats is idempotent: the refund tool records its idempotency key together with its effect, so a second
 // attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after
 // a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.
+import { logger } from "./logger.ts";
+const log = logger("reliable_call");
 
 export class Transient extends Error {} // a failure worth retrying: a timeout, a rate limit, a lost response
 
@@ -16,6 +18,7 @@ export class Ledger {
 
 /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */
 export function refund(ledger: Ledger, key: string | null, order: string, amount: number, loseResponse: boolean): string {
+  log.debug("refund input", key);
   if (key !== null && ledger.keys.has(key)) return ledger.keys.get(key)!;
   ledger.paid.push([order, amount]);
   const receipt = `refund-${ledger.paid.length}`;

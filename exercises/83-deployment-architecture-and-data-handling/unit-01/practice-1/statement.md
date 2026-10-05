@@ -15,6 +15,19 @@ A configuration has `platform` (`api`, `aws-platform`, `bedrock` or `vertex`), `
 requirements have `residency` (`us`, `eu` or missing), `phi`, `zdr_required`, `multi_tenant` (booleans) and `audit_min_days` and `audit_max_days` (whole numbers, either may be missing). A
 missing flag is false.
 
+## What is already written, and what you write
+
+The starter is a working data policy with six gaps cut out of it. Everything that is plumbing is written and correct: the residency findings, the tenant finding, the retention-window findings, the function that joins them and the age of an entry. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, `null` or an empty set), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):
+
+1. `_report` unlocks `m1`: the sorted list of finding ids. Once it is written the residency (`e1`), tenant (`e4`) and retention-window (`e6`) checks that are already written start to pass; read them as worked examples.
+2. `_zdr_findings` unlocks `e2`: the findings about zero data retention.
+3. `_phi_findings` unlocks `e3`: the findings about protected health information.
+4. `_audit_findings` unlocks `e5`: the finding about stored prompts.
+5. `retention_actions` unlocks `e7`: what a retention rule purges and keeps.
+6. `pick_deployment` unlocks `e8`: the deployment that may serve a user's region.
+
+About twenty lines in all. The sections below describe the whole policy; the parts you do not write are there so you can see how your functions are used.
+
 ## What to write
 
 `check_deployment(config, requirements)` returns the finding ids that apply, sorted and without duplicates:

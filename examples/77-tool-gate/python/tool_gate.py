@@ -4,6 +4,10 @@ an approved tool runs and its result is checked against the schema it declared, 
 The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
 The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 DENIED = ("network", "run_process")
 NEEDS_APPROVAL = ("write_files",)
 SCHEMA = {"headline": str, "rows": int}
@@ -20,6 +24,7 @@ REVIEWER = {"write_summary": True, "tidy_up": False}  # the person's answers, by
 
 def decide(permissions):
     """Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic."""
+    log.debug("decide input: %r", permissions)
     denied = [p for p in permissions if p in DENIED]
     if denied:
         return "refused", denied

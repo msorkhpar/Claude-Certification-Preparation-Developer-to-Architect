@@ -1,6 +1,8 @@
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val log = System.getLogger("assistant_turns")
+
 /**
  * The turn logic of a conversational assistant in miniature: a message is routed in code before the model sees it, the window keeps the pinned facts and the newest turns
  * that fit, and a memory that crosses sessions is read per customer and marked when it is old.
@@ -20,6 +22,7 @@ val STORE = mapOf("ada" to listOf(Saved("address", "12 Elm Road", "2026-09-20"),
 
 /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
 fun route(message: String, misses: Int = 0): String {
+    log.log(System.Logger.Level.DEBUG, "route input: {0}", message)
     val text = message.lowercase()
     return when {
         RISK.any { it in text } -> "handoff:safety"

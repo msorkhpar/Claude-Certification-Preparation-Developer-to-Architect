@@ -14,6 +14,21 @@ A design has `name`, `pattern` (`workflow`, `augmented`, `agent` or `multi-agent
 task), `path_known`, `parallel_independent`, `shared_context`, `needs_audit` and `writes_without_approval` (booleans; a missing one is false), and `stages`: a map with the
 lists `input`, `processing`, `output` and `feedback`. An empty list or a missing key means the stage is absent.
 
+## What is already written, and what you write
+
+The starter is a working review with eight gaps cut out of it. The severity table, the helper that builds a finding and `review`, which joins the findings of the rules and orders them, are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `stage_findings` unlocks `e1`: the absent stages and the missing feedback loop.
+2. `team_findings` unlocks `e3`: more than one agent needs independent parts and no shared context.
+3. `write_findings` unlocks `e4`: an unapproved write when an audit is needed.
+4. `autonomy_findings` unlocks `e2`: an agent or a team on a known path.
+5. `output_findings` unlocks `e5`: an output stage with no validation step.
+6. `order_findings` unlocks `e6`: severity first, then rule name.
+7. `verdict` unlocks `m1` and `e6`: reject, revise or approve from the worst finding.
+8. `cheapest_adequate` unlocks `e7`: the cheapest design that is not rejected, ties by name.
+
+About fifteen lines in all.
+
 ## What to write
 
 - `review(design)` returns a list of findings `{"rule", "severity"}`. The rubric:

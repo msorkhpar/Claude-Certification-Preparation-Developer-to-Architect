@@ -1,3 +1,6 @@
+import { logger } from "./logger.ts";
+const log = logger("capability_audit");
+
 /**
  * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.
  *
@@ -25,6 +28,7 @@ export const POLICY: Policy = {
 
 /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */
 export function audit(holds: string[], needs: string[], catalog: Record<string, [string, number]>) {
+  log.debug("audit input", holds);
   const remove = holds.filter((t) => !needs.includes(t));
   return { remove, risky: remove.filter((t) => RISKY.has(catalog[t][0])), missing: needs.filter((t) => !holds.includes(t)) };
 }

@@ -1,3 +1,5 @@
+private val log = System.getLogger("reliable_call")
+
 /**
  * A retried refund that must not pay twice, and a circuit breaker around a failing agent.
  *
@@ -18,6 +20,7 @@ class Ledger {
 
 /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */
 fun refund(ledger: Ledger, key: String?, order: String, amount: Int, loseResponse: Boolean): String {
+    log.log(System.Logger.Level.DEBUG, "refund input: {0}", key)
     if (key != null && key in ledger.keys) return ledger.keys.getValue(key)
     ledger.paid += "$order:$amount"
     val receipt = "refund-${ledger.paid.size}"

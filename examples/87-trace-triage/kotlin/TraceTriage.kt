@@ -1,3 +1,5 @@
+private val log = System.getLogger("trace_triage")
+
 /**
  * Observability decisions for a system of agents and tools: which traces to keep, how to find the layer that failed, when a change in a metric is drift, when to alert and what a log record may hold.
  *
@@ -34,6 +36,7 @@ fun keepReason(traceId: String, spans: List<Span>, rate: Int, feedback: Boolean 
 
 /** The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed. */
 fun rootCause(spans: List<Span>): Cause {
+    log.log(System.Logger.Level.DEBUG, "rootCause input: {0}", spans)
     val byId = spans.associateBy { it.id }
     val failed = spans.filter { it.status == "error" }
     if (failed.isNotEmpty()) {

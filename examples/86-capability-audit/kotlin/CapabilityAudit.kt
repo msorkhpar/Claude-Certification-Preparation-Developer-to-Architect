@@ -1,3 +1,5 @@
+private val log = System.getLogger("capability_audit")
+
 /**
  * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.
  *
@@ -38,6 +40,7 @@ val POLICY = Policy(
 
 /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */
 fun audit(holds: List<String>, needs: List<String>, catalog: Map<String, Tool>): Audit {
+    log.log(System.Logger.Level.DEBUG, "audit input: {0}", holds)
     val remove = holds.filter { it !in needs }
     return Audit(remove, remove.filter { catalog.getValue(it).access in RISKY }, needs.filter { it !in holds })
 }

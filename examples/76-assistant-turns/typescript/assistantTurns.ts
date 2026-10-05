@@ -3,12 +3,15 @@
 //
 // The words are made up and the routing is a plain list of phrases: this example is about where each decision lives, not about what a model would say. The shapes (a route,
 // a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("assistant_turns");
 const RISK = ["hurt myself", "end my life", "emergency"];
 const ASKS_FOR_PERSON = ["human", "a person", "an agent"];
 const STORE: Record<string, [key: string, value: string, saved: string][]> = { ada: [["address", "12 Elm Road", "2026-09-20"], ["plan", "Plus", "2025-12-01"]] };
 
 /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
 export function route(message: string, misses = 0): string {
+  log.debug("route input", message);
   const text = message.toLowerCase();
   if (RISK.some((p) => text.includes(p))) return "handoff:safety";
   if (ASKS_FOR_PERSON.some((p) => text.includes(p))) return "handoff:requested";

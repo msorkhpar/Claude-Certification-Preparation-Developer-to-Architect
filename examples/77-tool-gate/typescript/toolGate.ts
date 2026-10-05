@@ -3,6 +3,8 @@
 //
 // The tools are made-up proposals with made-up results: nothing generated is executed here, because this example is about the decisions around a run, not about running code.
 // The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("tool_gate");
 const DENIED = ["network", "run_process"];
 const NEEDS_APPROVAL = ["write_files"];
 const SCHEMA: Record<string, string> = { headline: "string", rows: "number" };
@@ -20,6 +22,7 @@ const REVIEWER: Record<string, boolean> = { write_summary: true, tidy_up: false 
 
 /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
 export function decide(permissions: string[]): [string, string[]] {
+  log.debug("decide input", permissions);
   const denied = permissions.filter((p) => DENIED.includes(p));
   if (denied.length > 0) return ["refused", denied];
   const gated = permissions.filter((p) => NEEDS_APPROVAL.includes(p));

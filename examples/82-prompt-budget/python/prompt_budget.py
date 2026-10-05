@@ -6,6 +6,10 @@ Claude Sonnet 5.5). The prompting guide says to put long documents "near the top
 the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the
 breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 MIN_CACHEABLE = 512  # tokens, Claude Sonnet 5.5
 
 POLICY = "Refunds above 200 are approved by a supervisor. Gift cards are never refunded in cash. " * 26
@@ -23,6 +27,7 @@ def tokens(text):
 
 def assemble(modules, variables):
     """Static modules first, in the order given, then the dynamic ones with their variables filled in."""
+    log.debug("assemble input: %r", modules)
     ordered = [m for m in modules if m["static"]] + [m for m in modules if not m["static"]]
     blocks = [{"name": m["name"], "static": m["static"], "text": m["text"].format(**variables) if not m["static"] else m["text"]} for m in ordered]
     prefix = sum(tokens(b["text"]) for b in blocks if b["static"])

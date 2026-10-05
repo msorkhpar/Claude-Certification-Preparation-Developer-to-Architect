@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
  * documentation page "Embeddings". Nothing here calls a model.
  */
 public final class ChunkingAndRecall {
+    private static final System.Logger LOG = System.getLogger(ChunkingAndRecall.class.getName());
     private ChunkingAndRecall() {}
 
     /** A chunk: its id and its text. */
@@ -52,6 +53,7 @@ public final class ChunkingAndRecall {
 
     /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */
     static List<Chunk> chunkSections(String docId, String text, boolean context) {
+        LOG.log(System.Logger.Level.DEBUG, "chunkSections input: {0}", text);
         String[] parts = text.split("\n## ");
         String title = parts[0].startsWith("# ") ? parts[0].substring(2) : parts[0];
         List<Chunk> out = new ArrayList<>();

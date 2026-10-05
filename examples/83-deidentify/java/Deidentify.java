@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
  * the prompt. The patterns do not find names, and the output shows that gap on purpose. No model is called.
  */
 public final class Deidentify {
+    private static final System.Logger LOG = System.getLogger(Deidentify.class.getName());
     record Kind(String label, Pattern pattern) {}
 
     /** What the log keeps: the request id, the size of the prompt, how many distinct identifiers were tokenised. Never the prompt. */
@@ -25,6 +26,7 @@ public final class Deidentify {
 
     /** Replaces every match by a token; the same value always gets the same token. {@code vault} maps value to token and stays local. */
     static String tokenise(String text, Map<String, String> vault) {
+        LOG.log(System.Logger.Level.DEBUG, "tokenise input: {0}", text);
         String out = text;
         for (Kind kind : PATTERNS) {
             Matcher m = kind.pattern().matcher(out);

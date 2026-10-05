@@ -71,7 +71,10 @@ The corpus is four short documents. The "semantic" rankings are scripted: they s
 offers no embedding model and points to a provider). What the code shows is the design around that index. Read on 2026-10-04 against the Anthropic post on contextual retrieval and the Claude
 documentation page "Embeddings". Nothing here calls a model.
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 STOP = {"a", "an", "the", "is", "are", "can", "i", "what", "does", "do", "how", "my", "it", "of", "to", "for", "and", "or", "in", "when", "will", "be", "that", "this", "with", "by", "at"}
 DOCS = {
@@ -94,6 +97,7 @@ def chunk_fixed(doc_id, text, size):
 
 def chunk_sections(doc_id, text, context):
     """Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone."""
+    log.debug("chunk_sections input: %r", text)
     head, *sections = text.split("\n## ")
     title = head.removeprefix("# ")
     chunks = []
@@ -233,6 +237,9 @@ after the window changes from 30 to 60 days, replace the document's chunks: 7 ch
 8 questions: evidence retrieved for 5, answers correct 5, by layer generation 1, ok 4, retrieval 2, unsupported 1
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("chunking_and_recall");
+
 /**
  * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.
  *
@@ -264,6 +271,7 @@ export function chunkFixed(docId: string, text: string, size: number): Chunk[] {
 
 /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */
 export function chunkSections(docId: string, text: string, context: boolean): Chunk[] {
+  log.debug("chunkSections input", text);
   const [head, ...sections] = text.split("\n## ");
   const title = head.replace(/^# /, "");
   return sections.map((section) => {
@@ -417,6 +425,7 @@ import java.util.regex.Pattern;
  * documentation page "Embeddings". Nothing here calls a model.
  */
 public final class ChunkingAndRecall {
+    private static final System.Logger LOG = System.getLogger(ChunkingAndRecall.class.getName());
     private ChunkingAndRecall() {}
 
     /** A chunk: its id and its text. */
@@ -451,6 +460,7 @@ public final class ChunkingAndRecall {
 
     /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */
     static List<Chunk> chunkSections(String docId, String text, boolean context) {
+        LOG.log(System.Logger.Level.DEBUG, "chunkSections input: {0}", text);
         String[] parts = text.split("\n## ");
         String title = parts[0].startsWith("# ") ? parts[0].substring(2) : parts[0];
         List<Chunk> out = new ArrayList<>();
@@ -630,6 +640,8 @@ after the window changes from 30 to 60 days, replace the document's chunks: 7 ch
 8 questions: evidence retrieved for 5, answers correct 5, by layer generation 1, ok 4, retrieval 2, unsupported 1
 ```
 ```kotlin
+private val log = System.getLogger("chunking_and_recall")
+
 /**
  * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.
  *
@@ -659,6 +671,7 @@ fun chunkFixed(docId: String, text: String, size: Int): List<Chunk> =
 
 /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */
 fun chunkSections(docId: String, text: String, context: Boolean): List<Chunk> {
+    log.log(System.Logger.Level.DEBUG, "chunkSections input: {0}", text)
     val parts = text.split("\n## ")
     val title = parts[0].removePrefix("# ")
     return parts.drop(1).map { section ->

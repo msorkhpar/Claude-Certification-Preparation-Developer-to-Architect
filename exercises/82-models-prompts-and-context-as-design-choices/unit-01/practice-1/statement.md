@@ -9,6 +9,20 @@ Names are Python's (`assemble`, `choose_model`, `reusable_prefix`, `tokens`, `MI
 camel-case names as static methods of `PromptPlan` and Kotlin has top-level functions. A module, a prompt and a model are maps, as the starters show. A refusal is `ValueError`
 (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`).
 
+## What is already written, and what you write
+
+The starter is a working planner with seven gaps cut out of it. `tokens`, the split into static and dynamic modules, the order of the blocks, the prefix and token counts and the shape of the result are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `fill` unlocks `e2`: the variables of a dynamic module, and a missing one refused.
+2. `check_static` unlocks `e1`: a variable in a static module refused.
+3. `pick_victim` unlocks `e3`: the lowest priority first, and of a tie the later one.
+4. `fit_budget` unlocks `e3` and `e4`: drop until the prompt fits, and refuse when only static modules are left.
+5. `breakpoint_of` unlocks `m1` and `e5`: the breakpoint after the last static block, and none under the minimum.
+6. `choose_model` unlocks `e6`: the cheapest model that meets the tier and the latency, ties by name.
+7. `reusable_prefix` unlocks `e7`: the tokens of an identical static prefix, or 0.
+
+About twenty lines in all.
+
 ## What to write
 
 - `tokens(text)` is given: one token per four characters, rounded up. `MIN_CACHEABLE` is 512 tokens.

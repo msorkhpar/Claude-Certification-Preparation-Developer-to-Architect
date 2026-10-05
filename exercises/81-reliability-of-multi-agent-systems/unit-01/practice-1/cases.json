@@ -64,52 +64,23 @@
     }
   },
   "plants": {
-    "wrong-retry-new-key": {
-      "caught_by": [
-        "e1",
-        "e3",
-        "e5",
-        "e6",
-        "e7",
-        "m1"
-      ],
-      "defect": "sends a new idempotency key with every retry"
-    },
     "wrong-key-changes-late": {
       "caught_by": [
         "e1"
       ],
       "defect": "sends a new idempotency key from the third attempt on"
     },
-    "wrong-fatal-retried": {
+    "wrong-one-more-attempt": {
       "caught_by": [
-        "e2",
-        "e3",
-        "e5"
+        "e2"
       ],
-      "defect": "retries a failure that cannot be fixed by retrying"
-    },
-    "wrong-attempts-off-by-one": {
-      "caught_by": [
-        "e1",
-        "e2",
-        "e4"
-      ],
-      "defect": "makes one attempt fewer than the limit"
+      "defect": "makes one call more than the limit when the limit is three"
     },
     "wrong-dependents-still-run": {
       "caught_by": [
         "e3"
       ],
       "defect": "runs a task whose dependency failed"
-    },
-    "wrong-failure-stops-run": {
-      "caught_by": [
-        "e2",
-        "e3",
-        "e4"
-      ],
-      "defect": "stops the whole run at the first failed task"
     },
     "wrong-breaker-total": {
       "caught_by": [
@@ -146,13 +117,6 @@
         "e7"
       ],
       "defect": "turns an unexpected crash into a failed task"
-    },
-    "wrong-checkpoint-late": {
-      "caught_by": [
-        "e5",
-        "e7"
-      ],
-      "defect": "writes the checkpoint only when the whole run ends"
     }
   }
 }

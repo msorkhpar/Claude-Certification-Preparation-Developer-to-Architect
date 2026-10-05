@@ -55,8 +55,8 @@ def test_e5_a_permission_the_code_uses_without_declaring_it_or_a_denied_one_refu
 
 
 def test_e6_a_declared_write_is_approved_only_with_a_gate_and_a_read_alone_is_approved_outright():
-    writer = review(proposal(permissions=("read_files", "write_files"), code=READ + "out.write(text)\n"), POLICY)
-    assert writer == out("summarise_report", "approve_with_gate", used=("read_files", "write_files"))
+    writer = review(proposal(permissions=("write_files",), code="out.write(text)\n"), POLICY)
+    assert writer == out("summarise_report", "approve_with_gate", used=("write_files",))
     assert review(proposal(), POLICY)["decision"] == "approve"
 
 

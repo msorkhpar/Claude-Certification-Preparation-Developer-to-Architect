@@ -11,6 +11,7 @@ import java.util.Set;
  * "Tool search tool", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.
  */
 public final class CapabilityAudit {
+    private static final System.Logger LOG = System.getLogger(CapabilityAudit.class.getName());
     private CapabilityAudit() {}
 
     /** A tool's access class and the size of its definition in tokens. */
@@ -51,6 +52,7 @@ public final class CapabilityAudit {
 
     /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */
     static Audit audit(List<String> holds, List<String> needs, Map<String, Tool> catalog) {
+        LOG.log(System.Logger.Level.DEBUG, "audit input: {0}", holds);
         List<String> remove = holds.stream().filter(t -> !needs.contains(t)).toList();
         return new Audit(remove, remove.stream().filter(t -> RISKY.contains(catalog.get(t).access())).toList(), needs.stream().filter(t -> !holds.contains(t)).toList());
     }

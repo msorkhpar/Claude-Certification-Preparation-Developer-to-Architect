@@ -9,6 +9,19 @@ capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotl
 Names are Python's (`audit`); TypeScript has the same name and the same snake-case fields. Java has the static method `RunAudit.audit` and the records `Run`, `Policy`, `Segment` and `Report` with
 camel-case fields (`retriedAbsent`, `sumOk`, `minN`, `needsReview`, `accuracyAll`); Kotlin has the top-level function `audit` and the data classes of the same names.
 
+## What is already written, and what you write
+
+The starter is a working audit with six gaps cut out of it. The counting of the statuses, the accuracies and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `percent` unlocks `e8` (and the figures of `m1` and `e1`): the whole percentage, rounded half up.
+2. `segments_of` unlocks `e3` and `e4`: one entry per kind, sorted, with the automate decision.
+3. `failure_shapes` unlocks `e6`: the invented, wasted-retry and unchecked-total counts.
+4. `meets` unlocks `e2` and `e1`: the target comparison, false for an empty run.
+5. `is_overstated` unlocks `e5`: the validated accuracy against the all-document accuracy and the gap.
+6. `choose_fix` unlocks `e7`: the first fix by the order of what costs most.
+
+About twenty lines in all.
+
 ## What to write
 
 A run is a list of documents `{id, kind, status, correct, invented, retried_absent, sum_ok}`: `status` is `valid`, `needs_review` or `failed`; `correct` says that the record the pipeline delivered

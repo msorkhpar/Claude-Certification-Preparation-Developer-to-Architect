@@ -9,6 +9,19 @@ capstone, not an Anthropic interface, and a text scan is not a sandbox: it is th
 Names are Python's (`review`); TypeScript has the same name and the same snake-case fields (`timeout_s`, `memory_mb`). Java has the static method `ToolReview.review` and the records `Proposal`,
 `Policy` and `Report` with camel-case fields (`timeoutS`, `memoryMb`, `minWords`); Kotlin has the top-level function `review` and the data classes of the same names.
 
+## What is already written, and what you write
+
+The starter is a working review with six gaps cut out of it. The forbidden-token list, the table of markers that shows which permission a piece of code uses, and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `findings_of` unlocks `e1`, `e2` and `e3`: the name, the description and the limits.
+2. `forbidden_calls` unlocks `e4`: the forbidden tokens in the code, alphabetical.
+3. `permissions_used` unlocks `e5`, `e6` and `e8`: the permissions the code shows, alphabetical.
+4. `refusals_of` unlocks `e4` and `e5`: the three groups of refusals, in order.
+5. `is_gated` unlocks `e6`: whether a declared permission needs a person's approval.
+6. `decide` unlocks `m1`, `e6` and `e7`: refuse, then revise, then gate, then approve.
+
+About fifteen lines in all.
+
 ## What to write
 
 A proposal is `{name, description, permissions, timeout_s, memory_mb, code}`; `permissions` is a list drawn from `read_files`, `write_files`, `network` and `run_process`. The policy is

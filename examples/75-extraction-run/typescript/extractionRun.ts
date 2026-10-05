@@ -3,6 +3,8 @@
 //
 // The model is a table of made-up replies: this example is about what the pipeline does with a record, not about what a model writes. Amounts are in cents. The shapes
 // (a record, an error with a kind and a field, the status of a document) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("extraction_run");
 export type Rec = { vendor: string | null; lines: number[]; total: number | null; conflict: boolean };
 export type Err = [kind: string, field: string];
 export type Extracted = { id: string; attempts: number; record: Rec; errors: Err[]; retried: string[]; status: string };
@@ -40,6 +42,7 @@ export function validate(record: Rec, text: string): Err[] {
 
 /** One attempt, then one retry that carries the errors, and only when a second look can fix one. An absent value is never retried. */
 export function extract(docId: string, text: string): Extracted {
+  log.debug("extract input", text);
   let retried: string[] = [];
   const replies = REPLIES[docId];
   let record = replies[0];

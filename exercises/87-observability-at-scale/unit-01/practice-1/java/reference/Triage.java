@@ -11,6 +11,7 @@ import java.util.TreeSet;
 
 /** Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md. */
 final class Triage {
+    private static final System.Logger LOG = System.getLogger(Triage.class.getName());
     private Triage() {}
 
     /** One step of a trace: its id and its parent's id (empty for the root), the kind (agent, llm, tool or retrieval), the name, the status (ok or error), the milliseconds and a note. */
@@ -35,6 +36,7 @@ final class Triage {
     }
 
     static String keepTrace(String traceId, List<Span> spans, int rate, boolean feedback, int slowMs) {
+        LOG.log(System.Logger.Level.DEBUG, "keepTrace input: {0}", spans);
         for (Span s : spans) if (s.status().equals("error")) return "error";
         if (spans.get(0).ms() > slowMs) return "slow";
         Map<String, Integer> tools = new HashMap<>();
@@ -44,24 +46,29 @@ final class Triage {
         return bucket(traceId) < rate ? "sampled" : "dropped";
     }
 
+    private static Span deepest(List<Span> failed) {
+        return failed.stream().filter(s -> failed.stream().noneMatch(o -> o.parent().equals(s.id()))).findFirst().orElse(failed.get(0));
+    }
+
+    private static Span blamedRetrieval(List<Span> spans) {
+        for (Span s : spans) if (s.kind().equals("retrieval") && (s.note().equals("stale") || s.note().equals("no-hits"))) return s;
+        return null;
+    }
+
     static Cause rootCause(List<Span> spans) {
         Map<String, Span> byId = new HashMap<>();
         for (Span s : spans) byId.put(s.id(), s);
         List<Span> failed = new ArrayList<>();
         for (Span s : spans) if (s.status().equals("error")) failed.add(s);
         if (!failed.isEmpty()) {
-            Set<String> parents = new HashSet<>();
-            for (Span s : failed) parents.add(s.parent());
-            Span origin = null;
-            for (Span s : failed) if (!parents.contains(s.id())) { origin = s; break; }
+            Span origin = deepest(failed);
             List<String> path = new ArrayList<>();
             for (Span cursor = origin; cursor != null; cursor = byId.get(cursor.parent())) path.add(cursor.name());
             Collections.reverse(path);
             return new Cause(origin.kind(), origin.name(), "failed", path);
         }
-        for (Span s : spans) {
-            if (s.kind().equals("retrieval") && (s.note().equals("stale") || s.note().equals("no-hits"))) return new Cause("retrieval", s.name(), s.note(), List.of(spans.get(0).name(), s.name()));
-        }
+        Span s = blamedRetrieval(spans);
+        if (s != null) return new Cause("retrieval", s.name(), s.note(), List.of(spans.get(0).name(), s.name()));
         return new Cause("none", "", "no span failed", List.of());
     }
 
@@ -94,11 +101,6 @@ final class Triage {
     }
 
     static List<String> requestTrail(List<Event> events, String request) {
-        List<Event> mine = new ArrayList<>();
-        for (Event e : events) if (e.request().equals(request)) mine.add(e);
-        mine.sort(Comparator.comparingInt(Event::ts));
-        List<String> out = new ArrayList<>();
-        for (Event e : mine) out.add(e.component() + ": " + e.message());
-        return out;
+        return events.stream().filter(e -> e.request().equals(request)).sorted(Comparator.comparingInt(Event::ts)).map(e -> e.component() + ": " + e.message()).toList();
     }
 }

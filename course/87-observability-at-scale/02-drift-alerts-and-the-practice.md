@@ -55,7 +55,10 @@ The example is the one from the first page. Its second half is this page: the dr
 The traces, metrics and events are invented for the example. The rules come from the Claude Certified Architect - Professional exam guide (domains 3 and 4), Anthropic's article on its multi-agent research system
 and the Claude Code monitoring documentation, read on 2026-10-04. Nothing here calls a model.
 """
+import logging
 from collections import namedtuple
+
+log = logging.getLogger(__name__)
 
 Span = namedtuple("Span", "id parent kind name status ms note")
 CONTENT = {"prompt", "response", "tool_input", "tool_output"}
@@ -89,6 +92,7 @@ def keep_reason(trace_id, spans, rate, feedback=False, slow_ms=5000):
 
 def root_cause(spans):
     """The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed."""
+    log.debug("root_cause input: %r", spans)
     by_id = {s.id: s for s in spans}
     failed = [s for s in spans if s.status == "error"]
     if failed:
@@ -164,6 +168,9 @@ error rate per window [1, 2, 9, 2, 8, 9, 10, 3], threshold 5: one window over fi
 log record keeps: input_tokens, model, output_tokens, status, tool, trace; with tool_input allowed by name: tool_input
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("trace_triage");
+
 /**
  * Observability decisions for a system of agents and tools: which traces to keep, how to find the layer that failed, when a change in a metric is drift, when to alert and what a log record may hold.
  *
@@ -200,6 +207,7 @@ export function keepReason(traceId: string, spans: Span[], rate: number, feedbac
 
 /** The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed. */
 export function rootCause(spans: Span[]): Cause {
+  log.debug("rootCause input", spans);
   const byId = new Map(spans.map((s) => [s.id, s]));
   const failed = spans.filter((s) => s.status === "error");
   if (failed.length > 0) {
@@ -298,6 +306,7 @@ import java.util.TreeSet;
  * and the Claude Code monitoring documentation, read on 2026-10-04. Nothing here calls a model.
  */
 public class TraceTriage {
+    private static final System.Logger LOG = System.getLogger(TraceTriage.class.getName());
     record Span(String id, String parent, String kind, String name, String status, int ms, String note) {}
 
     record Cause(String layer, String name, String why, List<String> path) {}
@@ -334,6 +343,7 @@ public class TraceTriage {
 
     /** The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed. */
     static Cause rootCause(List<Span> spans) {
+        LOG.log(System.Logger.Level.DEBUG, "rootCause input: {0}", spans);
         Map<String, Span> byId = new HashMap<>();
         for (Span s : spans) byId.put(s.id(), s);
         List<Span> failed = new ArrayList<>();
@@ -443,6 +453,8 @@ error rate per window [1, 2, 9, 2, 8, 9, 10, 3], threshold 5: one window over fi
 log record keeps: input_tokens, model, output_tokens, status, tool, trace; with tool_input allowed by name: tool_input
 ```
 ```kotlin
+private val log = System.getLogger("trace_triage")
+
 /**
  * Observability decisions for a system of agents and tools: which traces to keep, how to find the layer that failed, when a change in a metric is drift, when to alert and what a log record may hold.
  *
@@ -479,6 +491,7 @@ fun keepReason(traceId: String, spans: List<Span>, rate: Int, feedback: Boolean 
 
 /** The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed. */
 fun rootCause(spans: List<Span>): Cause {
+    log.log(System.Logger.Level.DEBUG, "rootCause input: {0}", spans)
     val byId = spans.associateBy { it.id }
     val failed = spans.filter { it.status == "error" }
     if (failed.isNotEmpty()) {

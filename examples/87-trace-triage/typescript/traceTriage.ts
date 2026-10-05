@@ -1,3 +1,6 @@
+import { logger } from "./logger.ts";
+const log = logger("trace_triage");
+
 /**
  * Observability decisions for a system of agents and tools: which traces to keep, how to find the layer that failed, when a change in a metric is drift, when to alert and what a log record may hold.
  *
@@ -34,6 +37,7 @@ export function keepReason(traceId: string, spans: Span[], rate: number, feedbac
 
 /** The deepest failing span is the origin, not the span that reported the error; with no failure, a retrieval that returned stale or no chunks is blamed. */
 export function rootCause(spans: Span[]): Cause {
+  log.debug("rootCause input", spans);
   const byId = new Map(spans.map((s) => [s.id, s]));
   const failed = spans.filter((s) => s.status === "error");
   if (failed.length > 0) {

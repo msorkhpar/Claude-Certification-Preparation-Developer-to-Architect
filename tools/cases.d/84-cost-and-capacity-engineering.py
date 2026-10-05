@@ -13,8 +13,8 @@ PRACTICES[f"{X}/84-cost-and-capacity-engineering/unit-01/practice-1"] = {
         ("e6", "edge", "a model pinned by a team is honoured only when the policy allows it"),
     ],
     "plants": {
-        "wrong-route-ignores-table": (["m1"], "sends every task to the default model"),
-        "wrong-warn-keeps-model": (["e1"], "keeps the expensive model for a team that is near its budget"),
+        "wrong-route-ignores-table": (["m1", "e1", "e6"], "sends every task to the default model"),
+        "wrong-warn-keeps-model": (["e1", "e6"], "keeps the expensive model for a team that is near its budget"),
         "wrong-block-still-routes": (["e1"], "routes a request of a team that is over its budget"),
         "wrong-warn-strict": (["e2"], "warns only above 80 percent and not at it"),
         "wrong-block-at-budget": (["e2"], "blocks a request that lands exactly on the budget"),

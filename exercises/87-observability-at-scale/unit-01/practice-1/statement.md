@@ -4,6 +4,20 @@ A platform keeps a random one percent of its traces, so the failures it needs to
 
 Names are Python's (`keep_trace`, `root_cause`, `drift`, `alert_at`, `redact`, `request_trail`); TypeScript has the camel-case names (`keepTrace`, `rootCause`, `alertAt`, `requestTrail`); Java has the same camel-case names as static methods of `Triage`; Kotlin has top-level functions. A span is `Span(id, parent, kind, name, status, ms, note)` and an event is `Event(request, ts, component, message)`; the starter shows them in each language, with `bucket` already written. The first span of a trace is its root. A `kind` is `agent`, `llm`, `tool` or `retrieval`; a `status` is `ok` or `error`.
 
+## What is already written, and what you write
+
+The starter is a working triage with seven gaps cut out of it. Everything that is plumbing is written and correct: `bucket`, the walk from a failing span up to the root that builds the path, and the answer when nothing failed. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, an empty list, the first failed span), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):
+
+1. `keep_trace` unlocks `m1` and `e1`: why a trace is kept, by the order error, slow, retries, feedback, sampled.
+2. `_deepest` unlocks `e2`: the failing span that no other failing span hangs below.
+3. `_blamed_retrieval` unlocks `e3`: the stale or empty retrieval to blame when nothing failed.
+4. `drift` unlocks `e4`: the metrics that moved over the tolerance, in either direction.
+5. `alert_at` unlocks `e5`: consecutive windows over the threshold, a dip starting the count again.
+6. `redact` unlocks `e6`: a record without its content fields unless allowed by name.
+7. `request_trail` unlocks `e7`: one request's events in time order.
+
+About twenty lines in all. The sections below describe the whole triage.
+
 ## What to write
 
 - `keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000)` returns why a trace is kept, checked in this order: `error` (any span has the status `error`), `slow` (the root took more than `slow_ms`), `retries` (one tool name appears on three or more spans of kind `tool`), `feedback` (the flag is set), then `sampled` when `bucket(trace_id)` is under `rate` and `dropped` otherwise.

@@ -11,6 +11,7 @@ import java.util.Map;
  * The shapes (a decision, a reviewer's answer, a result check, an audit line) are this course's design, not an Anthropic interface.
  */
 public final class ToolGate {
+    private static final System.Logger LOG = System.getLogger(ToolGate.class.getName());
     record Proposal(String name, List<String> permissions, Map<String, Object> result) {}
 
     record Decision(String decision, List<String> why) {}
@@ -28,6 +29,7 @@ public final class ToolGate {
 
     /** Refused when a denied permission is asked for, held for a person when a permission needs one, otherwise automatic. */
     static Decision decide(List<String> permissions) {
+        LOG.log(System.Logger.Level.DEBUG, "decide input: {0}", permissions);
         List<String> denied = permissions.stream().filter(DENIED::contains).toList();
         if (!denied.isEmpty()) return new Decision("refused", denied);
         List<String> gated = permissions.stream().filter(NEEDS_APPROVAL::contains).toList();

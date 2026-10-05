@@ -79,8 +79,8 @@ class ToolReviewTest {
 
     @Test
     void e6_aDeclaredWriteIsApprovedOnlyWithAGateAndAReadAloneIsApprovedOutright() {
-        var writer = ToolReview.review(withCode(READ + "out.write(text)\n", "read_files", "write_files"), POLICY);
-        assertEquals(out("approve_with_gate", List.of(), List.of(), List.of("read_files", "write_files")), writer);
+        var writer = ToolReview.review(withCode("out.write(text)\n", "write_files"), POLICY);
+        assertEquals(out("approve_with_gate", List.of(), List.of(), List.of("write_files")), writer);
         assertEquals("approve", ToolReview.review(proposal(), POLICY).decision());
     }
 

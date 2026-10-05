@@ -1,5 +1,8 @@
 """Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md."""
+import logging
 from collections import namedtuple
+
+log = logging.getLogger(__name__)
 
 Span = namedtuple("Span", "id parent kind name status ms note")
 Event = namedtuple("Event", "request ts component message")
@@ -14,6 +17,7 @@ def bucket(trace_id):
 
 
 def keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000):
+    log.debug("keep_trace input: %r", spans)
     if any(s.status == "error" for s in spans):
         return "error"
     if spans[0].ms > slow_ms:
@@ -26,20 +30,31 @@ def keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000):
     return "sampled" if bucket(trace_id) < rate else "dropped"
 
 
+def _deepest(failed):
+    parents = {s.parent for s in failed}
+    return next(s for s in failed if s.id not in parents)
+
+
+def _blamed_retrieval(spans):
+    for s in spans:
+        if s.kind == "retrieval" and s.note in ("stale", "no-hits"):
+            return s
+    return None
+
+
 def root_cause(spans):
     by_id = {s.id: s for s in spans}
     failed = [s for s in spans if s.status == "error"]
     if failed:
-        parents = {s.parent for s in failed}
-        origin = next(s for s in failed if s.id not in parents)
+        origin = _deepest(failed)
         path, cursor = [], origin
         while cursor is not None:
             path.append(cursor.name)
             cursor = by_id.get(cursor.parent)
         return {"layer": origin.kind, "name": origin.name, "why": "failed", "path": path[::-1]}
-    for s in spans:
-        if s.kind == "retrieval" and s.note in ("stale", "no-hits"):
-            return {"layer": "retrieval", "name": s.name, "why": s.note, "path": [spans[0].name, s.name]}
+    s = _blamed_retrieval(spans)
+    if s is not None:
+        return {"layer": "retrieval", "name": s.name, "why": s.note, "path": [spans[0].name, s.name]}
     return {"layer": "none", "name": "", "why": "no span failed", "path": []}
 
 

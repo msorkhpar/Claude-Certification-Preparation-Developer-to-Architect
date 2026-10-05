@@ -6,10 +6,14 @@
 // that mean nothing to the model, the vault that maps tokens back stays in the caller, and the audit entry records sizes and counts, never
 // the prompt. The patterns do not find names, and the output shows that gap on purpose. No model is called.
 
+import { logger } from "./logger.ts";
+const log = logger("deidentify");
+
 export const PATTERNS: Array<[string, RegExp]> = [["EMAIL", /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g], ["MEMBER", /\bM-\d{6}\b/g]];
 
 /** Replaces every match by a token; the same value always gets the same token. `vault` maps value to token and stays local. */
 export function tokenise(text: string, vault: Map<string, string>): string {
+  log.debug("tokenise input", text);
   for (const [label, pattern] of PATTERNS) {
     text = text.replace(pattern, (value) => {
       if (!vault.has(value)) vault.set(value, `<${label}_${[...vault.values()].filter((t) => t.startsWith(`<${label}_`)).length + 1}>`);

@@ -1,3 +1,5 @@
+private val log = System.getLogger("triage")
+
 /** Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md. */
 
 /** One step of a trace: its id and its parent's id (empty for the root), the kind (agent, llm, tool or retrieval), the name, the status (ok or error), the milliseconds and a note. */
@@ -18,6 +20,7 @@ fun bucket(traceId: String): Int {
 }
 
 fun keepTrace(traceId: String, spans: List<Span>, rate: Int, feedback: Boolean = false, slowMs: Int = 5000): String? {
+    log.log(System.Logger.Level.DEBUG, "keepTrace input: {0}", spans)
     if (spans.any { it.status == "error" }) return "error"
     if (spans[0].ms > slowMs) return "slow"
     val tools = spans.filter { it.kind == "tool" }.map { it.name }
@@ -26,12 +29,20 @@ fun keepTrace(traceId: String, spans: List<Span>, rate: Int, feedback: Boolean =
     return if (bucket(traceId) < rate) "sampled" else "dropped"
 }
 
+private fun deepest(failed: List<Span>): Span {
+    val parents = failed.map { it.parent }.toSet()
+    return failed.first { it.id !in parents }
+}
+
+private fun blamedRetrieval(spans: List<Span>): Span? {
+    return spans.firstOrNull { it.kind == "retrieval" && (it.note == "stale" || it.note == "no-hits") }
+}
+
 fun rootCause(spans: List<Span>): Cause? {
     val byId = spans.associateBy { it.id }
     val failed = spans.filter { it.status == "error" }
     if (failed.isNotEmpty()) {
-        val parents = failed.map { it.parent }.toSet()
-        val origin = failed.first { it.id !in parents }
+        val origin = deepest(failed)
         val path = mutableListOf<String>()
         var cursor: Span? = origin
         while (cursor != null) {
@@ -40,7 +51,8 @@ fun rootCause(spans: List<Span>): Cause? {
         }
         return Cause(origin.kind, origin.name, "failed", path.reversed())
     }
-    for (s in spans) if (s.kind == "retrieval" && (s.note == "stale" || s.note == "no-hits")) return Cause("retrieval", s.name, s.note, listOf(spans[0].name, s.name))
+    val s = blamedRetrieval(spans)
+    if (s != null) return Cause("retrieval", s.name, s.note, listOf(spans[0].name, s.name))
     return Cause("none", "", "no span failed", listOf())
 }
 
@@ -64,6 +76,10 @@ fun alertAt(series: List<Int>, threshold: Int, windows: Int): Int {
     return -1
 }
 
-fun redact(event: Map<String, Any>, allowed: Set<String> = setOf()): Map<String, Any>? = event.filter { it.key !in CONTENT || it.key in allowed }
+fun redact(event: Map<String, Any>, allowed: Set<String> = setOf()): Map<String, Any>? {
+    return event.filter { it.key !in CONTENT || it.key in allowed }
+}
 
-fun requestTrail(events: List<Event>, request: String): List<String>? = events.filter { it.request == request }.sortedBy { it.ts }.map { "${it.component}: ${it.message}" }
+fun requestTrail(events: List<Event>, request: String): List<String>? {
+    return events.filter { it.request == request }.sortedBy { it.ts }.map { "${it.component}: ${it.message}" }
+}

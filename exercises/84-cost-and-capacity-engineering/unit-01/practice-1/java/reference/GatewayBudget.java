@@ -6,6 +6,7 @@ import java.util.Map;
 
 /** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. Requests, policies and rows are JSON-like maps. */
 final class GatewayBudget {
+    private static final System.Logger LOG = System.getLogger(GatewayBudget.class.getName());
     private GatewayBudget() {}
 
     @SuppressWarnings("unchecked")
@@ -18,43 +19,49 @@ final class GatewayBudget {
         return (List<String>) value;
     }
 
-    static String route(Map<String, Object> request, Map<String, Object> policy, String status) {
-        if (status.equals("block")) {
-            return null;
-        }
+    private static long n(Map<String, Object> map, String key) {
+        return ((Number) map.get(key)).longValue();
+    }
+
+    private static String chosenModel(Map<String, Object> request, Map<String, Object> policy) {
         Object wanted = request.get("model");
-        String model = wanted != null && asList(policy.get("allowed")).contains(wanted) ? (String) wanted
+        return wanted != null && asList(policy.get("allowed")).contains(wanted) ? (String) wanted
                 : (String) asMap(policy.get("routes")).getOrDefault(request.get("task"), policy.get("default"));
-        if (status.equals("warn")) {
-            model = (String) asMap(policy.get("cheaper")).getOrDefault(model, model);
-        }
-        return model;
+    }
+
+    static String route(Map<String, Object> request, Map<String, Object> policy, String status) {
+        LOG.log(System.Logger.Level.DEBUG, "route input: {0}", request);
+        if (status.equals("block")) return null;
+        String model = chosenModel(request, policy);
+        return status.equals("warn") ? (String) asMap(policy.get("cheaper")).getOrDefault(model, model) : model;
     }
 
     static String admit(long spend, long budget, long estimate) {
-        if (budget <= 0) {
-            return "block";
-        }
+        if (budget <= 0) return "block";
         long after = spend + estimate;
         if (after > budget) return "block";
         if (after * 100 >= budget * 80) return "warn";
         return "allow";
     }
 
+    private static long cost(Map<String, Object> row, Map<String, Object> prices) {
+        if (!prices.containsKey(row.get("model"))) throw new IllegalArgumentException("unknown model: " + row.get("model"));
+        Map<String, Object> p = asMap(prices.get(row.get("model")));
+        return n(row, "input") * n(p, "input") + n(row, "cache_read") * n(p, "cache_read") + n(row, "output") * n(p, "output");
+    }
+
+    private static long toCents(long value) {
+        return (value + 500_000) / 1_000_000;
+    }
+
     static List<Map<String, Object>> showback(List<Map<String, Object>> rows, Map<String, Object> prices) {
         Map<String, Long> totals = new LinkedHashMap<>();
-        for (Map<String, Object> r : rows) {
-            if (!prices.containsKey(r.get("model"))) throw new IllegalArgumentException("unknown model: " + r.get("model"));
-            Map<String, Object> p = asMap(prices.get(r.get("model")));
-            long value = ((Number) r.get("input")).longValue() * ((Number) p.get("input")).longValue() + ((Number) r.get("cache_read")).longValue() * ((Number) p.get("cache_read")).longValue()
-                    + ((Number) r.get("output")).longValue() * ((Number) p.get("output")).longValue();
-            totals.merge((String) r.get("team"), value, Long::sum);
-        }
+        for (Map<String, Object> r : rows) totals.merge((String) r.get("team"), cost(r, prices), Long::sum);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map.Entry<String, Long> e : totals.entrySet()) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("team", e.getKey());
-            row.put("cents", (e.getValue() + 500_000) / 1_000_000);
+            row.put("cents", toCents(e.getValue()));
             result.add(row);
         }
         result.sort(Comparator.comparingLong((Map<String, Object> x) -> -(Long) x.get("cents")).thenComparing(x -> (String) x.get("team")));

@@ -1,3 +1,6 @@
+import { logger } from "./logger.ts";
+const log = logger("chunking_and_recall");
+
 /**
  * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.
  *
@@ -29,6 +32,7 @@ export function chunkFixed(docId: string, text: string, size: number): Chunk[] {
 
 /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */
 export function chunkSections(docId: string, text: string, context: boolean): Chunk[] {
+  log.debug("chunkSections input", text);
   const [head, ...sections] = text.split("\n## ");
   const title = head.replace(/^# /, "");
   return sections.map((section) => {

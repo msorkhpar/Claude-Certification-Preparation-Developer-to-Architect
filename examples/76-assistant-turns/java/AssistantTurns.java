@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  * a window, a recalled fact with a status) are this course's design, not an Anthropic interface.
  */
 public final class AssistantTurns {
+    private static final System.Logger LOG = System.getLogger(AssistantTurns.class.getName());
     record Saved(String key, String value, String saved) {}
 
     record Window(List<String> kept, int dropped, List<String> facts) {}
@@ -25,6 +26,7 @@ public final class AssistantTurns {
 
     /** Decided in code, in this order: a signal of risk, a request for a person, a stalled conversation, otherwise the model answers. */
     static String route(String message, int misses) {
+        LOG.log(System.Logger.Level.DEBUG, "route input: {0}", message);
         String text = message.toLowerCase();
         if (RISK.stream().anyMatch(text::contains)) return "handoff:safety";
         if (ASKS_FOR_PERSON.stream().anyMatch(text::contains)) return "handoff:requested";

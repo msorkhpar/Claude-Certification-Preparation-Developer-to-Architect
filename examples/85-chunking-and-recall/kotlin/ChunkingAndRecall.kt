@@ -1,3 +1,5 @@
+private val log = System.getLogger("chunking_and_recall")
+
 /**
  * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.
  *
@@ -27,6 +29,7 @@ fun chunkFixed(docId: String, text: String, size: Int): List<Chunk> =
 
 /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */
 fun chunkSections(docId: String, text: String, context: Boolean): List<Chunk> {
+    log.log(System.Logger.Level.DEBUG, "chunkSections input: {0}", text)
     val parts = text.split("\n## ")
     val title = parts[0].removePrefix("# ")
     return parts.drop(1).map { section ->

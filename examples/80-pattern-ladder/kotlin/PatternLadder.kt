@@ -1,3 +1,5 @@
+private val log = System.getLogger("pattern_ladder")
+
 /**
  * The pattern ladder: which rung a task needs, and whether its value pays for the rung.
  *
@@ -24,11 +26,14 @@ val TASKS = listOf(
 )
 
 /** The lowest rung that fits: a call, an augmented call, a workflow, an agent, and a team only when its value covers the team's cost. */
-fun choosePattern(task: Task): String = when {
-    task.oneStep -> if (task.needsExternal) "augmented call" else "plain call"
-    task.stepsKnown -> "workflow"
-    task.independentParts && task.value >= MULTIPLIER.getValue("multi-agent") * task.chatCost -> "multi-agent"
-    else -> "agent"
+fun choosePattern(task: Task): String {
+    log.log(System.Logger.Level.DEBUG, "choosePattern input: {0}", task)
+    return when {
+        task.oneStep -> if (task.needsExternal) "augmented call" else "plain call"
+        task.stepsKnown -> "workflow"
+        task.independentParts && task.value >= MULTIPLIER.getValue("multi-agent") * task.chatCost -> "multi-agent"
+        else -> "agent"
+    }
 }
 
 fun cost(task: Task, pattern: String): Double = (if (pattern == "workflow") task.steps else MULTIPLIER.getValue(pattern)) * task.chatCost
