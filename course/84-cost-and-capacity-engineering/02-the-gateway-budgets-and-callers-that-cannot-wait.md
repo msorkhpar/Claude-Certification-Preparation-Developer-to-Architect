@@ -82,7 +82,7 @@ This quiz covers both pages of the module.
    - **a**: Honours the pin, since the team chose that model deliberately
    - **b**: Blocks the team for breaking the policy until it has been reviewed
    - **c**: Uses the pin once and warns the platform team afterwards
-   - **d**: Routes by the table entry for the task, as the pin is only a wish
+   - **d**: Routes by the table entry for the task, as that choice is a wish
 
 2. Scenario: Tallow Insurance's gateway sees a team at exactly 80 percent of its budget, and the next request is estimated to stay under 100 percent. What does admission return?
    - **a**: Allow, since the team has not yet passed its budget and nothing is wrong at this point
