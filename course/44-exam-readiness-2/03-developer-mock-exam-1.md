@@ -75,7 +75,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 5. Every call returns a 400 whose message begins with "You have reached your specified API usage limits". The team reformats the request body three times with no change. What should they do next?
    - **a**: Back off and retry after the interval that the response supplies
-   - **b**: Rotate the API key, the credential having probably expired or been revoked
+   - **b**: Rotate the API key and send the same request again
    - **c**: Raise the ceiling that an administrator configured below the plan's cap
    - **d**: Shrink the payload toward the 32 MB size limit and send it again
 
@@ -156,7 +156,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 18. Nightly bulk jobs share a 30,000-token instruction block, yet cache hit rates stay low because each entry lapses before many requests have arrived. Which adjustment does the page suggest?
    - **a**: Submit that block as a separate batch beforehand to warm the entry
    - **b**: Ask for the one-hour lifetime on the common material
-   - **c**: Remove the cache markers, hits being impossible inside a batch
+   - **c**: Remove the cache markers from every request in the batch
    - **d**: Vary the instruction block slightly per call to make entries differ
 
 19. A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?
@@ -186,7 +186,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 23. A request to Claude Haiku 4.5, whose limit is 200K, carries about 150,000 input tokens and sets max_tokens to 64,000, which together go beyond that limit. What happens?
    - **a**: The call is accepted, and a lengthy reply ends early with a dedicated stop reason
-   - **b**: The call is rejected with a 400, input plus output being barred from exceeding the limit
+   - **b**: The call is rejected with a 400 error before any generation starts
    - **c**: The excess is trimmed from the start of the input history before any processing begins
    - **d**: The output allowance is silently lowered to fit, so the reply always completes
 
@@ -271,7 +271,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Ask for a brief explanation as the field's content in its place
 
 37. An extraction loop repairs failed replies by sending the original prompt again with the note "try again". The same mistakes keep recurring. Which two changes fit? (Select two.)
-   - **a**: Retry without a limit, eventual success being likely on a hard document
+   - **a**: Retry without a limit until the hard document finally succeeds
    - **b**: Return the model's own answer with the request
    - **c**: List every problem with its path and message
    - **d**: Add a prefilled assistant turn that opens the JSON object
@@ -302,7 +302,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Use the automatic setting and say in a user message to run that function
 
 42. After a refactor, a model that used to call three independent tools in one reply now calls them one at a time. The code sends each output back in its own message. What is the likely cause?
-   - **a**: Parallel use is limited to operations that merely read data, a setting having changed
+   - **a**: Parallel use is now limited to operations that merely read data
    - **b**: The default for the choice field was switched to disable parallel use between releases
    - **c**: Separate returns teach Claude to avoid issuing several requests together
    - **d**: Parallel calls vanish whenever a conversation passes a certain length of history
@@ -315,13 +315,13 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: Each schema loads in full at session start, so the cost stays fixed per server
 
 44. An application defines its own function called screenshot alongside Anthropic's screen-control entry. Incoming blocks with that word are sometimes meant for one and sometimes for the other. How should dispatch work?
-   - **a**: Reject the custom function, member names being reserved
+   - **a**: Reject the custom function and keep only Anthropic's entry
    - **b**: Use the order in which the blocks arrive to decide which handler applies
    - **c**: Check whether the block carries display dimensions, which only screen actions have
    - **d**: Branch on the member together with the extra field that identifies the toolset
 
 45. A Python MCP server rejects a blank title by raising an ordinary ValueError inside the handler, and the model never sees why the call failed. Which change fits?
-   - **a**: Return a protocol error, the model being able to retry after a malformed request
+   - **a**: Return a protocol error that tells the client to resend the request
    - **b**: Print the reason to standard output for the client to relay
    - **c**: Signal it with the SDK's dedicated exception type for expected problems
    - **d**: Catch the exception and return an empty success result
@@ -384,7 +384,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 4. **d**. The plain count "only represents tokens that appear after your last cache breakpoint", so the other two fields must be added (module 14, page 2). *a* is ruled out because the page gives the same case, "reads 50 although the total input is 200,050", and nothing was capped. *b* is ruled out because the page states that "the total input is the sum of three numbers", not one. *c* is ruled out because the page says "the input side arrives in message_start", so timing does not explain a low value.
 5. **c**. A limit set below the tier's cap returns a 400, and "Lifting the limit is the cure, not changing the request" (module 15, page 1). *a* is ruled out because a 400 is in the group where "the same request fails again", so waiting does not help. *b* is ruled out because the page explains that "A limit you set yourself, below the tier's cap, also stops requests". *d* is ruled out because an oversized body gives a different outcome: "a larger request is refused with a 413".
 6. **b**. The header sets a floor, so wait "the larger of your back-off and the header" (module 15, page 2). *a* is ruled out because the page says "it is a floor, not a suggestion", so the header cannot be treated as advice. *c* is ruled out because the header text says "Earlier retries will fail", and nothing in it is reduced by elapsed time. *d* is ruled out because the page warns that "hammering the endpoint in the meantime only fails".
-7. **c**. In-flight calls follow Little's law: "the number of requests in flight equals the request rate times the time each takes", so 10 a second for 3 seconds gives 30 (module 16, page 1). *a* is ruled out because the page defines the bound as "the number of requests in flight equals the request rate times the time each takes", which includes the duration. *b* is ruled out because a bound above the need "would only invite 429 errors". *d* is ruled out because the rule is to "compute the bound from the limit you must stay under", not to match the total sent.
+7. **c**. In-flight calls follow Little's law: "the number of requests in flight equals the request rate times the time each takes", so 10 a second for 3 seconds gives 30 (module 16, page 1). *a* is ruled out because a bound that counts only starts per second ignores the call time, and the page shows what a low bound costs: "A bound of 20 would cap you at about 200 a minute". *b* is ruled out because a bound above the need "would only invite 429 errors". *d* is ruled out because the rule is to "compute the bound from the limit you must stay under", not to match the total sent.
 8. **b and d**. The stop reason "arrives in message_delta, near the end", so a read at the start finds nothing (module 17, page 1). *a* is ruled out because "stop_reason indicates normal completion; HTTP errors indicate failures". *c* is ruled out because that frame means "The block at index is complete" and carries no reason. *e* is ruled out because the opening frame carries "an empty content and the input token count in usage", not the stop reason.
 9. **b**. Batches that are stopped "end up with a status of ended and may contain partial results", and processed work is billed (module 21, page 2). *a* is ruled out because the page says "the requests that had already run are still billed". *c* is ruled out because the batch "may contain partial results for requests that were processed before cancellation". *d* is ruled out because "Cancellation may not be instant", so the batch is not removed at once.
 10. **c**. On Bedrock the version "stays a header, as on the direct API" (module 22, page 1). *a* is ruled out because that placement is the Google Cloud rule: "anthropic_version is passed in the request body". *b* is ruled out because the contract lists the version as "which the overview lists as required". *d* is ruled out because the page treats them as separate items: "Authentication, version and body type are all a plain request needs".
@@ -407,7 +407,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 27. **a**. Sectioning needs independent work, and "Parallel calls cannot see each other's output", so a dependent step belongs in a chain (module 34, page 1). *b* is ruled out because sectioning means "independent subtasks run in parallel", which these are not. *c* is ruled out because routing "directs it to a specialized followup task" and does not order two calls. *d* is ruled out because an agent suits a case where "the path cannot be written in advance", and this path is fixed.
 28. **b**. "If the verdict cannot be parsed, the draft is unchecked", so it is graded zero with a reason (module 34, page 2). *a* is ruled out because "a reply that is not a bare score counts as ungradable", and an ungradable case fails. *c* is ruled out because such a parse "turns a broken grader into a plausible number". *d* is ruled out because "A refinement loop can get worse", so the page keeps the best draft and not the last.
 29. **d**. The page states that "the budget covers subagents too" (module 35, page 1). *a* is ruled out because the option is described as "Maximum cost before stopping". *b* is ruled out because only the turn limit "counts tool-use turns only", while the budget measures cost. *c* is ruled out because "When a limit is reached the run ends with a result whose subtype names it".
-30. **a and e**. "Annotations are metadata, not enforcement", and "A tool marked read-only can still write if its handler does" (module 35, page 2). *b* is ruled out because clients treat annotations as "untrusted unless they come from trusted servers", wherever the tool is served. *c* is ruled out because "Annotations are metadata, not enforcement". *d* is ruled out because the hint "lets the tool run in parallel with other read-only tools".
+30. **a and e**. "Annotations are metadata, not enforcement", and "A tool marked read-only can still write if its handler does" (module 35, page 2). *b* is ruled out because clients treat annotations as "untrusted unless they come from trusted servers", wherever the tool is served. *c* is ruled out because annotations exist "not because they enforce anything", so the SDK does not police writes on their basis. *d* is ruled out because the hint "lets the tool run in parallel with other read-only tools".
 31. **c**. The page says "a session can instead pin a version" so a prompt can be promoted or rolled back without a deploy (module 36, page 1). *a* is ruled out because "overrides replace and never merge". *b* is ruled out because a session made with just an agent ID "creates the session with the latest agent version". *d* is ruled out because an agent's version "starts at 1 and increments each time an update changes the agent", so editing in place would change what production runs.
 32. **a**. "Tool inputs and outputs still flow to Anthropic's control plane" (module 36, page 2). *b* is ruled out because "Anthropic does not inspect or verify your sandbox image", and the image is the customer's. *c* is ruled out because the page says "files, processes and network traffic stay in your environment". *d* is ruled out because the key belongs in "a secrets manager, never an image".
 33. **b**. "Validation proves the shape", and nothing more (module 37, page 1). *a* is ruled out because "A refund of 4999 cents passes the schema whether or not it is right". *c* is ruled out because only "a reply that does not validate against the output type is refused", and this one validated. *d* is ruled out because "A checkpoint is a copy of the state at a point in the graph", not a check.
@@ -425,10 +425,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 45. **c**. "In the Python SDK, raise ToolError for an expected failure" (module 32, page 2). *a* is ruled out because protocol errors are for "issues with the request structure itself that models are less likely to be able to fix". *b* is ruled out because "The server MUST NOT write anything to its stdout that is not a valid MCP message". *d* is ruled out because a swallowed failure "tells the model the call worked".
 46. **b**. "An answer of decline or cancel is a normal outcome" (module 33, page 1). *a* is ruled out because that error is for a capability the call did not declare, "which names the missing capabilities". *c* is ruled out because the page lists three forms of answer and says "a server handles each". *d* is ruled out because a retry exists to supply information: the client "retries the original request including the additional requested information".
 47. **a**. "Giving feedback with the thumbs buttons stores the conversation for up to five years", on both plan types (module 10, page 1). *b* is ruled out because "Incognito chats are not used to improve Claude". *c* is ruled out because "Raw content fetched through a connector is excluded unless you copy it into the chat". *d* is ruled out because where improvement is off, "a deleted chat leaves the back end within 30 days".
-48. **a and c**. The classifiers "are a second layer", and "Claude will follow commands found in content even when they conflict with your instructions" (module 31, page 2). *b* is ruled out because screenshots "are captured and stored in your environment, not by Anthropic". *d* is ruled out because the precautions begin with "a dedicated virtual machine or container with minimal privileges". *e* is ruled out because "They are a second layer", behind the container, the missing secrets, the allowlist and the confirmation.
+48. **a and c**. The classifiers "are a second layer", and "Claude will follow commands found in content even when they conflict with your instructions" (module 31, page 2). *b* is ruled out because screenshots "are captured and stored in your environment, not by Anthropic". *d* is ruled out because the precautions begin with "a dedicated virtual machine or container with minimal privileges". *e* is ruled out because the documented precautions include "Asking a human to confirm decisions that might result in meaningful real-world consequences", and the scan does not replace that step.
 49. **a**. The page says "Don't put your own instructions in tool results", so send them in a user turn after the block (module 41, page 1). *b* is ruled out because "Claude treats that content as untrusted data, so your instruction may be ignored", however often it is repeated. *c* is ruled out because third-party content goes "never in system prompts or plain user text blocks". *d* is ruled out because the JSON step applies to untrusted content: "Wrap third-party strings in a JSON object".
 50. **c**. The page says to "return an error or a stripped summary in the tool_result block instead of the raw content" (module 41, page 3). *a* is ruled out because content is returned only "if the screen reports no injection attempt". *b* is ruled out because the page adds "consider surfacing the attempt to the user", which is not a reason to end the run. *d* is ruled out because "A list of patterns catches the phrasing someone thought of and misses the paraphrase".
-51. **d**. Bare mode "never reads OAuth credentials or the system keychain", so a key must come from the environment (module 38, page 3). *a* is ruled out because bare mode "never reads OAuth credentials or the system keychain", so mounting it changes nothing. *b* is ruled out because the flag is "useful for CI and scripts where you need the same result on every machine". *c* is ruled out because the headless mode is meant to "Run Claude non-interactively for CI, pre-commit hooks, or batch processing".
+51. **d**. Bare mode "never reads OAuth credentials or the system keychain", so a key must come from the environment (module 38, page 3). *a* is ruled out because in CI "keys live in the platform's secret store and are referenced and not written", so a developer's keychain is not the source. *b* is ruled out because the flag is "useful for CI and scripts where you need the same result on every machine". *c* is ruled out because the headless mode is meant to "Run Claude non-interactively for CI, pre-commit hooks, or batch processing".
 52. **b**. When several hooks match, "the most restrictive answer applies", so the denial wins (module 39, page 2). *a* is ruled out because "A logging hook that exits 0 does not weaken a guard hook that denies". *c* is ruled out because "Several hooks can match one call, and they run in parallel". *d* is ruled out because the order is "in the order deny, defer, ask, allow", so deny outranks ask.
 53. **a**. The harness "reports it as removed and fails the comparison" (module 42, page 3). *b* is ruled out because "An average never excuses a regression". *c* is ruled out because "A case that disappears is not a pass". *d* is ruled out because the page says "dropping the case that fails is the easiest way to improve a score".
 
