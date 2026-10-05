@@ -4,12 +4,15 @@ The replies are illustrative, hand-written bodies in the shapes of the batch pro
 captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in
 them. Waiting between polls is recorded, not slept.
 """
+import logging
 import json
 
 import httpx2
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-haiku-4-5-20251001"
 TICKETS = {"t-1": "My parcel never arrived.", "t-2": "How do I change my address?", "t-3": "Charge me twice? Refund please.", "t-4": "x" * 10}

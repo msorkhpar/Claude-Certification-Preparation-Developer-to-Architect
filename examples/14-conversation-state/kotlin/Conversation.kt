@@ -7,6 +7,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 
+private val log = System.getLogger("conversation")
+
 /**
  * A conversation the client keeps: the API is stateless, so every request carries the whole history.
  *

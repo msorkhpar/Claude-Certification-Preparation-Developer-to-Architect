@@ -24,6 +24,7 @@ import java.util.function.Function;
  * tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).
  */
 public final class CacheHits {
+    private static final System.Logger LOG = System.getLogger(CacheHits.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String POLICY = "Refund policy clause: items may be returned within 14 days. ".repeat(40); // about 600 tokens
 

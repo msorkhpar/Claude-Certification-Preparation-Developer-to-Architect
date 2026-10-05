@@ -5,11 +5,14 @@ caches the prefix up to a block that carries cache_control when that prefix reac
 minutes from its last use, and reports `cache_creation_input_tokens`, `cache_read_input_tokens` and `input_tokens` (the
 tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).
 """
+import logging
 import json
 import math
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 POLICY = "Refund policy clause: items may be returned within 14 days. " * 40  # about 600 tokens

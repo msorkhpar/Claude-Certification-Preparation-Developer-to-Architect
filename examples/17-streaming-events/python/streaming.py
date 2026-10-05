@@ -3,10 +3,13 @@
 The stream is an illustrative, hand-written sequence of events in the API's framing
 (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport, sse_response
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PARAMS = dict(model=MODEL, max_tokens=128, messages=[{"role": "user", "content": "Weather in Paris?"}],

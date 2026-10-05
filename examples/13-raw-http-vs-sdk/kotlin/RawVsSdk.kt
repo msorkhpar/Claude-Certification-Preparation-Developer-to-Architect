@@ -9,6 +9,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.ScriptedHttp
 
+private val log = System.getLogger("raw_vs_sdk")
+
 /**
  * One Messages call written by hand, then the same call through the SDK.
  *

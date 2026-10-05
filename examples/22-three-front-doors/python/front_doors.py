@@ -4,10 +4,13 @@ Each request is written out by hand and sent through a scripted transport, so no
 is signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The
 reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.
 """
+import logging
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 BASE = {"max_tokens": 64, "messages": [{"role": "user", "content": "Capital of France?"}]}
 PROJECT, REGION = "example-project", "us-east-1"

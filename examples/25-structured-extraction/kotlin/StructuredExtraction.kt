@@ -13,6 +13,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
 
+private val log = System.getLogger("structured_extraction")
+
 /**
  * Structured outputs plus the checks a schema cannot make, against a scripted model.
  *

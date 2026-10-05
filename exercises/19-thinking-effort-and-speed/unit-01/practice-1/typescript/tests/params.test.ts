@@ -36,7 +36,7 @@ test("e1 thinking modes a model does not have are refused", () => {
   assert.equal(refused(OPUS, { thinking: { type: "adaptive" } }), null);
 });
 
-test("e2 the mode that skips thinking up front is Sonnet only and needs high effort or below", () => {
+test("e2 the mode that skips thinking up front is sonnet only and needs high effort or below", () => {
   assert.deepEqual((buildParams(SONNET, 4096, { thinking: { type: "between_tools" } }) ?? {}).thinking, { type: "between_tools" });
   for (const level of ["low", "medium", "high"]) assert.equal(refused(SONNET, { thinking: { type: "between_tools" }, effort: level }), null, level);
   for (const level of ["xhigh", "max"]) assert.equal(refused(SONNET, { thinking: { type: "between_tools" }, effort: level }), "thinking", level);
@@ -54,7 +54,7 @@ test("e3 effort needs a supporting model and a real level", () => {
   assert.equal(refused(OPUS, { effort: "extreme" }), "output_config.effort");
 });
 
-test("e4 newer models reject sampling parameters and Haiku keeps them", () => {
+test("e4 newer models reject sampling parameters and haiku keeps them", () => {
   assert.equal(refused(OPUS, { temperature: 0.2 }), "temperature");
   assert.equal(refused(SONNET, { top_p: 0.9 }), "top_p");
   assert.equal(refused(FABLE, { top_k: 40 }), "top_k");
@@ -62,7 +62,7 @@ test("e4 newer models reject sampling parameters and Haiku keeps them", () => {
   assert.deepEqual(buildParams(HAIKU, 1024, { temperature: 0.2, top_k: 40 }), { model: HAIKU, max_tokens: 1024, temperature: 0.2, top_k: 40 });
 });
 
-test("e5 fast mode is Opus only with its beta header and never in a batch", () => {
+test("e5 fast mode is opus only with its beta header and never in a batch", () => {
   const params = buildParams(OPUS, 4096, { speed: "fast" }) ?? {};
   assert.deepEqual([params.speed, params.betas], ["fast", ["fast-mode-2026-02-01"]]);
   assert.equal(refused(SONNET, { speed: "fast" }), "speed");

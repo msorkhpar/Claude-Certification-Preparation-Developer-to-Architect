@@ -3,11 +3,14 @@
 The failures are illustrative, hand-written replies shaped like the API's error bodies.
 The SDK sleeps a short exponential back-off between attempts (about 0.5 s, then about 1 s).
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PARAMS = dict(model=MODEL, max_tokens=16, messages=[{"role": "user", "content": "Hi"}])

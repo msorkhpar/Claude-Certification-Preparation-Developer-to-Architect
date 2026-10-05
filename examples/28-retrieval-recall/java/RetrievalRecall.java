@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  * hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.
  */
 public final class RetrievalRecall {
+    private static final System.Logger LOG = System.getLogger(RetrievalRecall.class.getName());
     record Chunk(String id, String doc, String text) {}
 
     record Query(String text, List<String> relevant) {}

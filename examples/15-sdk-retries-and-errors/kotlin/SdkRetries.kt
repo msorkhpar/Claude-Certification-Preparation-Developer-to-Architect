@@ -11,6 +11,8 @@ import harness.Scripted.text
 import harness.ScriptedHttp
 import java.net.SocketTimeoutException
 
+private val log = System.getLogger("sdk_retries")
+
 /**
  * What the SDK retries on its own, and what it does not, against a scripted transport.
  *

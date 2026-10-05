@@ -10,6 +10,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import java.util.function.Function
 
+private val log = System.getLogger("cache_hits")
+
 /**
  * Prompt caching seen through the usage object, against a scripted server that applies the documented prefix rule.
  *

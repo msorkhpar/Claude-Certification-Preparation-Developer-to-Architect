@@ -2,6 +2,8 @@
 // The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:
 // named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the
 // predict permission (Google's IAM documentation, read 2026-10-02).
+import { logger } from "./logger.ts";
+const log = logger("policy_review");
 export const BROAD = { Version: "2012-10-17", Statement: [{ Effect: "Allow", Action: "bedrock:*", Resource: "*" }] };
 export const NARROW = {
   Version: "2012-10-17",

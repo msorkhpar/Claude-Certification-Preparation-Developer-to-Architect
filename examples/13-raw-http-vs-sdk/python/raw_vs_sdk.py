@@ -3,11 +3,14 @@
 Both go through the same scripted transport, so nothing leaves the container. The reply is an
 illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 URL = "https://api.anthropic.com/v1/messages"

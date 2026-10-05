@@ -1,20 +1,85 @@
 {
   "practice": "17-streaming/unit-01/practice-1",
   "name": "assemble",
-  "tests": {"java": "AssembleTest", "kotlin": "AssembleTest"},
+  "tests": {
+    "java": "AssembleTest",
+    "kotlin": "AssembleTest"
+  },
   "cases": {
-    "m1": {"kind": "main", "python": "test_m1_text_deltas_are_joined_and_the_message_is_complete", "typescript": "m1 text deltas are joined and the message is complete", "java": "m1_textDeltasAreJoinedAndTheMessageIsComplete", "kotlin": "m1_textDeltasAreJoinedAndTheMessageIsComplete"},
-    "e1": {"kind": "edge", "python": "test_e1_tool_input_is_the_fragments_joined_then_parsed_and_empty_input_is_an_empty_object", "typescript": "e1 tool input is the fragments joined then parsed and empty input is an empty object", "java": "e1_toolInputIsTheFragmentsJoinedThenParsedAndEmptyInputIsAnEmptyObject", "kotlin": "e1_toolInputIsTheFragmentsJoinedThenParsedAndEmptyInputIsAnEmptyObject"},
-    "e2": {"kind": "edge", "python": "test_e2_ping_and_unknown_event_types_are_ignored", "typescript": "e2 ping and unknown event types are ignored", "java": "e2_pingAndUnknownEventTypesAreIgnored", "kotlin": "e2_pingAndUnknownEventTypesAreIgnored"},
-    "e3": {"kind": "edge", "python": "test_e3_an_error_event_raises_with_its_type_and_message", "typescript": "e3 an error event raises with its type and message", "java": "e3_anErrorEventRaisesWithItsTypeAndMessage", "kotlin": "e3_anErrorEventRaisesWithItsTypeAndMessage"},
-    "e4": {"kind": "edge", "python": "test_e4_a_stream_that_ends_before_message_stop_is_an_error_not_a_short_message", "typescript": "e4 a stream that ends before message_stop is an error, not a short message", "java": "e4_aStreamThatEndsBeforeMessageStopIsAnErrorNotAShortMessage", "kotlin": "e4_aStreamThatEndsBeforeMessageStopIsAnErrorNotAShortMessage"},
-    "e5": {"kind": "edge", "python": "test_e5_usage_takes_input_tokens_from_the_start_and_the_cumulative_output_from_the_end", "typescript": "e5 usage takes input tokens from the start and the cumulative output from the end", "java": "e5_usageTakesInputTokensFromTheStartAndTheCumulativeOutputFromTheEnd", "kotlin": "e5_usageTakesInputTokensFromTheStartAndTheCumulativeOutputFromTheEnd"},
-    "e6": {"kind": "edge", "python": "test_e6_blocks_keep_their_index_order_and_thinking_fields_are_assembled", "typescript": "e6 blocks keep their index order and thinking fields are assembled", "java": "e6_blocksKeepTheirIndexOrderAndThinkingFieldsAreAssembled", "kotlin": "e6_blocksKeepTheirIndexOrderAndThinkingFieldsAreAssembled"}
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_text_deltas_are_joined_and_the_message_is_complete",
+      "typescript": "m1 text deltas are joined and the message is complete",
+      "java": "m1_textDeltasAreJoinedAndTheMessageIsComplete",
+      "kotlin": "m1_textDeltasAreJoinedAndTheMessageIsComplete"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_tool_input_is_the_fragments_joined_then_parsed_and_empty_input_is_an_empty_object",
+      "typescript": "e1 tool input is the fragments joined then parsed and empty input is an empty object",
+      "java": "e1_toolInputIsTheFragmentsJoinedThenParsedAndEmptyInputIsAnEmptyObject",
+      "kotlin": "e1_toolInputIsTheFragmentsJoinedThenParsedAndEmptyInputIsAnEmptyObject"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_ping_and_unknown_event_types_are_ignored",
+      "typescript": "e2 ping and unknown event types are ignored",
+      "java": "e2_pingAndUnknownEventTypesAreIgnored",
+      "kotlin": "e2_pingAndUnknownEventTypesAreIgnored"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_an_error_event_raises_with_its_type_and_message",
+      "typescript": "e3 an error event raises with its type and message",
+      "java": "e3_anErrorEventRaisesWithItsTypeAndMessage",
+      "kotlin": "e3_anErrorEventRaisesWithItsTypeAndMessage"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_stream_that_ends_before_message_stop_is_an_error_not_a_short_message",
+      "typescript": "e4 a stream that ends before message stop is an error not a short message",
+      "java": "e4_aStreamThatEndsBeforeMessageStopIsAnErrorNotAShortMessage",
+      "kotlin": "e4_aStreamThatEndsBeforeMessageStopIsAnErrorNotAShortMessage"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_usage_takes_input_tokens_from_the_start_and_the_cumulative_output_from_the_end",
+      "typescript": "e5 usage takes input tokens from the start and the cumulative output from the end",
+      "java": "e5_usageTakesInputTokensFromTheStartAndTheCumulativeOutputFromTheEnd",
+      "kotlin": "e5_usageTakesInputTokensFromTheStartAndTheCumulativeOutputFromTheEnd"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_blocks_keep_their_index_order_and_thinking_fields_are_assembled",
+      "typescript": "e6 blocks keep their index order and thinking fields are assembled",
+      "java": "e6_blocksKeepTheirIndexOrderAndThinkingFieldsAreAssembled",
+      "kotlin": "e6_blocksKeepTheirIndexOrderAndThinkingFieldsAreAssembled"
+    }
   },
   "plants": {
-    "wrong-overwrite-text": {"caught_by": ["m1"], "defect": "keeps only the last text fragment instead of appending"},
-    "wrong-sum-usage": {"caught_by": ["e5"], "defect": "adds the output tokens of message_delta to the output tokens of message_start"},
-    "wrong-ignore-error": {"caught_by": ["e3"], "defect": "skips an error event and returns what it has"},
-    "wrong-accept-incomplete": {"caught_by": ["e4"], "defect": "returns the partial message when message_stop never arrives"}
+    "wrong-overwrite-text": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "keeps only the last text fragment instead of appending"
+    },
+    "wrong-sum-usage": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "adds the output tokens of message_delta to the output tokens of message_start"
+    },
+    "wrong-ignore-error": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "skips an error event and returns what it has"
+    },
+    "wrong-accept-incomplete": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "returns the partial message when message_stop never arrives"
+    }
   }
 }

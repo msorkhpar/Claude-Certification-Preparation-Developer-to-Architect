@@ -61,7 +61,7 @@ test("e3 an error event raises with its type and message", () => {
   assert.deepEqual([err.errorType, err.detail], ["overloaded_error", "Overloaded"]);
 });
 
-test("e4 a stream that ends before message_stop is an error, not a short message", () => {
+test("e4 a stream that ends before message stop is an error not a short message", () => {
   const err: any = errorOf(() => assemble([start(), blockStart(0, TEXT_BLOCK), text(0, "cut off")]));
   assert.ok(err instanceof StreamError, String(err));
   assert.equal(err.errorType, "incomplete_stream");

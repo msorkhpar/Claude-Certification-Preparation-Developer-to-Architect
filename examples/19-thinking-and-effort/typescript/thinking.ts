@@ -4,6 +4,8 @@
 // `output_tokens_details.thinking_tokens` breakdown the thinking page documents.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("thinking");
 
 export const MODEL = "claude-opus-5-5";
 const PRICE_OUT = 20.0; // dollars per million output tokens, pricing page 2026-10-02

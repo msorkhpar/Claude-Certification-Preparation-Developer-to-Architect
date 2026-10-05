@@ -4,6 +4,10 @@ The policies are written for this page (placeholder account-free ARNs and names)
 named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the
 predict permission (Google's IAM documentation, read 2026-10-02).
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 BROAD = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}
 NARROW = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["bedrock-mantle:CreateInference"],
                                                    "Resource": ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5"]}]}

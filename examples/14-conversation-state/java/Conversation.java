@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  * hand-written Messages responses (claude-sonnet-5-5), not captures.
  */
 public final class Conversation {
+    private static final System.Logger LOG = System.getLogger(Conversation.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String SYSTEM = "You answer in one short sentence.";
 

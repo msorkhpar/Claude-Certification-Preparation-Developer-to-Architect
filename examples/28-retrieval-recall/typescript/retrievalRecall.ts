@@ -1,6 +1,8 @@
 // A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.
 // Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a
 // hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.
+import { logger } from "./logger.ts";
+const log = logger("retrieval_recall");
 type Chunk = { id: string; doc: string; text: string };
 type Scorer = (query: string, text: string) => number;
 

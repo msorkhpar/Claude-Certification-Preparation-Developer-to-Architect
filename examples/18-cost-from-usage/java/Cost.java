@@ -20,6 +20,7 @@ import java.util.Map;
  * tokens, read from the Claude pricing page on 2026-10-02.
  */
 public final class Cost {
+    private static final System.Logger LOG = System.getLogger(Cost.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String SYSTEM = "You answer from the policy document.";
     static final String QUESTION = "Summarise the refund policy in two sentences.";

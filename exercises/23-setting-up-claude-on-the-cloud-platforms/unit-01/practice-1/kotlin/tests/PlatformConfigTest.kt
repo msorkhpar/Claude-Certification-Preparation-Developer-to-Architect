@@ -52,7 +52,7 @@ class PlatformConfigTest {
     }
 
     @Test
-    fun e2_everyResourceARNNamesOneDocumentedRegionAndOneModel() {
+    fun e2_everyResourceArnNamesOneDocumentedRegionAndOneModel() {
         assertFalse(collect("Resource").isEmpty(), "the policy has no resource")
         for (arn in collect("Resource")) {
             assertFalse(arn.contains("*"), arn)

@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
  * Each ticket runs on its own virtual thread; the semaphore is what bounds them (the Java counterpart of asyncio.Semaphore).
  */
 public final class Bounded {
+    private static final System.Logger LOG = System.getLogger(Bounded.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final List<String> TICKETS = IntStream.rangeClosed(1, 12).mapToObj(n -> "ticket " + n).toList();
 

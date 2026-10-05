@@ -50,7 +50,7 @@ test("e1 client errors are not retried", () => {
   }
 });
 
-test("e2 retry-after is a floor for the wait", () => {
+test("e2 retry after is a floor for the wait", () => {
   const r = run([status(429, { "retry-after": "3" }, "rate_limit_error"), status(429, { "retry-after": "1" }, "rate_limit_error"), status(529, { "retry-after": "1" }), OK], { maxAttempts: 5 });
   assert.equal(r.err, null);
   assert.deepEqual(r.slept, [3, 1, 2]); // waits: max(0.5, 3), max(1, 1), max(2, 1)
@@ -65,7 +65,7 @@ test("e3 delay doubles up to the cap and the jitter is applied last", () => {
   assert.deepEqual(halved.slept, [0.25, 0.5]);
 });
 
-test("e4 a spend-cap 429 is not retried", () => {
+test("e4 a spend cap 429 is not retried", () => {
   const cap = status(429, { "request-id": "req_cap" }, "rate_limit_error", { error_code: "enforced_spend_limit_reached" });
   const r = run([cap, OK]);
   assert.ok(r.err instanceof CallFailed && r.err.status === 429 && r.err.attempts === 1 && r.err.requestId === "req_cap");

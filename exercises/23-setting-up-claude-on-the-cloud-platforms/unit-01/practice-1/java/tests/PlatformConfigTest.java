@@ -74,7 +74,7 @@ class PlatformConfigTest {
     }
 
     @Test
-    void e2_everyResourceARNNamesOneDocumentedRegionAndOneModel() {
+    void e2_everyResourceArnNamesOneDocumentedRegionAndOneModel() {
         assertFalse(collect("Resource").isEmpty(), "the policy has no resource");
         for (String arn : collect("Resource")) {
             assertFalse(arn.contains("*"), arn);

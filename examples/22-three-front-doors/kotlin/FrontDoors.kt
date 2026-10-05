@@ -6,6 +6,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.ScriptedHttp
 
+private val log = System.getLogger("front_doors")
+
 /**
  * The same question sent to the direct API, to Claude in Amazon Bedrock and to Claude on Google Vertex AI.
  *

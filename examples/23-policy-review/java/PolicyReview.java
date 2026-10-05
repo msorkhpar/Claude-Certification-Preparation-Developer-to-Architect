@@ -11,6 +11,7 @@ import java.util.Map;
  * predict permission (Google's IAM documentation, read 2026-10-02).
  */
 public final class PolicyReview {
+    private static final System.Logger LOG = System.getLogger(PolicyReview.class.getName());
     static final String BROAD = """
         {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}""";
     static final String NARROW = """

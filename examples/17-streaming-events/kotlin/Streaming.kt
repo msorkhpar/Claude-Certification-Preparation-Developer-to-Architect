@@ -13,6 +13,8 @@ import harness.Reply
 import harness.Scripted
 import harness.Scripted.map
 
+private val log = System.getLogger("streaming")
+
 /**
  * A streamed reply read three ways, from a scripted server-sent-event body.
  *

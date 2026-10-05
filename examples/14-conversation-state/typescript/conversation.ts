@@ -3,6 +3,8 @@
 // hand-written Messages responses (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("conversation");
 
 const MODEL = "claude-sonnet-5-5";
 const SYSTEM = "You answer in one short sentence.";

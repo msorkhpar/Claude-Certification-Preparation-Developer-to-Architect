@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  * The Java SDK reads the events itself and drops `ping` events, so a raw event list has no `ping` in it.
  */
 public final class Streaming {
+    private static final System.Logger LOG = System.getLogger(Streaming.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static MessageCreateParams params() {

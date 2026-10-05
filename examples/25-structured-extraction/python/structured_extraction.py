@@ -3,11 +3,14 @@
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 The API gets a schema without numeric constraints (structured outputs do not support them); the program enforces them.
 """
+import logging
 import copy
 import json
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 LOCAL_SCHEMA = {

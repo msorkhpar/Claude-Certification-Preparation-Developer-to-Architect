@@ -29,7 +29,7 @@ function errorOf(fn: () => unknown): unknown {
   return null;
 }
 
-test("m1 request has method, url, three headers and a JSON body", () => {
+test("m1 request has method url three headers and json body", () => {
   const req = buildRequest(KEY, "claude-sonnet-5-5", MSGS, 64, "Be brief.");
   assert.equal(req.method, "POST");
   assert.equal(req.url, "https://api.anthropic.com/v1/messages");
@@ -68,7 +68,7 @@ test("e3 success returns the message and text joins text blocks only", () => {
   assert.equal(textOf({ content: [] }), "");
 });
 
-test("e4 an error reply becomes an ApiError with the header request id", () => {
+test("e4 an error reply becomes an api error with the header request id", () => {
   const body = { type: "error", error: { type: "rate_limit_error", message: "Rate limited" }, request_id: "req_from_body" };
   let err: any = errorOf(() => sendMessages(() => reply(429, body, { "request-id": "req_from_header" }), KEY, "m", MSGS, 8));
   assert.ok(err instanceof ApiError, String(err));
@@ -78,7 +78,7 @@ test("e4 an error reply becomes an ApiError with the header request id", () => {
   assert.ok(err instanceof ApiError && err.requestId === "req_from_body" && err.errorType === "overloaded_error");
 });
 
-test("e5 a reply that is not JSON still gives an ApiError", () => {
+test("e5 a reply that is not json still gives an api error", () => {
   const html = "<html><body><h1>502 Bad Gateway</h1></body></html>";
   const err: any = errorOf(() => sendMessages(() => reply(502, html), KEY, "m", MSGS, 8));
   assert.ok(err instanceof ApiError, String(err));
@@ -86,7 +86,7 @@ test("e5 a reply that is not JSON still gives an ApiError", () => {
   assert.equal(err.requestId, null);
 });
 
-test("e6 the API key never appears in an error", () => {
+test("e6 the api key never appears in an error", () => {
   const body = { type: "error", error: { type: "authentication_error", message: `invalid x-api-key: ${KEY}` } };
   const err: any = errorOf(() => sendMessages(() => reply(401, body), KEY, "m", MSGS, 8));
   assert.ok(err instanceof ApiError, String(err));

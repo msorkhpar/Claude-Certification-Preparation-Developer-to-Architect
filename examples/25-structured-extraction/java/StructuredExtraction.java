@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  * The API gets a schema without numeric constraints (structured outputs do not support them); the program enforces them.
  */
 public final class StructuredExtraction {
+    private static final System.Logger LOG = System.getLogger(StructuredExtraction.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     private static final ObjectMapper JSON = new ObjectMapper();
     static final JsonNode LOCAL_SCHEMA = Scripted.tree("""

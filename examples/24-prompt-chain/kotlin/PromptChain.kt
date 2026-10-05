@@ -7,6 +7,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
 
+private val log = System.getLogger("prompt_chain")
+
 /**
  * A two-step prompt chain with versioned templates, against a scripted model.
  *

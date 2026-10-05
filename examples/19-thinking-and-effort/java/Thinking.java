@@ -25,6 +25,7 @@ import java.util.Map;
  * (`py` is the harness's formatter: it prints a value the way the Python edition does, so the output of the editions matches.)
  */
 public final class Thinking {
+    private static final System.Logger LOG = System.getLogger(Thinking.class.getName());
     static final String MODEL = "claude-opus-5-5";
     static final double PRICE_OUT = 20.0; // dollars per million output tokens, pricing page 2026-10-02
     static final Map<String, Object> THINKING_BLOCK = map("type", "thinking", "thinking", "", "signature", "illustrative-signature");

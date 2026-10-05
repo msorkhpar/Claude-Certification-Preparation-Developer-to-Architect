@@ -4,8 +4,11 @@ The reply is an illustrative, hand-written response in the API's shape (claude-o
 an omitted thinking block (the default display on this model: an empty `thinking` field and a signature) and the
 `output_tokens_details.thinking_tokens` breakdown the thinking page documents.
 """
+import logging
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-opus-5-5"
 PRICE_OUT = 20.0  # dollars per million output tokens, pricing page 2026-10-02
