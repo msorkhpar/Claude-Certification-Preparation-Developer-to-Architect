@@ -193,7 +193,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **d**: A worked example per rating, since it shows where the boundary lies
 
 27. Scenario S5. The pipeline's review step continues the very session that wrote the change, so that the context is already loaded. A reviewer asks why that is a finding. What is the reason?
-   - **a**: It lets authors favour their own output, since a clean slate is the sharper check
+   - **a**: It favours the author's work, since a clean slate is the sharper check
    - **b**: It cannot run in a pipeline, since sessions are interactive by design
    - **c**: It loses the findings of earlier runs, since they are discarded
    - **d**: It costs more tokens, since the whole history is billed again
