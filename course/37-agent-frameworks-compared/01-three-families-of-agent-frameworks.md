@@ -628,23 +628,23 @@ The example solves one support ticket three ways with a scripted model. The grap
    - **c**: A typed agent, because the loan is a record of fixed shape and size
    - **d**: A graph, because each node saves state and resumes after a stop
 
-2. A team's agent receives a request type nobody planned for. Which style handles it with the least extra code?
-   - **a**: A model-driven loop, since the model chooses its own steps
-   - **b**: A graph with a node written for every request type that may arrive
-   - **c**: A graph, since a missing edge falls back to the last node of the flow
-   - **d**: A fixed script, since the replies follow a template that was written
+2. A support agent starts receiving a kind of request that its authors never listed. Which style copes without anyone adding a path for it?
+   - **a**: A loop in which the model chooses each next step
+   - **b**: A graph whose edges pick the next node from the state
+   - **c**: A typed agent whose replies must fit an output schema
+   - **d**: A checkpointer that restores the run to its last state
 
-3. A model-driven loop calls a tool again and again and never produces a final reply. What does the engineering post recommend?
-   - **a**: A second model that repeats the same call for confirmation
-   - **b**: A larger context window, so that the loop can finish its work
-   - **c**: A stopping condition such as a maximum number of iterations
-   - **d**: A typed schema, which ends the loop when the data is valid
+3. A model-driven loop keeps calling the same tool and never produces a final reply. Which control does the engineering post name for this?
+   - **a**: A checkpoint saved after each tool call
+   - **b**: A longer context window for the whole conversation
+   - **c**: A ceiling on the number of rounds that it is allowed
+   - **d**: A second model that repeats each call to confirm it
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The page says "Checkpointers persist a thread's graph state as checkpoints", and a resumed run "repeats no earlier node", so the credit check is not paid for twice. *b* is ruled out because the table gives the next step to "The model, at each turn", and the loan order must always be fixed. *c* is ruled out because a typed agent has "Validated output" but "Types guard the edges of the model's freedom. They do not choose the route." *a* is ruled out because a prompt keeps no state, and the page gives the graph, not the prompt, the job of resuming: "the run resumes from the last checkpoint".
-2. **a**. The page says the model-driven route is "whatever the model chooses, so the same code handles a case nobody planned for." *c* is ruled out because "a case you did not draw has no path", and there is no fallback edge. *b* is ruled out because the graph is for a process that is "known and must be auditable", and a node for every type is the elaborate logic the model-driven authors reject: "elaborate orchestration logic, state machines, and predefined workflows". *d* is ruled out because a script is a route drawn in advance, and "a case you did not draw has no path".
-3. **c**. The post lists "stopping conditions (such as a maximum number of iterations) to maintain control." *b* is ruled out because "a loop that never ends must be cut off", and a larger window does not give the loop an end. *a* is ruled out because a repeat of the same call adds cost without a stop, and "Agentic systems often trade latency and cost for better task performance". *d* is ruled out because a schema checks shape, and "Validation proves the shape", not that a loop has finished.
+2. **a**. The page says "The route is whatever the model chooses, so the same code handles a case nobody planned for." *b* is ruled out because "a case you did not draw has no path", and the edges are drawn in advance. *c* is ruled out because "Types guard the edges of the model's freedom. They do not choose the route." *d* is ruled out because "A checkpoint is a copy of the state at a point in the graph.", which helps a run resume and adds no path.
+3. **c**. The post lists "stopping conditions (such as a maximum number of iterations) to maintain control." *a* is ruled out because "A checkpoint is a copy of the state at a point in the graph.", which saves the state and does not end a loop. *b* is ruled out because "a loop that never ends must be cut off", and a larger window does not give the loop an end. *d* is ruled out because a repeated call adds cost without a stop, and "Agentic systems often trade latency and cost for better task performance".
 
 </details>
