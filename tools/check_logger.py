@@ -55,6 +55,8 @@ def main():
                     if not folder.is_dir():
                         continue
                     f = main_file(folder, lang, name)
+                    if f is None and not any(folder.glob("*" + EXT[lang])):
+                        continue  # a practice of data files only has no program to carry a logger
                     checked += 1
                     if f is None:
                         bad.append(f"{folder.relative_to(ROOT)}: no main file found for '{name}'")
