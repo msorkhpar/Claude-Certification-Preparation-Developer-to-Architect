@@ -24,19 +24,19 @@
       "id": "01-what-ends-a-run#q2",
       "page": "01-what-ends-a-run.md",
       "scope": "page",
-      "stem": "An insurance agent handles claims that take between three and nine tool calls. Its loop calls the model four times and returns whatever the fourth reply says. Longer claims are returned as unfinished half-answers marked as complete. Which change fits best?",
+      "stem": "An insurance agent stops after ten model calls and files every run that reaches that cap as cut off. Auditors find complete answers filed this way whenever a case needed exactly ten calls. Which change fits best?",
       "options": {
-        "a": "Remove every limit, so that no claim is ever cut off before it has finished",
-        "b": "Raise the count to nine, so that even the longest claim fits inside the loop",
-        "c": "End on the stop value, and add a roomy ceiling with its own outcome",
-        "d": "Ask the model to write the steps still needed, at the end of each reply"
+        "a": "Raise the cap by one for these particular cases",
+        "b": "Drop the cap and let every run continue",
+        "c": "Compare the tally with the limit before each new request",
+        "d": "Report `done` for any run whose last reply holds some text"
       },
       "key": "c",
       "explanation": {
-        "c": "The model's own stop value ends a normal run, and the ceiling is only a backstop with a status that is not `done`.",
-        "b": "Ruled out because the count would still be the loop: \"The loop ends because the model ended it.\"",
-        "a": "Ruled out because a run that never converges needs something to stop it: \"A count is added so that a run that does not converge is stopped.\"",
-        "d": "Ruled out because control must not move into the text: \"Only the reply that ends the turn holds the answer.\""
+        "c": "The page says the count \"is checked before the next call, so that a reply that ends the turn on the very last allowed call is still `done`\".",
+        "a": "Ruled out because the page says to leave the number alone: \"When the status `max_turns` shows up often, the count is not the thing to change.\"",
+        "b": "Ruled out because a run that never converges needs something to stop it: \"A count is added so that a run that does not converge is stopped.\"",
+        "d": "Ruled out because text alone does not show an ending: \"the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer.\""
       }
     },
     {
@@ -86,7 +86,7 @@
         "a": "Turn the cap off entirely and let the model decide when a failure is final",
         "b": "Raise the cap again and again until the failures stop ending in the cap itself",
         "c": "Read the saved conversation, then repair that helper's description",
-        "d": "Mark such runs as done, since a retry limit is a normal way to finish"
+        "d": "Mark such runs as done"
       },
       "key": "c",
       "explanation": {
@@ -103,7 +103,7 @@
       "stem": "A loop that follows this module's practice receives a reply whose stop reason asks for a tool, but its content holds only a sentence of text. What should it do?",
       "options": {
         "a": "Send an empty user message and call the model once more to see what it does",
-        "b": "Finish with a malformed status, because nothing is there to answer",
+        "b": "Finish with a malformed status and make no further call",
         "c": "Return the sentence to the user as the finished answer",
         "d": "Call the model again with the same messages and hope for a call"
       },
@@ -123,7 +123,7 @@
       "options": {
         "a": "A turn limit, which can report a zero cost for the unfinished run of the agent",
         "b": "A refusal by the model, which is reported with a null stop reason at first sight",
-        "c": "A normal run, since a completed task has no further reason left to give",
+        "c": "A normal run that has no stop reason to give",
         "d": "A crashed session, which closes in an error result whose figures may be blanked"
       },
       "key": "d",
@@ -131,7 +131,7 @@
         "d": "The documentation describes this result for a crash: \"the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`\".",
         "b": "Ruled out because a refusal sets the reason: \"Claude declined to respond.\"",
         "c": "Ruled out because a normal end carries a value: \"Claude finished its response naturally.\"",
-        "a": "Ruled out because the limit ends in `error_max_turns`: \"counts tool-use turns only\"."
+        "a": "Ruled out because a run that the loop ends has a value: \"`stop_reason` carries the value from the last assistant response before the loop ended\"."
       }
     }
   ]

@@ -30,7 +30,7 @@ When you use the Agent SDK, the same loop runs inside the Claude Code binary, an
 
 **The context grows.** "The context window does not reset between turns within a session." Everything accumulates: the system prompt, the tool definitions, the history and every tool output, and a verbose output uses thousands of tokens in one turn. When the window nears its limit the SDK compacts: "Compaction replaces older messages with a summary, so specific instructions from early in the conversation may not be preserved." The consequence is a rule of placement. An instruction that must hold for the whole run belongs in a `CLAUDE.md` file loaded through the setting sources, which is re-injected on every request, and not only in the first prompt. Work that would flood the context with intermediate output belongs in a subagent (module 46), because "only its final response returns to the parent."
 
-**Reading the result.** The result message is where the run ends, and its subtype is "the primary way to check termination state" (module 35). Two details complete the picture. After a session crash, "the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`", so a null stop reason is not an error in your code. And the cost fields do not all cover the same work: "The `usage` field covers only the main agent loop. Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." A run that delegated to subagents has spent more than `usage` says.
+**Reading the result.** The result message is where the run ends, and its subtype is "the primary way to check termination state" (module 35). Two details complete the picture. After a session crash, "the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`", so a null stop reason is not an error in your code. A run that the loop itself ends, for example at the turn limit, is different: its result is `error_max_turns`, and "`stop_reason` carries the value from the last assistant response before the loop ended", so only the crash result has none. And the cost fields do not all cover the same work: "The `usage` field covers only the main agent loop. Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." A run that delegated to subagents has spent more than `usage` says.
 
 ### Where each control belongs
 
@@ -89,18 +89,18 @@ This quiz covers both pages of the module.
    - **a**: Turn the cap off entirely and let the model decide when a failure is final
    - **b**: Raise the cap again and again until the failures stop ending in the cap itself
    - **c**: Read the saved conversation, then repair that helper's description
-   - **d**: Mark such runs as done, since a retry limit is a normal way to finish
+   - **d**: Mark such runs as done
 
 2. A loop that follows this module's practice receives a reply whose stop reason asks for a tool, but its content holds only a sentence of text. What should it do?
    - **a**: Send an empty user message and call the model once more to see what it does
-   - **b**: Finish with a malformed status, because nothing is there to answer
+   - **b**: Finish with a malformed status and make no further call
    - **c**: Return the sentence to the user as the finished answer
    - **d**: Call the model again with the same messages and hope for a call
 
 3. A dashboard alerts on every run that ends with a null stop reason and zero cost, and the team suspects a parsing bug. What explains those runs?
    - **a**: A turn limit, which can report a zero cost for the unfinished run of the agent
    - **b**: A refusal by the model, which is reported with a null stop reason at first sight
-   - **c**: A normal run, since a completed task has no further reason left to give
+   - **c**: A normal run that has no stop reason to give
    - **d**: A crashed session, which closes in an error result whose figures may be blanked
 
 <details>
@@ -108,6 +108,6 @@ This quiz covers both pages of the module.
 
 1. **c**. The status is a signal about a run that does not converge, and the conversation shows why. *b* is ruled out because the count is not what is wrong: "The status is a signal to read the conversation, which the practice keeps whole for that reason." *a* is ruled out because a run needs a backstop: "A count is added so that a run that does not converge is stopped." *d* is ruled out because the count "has its own status", and reporting `done` for it hides the problem that the fixed loop also hides.
 2. **b**. There is nothing to answer, and the practice stops with its own status. *a* is ruled out because the API does not accept it: "an empty message, which a loop can send by accident when a `tool_use` reply holds no call, is refused." *c* is ruled out because narration is not an answer: "Only the reply that ends the turn holds the answer." *d* is ruled out because guessing is what the loop avoids: "A value the loop has never seen must not be guessed at."
-3. **d**. The documentation describes this result for a crash: "the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`". *b* is ruled out because a refusal sets the reason: "Claude declined to respond." *c* is ruled out because a normal end carries a value: "Claude finished its response naturally." *a* is ruled out because the limit ends in `error_max_turns`: "counts tool-use turns only".
+3. **d**. The documentation describes this result for a crash: "the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`". *b* is ruled out because a refusal sets the reason: "Claude declined to respond." *c* is ruled out because a normal end carries a value: "Claude finished its response naturally." *a* is ruled out because a run that the loop ends has a value: "`stop_reason` carries the value from the last assistant response before the loop ended".
 
 </details>

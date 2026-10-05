@@ -593,16 +593,15 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: Search the text for more completion phrases, such as "finished" and "complete"
    - **d**: Call the model a fixed number of times, large enough for the longest case
 
-2. An insurance agent handles claims that take between three and nine tool calls. Its loop calls the model four times and returns whatever the fourth reply says. Longer claims are returned as unfinished half-answers marked as complete. Which change fits best?
-   - **a**: Remove every limit, so that no claim is ever cut off before it has finished
-   - **b**: Raise the count to nine, so that even the longest claim fits inside the loop
-   - **c**: End on the stop value, and add a roomy ceiling with its own outcome
-   - **d**: Ask the model to write the steps still needed, at the end of each reply
+2. An insurance agent stops after ten model calls and files every run that reaches that cap as cut off. Auditors find complete answers filed this way whenever a case needed exactly ten calls. Which change fits best?
+   - **a**: Raise the cap by one for these particular cases
+   - **b**: Drop the cap and let every run continue
+   - **c**: Compare the tally with the limit before each new request
+   - **d**: Report `done` for any run whose last reply holds some text
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The model ends its turn by not asking for a tool, and the stop reason reports exactly that, so a reply that holds a tool call is not the end whatever its text says. *b* is ruled out because a closing phrase in the prompt keeps the control flow in the text: a control flow that needs a particular word "moves the loop's logic into the prompt, where nobody tests it." *c* is ruled out because more phrases do not make the text a protocol: "It changes with the model, the prompt, the language and the day." *d* is ruled out because a fixed count is the second anti-pattern: "A task that needs six steps is cut off in the middle".
-2. **c**. The model's own stop value ends a normal run, and the ceiling is only a backstop with a status that is not `done`. *b* is ruled out because the count would still be the loop: "The loop ends because the model ended it." *a* is ruled out because a run that never converges needs something to stop it: "A count is added so that a run that does not converge is stopped." *d* is ruled out because control must not move into the text: "Only the reply that ends the turn holds the answer."
-
+2. **c**. The page says the count "is checked before the next call, so that a reply that ends the turn on the very last allowed call is still `done`". *a* is ruled out because the page says to leave the number alone: "When the status `max_turns` shows up often, the count is not the thing to change." *b* is ruled out because a run that never converges needs something to stop it: "A count is added so that a run that does not converge is stopped." *d* is ruled out because text alone does not show an ending: "the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer."
 </details>
