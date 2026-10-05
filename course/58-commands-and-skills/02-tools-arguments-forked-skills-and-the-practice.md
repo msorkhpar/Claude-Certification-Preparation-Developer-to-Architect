@@ -67,6 +67,9 @@ import re
 import shlex
 import sys
 from pathlib import Path
+import logging
+
+log = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "40-workflow-lint" / "python"))
 from miniyaml import parse_yaml  # noqa: E402
@@ -201,6 +204,8 @@ quoted: first=hello world second=second
 fork: general-purpose Explore None
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("skill_model");
 /**
  * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.
  *
@@ -360,6 +365,7 @@ import java.util.stream.Collectors;
  * the front matter is YAML, read with Jackson.
  */
 public final class SkillModel {
+    private static final System.Logger LOG = System.getLogger(SkillModel.class.getName());
     static final List<String> LEVELS = List.of("enterprise", "personal", "project"); // the order in which a skill name is resolved: the first level wins
     private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
     private static final Pattern FRONTMATTER = Pattern.compile("^---\\n(.*?)\\n---\\n?(.*)$", Pattern.DOTALL);
@@ -575,6 +581,8 @@ fork: general-purpose Explore None
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import harness.Show.py
+
+private val log = System.getLogger("skill_model")
 
 /**
  * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.

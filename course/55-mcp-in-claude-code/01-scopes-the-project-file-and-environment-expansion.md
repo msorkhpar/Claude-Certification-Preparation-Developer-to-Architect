@@ -78,6 +78,9 @@ variables read as empty. The set of credential names here is the documentation's
 import fnmatch
 import json
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 SCOPES = ["local", "project", "user"]  # highest precedence first
 COVERED = {"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN"}
@@ -236,6 +239,8 @@ a description of 3000 characters keeps 2048 of them
 // the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`
 // expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential
 // variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.
+import { logger } from "./logger.ts";
+const log = logger("mcp_config");
 export const SCOPES = ["local", "project", "user"]; // highest precedence first
 const COVERED = new Set(["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN"]);
 const REMOTE = ["http", "sse", "ws"];
@@ -395,6 +400,7 @@ import java.util.regex.Pattern;
  * The configuration is JSON, read with Jackson.
  */
 public final class McpConfig {
+    private static final System.Logger LOG = System.getLogger(McpConfig.class.getName());
     static final List<String> SCOPES = List.of("local", "project", "user"); // highest precedence first
     static final Set<String> COVERED = Set.of("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN");
     static final Set<String> REMOTE = Set.of("http", "sse", "ws");
@@ -638,6 +644,8 @@ a description of 3000 characters keeps 2048 of them
 ```kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
 import harness.Show.py
+
+private val log = System.getLogger("mcp_config")
 
 /**
  * MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.

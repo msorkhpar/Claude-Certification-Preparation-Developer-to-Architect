@@ -66,6 +66,9 @@ on which platform, and which permission rule covers which tool.
 A teaching model of the "Tools reference" page of the Claude Code documentation (read on 2026-10-03), not the product's code. It covers six tools:
 Read, Write, Edit, Bash, Grep and Glob.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 SEARCH_TOOLS = ("Grep", "Glob")
 BASE_TOOLS = ("Read", "Write", "Edit", "Bash")
@@ -173,6 +176,8 @@ Bash(git log *) covers: Bash
 //
 // A teaching model of the "Tools reference" page of the Claude Code documentation (read on 2026-10-03), not the product's code. It covers six tools:
 // Read, Write, Edit, Bash, Grep and Glob.
+import { logger } from "./logger.ts";
+const log = logger("builtin_tools");
 const SEARCH_TOOLS = ["Grep", "Glob"];
 const BASE_TOOLS = ["Read", "Write", "Edit", "Bash"];
 const RULE_COVERS: Record<string, string[]> = { Read: ["Read", "Grep", "Glob"], Edit: ["Edit", "Write"], Bash: ["Bash"] }; // a Write(path) rule is never matched
@@ -280,6 +285,7 @@ import java.util.Map;
  * Read, Write, Edit, Bash, Grep and Glob.
  */
 public final class BuiltinTools {
+    private static final System.Logger LOG = System.getLogger(BuiltinTools.class.getName());
     static final List<String> SEARCH_TOOLS = List.of("Grep", "Glob");
     static final List<String> BASE_TOOLS = List.of("Read", "Write", "Edit", "Bash");
     static final Map<String, List<String>> RULE_COVERS = Map.of("Read", List.of("Read", "Grep", "Glob"), "Edit", List.of("Edit", "Write"), "Bash", List.of("Bash")); // a Write(path) rule is never matched
@@ -415,6 +421,8 @@ Bash(git log *) covers: Bash
 ```
 ```kotlin
 import harness.Show.py
+
+private val log = System.getLogger("builtin_tools")
 
 /**
  * The built-in file tools of Claude Code, modelled offline: Edit's exact match, the way out when it cannot apply, which search tools exist
