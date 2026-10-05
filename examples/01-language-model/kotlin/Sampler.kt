@@ -1,5 +1,7 @@
 import kotlin.math.exp
 
+private val log = System.getLogger("sampler")
+
 /** A toy next-token sampler. It is not Claude: it only shows what temperature does. */
 val TOKENS = listOf("blue", " clear", " falling", "green")
 val LOGITS = listOf(4.0, 2.5, 1.0, -1.0)

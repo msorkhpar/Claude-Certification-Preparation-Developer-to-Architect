@@ -1,4 +1,7 @@
 // A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words.
+import { logger } from "./logger.ts";
+const log = logger("bpe");
+
 export type Pair = [string, string];
 
 function merge(word: string[], pair: Pair): string[] {

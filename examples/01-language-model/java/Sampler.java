@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 /** A toy next-token sampler. It is not Claude: it only shows what temperature does. */
 public final class Sampler {
+    private static final System.Logger LOG = System.getLogger(Sampler.class.getName());
     static final String[] TOKENS = {"blue", " clear", " falling", "green"};
     static final double[] LOGITS = {4.0, 2.5, 1.0, -1.0};
 

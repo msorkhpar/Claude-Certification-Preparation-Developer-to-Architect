@@ -1,5 +1,8 @@
 """A toy next-token sampler. It is not Claude: it only shows what temperature does."""
+import logging
 import math
+
+log = logging.getLogger(__name__)
 
 TOKENS = ["blue", " clear", " falling", "green"]
 LOGITS = [4.0, 2.5, 1.0, -1.0]
