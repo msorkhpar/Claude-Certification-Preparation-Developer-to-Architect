@@ -29,11 +29,11 @@
         "a": "The type check rejects it at validation",
         "b": "Strict mode rejects it once the tool sets `strict`",
         "c": "The required-field check rejects it as inconsistent",
-        "d": "No check in the contract rejects it"
+        "d": "Only a check in your own code rejects it"
       },
       "key": "d",
       "explanation": {
-        "d": "The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not.",
+        "d": "The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not, so the check that catches it is \"Your code: checks that read the record against the source\".",
         "a": "Ruled out because \"A strict schema makes the first kind rare and does nothing about the second\", and both numbers pass a type check.",
         "b": "Ruled out because strict schemas \"do not prevent semantic errors\", and this record already matches its shape.",
         "c": "Ruled out because \"the guarantee is about shape\", which covers presence of fields and not agreement between them."
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?",
       "options": {
-        "a": "It excludes every failure",
+        "a": "It excludes every failure from its base",
         "b": "It understates accuracy for the passing set",
         "c": "It counts each one twice, once per rule",
-        "d": "It is correct as stated"
+        "d": "It counts reviewed documents as passed"
       },
       "key": "a",
       "explanation": {
         "a": "The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong.",
-        "b": "Ruled out because the report \"divides by the documents that passed\", so it overstates and does not understate.",
+        "b": "Ruled out because the filtered figure is the higher one: \"accuracy over the validated is 5 of 6, 0.83, and accuracy over all documents is 5 of 10, 0.5\".",
         "c": "Ruled out because it \"leaves out the documents that went to review or failed\", and nothing is counted twice.",
-        "d": "Ruled out because \"The first number is true and answers a different question\"."
+        "d": "Ruled out because the report \"divides by the documents that passed, which are the easy ones\"."
       }
     },
     {
