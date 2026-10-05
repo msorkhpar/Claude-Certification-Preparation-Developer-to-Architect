@@ -24,38 +24,38 @@
       "id": "01-git-committed-configuration-and-versioned-prompts#q2",
       "page": "01-git-committed-configuration-and-versioned-prompts.md",
       "scope": "page",
-      "stem": "A workflow sends a long instruction string that someone edits whenever results look wrong. What step makes those edits safe?",
+      "stem": "A workflow embeds its instruction text in a string, and teammates tweak it whenever an answer looks off. What makes those edits safe to ship?",
       "options": {
-        "a": "Give it a file of its own, with a version, a changelog entry and a review",
-        "b": "Shorten it to a few lines, so that each edit touches fewer words of it",
-        "c": "Store it in an environment variable, so the repository never holds its text",
-        "d": "Let Claude rewrite it every night from the previous day's results, unchecked"
+        "a": "A separate file with a version, a changelog line and a review",
+        "b": "A shorter string of a few lines in the same workflow",
+        "c": "A secret-store entry in place of the repository text",
+        "d": "A nightly rewrite by Claude from the day's results"
       },
       "key": "a",
       "explanation": {
         "a": "The page says to keep \"One file per prompt, in the repository\", with \"A version in the file\", \"A changelog entry for every change\" and \"A review of the change\".",
-        "b": "Ruled out because the page says \"A reworded prompt is a behaviour change\", and a shorter prompt is still unversioned and unreviewed.",
-        "c": "Ruled out because \"keys and tokens are read from the environment or from GitHub Secrets\", and a prompt needs history, which an environment variable lacks.",
-        "d": "Ruled out because a rewrite nobody reviews is the problem: \"A review of the change, ideally with a sample of inputs\"."
+        "b": "Ruled out because \"A reworded prompt is a behaviour change\", and a shorter string is still a rewording with no version or review.",
+        "c": "Ruled out because a prompt in the repository gives a diff and a revert: \"a rollback is one revert\", which a secret store does not offer.",
+        "d": "Ruled out because a rewrite nobody reads skips the step the page asks for: \"A review of the change, ideally with a sample of inputs whose outputs are compared before and after\"."
       }
     },
     {
       "id": "01-git-committed-configuration-and-versioned-prompts#q3",
       "page": "01-git-committed-configuration-and-versioned-prompts.md",
       "scope": "page",
-      "stem": "A pull request adds one entry to the shared settings that allows a new shell command. How should it be reviewed?",
+      "stem": "A pull request adds a line to the committed `.claude/settings.json` that allows a new shell command. How should the team treat it?",
       "options": {
-        "a": "Not at all, because a project permission rule has no effect on others",
-        "b": "Lightly, because a settings entry is configuration and the diff is one line",
-        "c": "With the care given to build tooling, since each teammate's machine inherits it",
-        "d": "By Claude alone, because the model wrote the line in the first place"
+        "a": "As a personal preference, since each developer picks their own rules",
+        "b": "As documentation, since the file only describes how Claude should act",
+        "c": "As a change to a build script, since it alters what every clone runs",
+        "d": "As a local override, since such lines belong in `.gitignore`"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine\", so such pull requests \"deserve the same care as a change to a build script\".",
-        "b": "Ruled out because such a line \"changes what runs on every teammate's machine\", which is behaviour and not preference.",
-        "a": "Ruled out because the file is committed and shared, so the rule \"changes what runs on every teammate's machine\".",
-        "d": "Ruled out because \"Pull requests that touch these files deserve the same care as a change to a build script\", with a person deciding."
+        "a": "Ruled out because the line \"changes what runs on every teammate's machine\", so it is shared behaviour and not a private choice.",
+        "b": "Ruled out because the file holds \"Team permission rules, default model, hooks, plugins\", which are rules that take effect and not prose.",
+        "d": "Ruled out because \"a committed file is reviewed like code\", and the shared settings file is committed, while the local file is the one kept out of version control."
       }
     },
     {
@@ -83,36 +83,36 @@
       "scope": "page",
       "stem": "A review job should inspect the code and post findings. Which permission set fits?",
       "options": {
-        "a": "Write access to every scope, so the job never fails for a missing grant",
-        "b": "Write access to the contents, so that findings can be committed to the branch",
-        "c": "No permissions at all, because comments need no access to the code",
-        "d": "Read access to the contents, plus the scopes for comments and authentication"
+        "a": "Write on the contents, with scopes for comments and authentication",
+        "b": "No access to the contents, with scopes for comments and authentication",
+        "c": "Read on the contents alone, with nothing else granted to the job",
+        "d": "Read on the contents, with scopes for comments and authentication"
       },
       "key": "d",
       "explanation": {
         "d": "The page says \"A job that only reviews needs `contents: read`\", and the review example reads pull requests and issues as well, and has the `id-token: write` permission for authentication.",
-        "b": "Ruled out because the page says \"Reading is enough to review\", and write access lets a compromised run change the repository.",
-        "c": "Ruled out because \"A job that only reviews needs `contents: read`\", so some access to the code is required.",
-        "a": "Ruled out because the page says \"Grant the least a job needs\", and a grant of every scope is the opposite."
+        "a": "Ruled out because \"A job that implements changes needs `contents: write`, `pull-requests: write` and `issues: write`\", and a review only reads, so the extra write access lets a compromised run change the repository.",
+        "b": "Ruled out because \"A job that only reviews needs `contents: read`\", so some access to the code is required.",
+        "c": "Ruled out because the review example includes `id-token: write`, which the documentation calls \"required for the Claude Code GitHub Action's default GitHub App authentication\"."
       }
     },
     {
       "id": "02-ci-code-review-and-repository-events#q3",
       "page": "02-ci-code-review-and-repository-events.md",
       "scope": "page",
-      "stem": "A team wants Claude's review to stop a merge until findings are fixed. What does Code Review do?",
+      "stem": "Code Review's findings are posted on a pull request, and a team wants them to hold up the merge button. What does the review's check run do?",
       "options": {
-        "a": "It marks its check run failed whenever a finding is rated important",
-        "b": "It leaves its check run neutral, so the decision stays with a person",
-        "c": "It approves the pull request when no finding is rated important",
-        "d": "It requests changes from the author on every finding it posts"
+        "a": "It fails whenever a finding is rated important, so merging stops",
+        "b": "It ends neutral every time, so nothing waits on it",
+        "c": "It approves the pull request, so a clean review lifts any block",
+        "d": "It requests changes from the author, so each finding must be fixed"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules.\"",
-        "a": "Ruled out because the same sentence says the check run \"always completes with a neutral conclusion\", so it never fails.",
-        "c": "Ruled out because findings \"don't approve or block\" a pull request, and so an empty review is no approval.",
-        "d": "Ruled out because findings are posted \"as inline comments\", and Code Review \"so it advises, and a person merges\"."
+        "a": "Ruled out because the check run \"always completes with a neutral conclusion\", so no rating makes it fail.",
+        "c": "Ruled out because findings \"don't approve or block your PR\", so a clean review approves nothing either.",
+        "d": "Ruled out because findings are posted \"as inline comments\", and the page says \"So it advises, and a person merges.\""
       }
     },
     {
@@ -187,8 +187,8 @@
       "explanation": {
         "c": "The page says a routine is \"a saved Claude Code configuration\", with a scheduled trigger, and it runs on cloud infrastructure so it keeps working \"while your laptop is closed\".",
         "b": "Ruled out because \"its job starts only when the comment mentions the bot\", and the job here is nightly.",
-        "a": "Ruled out because the page lists \"Triggers are scheduled (hourly, nightly, weekly, or once)\" for routines, and a hook has no schedule and no open session.",
-        "d": "Ruled out because \"Triggers are scheduled (hourly, nightly, weekly, or once)\" belongs to a routine, and a subagent has no clock."
+        "a": "Ruled out because hooks are among the things the shared settings file holds, \"Team permission rules, default model, hooks, plugins\", and they run inside a session on a machine, while a routine keeps working \"while your laptop is closed\".",
+        "d": "Ruled out because subagents are files the repository lists as \"Team skills and subagents\", which a session loads when it starts, so nothing starts one at midnight, and only a routine \"is a saved Claude Code configuration\" that runs \"automatically\"."
       }
     }
   ]

@@ -38,7 +38,7 @@ The configuration has two audiences, and the file name says which.
 | `.claude/settings.local.json` | No, in `.gitignore` | One developer's overrides |
 | `CLAUDE.local.md` | No, in `.gitignore` | One developer's notes for this project |
 
-Two rules follow. A secret is never committed: keys and tokens are read from the environment or from GitHub Secrets, and no configuration file holds one. And a committed file is reviewed like code, because a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine. Pull requests that touch these files deserve the same care as a change to a build script. Project permission rules and marketplaces wait for the folder to be trusted, so a hostile repository cannot act before a person has decided to trust it.
+Two rules follow. A secret is never committed: keys and tokens are read from the environment or from GitHub Secrets, and no configuration file holds one. And a committed file is reviewed like code, because a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine. Pull requests that touch these files deserve the same care as a change to a build script. Project allow rules and marketplaces wait for the folder to be trusted, so a hostile repository cannot act before a person has decided to trust it.
 
 ### Versioning prompts and settings
 
@@ -79,23 +79,23 @@ When Claude refactors such code, work in small steps on a branch. State the beha
    - **c**: `CLAUDE.md`, which every session loads before the first prompt is typed
    - **d**: `CLAUDE.local.md`, which stays out of version control
 
-2. A workflow sends a long instruction string that someone edits whenever results look wrong. What step makes those edits safe?
-   - **a**: Give it a file of its own, with a version, a changelog entry and a review
-   - **b**: Shorten it to a few lines, so that each edit touches fewer words of it
-   - **c**: Store it in an environment variable, so the repository never holds its text
-   - **d**: Let Claude rewrite it every night from the previous day's results, unchecked
+2. A workflow embeds its instruction text in a string, and teammates tweak it whenever an answer looks off. What makes those edits safe to ship?
+   - **a**: A separate file with a version, a changelog line and a review
+   - **b**: A shorter string of a few lines in the same workflow
+   - **c**: A secret-store entry in place of the repository text
+   - **d**: A nightly rewrite by Claude from the day's results
 
-3. A pull request adds one entry to the shared settings that allows a new shell command. How should it be reviewed?
-   - **a**: Not at all, because a project permission rule has no effect on others
-   - **b**: Lightly, because a settings entry is configuration and the diff is one line
-   - **c**: With the care given to build tooling, since each teammate's machine inherits it
-   - **d**: By Claude alone, because the model wrote the line in the first place
+3. A pull request adds a line to the committed `.claude/settings.json` that allows a new shell command. How should the team treat it?
+   - **a**: As a personal preference, since each developer picks their own rules
+   - **b**: As documentation, since the file only describes how Claude should act
+   - **c**: As a change to a build script, since it alters what every clone runs
+   - **d**: As a local override, since such lines belong in `.gitignore`
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The table puts "One developer's notes for this project" in `CLAUDE.local.md`, which is "No, in `.gitignore`". *b* is ruled out because the file is committed and holds "Team permission rules, default model, hooks, plugins", so the notes would reach the whole team. *c* is ruled out because `CLAUDE.md` is committed and holds "Commands, conventions, the git workflow", which every teammate loads. *a* is ruled out because `.mcp.json` holds "The MCP servers a project uses", which is configuration and not notes.
-2. **a**. The page says to keep "One file per prompt, in the repository", with "A version in the file", "A changelog entry for every change" and "A review of the change". *b* is ruled out because the page says "A reworded prompt is a behaviour change", and a shorter prompt is still unversioned and unreviewed. *c* is ruled out because "keys and tokens are read from the environment or from GitHub Secrets", and a prompt needs history, which an environment variable lacks. *d* is ruled out because a rewrite nobody reviews is the problem: "A review of the change, ideally with a sample of inputs".
-3. **c**. The page says "a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine", so such pull requests "deserve the same care as a change to a build script". *b* is ruled out because such a line "changes what runs on every teammate's machine", which is behaviour and not preference. *a* is ruled out because the file is committed and shared, so the rule "changes what runs on every teammate's machine". *d* is ruled out because "Pull requests that touch these files deserve the same care as a change to a build script", with a person deciding.
+2. **a**. The page says to keep "One file per prompt, in the repository", with "A version in the file", "A changelog entry for every change" and "A review of the change". *b* is ruled out because "A reworded prompt is a behaviour change", and a shorter string is still a rewording with no version or review. *c* is ruled out because a prompt in the repository gives a diff and a revert: "a rollback is one revert", which a secret store does not offer. *d* is ruled out because a rewrite nobody reads skips the step the page asks for: "A review of the change, ideally with a sample of inputs whose outputs are compared before and after".
+3. **c**. The page says "a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine", so such pull requests "deserve the same care as a change to a build script". *a* is ruled out because the line "changes what runs on every teammate's machine", so it is shared behaviour and not a private choice. *b* is ruled out because the file holds "Team permission rules, default model, hooks, plugins", which are rules that take effect and not prose. *d* is ruled out because "a committed file is reviewed like code", and the shared settings file is committed, while the local file is the one kept out of version control.
 
 </details>
