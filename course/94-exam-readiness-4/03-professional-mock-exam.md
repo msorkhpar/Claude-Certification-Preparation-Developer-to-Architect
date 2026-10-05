@@ -1,11 +1,11 @@
-# Professional mock exam
+# Professional mock exam 1
 
-**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 3 of 3**
+**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 3 of 4**
 **Exams:** P1 to P7 (CCAR-P; the questions follow the Professional blueprint over the content of modules 79 to 93)
 
 **After this page you can** tell whether you are ready for the Professional exam and which domains need more work.
 
-This mock exam covers **the content of Level 4** (modules 79 to 93), as the Professional exam draws on the architect's whole practice, and not one page or one module. It is written in the exam's style: a named scenario of two or three sentences with a constraint, one best answer and three plausible alternatives, each of which is a mistake a practitioner could make. Every question is the course's own, written fresh; no question comes from a live exam, and none repeats a question of a page quiz, a module quiz or another mock exam. The facts behind each answer were read on 2026-10-04 from the pages named on the module pages, so a reader who studies the pages can answer each question from the page it is drawn from. The real exam has multiple-choice and multiple-response items; this mock has single-answer items only.
+This mock exam covers **the content of Level 4** (modules 79 to 93), as the Professional exam draws on the architect's whole practice, and not one page or one module. Level 4 has two mock exams of 63 questions each, the Professional exam's number of items; this is the first, and no question of one repeats a question of the other. It is written in the exam's style: a named scenario of two or three sentences with a constraint, one best answer and three plausible alternatives, each of which is a mistake a practitioner could make. Every question is the course's own, written fresh; no question comes from a live exam, and none repeats a question of a page quiz, a module quiz or another mock exam. The facts behind each answer were read on 2026-10-04 from the pages named on the module pages, so a reader who studies the pages can answer each question from the page it is drawn from. The real exam has multiple-choice and multiple-response items; this mock has single-answer items only.
 
 ## How to take it
 
@@ -60,29 +60,29 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: C, because only an approved design may be chosen for a launch
    - **d**: None of them, because a design must be approved before it can be priced
 
-5. Scenario: Marlow Analytics' research subagent returns its whole reading, thousands of lines of page text, to the lead agent, whose window fills before it can write the report. What should the subagent hand back?
-   - **a**: The full reading, but in a smaller font so that more of it fits in the window
-   - **b**: Nothing until the lead asks, so that the window is never filled by surprise
-   - **c**: The reading of the first source only, since the others repeat what it says
-   - **d**: The finding with its source, in the shape the contract names
+5. Scenario: A coordinator at Marlow Analytics sends four subagents to read hundreds of pages each, and its window is full before it writes the report. The subagents must still run in parallel. Which contract change fixes the design?
+   - **a**: Each subagent reads only the first source, since the others repeat it
+   - **b**: Each subagent forwards the pages it read, trimmed to fit
+   - **c**: Each subagent waits for the coordinator to ask, so nothing arrives unplanned
+   - **d**: Each worker hands back its conclusion with a citation, in a fixed shape
 
-6. Scenario: Kite Pay's agent builds the key for its payment from the current time at every attempt. After a lost response, the retry pays a second time. What is the flaw?
-   - **a**: The key is stored in the same step as the payment, so a crash can orphan it
-   - **b**: It labels each try, when it should label the intention behind it
-   - **c**: The key is too short, so that two different payments can share the same one
-   - **d**: The key is made before the first call, so the tool cannot tell attempts apart
+6. Scenario: Kite Pay's payment tool honours an idempotency key, but the agent builds that key from the current time on each attempt, so a retry after a lost response pays twice. Which change fixes the design?
+   - **a**: Make a fresh value for each attempt and log every one of them
+   - **b**: Derive the label once from the order and the action, and reuse it for every repeat
+   - **c**: Lengthen the key, so that two different payments cannot share one
+   - **d**: Save the key before the call and the payment after it, in two steps
 
-7. Scenario: A tool call made by Oaken Labs' agent returns a refusal because the service account lacks a permission. The runner retries it five times with growing pauses. What should the runner do instead?
-   - **a**: Retry ten times, since a longer wait is more likely to outlast the fault, however long it lasts
-   - **b**: Switch to a fresh idempotency key, so the tool treats the call as new
-   - **c**: Fail the task at once with a clear reason, since a missing right will not clear itself
-   - **d**: Open the breaker of the agent, so every later task skips the tool as well
+7. Scenario: A runner at Oaken Labs treats every tool error alike, with five attempts and growing pauses, and a call refused for lack of permission uses all five. Which rule belongs in its design?
+   - **a**: Give every attempt a fresh idempotency key, so the tool sees each as new
+   - **b**: Open the breaker for the agent, so that every later task skips the tool
+   - **c**: Classify faults: repeat passing ones up to a cap, fail permanent ones at once
+   - **d**: Raise the attempts to ten with longer pauses, so that the fault outlasts the wait
 
-8. Scenario: Quarry Labs' circuit breaker for one agent is refusing calls. After its cooldown a probe is allowed through, and the probe fails. What is the breaker's state afterwards?
-   - **a**: Back to blocking, since the lone trial did not pass
-   - **b**: Closed, since the pause has already passed and counts as a recovery
-   - **c**: Half-open, with further probe calls allowed one after another
-   - **d**: Closed, once the next success resets the count of failures in a row
+8. Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?
+   - **a**: It reverts to refusing requests at once until a further pause has passed
+   - **b**: It resets its count of failures, so that the next three calls are allowed
+   - **c**: It closes, since the pause alone counts as a recovery
+   - **d**: It stays half-open and lets further probes through one after another
 
 9. Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which pattern does the capstone choose?
    - **a**: An augmented call inside a small fixed workflow, since the route is predetermined
@@ -270,23 +270,23 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: Release, since nothing was lost and the net result is positive
    - **d**: Refuse, since three added answers cannot offset a possible future loss
 
-40. Scenario: A mistake costs 3 and a person's check costs 1. How is the accuracy computed above which the check no longer pays?
-   - **a**: 66 percent, since a third of 100 rounds up to 34 and the rest is 66
-   - **b**: 67 percent, since a third rounds to the nearest whole percent
-   - **c**: 33 percent, since the check is a third of the cost of a mistake
-   - **d**: 0 percent, since a check that costs less than a mistake always pays
+40. Scenario: In a launch review at Tern Health, a wrong decision costs 3 units and a person's check costs 1 unit, and the architect must state the accuracy above which routing items to a person stops paying. Which figure goes into the review?
+   - **a**: 66, as the rounding climbs to 34 before the subtraction
+   - **b**: 33, since the share of the check is the answer itself
+   - **c**: 67, since a third rounds to the nearest whole percent
+   - **d**: 0, since a check that is cheaper than a mistake always pays
 
-41. Scenario: A proposal at Larch Mutual rolls its change out in exactly three stages. The review's rule asks for at least three. What does the review record for the roll-out?
+41. Scenario: A proposal at Larch Mutual moves its change out in exactly three stages, and the sponsor needs the review to say whether the plan blocks the launch. The rule asks for at least three. What does the review record for the roll-out?
    - **a**: No finding, since a threshold is met at its edge
-   - **b**: A medium finding, since three stages leave no spare stage
-   - **c**: A low finding, since three is the least that passes
-   - **d**: A high finding, since a roll-out needs more than three stages
+   - **b**: A low finding, since three is the least that passes
+   - **c**: A high finding, since a roll-out needs more than three stages
+   - **d**: A medium finding, since three stages leave no spare stage
 
-42. Scenario: Pelham Media's runner saves its results to the store only when the whole run ends. The tenth of twelve tasks crashes the process on every run. What should change?
-   - **a**: Store results at the end, but retry the whole run three times
-   - **b**: Write each outcome out the moment its work finishes
-   - **c**: Store the results of the first nine tasks in the prompt of the tenth
-   - **d**: Catch the crash in the runner, so the end of the run is always reached
+42. Scenario: A run of twelve tasks at Pelham Media crashes its process at the tenth task every time, and the runner writes results to the store only when the whole run ends. Which design change keeps finished work safe and cheap to redo?
+   - **a**: Retry the whole run three times, keeping the end-of-run write
+   - **b**: Persist each outcome as soon as it is done, so a retry takes only the rest
+   - **c**: Catch the crash in the runner, so that the end is always reached
+   - **d**: Put the first nine results into the prompt of the tenth task
 
 43. Scenario: Sorrel Cloud serves twelve customers from a single shared pool and separates their data by a filter in its application code. An auditor asks how the data of one customer is kept from another. What does the page say about the design?
    - **a**: It is sound, since a well-tested filter in code is the stronger separation of the two options
@@ -294,11 +294,11 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: It is a finding only if two of the customers work in the same industry
    - **d**: It is a finding, since the boundary that is enforced for you is a workspace per tenant
 
-44. Scenario: Bracken Health defines a structured output with a fixed list of allowed values, the names of diagnoses taken from real patient records. A reviewer objects. What is the objection?
-   - **a**: Schemas are sent after the messages, so the diagnoses reach the model late
-   - **b**: Schemas are limited to ten values, so a long list of diagnoses is cut short
-   - **c**: Schemas are cached apart from message content, so they lack the protection that a prompt has
-   - **d**: Schemas are read by every tenant, so the names are visible to other customers of the same service
+44. Scenario: Bracken Health's structured output uses a schema whose fixed list of allowed values holds the names of diagnoses taken from real patient records, in a deployment that is meant to be HIPAA ready. Which change does the design need?
+   - **a**: Cap the list at ten values, since a short list exposes less
+   - **b**: Give each tenant a schema of its own, since tenants are kept apart
+   - **c**: Keep clinical data out of the definition, and let the message carry it
+   - **d**: Encrypt the schema inside the request body, since the body is protected in transit
 
 45. Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. What does the page advise?
    - **a**: Accept the gap, since names carry no risk once the addresses are removed
@@ -312,17 +312,17 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: It goes out with a note that the quote could not be found in the source
    - **d**: It is held, since an unbacked claim is stopped whatever its rating
 
-47. Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. What should the design have done?
-   - **a**: Reset the context first, or repeat the query on a different model
-   - **b**: Resend the same conversation, since a refusal is a passing fault
-   - **c**: Raise the sampling temperature, so that the reply differs on the next try
-   - **d**: Show the user the category of the refusal, which is always present
+47. Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. Which recovery belongs in the design?
+   - **a**: Drop or rephrase the turn that triggered it, or send the request to another model
+   - **b**: Show the user the category of the refusal, which is always present
+   - **c**: Raise the sampling temperature, so that the next reply differs
+   - **d**: Resend the same history until it passes, since a refusal is a passing fault
 
-48. Scenario: Linnet Legal's assistant summarises inbound e-mails, and one e-mail contains a hidden line telling the model to forward the user's files to an outside address. Which design choices does the page give for the e-mail text?
-   - **a**: Put it in the system prompt, so that the model reads it before anything else
-   - **b**: Add it to the user turn, with a request that the model ignore any orders in it
-   - **c**: Pass it only inside tool results, JSON-encoded, with its origin named, and keep rights narrow
-   - **d**: Strip every sentence that is written as an instruction, using a list of patterns
+48. Scenario: Linnet Legal's assistant summarises inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?
+   - **a**: Add it to the user turn with a request that the model ignore any orders in it
+   - **b**: Strip every sentence that is written as an instruction, using a list of patterns
+   - **c**: Carry the incoming item as JSON inside a tool result, with its origin named, and narrow that right
+   - **d**: Place the text in the system prompt, so that the model reads it before anything else
 
 49. Scenario: Odell Health's register row for an unfair outcome names the parity report as its control, and a reviewer asks what the residual column should say.
    - **a**: Prevented, since every group is measured before an answer goes out
@@ -390,29 +390,29 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: The engineers' evidence first, so that the sponsor reads the analysis before the conclusion
    - **d**: Lead with the headline outcome, follow with a tally by area, and end with the ranked details
 
-60. Scenario: Eland Systems fetches its policy from the admin console. The network is down when a developer opens Claude Code in the morning. The security lead wants the tool to refuse to proceed without the policy. Which setting does that?
-   - **a**: allowManagedHooksOnly, which stops every unmanaged hook from running
-   - **b**: availableModels, which restricts the models a developer may pick
+60. Scenario: Eland Systems fetches its policy from the admin console, and the security lead decides that no developer may begin without the current policy, even when the network is down and work stops. Which setting expresses that decision?
+   - **a**: availableModels, which restricts the models a developer may pick
+   - **b**: disableSideloadFlags, which rejects the options that load a plugin
    - **c**: forceRemoteSettingsRefresh, which makes startup fail closed
-   - **d**: disableSideloadFlags, which rejects the options that load a plugin
+   - **d**: allowManagedHooksOnly, which stops every unmanaged hook from running
 
-61. Scenario: Fenn Labs limits effort at high in its managed settings. A developer sets a lower ceiling, medium, in a project file, and another team sets max in a user file. Which ceiling is in force?
+61. Scenario: A platform team caps effort at high in managed settings and must decide whether teams may tighten the ceiling for their own projects. A project file sets medium and a user file sets max. Which ceiling is in force, and what does that say of the design?
    - **a**: High, since managed settings outrank every other level for this key
-   - **b**: The smallest of them, since the strictest value from any source wins
+   - **b**: The lowest of the three, since the stricter choice stands
    - **c**: Max, since the user file is read last and so wins
-   - **d**: High, since the project file may not lower an organisation's cap
+   - **d**: High, since a project file may not lower an organisation's cap
 
-62. Scenario: A developer at Gorse Bank says that a restriction she set in her local file is not honoured, and the platform team cannot tell why. Which two commands on her machine answer that?
-   - **a**: /permissions, which lists the rules, and claude update, which fetches the newest policy
-   - **b**: /memory, which shows the loaded files, and claude init, which writes a fresh settings file
-   - **c**: /model, which shows the chosen model, and claude logout, which clears the stored session
+62. Scenario: A developer at Gorse Bank says that a restriction in her local file is not honoured, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?
+   - **a**: /memory, which shows the loaded files, and claude init, which writes a fresh settings file
+   - **b**: /model, which shows the chosen model, and claude logout, which clears the stored session
+   - **c**: /permissions, which lists the rules, and claude update, which fetches the newest policy
    - **d**: /status, which shows the setting sources, and claude doctor, which lists what was dropped
 
-63. Scenario: Hart Media's managed policy lists an MCP server in a single record that gives both its name and its address, to be safe. What does the page say about such a record?
-   - **a**: It is invalid, since an entry holds exactly one of the three identifying keys
-   - **b**: It is valid and stricter, since two keys must both match for the server
-   - **c**: It is valid, but only the address is read when both keys are set
-   - **d**: It is valid for a deny list, and invalid for an allow list only
+63. Scenario: Hart Media's platform team writes a managed MCP allowlist entry that gives both a server name and its address, believing two keys make the entry stricter. What does the page say about such an entry?
+   - **a**: It is invalid, since only one of the three identifiers fits per record
+   - **b**: It is valid, but only the address is read when both keys are set
+   - **c**: It is valid for a deny list, and invalid for an allow list only
+   - **d**: It is valid and stricter, since two keys must both match for the server
 
 <details>
 <summary>Answer key</summary>
@@ -421,10 +421,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 2. **a**. The pillar "Accepts a lower first-pass accuracy and a pilot, and measures adoption", which is what the sponsor asked for (module 79, page 1). *b* is ruled out because efficiency claims "The same work, with less effort per unit", and there was no work done for this group before. *c* is ruled out because productivity means "People get more done", and no staff member is the beneficiary here. *d* is ruled out because the cost pillar claims "Work costs less in total", and the sponsor named a new service.
 3. **d**. A team needs independent parts, and these share one context: "cannot be split without losing information" (module 80, page 1). *a* is ruled out because value is only the third condition: "it needs independence, volume and value together". *b* is ruled out because the first test fails whatever the window size: "A team that fails the first test is a worse single agent". *c* is ruled out because a workflow is for a known path: "Is the path known? Then it is a workflow, and it costs one chat per step", and drafting that depends on other drafts has no fixed order.
 4. **b**. Price comes last and among the survivors: "Price enters last, and only among the designs that were not rejected" (module 80, page 2). *a* is ruled out because "a cheaper design with a missing feedback loop is not cheaper, only unfinished". *c* is ruled out because the rule picks "the cheapest of those", and a design that needs revision is not a rejected one. *d* is ruled out because "when every design is rejected there is no winner", and here two designs survive.
-5. **d**. A subagent hands back a digest: "Return a digest, not a transcript" (module 80, page 2). *a* is ruled out because the transcript is the problem and not its size: "The subagent's reading is thrown away when it finishes". *b* is ruled out because the contract fixes the output: "What goes back is the finding, with its source, in the contract's shape". *c* is ruled out because the page asks for the objective and boundaries so "that two subagents do not research the same thing or leave a gap between them".
-6. **b**. The key must name the intention: "A new key for each attempt turns the retry into a new refund" (module 81, page 1). *a* is ruled out because recording both together is the cure: "Record the key together with the effect". *c* is ruled out because the flaw is that the value changes between attempts, and "The key names the intention, not the attempt". *d* is ruled out because making it once is correct: "The key is made once, before the first call, from what identifies the task".
-7. **c**. A refusal is a fatal failure, and the runner "never retries the second" kind (module 81, page 1). *a* is ruled out because "An unlimited retry is a way to spend money while nothing changes", and ten is the same mistake. *b* is ruled out because "The key names the intention, not the attempt", and a missing permission is not a problem of recognising repeats. *d* is ruled out because the breaker counts "consecutive failures for one agent", and a missing permission is a fact about the account.
-8. **a**. The table gives the rule: "A success closes it; a failure opens it again" (module 81, page 1). *b* is ruled out because a breaker closes only on a success: "A success closes it". *c* is ruled out because in the half-open state "One probe call goes through", and a failure sends the breaker back to open. *d* is ruled out because a success is needed to close it, and the page says "A success resets the count, so scattered failures do not open it", which concerns the closed state.
+5. **d**. A subagent's reading is thrown away when it finishes, so what goes back is a digest in the contract's shape: "Return a digest, not a transcript" (module 80, page 2). The finding with its source leaves the coordinator's window free for writing. *a* is ruled out because the page asks for the objective and boundaries so "that two subagents do not research the same thing or leave a gap between them". *b* is ruled out because the transcript is the problem and not its size: "The subagent's reading is thrown away when it finishes". *c* is ruled out because "What goes back is the finding, with its source, in the contract's shape".
+6. **b**. The key must name the intention and be made once, before the first call, from what identifies the task (module 81, page 1). The page says "A new key for each attempt turns the retry into a new refund", which is the flaw here. *a* is ruled out because "A new key for each attempt turns the retry into a new refund". *c* is ruled out because the flaw is that the value changes between attempts, and "The key names the intention, not the attempt". *d* is ruled out because the page says "Record the key together with the effect", in one transaction.
+7. **c**. A refusal is a fatal failure, and the runner "never retries the second" kind (module 81, page 1). A timeout or a rate limit is transient and is repeated up to a fixed number of calls. *a* is ruled out because "The key names the intention, not the attempt", and a missing permission is not a problem of recognising repeats. *b* is ruled out because the breaker counts "consecutive failures for one agent", and a missing permission is a fact about the account. *d* is ruled out because "An unlimited retry is a way to spend money while nothing changes", and ten is the same mistake.
+8. **a**. A failed probe opens the breaker again: "A success closes it; a failure opens it again" (module 81, page 1). The agent is not reached until the next probe, which saves calls in a long outage. *b* is ruled out because "A success resets the count, so scattered failures do not open it", which concerns the closed state. *c* is ruled out because "A success closes it", and nothing here succeeded. *d* is ruled out because "One probe call goes through", and a failure sends the breaker back to open.
 9. **a**. The capstone sets the rung: "an augmented call with a small fixed workflow, not an agent, because the path is known" (module 93, page 1). *b* is ruled out because "A team of agents would cost about 15 times a chat, and the value does not pay it". *c* is ruled out because "The pattern is the lowest rung that meets the need", and an agent with every tool is a higher one. *d* is ruled out because the design needs "Retrieve by the reader's rights", which a pasted text does not give.
 10. **b**. The chain removes first and ranks after: "a question that shares nothing with any readable document gets no evidence" (module 93, page 1). *a* is ruled out because "Documents the reader may not read are removed first, then the rest are ranked". *c* is ruled out because "a question that shares nothing with any readable document gets no evidence", so no chunk is returned. *d* is ruled out because "an answer whose quote is missing is held as unsupported", and the chain never sends it out with a flag.
 11. **d**. A high finding rejects: "The design is rejected until it is fixed" (module 93, page 2). *a* is ruled out because a medium flaw "weakens a design without breaking it", and a missing way back is a flaw that can cause harm that cannot be undone. *b* is ruled out because the low bullet reads "It is recorded and does not hold the design back", and a missing rollback is not low. *c* is ruled out because "reject if any finding is high", so a high finding is not a revision.
@@ -456,15 +456,15 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 37. **d**. The page describes the audit: "usage broken down by API key and model" from the Usage page (module 89, page 1). *a* is ruled out because "There is notice, and it is finite", and waiting leaves no time to find the applications. *b* is ruled out because a blind change of ids ships the failures the audit is meant to find: "You cannot migrate what you cannot find". *c* is ruled out because a recollection is not an audit, and the export "finds the keys; the keys point to the applications".
 38. **b**. The edge is stated: "A rise exactly at the budget passes and one point over it is refused" (module 89, page 2). *a* is ruled out because the check refuses only a rise beyond the budget, and cost is judged "against a budget set before the run". *c* is ruled out because the check is made "against a budget set before the run", and the rule keeps no reserve beyond it. *d* is ruled out because the five checks are each judged on their own, and "every failing check adds a reason".
 39. **c**. The example prints the result: "the same change is a go with no loss and three gains" (module 93, page 1). *a* is ruled out because "an A/B test comes after it", and the gate's two keys are no protected loss and no net loss. *b* is ruled out because the rule is "no protected segment may lose a case", and it asks for no gain there. *d* is ruled out because the gate judges the cases it has: "the losses must not outnumber the gains", and a possible future loss is not one of them.
-40. **a**. The page works the case: "a third of a hundred is 33.3, which rounds up to 34" (module 93, page 2). *b* is ruled out because the percent is taken "with that percent rounded up", which gives 66 and not 67. *c* is ruled out because 33 is the rounded-down share, and the rule is "100 minus the review cost as a percent of the error cost, with that percent rounded up". *d* is ruled out because zero comes only when "A check that costs as much as an error, or more, needs no accuracy", and here the check is cheaper.
-41. **a**. The page treats the edge as passing: "three stages pass" and "One step past any of them is a finding" (module 93, page 2). *b* is ruled out because the rule fires only below three: "fewer than three roll-out stages". *c* is ruled out because the review must "treat the edge as the design's friend", and a pass at the edge carries no note. *d* is ruled out because the `big-bang-rollout` rule is medium and applies to "fewer than three roll-out stages", not to three.
-42. **b**. Results are written as work is done: "Write on success, immediately" (module 81, page 2). *a* is ruled out because a restart is the expensive path: "it discards the work that finished, which is the expensive part". *c* is ruled out because the checkpoint is a store of finished results, not context for the next task: "A checkpoint is a store of finished results". *d* is ruled out because "swallowing it hides the defect and reports unverified results".
+40. **a**. The page works the case: "a third of a hundred is 33.3, which rounds up to 34" (module 93, page 2), so the accuracy is 100 minus 34, which is 66. *b* is ruled out because 33 is the rounded-down share, and the rule is "100 minus the review cost as a percent of the error cost, with that percent rounded up". *c* is ruled out because the percent is taken "with that percent rounded up", which gives 66 and not 67. *d* is ruled out because zero comes only when "A check that costs as much as an error, or more, needs no accuracy".
+41. **a**. The page treats the edge as passing: "three stages pass", and "One step past any of them is a finding" (module 93, page 2). The roll-out here sits exactly at the edge. *b* is ruled out because the review must "treat the edge as the design's friend", and a pass at the edge carries no note. *c* is ruled out because the `big-bang-rollout` rule is medium and applies to "fewer than three roll-out stages", not to three. *d* is ruled out because the rule fires only below three: "fewer than three roll-out stages".
+42. **b**. Results are written as work is done: "Write on success, immediately" (module 81, page 2). A crash in the tenth task then loses nothing from the first nine, and the next run does the rest. *a* is ruled out because a restart is the expensive path: "it discards the work that finished, which is the expensive part". *c* is ruled out because "swallowing it hides the defect and reports unverified results". *d* is ruled out because the checkpoint is a store of finished results, not context for the next task: "A checkpoint is a store of finished results".
 43. **d**. The separation is the platform's: "one workspace per tenant, with its own keys, limits and spend" (module 83, page 1). *a* is ruled out because "code-only separation fails the first time a filter is forgotten". *b* is ruled out because the workspace is the unit: "A single shared workspace for all tenants is a finding for a multi-tenant requirement". *c* is ruled out because the finding follows from the shape of the deployment, since "the separation then rests on application code alone".
-44. **c**. The page warns that schemas "are compiled into grammars that are cached separately from message content, so they do not get the protections of the prompt" (module 83, page 1). *a* is ruled out because the objection concerns where the schema is stored, and the page says only "put no health data in a schema". *b* is ruled out because the page names no such limit, and the rule it gives is "put no health data in a schema". *d* is ruled out because tenants are separated by workspace, "one workspace per tenant", and the page does not say that a schema crosses tenants.
+44. **c**. The page warns that schemas "are compiled into grammars that are cached separately from message content, so they do not get the protections of the prompt" (module 83, page 1), so health data stays out of them. *a* is ruled out because the page names no such limit, and the rule it gives is "put no health data in a schema". *b* is ruled out because tenants are separated by workspace, "one workspace per tenant", and a schema per tenant would still hold the data. *d* is ruled out because the objection concerns where the schema is stored, and the page says "put no health data in a schema".
 45. **b**. A layer needs testing against what it claims to remove: "tests that plant identifiers of every kind and check that none reaches the request" (module 83, page 2). *a* is ruled out because "A person's name has no fixed shape, so a pattern layer leaves it in", and the page treats that as a gap to close. *c* is ruled out because "the data has already crossed the boundary, nothing proves the instruction was followed". *d* is ruled out because the layer still removes the shapes it finds, and the page says it "cannot leak what it never had".
 46. **d**. The route checks the source before the score: "An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99" (module 90, page 1). *a* is ruled out because "confidence is not evidence", and a model can be certain and wrong. *b* is ruled out because review is for answers the source supports: "a low-consequence action goes out unreviewed only at a confidence of at least 95, and below it goes to review". *c* is ruled out because the example holds the answer: "An answer whose quote is not in the source is held", and a note would still send the unsupported text out.
-47. **a**. The design treats a refusal as an outcome: "the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model" (module 90, page 1). *b* is ruled out because the page says "the context is reset (the turn that caused it removed or rephrased) before the conversation continues", not resent. *c* is ruled out because the page names two recoveries, with "or the request is retried on a different model" as the second, and sampling is neither. *d* is ruled out because "the stop_details fields can be null", so the user-facing message comes from the application.
-48. **c**. The injection control has several parts: "untrusted content only in tool results, JSON-encoded; screen tool output; least privilege" (module 90, page 1). *a* is ruled out because untrusted content belongs "only in tool results", and not among the instructions. *b* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip". *d* is ruled out because pattern lists belong to the input layer, and the page says "A screen with a small model reduces risk and does not remove it".
+47. **a**. The design treats a refusal as an outcome: "the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model" (module 90, page 1). *b* is ruled out because "the stop_details fields can be null", so the user-facing message comes from the application. *c* is ruled out because the page names two recoveries, with "or the request is retried on a different model" as the second, and sampling is neither. *d* is ruled out because the page says "the context is reset (the turn that caused it removed or rephrased) before the conversation continues", not resent.
+48. **c**. The injection control has several parts: "untrusted content only in tool results, JSON-encoded; screen tool output; least privilege" (module 90, page 1). The narrow right limits what a hidden line can do. *a* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip". *b* is ruled out because pattern lists belong to the input layer, and the page says "A screen with a small model reduces risk and does not remove it". *d* is ruled out because untrusted content belongs "only in tool results", and not among the instructions.
 49. **c**. The report is a measure with an owner, not a repair: "monitored and not prevented" is the wording the page gives the residual column (module 90, page 2). *a* is ruled out because "The report does not fix anything on its own", so nothing is prevented before an answer goes out. *b* is ruled out because "The design cannot prevent unfairness by saying so; it measures it", and a measured gap is a risk that remains. *d* is ruled out because the duty stays with the deployment: "A model does not make a system compliant", and the vendor does not take the risk over.
 50. **a**. The register's test is mechanical: "a row with a control that does not exist is a wish" (module 90, page 2). *b* is ruled out because "every control in the register is a control in the design". *c* is ruled out because "A row with no owner has nobody to call; a row with a control that does not exist is a wish", and the two faults are separate. *d* is ruled out because "the residual column says what is left" once a control works, and a control that does not exist leaves the whole risk.
 51. **d**. The page ties the assumption to a computation: "Compute reviewer hours per day from volume and routing rates" (module 79, page 2). *a* is ruled out because the pilot's own conditions are the problem: "The pilot's conditions were friendly in ways nobody wrote down". *b* is ruled out because that test belongs to another row: "Count escalations per hundred tasks and staff for the rate" answers whether people covered edge cases. *c* is ruled out because "Test permissions with the least privileged real role" is the test for the access assumption, not for reviewers.
@@ -476,9 +476,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 57. **a**. A miss is reported with its size: "A miss says by how much" (module 91, page 2). *b* is ruled out because a bare failure "starts an argument that a number would have ended". *c* is ruled out because "A ceiling is met below it and a floor is met above it", and 990 is below the floor. *d* is ruled out because the unit is the target's own: "The target has a number and a unit and a direction".
 58. **b**. The page gives the habit: "change a promise through the same channel that made it, with a reason, before the date it matters" (module 91, page 2). *a* is ruled out because the page says "Say early what the design cannot promise". *c* is ruled out because "Promise what you measure and measure what you promise", and the average hides the costly segment. *d* is ruled out because a change must go "through the same channel that made it", and the sponsor was promised the number.
 59. **d**. The review is written for two readers: "the verdict first, then the scorecard, then the findings in their order, each with the evidence from the design and the fix" (module 93, page 2). *a* is ruled out because "A list ordered only by domain buries the high findings in the middle", and the sponsor stops early. *b* is ruled out because a review without a conclusion leaves the sponsor nothing to decide: "The sponsor stops at the verdict and the scorecard". *c* is ruled out because "the engineers read the findings", and the sponsor does not read the analysis.
-60. **c**. The page says the default is to carry on: "If the fetch fails, Claude Code continues without the remote policy and warns, unless `forceRemoteSettingsRefresh` is set, which makes startup fail closed" (module 92, page 1). *a* is ruled out because that key means "only managed hooks run", and says nothing of a start without the policy. *b* is ruled out because it is a list of models: "The **lock** is `availableModels`, a list". *d* is ruled out because that key rejects the flags "that sideload plugins, agents and MCP servers", and has nothing to do with fetching.
+60. **c**. The default is to carry on: "If the fetch fails, Claude Code continues without the remote policy and warns, unless `forceRemoteSettingsRefresh` is set, which makes startup fail closed" (module 92, page 1). *a* is ruled out because it is a list of models: "The lock is `availableModels`, a list". *b* is ruled out because that key rejects the flags "that sideload plugins, agents and MCP servers", and has nothing to do with fetching. *d* is ruled out because that key means "only managed hooks run", and says nothing of a start without the policy.
 61. **b**. The page gives the rule: "when several levels set a cap, the lowest applies, so a developer may lower the organisation's cap and nobody can raise it" (module 92, page 1). *a* is ruled out because the key is one of the two that go the other way, where "a stricter value is always welcome". *c* is ruled out because "nobody can raise it", and a higher cap in a lower file has no effect. *d* is ruled out because "a developer may lower the organisation's cap".
-62. **d**. The page gives the lookup: "`/status` shows the `Setting sources` line, which names the managed source Claude Code selected, and `claude doctor` lists what it dropped" (module 92, page 1). *a* is ruled out because the answer is "a lookup and not a guess", and a command that fetches a policy does not say what was dropped. *b* is ruled out because a fresh settings file would hide the evidence, and the answer is "a lookup and not a guess". *c* is ruled out because the lookup needs the line that "names the managed source Claude Code selected", and a model choice or a sign-out shows none.
-63. **a**. The page states the shape: "Each entry has exactly one of `serverName`, `serverCommand` or `serverUrl`: an entry with two keys is invalid" (module 92, page 2). *b* is ruled out because "an entry with two keys is invalid", and it is not stricter. *c* is ruled out because the page gives no preference between keys, and states that "Each entry has exactly one of". *d* is ruled out because the rule is about the entry itself, and "A denied server wins over an allowed one" is a different rule about two lists.
+62. **d**. The page gives the lookup: "`/status` shows the `Setting sources` line, which names the managed source Claude Code selected, and `claude doctor` lists what it dropped" (module 92, page 1). *a* is ruled out because a fresh settings file would hide the evidence, and the answer is "a lookup and not a guess". *b* is ruled out because the lookup needs the line that "names the managed source Claude Code selected", and a model choice or a sign-out shows none. *c* is ruled out because the answer is "a lookup and not a guess", and a command that fetches a policy does not say what was dropped.
+63. **a**. The page states the shape: "Each entry has exactly one of `serverName`, `serverCommand` or `serverUrl`: an entry with two keys is invalid" (module 92, page 2). *b* is ruled out because the page gives no preference between keys, and states that "Each entry has exactly one of". *c* is ruled out because the rule is about the entry itself, and "A denied server wins over an allowed one" is a different rule about two lists. *d* is ruled out because "an entry with two keys is invalid", and it is not stricter.
 
 </details>

@@ -1,0 +1,484 @@
+# Professional mock exam 2
+
+**Level:** Architect Professional · **Module 94:** Exam readiness 4 · **Page 4 of 4**
+**Exams:** P1 to P7 (CCAR-P; the questions follow the Professional blueprint over the content of modules 79 to 93)
+
+**After this page you can** tell whether you are ready for the Professional exam and which domains need more work.
+
+This mock exam covers **the content of Level 4** (modules 79 to 93), as the Professional exam draws on the architect's whole practice, and not one page or one module. Level 4 has two mock exams of 63 questions each, the Professional exam's number of items; this is the second, and no question of one repeats a question of the other. It is written in the exam's style: a named scenario of two or three sentences with a constraint, one best answer and three plausible alternatives, each of which is a mistake a practitioner could make. Every question is the course's own, written fresh; no question comes from a live exam, and none repeats a question of a page quiz, a module quiz or another mock exam. The facts behind each answer were read on 2026-10-04 from the pages named on the module pages, so a reader who studies the pages can answer each question from the page it is drawn from. The real exam has multiple-choice and multiple-response items; this mock has single-answer items only.
+
+## How to take it
+
+1. **Choose your conditions.** For a readiness test, take all 63 questions in **120 minutes** with no notes, which is the Professional exam's pace of about 1.9 minutes an item. For learning, take it untimed and read each explanation.
+2. **Answer every question.** The guides describe no penalty for a wrong answer.
+3. **Mark each answer** and read the explanations only after you finish.
+4. **Score by domain,** not only in total, using the table below, and spend your next study session on the weakest domain with the most weight.
+
+There is no official conversion from a mock percentage to a result. The real exam reports the percent correct for each domain, but **pass or fail depends on the total: a scaled score of 720 on a scale from 100 to 1,000**. Treat the mock as a guide to where you stand in each domain and never as a prediction.
+
+## What it covers
+
+The mock has **63 questions**, the number of items on the real exam. They are spread by the Professional blueprint's weights (each domain's weight times 63, rounded so that the total stays 63) and grouped by domain here for easy scoring; the real exam mixes them. The share column is the count divided by 63, set beside the official weight so that you can see the split matches.
+
+| Questions | Domain | Weight | Count | Share of this mock | Drawn from modules |
+|---|---|---|---|---|---|
+| 1 to 11 | P1 Solution design and architecture | 17% | 11 | 17.5% | 79, 80, 81, 93 |
+| 12 to 19 | P2 Claude models, prompting and context | 13% | 8 | 12.7% | 82, 84 |
+| 20 to 31 | P3 Integration | 19% | 12 | 19.0% | 85, 86, 87 |
+| 32 to 41 | P4 Evaluation, testing and optimisation | 16% | 10 | 15.9% | 88, 89, 93 |
+| 42 to 50 | P5 Governance, safety and risk | 14% | 9 | 14.3% | 83, 90 |
+| 51 to 59 | P6 Stakeholder communication and lifecycle | 14% | 9 | 14.3% | 79, 91, 93 |
+| 60 to 63 | P7 Developer productivity and operational enablement | 7% | 4 | 6.3% | 92 |
+
+For a miss, open the page that the question's explanation names, as (module, page), and reread the passage it quotes. A cluster of misses in one domain points at that domain's modules in the last column. Integration (P3) and solution design (P1) carry the most weight, so they repay the first revision session.
+
+## Mock exam
+
+This mock exam covers the content of Level 4, modules 79 to 93. Choose one answer for each question.
+
+1. Scenario: Fell Utilities must let an agent call a vendor's booking tool that changes records and offers no idempotency key. The agent's runner retries on timeouts. What does the architect do?
+   - **a**: Wrap it with an identifier of its own, or keep any repeat from reaching it
+   - **b**: Tell the agent in its prompt to avoid booking the same slot twice
+   - **c**: Retry until a reply arrives, since every failure of this kind is temporary
+   - **d**: Allow retries as they are, since the model reasons correctly about each attempt
+
+2. Scenario: Marden Health's pilot ran with ten volunteers who sent clean cases, and the sponsor wants the roll-out to two thousand users to begin next week. Which test does the roll-out plan need for the pilot's assumption about what the volunteers sent?
+   - **a**: Buy licences for all two thousand users and read the first week's tickets
+   - **b**: Raise the model tier before the roll-out, so that odd inputs are handled better
+   - **c**: Sample real production traffic and evaluate it by slice
+   - **d**: Count escalations per hundred tasks and staff the help desk for that rate
+
+3. Scenario: A design at Tamsin Rail passes each customer message straight to a model with no check on its length, its content or its source, and it has a good processing stage, an output check and a feedback loop. What does the four-stage review record?
+   - **a**: A missing feedback stage, which is a high finding for lack of any learning
+   - **b**: A missing processing stage, which is a medium finding that asks for revision
+   - **c**: No finding, since a good output check also catches the faults of bad input
+   - **d**: The input side is missing, a high-severity gap that rejects it
+
+4. Scenario: A refund screen at Ashby Mutual shows the handler a model's ruling and a green button. Handlers approve over 99 percent of what appears. What does the design lack?
+   - **a**: A disclosure line on the screen, so that the handler knows AI helped
+   - **b**: The source material next to the answer, so that the review means something
+   - **c**: A lower accuracy target for the model, so that handlers have more to correct
+   - **d**: A second model that repeats the verdict, so that two opinions agree
+
+5. Scenario: A review at Harlow Retail examines an agent that chooses its own tools for open-ended supplier research, where the path depends on what is found. Everything else in the design is sound. Which finding does the rubric raise for the pattern?
+   - **a**: A low finding for team below price, since a lone agent costs about four chats
+   - **b**: A medium finding for autonomy without need, since any agent is more than a plan requires
+   - **c**: None, since the rule fires only where the route is already known
+   - **d**: A high finding for a missing stage, since an agent has no fixed processing step
+
+6. Scenario: An automated workflow at Torrance Mutual approves payments under a daily spending limit. The team measured 99.8 percent accuracy in testing and proposes to enforce the limit in the system prompt. Where should the limit live?
+   - **a**: In the model's tool description, so that the model reads it at every call
+   - **b**: In the prompt, with a check in the next test run, since accuracy is already high
+   - **c**: In a reviewer's checklist, so that a person catches every breach by hand
+   - **d**: In code outside the model, since a control that must hold cannot depend on behaviour
+
+7. Scenario: A sponsor at Pellam Retail funds a chat design for its agreed targets, the 95th percentile latency and availability. Which value claim is that, and what does it influence in the design?
+   - **a**: The service-level pillar, which affects model tier, caching, concurrency and accept-and-poll
+   - **b**: Cost, which counts tokens, review time and rework and not the model price alone
+   - **c**: Productivity, which favours an augmented assistant with a person in the loop
+   - **d**: Efficiency, which favours a workflow on the routine path with people kept for exceptions
+
+8. Scenario: At Northwind Insurance about 15 percent of claims are disputed, and nobody can list the steps in advance, though a handler will decide each one anyway. Which design does the worked example reach for them?
+   - **a**: A single call that receives the claim text and returns an approval
+   - **b**: An assistant that gathers the file and leaves the ruling to a person
+   - **c**: A team of agents that investigates each dispute in parallel and rules on it
+   - **d**: A workflow of fixed calls that rules on each dispute in a set order
+
+9. Scenario: A sponsor at Ivel Bank claims its new triage assistant lowers cost. The team plans to show the saving as the model's price per token, which is below the price of the old tool. What should the design measure?
+   - **a**: The share of customers reached in a new way, since a new reach shows value
+   - **b**: The spend per finished task, adding review time and rework, against the human baseline
+   - **c**: The model's token rate, since the supplier publishes it and it needs no estimate
+   - **d**: The count of hours saved for each person each week, since staff time is the real cost, as most teams do
+
+10. Scenario: A research run at Pike Biotech crashes after a payment tool acts but before its result is written to the store. The next run starts from the store. How is the effect kept from happening twice?
+   - **a**: Write the results at the end of the run, so that a crash is never half done
+   - **b**: Mint a fresh identifier for the next run, since a new run is a new intention
+   - **c**: Skip the task on the next run, since its effect already happened
+   - **d**: Resume with the recorded identifier, so that the first receipt comes back
+
+11. Scenario: A lead agent at Rowan Research dispatches three subagents with the one-line task "look into the market", and the subagents return overlapping findings with a gap in the middle. What should the lead write instead?
+   - **a**: A brief naming the objective, format, tools and boundaries
+   - **b**: A longer one-line task with more adjectives about thoroughness
+   - **c**: The full conversation so far, so that no subagent lacks context
+   - **d**: Nothing, because each subagent should find its own task from the lead's files
+
+12. Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. How should the design behave?
+   - **a**: Drop the lowest-priority static module, since every module has a rank
+   - **b**: Send it anyway and let the model discard the surplus, since models skip what does not fit
+   - **c**: Decline to send it, since a cut rulebook is worse than no answer
+   - **d**: Trim the end of the policy until the request fits, since the opening lines matter most
+
+13. Scenario: A voice product at Hallow Studio peaks at 500 calls a minute, each carrying 800 fresh input tokens and producing 1,500 tokens of reply. The plan allows 30 percent spare capacity and checks Start (1,000 requests, 2 million input, 400,000 output tokens a minute) and Build (5,000, 5 million, 1 million). Which plan does it pick?
+   - **a**: Scale, because tokens read from a cache count toward the input limit
+   - **b**: Start, because the request rate of 650 and input volume of 520,000 are both inside it
+   - **c**: The middle tier, since generated text at 975,000 outruns the entry tier's cap
+   - **d**: Start, because only the request rate of a service decides the tier
+
+14. Scenario: Admission at Elwood Foods checks a team whose monthly allowance is 100 and whose spend so far is 90, and the next call is estimated to take exactly 10. Which decision does admission return?
+   - **a**: Warn, since the total reaches the ceiling without passing it
+   - **b**: Degrade to a cheaper model silently, since the team is nearly out
+   - **c**: Allow without comment, since the budget is not exceeded
+   - **d**: Block, since the estimate takes the team to its whole budget
+
+15. Scenario: Garnet Post's gateway returns a ticket number at once for slow jobs and does the work behind the scenes. A caller's network drops and it re-submits the same job. What should the design use to keep the work from running twice?
+   - **a**: A new ticket for every submission, so that each try is tracked separately
+   - **b**: A longer timeout for the caller, so that no second submission is needed
+   - **c**: A rule in the prompt that tells the model to skip duplicate jobs
+   - **d**: The identifier handed back, treated as the key for that request
+
+16. Scenario: Perrin Cloud's assembler holds two dynamic modules of equal priority, a long customer history and a long list of offers, and the request is over budget by a little. Which module does it drop first?
+   - **a**: Neither, since two equal modules can only be cut together
+   - **b**: The one that sits later in the final sequence
+   - **c**: The one that the caller names, since callers know which text matters
+   - **d**: The one that holds more tokens, since dropping it frees the most room
+
+17. Scenario: Orlan Support picks the model for a classification workload by reading its name in the lineup, and a new release replaces the old one without a new check. Which practice does the page require for the capability the task needs?
+   - **a**: Run an evaluation on candidates, and repeat it whenever one is swapped out
+   - **b**: Copy the tier from the previous model, since replacements keep their predecessor's level
+   - **c**: Read the capability from the model's price, since price tracks ability exactly
+   - **d**: Take the highest rung of the lineup, since a larger model is never worse at it
+
+18. Scenario: Ferrow Retail's finance lead asks for showback that takes each team's total volume and applies a single blended rate. What does the gateway design do instead?
+   - **a**: Round each row first, then add them, since cents belong to rows
+   - **b**: Price input only, since outputs are small in most workloads
+   - **c**: Use the average, since one blended rate is the simplest to explain
+   - **d**: Charge each usage kind at its own model price, cache reads cheap and output dear
+
+19. Scenario: A prompt module at Lanyard Health is marked static and holds the text "Dear {customer}" in its first line, and the team defends it as convenient. What does the assembler do, and why?
+   - **a**: It moves the module behind the dynamic ones, since the order is chosen by callers
+   - **b**: It refuses to build the request, since a changing value in the prefix breaks the cache
+   - **c**: It fills the value in and caches the result, since the cache matches on meaning
+   - **d**: It drops the module as the lowest priority, since a budget would cut it first
+
+20. Scenario: A team at Selby Finance enables the variable that emits raw request and response bodies, intending only to see tool inputs. What does the page say about that setting?
+   - **a**: It redacts prompts by default and so changes nothing
+   - **b**: It reveals tool inputs alone, since the narrower variable is the one that matters
+   - **c**: It exposes all the other content too, as payloads hold the entire conversation
+   - **d**: It stays off in a project file unless the repository sets it
+
+21. Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the form that exception names, where each lookup depends on the last result. A single top-k list fails on it. Which mechanism does the page match to this?
+   - **a**: A cached prompt that holds the whole rulebook, since nothing can then be missed
+   - **b**: A structured query run by a tool, since a form is a record
+   - **c**: An agent that searches, issuing one query after another
+   - **d**: A keyword index with a larger k, since more results reach more links
+
+22. Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licences. Which cost does the page name?
+   - **a**: Nothing beyond a configuration file, since a gateway is only a setting, as many reviews assume
+   - **b**: Running it as infrastructure that must follow whatever its clients send
+   - **c**: A second provider key for every team, since gateways issue none
+   - **d**: The loss of the logs, since a gateway cannot record a refusal
+
+23. Scenario: Pelham Health's guidance changes weekly, differs by reader group and must name its source in every answer. A proposal is to train the facts into the model. What does the page conclude?
+   - **a**: Retrieval, since weights cannot cite or be withheld from an audience
+   - **b**: Train them in, since weights keep facts stable between releases
+   - **c**: Train them in, using the Claude API's fine-tuning service
+   - **d**: Cache them in the prompt, since the same text suits every request, as a first step
+
+24. Scenario: To cut the monitoring bill, a team at Rowley Travel proposes to keep a random tenth of the data points on every time series. What does the page conclude?
+   - **a**: It is wrong only for alerts, since dashboards can tolerate gaps
+   - **b**: It is sound, since a random sample estimates any rate well
+   - **c**: It is sound, since traces are sampled the same way in the example, as the sponsor prefers
+   - **d**: Wrong rates, since a metric is a count and a missing count is wrong
+
+25. Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. What should the job do?
+   - **a**: Purge the stale records of retired and revised sources before loading the latest versions
+   - **b**: Run the same job twice a night, since a second pass will catch the leaflet
+   - **c**: Lower the number of results returned, so that the old leaflet falls out of the top
+   - **d**: Re-embed every chunk with the same model, since vectors can drift
+
+26. Scenario: A small internal agent at Yarrow Print has six tools, every one of which is used in nearly every request, and each definition is short. An engineer proposes the tool search tool to modernise it. What does the page say?
+   - **a**: Defer all six, since the cache keeps the prefix untouched
+   - **b**: Keep them all loaded, since discovery adds a step and nothing to tune away
+   - **c**: Split the six into two agents, since fewer tools per agent is always safer
+   - **d**: Defer five of the six, since discovery is the better design for any agent
+
+27. Scenario: A drift check at Oakley Pay stores a baseline of zero for the share of requests refused. This week the share is 3 percent, and the check divides by the baseline. What should the rule do?
+   - **a**: Skip the metric, since a zero baseline carries no information
+   - **b**: Raise the baseline to the current value, since planned change resets it
+   - **c**: Count any rise from nothing as a 100-point move and skip the division
+   - **d**: Report the move as 3 percent, since that is the figure on the dashboard
+
+28. Scenario: In a trace at Dunmore Media, one lookup was repeated four times in a row before it succeeded, and the request returned a correct answer with a normal latency. Under a tail-based rule, why might that trace still be kept?
+   - **a**: Because a correct answer with normal latency is the rarest kind to find
+   - **b**: Because retries of a tool are always logged as errors in the span
+   - **c**: Because every successful trace is stored when it follows a failure
+   - **d**: Three or more calls of a single tool mark a loop that eventually worked
+
+29. Scenario: Ordway Telecom indexes eight years of call transcripts in fixed windows of 200 words, and answers quote half a line from one participant and half from the other. Where should the cut be made?
+   - **a**: At a larger window of 800 words, so that every exchange arrives whole
+   - **b**: At the same size, with a stronger embedding model to rank the pieces
+   - **c**: At a smaller window of 50 words, so that fewer sentences share a chunk
+   - **d**: At each change of speaker, with long turns split at sentence ends
+
+30. Scenario: A review at Lowden Care compares a support agent's tools with its role and plans to delete everything the role does not use, and nothing else. The role also needs a tool the agent was never given. What does the page say about the review?
+   - **a**: It is complete, since least privilege is only a matter of taking tools away
+   - **b**: It must add logging for every tool left, since removal alone is a weak control
+   - **c**: It must also report the shortfall, since pruning alone leaves the job unfinishable
+   - **d**: It must remove the missing tool from the role description, so that the two agree, for the next release
+
+31. Scenario: Hendry Stores' agent is offered 120 tools through a search tool, and every request starts with a search because all tools are deferred. Latency is poor. Which configuration does the guidance advise?
+   - **a**: Replace the search tool with shorter tool descriptions for all 120
+   - **b**: Load the three to five most used definitions up front and defer the long tail
+   - **c**: Defer nothing, since a search adds a round trip to each call
+   - **d**: Defer the most used ones too, since fewer loaded tools means fewer tokens
+
+32. Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. What does the page advise first?
+   - **a**: A shadow run, which exposes no user and compares outputs case by case
+   - **b**: A comparison of average segment accuracies, since averages summarise the change
+   - **c**: An A/B test on all users, since it is the one test that predicts reaction
+   - **d**: Release to half of users, since a large exposure gives the clearest data
+
+33. Scenario: A change at Ravel Freight is refused by the gate on a refund case that must pass, and the old model's retirement is 40 days away. The lead proposes to ship anyway. What does the page say?
+   - **a**: Ship it, since the calendar decides and the gate only advises
+   - **b**: Re-weight the failing case until the average rises
+   - **c**: Make it a work list, one owner for each reason
+   - **d**: Watch the failure in production and fix it later
+
+34. Scenario: Dovedale Insurance's assistant answers a coverage question with a claim the policy extract does not make, though the right passage was in the prompt and the reply has the right shape. Where does the diagnosis place the fault, and what does it try?
+   - **a**: In retrieval, by rebuilding the index, since evidence is always the first suspect, as the vendor suggests
+   - **b**: In the model, by moving to a larger one, since a stronger model reads better
+   - **c**: In format, by adding an output schema, since shape failures are the cheapest
+   - **d**: In grounding, by allowing it to say it does not know and by requiring quotes first
+
+35. Scenario: A team at Merrin Air trims its instructions and switches to a smaller model to cut delay before any evaluation of the full-strength system exists. Which order does the documentation advise?
+   - **a**: Cut delay first, since every later change is judged against the speed it gives
+   - **b**: Engineer a prompt that performs well without constraints, then reduce latency afterwards
+   - **c**: Cut delay only on the mean, since users feel the average reply
+   - **d**: Cut delay and measure quality together in a single step, since two changes show their effect at once
+
+36. Scenario: Eskdale Telecom's gate measures the 95th percentile of the new model's timings on forty cases against its limit. One run shows a single slow case, and a second run shows three. What should the check do?
+   - **a**: Pass at one, refuse at three, since a lone outlier is tolerated
+   - **b**: Pass both, since the mean is within the limit
+   - **c**: Refuse neither, since latency cannot gate a change
+   - **d**: Refuse both, since any slow case breaks the limit for the worst user
+
+37. Scenario: A review at Quill Telecom runs the launch rubric on a design where a human review costs 60 and a wrong decision costs 50. What accuracy does the needed-accuracy rule return?
+   - **a**: Minus 20, since the check exceeds the error by that percent
+   - **b**: Zero, since the check never pays and the result is clamped there
+   - **c**: Eighty, since the error is 80 percent of the check
+   - **d**: A hundred, since a check this dear needs a perfect model
+
+38. Scenario: Tolley Foods can grade its label-type answers by code, and its engineers plan to hand-grade thirty polished cases instead of running six hundred machine-graded ones, because hand grading has higher quality. What does the documentation advise for those outputs?
+   - **a**: Hand-grade thirty, since quality is the property that makes a set trustworthy
+   - **b**: Wait for a few thousand cases before grading any, since small sets mislead
+   - **c**: Run the broad automated set, since breadth beats refinement when software does the marking
+   - **d**: Hand-grade all six hundred, since people are the only valid judges
+
+39. Scenario: Corran Health's release gate for its claims assistant measures accuracy, latency and cost, and an audit finds that prompt-injection attempts reach the tool layer. Which addition does the guide's list of dimensions require?
+   - **a**: A user rating after each answer, since people notice an attack quickly
+   - **b**: A higher accuracy floor on ordinary cases, since a better model resists attacks, at first glance
+   - **c**: A mean latency per request, since slow replies are the sign of an attack
+   - **d**: The share of hostile inputs that succeeded, tested on cases built to provoke them
+
+40. Scenario: Tavern Group moves an assistant to a model whose replies include adaptive thinking, and many replies are now cut off mid-sentence though max_tokens is unchanged. What explains it, and what is the fix?
+   - **a**: Reasoning draws on the same cap, so the limit needs to be raised and re-measured
+   - **b**: The reply format changed, so the parser must read the first block as text
+   - **c**: Thinking is off by default, so the reply is being stopped by the safety filter, in the usual way
+   - **d**: The prices changed, so the limit must be lowered to keep the old bill
+
+41. Scenario: At Linford Retail an A/B test with 500 cases in each arm shows 410 right for the current prompt and 431 right for the new one, and the planned minimum was 200. The sponsor wants the new prompt shipped. What does the two-proportion test at 95 percent conclude?
+   - **a**: The new prompt is better, since 431 is more than 410 on a sample over the minimum
+   - **b**: Too few cases, since a test of this kind needs thousands per arm
+   - **c**: The old prompt is better, since a clear test can only favour the version in use
+   - **d**: No clear difference, since a gap of that size on that sample is within chance
+
+42. Scenario: A fairness review at Stanton Mutual wants a parity report across customer groups, but the system holds no field that labels a customer's group. What does the page say about the report?
+   - **a**: The cohorts must be defined where they can be measured, or the gap stays unseen
+   - **b**: The report can use the overall average instead, which covers every group
+   - **c**: The report should be skipped, since bias is a property of the model alone
+   - **d**: The report fixes the gap itself once the labels exist, with no owner needed
+
+43. Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. What does the review find?
+   - **a**: Neither matters, since de-identified input removes the duty entirely
+   - **b**: Two separate arrangements, and the agreement-based one is unavailable there
+   - **c**: Both are offered there, since the platform shares the Claude API's policy
+   - **d**: One arrangement, since zero retention implies the agreement for health data
+
+44. Scenario: A support assistant at Fenwick Mutual must tell readers where an answer came from, and the team wants a design that shows the basis without storing the answer in the audit trail. Which elements does the page give?
+   - **a**: The full prompt and reply in the trace, since the basis is the text itself
+   - **b**: A line saying that the model is confident, since confidence is a basis
+   - **c**: The source quote, the document version and a way to reach a person
+   - **d**: Nothing beyond a disclosure that AI helped, since that satisfies both duties
+
+45. Scenario: Ingram Bank's design puts three strong controls on the input layer, a harmlessness screen, injection patterns and an untrusted-content rule, and none elsewhere. A confident wrong answer and a rogue tool call both occur in testing. What does the review conclude?
+   - **a**: Other tiers are bare, so it adds output, action and monitor safeguards
+   - **b**: The design needs a longer system prompt, since the model can argue with controls
+   - **c**: The design needs a fourth input control, since more screens close the gap
+   - **d**: The design is sound, since input controls stop every kind of fault
+
+46. Scenario: Calloway Mutual's policy caps log retention at 365 days. On the night, the purge job meets a record stored for exactly 365 days, and nobody has placed a hold on it. What does the job do?
+   - **a**: Keeps it forever, since an entry at the edge is under a hold
+   - **b**: Removes it after a warning, since the limit is a soft one
+   - **c**: Keeps it, since removal needs an age beyond the limit
+   - **d**: Removes it, since the limit has been reached
+
+47. Scenario: A design review at Norwood Energy hears the claim that the assistant is GDPR compliant, resting on the model vendor's reputation. What should the architect ask to see?
+   - **a**: A signed statement from the vendor, since compliance belongs to the model
+   - **b**: A line in the system prompt that names the regulation
+   - **c**: A passing score on the accuracy suite, since compliance follows from quality
+   - **d**: The requirement, the part of the system that meets it, and the evidence
+
+48. Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. What should the design do under the page's rule?
+   - **a**: Switch the input screen off too, since two checks are down together
+   - **b**: Let replies go on with a mark showing the screen did not run
+   - **c**: Hold every reply until the check returns, since a failed control must stop work
+   - **d**: Treat the outage as a pass and drop the record of it
+
+49. Scenario: A user of Pellew Insurance's assistant triggers refusals eleven times in a day, each ending with a refusal stop reason. What does the design do with that count?
+   - **a**: Tell the person the action breaches policy, then throttle or end access
+   - **b**: Raise the sampling temperature, so that the replies differ next time, as most teams do
+   - **c**: Show the category of each refusal to the user in a message
+   - **d**: Ignore the count, since a refusal is an event of the model alone
+
+50. Scenario: The tokenising layer at Wyndham Care replaces each e-mail address with a placeholder, and a reviewer asks where the map from placeholder to address lives and whether one person keeps one placeholder. What does the design say?
+   - **a**: In the provider's logs, so that the model can restore each value in its reply
+   - **b**: In a vault held only by the caller, and equal values get one stand-in each
+   - **c**: In the system prompt, so that the model can reason about who wrote twice
+   - **d**: In a fresh placeholder for each mention, so that no pattern can be learnt
+
+51. Scenario: A sponsor at Addison Travel says the new assistant must be quick. The agents who use it sit at a screen, and a nightly job also calls it. What should discovery write down for the agents?
+   - **a**: A target of fast, since the sponsor chose the word
+   - **b**: The mean time, since it is the figure everybody knows
+   - **c**: A minutes-long allowance, since the nightly job sets the pace
+   - **d**: A 95th-percentile ceiling such as 2 seconds, since a person waits
+
+52. Scenario: A handover note at Oldham Health gives an owner and a runbook for a new assistant, and one monitor, the error rate, compared with a baseline. What does the hand-off section still lack?
+   - **a**: A named vendor contact, since the model's maker answers every alert
+   - **b**: A statement that the design cannot change after launch, so that it stays stable
+   - **c**: A second signal, each read against the old figures in both directions, and a rollback
+   - **d**: A third document, the architecture diagram, since a runbook needs a picture
+
+53. Scenario: A sponsor at Penrose Care insists on a single accuracy figure for the board, though the system answers three kinds of request with very different error costs. Which figure does the page advise giving?
+   - **a**: The overall average, since one number is what a board can remember
+   - **b**: The best segment's figure, since the strongest result builds confidence
+   - **c**: No figure at all, since a single number can only mislead
+   - **d**: The number for the decision they face, stated with what it leaves out
+
+54. Scenario: An architect at Dalby Foods shows the sponsor only the option she recommends, and the sponsor asks why nobody considered the simple thing. What does the page say a record must hold?
+   - **a**: Two options, the recommended one and its nearest rival
+   - **b**: The recommended option with a longer argument in its favour
+   - **c**: Four or more options, the weak ones included, each with a reason
+   - **d**: Every option the vendor has ever listed, ranked by novelty
+
+55. Scenario: Two months after launch, the review at Brandt Telecom finds that a new customer segment has appeared and a threshold no longer fits. A manager reads this as proof that the original design failed. How does the page frame it?
+   - **a**: As a reason to freeze the design until the next sponsor review
+   - **b**: As planned iteration, since each checkpoint is allowed to alter the plan
+   - **c**: As a reason to restart discovery, since the facts were wrong from the beginning
+   - **d**: As a failure, since a sound design never needs a change after launch
+
+56. Scenario: After three months of work, an architect at Hollis Rail cannot show the sponsor any saving, though the assistant clearly handles disputes. The discovery notes record the volume and the error cost. Which discovery question was left out?
+   - **a**: What exists today, with its price and quality, as the baseline
+   - **b**: Who is accountable, so that someone can be telephoned
+   - **c**: What counts as done, with a measure, a threshold and an owner
+   - **d**: What is out of bounds, such as data that may not leave a region
+
+57. Scenario: A design record at Westmere Health lists two options as recommended, both cheaper than the baseline and both within the service levels, so that the sponsor can pick the one that suits. What does the review say?
+   - **a**: Keep both, since a choice gives the sponsor a sense of control
+   - **b**: Name a single winner, since two endorsements push the choice back to the reader
+   - **c**: Recommend the more capable of the two, since capability is the safer reason
+   - **d**: Remove the options that were not recommended, since a record is an announcement
+
+58. Scenario: A service record at Merton Care names an accountable party as "the project team", and the incident review cannot find anyone to call at night. What does the page say should have been written?
+   - **a**: The vendor, since the model's maker answers for its output
+   - **b**: The sponsor, since the person who pays should answer
+   - **c**: A role reachable by telephone, such as the billing operations manager
+   - **d**: A committee, since shared ownership spreads the risk
+
+59. Scenario: A launch review at Garston Retail runs the rubric on a design that promises "fast replies" with no figure, though an owner and the needed accuracy are stated. What does the rubric record?
+   - **a**: A medium finding for a latency with no number, so the verdict is revise
+   - **b**: No finding, since a promise in words is a service level
+   - **c**: A low finding for unstated accuracy, so the verdict is approve
+   - **d**: A high finding for no accountable owner, so the verdict is reject
+
+60. Scenario: Dunmow Group sets an organisation spend limit of 20,000, group limits of 6,000, 8,000 and 6,000, and gives one member a ceiling of 9,000 in the 6,000 group. What is wrong with the member's figure?
+   - **a**: It breaks the sum, since the groups together would then exceed the organisation
+   - **b**: It is fine, since the organisation limit is the safety net that catches overspend
+   - **c**: Nothing, since the member may exceed a group's limit with the organisation's consent
+   - **d**: It is unreachable, since an individual cap stays within the smallest share
+
+61. Scenario: Rowan Labs has no device management and sets its policy in the admin console, and its security lead wants a stricter policy for the contractors' group alone. What does the page say?
+   - **a**: Ask any administrator to edit it for the group, since all admins may
+   - **b**: Set it in the shared project file, since the repository reaches everyone
+   - **c**: It cannot yet target a subset, so a separate file or profile goes to those machines
+   - **d**: Set the stricter values in the console for the group, since groups are supported, as many reviews assume
+
+62. Scenario: Kinsale Software wants developers to install plugins only from its own marketplace repository, and an engineer sets the managed allowlist of marketplace sources to an empty list to be safe. What happens?
+   - **a**: Every origin is blocked, the firm's collection and the official one alike
+   - **b**: Every source is allowed, since an absent rule falls back to the defaults
+   - **c**: Only the official source is allowed, since it is the safe default
+   - **d**: Only the company's source is allowed, since an empty list means no outside sources
+
+63. Scenario: A platform team at Larkin Pay enables Claude Code for an organisation with zero data retention and promises leadership a dashboard of merged pull requests with assistance. What should it check first?
+   - **a**: The baseline of four weeks, since metrics begin when the baseline ends
+   - **b**: Whether those contribution metrics are available at all, since they need the GitHub app
+   - **c**: The count of lines accepted, since that is the outcome that matters
+   - **d**: The seat allowance, since it limits how many merges are recorded
+
+<details>
+<summary>Answer key</summary>
+
+1. **a**. The key belongs to the tool's design as much as the agent's, so when a tool that changes things offers none, the architect wraps it with one or does not let an agent retry it (module 81, page 1). The danger is the lost response after the action happened. The page puts it as "When a tool that changes things offers no key, the architect wraps it with one, or does not let an agent retry it". *b* is ruled out because "the agent cannot see an attempt whose response was lost", and a control that must hold is enforced in code. *c* is ruled out because "An unlimited retry is a way to spend money while nothing changes." *d* is ruled out because "repeats the change unless the tool can tell that this attempt is a repeat"
+2. **c**. Ten volunteers sent clean cases, but production brings a long tail of odd, long, multilingual or hostile inputs, so the test is to sample real inputs and evaluate by slice (module 79, page 2). A plan that lists the assumptions, the evidence and "the trigger that stops the roll-out" is a plan. *a* is ruled out because the page rejects it: "Scale the pilot as it is and buy more licences". *b* is ruled out because the page says "None of the rows is about the model getting worse". *d* is ruled out because that tests a different assumption: "People covered the edge cases".
+3. **d**. The input stage holds where requests come from, how they are validated and bounded and what is stripped, and a design that sends raw text straight to the model lacks it, which is a high finding (module 80, page 1). The rubric rejects on any high finding. The page puts it as "Where requests come from, how they are validated and bounded, what is stripped before the model sees it". *a* is ruled out because the stem names a feedback loop, and a missing one reads "Nobody learns that it was wrong". *b* is ruled out because the page's example of a missing processing stage is "Everything is one long prompt". *c* is ruled out because the page asks "how they are validated and bounded", and treats an empty stage as a finding in its own right.
+4. **b**. A person can only hold the line when the design makes the review real, which means they see the evidence and not only the model's verdict (module 79, page 2). The page warns that the interface must not turn review into "a click-through". The page puts it as "they see the evidence, not only the model's verdict". *a* is ruled out because the page says "people who receive output directly are told that AI helped produce it", and the handler is not one of them. *c* is ruled out because the page ties the target to "an item is worth reviewing when its expected error cost exceeds the review cost", and not to keeping handlers busy. *d* is ruled out because the page asks that "they see the evidence, not only the model's verdict", and a repeat adds none.
+5. **c**. Autonomy without need is conditional on a second fact, a known path, and here the path depends on what is found (module 93, page 2). The page says "A rule that fires without its second fact is a false alarm". *a* is ruled out because that rule concerns "a team's value is below 15 chats' worth", and this design has no team. *b* is ruled out because the page says "an agent is only flagged when the path is known", and a rule that fires without its second fact is "a false alarm". *d* is ruled out because the page raises that when "A stage is empty or absent", and an agent's processing is present.
+6. **d**. A control that must always hold is enforced in code, because the model's behaviour is probabilistic (module 79, page 2). The page adds that "a regulatory control never rests on the model alone", whatever the test score was. *a* is ruled out because a description is text to the model, and "a regulatory control never rests on the model alone". *b* is ruled out because the page says "Probabilistic behaviour cannot give a guarantee, however high the measured accuracy". *c* is ruled out because people are kept for "decisions that carry accountability, cannot be undone or fall under a rule that demands a human", whereas a control that must always hold is enforced in code.
+7. **a**. The pillar of agreed targets such as latency, availability and accuracy by case type is performance service levels, and it shapes model tier, caching, concurrency and accept-and-poll (module 79, page 1). The other three each claim a different kind of value with a different measure. The page puts it as "Shapes model tier, caching, concurrency and accept-and-poll". *b* is ruled out because the page defines cost as "Work costs less in total", measured against the human baseline. *c* is ruled out because the page defines it as "People get more done", measured in hours saved per person per week. *d* is ruled out because the page lists efficiency as "The same work, with less effort per unit", measured by handling time per claim.
+8. **b**. The path cannot be listed, but a person decides anyway, so the design is an assistant that gathers the file for the person (module 79, page 1). The example names the routine claims for a workflow and the policy questions for an augmented call, and "No decision calls for a team of agents". *a* is ruled out because a ruling that carries accountability stays with a person, and "The model prepares the file; a qualified person decides." *c* is ruled out because the page concludes "No decision calls for a team of agents". *d* is ruled out because a fixed order suits work where "The path is known in advance", and these paths are not.
+9. **b**. The cost pillar claims that work costs less in total, and its measure is the cost per completed task against the human baseline, counting tokens, review time and rework and not model price alone (module 79, page 1). The page puts it as "Counts tokens, review time and rework, not model price alone". *a* is ruled out because that is the transformation pillar, "Share of customers served in a new way". *c* is ruled out because the page counts "tokens, review time and rework, not model price alone". *d* is ruled out because that is the productivity pillar, "Hours saved per person per week", which claims a different kind of value.
+10. **d**. A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The checkpoint and the key together cover both halves of the gap. The page puts it as "The checkpoint and the idempotency key cover the two halves of the same gap". *a* is ruled out because the page says "Write on success, immediately." *b* is ruled out because "The key names the intention, not the attempt." *c* is ruled out because the store holds no result for it, so it would be reported as missing; the page pairs the two halves: "The checkpoint and the idempotency key cover the two halves of the same gap."
+11. **a**. A subagent sees only what it is given, so the lead writes the task like a brief, with the objective, the output format, the tools and sources, and the boundaries (module 80, page 2). That keeps "two subagents do not research the same thing or leave a gap between them". *b* is ruled out because the page asks for a brief, whereas stacking words leaves the boundaries open, so two subagents "research the same thing or leave a gap between them". *c* is ruled out because "Give every subagent the whole conversation so nothing is lost" is the page's trap, since the subagent's small context is why it exists. *d* is ruled out because "A subagent starts with only what it is given."
+12. **c**. The static modules are never dropped, so when only they remain and they still exceed the budget, the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation "worse than a refusal". *a* is ruled out because priority applies to dynamic modules: "each dynamic module has a priority". *b* is ruled out because "A silent truncation would be worse than a refusal." *d* is ruled out because the page says "When the request is too long, truncate the end of the system prompt" is rejected, because "static modules hold the rules and are never cut".
+13. **c**. The needed figures are 650 requests, 520,000 input tokens and 975,000 output tokens a minute, and the output side exceeds Start's 400,000 while fitting Build's 1 million (module 84, page 1). The page says "the limit that fails first is the binding one". *a* is ruled out because "cache reads do not count toward ITPM", and nothing here is read from a cache. *b* is ruled out because the output side is the third limit: "the workload fits a tier only if all three fit". *d* is ruled out because the page rejects it: "Size the service on requests per minute; tokens are the model's business."
+14. **a**. The edges are exact: a request that brings the spend exactly to the budget does not block, and at or beyond 80 percent it warns (module 84, page 2). The page's order is "warned, then degraded, then stopped". *b* is ruled out because degrading is a routing step with its own rule, and admission returns "allow, warn or block". *c* is ruled out because "Reaching 80 percent warns", and the team is already beyond that mark. *d* is ruled out because "one that brings it exactly to the budget does not" block.
+15. **d**. Accept-and-poll pairs with the retry and key discipline of module 81, since the identifier given to the caller is the key for the request (module 84, page 2). A repeat with the same ticket returns the same work and does not start it again. The page puts it as "the identifier given to the caller is the key for the request". *a* is ruled out because "The key names the intention, not the attempt", and a fresh value makes the retry look new. *b* is ruled out because the page rejects that: "Raising the legacy system's timeout is often not possible". *c* is ruled out because a control that must hold "is enforced in code outside the model".
+16. **b**. Equal priorities are broken by position, and the later module goes first (module 82, page 1). The page's rule is that "the assembler drops the lowest first, and among equal priorities the later one". *a* is ruled out because the rule leaves no tie unbroken: "among equal priorities the later one" goes. *c* is ruled out because "The order is the same every time", and "callers cannot" decide it. *d* is ruled out because the page orders the cut by rank and not by size: "each dynamic module has a priority".
+17. **a**. The tier a task needs is found by evaluating the task, not by reading a model's name, and it can change when a model is replaced (module 82, page 2). The page adds that price "can only rank models that are already right". *b* is ruled out because the page says the needed tier "can change when a model is replaced". *c* is ruled out because price "cannot make a model wrong, it can only rank models that are already right". *d* is ruled out because "Use the largest model for every workload" is rejected, because the requirement is a rung, a speed limit and a price.
+18. **d**. Showback is computed from usage rows by token kind at the price of the row's model, and the total is divided by a million and rounded once at the end (module 84, page 2). A bill that ignores the kinds is wrong. The page puts it as "Every token kind has its own price". *a* is ruled out because "rounding each row first gains or loses cents". *b* is ruled out because the page says "Every token kind has its own price", so leaving one out misstates the bill. *c* is ruled out because "Every token kind has its own price", so a bill that ignores either "cache reads are cheap, output is dear" is wrong.
+19. **b**. A static module that holds a variable is refused when the request is assembled, because a value that changes in the prefix breaks the cache (module 82, page 1). The page's rule is that "Variables belong in dynamic modules only." *a* is ruled out because "The order is the same every time", and "callers cannot" decide it. *c* is ruled out because the page says "Two requests share a cache entry only when everything up to the breakpoint is identical, character for character." *d* is ruled out because "The static modules are never dropped, since they hold the rules"
+20. **c**. The variable that emits raw bodies implies consent to everything the three narrower variables would reveal, because the bodies include the entire conversation history (module 87, page 1). The page puts it as "include the entire conversation history". *a* is ruled out because the defaults say "Spans redact user prompt text, tool input details, and tool content by default", and this setting overrides that. *b* is ruled out because the page says it "implies consent to everything" the other three would reveal. *d* is ruled out because "a repository can't use them to turn telemetry on, choose where it goes, or capture content".
+21. **c**. When the next query depends on the last result, the mechanism is an agent that searches one query after another, because a single top-k list cannot follow a chain (module 85, page 1). The page puts it as "A single top-k list that cannot follow a chain". *a* is ruled out because the page reserves that for a corpus "under about 200,000 tokens", and a bank's rulebook may not fit that case. *b* is ruled out because that mechanism fits when "The answer lives in a table or a database", and these are linked passages. *d* is ruled out because "A single top-k list that cannot follow a chain" is the failure the page names.
+22. **b**. The page states the cost plainly: the gateway becomes infrastructure the organisation operates, and it has to forward what its clients send as they change (module 86, page 1). The page puts it as "The tradeoff is that the gateway becomes infrastructure your organization operates". *a* is ruled out because "The tradeoff is that the gateway becomes infrastructure your organization operates." *c* is ruled out because the page says "the provider key stays server-side; developers hold gateway credentials instead". *d* is ruled out because "every decision, the refusals included, leaves a record", so the logs are a gain and not a cost.
+23. **a**. Facts that change weekly, belong to different readers and must be cited are retrieval's case: a weight cannot be edited for one document, name its source or be taken from one reader (module 85, page 2). The page puts it as "a weight cannot be edited for one document, cannot name its source and cannot be taken away from one reader". *b* is ruled out because "Facts change, a source must be shown or a reader's access must be respected" are the cases where the weights are weak. *c* is ruled out because the glossary says "The Claude API does not currently offer fine-tuning". *d* is ruled out because that suits "a small, stable body of rules shared by every request", which weekly guidance is not.
+24. **d**. Metrics are counts, so dropping a random share of points gives a wrong rate, and the lever for cost is fewer labels with many values (module 87, page 2). The page puts it as "metrics are counts, and a missing count is a wrong count". *a* is ruled out because the page rejects "a random sample of metric points" for every use of a rate. *b* is ruled out because "metrics are counts, and a missing count is a wrong count". *c* is ruled out because the example keeps traces by rule: "Tail-based sampling decides when the trace is complete".
+25. **a**. A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). The page says that for a withdrawn document "the removal is a correctness and, for personal data, a compliance matter, not a tidiness one". *b* is ruled out because "A re-index that runs less often than the documents change leaves old text in the index between runs", and a repeat of an adding job removes nothing. *c* is ruled out because the old chunk "competes with the new one for a place in the top results", and a smaller list only hides it sometimes. *d* is ruled out because "Vectors made by two models are not in one space", and the fault here is a record that should be gone, not a space mismatch.
+26. **b**. Where the tool set is small, loading everything is the better design, with no extra step and nothing to tune (module 86, page 2). The documentation lists "10 or more tools" and "tool definitions consume more than 10k tokens" as the signs for search. *a* is ruled out because deferring pays on "a large or growing" set, and here it adds a round trip when the needed tool is absent. *c* is ruled out because the threshold the documentation lists is "10 or more tools", and six is far below it. *d* is ruled out because the documentation says standard calling is "a better fit when you have fewer than 10 tools, every tool is used in every request, or your tool definitions are small".
+27. **c**. A move from zero is treated as a move of 100 percent, and the check never divides by it, so the metric is flagged beyond tolerance (module 87, page 2). The page puts it as "the example treats any move from zero as a move of 100 percent, and never divides by it". *a* is ruled out because "A metric whose baseline is zero needs a rule of its own", and silence is not one. *b* is ruled out because "to treat a move you did not plan as a finding", and resets are made at a change you decided on. *d* is ruled out because the check computes "the relative change in whole percent", and a change from zero has no relative size.
+28. **d**. The retries rule keeps a trace in which one tool was called three times or more, a sign of a loop that eventually succeeded (module 87, page 1). It ranks below error and slow and above feedback and the sample. The page puts it as "one tool was called three times or more, a sign of a loop that eventually succeeded". *a* is ruled out because the rule keeps "the rest, kept by a share of their ids", and this trace has a reason of its own. *b* is ruled out because the example's reason is "one tool was called three times or more, a sign of a loop that eventually succeeded". *c* is ruled out because "The example keeps a trace for the first of these reasons, in this order", so a success earns a place only as part of the sample.
+29. **d**. The cut follows the joints of the data, and for a transcript the joint is the speaker turn, with a unit longer than the limit split at sentence ends (module 85, page 1). The page says "Size then follows from the unit". *a* is ruled out because the page asks for the cut to follow the data: "A heading, a clause number, a function, a table row and a support ticket are the joints of their kinds of data". *b* is ruled out because "changing the index changes how the pieces are scored, not where they were cut". *c* is ruled out because "A smaller window cuts in more places and separates more sentences from their neighbours."
+30. **c**. The audit compares what an agent holds with what its role needs and returns four lists: tools to remove, needed tools it lacks, risky ones named first, and dormant ones to review (module 86, page 2). A review that only removes will break the role. The page puts it as "The needed tools the agent lacks are listed too". *a* is ruled out because the audit returns four things, and "The needed tools the agent lacks are listed too". *b* is ruled out because "Logging and confirmation prompts are compensating controls", and they do not replace the audit of what is held and needed. *d* is ruled out because a role's needs come first: "since a review that only removes will break the role".
+31. **b**. The common path stays loaded so that most requests never search, and the long tail is deferred, where a search costs less than the definitions would on every request (module 86, page 2). The page names a floor of three to five loaded tools. The page puts it as "most frequently used tools non-deferred so Claude can call them without searching first". *a* is ruled out because "Shorten every tool description to save tokens" fails because it "trades selection quality for tokens". *c* is ruled out because "Past the 30 to 50 tools" accuracy falls, so loading all 120 trades one cost for another. *d* is ruled out because the page says "Keep your 3–5 most frequently used tools non-deferred so Claude can call them without searching first."
+32. **a**. A shadow run sends copies of live requests to the new version and keeps the answers away from users, so it exposes no one to a regression (module 88, page 2). It costs a second round of inference and gives no signal about user reaction, which is why the A/B test follows it. The page puts it as "A shadow run sends copies of live requests to the new version, keeps the answers away from users". *b* is ruled out because "An average of segment accuracies weights a rare segment like a common one and hides its price." *c* is ruled out because "It comes first; an A/B test comes after it, once the shadow run says the change is safe to show." *d* is ruled out because "A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it, so that is not a gate."
+33. **c**. A refused gate with a retirement date in 40 days becomes a work list with an owner for each reason (module 89, page 2). The page adds that the gate "says what must be fixed or accepted first". *a* is ruled out because the page says "The gate does not decide the migration: the calendar does, and the gate says what must be fixed or accepted first." *b* is ruled out because "Re-weighting a failed case turns a rule into a preference". *d* is ruled out because "watching a known failure in production makes customers the test".
+34. **d**. The evidence was there and the answer claims more than it says, so the fault is grounding (module 88, page 2). The documentation's remedies are permission to say it does not know, quotes extracted first and a citation for every claim. The page puts it as "permission to say it does not know, quotes extracted first, a citation for every claim". *a* is ruled out because the order begins "Was the evidence found?", and here the passage was supplied. *b* is ruled out because "A larger model does not know a document it was never shown", and the model comes last because it is the most expensive fix. *c* is ruled out because "Format and instruction failures are cheap to see and cheap to fix in the prompt", but the stem says the shape was right.
+35. **b**. The floor comes first: a prompt that works well without model or prompt constraints shows what top performance looks like, and latency reduction follows (module 88, page 2). The documentation warns that reducing it prematurely can hide that. The page puts it as "Trying to reduce latency prematurely might prevent you from discovering what top performance looks like". *a* is ruled out because "Trying to reduce latency prematurely might prevent you from discovering what top performance looks like." *c* is ruled out because "A mean hides the tail", and "the slowest five in a hundred requests are the ones users complain about". *d* is ruled out because the order is "first engineer a prompt that works well", and two changes at once blur which one moved a score.
+36. **a**. The check is the nearest-rank 95th percentile, and a single slow case among forty does not block the change while three do (module 89, page 2). The example uses the percentile and not the worst case. The page puts it as "A single slow case among forty does not block the change, and three do". *b* is ruled out because the check is "the percentile and not the worst case", and the mean hides the tail. *c* is ruled out because the page lists "Latency. The tail, by the nearest-rank 95th percentile of the new timings" as a check of the gate. *d* is ruled out because "A single slow case among forty does not block the change, and three do."
+37. **b**. The accuracy is 100 minus the review cost as a percent of the error cost, rounded up and never below 0, so a check that costs as much as an error or more needs no accuracy (module 93, page 2). The result stays 0 and does not go negative. The page puts it as "A check that costs as much as an error, or more, needs no accuracy". *a* is ruled out because "the result stays 0 and does not go negative." *c* is ruled out because the rule rounds the percent "up, and never below 0", and 80 is not a result of it. *d* is ruled out because the formula is "100 minus the review cost as a percent of the error cost", and the result is clamped at zero.
+38. **c**. For outputs that a machine can grade, the page prefers volume to polish, quoting the documentation that more questions with slightly lower signal and automated grading are better than fewer hand-graded ones (module 88, page 1). Code grading is "Fastest and most reliable, extremely scalable". *a* is ruled out because the documentation says "More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals." *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful." *d* is ruled out because human grading is "Most flexible and high quality, but slow and expensive. Avoid if possible."
+39. **d**. A release gate needs a number for each dimension that can fail it, and for security that number is the share of injection or leak attempts that got through, on attack cases (module 88, page 1). The page lists five dimensions: accuracy, latency, cost, safety and security. The page puts it as "the share of injection or leak attempts that got through, on attack cases". *a* is ruled out because the security measure is "the share of injection or leak attempts that got through, on attack cases", and not an opinion poll. *b* is ruled out because the guide lists five dimensions, and "Safety" and "Security" are separate from "Accuracy: the share of cases answered correctly, by case type". *c* is ruled out because "Latency: a percentile and not a mean", and speed says nothing of what got through.
+40. **a**. On this model `max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens, so a limit sized for the old model cuts replies short (module 89, page 1). The fix is to raise it, recount the tokens and re-baseline cost. The page puts it as "thinking tokens are billed as output tokens". *b* is ruled out because the page says "Read content blocks by `type`", which is a different failure from a cut-off reply. *c* is ruled out because the guide says "a request with no `thinking` field runs with adaptive thinking". *d* is ruled out because "thinking tokens are billed as output tokens", and a lower cap would cut more replies short.
+41. **d**. The page gives the contrast: 410 right of 500 against 438 is a clear gain, and 410 against 431 is not (module 88, page 2). The sample is above the minimum, so the verdict is that the gap is within chance. The page puts it as "410 right of 500 against 438 is a clear gain, and 410 against 431 is not". *a* is ruled out because "The larger number is not the better version." *b* is ruled out because "The example's minimum is 200; below it the verdict is `too few cases`", and 500 is above it. *c* is ruled out because "A clear difference can go either way", and a test that can only report wins "is not a test".
+42. **a**. The report computes one metric per group and shows the gap, and the groups must be defined where they can be measured, since a segment you cannot label cannot be reported (module 90, page 2). The page puts it as "The groups must be defined where they can be measured". *b* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment". *c* is ruled out because "Bias, in the guide's wording, is a property of outcomes." *d* is ruled out because "The report does not fix anything on its own", which is why the register gives it an owner.
+43. **b**. Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting, and the latter applies to the Claude API only (module 83, page 1). The review finds that the platform cannot meet the health-data requirement. The page puts it as "Zero data retention and HIPAA readiness are different things". *a* is ruled out because "Neither arrangement removes the need to de-identify", and a design adds it on top. *c* is ruled out because HIPAA readiness applies to "The Claude API only, not Claude Platform on AWS or Microsoft Foundry". *d* is ruled out because the page contrasts them: "Zero data retention and HIPAA readiness are different things".
+44. **c**. Transparency has two duties: tell people AI helped, and show the basis, which means the quote the grounding check used, the document version and the way to reach a person (module 90, page 2). The page puts it as "A trace that holds ids and sizes can show which document supported an answer without holding the answer". *a* is ruled out because "A trace that holds ids and sizes can show which document supported an answer without holding the answer." *b* is ruled out because "confidence is not evidence", and a model can be certain and wrong. *d* is ruled out because "Two duties travel together", and the second is to let a reader see the basis of an answer.
+45. **a**. The layers answer different attackers and mistakes, so a design with all its controls on one layer has a gap on the others (module 90, page 1). The review adds an output control, an action control and a monitor. The page puts it as "An input control cannot catch a confident wrong answer". *b* is ruled out because "the model is told in the system prompt" is "a weak instance of one layer". *c* is ruled out because "an output control cannot stop a tool call that already happened", and the reverse holds for input. *d* is ruled out because "An input control cannot catch a confident wrong answer".
+46. **c**. Purging follows the same precision as the check: an entry is removed only when it is more than the ceiling old, so one exactly at the ceiling stays (module 83, page 2). A retention equal to a limit is acceptable. The page puts it as "an entry is removed only when it is more than the ceiling old". *a* is ruled out because a hold is a separate matter: "an entry under a legal hold is never removed, whatever its age". *b* is ruled out because the page treats a ceiling as a limit, and "a retention equal to a limit as acceptable". *d* is ruled out because "an entry is removed only when it is more than the ceiling old".
+47. **d**. A claim about a regime needs a source: which requirement, which part of the system meets it and what evidence shows that (module 90, page 2). The page points to a trust centre for the compliance material. The page puts it as "A claim about a regime needs a source". *a* is ruled out because "A model does not make a system compliant". *b* is ruled out because a regime is "a list of requirements, not a feature", and a prompt line is a request to the model. *c* is ruled out because the page reads a regime as "requirements on the design", and not as a test result.
+48. **b**. Only an output or monitor control of the ordinary tier may proceed with a flag, because the cost of the gap is a delay in noticing and other controls still check the answers (module 90, page 1). The record carries the mark. The page puts it as "Only an output or monitor control of the ordinary tier may proceed with a flag". *a* is ruled out because "a control on the input or the action layer, and any control of the high tier, holds." *c* is ruled out because "Only an output or monitor control of the ordinary tier may proceed with a flag." *d* is ruled out because the page asks that the gap "shows in the record", with a mark such as `auto (unscreened)`.
+49. **a**. Counting refusals per user feeds the response to repeat offenders: tell the user the action violates the usage policy and throttle or end the access (module 90, page 1). A refusal is an outcome the application handles. The page puts it as "Counting refusals per user also feeds the response to repeat offenders that the jailbreak page describes". *b* is ruled out because the page treats a refusal as an outcome with a branch: "the context is reset (the turn that caused it removed or rephrased)". *c* is ruled out because "the `stop_details` fields can be null, so the user-facing message comes from the application". *d* is ruled out because "Counting refusals per user also feeds the response to repeat offenders that the jailbreak page describes".
+50. **b**. The map stays in a vault inside the caller, the provider sees only tokens, and the same value gets the same token so the model can still reason about one person writing twice (module 83, page 2). Restoration happens after the reply. The page puts it as "The same value gets the same token". *a* is ruled out because "The vault is local" and "The provider sees tokens and never the values." *c* is ruled out because the map is data that "never leaves the caller", and a prompt would send it across. *d* is ruled out because "The same value gets the same token", so the model can still reason about "the same person wrote twice".
+51. **d**. The question is who waits and for how long, and for a person on screen the answer is a number such as 2 seconds at the 95th percentile, while a batch job would allow minutes (module 91, page 1). The page puts it as "so the answer must come within 2 seconds at the 95th percentile". *a* is ruled out because "Fast", "accurate" and "safe" are not answers, "because nobody can fail them". *b* is ruled out because a latency is "a ceiling (95th percentile of at most 2000 ms)", and a mean hides the tail. *c* is ruled out because "a batch job would allow minutes", but the agents at a screen cannot wait that long.
+52. **c**. The hand-off names the owner, the runbook, at least two monitors, such as refusals or tokens per answer, each compared with a baseline in both directions, and the rollback to the previous model that stays tested (module 91, page 2). The page puts it as "at least two signals, such as refusals, tokens per answer". *a* is ruled out because the page lists "the owner of the service (a role), the owner of the runbook that explains each alert, the monitors" and the rollback. *b* is ruled out because "Iteration is not a failure of the design; it is the part of the design that was planned for." *d* is ruled out because "a diagram without the runbook leaves the first incident to the person who happens to remember".
+53. **d**. If the sponsor insists on one figure, the architect gives the number that matches the decision they face and says what it does not cover (module 79, page 2). The page adds that the accuracy to ask for is "99 percent on the confident slice, with the rest reviewed". *a* is ruled out because "Full automation at 6 percent wrong barely beats the human baseline once errors are priced", and an average hides the costly slice. *b* is ruled out because "Promise what you measure and measure what you promise", and a flattering slice is a promise the design cannot keep. *c* is ruled out because "If the sponsor insists on a single figure, give the number that matches the decision they face and say what it does not cover".
+54. **c**. A record compares at least four options, including obviously wrong ones, because the reader's first question is why not the simple thing (module 91, page 1). Each has a monthly cost, whether it meets the service levels, a status and a reason. The page puts it as "at least four, including the ones that are obviously wrong". *a* is ruled out because the page asks for "at least four, including the ones that are obviously wrong". *b* is ruled out because "A design record that shows one option is an announcement." *d* is ruled out because the page ranks by cost: "among those that meet them the cheapest wins", and asks for a reason in a sentence.
+55. **b**. The record is reviewed at each stage of the roll-out, and each review may change the design: a new segment appears, a threshold moves, a model is replaced (module 91, page 2). Iteration is the part of the design that was planned for. The page puts it as "a new segment appears, a threshold moves, a model is replaced". *a* is ruled out because the page treats a changed threshold as expected, and "a new segment appears, a threshold moves, a model is replaced". *c* is ruled out because the record "is reviewed at each stage of the roll-out, and each review is allowed to change the design". *d* is ruled out because "Iteration is not a failure of the design; it is the part of the design that was planned for."
+56. **a**. Discovery asks what exists today, such as the cost and quality of the current way, because without a baseline no saving can be shown (module 91, page 1). The page's example is 315,000 a month with people alone. The page puts it as "Without a baseline no saving can be shown". *b* is ruled out because the page lists that separately: "A role that can be telephoned". *c* is ruled out because that question concerns the target, "A measure, a threshold, an owner", and the saving needs the figure for the current way. *d* is ruled out because that question sets limits on the design, and "Without a baseline no saving can be shown."
+57. **b**. The record recommends exactly one option, the cheapest that meets the service levels, and two recommended options push the choice back to the reader (module 91, page 1). The other options stay in the record with a reason in a sentence. The page puts it as "Two recommended options push the choice back to the reader". *a* is ruled out because the page says "Exactly one is recommended." *c* is ruled out because "the newest" and "the most capable" are not criteria, as the page says: "among those that meet them the cheapest wins". *d* is ruled out because "A design record that shows one option is an announcement."
+58. **c**. Accountability is a role that can be telephoned, written in the record, and where the model prepares and a person decides the record says so (module 91, page 1). The page calls an ownerless target "nobody's". The page puts it as "A role that can be telephoned". *a* is ruled out because "deploying an automated decision means owning its outcomes", so the deploying organisation owns it. *b* is ruled out because "the owner is a role that can be called when it moves", and a sponsor is not that. *d* is ruled out because "A target without a measure cannot be reported, and one without an owner is nobody's."
+59. **a**. The rule `sla-without-numbers` is a medium P6 finding raised when a latency or an availability has no number, and any medium finding with no high one gives revise (module 93, page 2). The page puts it as "a latency or an availability with no number". *b* is ruled out because the rule raises on "a latency or an availability with no number", and a service level needs "a target, a measure and an owner". *c* is ruled out because the table gives `accuracy-unstated` as "the needed accuracy is not stated", and the stem states it. *d* is ruled out because `no-accountable-owner` is raised when there is "no owner for the service", which the stem excludes.
+60. **d**. A member's limit is no higher than the smallest group's, and a larger one is a number that can never be reached (module 92, page 2). The group limits here add up exactly to the organisation's 20,000. The page puts it as "a member limit above a group's own makes the member limit a number that can never be reached". *a* is ruled out because the groups add up exactly: "a total of exactly 20000 passes and 20001 does not". *b* is ruled out because "make the groups add up exactly", because the organisation limit decides first otherwise. *c* is ruled out because the page says "a member limit above a group's own makes the member limit a number that can never be reached".
+61. **c**. Server-managed settings apply to everyone in the organisation, and a different policy for one group means a different file or profile deployed to that group (module 92, page 1). They are fetched at startup and refreshed hourly. The page puts it as "per-group policy is not yet supported there". *a* is ruled out because it "is edited by an Owner or Primary Owner, not by any administrator". *b* is ruled out because "a policy belongs in managed settings, and the shared file holds what the team agrees for itself". *d* is ruled out because the page says "per-group policy is not yet supported there".
+62. **a**. An empty list blocks every source, the official marketplace included, so allow nothing and allow ours are different lists (module 92, page 2). The company's own repository must be listed to be allowed. The page puts it as "An empty list blocks every source, the official one included". *b* is ruled out because the allowlist is "an allowlist of the sources plugins may come from", and an empty one lists none. *c* is ruled out because "Allow all plugins from the official marketplace and block the rest" is rejected, because an empty list blocks the official one too. *d* is ruled out because the page says "An empty list blocks every source, the official one included", so allowing nothing and allowing ours differ.
+63. **b**. Contribution metrics need the GitHub app and are not available for organisations with zero data retention enabled, so the team checks that before promising them (module 92, page 2). The page puts it as "are not available for organisations with zero data retention enabled". *a* is ruled out because the baseline is a need of targets, whereas contribution metrics "are not available for organisations with zero data retention enabled". *c* is ruled out because "Lines and suggestions accepted are reported and not targeted." *d* is ruled out because "a member's use draws from a seat allowance", which concerns spend and not metrics.
+
+</details>

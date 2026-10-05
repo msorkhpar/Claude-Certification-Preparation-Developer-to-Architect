@@ -1,6 +1,6 @@
 # Architect mock exam 2
 
-**Level:** Architect · **Module 78:** Exam readiness 3 · **Page 4 of 4**
+**Level:** Architect · **Module 78:** Exam readiness 3 · **Page 4 of 5**
 **Exams:** A1 to A5 (CCAR-F; the questions follow the Architect blueprint over the content of modules 45 to 77)
 
 **After this page you can** tell whether you are ready for the Architect exam, which domains need more work, and which scenario slows you down.
