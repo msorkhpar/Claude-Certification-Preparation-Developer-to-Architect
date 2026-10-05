@@ -160,9 +160,9 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Vary the instruction block slightly per call so that entries differ
 
 19. A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?
-   - **a**: Abandon the design, because no model suits long-horizon work of this kind
+   - **a**: Abandon the design of the long-running agent and start over with a new one
    - **b**: Add a second agent on the same tier so that answers receive a majority vote
-   - **c**: Drop to Claude Sonnet 5.5, since faster models usually score higher on such tests
+   - **c**: Drop to Claude Sonnet 5.5 to lower the cost of each task run
    - **d**: Switch to Claude Fable 5.1, which the page reserves for demanding reasoning
 
 20. A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which two statements explain it and the fix? (Select two.)
@@ -179,9 +179,9 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Shrink the prefix below the minimum so that nothing has to be written
 
 22. A team has no evaluation data yet and no sense of how hard its new feature is. Which starting plan matches the documentation's method?
-   - **a**: Pick the cheapest tier at once, since the pricing page says to use it for simple tasks
-   - **b**: Begin with a capable model, test on real cases, then step down a tier at a time
-   - **c**: Use the top tier permanently, since it protects quality for every task
+   - **a**: Pick the cheapest tier at once and keep it for the feature
+   - **b**: Begin with a capable model, test on real cases, then step down a tier
+   - **c**: Use the top tier permanently for every request it handles
    - **d**: Choose by reputation, then adjust after the first production complaint
 
 23. A request to Claude Haiku 4.5, whose limit is 200K, carries about 150,000 input tokens and sets max_tokens to 64,000, which together go beyond that limit. What happens?
@@ -216,10 +216,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Replace both calls with an autonomous agent that decides the order of the steps
 
 28. In a draft-and-review loop, the reviewer's reply is sometimes prose such as "looks fine to me" instead of a score the program can parse. The loop currently treats that as a pass. What should it do?
-   - **a**: Accept it as a pass, since no objection was raised
+   - **a**: Accept it as a pass and send the draft to the next stage
    - **b**: Count the attempt as unchecked, giving it zero with a stated cause
    - **c**: Pull the first digit from the text and treat it as the grade
-   - **d**: Return the latest draft, since the reviewer is evidently satisfied
+   - **d**: Return the latest draft to the user as it now stands
 
 29. A service sets a dollar budget on its Agent SDK run, and the run fans work out to secondary workers. Finance worries that the workers' spending escapes the limit. What does the documentation say?
    - **a**: No cost control exists, so the team must stop runs by hand
@@ -235,10 +235,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: The label is scheduling metadata and not a guarantee
 
 31. A team promotes a new system prompt for a hosted agent and wants production runs to keep the previous behaviour until a person approves the switch. Which approach fits?
-   - **a**: Override the system field on every run, since overrides merge with the saved agent
+   - **a**: Override the system field on every run
    - **b**: Create the sessions with just the agent ID, which pins the first version
    - **c**: Create each session with a pinned version number
-   - **d**: Edit the agent in place, because environments are versioned for rollback
+   - **d**: Edit the agent in place
 
 32. A security officer approves self-hosted sandboxes for a managed agent on the grounds that nothing the agent touches will ever leave the company network. What is wrong with that reasoning?
    - **a**: Inputs and outputs of each call still reach the provider's control plane
@@ -247,10 +247,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: The environment key must be stored inside the image so the worker can start
 
 33. A typed agent returns a refund record that passes its schema, showing an amount of 4999 cents for a 49-cent item, and the team ships it because validation succeeded. What should they conclude?
-   - **a**: The schema is wrong, because a correct type guarantees a correct number
-   - **b**: Form checks prove only the shape, so a separate rule must judge the value
-   - **c**: The retry loop should have caught it, since failed validation retries by itself
-   - **d**: A graph framework would have prevented it, since its checkpoints verify values
+   - **a**: The schema is wrong and must be rewritten from scratch with new limits
+   - **b**: Form checks prove only shape, so a separate rule must judge the value
+   - **c**: The retry loop should have caught it before shipping
+   - **d**: A graph framework would have prevented it from shipping
 
 34. A team wants a framework mainly because it is popular, though nobody can say which missing feature it would supply. Which step does the page advise?
    - **a**: Write the requirement with a number in it and test the simplest option
@@ -371,8 +371,8 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 53. Between two evaluation runs the pass rate rose from 0.71 to 0.80, but a diff shows that four failing cases were deleted from the set. How should the harness treat this?
    - **a**: Flag the dropped items as removed and reject the check
-   - **b**: Accept it, since a higher pass rate means the change helped
-   - **c**: Treat the deleted ones as passes, since nothing contradicts them
+   - **b**: Accept it as the same run with a higher score
+   - **c**: Treat the deleted ones as passes in the new total
    - **d**: Ignore the deletions when the edge-tagged cases still reach their threshold
 
 <details>

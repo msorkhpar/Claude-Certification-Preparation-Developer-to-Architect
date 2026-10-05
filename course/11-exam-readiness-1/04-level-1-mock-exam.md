@@ -83,8 +83,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 7. A support lead adds "You are a licensed pharmacist" to a prompt, expecting dependable medication advice from the replies. Which statement about that line is accurate?
    - **a**: It changes the voice and focus, but truth still needs checking
-   - **b**: It replaces the need for a task, since the role already says what to do
-   - **c**: It makes the answers medically reliable, since the role carries professional knowledge
+   - **b**: It replaces the need for a task line in the prompt
+   - **c**: It makes the answers medically reliable for any patient
    - **d**: It acts as a safeguard, so protected facts stay protected
 
 8. A manager types "Write something about our Q3 results" and receives a generic paragraph with no figures. The board pack is due within the hour. Which revision best fixes the request?
@@ -102,13 +102,13 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 10. A news desk asks Claude to confirm that a reader's photo of a flood is not AI-generated before it runs on the front page. What should the desk expect?
    - **a**: A confident answer once it has been asked to examine the image twice
-   - **b**: A reliable yes or no, since image models can spot synthetic pixels
+   - **b**: A reliable yes or no from the model after one look
    - **c**: No reliable verdict, so provenance checks and an editor decide
-   - **d**: A refusal, since Claude cannot view photographs of disasters at all
+   - **d**: A refusal to look at the photo of a disaster
 
 11. A team lead skims Claude Tag's summary of a long thread, and also forwards a note that Claude drafted to a customer. How much reading does the page ask for in each case?
-   - **a**: A light pass for both, since the thread supplied all the context
-   - **b**: A close read for both, since every Tag output carries equal stakes
+   - **a**: A light pass for both the digest and the note
+   - **b**: A close read for both the digest and the note
    - **c**: A close read for the digest and a light pass for the note to the customer
    - **d**: A light pass for the digest, a careful look at anything sent outside
 
@@ -150,10 +150,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: It is approved for such work, since cell-level citations make each result reliable
 
 18. Before sending a report to a client, an analyst asks Claude "How confident are you in these figures?" and gets "Very confident". Which view of that reply is right?
-   - **a**: It lets the numbers skip review, because the client reads them anyway
-   - **b**: It proves nothing, so the numbers are checked against the original data
-   - **c**: It is a good sign, because a calm and detailed tone shows careful work
-   - **d**: It settles the question, since a model reports its own certainty reliably
+   - **a**: It lets the numbers skip review and go straight to the client
+   - **b**: It proves nothing, so the numbers are checked against the data
+   - **c**: It is a good sign that the figures are right and complete
+   - **d**: It settles the question of whether the figures are right
 
 19. An analyst needs Claude's output to load into a database through a script, and also to show executives a short takeaway. Which pair of formats fits?
    - **a**: A published artifact with shared storage that serves both audiences at once
@@ -310,9 +310,9 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: A private Project cannot sync from Drive at all, so the chart was never read
 
 44. A policy exists in the company wiki and as a PDF inside a Project. After two quarters the two differ, and Claude quotes both. Which principle of keeping knowledge current was missed?
-   - **a**: Version names, since a dated file name alone decides which copy wins
-   - **b**: Source judgement, since a final approved text replaces the wiki copy
-   - **c**: A review date, since a calendar note alone prevents the two copies diverging
+   - **a**: Version names added to the title of every file in the Project
+   - **b**: Source judgement applied before anything is uploaded to the Project
+   - **c**: A review date written on each document that the Project holds
    - **d**: A single source of record, mirrored by the workspace or synced directly
 
 45. A coordinator builds a small published artifact where parents of pupils enter their children's dietary needs, and it keeps data. What should she check before inviting people?
@@ -341,8 +341,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Not by default, and deleted within 30 days unless custom or zero retention applies
 
 49. A manager connects a client folder to Cowork and is concerned that a task might remove files. What does the safety page say about permanent deletion?
-   - **a**: Claude cannot delete anything, since the cloud sandbox is read-only
-   - **b**: Claude deletes silently, since folder access includes removing items
+   - **a**: Claude cannot delete anything from the connected folder
+   - **b**: Claude deletes silently once the folder is connected
    - **c**: Explicit permission comes first, and key material should be backed up
    - **d**: Backups are unnecessary once permission has been given for the removal
 
@@ -372,10 +372,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: A stronger approval prompt for each single call to the tool
 
 54. A student submits an essay drafted entirely by Claude to a course whose rules require AI help to be declared, and does not declare it. Which Usage Policy category does this touch?
-   - **a**: A high-risk use, since academic work always needs a qualified reviewer
-   - **b**: Fraudulent, abusive or predatory practices, such as unattributed AI work
-   - **c**: Compromising privacy or identity, since the essay may contain names
-   - **d**: Misinformation, since an essay presents its claims as the student's own words
+   - **a**: A high-risk use of the model in a regulated professional field
+   - **b**: Fraudulent, abusive or predatory practices, like unattributed AI work
+   - **c**: Compromising privacy or identity of the people the essay names
+   - **d**: Misinformation spread to the public through the essay itself
 
 55. A team's bill jumps after it starts sending full-size phone photos with each request, though the text prompts are unchanged. Which two facts about images explain the jump? (Select two.)
    - **a**: Photos are turned into text first, which multiplies the words sent
@@ -452,9 +452,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    MRIs", whatever the cost or the image quality. *d* is ruled out because "A conversation with Claude does not
    teach it anything that carries to the next conversation". *c* is ruled out because "Claude cannot be used to name
    people in images, and refuses to".
-14. **a**. Permission to say the material is insufficient is the first listed technique (module 1, page 2). *b* is
-   ruled out because "A prompt sentence does not remove sampling" and a setting does not give the model a way to say
-   it does not know. *c* is ruled out because "asking a model how sure it is does not make a wrong answer right".
+14. **a**. Permission to say the material is insufficient is the first listed technique (module 1, page 2). *b* is ruled out because "The models this course uses do not accept them", and a setting does not give the model a way to say it does not know. *c* is ruled out because "asking a model how sure it is does not make a wrong answer right".
    *d* is ruled out because "more context isn't automatically better", and the manuals are already supplied.
 15. **c and e**. Checking in proportion to the cost of being wrong puts the effort on figures and citations, because "You own what you send, whoever drafted it" (module 5, page 2). *a* is ruled out because "Readers check tone and grammar, which are visible", and skip the figures. *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *d* is ruled out because "You own what you send, whoever drafted it".
 16. **c**. Bias often comes from the framing of the request, so the request is revised and both framings are

@@ -51,10 +51,10 @@
       "scope": "level",
       "stem": "Scenario: Brindle Law's drafting task is worth about forty chats, and four agents would each need the whole case file and the other agents' drafts at every step. A designer proposes a coordinator with four subagents. What does the page conclude?",
       "options": {
-        "a": "Use the team, since a value of forty chats pays the multiple of fifteen",
+        "a": "Use the team",
         "b": "Use the team, but give every subagent a larger window to hold the shared file",
-        "c": "Use a workflow with four fixed calls, since the work is known to have four parts",
-        "d": "Keep it to one worker, since parts sharing one context cannot be split"
+        "c": "Use a workflow with four fixed calls",
+        "d": "Keep it to one worker"
       },
       "key": "d",
       "explanation": {
@@ -89,7 +89,7 @@
       "scope": "level",
       "stem": "Scenario: A coordinator at Marlow Analytics sends four subagents to read hundreds of pages each, and its window is full before it writes the report. The subagents must still run in parallel. Which contract change fixes the design?",
       "options": {
-        "a": "Each subagent reads only the first source, since the others repeat it",
+        "a": "Each subagent reads only the first source",
         "b": "Each subagent forwards the pages it read, trimmed to fit",
         "c": "Each subagent waits for the coordinator to ask, so nothing arrives unplanned",
         "d": "Each worker hands back its conclusion with a citation, in a fixed shape"
@@ -148,7 +148,7 @@
       "options": {
         "a": "It reverts to refusing requests at once until a further pause has passed",
         "b": "It resets its count of failures, so that the next three calls are allowed",
-        "c": "It closes, since the pause alone counts as a recovery",
+        "c": "It closes and lets all traffic back through again",
         "d": "It stays half-open and lets further probes through one after another"
       },
       "key": "a",
@@ -190,9 +190,9 @@
       "scope": "level",
       "stem": "Scenario: A claims question at Larch Mutual shares no word with any document that the reader may read, though it does match a contract that only the partnership team may read. What does the chain return?",
       "options": {
-        "a": "The contract chunk, since it is the closest match in the whole index",
-        "b": "A hold for lack of evidence, since barred material is never a candidate",
-        "c": "The best readable chunk, since something readable is always better than nothing",
+        "a": "The contract chunk",
+        "b": "A hold for lack of evidence",
+        "c": "The best readable chunk",
         "d": "An answer from the model alone, flagged as unsupported by any document"
       },
       "key": "b",
@@ -292,9 +292,9 @@
       "stem": "Scenario: Pallet Support's smaller model costs half as much per token as its larger one, but it needs about three attempts for each ticket, while the larger one answers once. Which comparison does the page require?",
       "options": {
         "a": "The full bill for one completed item, tries included",
-        "b": "The price of a token, since the choice should follow the published rates",
-        "c": "The latency of one attempt, since speed decides which model suits a ticket",
-        "d": "The size of the context window, since a larger window removes extra attempts"
+        "b": "The price of a token for each of the two models",
+        "c": "The latency of one attempt on each model",
+        "d": "The size of the context window of each model"
       },
       "key": "a",
       "explanation": {
@@ -348,8 +348,8 @@
       "scope": "level",
       "stem": "Scenario: A team at Marsh Retail is close to its budget, and the policy names no cheaper model for the model it uses for refund drafting. The team is not blocked. What does the gateway do with its next request?",
       "options": {
-        "a": "Keeps its original pick, since only a listed alternative would replace it",
-        "b": "Switches to the cheapest model in the whole table, since the budget is nearly spent",
+        "a": "Keeps its original pick",
+        "b": "Switches to the cheapest model in the whole table",
         "c": "Blocks the request until the budget has been raised by the platform team",
         "d": "Switches to a model of the same tier from another vendor, to stay within the budget"
       },
@@ -368,8 +368,8 @@
       "stem": "Scenario: Tern Fuel's usage report has a row for a model that the price table does not list. The report job must still finish. What should showback do with that row?",
       "options": {
         "a": "Price it at the average of the listed models, so that the total stays near the truth",
-        "b": "Skip the row, since an unpriced model cannot add to a team's bill",
-        "c": "Price it at zero and add a note, since a note is enough to warn the reader",
+        "b": "Skip the row",
+        "c": "Price it at zero and add a note",
         "d": "Reject that line and say which one has no rate"
       },
       "key": "d",
@@ -430,9 +430,9 @@
       "scope": "level",
       "stem": "Scenario: Tarn Dental's entire knowledge base is about 60,000 tokens, edited a few times a year, and the team plans a vector database with chunking and reranking. What does the page advise first?",
       "options": {
-        "a": "Build the vector database, since every knowledge base needs an index to be searched",
-        "b": "Put the complete corpus into a cached prompt, since no stage is left to fail",
-        "c": "Fine-tune a model on the corpus, since facts held in weights need no retrieval step",
+        "a": "Build the vector database",
+        "b": "Put the complete corpus into a cached prompt",
+        "c": "Fine-tune a model on the corpus",
         "d": "Split the corpus across several agents, each of which holds a part of it"
       },
       "key": "b",
@@ -451,8 +451,8 @@
       "options": {
         "a": "The newer model needs a larger chunk size, so the old chunks are now too small",
         "b": "The old vectors are stale copies of their documents, so a re-index would clear them",
-        "c": "Vectors from two different makers are not in one space, so the whole index must be rebuilt",
-        "d": "The keyword index must be rebuilt first, since the vectors are scored through it"
+        "c": "Vectors from two different makers share no space, so rebuild the whole index",
+        "d": "The keyword index must be rebuilt first, then the vectors"
       },
       "key": "c",
       "explanation": {
@@ -488,7 +488,7 @@
       "stem": "Scenario: Mallow Cloud's MCP server requests every permission up front when a person connects, so that nobody sees a second consent prompt. A reviewer objects. What does the guidance say instead?",
       "options": {
         "a": "Begin with read access and widen it when a privileged operation is first attempted",
-        "b": "Ask for every scope, since fewer prompts mean fewer chances for users to refuse",
+        "b": "Ask for every scope the server offers, once at the start",
         "c": "Ask for one broad scope that covers all operations, and log each use of it afterwards",
         "d": "Pass the user's own token on to the downstream service, so no scope is needed"
       },
@@ -569,7 +569,7 @@
       "scope": "level",
       "stem": "Scenario: Wick Health's log records hold ids, counts and timings, and no message text. An engineer needs the prompt of a few failing cases to find a fault. Which handling does the page support?",
       "options": {
-        "a": "Add every content field to the records, since a fault needs full context",
+        "a": "Add every content field to the records",
         "b": "Allow that one content field by name, for a stated purpose and a limited time",
         "c": "Copy the prompts to a private file, so that the shared records stay free of content",
         "d": "Keep the records as they are, and ask users to describe the failing cases"
@@ -589,7 +589,7 @@
       "stem": "Scenario: Sable Cargo changed its model on purpose last Tuesday, and its cost per answer rose by 35 percent against the stored reference. The drift check pages the on-call engineer. What does the page advise?",
       "options": {
         "a": "Keep the old baseline for a year, so that the rise is never forgotten, whatever else changes in between",
-        "b": "Raise the tolerance until the page stops, since the change was planned",
+        "b": "Raise the tolerance until the page stops",
         "c": "Turn the cost metric off until the next planned change has been decided",
         "d": "Reset the baseline at the switch that was chosen and treat other moves as findings"
       },
@@ -626,10 +626,10 @@
       "scope": "level",
       "stem": "Scenario: Bexley Bank plans to let a language model mark 1,000 free-form write-ups each night against a rubric. No person has yet compared its marks with theirs. What comes first?",
       "options": {
-        "a": "Switch the grader on at full volume, since a model grader is fast and scalable",
-        "b": "Replace the grader with exact-match checks, since they are the most reliable kind",
-        "c": "Measure how closely it agrees with human judgement on a small sample",
-        "d": "Have people grade all 1,000 reports each night, since human grading is the best"
+        "a": "Switch the grader on at full volume straight away",
+        "b": "Replace the grader with exact-match checks on every write-up",
+        "c": "Measure its agreement with human judgement on a small sample",
+        "d": "Have people grade all 1,000 reports each night as well"
       },
       "key": "c",
       "explanation": {
@@ -646,9 +646,9 @@
       "stem": "Scenario: Colt Retail scores its assistant on the five worked examples written into its own prompt and reports 100 percent. A reviewer says the score tells little. What should make up its evaluation set?",
       "options": {
         "a": "The same worked examples, with more of them added until the score stops moving",
-        "b": "Cases written by the developers, since they know the product best of all",
-        "c": "Real traffic with its proportions kept, plus awkward cases added on purpose and tagged",
-        "d": "A single hard benchmark, since a hard test shows the ceiling of the system"
+        "b": "Cases written by the developers who built the assistant and know it",
+        "c": "Real traffic in its proportions, plus awkward cases added and tagged",
+        "d": "A single hard benchmark taken from a public leaderboard of models"
       },
       "key": "c",
       "explanation": {
@@ -689,10 +689,10 @@
       "scope": "level",
       "stem": "Scenario: Pike Telecom reports a mean latency of 1.4 seconds for its streamed assistant, yet users complain that it is slow. Which figures should the report add?",
       "options": {
-        "a": "The mean of the fastest half, since users remember the quick answers",
-        "b": "The maximum over a month, since one very slow case shows what users feel",
-        "c": "The total tokens per answer, since long answers are the cause of slow ones",
-        "d": "The 95th percentile and the time to the first token"
+        "a": "The mean of the fastest half of the requests",
+        "b": "The maximum latency seen over a whole month",
+        "c": "The total tokens per answer, averaged over a day",
+        "d": "The 95th percentile and the time to first token"
       },
       "key": "d",
       "explanation": {
@@ -708,10 +708,10 @@
       "scope": "level",
       "stem": "Scenario: Kern Logistics runs one assistant on Anthropic's own API and on Amazon Bedrock, and plans all its migrations from the dates in Anthropic's table. A model is listed as retiring in four months. What should the team do?",
       "options": {
-        "a": "Use the table's date for both, since the model is the same on each platform",
-        "b": "Track a second schedule, since the cloud provider publishes a separate calendar",
+        "a": "Use the table's date for both",
+        "b": "Track a second schedule",
         "c": "Wait for the provider to send a notice before acting at all",
-        "d": "Move only the direct traffic and leave Bedrock alone, since it is out of scope"
+        "d": "Move only the direct traffic and leave Bedrock alone"
       },
       "key": "b",
       "explanation": {
@@ -788,12 +788,12 @@
       "id": "03-professional-mock-exam#x40",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: In a launch review at Tern Health, a wrong decision costs 3 units and a person's check costs 1 unit, and the architect must state the accuracy above which routing items to a person stops paying. Which figure goes into the review?",
+      "stem": "Scenario: In a launch review at Tern Health, a wrong decision costs 3 units and a person's check costs 1 unit, and the architect must state the accuracy above which routing items to a person stops paying. Which figure goes into the review, following the page's rule?",
       "options": {
-        "a": "66, as the rounding climbs to 34 before the subtraction",
-        "b": "33, since the share of the check is the answer itself",
-        "c": "67, since a third rounds to the nearest whole percent",
-        "d": "0, since a check that is cheaper than a mistake always pays"
+        "a": "66, which is 100 minus the percent rounded up",
+        "b": "33, the share the check costs against an error, rounded down",
+        "c": "67, the share left after the exact percent is rounded to the nearest unit",
+        "d": "0, the figure used when no check pays at any accuracy"
       },
       "key": "a",
       "explanation": {
@@ -807,7 +807,7 @@
       "id": "03-professional-mock-exam#x41",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: A proposal at Larch Mutual moves its change out in exactly three stages, and the sponsor needs the review to say whether the plan blocks the launch. The rule asks for at least three. What does the review record for the roll-out?",
+      "stem": "Scenario: A proposal at Larch Mutual moves its change out in exactly three stages, and the sponsor needs the review to say whether the plan blocks the launch. What does the review record for the roll-out?",
       "options": {
         "a": "No finding, since a threshold is met at its edge",
         "b": "A low finding, since three is the least that passes",
@@ -847,10 +847,10 @@
       "scope": "level",
       "stem": "Scenario: Sorrel Cloud serves twelve customers from a single shared pool and separates their data by a filter in its application code. An auditor asks how the data of one customer is kept from another. What does the page say about the design?",
       "options": {
-        "a": "It is sound, since a well-tested filter in code is the stronger separation of the two options",
+        "a": "It is sound",
         "b": "It is sound, as long as each customer is given a key of its own to use",
         "c": "It is a finding only if two of the customers work in the same industry",
-        "d": "It is a finding, since the boundary that is enforced for you is a workspace per tenant"
+        "d": "It is a finding"
       },
       "key": "d",
       "explanation": {
@@ -866,10 +866,10 @@
       "scope": "level",
       "stem": "Scenario: Bracken Health's structured output uses a schema whose fixed list of allowed values holds the names of diagnoses taken from real patient records, in a deployment that is meant to be HIPAA ready. Which change does the design need?",
       "options": {
-        "a": "Cap the list at ten values, since a short list exposes less",
-        "b": "Give each tenant a schema of its own, since tenants are kept apart",
-        "c": "Keep clinical data out of the definition, and let the message carry it",
-        "d": "Encrypt the schema inside the request body, since the body is protected in transit"
+        "a": "Cap the list at ten of the most common values",
+        "b": "Give each tenant a schema of its own with that list",
+        "c": "Move clinical data out of the definition into the message",
+        "d": "Encrypt the schema inside the request body in transit"
       },
       "key": "c",
       "explanation": {
@@ -910,10 +910,10 @@
       "scope": "level",
       "stem": "Scenario: Brae Insurance's assistant quotes a sentence that is not in the policy text, and its score is 99. The threshold for sending unreviewed is 95. What becomes of the reply?",
       "options": {
-        "a": "It goes out unreviewed, since 99 is above the threshold for sending",
-        "b": "It goes to review, since only replies below the threshold are held back",
+        "a": "It goes out unreviewed",
+        "b": "It goes to review",
         "c": "It goes out with a note that the quote could not be found in the source",
-        "d": "It is held, since an unbacked claim is stopped whatever its rating"
+        "d": "It is held"
       },
       "key": "d",
       "explanation": {
@@ -929,10 +929,10 @@
       "scope": "level",
       "stem": "Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. Which recovery belongs in the design?",
       "options": {
-        "a": "Drop or rephrase the turn that triggered it, or send the request to another model",
+        "a": "Drop or rephrase the triggering turn, or send the request to another model",
         "b": "Show the user the category of the refusal, which is always present",
         "c": "Raise the sampling temperature, so that the next reply differs",
-        "d": "Resend the same history until it passes, since a refusal is a passing fault"
+        "d": "Resend the same history unchanged until it passes through"
       },
       "key": "a",
       "explanation": {
@@ -992,10 +992,10 @@
       "scope": "level",
       "stem": "Scenario: Hollis Mutual's risk register lists four failure modes, and the entry for privacy leaks names a pattern filter that does not appear anywhere in the architecture. What does the page say about that row?",
       "options": {
-        "a": "It is a wish, since each safeguard in it must exist as a part of the system",
-        "b": "It is sound, since the filter will be built before the system goes live",
+        "a": "It is a wish",
+        "b": "It is sound",
         "c": "It is sound, as long as the owner column names a person",
-        "d": "It is a minor flaw, since the residual column already says the risk is medium"
+        "d": "It is a minor flaw"
       },
       "key": "a",
       "explanation": {
@@ -1093,9 +1093,9 @@
       "scope": "level",
       "stem": "Scenario: In the options table of a design record, the entry for the costliest design carries a two-word rationale, \"Too much\". A reviewer asks for a change. What should that entry say instead?",
       "options": {
-        "a": "A single word that names the main cost, since short reasons read faster",
-        "b": "A reference to the sponsor's budget, since the budget is what decides",
-        "c": "A sentence with a checkable reason, such as top price and slowest reply",
+        "a": "A single word that names the main cost of the option",
+        "b": "A reference to the sponsor's budget for the year",
+        "c": "A sentence with a checkable reason, such as top price and slow reply",
         "d": "The name of the engineer who first rejected the option, for traceability"
       },
       "key": "c",
@@ -1132,9 +1132,9 @@
       "stem": "Scenario: A service level promises availability of at least 99.5 percent, written as 995 per mille. The month's measurement is 990 per mille. How does the report read?",
       "options": {
         "a": "Short of the floor by 5, counted in the unit of the target",
-        "b": "Failed, since a bare statement ends the argument more quickly",
-        "c": "Met, since 990 is within 1 percent of the promised target",
-        "d": "Short by 5 percent, since the two figures differ by five units"
+        "b": "Failed, with the gap left unstated in the report",
+        "c": "Met, as the measurement is within a rounding margin",
+        "d": "Short by 5 percent of the monthly availability"
       },
       "key": "a",
       "explanation": {
@@ -1150,9 +1150,9 @@
       "scope": "level",
       "stem": "Scenario: Two months into a pilot, Dray Finance's team sees that its accuracy target for the costly segment will not be met by the agreed deadline. How should it handle the promise?",
       "options": {
-        "a": "Keep quiet until the date, since the measurement may still improve",
-        "b": "Amend it through the same channel that made it, with a reason, ahead of the due day",
-        "c": "Report the overall average instead, since it is above the target",
+        "a": "Keep quiet about the shortfall until the date",
+        "b": "Amend it through the channel that made it, with a reason, before the due day",
+        "c": "Report the overall average instead of the segment",
         "d": "Move the target in the next sprint plan, without telling the sponsor or the review board"
       },
       "key": "b",
@@ -1172,7 +1172,7 @@
         "a": "The flaws first in domain order, then the conclusion and the count at the end",
         "b": "The count first, then a narrative of the design, then the flaws with no conclusion",
         "c": "The engineers' evidence first, so that the sponsor reads the analysis before the conclusion",
-        "d": "Lead with the headline outcome, follow with a tally by area, and end with the ranked details"
+        "d": "Lead with the headline outcome, follow with a tally by area, then the ranked details"
       },
       "key": "d",
       "explanation": {
@@ -1251,10 +1251,10 @@
       "scope": "level",
       "stem": "Scenario: Hart Media's platform team writes a managed MCP allowlist entry that gives both a server name and its address, believing two keys make the entry stricter. What does the page say about such an entry?",
       "options": {
-        "a": "It is invalid, since only one of the three identifiers fits per record",
+        "a": "It is invalid",
         "b": "It is valid, but only the address is read when both keys are set",
         "c": "It is valid for a deny list, and invalid for an allow list only",
-        "d": "It is valid and stricter, since two keys must both match for the server"
+        "d": "It is valid and stricter"
       },
       "key": "a",
       "explanation": {
@@ -1270,10 +1270,10 @@
       "scope": "level",
       "stem": "Scenario: Fell Utilities must let an agent call a vendor's booking tool that changes records and offers no idempotency key. The agent's runner retries on timeouts. What does the architect do?",
       "options": {
-        "a": "Wrap it with an identifier of its own, or keep any repeat from reaching it",
+        "a": "Give it an identifier of its own, or keep repeats away from it",
         "b": "Tell the agent in its prompt to avoid booking the same slot twice",
-        "c": "Retry until a reply arrives, since every failure of this kind is temporary",
-        "d": "Allow retries as they are, since the model reasons correctly about each attempt"
+        "c": "Retry the call until some reply finally arrives",
+        "d": "Allow the retries to run exactly as they are today"
       },
       "key": "a",
       "explanation": {
@@ -1306,19 +1306,19 @@
       "id": "04-professional-mock-exam-2#x3",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: A design at Tamsin Rail passes each customer message straight to a model with no check on its length, its content or its source, and it has a good processing stage, an output check and a feedback loop. What does the four-stage review record?",
+      "stem": "**Mark each answer** and read the explanations only after you finish.",
       "options": {
-        "a": "A missing feedback stage, which is a high finding for lack of any learning",
-        "b": "A missing processing stage, which is a medium finding that asks for revision",
-        "c": "No finding, since a good output check also catches the faults of bad input",
-        "d": "The input side is missing, a high-severity gap that rejects it"
+        "a": "No finding, as the three stages present are the strong ones",
+        "b": "A medium finding for the missing input side, which asks for revision",
+        "c": "A low finding, as an input stage can be added after launch",
+        "d": "A high finding for the missing input side, which rejects the design"
       },
       "key": "d",
       "explanation": {
         "d": "The input stage holds where requests come from, how they are validated and bounded and what is stripped, and a design that sends raw text straight to the model lacks it, which is a high finding (module 80, page 1). The rubric rejects on any high finding. The page puts it as \"Where requests come from, how they are validated and bounded, what is stripped before the model sees it\".",
-        "a": "Ruled out because the stem names a feedback loop, and a missing one reads \"Nobody learns that it was wrong\".",
-        "b": "Ruled out because the page's example of a missing processing stage is \"Everything is one long prompt\".",
-        "c": "Ruled out because the page asks \"how they are validated and bounded\", and treats an empty stage as a finding in its own right."
+        "a": "Ruled out because the stem lists the other stages as present, and the page asks \"how they are validated and bounded\" of the input side alone.",
+        "b": "Ruled out because a design that skips \"how they are validated and bounded\" is a high finding and not a medium one.",
+        "c": "Ruled out because the page asks \"what is stripped before the model sees it\" before launch, not after."
       }
     },
     {
@@ -1366,9 +1366,9 @@
       "stem": "Scenario: An automated workflow at Torrance Mutual approves payments under a daily spending limit. The team measured 99.8 percent accuracy in testing and proposes to enforce the limit in the system prompt. Where should the limit live?",
       "options": {
         "a": "In the model's tool description, so that the model reads it at every call",
-        "b": "In the prompt, with a check in the next test run, since accuracy is already high",
+        "b": "In the prompt, with a check in the next test run",
         "c": "In a reviewer's checklist, so that a person catches every breach by hand",
-        "d": "In code outside the model, since a control that must hold cannot depend on behaviour"
+        "d": "In code outside the model"
       },
       "key": "d",
       "explanation": {
@@ -1384,7 +1384,7 @@
       "scope": "level",
       "stem": "Scenario: A sponsor at Pellam Retail funds a chat design for its agreed targets, the 95th percentile latency and availability. Which value claim is that, and what does it influence in the design?",
       "options": {
-        "a": "The service-level pillar, which affects model tier, caching, concurrency and accept-and-poll",
+        "a": "The service-level pillar, which affects tier, caching, concurrency and accept-and-poll",
         "b": "Cost, which counts tokens, review time and rework and not the model price alone",
         "c": "Productivity, which favours an augmented assistant with a person in the loop",
         "d": "Efficiency, which favours a workflow on the routine path with people kept for exceptions"
@@ -1428,10 +1428,10 @@
       "scope": "level",
       "stem": "Scenario: A sponsor at Ivel Bank claims its new triage assistant lowers cost. The team plans to show the saving as the model's price per token, which is below the price of the old tool. What should the design measure?",
       "options": {
-        "a": "The share of customers reached in a new way, since a new reach shows value",
-        "b": "The spend per finished task, adding review time and rework, against the human baseline",
-        "c": "The model's token rate, since the supplier publishes it and it needs no estimate",
-        "d": "The count of hours saved for each person each week, since staff time is the real cost"
+        "a": "The share of customers reached in a new way by the assistant each month",
+        "b": "Spend per finished task including review and rework, against a human baseline",
+        "c": "The model's token rate per second across all the requests served",
+        "d": "The count of hours saved for each person each week, summed across the whole team"
       },
       "key": "b",
       "explanation": {
@@ -1475,7 +1475,7 @@
         "a": "A brief naming the objective, format, tools and boundaries",
         "b": "A longer one-line task with more adjectives about thoroughness",
         "c": "The full conversation so far, so that no subagent lacks context",
-        "d": "Nothing, because each subagent should find its own task from the lead's files"
+        "d": "The same one-line task with the market named more precisely"
       },
       "key": "a",
       "explanation": {
@@ -1518,7 +1518,7 @@
       "options": {
         "a": "Scale, because tokens read from a cache count toward the input limit",
         "b": "Start, because the request rate of 650 and input volume of 520,000 are both inside it",
-        "c": "The middle tier, since generated text at 975,000 outruns the entry tier's cap",
+        "c": "The larger of those two, since generated text at 975,000 outruns the smaller one's cap",
         "d": "Start, because only the request rate of a service decides the tier"
       },
       "key": "c",
@@ -1552,19 +1552,19 @@
       "id": "04-professional-mock-exam-2#x15",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Garnet Post's gateway returns a ticket number at once for slow jobs and does the work behind the scenes. A caller's network drops and it re-submits the same job. What should the design use to keep the work from running twice?",
+      "stem": "Scenario: Harbor Lines marks its brief standing instructions for caching, the calls succeed, and the bill shows no savings from it and no error. What explains it?",
       "options": {
-        "a": "A new ticket for every submission, so that each try is tracked separately",
-        "b": "A longer timeout for the caller, so that no second submission is needed",
-        "c": "A rule in the prompt that tells the model to skip duplicate jobs",
-        "d": "The identifier handed back, treated as the key for that request"
+        "a": "The prefix is under the model's minimum, so the tag it carries has no effect and nothing is stored",
+        "b": "The cache was written and expired between calls, so a longer lifetime is needed",
+        "c": "Short prefixes need a batch request, so the calls should be resubmitted that way",
+        "d": "An error was raised and missed in the logs, so the logging level must be raised"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "Accept-and-poll pairs with the retry and key discipline of module 81, since the identifier given to the caller is the key for the request (module 84, page 2). A repeat with the same ticket returns the same work and does not start it again. The page puts it as \"the identifier given to the caller is the key for the request\".",
-        "a": "Ruled out because \"The key names the intention, not the attempt\", and a fresh value makes the retry look new.",
-        "b": "Ruled out because the page rejects that: \"Raising the legacy system's timeout is often not possible\".",
-        "c": "Ruled out because a control that must hold \"is enforced in code outside the model\"."
+        "a": "Below the model's minimum the marking \"has no effect and does not report an error\", so the cache stays inactive and shows up only in the bill (module 82, page 1).",
+        "b": "Ruled out because \"A cache that was never active shows up only in the bill\", so nothing was written that could expire.",
+        "c": "Ruled out because the check is \"to read the usage figures the API returns for cache writes and cache reads\", and not to change the call type.",
+        "d": "Ruled out because the marking \"does not report an error\" below the minimum, so there is none to miss."
       }
     },
     {
@@ -1573,10 +1573,10 @@
       "scope": "level",
       "stem": "Scenario: Perrin Cloud's assembler holds two dynamic modules of equal priority, a long customer history and a long list of offers, and the request is over budget by a little. Which module does it drop first?",
       "options": {
-        "a": "Neither, since two equal modules can only be cut together",
+        "a": "Neither module, as they hold equal priority",
         "b": "The one that sits later in the final sequence",
-        "c": "The one that the caller names, since callers know which text matters",
-        "d": "The one that holds more tokens, since dropping it frees the most room"
+        "c": "The one that the caller names first in the request",
+        "d": "The one that holds more tokens in its current form"
       },
       "key": "b",
       "explanation": {
@@ -1592,10 +1592,10 @@
       "scope": "level",
       "stem": "Scenario: Orlan Support picks the model for a classification workload by reading its name in the lineup, and a new release replaces the old one without a new check. Which practice does the page require for the capability the task needs?",
       "options": {
-        "a": "Run an evaluation on candidates, and repeat it whenever one is swapped out",
-        "b": "Copy the tier from the previous model, since replacements keep their predecessor's level",
-        "c": "Read the capability from the model's price, since price tracks ability exactly",
-        "d": "Take the highest rung of the lineup, since a larger model is never worse at it"
+        "a": "Evaluate the candidates, and repeat it whenever one is swapped",
+        "b": "Copy the tier from the previous model into the new one",
+        "c": "Read the capability from the model's price and its position in the lineup",
+        "d": "Take the highest rung of the lineup for every workload"
       },
       "key": "a",
       "explanation": {
@@ -1611,10 +1611,10 @@
       "scope": "level",
       "stem": "Scenario: Ferrow Retail's finance lead asks for showback that takes each team's total volume and applies a single blended rate. What does the gateway design do instead?",
       "options": {
-        "a": "Round each row first, then add them, since cents belong to rows",
-        "b": "Price input only, since outputs are small in most workloads",
-        "c": "Use the average, since one blended rate is the simplest to explain",
-        "d": "Charge each usage kind at its own model price, cache reads cheap and output dear"
+        "a": "Round each row first, then add the rounded rows together",
+        "b": "Price the input tokens only and leave the output unbilled across teams",
+        "c": "Use the average of every model's price across the teams",
+        "d": "Charge each usage kind at its model's price, cache reads cheap"
       },
       "key": "d",
       "explanation": {
@@ -1631,7 +1631,7 @@
       "stem": "Scenario: A prompt module at Lanyard Health is marked static and holds the text \"Dear {customer}\" in its first line, and the team defends it as convenient. What does the assembler do, and why?",
       "options": {
         "a": "It moves the module behind the dynamic ones, since the order is chosen by callers",
-        "b": "It refuses to build the request, since a changing value in the prefix breaks the cache",
+        "b": "It refuses to build the request, since a changing prefix value breaks the cache",
         "c": "It fills the value in and caches the result, since the cache matches on meaning",
         "d": "It drops the module as the lowest priority, since a budget would cut it first"
       },
@@ -1650,8 +1650,8 @@
       "stem": "Scenario: A team at Selby Finance enables the variable that emits raw request and response bodies, intending only to see tool inputs. What does the page say about that setting?",
       "options": {
         "a": "It redacts prompts by default and so changes nothing",
-        "b": "It reveals tool inputs alone, since the narrower variable is the one that matters",
-        "c": "It exposes all the other content too, as payloads hold the entire conversation",
+        "b": "It reveals tool inputs alone, and nothing else in the payload at all",
+        "c": "It exposes all other content too, as payloads hold the conversation",
         "d": "It stays off in a project file unless the repository sets it"
       },
       "key": "c",
@@ -1666,12 +1666,12 @@
       "id": "04-professional-mock-exam-2#x21",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the form that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)",
+      "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the free-text procedure that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)",
       "options": {
         "a": "A keyword index with a larger k is the fit, since more results reach more links",
         "b": "A cached prompt that holds the whole rulebook is the fit, since nothing can then be missed",
         "c": "An agent that searches issues one query after another",
-        "d": "A structured query run by a tool is the fit, since a form is a record",
+        "d": "A structured query run by a tool is the fit, since each lookup is a record",
         "e": "A single top-k list cannot follow a chain"
       },
       "key": [
@@ -1693,10 +1693,10 @@
       "scope": "level",
       "stem": "Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licences. Which cost does the page name?",
       "options": {
-        "a": "Nothing beyond a configuration file, since a gateway is only a setting",
-        "b": "Running it as infrastructure that must follow whatever its clients send",
-        "c": "A second provider key for every team, since gateways issue none",
-        "d": "The loss of the logs, since a gateway cannot record a refusal"
+        "a": "Nothing beyond a configuration file and a short setup guide for teams",
+        "b": "Running it as infrastructure that follows what its clients send",
+        "c": "A second provider key for every team that uses the gateway",
+        "d": "The loss of the logs from retired teams and old projects"
       },
       "key": "b",
       "explanation": {
@@ -1712,10 +1712,10 @@
       "scope": "level",
       "stem": "Scenario: Pelham Health's guidance changes weekly, differs by reader group and must name its source in every answer. A proposal is to train the facts into the model. What does the page conclude?",
       "options": {
-        "a": "Retrieval, since weights cannot cite or be withheld from an audience",
-        "b": "Train them in, since weights keep facts stable between releases",
+        "a": "Retrieval from a store the team keeps current",
+        "b": "Train the facts into the model once a month",
         "c": "Train them in, using the Claude API's fine-tuning service",
-        "d": "Cache them in the prompt, since the same text suits every request"
+        "d": "Cache the facts in the prompt of each call"
       },
       "key": "a",
       "explanation": {
@@ -1733,8 +1733,8 @@
       "options": {
         "a": "It is wrong only for alerts, since dashboards can tolerate gaps",
         "b": "It is sound, since a random sample estimates any rate well",
-        "c": "It is sound, since traces are sampled the same way in the example",
-        "d": "Wrong rates, since a metric is a count and a missing count is wrong"
+        "c": "It is sound, since traces are sampled the same way in the example here",
+        "d": "It is wrong, since a metric is a count and a missing count is wrong"
       },
       "key": "d",
       "explanation": {
@@ -1794,10 +1794,10 @@
       "scope": "level",
       "stem": "Scenario: A drift check at Oakley Pay stores a baseline of zero for the share of requests refused. This week the share is 3 percent, and the check divides by the baseline. What should the rule do?",
       "options": {
-        "a": "Skip the metric, since a zero baseline carries no information",
-        "b": "Raise the baseline to the current value, since planned change resets it",
-        "c": "Count any rise from nothing as a 100-point move and skip the division",
-        "d": "Report the move as 3 percent, since that is the figure on the dashboard"
+        "a": "Skip the metric entirely until a nonzero baseline has been stored again",
+        "b": "Raise the baseline to the current value and then divide",
+        "c": "Treat any rise from nothing as a 100-point move, with no division",
+        "d": "Report the move as 3 percent of the whole traffic"
       },
       "key": "c",
       "explanation": {
@@ -1851,9 +1851,9 @@
       "scope": "level",
       "stem": "Scenario: A review at Lowden Care compares a support agent's tools with its role and plans to delete everything the role does not use, and nothing else. The role also needs a tool the agent was never given. What does the page say about the review?",
       "options": {
-        "a": "It is complete, since least privilege is only a matter of taking tools away",
-        "b": "It must add logging for every tool left, since removal alone is a weak control",
-        "c": "It must also report the shortfall, since pruning alone leaves the job unfinishable",
+        "a": "It is complete",
+        "b": "It must add logging for every tool left",
+        "c": "It must also report the shortfall",
         "d": "It must remove the missing tool from the role description, so that the two agree"
       },
       "key": "c",
@@ -1871,9 +1871,9 @@
       "stem": "Scenario: Hendry Stores' agent is offered 120 tools through a search tool, and every request starts with a search because all tools are deferred. Latency is poor. Which configuration does the guidance advise?",
       "options": {
         "a": "Replace the search tool with shorter tool descriptions for all 120",
-        "b": "Load the three to five most used definitions up front and defer the long tail",
-        "c": "Defer nothing, since a search adds a round trip to each call",
-        "d": "Defer the most used ones too, since fewer loaded tools means fewer tokens"
+        "b": "Load the three to five most used definitions and defer the rest",
+        "c": "Defer nothing, so that every definition loads up front",
+        "d": "Defer the most used ones too, along with the rest"
       },
       "key": "b",
       "explanation": {
@@ -1914,7 +1914,7 @@
       "scope": "level",
       "stem": "Scenario: A change at Ravel Freight is refused by the gate on a refund case that must pass, and the old model's retirement is 40 days away. The lead proposes to ship anyway. What does the page say?",
       "options": {
-        "a": "Ship it, since the calendar decides and the gate only advises",
+        "a": "Ship it as proposed and note the failure in the release",
         "b": "Re-weight the failing case until the average rises",
         "c": "Make it a work list, one owner for each reason",
         "d": "Watch the failure in production and fix it later"
@@ -1933,10 +1933,10 @@
       "scope": "level",
       "stem": "Scenario: Dovedale Insurance's assistant answers a coverage question with a claim the policy extract does not make, though the right passage was in the prompt and the reply has the right shape. Where does the diagnosis place the fault, and what does it try?",
       "options": {
-        "a": "In retrieval, by rebuilding the index, since evidence is always the first suspect",
-        "b": "In the model, by moving to a larger one, since a stronger model reads better",
-        "c": "In format, by adding an output schema, since shape failures are the cheapest",
-        "d": "In grounding, by allowing it to say it does not know and by requiring quotes first"
+        "a": "In retrieval, by rebuilding the index with a different chunk size and overlap",
+        "b": "In the model, by moving to a larger one from the same family",
+        "c": "In format, by adding an output schema with stricter field types",
+        "d": "In grounding, by letting it say it does not know and quoting first"
       },
       "key": "d",
       "explanation": {
@@ -1952,10 +1952,10 @@
       "scope": "level",
       "stem": "Scenario: A team at Merrin Air trims its instructions and switches to a smaller model to cut delay before any evaluation of the full-strength system exists. Which order does the documentation advise?",
       "options": {
-        "a": "Cut delay first, since every later change is judged against the speed it gives",
-        "b": "Engineer a prompt that performs well without constraints, then reduce latency afterwards",
-        "c": "Cut delay only on the mean, since users feel the average reply",
-        "d": "Cut delay and measure quality together in a single step, since two changes show their effect at once"
+        "a": "Cut delay first, then judge the quality of the answers afterwards on a sample",
+        "b": "Get the prompt performing well without constraints, then reduce latency",
+        "c": "Cut delay, measured only on the mean latency across all requests",
+        "d": "Cut delay and measure quality together in a single combined step"
       },
       "key": "b",
       "explanation": {
@@ -1991,7 +1991,7 @@
       "stem": "Scenario: A review at Quill Telecom runs the launch rubric on a design where a human review costs 60 and a wrong decision costs 50. What accuracy does the needed-accuracy rule return?",
       "options": {
         "a": "Minus 20, since the check exceeds the error by that percent",
-        "b": "Zero, since the check never pays and the result is clamped there",
+        "b": "Zero, since the check never pays and the result is clamped",
         "c": "Eighty, since the error is 80 percent of the check",
         "d": "A hundred, since a check this dear needs a perfect model"
       },
@@ -2011,7 +2011,7 @@
       "options": {
         "a": "Hand-grade thirty, since quality is the property that makes a set trustworthy",
         "b": "Wait for a few thousand cases before grading any, since small sets mislead",
-        "c": "Run the broad automated set, since breadth beats refinement when software does the marking",
+        "c": "Run the broad automated set, since breadth beats refinement here",
         "d": "Hand-grade all six hundred, since people are the only valid judges"
       },
       "key": "c",
@@ -2028,10 +2028,10 @@
       "scope": "level",
       "stem": "Scenario: Corran Health's release gate for its claims assistant measures accuracy, latency and cost, and an audit finds that prompt-injection attempts reach the tool layer. Which addition does the guide's list of dimensions require?",
       "options": {
-        "a": "A user rating after each answer, since people notice an attack quickly",
-        "b": "A higher accuracy floor on ordinary cases, since a better model resists attacks",
-        "c": "A mean latency per request, since slow replies are the sign of an attack",
-        "d": "The share of hostile inputs that succeeded, tested on cases built to provoke them"
+        "a": "A user rating collected after each answer, averaged by month and by team name",
+        "b": "A higher accuracy floor on ordinary cases, checked on the same sample",
+        "c": "A mean latency per request, reported with the median for comparison",
+        "d": "The share of hostile inputs that succeeded, on cases built to provoke them"
       },
       "key": "d",
       "explanation": {
@@ -2091,9 +2091,9 @@
       "scope": "level",
       "stem": "Scenario: A fairness review at Stanton Mutual wants a parity report across customer groups, but the system holds no field that labels a customer's group. What does the page say about the report?",
       "options": {
-        "a": "The cohorts must be defined where they can be measured, or the gap stays unseen",
+        "a": "The cohorts must be defined where they can be measured, or the gap hides",
         "b": "The report can use the overall average instead, which covers every group",
-        "c": "The report should be skipped, since bias is a property of the model alone",
+        "c": "The report should be skipped",
         "d": "The report fixes the gap itself once the labels exist, with no owner needed"
       },
       "key": "a",
@@ -2135,10 +2135,10 @@
       "scope": "level",
       "stem": "Scenario: A support assistant at Fenwick Mutual must tell readers where an answer came from, and the team wants a design that shows the basis without storing the answer in the audit trail. Which elements does the page give?",
       "options": {
-        "a": "The full prompt and reply in the trace, since the basis is the text itself",
-        "b": "A line saying that the model is confident, since confidence is a basis",
-        "c": "The source quote, the document version and a way to reach a person",
-        "d": "Nothing beyond a disclosure that AI helped, since that satisfies both duties"
+        "a": "The full prompt and reply stored in the trace for later audit",
+        "b": "A line saying that the model is confident in its answer",
+        "c": "The source quote, the document version and a contact person",
+        "d": "Nothing beyond a disclosure that AI helped write the answer"
       },
       "key": "c",
       "explanation": {
@@ -2154,10 +2154,10 @@
       "scope": "level",
       "stem": "Scenario: Ingram Bank's design puts three strong controls on the input layer, a harmlessness screen, injection patterns and an untrusted-content rule, and none elsewhere. A confident wrong answer and a rogue tool call both occur in testing. What does the review conclude?",
       "options": {
-        "a": "Other tiers are bare, so it adds output, action and monitor safeguards",
-        "b": "The design needs a longer system prompt, since the model can argue with controls",
-        "c": "The design needs a fourth input control, since more screens close the gap",
-        "d": "The design is sound, since input controls stop every kind of fault"
+        "a": "Other tiers are bare, so add output, action and monitor safeguards",
+        "b": "The design needs a longer system prompt to carry all of the rules",
+        "c": "The design needs a fourth input control for tool arguments",
+        "d": "The design is sound as it stands and needs no further layers added later"
       },
       "key": "a",
       "explanation": {
@@ -2192,10 +2192,10 @@
       "scope": "level",
       "stem": "Scenario: A design review at Norwood Energy hears the claim that the assistant is GDPR compliant, resting on the model vendor's reputation. What should the architect ask to see?",
       "options": {
-        "a": "A signed statement from the vendor, since compliance belongs to the model",
-        "b": "A line in the system prompt that names the regulation",
-        "c": "A passing score on the accuracy suite, since compliance follows from quality",
-        "d": "The requirement, the part of the system that meets it, and the evidence"
+        "a": "A signed statement from the vendor about the model's handling of data",
+        "b": "A line in the system prompt that names the regulation in full",
+        "c": "A passing score on the accuracy suite for the assistant itself",
+        "d": "The requirement, the part of the system meeting it, and the evidence"
       },
       "key": "d",
       "explanation": {
@@ -2236,10 +2236,10 @@
       "scope": "level",
       "stem": "Scenario: A user of Pellew Insurance's assistant triggers refusals eleven times in a day, each ending with a refusal stop reason. What does the design do with that count?",
       "options": {
-        "a": "Tell the person the action breaches policy, then throttle or end access",
+        "a": "Tell the person it breaches policy, then throttle or end access",
         "b": "Raise the sampling temperature, so that the replies differ next time",
         "c": "Show the category of each refusal to the user in a message",
-        "d": "Ignore the count, since a refusal is an event of the model alone"
+        "d": "Ignore the count and leave the reply path unchanged"
       },
       "key": "a",
       "explanation": {
@@ -2275,9 +2275,9 @@
       "stem": "Scenario: A sponsor at Addison Travel says the new assistant must be quick. The agents who use it sit at a screen, and a nightly job also calls it. What should discovery write down for the agents?",
       "options": {
         "a": "A target of fast, since the sponsor chose the word",
-        "b": "The mean time, since it is the figure everybody knows",
+        "b": "The mean time, since it is the one figure that everybody knows well",
         "c": "A minutes-long allowance, since the nightly job sets the pace",
-        "d": "A 95th-percentile ceiling such as 2 seconds, since a person waits"
+        "d": "A 95th-percentile ceiling like 2 seconds, since a person waits"
       },
       "key": "d",
       "explanation": {
@@ -2293,10 +2293,10 @@
       "scope": "level",
       "stem": "Scenario: A handover note at Oldham Health gives an owner and a runbook for a new assistant, and one monitor, the error rate, compared with a baseline. What does the hand-off section still lack?",
       "options": {
-        "a": "A named vendor contact, since the model's maker answers every alert",
+        "a": "A named vendor contact who can be reached after hours",
         "b": "A statement that the design cannot change after launch, so that it stays stable",
-        "c": "A second signal, each read against the old figures in both directions, and a rollback",
-        "d": "A third document, the architecture diagram, since a runbook needs a picture"
+        "c": "A second signal, read against the old figures both ways, and a rollback",
+        "d": "A third document, the architecture diagram of the whole service"
       },
       "key": "c",
       "explanation": {
@@ -2312,10 +2312,10 @@
       "scope": "level",
       "stem": "Scenario: A sponsor at Penrose Care insists on a single accuracy figure for the board, though the system answers three kinds of request with very different error costs. Which figure does the page advise giving?",
       "options": {
-        "a": "The overall average, since one number is what a board can remember",
-        "b": "The best segment's figure, since the strongest result builds confidence",
-        "c": "No figure at all, since a single number can only mislead",
-        "d": "The number for the decision they face, stated with what it leaves out"
+        "a": "The overall average across all three kinds of request",
+        "b": "The best segment's figure, quoted with the sample that produced it",
+        "c": "No figure at all until the system has been in use a year",
+        "d": "The number for the decision they face, with what it leaves out"
       },
       "key": "d",
       "explanation": {
@@ -2357,9 +2357,9 @@
       "stem": "Scenario: Two months after launch, the review at Brandt Telecom finds that a new customer segment has appeared and a threshold no longer fits. A manager reads this as proof that the original design failed. How does the page frame it?",
       "options": {
         "a": "As a reason to freeze the design until the next sponsor review",
-        "b": "As planned iteration, since each checkpoint is allowed to alter the plan",
-        "c": "As a reason to restart discovery, since the facts were wrong from the beginning",
-        "d": "As a failure, since a sound design never needs a change after launch"
+        "b": "As planned iteration",
+        "c": "As a reason to restart discovery",
+        "d": "As a failure"
       },
       "key": "b",
       "explanation": {
@@ -2413,10 +2413,10 @@
       "scope": "level",
       "stem": "Scenario: A service record at Merton Care names an accountable party as \"the project team\", and the incident review cannot find anyone to call at night. What does the page say should have been written?",
       "options": {
-        "a": "The vendor, since the model's maker answers for its output",
-        "b": "The sponsor, since the person who pays should answer",
-        "c": "A role reachable by telephone, such as the billing operations manager",
-        "d": "A committee, since shared ownership spreads the risk"
+        "a": "The vendor, named as the supplier of the underlying model",
+        "b": "The sponsor, named as the executive who approved the work",
+        "c": "A role reachable by phone, such as the billing operations manager",
+        "d": "A committee, named as the group that reviews every incident each week"
       },
       "key": "c",
       "explanation": {
@@ -2432,8 +2432,8 @@
       "scope": "level",
       "stem": "Scenario: A launch review at Garston Retail runs the rubric on a design that promises \"fast replies\" with no figure, though an owner and the needed accuracy are stated. What does the rubric record?",
       "options": {
-        "a": "A medium finding for a latency with no number, so the verdict is revise",
-        "b": "No finding, since a promise in words is a service level",
+        "a": "A medium finding for no latency number, so the verdict is revise",
+        "b": "No finding at all, so the verdict is approve as proposed",
         "c": "A low finding for unstated accuracy, so the verdict is approve",
         "d": "A high finding for no accountable owner, so the verdict is reject"
       },
@@ -2476,10 +2476,10 @@
       "scope": "level",
       "stem": "Scenario: Rowan Labs has no device management and sets its policy in the admin console, and its security lead wants a stricter policy for the contractors' group alone. What does the page say?",
       "options": {
-        "a": "Ask any administrator to edit it for the group, since all admins may",
-        "b": "Set it in the shared project file, since the repository reaches everyone",
-        "c": "It cannot yet target a subset, so a separate file or profile goes to those machines",
-        "d": "Set the stricter values in the console for the group, since groups are supported"
+        "a": "Ask any administrator to edit the setting for the contractors' group",
+        "b": "Set it in the shared project file that every contractor checks out",
+        "c": "It cannot target a subset yet, so a separate profile goes to them",
+        "d": "Set the stricter values in the console for the group of contractors"
       },
       "key": "c",
       "explanation": {
@@ -2495,10 +2495,10 @@
       "scope": "level",
       "stem": "Scenario: Kinsale Software wants developers to install plugins only from its own marketplace repository, and an engineer sets the managed allowlist of marketplace sources to an empty list to be safe. What happens?",
       "options": {
-        "a": "Every origin is blocked, the firm's collection and the official one alike",
-        "b": "Every source is allowed, since an absent rule falls back to the defaults",
-        "c": "Only the official source is allowed, since it is the safe default",
-        "d": "Only the company's source is allowed, since an empty list means no outside sources"
+        "a": "Every origin is blocked, the firm's and the official one alike",
+        "b": "Every source is allowed, the firm's own and any public one",
+        "c": "Only the official source is allowed, and the firm's own is refused",
+        "d": "Only the company's source is allowed, and the official one is refused"
       },
       "key": "a",
       "explanation": {
@@ -2514,8 +2514,8 @@
       "scope": "level",
       "stem": "Scenario: A platform team at Larkin Pay enables Claude Code for an organisation with zero data retention and promises leadership a dashboard of merged pull requests with assistance. What should it check first?",
       "options": {
-        "a": "The baseline of four weeks, since metrics begin when the baseline ends",
-        "b": "Whether those contribution metrics are available at all, since they need the GitHub app",
+        "a": "The baseline of four weeks, since the metrics begin once the baseline period ends",
+        "b": "Whether those contribution metrics are available, since they need the GitHub app",
         "c": "The count of lines accepted, since that is the outcome that matters",
         "d": "The seat allowance, since it limits how many merges are recorded"
       },

@@ -53,7 +53,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 1. A support console's spec says that no summary may repeat a card number found in a ticket thread, and the team must decide where that rule is enforced. Which approach fits best?
    - **a**: A firm instruction in the prompt, written in capitals and repeated twice at the top
    - **b**: A target that at least 90 percent of summaries are rated accurate by two leads
-   - **c**: A regular expression in the application code that screens each output before display
+   - **c**: A regular expression in the code that screens each output before display
    - **d**: A longer explanation of the rule, placed in the user turn of every request
 
 2. A team wants an alert that fires before its first 429 arrives, not after. Which signal fits best?
@@ -78,11 +78,11 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 5. After a tool loop, Claude Sonnet 5.5 sometimes ends its turn with no content at all. The client packs each tool's findings into the message together with a sentence announcing that data is attached. Which change fits best?
    - **a**: Raise max_tokens so that the model has room to produce a full answer
    - **b**: Retry the identical request until a non-empty reply finally arrives
-   - **c**: Send the result blocks alone, with no text of any kind placed beside them
+   - **c**: Send the result blocks alone, with no text placed beside them
    - **d**: Switch the request to streaming so the empty turn is delivered in pieces
 
 6. A chat form lets a person submit an empty message, and each one still triggers a paid call whose reply wanders. Which handling fits best?
-   - **a**: Refuse the blank turn in the client, before anything is sent over the network
+   - **a**: Refuse the blank turn in the client, before anything is sent
    - **b**: Send it anyway and discard the reply when it comes back from the service
    - **c**: Insert a default question in place of the blank so that the call is useful
    - **d**: Add a line to the system prompt telling Claude to ignore empty messages
@@ -120,16 +120,16 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Move the request into a batch, whose results arrive together as one file
 
 12. A team's list holds 1,000 request ids and the result file has 998 lines, yet its program reports every request as handled. What should it do?
-   - **a**: Treat the missing two as succeeded, since nothing in the file contradicts them
-   - **b**: Diff the sent identifiers against the returned ones and resend any that are missing
-   - **c**: Resubmit the whole batch, since a short result file means that processing has failed
-   - **d**: Match the two by position, since the file keeps the order of submission
+   - **a**: Treat the missing two as succeeded, as the rest all came back
+   - **b**: Diff the sent identifiers against the returned ones and resend the missing
+   - **c**: Resubmit the whole batch of 1,000 requests from the very start
+   - **d**: Match the two files by position, line against line, in order
 
 13. A team on Google Cloud wants to reference a PDF by its web address in each request instead of embedding it. What do the platform pages say?
    - **a**: Web addresses work there, and a PDF counts as a document block like any other
    - **b**: Web addresses do not work there for documents, though they do for images
    - **c**: A single upload through the Files API lets later requests reference the PDF by id
-   - **d**: That source type is not offered there, so another way to supply the file is needed
+   - **d**: That source type is not offered there, so supply the file another way
 
 14. A team calls Claude Sonnet 5.5 through Amazon Bedrock with valid credentials and a correct policy, yet the call is refused. Which prerequisite does the page name?
    - **a**: The model must first be enabled for the account, since access is gated per model
@@ -244,9 +244,9 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 32. A hosted agent's shell command prints about 400,000 characters. What does the model receive for that output?
    - **a**: The full text, sent in several consecutive events until it is complete
-   - **b**: Nothing, since the output is not kept once the tool call has ended
-   - **c**: A truncated preview, with the path of a file in the sandbox that holds the rest
-   - **d**: An error result, because any output above the limit is rejected outright by the harness
+   - **b**: Nothing at all, as the output was too large to keep
+   - **c**: A truncated preview, with the path of a sandbox file that holds the rest
+   - **d**: An error result that tells it the output was too long
 
 33. A security review expects a new sandbox for a hosted agent to be cut off from the internet, because the create request never mentions the network field. What will happen?
    - **a**: The platform applies limited networking with an empty host list
@@ -286,10 +286,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Remove the validation step for that document so that the first reply is accepted
 
 39. A team wants to prepend a short context sentence to each of its 50,000 chunks before indexing, but fears the model calls would be too costly. Which fact answers the worry?
-   - **a**: The sentences are generated once per chunk for free, since indexing is not billed
-   - **b**: Contextual retrieval needs no extra calls, since the embeddings already hold the context
-   - **c**: Only the first thousand chunks need a sentence, since later ones inherit it
-   - **d**: Caching the document makes the work affordable, at about a dollar per million tokens
+   - **a**: The sentences are generated once per chunk for free by the platform
+   - **b**: Contextual retrieval needs no extra model calls to run at all
+   - **c**: Only the first thousand chunks need a sentence of context at all
+   - **d**: Caching the document makes it affordable, about a dollar per million tokens
 
 40. A team asks Claude in the prompt to quote its sources for each claim, and the replies get expensive. Which feature addresses this?
    - **a**: The Files API, which stores the quoted material outside the request
@@ -305,9 +305,9 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: Rely on the runner's default behaviour, which has no limit
 
 42. A migration touches hundreds of files, and the team wants its findings cross-checked before anyone sees them, which is beyond what a handful of helpers can manage. Which extension fits best?
-   - **a**: A subagent, because Claude decides turn by turn what runs next
-   - **b**: A skill, because it adds reference material to every conversation
-   - **c**: A dynamic workflow, where a script rather than the model decides what runs next
+   - **a**: A subagent that runs one helper task in its own context
+   - **b**: A skill that packages one prompt for repeated use
+   - **c**: A dynamic workflow, where a script decides what runs next
    - **d**: A line in CLAUDE.md that tells Claude to double-check its own findings
 
 43. A new server design wants to borrow the host application's language model for a completion, so that the server needs no key of its own. What does the 2026-07-28 revision advise?
@@ -360,10 +360,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: A larger context window, so that the whole history of the attacker's inputs fits
 
 51. Claude ran a script that altered rows in a production database. The developer presses Esc twice to rewind, expecting the rows to come back. What happens?
-   - **a**: Everything is undone, because the checkpoint also snapshots the database
-   - **b**: The database is restored only if Claude is asked to undo the script itself
-   - **c**: Only file edits are undone; changes made to outside systems stay in place
-   - **d**: The rewind is refused, because a session cannot rewind after running a command
+   - **a**: Everything is undone, the database rows included
+   - **b**: The database is restored if Claude is asked to undo the script
+   - **c**: Only file edits are undone; outside systems stay as they were
+   - **d**: The rewind is refused when a script was run
 
 52. A team adds a deny entry `Write(./config/prod.yaml)` to its settings, yet Claude still changes that configuration. Which fix fits best?
    - **a**: Move the entry from the shared file to the user file, which ranks lower
@@ -372,10 +372,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Use an Edit or Read rule instead, since a Write path rule is never consulted
 
 53. A response arrives whose stop reason is `model_context_window_exceeded`. How should the client handle it?
-   - **a**: Treat it as truncated, then trim or compact the history before the next call
-   - **b**: Retry the identical request on the same model, since the failure is on the service side
-   - **c**: Raise max_tokens so that the reply has room to finish
-   - **d**: Switch to a fallback model, since the model declined to answer
+   - **a**: Treat it as truncated, then trim history before the next call
+   - **b**: Retry the identical request on the same model after a short wait
+   - **c**: Raise max_tokens so that the reply has room to finish its text
+   - **d**: Switch to a fallback model with a larger window
 
 <details>
 <summary>Answer key</summary>

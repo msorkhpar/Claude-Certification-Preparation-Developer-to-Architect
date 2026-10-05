@@ -57,9 +57,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **e**: Handle only the first matter and ask the customer to send the others separately
 
 3. Scenario S1. A refund-limit hook should govern only the coordinator, yet it also fires for subagents that call the same tool. How can it tell the two apart?
-   - **a**: Read the extra identity fields in its input that are present only for nested workers
-   - **b**: Use a matcher that names the coordinator, since matchers see more than tool names
-   - **c**: Register the hook only in the coordinator's options, since subagents never run hooks
+   - **a**: Read the identity fields in its input present only for nested workers
+   - **b**: Use a matcher that names the coordinator in its pattern
+   - **c**: Register the hook only in the coordinator's options file
    - **d**: Wait for a subagent stop event and undo the call afterwards
 
 4. Scenario S1. A gate refuses a refund because identity is not verified. A teammate suggests that the gate should run the verification itself and carry on. Why not?
@@ -70,8 +70,8 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 5. Scenario S1. In a loop built on the SDK, which party should own the decision whether a refund call runs, and where does that decision live?
    - **a**: The code, in permissions and hooks that act before execution
-   - **b**: The model, through the stop reason of its reply
-   - **c**: The model, by weighing the policy text in its prompt
+   - **b**: The model, through the stop reason of its reply to the call
+   - **c**: The model, by weighing the policy text in its prompt each turn
    - **d**: A person, through a question after each call
 
 6. Scenario S1. A support server exposes cancel_order, hold_order and release_order, which take the same inputs and return the same shape and differ only in the verb. What does the page advise?
@@ -93,10 +93,10 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **c**: Write more detailed descriptions, and let the error name the field with an example value
    - **d**: Switch the field to free text so that no value can ever be rejected by the tool
 
-9. Scenario S1. A refund cap tool receives the amount true in the model's call. The backend would accept the value without complaint, yet the cap check is meant to rely on whole numbers. What should the tool layer do?
-   - **a**: Treat it as one unit, since a boolean converts to one in most languages
-   - **b**: Refuse it as a malformed figure, with a result that says what is needed
-   - **c**: Pass it through, since the backend validates its own inputs anyway
+9. Scenario S1. A refund cap tool receives the boolean true as the amount in the model's call. The backend would accept the value without complaint, yet the cap check is meant to rely on whole numbers. What should the tool layer do?
+   - **a**: Treat it as one unit and carry on with the cap check
+   - **b**: Refuse it as malformed, with a result that says what is needed
+   - **c**: Pass it through to the backend unchanged, as it accepts it
    - **d**: Round it to the nearest allowed value and move to the next step
 
 10. Scenario S1. A new engineer's session ignores the team rule that every endpoint validates its input. A senior engineer wrote the rule into the personal memory file in his home folder, and nothing in the repository carries it. Where should the rule go?
@@ -196,7 +196,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **c**: Its own instructions, which must therefore stand on their own
    - **d**: The summary that compaction produced for the parent
 
-26. Scenario S3. A research system's extraction returns claims with sources. Which two statements describe the check that lets code catch a claim that no source supports? (Select two.)
+26. Scenario S3. A research system's extraction returns claims with sources. Which two statements are true of the check that lets code catch a claim that no source supports? (Select two.)
    - **a**: The model double-checks its own output and reports changes
    - **b**: The schema gives every field a minimum length of several words
    - **c**: Each assertion carries a verbatim quote, tested by plain substring
@@ -204,10 +204,10 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **e**: The model reports its confidence in each claim, and low ones are dropped
 
 27. Scenario S3. A long report is extracted in chunks, and the figures of the chunks must be combined into one total. Who should add them?
-   - **a**: The synthesis model, since it saw every chunk of the report
+   - **a**: The synthesis model, asked to add the figures
    - **b**: Ordinary code that recomputes the sum, never a model asked for arithmetic
-   - **c**: The first chunk's extraction, which keeps its own total from the start and never revises it
-   - **d**: The last chunk's extraction, since it saw the most context of all
+   - **c**: The first chunk's extraction, which keeps its own total and never revises it
+   - **d**: The last chunk's extraction, which keeps a running total
 
 28. Scenario S3. Five topics were scheduled for research, and four were covered. The report leaves out the fifth. Which two statements describe what the coverage note does? (Select two.)
    - **a**: The topic is listed under no findings, since nothing was found for it
@@ -286,9 +286,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 40. Scenario S5. A team asks what line count the documentation gives as the target for a root memory file, since its practice exercise sets a much lower limit for a small project.
    - **a**: Twenty-five lines, which the documentation sets for projects of a small size
-   - **b**: Roughly two hundred, whereas the stricter cap is a choice made for testing
-   - **c**: Five hundred lines, since memory files load on demand rather than at launch
-   - **d**: No target at all, since size has no effect on how well guidance is followed
+   - **b**: Roughly two hundred, whereas the stricter cap is a testing choice
+   - **c**: Five hundred lines, the ceiling the documentation names
+   - **d**: No target at all, as it leaves the length to each team
 
 41. Scenario S5. A team adds minLength to a required field to stop placeholder strings. Why does that not work?
    - **a**: Placeholder strings tend to be longer than real values, so the limit rejects real ones
@@ -307,7 +307,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **a**: Ask about every missing detail before doing anything
    - **b**: Stop with a plain failure that lists the missing fields
    - **c**: Proceed silently on guesses, so that the developer is not interrupted
-   - **d**: Ask only what cannot be assumed, and state the assumptions made for the rest
+   - **d**: Ask only what cannot be assumed, and state the assumptions
 
 44. Scenario S5. A CI extraction step fails the sum check and is retried. What must the second request hold besides the original document?
    - **a**: The faulty record and the specific errors with their fields
@@ -360,15 +360,15 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Read-only hints exist only for built-in tools and cannot be set by a server
 
 52. Scenario S6. A skill that extracts fields from documents sets context: fork and names no agent. Which subagent type runs it?
-   - **a**: The Explore one, since extraction only reads
+   - **a**: The Explore one, which is limited to read-only search
    - **b**: A new subagent that inherits the parent's conversation
-   - **c**: None, since a forked skill must name an agent
+   - **c**: None, as a forked skill needs a named agent first
    - **d**: The general-purpose one, which is the default
 
 53. Scenario S6. A skill body uses $1, and the user types only one argument. What does the second placeholder become?
-   - **a**: It stays in the text unchanged, whereas a named one would expand to nothing
-   - **b**: An empty string, since a missing argument has no value to put in its place in the text
-   - **c**: The first argument repeated, since indexes wrap around when they run out
+   - **a**: It stays in the text, where a named one expands to nothing
+   - **b**: An empty string in the place of the missing second argument
+   - **c**: The first argument repeated in the second slot of the text
    - **d**: The full list of arguments joined together into a single string
 
 54. Scenario S6. A document gives a currency that the closed enum does not list, and another document leaves the currency unstated. Which enum design handles both honestly?
@@ -378,27 +378,27 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Add unclear for the silent case, and other with a detail field for new values
 
 55. Scenario S6. A dashboard reports 97 percent among the records that were accepted, yet a tenth of the clients' uploads broke and never reached the next system. Which base should the figure use?
-   - **a**: Only the accepted records, since a lost upload produced nothing to score
-   - **b**: All inputs that arrived, with each one lost along the way scored as wrong
+   - **a**: Only the accepted records that reached the next system
+   - **b**: All inputs that arrived, each one lost on the way scored as wrong
    - **c**: A mean taken over the kinds of input, so that rare kinds count equally
-   - **d**: Only the records that a person reviewed, since those were checked by hand
+   - **d**: Only the records that a person reviewed by hand
 
 56. Scenario S6. A pipeline handles invoices, receipts and credit notes, each with its own extraction tool, and the model allows forcing. Which setting fits?
-   - **a**: The option that demands a call but lets the system pick which, as the type is unknown
-   - **b**: A named choice of the invoice entry, since it is the most common of the three types in the batch
-   - **c**: Automatic choice, since a call is then guaranteed whatever the request says
+   - **a**: The option that demands a call but lets the system pick which one
+   - **b**: A named choice of the invoice extraction entry alone
+   - **c**: Automatic choice, leaving the model free to answer in text
    - **d**: No tools at all, with the answer parsed from prose by a regular expression
 
 57. Scenario S6. A team makes every field of an invoice schema nullable, to be safe. Reviewers say that a fully optional schema feels safer because nothing can be rejected. What is the cost?
-   - **a**: Nothing, since null values are cheap to store and to transmit between stages
-   - **b**: Required entries with real values check more, so null suits only truly absent values
-   - **c**: Parsing fails, since a schema may not contain more than one null type in a record at the same time
-   - **d**: The model stops filling any entry, since null is the easiest output to give
+   - **a**: Nothing, as every field still arrives in the result
+   - **b**: Required entries check more, so null fits only absent values
+   - **c**: Parsing fails whenever one of the fields is left empty or missing
+   - **d**: The model stops filling any entry with real data at all
 
 58. Scenario S6. Two chunks of one document give the vendor as null in the first and as a name with a quote in the second. How does the merge treat that field?
-   - **a**: It keeps the earliest usable entry, along with the passage that backed it
-   - **b**: It keeps null, since the first chunk is the authoritative one for the document
-   - **c**: It marks a conflict, since the two chunks differ from each other in this field
+   - **a**: It keeps the earliest usable entry, with its passage
+   - **b**: It keeps null, as the first chunk came first in the document
+   - **c**: It marks a conflict and asks a person to resolve it by hand
    - **d**: It joins both into one string separated by a comma and a space
 
 59. Scenario S6. In a sample of accepted extractions, one wrong item fits no known pattern of mistakes. What does it signal?

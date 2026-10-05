@@ -367,9 +367,9 @@
       "scope": "level",
       "stem": "A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?",
       "options": {
-        "a": "Abandon the design, because no model suits long-horizon work of this kind",
+        "a": "Abandon the design of the long-running agent and start over with a new one",
         "b": "Add a second agent on the same tier so that answers receive a majority vote",
-        "c": "Drop to Claude Sonnet 5.5, since faster models usually score higher on such tests",
+        "c": "Drop to Claude Sonnet 5.5 to lower the cost of each task run",
         "d": "Switch to Claude Fable 5.1, which the page reserves for demanding reasoning"
       },
       "key": "d",
@@ -430,9 +430,9 @@
       "scope": "level",
       "stem": "A team has no evaluation data yet and no sense of how hard its new feature is. Which starting plan matches the documentation's method?",
       "options": {
-        "a": "Pick the cheapest tier at once, since the pricing page says to use it for simple tasks",
-        "b": "Begin with a capable model, test on real cases, then step down a tier at a time",
-        "c": "Use the top tier permanently, since it protects quality for every task",
+        "a": "Pick the cheapest tier at once and keep it for the feature",
+        "b": "Begin with a capable model, test on real cases, then step down a tier",
+        "c": "Use the top tier permanently for every request it handles",
         "d": "Choose by reputation, then adjust after the first production complaint"
       },
       "key": "b",
@@ -550,10 +550,10 @@
       "scope": "level",
       "stem": "In a draft-and-review loop, the reviewer's reply is sometimes prose such as \"looks fine to me\" instead of a score the program can parse. The loop currently treats that as a pass. What should it do?",
       "options": {
-        "a": "Accept it as a pass, since no objection was raised",
+        "a": "Accept it as a pass and send the draft to the next stage",
         "b": "Count the attempt as unchecked, giving it zero with a stated cause",
         "c": "Pull the first digit from the text and treat it as the grade",
-        "d": "Return the latest draft, since the reviewer is evidently satisfied"
+        "d": "Return the latest draft to the user as it now stands"
       },
       "key": "b",
       "explanation": {
@@ -613,10 +613,10 @@
       "scope": "level",
       "stem": "A team promotes a new system prompt for a hosted agent and wants production runs to keep the previous behaviour until a person approves the switch. Which approach fits?",
       "options": {
-        "a": "Override the system field on every run, since overrides merge with the saved agent",
+        "a": "Override the system field on every run",
         "b": "Create the sessions with just the agent ID, which pins the first version",
         "c": "Create each session with a pinned version number",
-        "d": "Edit the agent in place, because environments are versioned for rollback"
+        "d": "Edit the agent in place"
       },
       "key": "c",
       "explanation": {
@@ -651,10 +651,10 @@
       "scope": "level",
       "stem": "A typed agent returns a refund record that passes its schema, showing an amount of 4999 cents for a 49-cent item, and the team ships it because validation succeeded. What should they conclude?",
       "options": {
-        "a": "The schema is wrong, because a correct type guarantees a correct number",
-        "b": "Form checks prove only the shape, so a separate rule must judge the value",
-        "c": "The retry loop should have caught it, since failed validation retries by itself",
-        "d": "A graph framework would have prevented it, since its checkpoints verify values"
+        "a": "The schema is wrong and must be rewritten from scratch with new limits",
+        "b": "Form checks prove only shape, so a separate rule must judge the value",
+        "c": "The retry loop should have caught it before shipping",
+        "d": "A graph framework would have prevented it from shipping"
       },
       "key": "b",
       "explanation": {
@@ -1050,8 +1050,8 @@
       "stem": "Between two evaluation runs the pass rate rose from 0.71 to 0.80, but a diff shows that four failing cases were deleted from the set. How should the harness treat this?",
       "options": {
         "a": "Flag the dropped items as removed and reject the check",
-        "b": "Accept it, since a higher pass rate means the change helped",
-        "c": "Treat the deleted ones as passes, since nothing contradicts them",
+        "b": "Accept it as the same run with a higher score",
+        "c": "Treat the deleted ones as passes in the new total",
         "d": "Ignore the deletions when the edge-tagged cases still reach their threshold"
       },
       "key": "a",
@@ -1070,7 +1070,7 @@
       "options": {
         "a": "A firm instruction in the prompt, written in capitals and repeated twice at the top",
         "b": "A target that at least 90 percent of summaries are rated accurate by two leads",
-        "c": "A regular expression in the application code that screens each output before display",
+        "c": "A regular expression in the code that screens each output before display",
         "d": "A longer explanation of the rule, placed in the user turn of every request"
       },
       "key": "c",
@@ -1152,7 +1152,7 @@
       "options": {
         "a": "Raise max_tokens so that the model has room to produce a full answer",
         "b": "Retry the identical request until a non-empty reply finally arrives",
-        "c": "Send the result blocks alone, with no text of any kind placed beside them",
+        "c": "Send the result blocks alone, with no text placed beside them",
         "d": "Switch the request to streaming so the empty turn is delivered in pieces"
       },
       "key": "c",
@@ -1169,7 +1169,7 @@
       "scope": "level",
       "stem": "A chat form lets a person submit an empty message, and each one still triggers a paid call whose reply wanders. Which handling fits best?",
       "options": {
-        "a": "Refuse the blank turn in the client, before anything is sent over the network",
+        "a": "Refuse the blank turn in the client, before anything is sent",
         "b": "Send it anyway and discard the reply when it comes back from the service",
         "c": "Insert a default question in place of the blank so that the call is useful",
         "d": "Add a line to the system prompt telling Claude to ignore empty messages"
@@ -1295,10 +1295,10 @@
       "scope": "level",
       "stem": "A team's list holds 1,000 request ids and the result file has 998 lines, yet its program reports every request as handled. What should it do?",
       "options": {
-        "a": "Treat the missing two as succeeded, since nothing in the file contradicts them",
-        "b": "Diff the sent identifiers against the returned ones and resend any that are missing",
-        "c": "Resubmit the whole batch, since a short result file means that processing has failed",
-        "d": "Match the two by position, since the file keeps the order of submission"
+        "a": "Treat the missing two as succeeded, as the rest all came back",
+        "b": "Diff the sent identifiers against the returned ones and resend the missing",
+        "c": "Resubmit the whole batch of 1,000 requests from the very start",
+        "d": "Match the two files by position, line against line, in order"
       },
       "key": "b",
       "explanation": {
@@ -1317,7 +1317,7 @@
         "a": "Web addresses work there, and a PDF counts as a document block like any other",
         "b": "Web addresses do not work there for documents, though they do for images",
         "c": "A single upload through the Files API lets later requests reference the PDF by id",
-        "d": "That source type is not offered there, so another way to supply the file is needed"
+        "d": "That source type is not offered there, so supply the file another way"
       },
       "key": "d",
       "explanation": {
@@ -1694,9 +1694,9 @@
       "stem": "A hosted agent's shell command prints about 400,000 characters. What does the model receive for that output?",
       "options": {
         "a": "The full text, sent in several consecutive events until it is complete",
-        "b": "Nothing, since the output is not kept once the tool call has ended",
-        "c": "A truncated preview, with the path of a file in the sandbox that holds the rest",
-        "d": "An error result, because any output above the limit is rejected outright by the harness"
+        "b": "Nothing at all, as the output was too large to keep",
+        "c": "A truncated preview, with the path of a sandbox file that holds the rest",
+        "d": "An error result that tells it the output was too long"
       },
       "key": "c",
       "explanation": {
@@ -1832,10 +1832,10 @@
       "scope": "level",
       "stem": "A team wants to prepend a short context sentence to each of its 50,000 chunks before indexing, but fears the model calls would be too costly. Which fact answers the worry?",
       "options": {
-        "a": "The sentences are generated once per chunk for free, since indexing is not billed",
-        "b": "Contextual retrieval needs no extra calls, since the embeddings already hold the context",
-        "c": "Only the first thousand chunks need a sentence, since later ones inherit it",
-        "d": "Caching the document makes the work affordable, at about a dollar per million tokens"
+        "a": "The sentences are generated once per chunk for free by the platform",
+        "b": "Contextual retrieval needs no extra model calls to run at all",
+        "c": "Only the first thousand chunks need a sentence of context at all",
+        "d": "Caching the document makes it affordable, about a dollar per million tokens"
       },
       "key": "d",
       "explanation": {
@@ -1895,9 +1895,9 @@
       "scope": "level",
       "stem": "A migration touches hundreds of files, and the team wants its findings cross-checked before anyone sees them, which is beyond what a handful of helpers can manage. Which extension fits best?",
       "options": {
-        "a": "A subagent, because Claude decides turn by turn what runs next",
-        "b": "A skill, because it adds reference material to every conversation",
-        "c": "A dynamic workflow, where a script rather than the model decides what runs next",
+        "a": "A subagent that runs one helper task in its own context",
+        "b": "A skill that packages one prompt for repeated use",
+        "c": "A dynamic workflow, where a script decides what runs next",
         "d": "A line in CLAUDE.md that tells Claude to double-check its own findings"
       },
       "key": "c",
@@ -2072,10 +2072,10 @@
       "scope": "level",
       "stem": "Claude ran a script that altered rows in a production database. The developer presses Esc twice to rewind, expecting the rows to come back. What happens?",
       "options": {
-        "a": "Everything is undone, because the checkpoint also snapshots the database",
-        "b": "The database is restored only if Claude is asked to undo the script itself",
-        "c": "Only file edits are undone; changes made to outside systems stay in place",
-        "d": "The rewind is refused, because a session cannot rewind after running a command"
+        "a": "Everything is undone, the database rows included",
+        "b": "The database is restored if Claude is asked to undo the script",
+        "c": "Only file edits are undone; outside systems stay as they were",
+        "d": "The rewind is refused when a script was run"
       },
       "key": "c",
       "explanation": {
@@ -2110,10 +2110,10 @@
       "scope": "level",
       "stem": "A response arrives whose stop reason is `model_context_window_exceeded`. How should the client handle it?",
       "options": {
-        "a": "Treat it as truncated, then trim or compact the history before the next call",
-        "b": "Retry the identical request on the same model, since the failure is on the service side",
-        "c": "Raise max_tokens so that the reply has room to finish",
-        "d": "Switch to a fallback model, since the model declined to answer"
+        "a": "Treat it as truncated, then trim history before the next call",
+        "b": "Retry the identical request on the same model after a short wait",
+        "c": "Raise max_tokens so that the reply has room to finish its text",
+        "d": "Switch to a fallback model with a larger window"
       },
       "key": "a",
       "explanation": {

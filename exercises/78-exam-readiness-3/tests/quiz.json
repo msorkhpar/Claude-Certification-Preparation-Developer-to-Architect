@@ -51,9 +51,9 @@
       "scope": "level",
       "stem": "Scenario S1. A refund-limit hook should govern only the coordinator, yet it also fires for subagents that call the same tool. How can it tell the two apart?",
       "options": {
-        "a": "Read the extra identity fields in its input that are present only for nested workers",
-        "b": "Use a matcher that names the coordinator, since matchers see more than tool names",
-        "c": "Register the hook only in the coordinator's options, since subagents never run hooks",
+        "a": "Read the identity fields in its input present only for nested workers",
+        "b": "Use a matcher that names the coordinator in its pattern",
+        "c": "Register the hook only in the coordinator's options file",
         "d": "Wait for a subagent stop event and undo the call afterwards"
       },
       "key": "a",
@@ -90,8 +90,8 @@
       "stem": "Scenario S1. In a loop built on the SDK, which party should own the decision whether a refund call runs, and where does that decision live?",
       "options": {
         "a": "The code, in permissions and hooks that act before execution",
-        "b": "The model, through the stop reason of its reply",
-        "c": "The model, by weighing the policy text in its prompt",
+        "b": "The model, through the stop reason of its reply to the call",
+        "c": "The model, by weighing the policy text in its prompt each turn",
         "d": "A person, through a question after each call"
       },
       "key": "a",
@@ -169,11 +169,11 @@
       "id": "03-architect-mock-exam-1#x9",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S1. A refund cap tool receives the amount true in the model's call. The backend would accept the value without complaint, yet the cap check is meant to rely on whole numbers. What should the tool layer do?",
+      "stem": "Scenario S1. A refund cap tool receives the boolean true as the amount in the model's call. The backend would accept the value without complaint, yet the cap check is meant to rely on whole numbers. What should the tool layer do?",
       "options": {
-        "a": "Treat it as one unit, since a boolean converts to one in most languages",
-        "b": "Refuse it as a malformed figure, with a result that says what is needed",
-        "c": "Pass it through, since the backend validates its own inputs anyway",
+        "a": "Treat it as one unit and carry on with the cap check",
+        "b": "Refuse it as malformed, with a result that says what is needed",
+        "c": "Pass it through to the backend unchanged, as it accepts it",
         "d": "Round it to the nearest allowed value and move to the next step"
       },
       "key": "b",
@@ -498,7 +498,7 @@
       "id": "03-architect-mock-exam-1#x26",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S3. A research system's extraction returns claims with sources. Which two statements describe the check that lets code catch a claim that no source supports? (Select two.)",
+      "stem": "Scenario S3. A research system's extraction returns claims with sources. Which two statements are true of the check that lets code catch a claim that no source supports? (Select two.)",
       "options": {
         "a": "The model double-checks its own output and reports changes",
         "b": "The schema gives every field a minimum length of several words",
@@ -525,10 +525,10 @@
       "scope": "level",
       "stem": "Scenario S3. A long report is extracted in chunks, and the figures of the chunks must be combined into one total. Who should add them?",
       "options": {
-        "a": "The synthesis model, since it saw every chunk of the report",
+        "a": "The synthesis model, asked to add the figures",
         "b": "Ordinary code that recomputes the sum, never a model asked for arithmetic",
-        "c": "The first chunk's extraction, which keeps its own total from the start and never revises it",
-        "d": "The last chunk's extraction, since it saw the most context of all"
+        "c": "The first chunk's extraction, which keeps its own total and never revises it",
+        "d": "The last chunk's extraction, which keeps a running total"
       },
       "key": "b",
       "explanation": {
@@ -791,9 +791,9 @@
       "stem": "Scenario S5. A team asks what line count the documentation gives as the target for a root memory file, since its practice exercise sets a much lower limit for a small project.",
       "options": {
         "a": "Twenty-five lines, which the documentation sets for projects of a small size",
-        "b": "Roughly two hundred, whereas the stricter cap is a choice made for testing",
-        "c": "Five hundred lines, since memory files load on demand rather than at launch",
-        "d": "No target at all, since size has no effect on how well guidance is followed"
+        "b": "Roughly two hundred, whereas the stricter cap is a testing choice",
+        "c": "Five hundred lines, the ceiling the documentation names",
+        "d": "No target at all, as it leaves the length to each team"
       },
       "key": "b",
       "explanation": {
@@ -856,7 +856,7 @@
         "a": "Ask about every missing detail before doing anything",
         "b": "Stop with a plain failure that lists the missing fields",
         "c": "Proceed silently on guesses, so that the developer is not interrupted",
-        "d": "Ask only what cannot be assumed, and state the assumptions made for the rest"
+        "d": "Ask only what cannot be assumed, and state the assumptions"
       },
       "key": "d",
       "explanation": {
@@ -1036,9 +1036,9 @@
       "scope": "level",
       "stem": "Scenario S6. A skill that extracts fields from documents sets context: fork and names no agent. Which subagent type runs it?",
       "options": {
-        "a": "The Explore one, since extraction only reads",
+        "a": "The Explore one, which is limited to read-only search",
         "b": "A new subagent that inherits the parent's conversation",
-        "c": "None, since a forked skill must name an agent",
+        "c": "None, as a forked skill needs a named agent first",
         "d": "The general-purpose one, which is the default"
       },
       "key": "d",
@@ -1055,9 +1055,9 @@
       "scope": "level",
       "stem": "Scenario S6. A skill body uses $1, and the user types only one argument. What does the second placeholder become?",
       "options": {
-        "a": "It stays in the text unchanged, whereas a named one would expand to nothing",
-        "b": "An empty string, since a missing argument has no value to put in its place in the text",
-        "c": "The first argument repeated, since indexes wrap around when they run out",
+        "a": "It stays in the text, where a named one expands to nothing",
+        "b": "An empty string in the place of the missing second argument",
+        "c": "The first argument repeated in the second slot of the text",
         "d": "The full list of arguments joined together into a single string"
       },
       "key": "a",
@@ -1093,10 +1093,10 @@
       "scope": "level",
       "stem": "Scenario S6. A dashboard reports 97 percent among the records that were accepted, yet a tenth of the clients' uploads broke and never reached the next system. Which base should the figure use?",
       "options": {
-        "a": "Only the accepted records, since a lost upload produced nothing to score",
-        "b": "All inputs that arrived, with each one lost along the way scored as wrong",
+        "a": "Only the accepted records that reached the next system",
+        "b": "All inputs that arrived, each one lost on the way scored as wrong",
         "c": "A mean taken over the kinds of input, so that rare kinds count equally",
-        "d": "Only the records that a person reviewed, since those were checked by hand"
+        "d": "Only the records that a person reviewed by hand"
       },
       "key": "b",
       "explanation": {
@@ -1112,9 +1112,9 @@
       "scope": "level",
       "stem": "Scenario S6. A pipeline handles invoices, receipts and credit notes, each with its own extraction tool, and the model allows forcing. Which setting fits?",
       "options": {
-        "a": "The option that demands a call but lets the system pick which, as the type is unknown",
-        "b": "A named choice of the invoice entry, since it is the most common of the three types in the batch",
-        "c": "Automatic choice, since a call is then guaranteed whatever the request says",
+        "a": "The option that demands a call but lets the system pick which one",
+        "b": "A named choice of the invoice extraction entry alone",
+        "c": "Automatic choice, leaving the model free to answer in text",
         "d": "No tools at all, with the answer parsed from prose by a regular expression"
       },
       "key": "a",
@@ -1131,10 +1131,10 @@
       "scope": "level",
       "stem": "Scenario S6. A team makes every field of an invoice schema nullable, to be safe. Reviewers say that a fully optional schema feels safer because nothing can be rejected. What is the cost?",
       "options": {
-        "a": "Nothing, since null values are cheap to store and to transmit between stages",
-        "b": "Required entries with real values check more, so null suits only truly absent values",
-        "c": "Parsing fails, since a schema may not contain more than one null type in a record at the same time",
-        "d": "The model stops filling any entry, since null is the easiest output to give"
+        "a": "Nothing, as every field still arrives in the result",
+        "b": "Required entries check more, so null fits only absent values",
+        "c": "Parsing fails whenever one of the fields is left empty or missing",
+        "d": "The model stops filling any entry with real data at all"
       },
       "key": "b",
       "explanation": {
@@ -1150,9 +1150,9 @@
       "scope": "level",
       "stem": "Scenario S6. Two chunks of one document give the vendor as null in the first and as a name with a quote in the second. How does the merge treat that field?",
       "options": {
-        "a": "It keeps the earliest usable entry, along with the passage that backed it",
-        "b": "It keeps null, since the first chunk is the authoritative one for the document",
-        "c": "It marks a conflict, since the two chunks differ from each other in this field",
+        "a": "It keeps the earliest usable entry, with its passage",
+        "b": "It keeps null, as the first chunk came first in the document",
+        "c": "It marks a conflict and asks a person to resolve it by hand",
         "d": "It joins both into one string separated by a comma and a space"
       },
       "key": "a",
@@ -1567,7 +1567,7 @@
       "scope": "level",
       "stem": "Scenario S4. A process died while a tool call was running, and the session is resumed. What does the model see?",
       "options": {
-        "a": "The operation flagged as interrupted before its outcome was stored, with a prompt to verify it",
+        "a": "The operation flagged as interrupted before its outcome was stored, to verify",
         "b": "The call is finished again silently when the session resumes, without any notice",
         "c": "The call is shown as succeeded, since the process had already started it",
         "d": "The history is cut at the last completed message and the session carries on as normal"
@@ -1631,9 +1631,9 @@
       "stem": "Scenario S4. A tool design whose name breaks the required form also declares an effect that needs a person's sign-off. What should happen first?",
       "options": {
         "a": "It goes straight to the person, who can fix the name while approving",
-        "b": "It returns for revision, so approval is asked only of a proposal worth reading",
-        "c": "It is refused, since any format error is treated as a forbidden call",
-        "d": "It is approved outright, since a name has no effect on safety"
+        "b": "It returns for revision, so approval goes to something worth reading",
+        "c": "It is refused outright, with no chance of revision at all",
+        "d": "It is approved outright and fixed at a later review of the tool"
       },
       "key": "b",
       "explanation": {
@@ -1668,9 +1668,9 @@
       "scope": "level",
       "stem": "Scenario S4. A skill from an installed plugin has the same folder name as a project skill. How can both be used?",
       "options": {
-        "a": "The extension's is prefixed with its package label, so two separate commands exist",
-        "b": "The project's overrides the plugin's, since committed files win over anything installed",
-        "c": "The plugin's overrides the project's, since plugins are newer than the repository",
+        "a": "The extension's is prefixed with its package label, so two commands exist",
+        "b": "The project's overrides the plugin's one of the same name",
+        "c": "The plugin's overrides the project's one of the same name",
         "d": "Neither runs until one of them is renamed to remove the clash"
       },
       "key": "a",
@@ -1700,9 +1700,9 @@
       "explanation": {
         "b": "The documentation lists the files \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\" (module 57, page 1).",
         "c": "The documentation lists the files \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\" (module 57, page 1).",
-        "a": "Ruled out because \"Memory is advice with good delivery.\"",
+        "a": "Ruled out because the load order runs \"from broadest scope to most specific\", so the project file comes after the user file.",
         "d": "Ruled out because \"All discovered files are concatenated into context\".",
-        "e": "Ruled out because \"at the start of every session\"."
+        "e": "Ruled out because the order is by scope, \"from broadest scope to most specific\", and not by edit time."
       },
       "select": 2
     },
@@ -1908,9 +1908,9 @@
       "scope": "level",
       "stem": "Scenario S6. An extraction stores for each field the quote it came from. What does a passing check prove?",
       "options": {
-        "a": "That the value is correct, since the quote came from the source",
-        "b": "That the model is confident, since it supplied a quote",
-        "c": "That the schema is valid, since provenance is a required object",
+        "a": "That the value is correct, whatever the text says",
+        "b": "That the model is confident about the value it gave",
+        "c": "That the schema is valid for the document type",
         "d": "That the value is grounded in the text, not that it is correct"
       },
       "key": "d",
@@ -1927,10 +1927,10 @@
       "scope": "level",
       "stem": "Scenario S6. A schema gives a missing vendor name the default unknown. Why does that hurt downstream?",
       "options": {
-        "a": "It breaks the parser, since a string is not allowed for that field in the schema",
-        "b": "It lowers accuracy in the report, since defaults count as errors",
+        "a": "It breaks the parser of the report that reads each record",
+        "b": "It lowers accuracy in the final report that the team reads",
         "c": "It forces the model to guess the vendor on every record",
-        "d": "Code cannot tell it from a real value, so a placeholder passes as genuine"
+        "d": "Code cannot tell it from a real value, so a placeholder passes as real"
       },
       "key": "d",
       "explanation": {
@@ -2200,7 +2200,7 @@
         "b": "The guide says \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook\" (module 49, page 2).",
         "e": "The guide says \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook\" (module 49, page 2).",
         "a": "Ruled out because \"Where the reason lands depends on the event\".",
-        "c": "Ruled out because \"No objection from the exit code; with JSON printed on standard output, the JSON decides\".",
+        "c": "Ruled out because the guide says to \"Choose one approach per hook\", and not both together.",
         "d": "Ruled out because \"Mixing them leaves it to the reference to say which wins, and a guard should not depend on that.\""
       },
       "select": 2
@@ -2331,9 +2331,9 @@
       "scope": "level",
       "stem": "Scenario S1. An organisation wants data-handling reminders delivered to every machine and wants a particular shell command blocked. Which pairing is right?",
       "options": {
-        "a": "A managed memory document for both, since individual settings cannot exclude it",
-        "b": "Managed settings for both, since they carry text and rules alike",
-        "c": "A managed memory document for the text and managed settings for the prohibition",
+        "a": "A managed memory document for both the text and the block",
+        "b": "Managed settings for both the reminders and the prohibition",
+        "c": "A managed memory file for text, managed settings for the ban",
         "d": "A user-level memory document for both, pushed by a login script"
       },
       "key": "c",
@@ -2408,8 +2408,8 @@
       "stem": "Scenario S2. A team places a CLAUDE.md in the folder of its payments service and expects every session in the repository to carry its rules from the first message. Sessions that never touch that folder do not show them. What explains it?",
       "options": {
         "a": "The file loads only for sessions started by its owner, since it is a personal setting",
-        "b": "The file loads at launch but is pushed out first when context fills, since it has the lowest rank, as a quick remedy",
-        "c": "It loads on demand, when files in its own directory are read",
+        "b": "The file loads at launch but is pushed out first when context fills, since it has the lowest rank",
+        "c": "It loads on demand, since files in subdirectories load only when read",
         "d": "The file loads only when a slash command names it, since commands choose memory"
       },
       "key": "c",
@@ -2427,7 +2427,7 @@
       "stem": "Scenario S2. A repository holds a command file at .claude/commands/deploy.md and, after a refactor, also a skill at .claude/skills/deploy/SKILL.md. A developer types /deploy. What runs?",
       "options": {
         "a": "Both, one after the other, since the name maps to each file",
-        "b": "The newer packaged definition, which wins when both carry the name",
+        "b": "The packaged definition, since it wins on a shared name",
         "c": "Neither, since a clash of names disables the command",
         "d": "The command file, since older definitions keep their place"
       },
@@ -2445,7 +2445,7 @@
       "scope": "level",
       "stem": "Scenario S2. A rule file in a project's rules folder has no paths list. The team assumes that it applies only to the files its title mentions. When does it load?",
       "options": {
-        "a": "At the start of every session, at the same priority as the root one",
+        "a": "At the start of every session, since nothing restricts its scope",
         "b": "Never, since an unscoped rule has no target",
         "c": "Only when a developer names it in a command, since unscoped rules wait for a call",
         "d": "Only when a file of its area is opened, since rules load by relevance"
@@ -2467,7 +2467,7 @@
         "a": "No, since rule files read only exact file names",
         "b": "Yes, since the extension alone decides the match",
         "c": "Yes, since a star matches any depth below the folder",
-        "d": "No; a lone star stays within one level and the item sits deeper"
+        "d": "No, since a lone star stays within one level"
       },
       "key": "d",
       "explanation": {
@@ -2522,7 +2522,7 @@
       "stem": "Scenario S2. To avoid match failures, a developer tells Claude Code to rewrite the whole document for a one-line fix in an existing source file. What does the page say?",
       "options": {
         "a": "Keep the whole-file write if the file is under a hundred lines",
-        "b": "Use the edit tool; replacing everything lets damage slip through unseen",
+        "b": "Use the edit tool, since replacing everything lets damage slip through unseen",
         "c": "Use the shell with a stream editor, since it avoids both tools",
         "d": "Keep the whole-file write, since it never fails to match"
       },
@@ -2543,7 +2543,7 @@
         "a": "Each skill applies when its folder is opened, since folders are the unit",
         "b": "Each skill applies by itself, since skills watch the open files",
         "c": "Only the newest skill applies, since later skills outrank earlier ones",
-        "d": "Matching a path never launches one; scoped rules are what load by location"
+        "d": "Matching a path never launches one, since scoped rules are what load by location"
       },
       "key": "d",
       "explanation": {
@@ -2559,15 +2559,15 @@
       "scope": "level",
       "stem": "Scenario S3. Before synthesis even starts, the lead of a four-worker research team has no room left because every worker returned everything it fetched. Which change fits?",
       "options": {
-        "a": "The coordinator reads each output twice and keeps only the second reading",
+        "a": "The coordinator condenses each output in its own context and keeps the summary",
         "b": "The synthesis agent receives every output directly, bypassing the coordinator",
-        "c": "Each worker returns its output in a shorter font so that it takes less room",
+        "c": "Each worker returns its full output split over several shorter messages",
         "d": "Each one saves its results outside and hands back a lightweight reference"
       },
       "key": "d",
       "explanation": {
         "d": "Large results should not travel through the hub: subagents store their work in external systems and pass lightweight references back (module 72, page 1). The page's table names the failure \"Large results passed through the hub\".",
-        "a": "Ruled out because the failure is \"Large results passed through the hub\", and rereading passes them through twice.",
+        "a": "Ruled out because the failure is \"Large results passed through the hub\", and condensing them there still passes them through the hub.",
         "b": "Ruled out because the hub keeps the plan and the status, and the page's fix is \"Subagents store their work and pass back references\".",
         "c": "Ruled out because the page says \"Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator.\""
       }
@@ -2578,7 +2578,7 @@
       "scope": "level",
       "stem": "Scenario S3. The search agent is given a tool that writes notes to a shared drive so that findings are saved, and the report agent is given web search to check a figure. A review applies the least-privilege rule. What does it conclude?",
       "options": {
-        "a": "Each holds the other's kind of access, so each is trimmed to its own job",
+        "a": "Trim each to its own job, since each holds the other's kind of access",
         "b": "Both are right, since extra tools make the agents more flexible",
         "c": "Only the report agent is wrong, since the search agent must be able to save its findings",
         "d": "Both are right if each tool is logged, since logging controls the risk"
@@ -2599,7 +2599,7 @@
       "options": {
         "a": "The scope should be marked partial, since an error once occurred there",
         "b": "The retry should have been hidden from the coordinator",
-        "c": "It should have been removed once a newer result covered that topic",
+        "c": "It should have been removed, since a newer result covered that topic",
         "d": "Nothing, since the list is a history of every failure that occurred"
       },
       "key": "c",
@@ -2655,7 +2655,7 @@
       "stem": "Scenario S3. To spare the coordinator's context, a developer lets the search and analysis subagents pass findings directly to each other. What does the page say?",
       "options": {
         "a": "Allow it, since a shorter path saves tokens for the coordinator",
-        "b": "Route it through the hub, which gives one place to observe",
+        "b": "Route it through the hub, since that gives one place to observe",
         "c": "Allow it if each pair logs its exchanges to a shared file",
         "d": "Allow it for the analysis agent only, since it reads documents"
       },
@@ -2675,7 +2675,7 @@
       "options": {
         "a": "It is sound for numbers only, since prose carries words well",
         "b": "It is sound, since short input is easier to draft from the start",
-        "c": "Claim-origin pairs must travel on; sentences cannot restore them",
+        "c": "Claim-origin pairs must travel on, since sentences cannot restore them",
         "d": "It is sound if the writer searches again for each claim"
       },
       "key": "c",
@@ -2692,7 +2692,7 @@
       "scope": "level",
       "stem": "Scenario S3. A report's table gives a figure with no mention of the survey behind it, and a reader later sees it disagree with an audit figure and takes it for an error. What was left out?",
       "options": {
-        "a": "The method, which is part of the finding",
+        "a": "The method, since it is part of the finding",
         "b": "The reader's rank, since figures vary by audience",
         "c": "A rounding note, since small differences come from rounding",
         "d": "A longer sentence, since tables lack context by nature"
@@ -2714,7 +2714,7 @@
         "a": "It denies the whole server, since parentheses widen the pattern",
         "b": "It narrows the tool to closed tickets, as path patterns narrow file tools",
         "c": "It asks the user for each ticket, since a pattern implies a prompt",
-        "d": "It is skipped and matches nothing, so the capability stays unnarrowed"
+        "d": "It matches nothing, since an entry of that form is skipped"
       },
       "key": "d",
       "explanation": {
@@ -2750,7 +2750,7 @@
       "stem": "Scenario S4. An engineer investigated a payments module on Monday. Overnight a colleague rewrote half of it, and on Tuesday the engineer wants to carry on. Which session choice does the page key?",
       "options": {
         "a": "Run two fresh sessions and repeat the analysis in each",
-        "b": "Begin anew and inject a short summary of the findings that still hold",
+        "b": "Begin anew with a short summary, since old results describe files as they were",
         "c": "Resume Monday's session, since the model remembers the analysis",
         "d": "Fork Monday's session, since a branch keeps the analysis and the history"
       },
@@ -2804,19 +2804,19 @@
       "id": "05-architect-scenario-question-pool#x22",
       "page": "05-architect-scenario-question-pool.md",
       "scope": "level",
-      "stem": "Scenario S4. A developer adds an experimental documentation server to the committed project file, reasoning that colleagues who do not want it can ignore it. What does the page say?",
+      "stem": "Scenario S4. A developer defines a server named github in her local scope with one address, and the committed file defines the same name with headers and another address. What does Claude Code use?",
       "options": {
-        "a": "It loads for everyone, unattended runs included",
-        "b": "It is harmless, since unused servers cost nothing",
-        "c": "It is harmless if the server is read-only",
-        "d": "It is fine if the file is added to the ignore list"
+        "a": "Only the highest-ranking entry, taken whole, since no merging happens there",
+        "b": "A blend, headers from one and address from the other, since merging is the default",
+        "c": "The committed file's entry, since a team file always outranks a personal one",
+        "d": "Both entries, connected twice, since each source keeps its own server"
       },
       "key": "a",
       "explanation": {
-        "a": "A project server is shared, so every teammate and every unattended run loads it, and a personal or experimental server goes in the user scope (module 55, page 1). The page puts it as \"a project server is shared, so every teammate and every unattended run loads it\".",
-        "b": "Ruled out because \"a project server is shared, so every teammate and every unattended run loads it\".",
-        "c": "Ruled out because \"A personal or experimental server goes in the user scope.\"",
-        "d": "Ruled out because the file \"exists to be committed so that the team gets the same tools\"."
+        "a": "The same name is connected once, using the entire entry from the highest-precedence source, so \"The entire server entry from that source is used\" (module 55, page 1).",
+        "b": "Ruled out because \"fields are not merged across scopes\".",
+        "c": "Ruled out because the order is \"local, project, user, plugin-provided servers, then claude.ai connectors\", so the local definition ranks above the committed one.",
+        "d": "Ruled out because \"Claude Code connects to it once, using the definition from the highest-precedence source\"."
       }
     },
     {
@@ -2825,9 +2825,9 @@
       "scope": "level",
       "stem": "Scenario S4. Every integration in a team's setup is flagged to be present from the opening message of each session, on the theory that tools should always be at hand. What follows?",
       "options": {
-        "a": "Costs fall, since tools are cached once loaded",
-        "b": "Crowded context and worse selection return",
-        "c": "Selection improves, since the model sees every definition",
+        "a": "Costs fall, since the definitions are cached once they have been loaded",
+        "b": "Crowded context and worse selection return, since lazy loading is bypassed",
+        "c": "Selection improves, since the model sees every definition up front",
         "d": "Nothing, since definitions never count against the window"
       },
       "key": "b",
@@ -2885,7 +2885,7 @@
         "a": "A longer definition for each rating, since more words fix the boundary",
         "b": "A request for fewer comments overall, since fewer means less noise in the output",
         "c": "An instruction to be conservative and report only important issues",
-        "d": "A worked example per rating, showing where the boundary between two lies"
+        "d": "A worked example per rating, since it shows where the boundary lies"
       },
       "key": "d",
       "explanation": {
@@ -2901,7 +2901,7 @@
       "scope": "level",
       "stem": "Scenario S5. The pipeline's review step continues the very session that wrote the change, so that the context is already loaded. A reviewer asks why that is a finding. What is the reason?",
       "options": {
-        "a": "Authors favour their own output; a clean slate sharpens the check",
+        "a": "Authors favour their own output, since a clean slate sharpens the check",
         "b": "A shared session cannot run in a pipeline, since sessions are interactive",
         "c": "A shared session loses the findings of earlier runs, since they are discarded",
         "d": "A shared session costs more tokens, since the history is billed again"
@@ -2939,8 +2939,8 @@
       "scope": "level",
       "stem": "Scenario S5. A script submits the overnight report to the batch interface, and an audit flags that its command lacks the headless flag. Is the finding right?",
       "options": {
-        "a": "No, but only because batches have no commands of any kind",
-        "b": "No; that rule covers calls starting with the CLI, not a sender",
+        "a": "No, but only because batch jobs use a different flag for headless runs",
+        "b": "No, since that rule covers calls starting with the CLI, not a sender",
         "c": "Yes, since every command in a pipeline needs the flag to run unattended",
         "d": "Yes, since batch jobs run through the interactive terminal tool"
       },
@@ -2958,7 +2958,7 @@
       "scope": "level",
       "stem": "Scenario S5. To keep a multi-file review consistent, each file's pass is shown the findings of the previous files. What does the page say about it?",
       "options": {
-        "a": "Passes stop being independent, and consistency is the cross pass's job",
+        "a": "Passes stop being independent, since earlier mistakes become premises",
         "b": "It is wrong only for the last file, since its pass needs all of them",
         "c": "It is sound, since consistency needs shared memory",
         "d": "It is sound if the findings are summarised first, since summaries are neutral"
@@ -2998,8 +2998,8 @@
       "options": {
         "a": "Yes, since writing test files is a way to change things in production",
         "b": "Yes, since every job in the pipeline must be read-only",
-        "c": "No, but only because a shell tool would be worse",
-        "d": "No; that limit binds inspections alone, and this task writes by design"
+        "c": "No, but only because a shell tool would be worse than the edit tool",
+        "d": "No, since that limit binds inspections alone and this task writes by design"
       },
       "key": "d",
       "explanation": {

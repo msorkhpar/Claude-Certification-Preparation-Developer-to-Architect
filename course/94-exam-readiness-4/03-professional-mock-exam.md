@@ -50,10 +50,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Cost, since the work in total is priced lower than the bank pays today
 
 3. Scenario: Brindle Law's drafting task is worth about forty chats, and four agents would each need the whole case file and the other agents' drafts at every step. A designer proposes a coordinator with four subagents. What does the page conclude?
-   - **a**: Use the team, since a value of forty chats pays the multiple of fifteen
+   - **a**: Use the team
    - **b**: Use the team, but give every subagent a larger window to hold the shared file
-   - **c**: Use a workflow with four fixed calls, since the work is known to have four parts
-   - **d**: Keep it to one worker, since parts sharing one context cannot be split
+   - **c**: Use a workflow with four fixed calls
+   - **d**: Keep it to one worker
 
 4. Scenario: Fable Retail's reviewer rates three designs. Design A is rejected and costs 30,000 a month. Design B needs a revision and costs 50,000. Design C is approved and costs 70,000. Which does the cheapest-adequate rule pick?
    - **a**: A, because the cheapest design wins whatever its verdict happens to be
@@ -62,7 +62,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: None of them, because a design must be approved before it can be priced
 
 5. Scenario: A coordinator at Marlow Analytics sends four subagents to read hundreds of pages each, and its window is full before it writes the report. The subagents must still run in parallel. Which contract change fixes the design?
-   - **a**: Each subagent reads only the first source, since the others repeat it
+   - **a**: Each subagent reads only the first source
    - **b**: Each subagent forwards the pages it read, trimmed to fit
    - **c**: Each subagent waits for the coordinator to ask, so nothing arrives unplanned
    - **d**: Each worker hands back its conclusion with a citation, in a fixed shape
@@ -82,7 +82,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 8. Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?
    - **a**: It reverts to refusing requests at once until a further pause has passed
    - **b**: It resets its count of failures, so that the next three calls are allowed
-   - **c**: It closes, since the pause alone counts as a recovery
+   - **c**: It closes and lets all traffic back through again
    - **d**: It stays half-open and lets further probes through one after another
 
 9. Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which two statements does the capstone support? (Select two.)
@@ -93,9 +93,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **e**: A small fixed workflow around a retrieval-backed call suits the known path
 
 10. Scenario: A claims question at Larch Mutual shares no word with any document that the reader may read, though it does match a contract that only the partnership team may read. What does the chain return?
-   - **a**: The contract chunk, since it is the closest match in the whole index
-   - **b**: A hold for lack of evidence, since barred material is never a candidate
-   - **c**: The best readable chunk, since something readable is always better than nothing
+   - **a**: The contract chunk
+   - **b**: A hold for lack of evidence
+   - **c**: The best readable chunk
    - **d**: An answer from the model alone, flagged as unsupported by any document
 
 11. Scenario: A review at Larch Mutual of a proposal finds no way back to the previous model if the new one fails, and no other flaw. What does the written review record and conclude?
@@ -125,9 +125,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 15. Scenario: Pallet Support's smaller model costs half as much per token as its larger one, but it needs about three attempts for each ticket, while the larger one answers once. Which comparison does the page require?
    - **a**: The full bill for one completed item, tries included
-   - **b**: The price of a token, since the choice should follow the published rates
-   - **c**: The latency of one attempt, since speed decides which model suits a ticket
-   - **d**: The size of the context window, since a larger window removes extra attempts
+   - **b**: The price of a token for each of the two models
+   - **c**: The latency of one attempt on each model
+   - **d**: The size of the context window of each model
 
 16. Scenario: Isle Travel's legacy caller times out after 2,000 ms. The assistant's slow case, the 95th percentile, is 1,500 ms, and the team adds a safety margin of 600 ms. How should the gateway deliver the answer?
    - **a**: Synchronously, since the median call fits well inside the limit
@@ -142,15 +142,15 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Allow once, then block when the spend reaches eighty percent of nothing
 
 18. Scenario: A team at Marsh Retail is close to its budget, and the policy names no cheaper model for the model it uses for refund drafting. The team is not blocked. What does the gateway do with its next request?
-   - **a**: Keeps its original pick, since only a listed alternative would replace it
-   - **b**: Switches to the cheapest model in the whole table, since the budget is nearly spent
+   - **a**: Keeps its original pick
+   - **b**: Switches to the cheapest model in the whole table
    - **c**: Blocks the request until the budget has been raised by the platform team
    - **d**: Switches to a model of the same tier from another vendor, to stay within the budget
 
 19. Scenario: Tern Fuel's usage report has a row for a model that the price table does not list. The report job must still finish. What should showback do with that row?
    - **a**: Price it at the average of the listed models, so that the total stays near the truth
-   - **b**: Skip the row, since an unpriced model cannot add to a team's bill
-   - **c**: Price it at zero and add a note, since a note is enough to warn the reader
+   - **b**: Skip the row
+   - **c**: Price it at zero and add a note
    - **d**: Reject that line and say which one has no rate
 
 20. Scenario: Quay Retail's assistant must give each branch's refund total for February. The figures sit in a table, and the team has cut the table into text chunks, after which the model adds the numbers by eye and gets them wrong. Which two statements does the page support? (Select two.)
@@ -167,16 +167,16 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Put the document title and section name in front of each piece before indexing
 
 22. Scenario: Tarn Dental's entire knowledge base is about 60,000 tokens, edited a few times a year, and the team plans a vector database with chunking and reranking. What does the page advise first?
-   - **a**: Build the vector database, since every knowledge base needs an index to be searched
-   - **b**: Put the complete corpus into a cached prompt, since no stage is left to fail
-   - **c**: Fine-tune a model on the corpus, since facts held in weights need no retrieval step
+   - **a**: Build the vector database
+   - **b**: Put the complete corpus into a cached prompt
+   - **c**: Fine-tune a model on the corpus
    - **d**: Split the corpus across several agents, each of which holds a part of it
 
 23. Scenario: Dunmore Legal switches its retrieval from one embedding model to a newer one. It embeds only the documents that change from now on, and keeps the old embeddings for the rest. Recall on its labelled questions falls at once. What explains it?
    - **a**: The newer model needs a larger chunk size, so the old chunks are now too small
    - **b**: The old vectors are stale copies of their documents, so a re-index would clear them
-   - **c**: Vectors from two different makers are not in one space, so the whole index must be rebuilt
-   - **d**: The keyword index must be rebuilt first, since the vectors are scored through it
+   - **c**: Vectors from two different makers share no space, so rebuild the whole index
+   - **d**: The keyword index must be rebuilt first, then the vectors
 
 24. Scenario: Ferris Systems' staff each paste the company's access string for the model supplier into their own scripts, and a former employee still has a working copy. The security lead asks for a design that limits the damage of a leaked or abandoned copy. What fits?
    - **a**: A proxy that holds the master secret itself and issues every person a separate token
@@ -186,7 +186,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 25. Scenario: Mallow Cloud's MCP server requests every permission up front when a person connects, so that nobody sees a second consent prompt. A reviewer objects. What does the guidance say instead?
    - **a**: Begin with read access and widen it when a privileged operation is first attempted
-   - **b**: Ask for every scope, since fewer prompts mean fewer chances for users to refuse
+   - **b**: Ask for every scope the server offers, once at the start
    - **c**: Ask for one broad scope that covers all operations, and log each use of it afterwards
    - **d**: Pass the user's own token on to the downstream service, so no scope is needed
 
@@ -210,14 +210,14 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: At the model, since it produced the final text that the user saw
 
 29. Scenario: Wick Health's log records hold ids, counts and timings, and no message text. An engineer needs the prompt of a few failing cases to find a fault. Which handling does the page support?
-   - **a**: Add every content field to the records, since a fault needs full context
+   - **a**: Add every content field to the records
    - **b**: Allow that one content field by name, for a stated purpose and a limited time
    - **c**: Copy the prompts to a private file, so that the shared records stay free of content
    - **d**: Keep the records as they are, and ask users to describe the failing cases
 
 30. Scenario: Sable Cargo changed its model on purpose last Tuesday, and its cost per answer rose by 35 percent against the stored reference. The drift check pages the on-call engineer. What does the page advise?
    - **a**: Keep the old baseline for a year, so that the rise is never forgotten, whatever else changes in between
-   - **b**: Raise the tolerance until the page stops, since the change was planned
+   - **b**: Raise the tolerance until the page stops
    - **c**: Turn the cost metric off until the next planned change has been decided
    - **d**: Reset the baseline at the switch that was chosen and treat other moves as findings
 
@@ -228,16 +228,16 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: As a billing artefact, since declines are counted in a separate system from the one that bills
 
 32. Scenario: Bexley Bank plans to let a language model mark 1,000 free-form write-ups each night against a rubric. No person has yet compared its marks with theirs. What comes first?
-   - **a**: Switch the grader on at full volume, since a model grader is fast and scalable
-   - **b**: Replace the grader with exact-match checks, since they are the most reliable kind
-   - **c**: Measure how closely it agrees with human judgement on a small sample
-   - **d**: Have people grade all 1,000 reports each night, since human grading is the best
+   - **a**: Switch the grader on at full volume straight away
+   - **b**: Replace the grader with exact-match checks on every write-up
+   - **c**: Measure its agreement with human judgement on a small sample
+   - **d**: Have people grade all 1,000 reports each night as well
 
 33. Scenario: Colt Retail scores its assistant on the five worked examples written into its own prompt and reports 100 percent. A reviewer says the score tells little. What should make up its evaluation set?
    - **a**: The same worked examples, with more of them added until the score stops moving
-   - **b**: Cases written by the developers, since they know the product best of all
-   - **c**: Real traffic with its proportions kept, plus awkward cases added on purpose and tagged
-   - **d**: A single hard benchmark, since a hard test shows the ceiling of the system
+   - **b**: Cases written by the developers who built the assistant and know it
+   - **c**: Real traffic in its proportions, plus awkward cases added and tagged
+   - **d**: A single hard benchmark taken from a public leaderboard of models
 
 34. Scenario: Arden Insurance runs a live test of a new prompt. After 300 trials in each arm the new prompt is two points ahead, and the owner wants to stop and ship while it is in front. Which two statements does the page support? (Select two.)
    - **a**: Add trials until the lead reaches five points, then ship
@@ -247,16 +247,16 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **e**: Stop now, since the larger number is the better version
 
 35. Scenario: Pike Telecom reports a mean latency of 1.4 seconds for its streamed assistant, yet users complain that it is slow. Which figures should the report add?
-   - **a**: The mean of the fastest half, since users remember the quick answers
-   - **b**: The maximum over a month, since one very slow case shows what users feel
-   - **c**: The total tokens per answer, since long answers are the cause of slow ones
-   - **d**: The 95th percentile and the time to the first token
+   - **a**: The mean of the fastest half of the requests
+   - **b**: The maximum latency seen over a whole month
+   - **c**: The total tokens per answer, averaged over a day
+   - **d**: The 95th percentile and the time to first token
 
 36. Scenario: Kern Logistics runs one assistant on Anthropic's own API and on Amazon Bedrock, and plans all its migrations from the dates in Anthropic's table. A model is listed as retiring in four months. What should the team do?
-   - **a**: Use the table's date for both, since the model is the same on each platform
-   - **b**: Track a second schedule, since the cloud provider publishes a separate calendar
+   - **a**: Use the table's date for both
+   - **b**: Track a second schedule
    - **c**: Wait for the provider to send a notice before acting at all
-   - **d**: Move only the direct traffic and leave Bedrock alone, since it is out of scope
+   - **d**: Move only the direct traffic and leave Bedrock alone
 
 37. Scenario: Hale Group runs forty programs on three generations of Claude and has no list of which program uses which version when a retirement notice arrives. Which step does the page give first?
    - **a**: Wait for the retirement date to fix the list of models that are still in use
@@ -277,13 +277,13 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: Release, since nothing was lost and the net result is positive
    - **d**: Refuse, since three added answers cannot offset a possible future loss
 
-40. Scenario: In a launch review at Tern Health, a wrong decision costs 3 units and a person's check costs 1 unit, and the architect must state the accuracy above which routing items to a person stops paying. Which figure goes into the review?
-   - **a**: 66, as the rounding climbs to 34 before the subtraction
-   - **b**: 33, since the share of the check is the answer itself
-   - **c**: 67, since a third rounds to the nearest whole percent
-   - **d**: 0, since a check that is cheaper than a mistake always pays
+40. Scenario: In a launch review at Tern Health, a wrong decision costs 3 units and a person's check costs 1 unit, and the architect must state the accuracy above which routing items to a person stops paying. Which figure goes into the review, following the page's rule?
+   - **a**: 66, which is 100 minus the percent rounded up
+   - **b**: 33, the share the check costs against an error, rounded down
+   - **c**: 67, the share left after the exact percent is rounded to the nearest unit
+   - **d**: 0, the figure used when no check pays at any accuracy
 
-41. Scenario: A proposal at Larch Mutual moves its change out in exactly three stages, and the sponsor needs the review to say whether the plan blocks the launch. The rule asks for at least three. What does the review record for the roll-out?
+41. Scenario: A proposal at Larch Mutual moves its change out in exactly three stages, and the sponsor needs the review to say whether the plan blocks the launch. What does the review record for the roll-out?
    - **a**: No finding, since a threshold is met at its edge
    - **b**: A low finding, since three is the least that passes
    - **c**: A high finding, since a roll-out needs more than three stages
@@ -296,16 +296,16 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Put the first nine results into the prompt of the tenth task
 
 43. Scenario: Sorrel Cloud serves twelve customers from a single shared pool and separates their data by a filter in its application code. An auditor asks how the data of one customer is kept from another. What does the page say about the design?
-   - **a**: It is sound, since a well-tested filter in code is the stronger separation of the two options
+   - **a**: It is sound
    - **b**: It is sound, as long as each customer is given a key of its own to use
    - **c**: It is a finding only if two of the customers work in the same industry
-   - **d**: It is a finding, since the boundary that is enforced for you is a workspace per tenant
+   - **d**: It is a finding
 
 44. Scenario: Bracken Health's structured output uses a schema whose fixed list of allowed values holds the names of diagnoses taken from real patient records, in a deployment that is meant to be HIPAA ready. Which change does the design need?
-   - **a**: Cap the list at ten values, since a short list exposes less
-   - **b**: Give each tenant a schema of its own, since tenants are kept apart
-   - **c**: Keep clinical data out of the definition, and let the message carry it
-   - **d**: Encrypt the schema inside the request body, since the body is protected in transit
+   - **a**: Cap the list at ten of the most common values
+   - **b**: Give each tenant a schema of its own with that list
+   - **c**: Move clinical data out of the definition into the message
+   - **d**: Encrypt the schema inside the request body in transit
 
 45. Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)
    - **a**: Add a line to the system prompt telling the model to disregard names
@@ -315,16 +315,16 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **e**: Accept the gap, since names carry no risk once the addresses are gone
 
 46. Scenario: Brae Insurance's assistant quotes a sentence that is not in the policy text, and its score is 99. The threshold for sending unreviewed is 95. What becomes of the reply?
-   - **a**: It goes out unreviewed, since 99 is above the threshold for sending
-   - **b**: It goes to review, since only replies below the threshold are held back
+   - **a**: It goes out unreviewed
+   - **b**: It goes to review
    - **c**: It goes out with a note that the quote could not be found in the source
-   - **d**: It is held, since an unbacked claim is stopped whatever its rating
+   - **d**: It is held
 
 47. Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. Which recovery belongs in the design?
-   - **a**: Drop or rephrase the turn that triggered it, or send the request to another model
+   - **a**: Drop or rephrase the triggering turn, or send the request to another model
    - **b**: Show the user the category of the refusal, which is always present
    - **c**: Raise the sampling temperature, so that the next reply differs
-   - **d**: Resend the same history until it passes, since a refusal is a passing fault
+   - **d**: Resend the same history unchanged until it passes through
 
 48. Scenario: Linnet Legal's assistant summarises inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?
    - **a**: Add it to the user turn with a request that the model ignore any orders in it
@@ -340,10 +340,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **e**: That measure needs an owner, since it repairs nothing itself
 
 50. Scenario: Hollis Mutual's risk register lists four failure modes, and the entry for privacy leaks names a pattern filter that does not appear anywhere in the architecture. What does the page say about that row?
-   - **a**: It is a wish, since each safeguard in it must exist as a part of the system
-   - **b**: It is sound, since the filter will be built before the system goes live
+   - **a**: It is a wish
+   - **b**: It is sound
    - **c**: It is sound, as long as the owner column names a person
-   - **d**: It is a minor flaw, since the residual column already says the risk is medium
+   - **d**: It is a minor flaw
 
 51. Scenario: In a pilot, two people checked every item, and after launch about 40,000 items a month will be sent to people for a check. The team wants to test the assumption that those people will keep up. Which test does the page give?
    - **a**: Ask the pilot's two reviewers whether the work felt comfortable during the trial
@@ -371,9 +371,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **e**: A requirement is complete when the sponsor has signed it and engineers have read it once
 
 55. Scenario: In the options table of a design record, the entry for the costliest design carries a two-word rationale, "Too much". A reviewer asks for a change. What should that entry say instead?
-   - **a**: A single word that names the main cost, since short reasons read faster
-   - **b**: A reference to the sponsor's budget, since the budget is what decides
-   - **c**: A sentence with a checkable reason, such as top price and slowest reply
+   - **a**: A single word that names the main cost of the option
+   - **b**: A reference to the sponsor's budget for the year
+   - **c**: A sentence with a checkable reason, such as top price and slow reply
    - **d**: The name of the engineer who first rejected the option, for traceability
 
 56. Scenario: The one-page note that Vane Rail's architect wrote for the funder describes the saving in detail and says nothing of what the proposal gives up. A colleague objects. What should the note also contain?
@@ -384,21 +384,21 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 57. Scenario: A service level promises availability of at least 99.5 percent, written as 995 per mille. The month's measurement is 990 per mille. How does the report read?
    - **a**: Short of the floor by 5, counted in the unit of the target
-   - **b**: Failed, since a bare statement ends the argument more quickly
-   - **c**: Met, since 990 is within 1 percent of the promised target
-   - **d**: Short by 5 percent, since the two figures differ by five units
+   - **b**: Failed, with the gap left unstated in the report
+   - **c**: Met, as the measurement is within a rounding margin
+   - **d**: Short by 5 percent of the monthly availability
 
 58. Scenario: Two months into a pilot, Dray Finance's team sees that its accuracy target for the costly segment will not be met by the agreed deadline. How should it handle the promise?
-   - **a**: Keep quiet until the date, since the measurement may still improve
-   - **b**: Amend it through the same channel that made it, with a reason, ahead of the due day
-   - **c**: Report the overall average instead, since it is above the target
+   - **a**: Keep quiet about the shortfall until the date
+   - **b**: Amend it through the channel that made it, with a reason, before the due day
+   - **c**: Report the overall average instead of the segment
    - **d**: Move the target in the next sprint plan, without telling the sponsor or the review board
 
 59. Scenario: Larch Mutual's architect has a finished review: a conclusion, a count per domain and twenty-two itemised flaws, and must present it to the sponsor and the engineers. How should the document be arranged?
    - **a**: The flaws first in domain order, then the conclusion and the count at the end
    - **b**: The count first, then a narrative of the design, then the flaws with no conclusion
    - **c**: The engineers' evidence first, so that the sponsor reads the analysis before the conclusion
-   - **d**: Lead with the headline outcome, follow with a tally by area, and end with the ranked details
+   - **d**: Lead with the headline outcome, follow with a tally by area, then the ranked details
 
 60. Scenario: Eland Systems fetches its policy from the admin console, and the security lead decides that no developer may begin without the current policy, even when the network is down and work stops. Which setting expresses that decision?
    - **a**: availableModels, which restricts the models a developer may pick
@@ -420,10 +420,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: /status, which shows the setting sources, and claude doctor, which lists what was dropped
 
 63. Scenario: Hart Media's platform team writes a managed MCP allowlist entry that gives both a server name and its address, believing two keys make the entry stricter. What does the page say about such an entry?
-   - **a**: It is invalid, since only one of the three identifiers fits per record
+   - **a**: It is invalid
    - **b**: It is valid, but only the address is read when both keys are set
    - **c**: It is valid for a deny list, and invalid for an allow list only
-   - **d**: It is valid and stricter, since two keys must both match for the server
+   - **d**: It is valid and stricter
 
 <details>
 <summary>Answer key</summary>

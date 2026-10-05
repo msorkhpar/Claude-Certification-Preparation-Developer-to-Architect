@@ -38,18 +38,18 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 
 1. Scenario S2. A team places a CLAUDE.md in the folder of its payments service and expects every session in the repository to carry its rules from the first message. Sessions that never touch that folder do not show them. What explains it?
    - **a**: The file loads only for sessions started by its owner, since it is a personal setting
-   - **b**: The file loads at launch but is pushed out first when context fills, since it has the lowest rank, as a quick remedy
-   - **c**: It loads on demand, when files in its own directory are read
+   - **b**: The file loads at launch but is pushed out first when context fills, since it has the lowest rank
+   - **c**: It loads on demand, since files in subdirectories load only when read
    - **d**: The file loads only when a slash command names it, since commands choose memory
 
 2. Scenario S2. A repository holds a command file at .claude/commands/deploy.md and, after a refactor, also a skill at .claude/skills/deploy/SKILL.md. A developer types /deploy. What runs?
    - **a**: Both, one after the other, since the name maps to each file
-   - **b**: The newer packaged definition, which wins when both carry the name
+   - **b**: The packaged definition, since it wins on a shared name
    - **c**: Neither, since a clash of names disables the command
    - **d**: The command file, since older definitions keep their place
 
 3. Scenario S2. A rule file in a project's rules folder has no paths list. The team assumes that it applies only to the files its title mentions. When does it load?
-   - **a**: At the start of every session, at the same priority as the root one
+   - **a**: At the start of every session, since nothing restricts its scope
    - **b**: Never, since an unscoped rule has no target
    - **c**: Only when a developer names it in a command, since unscoped rules wait for a call
    - **d**: Only when a file of its area is opened, since rules load by relevance
@@ -58,7 +58,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **a**: No, since rule files read only exact file names
    - **b**: Yes, since the extension alone decides the match
    - **c**: Yes, since a star matches any depth below the folder
-   - **d**: No; a lone star stays within one level and the item sits deeper
+   - **d**: No, since a lone star stays within one level
 
 5. Scenario S2. A repository keeps shared guidance in AGENTS.md beside its memory file, and a developer adds a CLAUDE.local.md for her notes. Afterwards the assistant stops following the shared guidance. What explains it?
    - **a**: Her file overrides the shared guidance line by line
@@ -74,7 +74,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 
 7. Scenario S2. To avoid match failures, a developer tells Claude Code to rewrite the whole document for a one-line fix in an existing source file. What does the page say?
    - **a**: Keep the whole-file write if the file is under a hundred lines
-   - **b**: Use the edit tool; replacing everything lets damage slip through unseen
+   - **b**: Use the edit tool, since replacing everything lets damage slip through unseen
    - **c**: Use the shell with a stream editor, since it avoids both tools
    - **d**: Keep the whole-file write, since it never fails to match
 
@@ -82,16 +82,16 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **a**: Each skill applies when its folder is opened, since folders are the unit
    - **b**: Each skill applies by itself, since skills watch the open files
    - **c**: Only the newest skill applies, since later skills outrank earlier ones
-   - **d**: Matching a path never launches one; scoped rules are what load by location
+   - **d**: Matching a path never launches one, since scoped rules are what load by location
 
 9. Scenario S3. Before synthesis even starts, the lead of a four-worker research team has no room left because every worker returned everything it fetched. Which change fits?
-   - **a**: The coordinator reads each output twice and keeps only the second reading
+   - **a**: The coordinator condenses each output in its own context and keeps the summary
    - **b**: The synthesis agent receives every output directly, bypassing the coordinator
-   - **c**: Each worker returns its output in a shorter font so that it takes less room
+   - **c**: Each worker returns its full output split over several shorter messages
    - **d**: Each one saves its results outside and hands back a lightweight reference
 
 10. Scenario S3. The search agent is given a tool that writes notes to a shared drive so that findings are saved, and the report agent is given web search to check a figure. A review applies the least-privilege rule. What does it conclude?
-   - **a**: Each holds the other's kind of access, so each is trimmed to its own job
+   - **a**: Trim each to its own job, since each holds the other's kind of access
    - **b**: Both are right, since extra tools make the agents more flexible
    - **c**: Only the report agent is wrong, since the search agent must be able to save its findings
    - **d**: Both are right if each tool is logged, since logging controls the risk
@@ -99,7 +99,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 11. Scenario S3. A search for one scope fails at first, and a retry through an alternative query later succeeds. The report's list of errors still shows the first failure. What is wrong?
    - **a**: The scope should be marked partial, since an error once occurred there
    - **b**: The retry should have been hidden from the coordinator
-   - **c**: It should have been removed once a newer result covered that topic
+   - **c**: It should have been removed, since a newer result covered that topic
    - **d**: Nothing, since the list is a history of every failure that occurred
 
 12. Scenario S3. A tool in a subagent's chain keeps failing, and the subagent simply stops with a generic message. The team wants the system to adapt. Which behaviour does Anthropic's article support?
@@ -116,18 +116,18 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 
 14. Scenario S3. To spare the coordinator's context, a developer lets the search and analysis subagents pass findings directly to each other. What does the page say?
    - **a**: Allow it, since a shorter path saves tokens for the coordinator
-   - **b**: Route it through the hub, which gives one place to observe
+   - **b**: Route it through the hub, since that gives one place to observe
    - **c**: Allow it if each pair logs its exchanges to a shared file
    - **d**: Allow it for the analysis agent only, since it reads documents
 
 15. Scenario S3. To keep the writer's input short, the coordinator has the synthesis step compress all findings into prose and tells the writer to add sources afterwards. What does the page say?
    - **a**: It is sound for numbers only, since prose carries words well
    - **b**: It is sound, since short input is easier to draft from the start
-   - **c**: Claim-origin pairs must travel on; sentences cannot restore them
+   - **c**: Claim-origin pairs must travel on, since sentences cannot restore them
    - **d**: It is sound if the writer searches again for each claim
 
 16. Scenario S3. A report's table gives a figure with no mention of the survey behind it, and a reader later sees it disagree with an audit figure and takes it for an error. What was left out?
-   - **a**: The method, which is part of the finding
+   - **a**: The method, since it is part of the finding
    - **b**: The reader's rank, since figures vary by audience
    - **c**: A rounding note, since small differences come from rounding
    - **d**: A longer sentence, since tables lack context by nature
@@ -136,7 +136,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **a**: It denies the whole server, since parentheses widen the pattern
    - **b**: It narrows the tool to closed tickets, as path patterns narrow file tools
    - **c**: It asks the user for each ticket, since a pattern implies a prompt
-   - **d**: It is skipped and matches nothing, so the capability stays unnarrowed
+   - **d**: It matches nothing, since an entry of that form is skipped
 
 18. Scenario S4. A team commits a .mcp.json whose ticket server's location is written with a fallback, and whose token is written with no fallback. A reviewer objects to the first. What is the verdict?
    - **a**: Sound for that field, since a non-secret entry suits a placeholder
@@ -146,7 +146,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 
 19. Scenario S4. An engineer investigated a payments module on Monday. Overnight a colleague rewrote half of it, and on Tuesday the engineer wants to carry on. Which session choice does the page key?
    - **a**: Run two fresh sessions and repeat the analysis in each
-   - **b**: Begin anew and inject a short summary of the findings that still hold
+   - **b**: Begin anew with a short summary, since old results describe files as they were
    - **c**: Resume Monday's session, since the model remembers the analysis
    - **d**: Fork Monday's session, since a branch keeps the analysis and the history
 
@@ -162,16 +162,16 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **c**: No, but only because the agent could ask a person to approve
    - **d**: No, since writing to disk has separate rules that must be set too
 
-22. Scenario S4. A developer adds an experimental documentation server to the committed project file, reasoning that colleagues who do not want it can ignore it. What does the page say?
-   - **a**: It loads for everyone, unattended runs included
-   - **b**: It is harmless, since unused servers cost nothing
-   - **c**: It is harmless if the server is read-only
-   - **d**: It is fine if the file is added to the ignore list
+22. Scenario S4. A developer defines a server named github in her local scope with one address, and the committed file defines the same name with headers and another address. What does Claude Code use?
+   - **a**: Only the highest-ranking entry, taken whole, since no merging happens there
+   - **b**: A blend, headers from one and address from the other, since merging is the default
+   - **c**: The committed file's entry, since a team file always outranks a personal one
+   - **d**: Both entries, connected twice, since each source keeps its own server
 
 23. Scenario S4. Every integration in a team's setup is flagged to be present from the opening message of each session, on the theory that tools should always be at hand. What follows?
-   - **a**: Costs fall, since tools are cached once loaded
-   - **b**: Crowded context and worse selection return
-   - **c**: Selection improves, since the model sees every definition
+   - **a**: Costs fall, since the definitions are cached once they have been loaded
+   - **b**: Crowded context and worse selection return, since lazy loading is bypassed
+   - **c**: Selection improves, since the model sees every definition up front
    - **d**: Nothing, since definitions never count against the window
 
 24. Scenario S4. A team wants an exploring helper that cannot change anything and can also query the company's knowledge server, and an engineer says the built-in read-only explorer already does that. What is missing?
@@ -190,10 +190,10 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **a**: A longer definition for each rating, since more words fix the boundary
    - **b**: A request for fewer comments overall, since fewer means less noise in the output
    - **c**: An instruction to be conservative and report only important issues
-   - **d**: A worked example per rating, showing where the boundary between two lies
+   - **d**: A worked example per rating, since it shows where the boundary lies
 
 27. Scenario S5. The pipeline's review step continues the very session that wrote the change, so that the context is already loaded. A reviewer asks why that is a finding. What is the reason?
-   - **a**: Authors favour their own output; a clean slate sharpens the check
+   - **a**: Authors favour their own output, since a clean slate sharpens the check
    - **b**: A shared session cannot run in a pipeline, since sessions are interactive
    - **c**: A shared session loses the findings of earlier runs, since they are discarded
    - **d**: A shared session costs more tokens, since the history is billed again
@@ -205,13 +205,13 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **d**: It lets authors skip the review when two runs disagree
 
 29. Scenario S5. A script submits the overnight report to the batch interface, and an audit flags that its command lacks the headless flag. Is the finding right?
-   - **a**: No, but only because batches have no commands of any kind
-   - **b**: No; that rule covers calls starting with the CLI, not a sender
+   - **a**: No, but only because batch jobs use a different flag for headless runs
+   - **b**: No, since that rule covers calls starting with the CLI, not a sender
    - **c**: Yes, since every command in a pipeline needs the flag to run unattended
    - **d**: Yes, since batch jobs run through the interactive terminal tool
 
 30. Scenario S5. To keep a multi-file review consistent, each file's pass is shown the findings of the previous files. What does the page say about it?
-   - **a**: Passes stop being independent, and consistency is the cross pass's job
+   - **a**: Passes stop being independent, since earlier mistakes become premises
    - **b**: It is wrong only for the last file, since its pass needs all of them
    - **c**: It is sound, since consistency needs shared memory
    - **d**: It is sound if the findings are summarised first, since summaries are neutral
@@ -225,8 +225,8 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 32. Scenario S5. An audit of a pipeline flags its test-generation job for holding the edit tool, citing the rule that review jobs must only read. Is the finding right?
    - **a**: Yes, since writing test files is a way to change things in production
    - **b**: Yes, since every job in the pipeline must be read-only
-   - **c**: No, but only because a shell tool would be worse
-   - **d**: No; that limit binds inspections alone, and this task writes by design
+   - **c**: No, but only because a shell tool would be worse than the edit tool
+   - **d**: No, since that limit binds inspections alone and this task writes by design
 
 <details>
 <summary>Answer key</summary>
@@ -239,7 +239,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 6. **a**. Examples of input and output give the work a target: two or three cases with their expected results say what a paragraph of description leaves open, and the page's example is one valid address, one invalid and one edge (module 71, page 2). The page puts it as "Two or three cases with their expected results say what a paragraph of description leaves open". *b* is ruled out because "Claude stops when the work looks done", and without a check "'looks done' is the only signal available". *c* is ruled out because "Two or three cases with their expected results say what a paragraph of description leaves open." *d* is ruled out because the first recommendation is "Give Claude a check it can run: tests, a build, a screenshot to compare."
 7. **b**. Write overwrites with the full content, so an accidental change elsewhere goes unseen, and for partial changes to an existing file the page says to use Edit (module 56, page 1). The page puts it as "Write overwrites with the full content, so an accidental change elsewhere goes unseen". *a* is ruled out because the page names no size rule; the reason is that "it never fails to match" is not a reason to overwrite. *c* is ruled out because "For partial changes to an existing file, use Edit." *d* is ruled out because "Write overwrites with the full content, so an accidental change elsewhere goes unseen."
 8. **d**. A skill is invoked, or chosen by the model from its description, and a path match does not start it, so conventions that must apply by path go in rule files with a paths list (module 71, page 1). The page puts it as "a skill is invoked, or chosen by the model from its description, and a path match does not start it". *a* is ruled out because the page's rule files, not skills, carry "a `paths` list of globs". *b* is ruled out because "Skills load when they are invoked or chosen, not because a path matched." *c* is ruled out because "a skill is invoked, or chosen by the model from its description, and a path match does not start it".
-9. **d**. Large results should not travel through the hub: subagents store their work in external systems and pass lightweight references back (module 72, page 1). The page's table names the failure "Large results passed through the hub". *a* is ruled out because the failure is "Large results passed through the hub", and rereading passes them through twice. *b* is ruled out because the hub keeps the plan and the status, and the page's fix is "Subagents store their work and pass back references". *c* is ruled out because the page says "Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator."
+9. **d**. Large results should not travel through the hub: subagents store their work in external systems and pass lightweight references back (module 72, page 1). The page's table names the failure "Large results passed through the hub". *a* is ruled out because the failure is "Large results passed through the hub", and condensing them there still passes them through the hub. *b* is ruled out because the hub keeps the plan and the status, and the page's fix is "Subagents store their work and pass back references". *c* is ruled out because the page says "Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator."
 10. **a**. The search agent has the web tools and nothing that writes, and the report agent writes the report and calls nothing else, so each tool set is trimmed to the job (module 72, page 1). The least-privilege rule applies to each of the four subagents. The page puts it as "The search agent has the web tools and nothing that writes". *b* is ruled out because the page says "The search agent has the web tools and nothing that writes." *c* is ruled out because "The report agent writes the report and calls nothing else." *d* is ruled out because the least-privilege rule of module 54 "applies to each of the four", and a log acts after the privilege exists.
 11. **c**. An error that a later result for the same scope made up for is dropped from the list of errors, since the report should list what is still wrong (module 72, page 2). The page puts it as "the report should list what is still wrong". *a* is ruled out because partial status concerns findings: "A claim is marked partial only when every finding behind it was partial". *b* is ruled out because the coordinator "decides" among alternatives, and it can decide "only if the error says what failed and what could be tried". *d* is ruled out because the page says "the report should list what is still wrong".
 12. **b**. The article says "Letting the agent know when a tool is failing and letting it adapt works surprisingly well", which is why a failure comes back as a result with its type, its query and alternatives (module 72, page 1). *a* is ruled out because "Send the timeout to a top-level handler that ends the whole run" is rejected, because "the scopes that worked are lost with it". *c* is ruled out because "it turns a failure into a false answer, and nothing downstream can recover from a failure it was never told about". *d* is ruled out because the article's line is "Letting the agent know when a tool is failing and letting it adapt works surprisingly well."
@@ -252,7 +252,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 19. **b**. Tool results in an old session describe files as they were, so after an overnight refactor the page keys a new session with a short structured summary and a fresh read of the files that matter (module 73, page 2). The page puts it as "Tool results in an old session describe files as they were". *a* is ruled out because the choice is about "what the old context is worth", and repeating everything wastes the findings that still hold. *c* is ruled out because "Tool results in an old session describe files as they were, and the model has no way to notice." *d* is ruled out because a fork is for "several directions" that start "from one shared analysis", not for code that changed.
 20. **c**. The project's servers load without a prompt in claude -p and SDK runs, so a pull request that changes .mcp.json deserves the review of a change to code (module 73, page 1). The page puts it as "The project's servers load without a prompt in claude -p and SDK runs". *a* is ruled out because the sentence says "a pull request that changes `.mcp.json` deserves the review of a change to code". *b* is ruled out because "The project's servers load without a prompt in `claude -p` and SDK runs". *d* is ruled out because "The project's servers load without a prompt in" those runs, and the page makes no split between remote and local.
 21. **d**. Denying the shell does not limit the file tools, which have their own rules, so the generator's writes must be limited by an Edit rule for its folder (module 73, page 1). The page puts it as "Denying the shell does not limit the file tools, which have their own rules". *a* is ruled out because "For files, an `Edit` rule applies to every built-in tool that edits files". *b* is ruled out because "Denying the shell does not limit the file tools, which have their own rules." *c* is ruled out because the rules are checked in the order "deny, then ask, then allow", and the file tools hold rules of their own.
-22. **a**. A project server is shared, so every teammate and every unattended run loads it, and a personal or experimental server goes in the user scope (module 55, page 1). The page puts it as "a project server is shared, so every teammate and every unattended run loads it". *b* is ruled out because "a project server is shared, so every teammate and every unattended run loads it". *c* is ruled out because "A personal or experimental server goes in the user scope." *d* is ruled out because the file "exists to be committed so that the team gets the same tools".
+22. **a**. The same name is connected once, using the entire entry from the highest-precedence source, so "The entire server entry from that source is used" (module 55, page 1). *b* is ruled out because "fields are not merged across scopes". *c* is ruled out because the order is "local, project, user, plugin-provided servers, then claude.ai connectors", so the local definition ranks above the committed one. *d* is ruled out because "Claude Code connects to it once, using the definition from the highest-precedence source".
 23. **b**. Loading every definition at the start brings back what tool search was avoiding: crowded context and worse selection (module 55, page 2). The page puts it as "Loading all of them at the start brings back what tool search was avoiding". *a* is ruled out because the page names "crowded context and worse selection" as the cost. *c* is ruled out because "Loading all of them at the start brings back what tool search was avoiding". *d* is ruled out because "the product keeps definitions out of context until they are needed".
 24. **c**. Claude Code ships a read-only explorer itself, and a project subagent of your own is the way to give the same shape the project's documentation server too, with a tools line that lists only reading and searching tools (module 73, page 1). The page puts it as "a project subagent of your own is the way to give the same shape the project's documentation server too". *a* is ruled out because the page says the built-in helper "is read-only", while "a project subagent of your own is the way to give the same shape the project's documentation server too". *b* is ruled out because "the root file loads in every session and costs context each time". *d* is ruled out because "A sentence in the prompt is a request that the model weighs; the `tools` line is a list the subagent cannot go beyond."
 25. **c**. When a run fails, re-running it repeats the cost with no reason to expect a different result, so the job reports the failure and a person decides (module 74, page 1). The page puts it as "When a run fails, re-running it repeats the cost with no reason to expect a different result". *a* is ruled out because "A longer job timeout only lets a loop run longer." *b* is ruled out because "A green job that said nothing is the failure the gate prevents". *d* is ruled out because "When a run fails, re-running it repeats the cost with no reason to expect a different result".

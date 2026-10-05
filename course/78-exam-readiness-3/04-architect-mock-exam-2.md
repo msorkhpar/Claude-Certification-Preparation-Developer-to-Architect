@@ -155,7 +155,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Saved conversations stay on the host that wrote them, so copy them or use a digest
 
 19. Scenario S4. A process died while a tool call was running, and the session is resumed. What does the model see?
-   - **a**: The operation flagged as interrupted before its outcome was stored, with a prompt to verify it
+   - **a**: The operation flagged as interrupted before its outcome was stored, to verify
    - **b**: The call is finished again silently when the session resumes, without any notice
    - **c**: The call is shown as succeeded, since the process had already started it
    - **d**: The history is cut at the last completed message and the session carries on as normal
@@ -175,9 +175,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 22. Scenario S4. A tool design whose name breaks the required form also declares an effect that needs a person's sign-off. What should happen first?
    - **a**: It goes straight to the person, who can fix the name while approving
-   - **b**: It returns for revision, so approval is asked only of a proposal worth reading
-   - **c**: It is refused, since any format error is treated as a forbidden call
-   - **d**: It is approved outright, since a name has no effect on safety
+   - **b**: It returns for revision, so approval goes to something worth reading
+   - **c**: It is refused outright, with no chance of revision at all
+   - **d**: It is approved outright and fixed at a later review of the tool
 
 23. Scenario S4. A documentation tool's description is long, with its key rule in the last paragraph. What does Claude Code do with the text?
    - **a**: It reads all of it, since only the first sentence is shown to the user in the list, as a rule of the product
@@ -186,9 +186,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: It rejects the server at launch with an error message naming the limit in force
 
 24. Scenario S4. A skill from an installed plugin has the same folder name as a project skill. How can both be used?
-   - **a**: The extension's is prefixed with its package label, so two separate commands exist
-   - **b**: The project's overrides the plugin's, since committed files win over anything installed
-   - **c**: The plugin's overrides the project's, since plugins are newer than the repository
+   - **a**: The extension's is prefixed with its package label, so two commands exist
+   - **b**: The project's overrides the plugin's one of the same name
+   - **c**: The plugin's overrides the project's one of the same name
    - **d**: Neither runs until one of them is renamed to remove the clash
 
 25. Scenario S4. A user-level file and a repository-level file give conflicting style advice. Which two statements follow the page? (Select two.)
@@ -260,16 +260,16 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Send it once more with a new record number, so that attempts are told apart
 
 36. Scenario S6. An extraction stores for each field the quote it came from. What does a passing check prove?
-   - **a**: That the value is correct, since the quote came from the source
-   - **b**: That the model is confident, since it supplied a quote
-   - **c**: That the schema is valid, since provenance is a required object
+   - **a**: That the value is correct, whatever the text says
+   - **b**: That the model is confident about the value it gave
+   - **c**: That the schema is valid for the document type
    - **d**: That the value is grounded in the text, not that it is correct
 
 37. Scenario S6. A schema gives a missing vendor name the default unknown. Why does that hurt downstream?
-   - **a**: It breaks the parser, since a string is not allowed for that field in the schema
-   - **b**: It lowers accuracy in the report, since defaults count as errors
+   - **a**: It breaks the parser of the report that reads each record
+   - **b**: It lowers accuracy in the final report that the team reads
    - **c**: It forces the model to guess the vendor on every record
-   - **d**: Code cannot tell it from a real value, so a placeholder passes as genuine
+   - **d**: Code cannot tell it from a real value, so a placeholder passes as real
 
 38. Scenario S6. A team plans a weekly extraction over thousands of stored documents and wants the lowest cost. Which two statements describe the right approach and its entries? (Select two.)
    - **a**: The synchronous interface in parallel threads fits, since discounts need a contract
@@ -390,9 +390,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Merge them into one lookup that tries both of the services in turn
 
 57. Scenario S1. An organisation wants data-handling reminders delivered to every machine and wants a particular shell command blocked. Which pairing is right?
-   - **a**: A managed memory document for both, since individual settings cannot exclude it
-   - **b**: Managed settings for both, since they carry text and rules alike
-   - **c**: A managed memory document for the text and managed settings for the prohibition
+   - **a**: A managed memory document for both the text and the block
+   - **b**: Managed settings for both the reminders and the prohibition
+   - **c**: A managed memory file for text, managed settings for the ban
    - **d**: A user-level memory document for both, pushed by a login script
 
 58. Scenario S1. A support assistant's role is set in one sentence of the system prompt. What does the documentation say about such a sentence?
@@ -440,7 +440,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 22. **b**. The page states it (module 77, page 2): "A revision comes before a gate, because a person should be asked to approve a proposal that is worth reading". *a* is ruled out because revision comes first: "A revision comes before a gate" *c* is ruled out because a format error only sends it back: "Four things only send it back: a name that is not in the fixed form" *d* is ruled out because only a clean proposal passes outright: "Only a proposal with none of these is approved outright."
 23. **c**. The page states the limit (module 55, page 2): "Claude Code truncates each tool description and each server's instructions at 2,048 characters by default". *a* is ruled out because the cut is a fact: "Descriptions and server instructions are truncated at 2,048 characters by default." *b* is ruled out because the advice follows from it: "Keep them concise, and put critical details near the start." *d* is ruled out because the page names the effect: "The exam rejects the length: Claude Code truncates at 2,048 characters, so what you put last may be cut."
 24. **a**. The page lists the location (module 58, page 1): "with the name prefixed by the plugin's name". *b* is ruled out because the order of precedence is for skills that share a name: "Of skills that share a name" *c* is ruled out because a plugin skill is available where it is enabled: "Where the plugin is enabled" *d* is ruled out because a name clash has a winner: "`/deploy` runs the personal one"
-25. **b and c**. The documentation lists the files "in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction" (module 57, page 1). *a* is ruled out because "Memory is advice with good delivery." *d* is ruled out because "All discovered files are concatenated into context". *e* is ruled out because "at the start of every session".
+25. **b and c**. The documentation lists the files "in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction" (module 57, page 1). *a* is ruled out because the load order runs "from broadest scope to most specific", so the project file comes after the user file. *d* is ruled out because "All discovered files are concatenated into context". *e* is ruled out because the order is by scope, "from broadest scope to most specific", and not by edit time.
 26. **a**. The page states it (module 58, page 2): "A bare tool name like `Bash` removes the tool from Claude's context entirely". *b* is ruled out because only a bare name removes a tool: "only a bare name removes a tool" *c* is ruled out because a scoped entry has an effect: "a scoped entry such as `Edit(src/**)` is a narrower rule that leaves the tool in place" *d* is ruled out because patterns are exact: "The patterns in `allowed-tools` are as exact as the rules in module 38"
 27. **a**. The page states it (module 67, page 1): "The caller can ask for a thoroughness (quick, medium or very thorough)." *b* is ruled out because it is read-only: "with Write and Edit denied" *c* is ruled out because the cost of reading is the window: "Exploration is the most context-hungry thing an agent does." *d* is ruled out because the question has to be specific: "The question must be specific"
 28. **a**. The page states it (module 67, page 1): "The coordinator summarises the first phase's findings (from the scratchpad) and puts that summary into the initial prompts of the second phase's subagents." *b* is ruled out because the transcript is what filled the window: "It does not get the old transcript, which is what filled the first window." *c* is ruled out because one phase starts from the next: "The findings of one phase are the starting point of the next." *d* is ruled out because a worker does not inherit anything: "the brief must carry what the subagent needs, because it does not inherit the conversation"
@@ -465,7 +465,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 47. **b and d**. The page lists the value: "Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code" (module 45, page 1). *a* is ruled out because "Run the calls and send the results; this is the only value that continues". *c* is ruled out because "A value the loop has never seen must not be guessed at." *e* is ruled out because "The response reached your `max_tokens` limit."
 48. **b**. The page prefers a reason that teaches (module 49, page 1): a reason "tells the model what to do next, which is the same design as the refusal sentence of module 48". *a* is ruled out because a bare refusal says nothing to do: "A reason is part of the interface." *c* is ruled out because a flat denial ends the attempt: "Writing to /etc is not allowed" *d* is ruled out because the reason "tells the model why, so it avoids retrying."
 49. **d**. The page limits the normaliser (module 49, page 2): "since rewriting an error hides the failure". *a* is ruled out because it changes only what it understands: "Fields that are not in the table pass through as they were." *b* is ruled out because the page rejects it by name: "Normalise by rewriting every result, errors included." *c* is ruled out because a crash is not a repair: "A guard that crashes on unexpected input is therefore a guard that lets the call through."
-50. **b and e**. The guide says "Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook" (module 49, page 2). *a* is ruled out because "Where the reason lands depends on the event". *c* is ruled out because "No objection from the exit code; with JSON printed on standard output, the JSON decides". *d* is ruled out because "Mixing them leaves it to the reference to say which wins, and a guard should not depend on that."
+50. **b and e**. The guide says "Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook" (module 49, page 2). *a* is ruled out because "Where the reason lands depends on the event". *c* is ruled out because the guide says to "Choose one approach per hook", and not both together. *d* is ruled out because "Mixing them leaves it to the reference to say which wins, and a guard should not depend on that."
 51. **a**. The page gives the shape (module 45, page 2): "the tool_result blocks must come FIRST in the content array." *b* is ruled out because one message answers the whole turn: "A turn with three calls gets one user message with three results" *c* is ruled out because the answer is a user message: "Tool result blocks must immediately follow their corresponding tool use blocks in the message history" *d* is ruled out because blocks come first: "the tool_result blocks must come FIRST in the content array."
 52. **c**. The page gives the action (module 45, page 1): "Leave: done, and read which sequence fired". *a* is ruled out because only one value continues: "Run the calls and send the results; this is the only value that continues" *b* is ruled out because a cut-off is another value: "Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code" *d* is ruled out because this value is known: "A value the loop has never seen must not be guessed at."
 53. **c**. The page treats it as success (module 53, page 1): "A lookup that finds no orders for a customer has worked." *a* is ruled out because a failure and an empty answer are different: "from a valid empty result, which is a successful query that found no matches" *b* is ruled out because the two replies mean opposite things: "The two replies look alike in a log and mean opposite things" *d* is ruled out because a transient failure is a timeout or a limit: "A timeout, an unavailable service, a rate limit: the same call may work soon"
