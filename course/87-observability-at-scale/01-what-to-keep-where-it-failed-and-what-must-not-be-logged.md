@@ -591,10 +591,10 @@ log record keeps: input_tokens, model, output_tokens, status, tool, trace; with 
 ## Quiz
 
 1. A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show. Which rule fits best?
-   - **a**: Retain every request that errored, ran slowly or drew a complaint, and pick the others by a hash of the id
-   - **b**: Raise the random share from one percent to five, and have an engineer review what that larger share holds at the end of each week
-   - **c**: Retain only the requests of the largest customers, because their heavy usage accounts for the greatest part of all conversations
-   - **d**: Store metrics only, and rely on the daily error count to show what went wrong, since that costs almost nothing
+   - **a**: Keep all failures, slow calls and complaints, and sample the rest by id
+   - **b**: Raise the random share from one percent to five, and review that larger share each week
+   - **c**: Keep only the requests of the largest customers, because their heavy usage dominates
+   - **d**: Store metrics only, and rely on the daily error count, since that costs almost nothing
 
 2. In one trace, the orchestrator, a researcher agent and a download tool all show an error. The orchestrator's message says the research step failed. Where does the failure originate?
    - **a**: In the orchestrator, because it is the first component the user's request reached

@@ -593,7 +593,7 @@ The practice is in [`exercises/87-observability-at-scale`](../../exercises/87-ob
    - **a**: Raise the threshold until the nightly pages stop, so that only the very large outages are ever reported again
    - **b**: Average the error rate over each full day so that a single spike cannot cross the line
    - **c**: Send the alert to a shared channel that people read in the morning, in place of paging anybody at night
-   - **d**: Fire only after several windows in a row are over, and accept that many windows of delay
+   - **d**: Fire only when several windows in a row are over the line
 
 <details>
 <summary>Answer key</summary>
@@ -610,7 +610,7 @@ This quiz covers both pages of the module.
 1. A project commits a settings file in its repository that turns on prompt logging for telemetry, so that a reviewer can read developers' prompts. What does Claude Code do with it?
    - **a**: It captures the prompts of everyone who clones the repository, starting with the first session
    - **b**: It captures the prompts only in sessions where each developer has also enabled tracing
-   - **c**: It ignores the exporter variables found there, so they come from managed or per-user configuration
+   - **c**: It ignores them, since the exporter variables come from managed or per-user configuration
    - **d**: It applies the setting but redacts the prompts anyway, because redaction cannot be changed
 
 2. A complaint must be followed through the gateway, the orchestrator, two subagents and a tool, each logging in its own format. The records cannot be joined into one story. What was missing?
@@ -623,7 +623,7 @@ This quiz covers both pages of the module.
    - **a**: Move the metrics to a much larger store and carry on with the labels that the teams have added
    - **b**: Remove the id from the whole system, since single conversations are rarely worth reading
    - **c**: Store a random tenth of the metric points, so that the number of series that must be kept falls
-   - **d**: Keep the value out of the series, and put it in traces and events, which hold single occurrences
+   - **d**: Keep the value out of the series and put it in traces and events
 
 <details>
 <summary>Answer key</summary>

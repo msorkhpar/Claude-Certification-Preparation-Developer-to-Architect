@@ -478,7 +478,7 @@
         "a": "The documentation lists the gain of a gateway: \"the provider key stays server-side; developers hold gateway credentials instead\" (module 86, page 1), so offboarding revokes one credential.",
         "b": "Ruled out because the string stays in every pair of hands between rotations, whereas with a gateway \"a leaked developer credential is not a leaked provider key\".",
         "c": "Ruled out because \"a line in the system prompt is a request to the model and not a control\".",
-        "d": "Ruled out because a shared string in each team keeps the same leak, and the page puts the provider credential in one place, \"shared by all forwarded traffic\"."
+        "d": "Ruled out because a shared string in each team keeps the same leak, and the page puts the provider credential in one place, \"which all the forwarded traffic uses\"."
       }
     },
     {
@@ -899,7 +899,7 @@
         "c": "A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for \"a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind\" (module 83, page 2).",
         "d": "A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for \"a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind\" (module 83, page 2).",
         "a": "Ruled out because \"the instruction is read by the model that has already received the data\".",
-        "b": "Ruled out because \"a reviewer can test the layer with sample text, which cannot be done for an instruction\".",
+        "b": "Ruled out because the layer is what keeps names and other values from the model, and the page says of it \"It cannot leak what it never had\".",
         "e": "Ruled out because \"A layer that has not been tested against the identifiers it claims to remove is a hope with code around it.\""
       },
       "select": 2
@@ -931,14 +931,14 @@
       "options": {
         "a": "Drop or rephrase the triggering turn, or send the request to another model",
         "b": "Show the user the category of the refusal, which is always present",
-        "c": "Raise the sampling temperature to make the next reply differ",
+        "c": "Treat it as a network fault and retry through the shared error path",
         "d": "Resend the same history unchanged until it passes through"
       },
       "key": "a",
       "explanation": {
         "a": "The design treats a refusal as an outcome: \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model\" (module 90, page 1).",
         "b": "Ruled out because \"the stop_details fields can be null\", so the user-facing message comes from the application.",
-        "c": "Ruled out because \"Models released after Claude Opus 4.6 do not support setting temperature\", and a sampling setting is not one of the two recoveries of the page.",
+        "c": "Ruled out because the page says \"The design treats it as an outcome with its own branch\", and a shared error path is not that branch.",
         "d": "Ruled out because \"Re-sending a refused request to the same model usually results in another refusal\"."
       }
     },
@@ -1140,7 +1140,7 @@
       "explanation": {
         "a": "A miss is reported with its size: \"A miss says by how much\" (module 91, page 2).",
         "b": "Ruled out because a bare failure \"starts an argument that a number would have ended\".",
-        "c": "Ruled out because \"A ceiling is met below it and a floor is met above it\", and 990 is below the floor.",
+        "c": "Ruled out because \"A ceiling is met at or below it and a floor is met at or above it\", and 990 is below the floor.",
         "d": "Ruled out because the unit is the target's own: \"The target has a number and a unit and a direction\"."
       }
     },
@@ -1195,7 +1195,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The default is to carry on: \"If the fetch fails, Claude Code continues without the remote policy and warns, unless `forceRemoteSettingsRefresh` is set, which makes startup fail closed\" (module 92, page 1).",
+        "c": "The default is to carry on: \"If the fetch fails, Claude Code continues on the last policy it cached, or on none, and warns, unless `forceRemoteSettingsRefresh` is set, which makes startup fail closed\" (module 92, page 1).",
         "a": "Ruled out because it is a list of models: \"The lock is `availableModels`, a list\".",
         "b": "Ruled out because that key rejects the flags \"that sideload plugins, agents and MCP servers\", and has nothing to do with fetching.",
         "d": "Ruled out because that key means \"only managed hooks run\", and says nothing of a start without the policy."
@@ -1230,7 +1230,7 @@
       "id": "03-professional-mock-exam#x62",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: A developer at Gorse Bank says that a restriction in her local file is not honoured, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?",
+      "stem": "Scenario: A developer at Gorse Bank says that a restriction in their local file is not honoured, and the platform team wants a runbook step that explains why on their machine. Which two commands does the runbook name?",
       "options": {
         "a": "/memory, which shows the loaded files, and claude init, which writes a fresh settings file",
         "b": "/model, which shows the chosen model, and claude logout, which clears the stored session",
@@ -1656,7 +1656,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The variable that emits raw bodies implies consent to everything the three narrower variables would reveal, because the bodies include the entire conversation history (module 87, page 1). The page puts it as \"include the entire conversation history\".",
+        "c": "The variable that emits raw bodies reaches further than the three narrower variables, because the bodies carry the whole conversation (module 87, page 1). The page puts it as \"include the entire conversation history\".",
         "a": "Ruled out because the defaults say \"Spans redact user prompt text, tool input details, and tool content by default\", and this setting overrides that.",
         "b": "Ruled out because the page says it \"implies consent to everything\" the other three would reveal.",
         "d": "Ruled out because \"a repository can't use them to turn telemetry on, choose where it goes, or capture content\"."
@@ -1701,7 +1701,7 @@
       "key": "b",
       "explanation": {
         "b": "The page states the cost plainly: the gateway becomes infrastructure the organisation operates, and it has to forward what its clients send as they change (module 86, page 1). The page puts it as \"The tradeoff is that the gateway becomes infrastructure your organization operates\".",
-        "a": "Ruled out because the gateway is \"a proxy your organization runs between the clients and the provider\", which is a service to operate and not a file and a guide.",
+        "a": "Ruled out because the gateway is \"a proxy your organisation runs between the clients and the provider\", which is a service to operate and not a file and a guide.",
         "c": "Ruled out because the page says \"the provider key stays server-side; developers hold gateway credentials instead\".",
         "d": "Ruled out because \"every decision, the refusals included, leaves a record\", so the logs are a gain and not a cost."
       }
@@ -1998,9 +1998,9 @@
       "key": "b",
       "explanation": {
         "b": "The accuracy is 100 minus the review cost as a percent of the error cost, rounded up and never below 0, so a check that costs as much as an error or more needs no accuracy (module 93, page 2). The result stays 0 and does not go negative. The page puts it as \"A check that costs as much as an error, or more, needs no accuracy\".",
-        "a": "Ruled out because \"the result stays 0 and does not go negative.\"",
-        "c": "Ruled out because the rule rounds the percent \"up, and never below 0\", and 80 is not a result of it.",
-        "d": "Ruled out because the formula is \"100 minus the review cost as a percent of the error cost\", and the result is clamped at zero."
+        "a": "Ruled out because the rule rounds the percent \"up, and never below 0\".",
+        "c": "Ruled out because the rule takes \"the review cost as a percent of the error cost\", and 80 is the error as a share of the check.",
+        "d": "Ruled out because the page says \"the check never pays\", so no accuracy is needed."
       }
     },
     {
@@ -2070,16 +2070,16 @@
       "id": "04-professional-mock-exam-2#x41",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: At Linford Retail an A/B test with 500 cases in each arm shows 410 right for the current prompt and 431 right for the new one, and the planned minimum was 200. The sponsor wants the new prompt shipped. What does the two-proportion test at 95 percent conclude?",
+      "stem": "Scenario: At Linford Retail an A/B test with 500 cases in each arm shows 410 right for the current prompt and 425 right for the new one, and the planned minimum was 200. The sponsor wants the new prompt shipped. What does the two-proportion test at 95 percent conclude?",
       "options": {
-        "a": "The new prompt is better, since 431 is more than 410 on a sample over the minimum",
+        "a": "The new prompt is better, since 425 is more than 410 on a sample over the minimum",
         "b": "Too few cases, since a test of this kind needs thousands per arm",
         "c": "The old prompt is better, since a clear test can only favour the version in use",
         "d": "No clear difference, since a gap of that size on that sample is within chance"
       },
       "key": "d",
       "explanation": {
-        "d": "The page gives the contrast: 410 right of 500 against 438 is a clear gain, and 410 against 431 is not (module 88, page 2). The sample is above the minimum, so the verdict is that the gap is within chance. The page puts it as \"410 right of 500 against 438 is a clear gain, and 410 against 431 is not\".",
+        "d": "The page gives the contrast: 410 right of 500 against 438 is a clear gain, and 410 against 425 is not (module 88, page 2). The sample is above the minimum, so the verdict is that the gap is within chance. The page puts it as \"410 right of 500 against 438 is a clear gain, and 410 against 425 is not\".",
         "a": "Ruled out because \"The larger number is not the better version.\"",
         "b": "Ruled out because \"The example's minimum is 200; below it the verdict is `too few cases`\", and 500 is above it.",
         "c": "Ruled out because \"A clear difference can go either way\", and a test that can only report wins \"is not a test\"."
@@ -2222,11 +2222,11 @@
         "e"
       ],
       "explanation": {
-        "d": "\"Only an output or monitor control of the ordinary tier may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
-        "e": "\"Only an output or monitor control of the ordinary tier may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
+        "d": "\"A control that guards a low-consequence reply may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
+        "e": "\"A control that guards a low-consequence reply may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
         "a": "Ruled out because for an ordinary output control \"the answers themselves are still checked by other controls\", so a flag is enough and a hold is not needed.",
-        "b": "Ruled out because the page wants the gap to show \"so that the gap shows in the record\".",
-        "c": "Ruled out because \"a control on the input or the action layer, and any control of the high tier, holds.\""
+        "b": "Ruled out because the flag exists to \"record that the check did not run\".",
+        "c": "Ruled out because \"Every control has a failure mode of its own, and the design must say it\", so one control's outage does not switch another off."
       },
       "select": 2
     },
@@ -2329,7 +2329,7 @@
       "id": "04-professional-mock-exam-2#x54",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: An architect at Dalby Foods shows the sponsor only the option she recommends, and the sponsor asks why nobody considered the simple thing. Which two statements does the page support? (Select two.)",
+      "stem": "Scenario: An architect at Dalby Foods shows the sponsor only the option they recommend, and the sponsor asks why nobody considered the simple thing. Which two statements does the page support? (Select two.)",
       "options": {
         "a": "Four or more alternatives belong in the record, the weak ones among them",
         "b": "Each alternative has a monthly cost, a verdict on the service levels, a status and a reason",
@@ -2413,10 +2413,10 @@
       "scope": "level",
       "stem": "Scenario: A service record at Merton Care names an accountable party as \"the project team\", and the incident review cannot find anyone to call at night. What does the page say should have been written?",
       "options": {
-        "a": "The vendor, named as the supplier of the underlying model",
-        "b": "The sponsor, named as the executive who approved the work",
+        "a": "The vendor that supplies the underlying model to the assistant",
+        "b": "The executive sponsor who approved the work and funds it",
         "c": "A role reachable by phone, such as the billing operations manager",
-        "d": "A committee, named as the group that reviews every incident each week"
+        "d": "A committee that reviews every incident at its weekly meeting"
       },
       "key": "c",
       "explanation": {

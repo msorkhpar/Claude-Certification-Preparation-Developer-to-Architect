@@ -35,7 +35,7 @@ An audit log answers "what happened" for a regulator, so it must record who, whe
 
 ### Retention has a floor and a ceiling
 
-How long to keep the log is a decision with two limits. A **floor**: some rules require records for a minimum period (an audit window), so deleting sooner is a breach. A **ceiling**: other rules, and the principle of data minimisation, say data must not be kept longer than the purpose needs, so keeping indefinitely creates obligations and risk without a reason. A design states both, and the configuration check treats a retention equal to a limit as acceptable and one beyond it as a finding. Purging follows the same precision: an entry is removed only when it is **more than** the ceiling old, and an entry under a **legal hold** is never removed, whatever its age. "Store everything forever, since storage is cheap" fails twice: it ignores the ceiling and it leaves the largest possible store of data to protect.
+How long to keep the log is a decision with two limits. A **floor**: some rules require records for a minimum period (an audit window), so deleting sooner is a breach. A **ceiling**: other rules, and the principle of data minimisation, say data must not be kept longer than the purpose needs, so keeping indefinitely creates obligations and risk without a reason. A design states both, and the configuration check treats a retention equal to a limit as acceptable and one beyond it as a finding. Purging follows the same precision: an entry is removed only when it is **more than** the ceiling old, and an entry under a **legal hold** is never removed, whatever its age. A hold ends only when counsel releases it, and it keeps the entry itself and not a copy made at purge time. "Store everything forever, since storage is cheap" fails twice: it ignores the ceiling and it leaves the largest possible store of data to protect.
 
 ### The practice: a data policy for a deployment
 
@@ -331,7 +331,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **a**: A system prompt that instructs the model to ignore any personal details it comes across
    - **b**: A review step that checks the model's reply for personal details after it has been returned
    - **c**: A larger model that is better at noticing which parts of a note are sensitive ones
-   - **d**: A layer that swaps identifiers for placeholders before the call and restores them afterwards
+   - **d**: A layer that tokenises identifiers before the call and restores them afterwards
 
 2. Scenario: Rook Mutual's auditors ask for proof of each model call. The team proposes logging every full prompt and reply for ten years. What should the architect say?
    - **a**: Log request identifiers, sizes and outcomes, and keep content in the system of record
@@ -374,7 +374,7 @@ This quiz covers both pages of the module.
 
 1. **a**. Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none. *b* is ruled out because "serving a European user from a United States deployment because it was available is the failure the router exists to prevent". *c* is ruled out because another tenant's deployment breaks the tenant boundary: "one workspace per tenant". *d* is ruled out because speed is not a criterion, and the router sends a user's data "only to a deployment that keeps it in that region".
 2. **b**. A model that requires 30-day retention cannot meet a zero-retention requirement. *a* is ruled out because the arrangement "excludes models that need 30-day retention" so it does not cover every model. *c* is ruled out because the requirement is zero, and the page says the model "is part of the check". *d* is ruled out because "the model is part of the check and not only the platform", and the audit log does not change what the provider retains.
-3. **c**. A legal hold keeps an entry whatever its age. *a* is ruled out because an entry under a hold "is never removed, whatever its age". *b* is ruled out because a kept copy still follows a removal, and the entry "is never removed, whatever its age". *d* is ruled out because the hold, not an audit date, decides, and it names no end: "is never removed, whatever its age".
+3. **c**. A legal hold keeps an entry whatever its age. *a* is ruled out because an entry under a hold "is never removed, whatever its age". *b* is ruled out because the hold "keeps the entry itself and not a copy made at purge time", so nothing is removed first. *d* is ruled out because no audit date decides: "A hold ends only when counsel releases it".
 
 </details>
 

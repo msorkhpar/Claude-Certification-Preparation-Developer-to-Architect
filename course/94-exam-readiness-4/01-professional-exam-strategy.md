@@ -26,7 +26,7 @@ The guide lists seven domains. The course uses its own codes P1 to P7, in the gu
 | P1 | Solution Design and Architecture | 17% | about 10.7 | 79, 80, 81, 83, 93 |
 | P2 | Claude Models, Prompting and Context Engineering | 13% | about 8.2 | 82, 84 |
 | P3 | Integration | 19% | about 12.0 | 85, 86, 87 |
-| P4 | Evaluation, Testing and Optimization | 16% | about 10.1 | 84, 87, 88, 89 |
+| P4 | Evaluation, Testing and Optimisation | 16% | about 10.1 | 84, 87, 88, 89 |
 | P5 | Governance, Safety and Risk Management | 14% | about 8.8 | 81, 83, 90 |
 | P6 | Stakeholder Communication and Lifecycle Management | 14% | about 8.8 | 79, 89, 91 |
 | P7 | Developer Productivity and Operational Enablement | 7% | about 4.4 | 92 |

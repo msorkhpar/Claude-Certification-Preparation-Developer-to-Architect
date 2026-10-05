@@ -532,8 +532,8 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 This quiz covers both pages of the module.
 
-1. Scenario: A developer reports that the managed policy "does nothing" for the allowlist of MCP servers on her laptop. The organisation's allowlist, and the key that makes it the only list, are both in the shared project file of the repository. Which fact explains it?
-   - **a**: Lists in settings files merge, so her own list has been added to the policy
+1. Scenario: A developer reports that the managed policy "does nothing" for the allowlist of MCP servers on their laptop. The organisation's allowlist, and the key that makes it the only list, are both in the shared project file of the repository. Which fact explains it?
+   - **a**: Lists in settings files merge, so their own list has been added to the policy
    - **b**: The command line always outranks the managed file, so the list is overridden
    - **c**: Settings of that kind are honoured at the top tier alone and inert below it
    - **d**: The shared project file is read first, so the policy file replaced it
