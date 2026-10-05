@@ -29,14 +29,14 @@
         "a": "Later tools can stay blocked until verification returns a result",
         "b": "Text written before the call changes the order in which the tools run",
         "c": "Later turns are unconstrained, so a refund can still follow a failed check",
-        "d": "The forced choice leaves every later request uncached, so the cost rises"
+        "d": "The forced choice makes the system prompt uncached, so the cost rises"
       },
       "key": "c",
       "explanation": {
         "c": "A forced choice applies to the request that sets it, and nothing carries it to later calls.",
         "b": "Ruled out because the model writes no text before a forced call: \"the API prefills the assistant message to force a tool to be used\".",
-        "a": "Ruled out because nothing links the later tools to it: \"An order between steps is a property of the program that runs them.\"",
-        "d": "Ruled out because only the message blocks are reprocessed: \"tool definitions and system prompts remain cached\"."
+        "a": "Ruled out because keeping later tools blocked until verification returns is what a gate does, not what a forced choice does: \"An order between steps is a property of the program that runs them.\"",
+        "d": "Ruled out because the system prompt stays cached: \"tool definitions and system prompts remain cached\"."
       }
     },
     {
@@ -55,7 +55,7 @@
         "b": "An escape route must not sit behind a prerequisite that may be what failed.",
         "a": "Ruled out because the lock is not the fault: \"a successful check resets the count, so ordinary typing mistakes do not lock anyone out\".",
         "c": "Ruled out because a lower limit only shortens a dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\".",
-        "d": "Ruled out because the hand-off should come from the gate, not from the model's own account: \"A summary written by the model can leave out what went wrong.\""
+        "d": "Ruled out because the model has no route to a person while escalation sits behind the prerequisite: \"if every tool is behind the prerequisite, a blocked agent can only loop.\""
       }
     },
     {
@@ -67,7 +67,7 @@
         "a": "Keep the transcript, but have the model highlight its key lines",
         "b": "Attach a model-written summary of the conversation beside the full transcript",
         "c": "Add the customer's complete order history to the escalation",
-        "d": "Provide a record from the gate's own state, with the agent's reason as a field"
+        "d": "Send a gate-built record, with the agent's reason as one field"
       },
       "key": "d",
       "explanation": {
@@ -103,7 +103,7 @@
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes \"damaged\" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?",
       "options": {
         "a": "Keep extending the keyword list until the valid claims finally pass through it",
-        "b": "Let the model judge condition, and keep steps, amounts and limits as rules",
+        "b": "Let the model weigh the evidence, and keep steps, amounts and limits as rules",
         "c": "Move the refund limit into the prompt as well, so that the gate has fewer rules",
         "d": "Drop the ownership check altogether, so that more claims reach the model"
       },
