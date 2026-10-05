@@ -2,7 +2,8 @@
 """Read the outputs that tools/l2_run_all.sh left in .survey-out and judge the Level 2 practice proofs.
 
 Per practice and language: the reference passes every case; the starter fails every case; every planted wrong
-solution fails ON AN ASSERTION (no compile error, no other exception) and fails the case(s) cases.json names for it.
+solution fails ON AN ASSERTION (no compile error, no other exception) and fails exactly the case(s) cases.json names for it
+(a case it fails that caught_by does not list is a finding naming that case).
 Also checks the Level 2 examples' test runs. Prints one line per variant and a summary; exit 1 on any finding.
 usage: tools/grade_practices.py
 """
@@ -118,8 +119,9 @@ def main():
                     want = "all fail on assertions"
                 else:
                     caught = set(cases["plants"][variant]["caught_by"])
-                    ok = caught <= failed and not problems and rc not in (0, None)
-                    want = f"fails {sorted(caught)} on an assertion"
+                    unlisted = failed - caught   # a plant must fail exactly the cases its caught_by lists: a plant that also fails the main ask cannot serve an edge
+                    ok = caught <= failed and not unlisted and not problems and rc not in (0, None)
+                    want = f"fails {sorted(caught)} on an assertion" + (f" and no other case, but it also fails {sorted(unlisted)} that caught_by does not list" if unlisted else "")
                 summary.setdefault((practice, lang), []).append((variant, len(allids) - len(failed), len(failed), ok))
                 print(f"{practice.split('/')[0]:42} {lang:10} {variant:28} failed={sorted(failed)} rc={rc} {'ok' if ok else 'FINDING: want ' + want + ' ' + str(problems)}")
                 findings += 0 if ok else 1
