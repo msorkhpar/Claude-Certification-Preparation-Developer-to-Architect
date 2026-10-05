@@ -2,6 +2,8 @@
 //
 // The tools are scripted functions, so the output shows the control flow and the text the model would be given, and nothing about how a model would
 // answer. The refund service, the orders and the limits are illustrative.
+import { logger } from "./logger.ts";
+const log = logger("error_flow");
 
 export class ToolError extends Error {
   kind: string;

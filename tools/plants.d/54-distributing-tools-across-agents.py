@@ -21,6 +21,7 @@ PLANTS[f"{X}/54-distributing-tools-across-agents/unit-01/practice-1"] = {
         "wrong-cap-exclusive": [("if cap is not None and amount > cap:", "if cap is not None and amount >= cap:")],
         "wrong-approval-lifts-cap": [("if cap is not None and amount > cap:", 'if cap is not None and amount > cap and call.get("id") not in approvals:')],
         "wrong-approval-skipped": [('if rule.get("irreversible") and call.get("id") not in approvals:', "if False:")],
+        "wrong-irreversible-extra-dropped": [('            if extra not in names:\n                names.append(extra)\n', '            if extra not in names and (tags & set(tool.get("tags", [])) or not tool.get("irreversible")):\n                names.append(extra)\n')],
     }),
     "typescript": ("distribute.ts", {
         "wrong-sorted-names": [("result[role] = names;", "result[role] = [...names].sort();")],
@@ -41,6 +42,7 @@ PLANTS[f"{X}/54-distributing-tools-across-agents/unit-01/practice-1"] = {
         "wrong-cap-exclusive": [("if (cap !== null && amount > cap)", "if (cap !== null && amount >= cap)")],
         "wrong-approval-lifts-cap": [("if (cap !== null && amount > cap)", "if (cap !== null && amount > cap && !new Set(approvals).has(call.id))")],
         "wrong-approval-skipped": [("if (rule.irreversible && !new Set(approvals).has(call.id))", "if (false)")],
+        "wrong-irreversible-extra-dropped": [('if (!names.includes(extra)) names.push(extra);', 'if (!names.includes(extra) && (shares(tool) || !tool.irreversible)) names.push(extra);')],
     }),
     "java": ("Distribute.java", {
         "wrong-sorted-names": [("result.put(role.getKey(), names);", "java.util.Collections.sort(names);\n            result.put(role.getKey(), names);")],
@@ -61,6 +63,7 @@ PLANTS[f"{X}/54-distributing-tools-across-agents/unit-01/practice-1"] = {
         "wrong-cap-exclusive": [("(Integer) amount > cap", "(Integer) amount >= cap")],
         "wrong-approval-lifts-cap": [("if (cap != null && (Integer) amount > cap) return answer(", 'if (cap != null && (Integer) amount > cap && !approvals.contains(call.get("id"))) return answer(')],
         "wrong-approval-skipped": [('if (Boolean.TRUE.equals(rule.get("irreversible")) && !approvals.contains(call.get("id"))) return', "if (false) return")],
+        "wrong-irreversible-extra-dropped": [('if (!names.contains(extra)) names.add(extra);', 'if (!names.contains(extra) && (shares(tool, tags) || !Boolean.TRUE.equals(tool.get("irreversible")))) names.add(extra);')],
     }),
     "kotlin": ("Distribute.kt", {
         "wrong-sorted-names": [("result[role] = names", "result[role] = names.sorted()")],
@@ -81,5 +84,6 @@ PLANTS[f"{X}/54-distributing-tools-across-agents/unit-01/practice-1"] = {
         "wrong-cap-exclusive": [("(amount as Int) > cap", "(amount as Int) >= cap")],
         "wrong-approval-lifts-cap": [("if (cap != null && (amount as Int) > cap)", 'if (cap != null && (amount as Int) > cap && (call["id"] as String) !in approvals)')],
         "wrong-approval-skipped": [('if (rule["irreversible"] == true && (call["id"] as String) !in approvals) return', "if (false) return")],
+        "wrong-irreversible-extra-dropped": [('if (extra !in names) names.add(extra)', 'if (extra !in names && (shares(tool, tags) || tool["irreversible"] != true)) names.add(extra)')],
     }),
 }

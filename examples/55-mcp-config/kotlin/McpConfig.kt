@@ -1,6 +1,8 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import harness.Show.py
 
+private val log = System.getLogger("mcp_config")
+
 /**
  * MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.
  *

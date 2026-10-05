@@ -2,6 +2,9 @@
 
 No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 CATALOG = {
     "web_search": ["web"], "fetch_page": ["web"], "verify_fact": ["web", "synthesis"], "load_document": ["documents"], "extract_data_points": ["documents"],

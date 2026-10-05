@@ -1,4 +1,6 @@
 // Tool errors that an agent can act on: a structured error, bounded retries, an unknown outcome and the next action. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("errors");
 
 const KINDS: Record<string, boolean> = { transient: true, validation: false, permission: false, business: false, outcome_unknown: false, internal: false };
 const GENERIC = new Set(["", "error", "failed", "failure", "operation failed", "something went wrong", "unknown error"]);
@@ -43,6 +45,7 @@ function isEmpty(value: unknown): boolean {
 
 /** Call a tool, recover locally from what is safe to recover from, and return a result or a structured error. */
 export function runTool(tool: (args: Record<string, any>) => any, args: Record<string, any>, policy: Record<string, any>, sleep: (ms: number) => void): Record<string, any> {
+  log.debug("runTool input", args);
   const key = policy.idempotency_key;
   const maxRetries = policy.max_retries ?? 2;
   const base = policy.base_delay_ms ?? 100;

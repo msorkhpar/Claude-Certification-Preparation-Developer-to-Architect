@@ -1,4 +1,6 @@
 // Distributing tools across agents: scoped tool sets, the tool choice of a turn, a check of the reply and the authorisation of a call. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("distribute");
 
 const NO_FORCING = new Set(["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"]); // models whose API rejects tool_choice any and tool, as read on 2026-10-03
 
@@ -66,6 +68,7 @@ function answer(allowed: boolean, code: string, message: string, escalate = fals
 
 /** Decide a call to a tool that cannot be undone, in the tool layer, whatever the model says. */
 export function authorize(call: Record<string, any>, policy: Record<string, any>, approvals: Iterable<string>) {
+  log.debug("authorize input", call);
   const rule = policy.tools?.[call.tool];
   if (rule === undefined) return answer(false, "unknown_tool", `${call.tool} is not an allowed tool`);
   const cap = rule.cap ?? null;

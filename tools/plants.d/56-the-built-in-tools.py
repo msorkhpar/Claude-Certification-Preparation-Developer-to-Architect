@@ -21,6 +21,7 @@ _P56 = {
     "wrong-fallback-rewrite-first": {"docs/exploration-plan.md": [("1. If Edit says the text appears more than once, repeat it with more surrounding lines until it is unique.", "1. If Edit says the text appears more than once, Read the whole file and Write it back with the change."), ("3. If no unique anchor exists, Read the whole file and Write it back with the change.", "3. If that does not help, repeat it with more surrounding lines until it is unique.")]},
     "wrong-fallback-no-replace-all": {"docs/exploration-plan.md": [("2. If every occurrence should change, use replace_all.", "2. If every occurrence should change, run the edit once for each of them.")]},
     "wrong-home-path": {"docs/exploration-plan.md": [("Do not read every file first.", "Do not read every file first (the clone is in /home/dev/inventory).")]},
+    "wrong-extra-permission-key": {".claude/settings.json": [('"deny": ["Read(./.env)"', '"defaultMode": "acceptEdits",\n    "deny": ["Read(./.env)"')]},
 }
 
 PLANTS[f"{X}/56-the-built-in-tools/unit-01/practice-1"] = both(".claude/settings.json", _P56)

@@ -17,6 +17,7 @@ PLANTS[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
         "wrong-mutates-args": [("call_args = dict(args)", "call_args = args")],
         "wrong-permission-retry-later": [('"permission": "escalate"', '"permission": "retry_later"')],
         "wrong-internal-retryable": [('"outcome_unknown": False, "internal": False}', '"outcome_unknown": False, "internal": True}')],
+        "wrong-internal-no-detail": [('f"unexpected failure in the tool: {error}"', '"unexpected failure in the tool"')],
     }),
     "typescript": ("errors.ts", {
         "wrong-flag-missing": [("content: text, is_error: true }", "content: text, is_error: false }")],
@@ -33,6 +34,7 @@ PLANTS[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
         "wrong-mutates-args": [("const callArgs: Record<string, any> = { ...args };", "const callArgs: Record<string, any> = args;")],
         "wrong-permission-retry-later": [('permission: "escalate"', 'permission: "retry_later"')],
         "wrong-internal-retryable": [("outcome_unknown: false, internal: false }", "outcome_unknown: false, internal: true }")],
+        "wrong-internal-no-detail": [('`unexpected failure in the tool: ${error?.message ?? error}`', '"unexpected failure in the tool"')],
     }),
     "java": ("Errors.java", {
         "wrong-flag-missing": [('block.put("is_error", true);', 'block.put("is_error", false);')],
@@ -49,6 +51,7 @@ PLANTS[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
         "wrong-mutates-args": [("Map<String, Object> callArgs = new LinkedHashMap<>(args);", "Map<String, Object> callArgs = args;")],
         "wrong-permission-retry-later": [('"permission", "escalate"', '"permission", "retry_later"')],
         "wrong-internal-retryable": [('"outcome_unknown", false, "internal", false);', '"outcome_unknown", false, "internal", true);')],
+        "wrong-internal-no-detail": [('"unexpected failure in the tool: " + error.getMessage()', '"unexpected failure in the tool"')],
     }),
     "kotlin": ("Errors.kt", {
         "wrong-flag-missing": [('"content" to text, "is_error" to true)', '"content" to text, "is_error" to false)')],
@@ -65,5 +68,6 @@ PLANTS[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
         "wrong-mutates-args": [("val callArgs = LinkedHashMap(args)", "@Suppress(\"UNCHECKED_CAST\") val callArgs = args as MutableMap<String, Any?>")],
         "wrong-permission-retry-later": [('"permission" to "escalate"', '"permission" to "retry_later"')],
         "wrong-internal-retryable": [('"outcome_unknown" to false, "internal" to false)', '"outcome_unknown" to false, "internal" to true)')],
+        "wrong-internal-no-detail": [('"unexpected failure in the tool: ${error.message}"', '"unexpected failure in the tool"')],
     }),
 }

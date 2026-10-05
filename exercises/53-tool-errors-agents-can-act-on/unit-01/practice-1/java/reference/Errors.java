@@ -7,6 +7,7 @@ import java.util.function.IntConsumer;
 
 /** Tool errors that an agent can act on: a structured error, bounded retries, an unknown outcome and the next action. See ../../statement.md. Results are JSON-like maps. */
 final class Errors {
+    private static final System.Logger LOG = System.getLogger(Errors.class.getName());
     private Errors() {}
 
     private static final Map<String, Boolean> KINDS = Map.of("transient", true, "validation", false, "permission", false, "business", false, "outcome_unknown", false, "internal", false);
@@ -79,6 +80,7 @@ final class Errors {
 
     /** Call a tool, recover locally from what is safe to recover from, and return a result or a structured error. */
     static Map<String, Object> runTool(Function<Map<String, Object>, Object> tool, Map<String, Object> args, Map<String, Object> policy, IntConsumer sleep) {
+        LOG.log(System.Logger.Level.DEBUG, "runTool input: {0}", args);
         String key = (String) policy.get("idempotency_key");
         int maxRetries = policy.containsKey("max_retries") ? (Integer) policy.get("max_retries") : 2;
         int base = policy.containsKey("base_delay_ms") ? (Integer) policy.get("base_delay_ms") : 100;

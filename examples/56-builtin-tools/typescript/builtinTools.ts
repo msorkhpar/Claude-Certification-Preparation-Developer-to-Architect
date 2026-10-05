@@ -3,6 +3,8 @@
 //
 // A teaching model of the "Tools reference" page of the Claude Code documentation (read on 2026-10-03), not the product's code. It covers six tools:
 // Read, Write, Edit, Bash, Grep and Glob.
+import { logger } from "./logger.ts";
+const log = logger("builtin_tools");
 const SEARCH_TOOLS = ["Grep", "Glob"];
 const BASE_TOOLS = ["Read", "Write", "Edit", "Bash"];
 const RULE_COVERS: Record<string, string[]> = { Read: ["Read", "Grep", "Glob"], Edit: ["Edit", "Write"], Bash: ["Bash"] }; // a Write(path) rule is never matched

@@ -1,5 +1,8 @@
 """Tool errors that an agent can act on: a structured error, bounded retries, an unknown outcome and the next action. See ../../statement.md."""
 import json
+import logging
+
+log = logging.getLogger(__name__)
 
 KINDS = {"transient": True, "validation": False, "permission": False, "business": False, "outcome_unknown": False, "internal": False}
 GENERIC = {"", "error", "failed", "failure", "operation failed", "something went wrong", "unknown error"}
@@ -44,6 +47,7 @@ def _empty(value):
 
 def run_tool(tool, args, policy, sleep):
     """Call a tool, recover locally from what is safe to recover from, and return a result or a structured error."""
+    log.debug("run_tool input: %r", args)
     key = policy.get("idempotency_key")
     max_retries, base = policy.get("max_retries", 2), policy.get("base_delay_ms", 100)
     safe_to_repeat = bool(policy.get("read_only")) or bool(key)

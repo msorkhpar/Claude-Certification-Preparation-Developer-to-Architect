@@ -11,6 +11,7 @@ import java.util.Set;
  * <p>No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
  */
 public final class Distribution {
+    private static final System.Logger LOG = System.getLogger(Distribution.class.getName());
     static final Map<String, List<String>> CATALOG = new LinkedHashMap<>();
     static final Set<String> IRREVERSIBLE = Set.of("send_report");
     static final Map<String, String> ROLES = new LinkedHashMap<>();

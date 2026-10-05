@@ -8,6 +8,21 @@ edit the files there. The tests are the same in all four languages and read only
 language, and the Java and Kotlin tests read the JSON with Jackson. The checks run on the course's own model of the documented rules
 (`examples/55-mcp-config`, in your language). Nothing here starts Claude Code, starts a server or touches the network.
 
+## What is already written, and what you write
+
+The starter is a working set of configuration files with eight gaps cut out of it. Everything that is plumbing is written and correct: the four server entries with their types, the GitHub and core server shapes, the settings and user-scope files with their structure, the tool's input schema and the notes' table and prose. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:
+
+1. The command of the local servers, in `.mcp.json` (unlocks `m1`): `docs` and `schema` run `python3`; their `command` is empty in the starter.
+2. The credentials, in `.mcp.json` (unlocks `e1`): the `Authorization` header is `Bearer ${GITHUB_TOKEN}` (the starter writes a token in the file), and `docs` passes `DOCS_API_KEY` through as `${DOCS_API_KEY}` with no default.
+3. The defaults, in `.mcp.json` (unlocks `e2`): the URLs of `github` and `core` are `${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}` and `${CORE_MCP_URL:-https://core-mcp.example.com/mcp}`, and the `args` of `docs` and `schema` hold `${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py` and `.../schema_server.py`.
+4. The start-up load, in `.mcp.json` (unlocks `e3`): `core` has `alwaysLoad` set to true and no other server has it.
+5. The user-scope example, in `user-scope.example.json` (unlocks `e4`): the personal server `scratch` runs a script under `${HOME}/experiments/`, not under an absolute home path.
+6. The permissions, in `.claude/settings.json` (unlocks `e5`): `allow` names every tool of `docs` and of `schema` by server (`mcp__docs__*`), and `deny` holds `mcp__github__delete_repository`.
+7. The tool description, in `docs/tool-descriptions.json` (unlocks `e6`): a text of at most 2,048 characters that says in its first 300 characters when to use `search_docs` instead of `Grep`, then what it takes, what it returns and what it does not search.
+8. The notes, in `docs/mcp-servers.md` (unlocks `e7`, `e8`): a row for `core` and for `schema` (scope `project`; `schema` exposes resources), the line `@schema:schema://orders`, and no personal path.
+
+`m1` needs gap 1. About six lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
+
 ## What to write
 
 - `.mcp.json`, the project-scoped file that is committed. Four servers, named `github`, `docs`, `core` and `schema`.

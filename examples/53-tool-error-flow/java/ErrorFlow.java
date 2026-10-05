@@ -12,6 +12,7 @@ import java.util.Map;
  * answer. The refund service, the orders and the limits are illustrative.
  */
 public final class ErrorFlow {
+    private static final System.Logger LOG = System.getLogger(ErrorFlow.class.getName());
     /** A failure a tool reports about itself: its kind, a message the model can use, an optional wait the service asked for and an explanation for the customer. */
     static final class ToolError extends RuntimeException {
         final String kind;

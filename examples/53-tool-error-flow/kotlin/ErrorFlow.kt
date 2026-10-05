@@ -1,5 +1,7 @@
 import harness.Show.py
 
+private val log = System.getLogger("error_flow")
+
 /**
  * What a loop does with seven failed or odd tool calls: a structured result for each, bounded retries, and the next action.
  *

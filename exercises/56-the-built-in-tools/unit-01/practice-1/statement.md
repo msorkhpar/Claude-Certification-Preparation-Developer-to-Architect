@@ -9,6 +9,19 @@ code in a language, and the Java and Kotlin tests read the JSON with Jackson and
 the course's own models of the documented rules (`examples/38-settings-layers` for permission rules and `examples/56-builtin-tools` for the tools,
 in your language). Nothing here starts Claude Code or touches the network.
 
+## What is already written, and what you write
+
+The starter is a working set of configuration files with six gaps cut out of it. Everything that is plumbing is written and correct: the structure of the permissions file and of the options file, the agent's name and instructions, and the plan's opening paragraph, its first, second and last steps and its headings. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:
+
+1. The allow rules, in `.claude/settings.json` (unlocks `m1`, `e2`): the read-only git commands `git log` and `git diff` with any arguments and `git status`, and edits under `notes/` written as `Edit(notes/**)`; the starter allows the whole `Bash` tool and writes a path rule for `Write`, which are never right.
+2. The deny rules, in `.claude/settings.json` (unlocks `m1`, `e1`): reading `.env` and everything under `secrets/` written as `Read(...)` rules, and edits under `src/`.
+3. The agent, in `.claude/agents/explorer.md` (unlocks `e3`): a `description` that starts a sentence with `Use when`, a `tools` line with `Read, Grep, Glob` and nothing else, a `model` and a `maxTurns` of at most 15.
+4. The SDK options, in `agent-options.json` (unlocks `e4`): `tools` and `allowedTools` hold `Read`, `Grep` and `Glob`; `disallowedTools` holds `Bash`, `Edit` and `Write` by bare name.
+5. The exploration steps, in `docs/exploration-plan.md` (unlocks `e5`): step 3 reads the entry point files with `Read` and follows imports one hop at a time; step 4 lists the names each wrapper module exports and searches for each with `Grep` before tracing usage.
+6. The edit remedies, in `docs/exploration-plan.md` (unlocks `e6`, `e7`): three numbered remedies in this order: more surrounding lines, `replace_all`, then `Read` the whole file and `Write` it back; and no personal path in the file.
+
+`m1` needs gaps 1 and 2. About ten lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
+
 ## What to write
 
 - `.claude/settings.json`, the shared permissions:

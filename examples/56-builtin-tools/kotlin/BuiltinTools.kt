@@ -1,5 +1,7 @@
 import harness.Show.py
 
+private val log = System.getLogger("builtin_tools")
+
 /**
  * The built-in file tools of Claude Code, modelled offline: Edit's exact match, the way out when it cannot apply, which search tools exist
  * on which platform, and which permission rule covers which tool.

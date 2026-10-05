@@ -1,6 +1,8 @@
 /** Distributing tools across agents: scoped tool sets, the tool choice of a turn, a check of the reply and the authorisation of a call. See ../../statement.md. Results are JSON-like maps. */
 
 /** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */
+private val log = System.getLogger("distribute")
+
 private val NO_FORCING = setOf("claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1")
 
 @Suppress("UNCHECKED_CAST")
@@ -69,6 +71,7 @@ private fun answer(allowed: Boolean, code: String, message: String, escalate: Bo
 /** Decide a call to a tool that cannot be undone, in the tool layer, whatever the model says. */
 @Suppress("UNCHECKED_CAST")
 fun authorize(call: Map<String, Any?>, policy: Map<String, Any?>, approvals: Collection<String>): Map<String, Any?>? {
+    log.log(System.Logger.Level.DEBUG, "authorize input: {0}", call)
     val tools = (policy["tools"] as Map<String, Map<String, Any?>>?) ?: emptyMap()
     val rule = (call["tool"] as? String)?.let { tools[it] } ?: return answer(false, "unknown_tool", "${call["tool"]} is not an allowed tool")
     val cap = rule["cap"] as Int?
