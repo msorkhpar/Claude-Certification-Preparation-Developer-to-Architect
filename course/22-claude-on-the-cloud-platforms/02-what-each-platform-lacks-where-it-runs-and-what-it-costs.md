@@ -85,8 +85,8 @@ logging activity "on at least a 30-day rolling basis", through CloudWatch and Cl
 Google Cloud.
 
 Caching differs in one place. The prompt caching page says caches are isolated per workspace on the Claude API but that "Bedrock and Google Cloud
-maintain organization-level cache isolation". The minimum cacheable prompt is the same on every platform, and the prompt caching page lists the one-hour lifetime as available
-on both Amazon Bedrock and Google Cloud.
+maintain organization-level cache isolation". The prompt caching page lists the one-hour lifetime as available
+on both Amazon Bedrock and Google Cloud, and sends Bedrock readers to AWS for the per-model minimums.
 
 ## The practice: one request, three front doors
 
