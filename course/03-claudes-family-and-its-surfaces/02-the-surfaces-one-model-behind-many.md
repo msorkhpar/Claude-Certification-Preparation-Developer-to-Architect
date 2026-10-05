@@ -142,7 +142,7 @@ This quiz covers both pages of the module.
 
 1. A team's research job runs for hours with nobody watching: mostly routine page fetching and note-taking,
    with a few hard judgment calls. Which design fits?
-   - **a**: Place it in managed infrastructure with cheap workers and one strong decider
+   - **a**: Hand it to managed agents with cheap workers and one strong decider
    - **b**: Chat through an app Project, with a person starting each step by hand
    - **c**: Run the strongest tier through the Messages API on the team's own servers
    - **d**: Use the fastest tier for each step, then escalate only when the job fails
