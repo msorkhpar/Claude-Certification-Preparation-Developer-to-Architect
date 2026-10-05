@@ -92,9 +92,9 @@ This quiz covers both pages of the module.
 
 2. Scenario S6, structured data extraction. A team will extract fields from 400,000 archived documents through a batch. A trial on 100 easy documents shows no failures. What should happen before the full submission?
    - **a**: Submit everything and repair the prompt from whatever fails
-   - **b**: Run a varied sample synchronously, long and incomplete ones included, and refine
-   - **c**: Repeat the trial on another hundred easy ones to be sure
-   - **d**: Run the sample through the batch queue, so that the trial costs half as much per item
+   - **b**: Run a varied sample synchronously and refine the prompt on it
+   - **c**: Repeat the trial on another hundred easy ones and then submit
+   - **d**: Run a varied sample through the batch queue and refine the prompt on it
 
 3. Scenario S2, code generation with Claude Code. Two independent review passes report the same injection risk. One rates it 1 on a severity scale of 1 to 3 with confidence 95, and the other rates it 3 with confidence 70. Which entry does the combined list carry?
    - **a**: 2 / 83
@@ -106,7 +106,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The integration pass reads the first batch's results, so the two windows run one after the other, with the handling after each: 24 + 1 + 24 + 1. *a* is ruled out because "it cannot be in the same batch as them", so the audit is not one window. *b* is ruled out because the worst case is "two processing windows plus the handling after each", and 48 has no handling. *d* is ruled out for the same sentence, since the handling is "plus the handling after each" batch and not once.
-2. **b**. A prompt is proven on a sample that includes the awkward documents, run synchronously so the answer comes at once, before the discount is spent on volume. *a* is ruled out because "a day passes before the failures show, and the whole run is repeated". *c* is ruled out because "a sample of easy documents proves nothing". *d* is ruled out because the advice is to "run the prompt synchronously on a small, varied sample", not to wait a window for a trial.
+2. **b**. A prompt is proven on a sample that includes the awkward documents, run synchronously so the answer comes at once, before the discount is spent on volume. *a* is ruled out because "a day passes before the failures show, and the whole run is repeated". *c* is ruled out because "a sample of easy documents proves nothing". *d* is ruled out because the advice is to "run the prompt synchronously on a small, varied sample", and a trial in the queue waits a window for each result.
 3. **d**. The entry keeps the highest severity and the lowest confidence. *b* is ruled out because the rule is "so that a pass that saw the danger is not overruled by one that missed it". *c* is ruled out because the rule is "the lowest confidence, so that the weakest evidence caps the claim". *a* is ruled out because the rule is "Take the highest severity any pass gave", and nothing is averaged.
 
 </details>
