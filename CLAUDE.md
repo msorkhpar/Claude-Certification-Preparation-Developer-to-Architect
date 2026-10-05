@@ -39,9 +39,9 @@ Read `docs/GOAL.md`, `docs/IDEA.md`, `docs/SETUP.md` and `docs/EXAM-MAP.md` firs
 6. **Pinned pulls are allowed** (by digest or checksum). Nothing else goes off the host, except a
    capture run the owner has approved, which calls the API with the owner's key from the
    environment.
-7. **Memory: one heavy job at a time; file work runs in parallel.** A heavy job is any Docker
-   build, run or exec, any test suite and any API capture run. It goes through the single
-   heavy-job slot (`run-heavy.sh <kind> <command>` in the `.heavy-slot` folder beside the project).
+7. **Memory: at most two heavy jobs at a time; file work runs in parallel.** A heavy job is any Docker
+   build, run or exec, any test suite and any API capture run. It goes through the
+   two heavy-job slots (`run-heavy.sh <kind> <command>` in the `.heavy-slot` folder beside the project). Two jobs may run side by side when free host and Docker VM memory cover both their ledger needs plus a margin; an image build (a ledger need of 2.5 GB or more) takes both slots and runs alone.
    Test runs use at most 4 workers (never `-n auto`). Remove scratch images and containers as soon
    as a proof is done. The host has 24 GB and Docker's VM 12 GB.
 8. **Fixes land in the framework, not the course.** A defect that the course exposes in
@@ -70,7 +70,7 @@ Read `docs/GOAL.md`, `docs/IDEA.md`, `docs/SETUP.md` and `docs/EXAM-MAP.md` firs
   write lessons.
 - Heavy work goes to background offices on their own branch and worktree, in a directory beside
   the project under the same parent folder (not `/tmp`).
-- **Authoring batches run in parallel**, each on its own branch and worktree, over disjoint module ranges; heavy runs still queue through the one slot. A batch never edits the board (the register does), inserts its sections into the shared tools in module order, and lists new JVM libraries for the register instead of regenerating the checksum file. A batch whose questions must draw on a whole level (the exam-readiness modules with mock exams) runs after the rest of that level has merged. Quiz readers stay separate.
+- **Authoring batches run in parallel**, each on its own branch and worktree, over disjoint module ranges; heavy runs still queue through the heavy-job slots. A batch never edits the board (the register does), inserts its sections into the shared tools in module order, and lists new JVM libraries for the register instead of regenerating the checksum file. A batch whose questions must draw on a whole level (the exam-readiness modules with mock exams) runs after the rest of that level has merged. Quiz readers stay separate.
 - **Models:** the register runs on Opus 5.5 and picks the office's model by the task's weight:
   Sonnet for ordinary work (authoring, examples, framework changes, surveys), Haiku for very light
   tasks (a scan, a rename, a board edit). A task that turns out harder than its model is
