@@ -80,7 +80,7 @@ When Claude refactors such code, work in small steps on a branch. State the beha
    - **d**: `CLAUDE.local.md`, which stays out of version control
 
 2. A workflow embeds its instruction text in a string, and teammates tweak it whenever an answer looks off. What makes those edits safe to ship?
-   - **a**: A separate file with a version, a changelog line and a review
+   - **a**: A versioned file with a changelog line and a review
    - **b**: A shorter string of a few lines in the same workflow
    - **c**: A secret-store entry in place of the repository text
    - **d**: A nightly rewrite by Claude from the day's results
