@@ -693,7 +693,7 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 
 1. A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?
    - **a**: Advance to 25 percent, since a clean record needs no further evidence
-   - **b**: Hold where it is until enough volume has arrived to say anything
+   - **b**: Hold where it is, since a sample this small shows nothing yet
    - **c**: Roll back to zero, since too few requests counts as a failed stage
    - **d**: Declare the roll-out complete, since no error has been seen so far
 
@@ -718,7 +718,7 @@ This quiz covers both pages of the module.
 1. The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?
    - **a**: Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change
    - **b**: Recommend the move, because the newer model is the one that the vendor has recommended as the replacement
-   - **c**: State the trade: what improves, what the rise takes from the budget, and the date that forces the choice
+   - **c**: State the trade: what improves, what the budget loses, and the date that forces the choice
    - **d**: Defer the decision until the old model retires, so that the choice is made by the calendar instead
 
 2. After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?
@@ -738,6 +738,6 @@ This quiz covers both pages of the module.
 
 1. **c**. The decision is a trade, and the architect states it with its date. *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
 2. **b**. A reply may begin with thinking blocks, so the parser reads by type. *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens". *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
-3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "Passing a suite is a prediction about traffic, and traffic is where it is tested". *b* is ruled out because the Console export gives "usage broken down by API key and model", so the record does not live in the configuration. *c* is ruled out because the baseline is reset by the rule "Recount tokens and re-baseline cost" on the replacement, which needs no old id.
+3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "a suite predicts and traffic proves", and an error found after the old model is gone has no way back. *b* is ruled out because the Console export gives "usage broken down by API key and model", so the record does not live in the configuration. *c* is ruled out because the baseline is reset by the rule "Recount tokens and re-baseline cost" on the replacement, which needs no old id.
 
 </details>
