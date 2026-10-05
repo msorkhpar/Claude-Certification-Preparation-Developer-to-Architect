@@ -364,10 +364,10 @@ This quiz covers both pages of the module.
    - **d**: None, provided the deployment's audit log is set to expire after thirty days
 
 3. Scenario: Wren Logistics must keep audit entries for at least 90 days and at most 365. An entry is 400 days old, and counsel has placed it under a legal hold. What does the purge rule do?
-   - **a**: Purges it, because the ceiling applies to every entry whatever its status may be
-   - **b**: Purges the entry but keeps a copy of it for a further ninety days afterwards
+   - **a**: Purges it, because the ceiling applies to every entry alike
+   - **b**: Purges the entry and keeps a copy for a further ninety days
    - **c**: Retains it, because that order outranks the time limits
-   - **d**: Retains it only until the next audit closes, and then purges it for good under the usual rules
+   - **d**: Retains it until the next audit closes, then purges it as usual
 
 <details>
 <summary>Answer key</summary>
