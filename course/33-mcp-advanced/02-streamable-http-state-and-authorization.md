@@ -65,24 +65,24 @@ The practice is in `exercises/33-mcp-advanced/unit-01/practice-1/statement.md`, 
    - **c**: Close the stream of the next response so that the sender retries
    - **d**: Redirect it to the authorization server so that the sender can authenticate
 
-2. An MCP server accepts a credential that was meant for another service and passes it unchanged to a downstream API. What does the specification say?
-   - **a**: Allowed, since the downstream API validates the token on its own
-   - **b**: Allowed, once the user has consented to the downstream call
-   - **c**: Required, so that the downstream API sees the original audience
-   - **d**: Forbidden, since only tokens minted for the receiver are honored
+2. An MCP server accepts a credential that was meant for another service and passes it unchanged to a downstream API. What does the specification say about this behavior?
+   - **a**: It is allowed, since the downstream API validates the token again
+   - **b**: It is allowed once the user has consented to the downstream call
+   - **c**: It is required, so the original audience stays visible downstream
+   - **d**: It is forbidden, and onward calls need a token of its own
 
 3. A server issues a workflow identifier in a tool result and later acts on whoever presents it. Which attack does this invite?
-   - **a**: None, because MCP sessions already bind each handle to its caller
-   - **b**: Hijacking, because having the handle is accepted as proof of identity
-   - **c**: Scope inflation, because the handle carries more permissions than needed
-   - **d**: Cross-site scripting, because the identifier is echoed back in a result
+   - **a**: Session fixation on a protocol-level session
+   - **b**: Hijacking of the state handle
+   - **c**: Scope inflation through an overbroad token
+   - **d**: Token passthrough to a downstream API
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks", and that an invalid one gets 403 Forbidden. *a* is ruled out because "Servers MUST validate the Origin header on all incoming connections to prevent DNS rebinding attacks." *d* is ruled out because "If the header is present and invalid, the server must answer 403 Forbidden", not a redirect. *c* is ruled out because "Closing the response stream is cancellation", which is how a client cancels a request, and it is not an answer to a bad Origin.
-2. **d**. The page says "MCP servers MUST NOT accept or transit any other tokens." *a* is ruled out because "MCP servers MUST NOT accept or transit any other tokens." *b* is ruled out because "Token passthrough is explicitly forbidden", with no consent exception. *c* is ruled out because "MCP servers MUST validate that access tokens were issued specifically for them as the intended audience".
-3. **b**. The page says "MCP servers MUST NOT treat possession of a state handle as authentication." *a* is ruled out because MCP in this revision "is stateless and has no protocol-level sessions". *d* is ruled out because state handle hijacking is "an unauthorized party obtains or guesses a handle and uses it to read or change another user's state". *c* is ruled out because the remedy is that "MCP servers SHOULD bind handles server-side to the authenticated user", which is about ownership and not about permissions.
+2. **d**. The page says "MCP servers MUST NOT accept or transit any other tokens." and that "If the server needs to call a downstream API, it uses a token of its own for that API." *a* is ruled out because the danger is that "the downstream API trusts the call as though the MCP server had validated it", so a second validation does not make it safe. *b* is ruled out because "Token passthrough is explicitly forbidden", with no consent exception. *c* is ruled out because "MCP servers MUST validate that access tokens were issued specifically for them as the intended audience", so the original audience is the receiver and not the downstream API.
+3. **b**. The page says "MCP servers MUST NOT treat possession of a state handle as authentication." *a* is ruled out because MCP in this revision "is stateless and has no protocol-level sessions", so there is no session to fix. *d* is ruled out because passthrough is "A server that accepts tokens issued for another service, or forwards the client's token to a downstream API", and a handle is not a token. *c* is ruled out because the remedy is that "MCP servers SHOULD bind handles server-side to the authenticated user", which is about ownership and not about permissions.
 
 </details>
 
@@ -91,10 +91,10 @@ The practice is in `exercises/33-mcp-advanced/unit-01/practice-1/statement.md`, 
 This quiz covers both pages of the module.
 
 1. A tool wants a person's confirmation, but the calling client declared only roots. What must the server avoid?
-   - **a**: Returning a normal result that says the confirmation could not be requested
-   - **b**: Including an elicitation request for a feature the caller never announced
-   - **c**: Ending the call with an error code that names the missing capability
-   - **d**: Signing the state of the call so that the client cannot tamper with it
+   - **a**: Returning a normal result saying it could not ask
+   - **b**: Sending an elicitation request that the caller never announced
+   - **c**: Ending the call with an error code naming the missing capability
+   - **d**: Signing the state of the call so the client cannot alter it
 
 2. Two requests carry the same requestState and arrive within its lifetime, one from the user it was issued to and one from a different user. How should the server treat them?
    - **a**: Reject the second, because the signed payload names its intended principal
@@ -103,7 +103,7 @@ This quiz covers both pages of the module.
    - **d**: Accept both, because a valid signature proves the state is genuine
 
 3. A load balancer sends consecutive calls of one client to different instances of an MCP server on the 2026-07-28 revision. What does the protocol need so that this works?
-   - **a**: A self-contained request that carries everything the handler requires
+   - **a**: Self-contained requests that carry all their own context
    - **b**: A sticky connection that keeps one client on the same instance
    - **c**: A resumable stream that another instance can pick up by its event id
    - **d**: A session identifier that each instance looks up in a common table
