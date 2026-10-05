@@ -36,7 +36,7 @@ Facts to hold on 2026-10-02:
 - **Effort steers it.** With adaptive thinking "the model decides how much to think, steered by effort";
   the default effort is `high` for Fable 5.1 and Sonnet 5.5 and `medium` for Opus 5.5.
 - **It lives in the context.** Thinking tokens count toward the context window. Whether thinking from
-  earlier turns is kept depends on the model: current Opus, Sonnet, Fable models keep them by default, and
+  earlier turns is kept depends on the model: current Opus, Sonnet and Fable models keep them by default, and
   earlier models and Haiku strip them.
 
 Sources: Thinking; Context windows; Models overview, Claude API documentation.
@@ -53,7 +53,7 @@ type) inside a loop that your code runs: the model asks for an action, the progr
 back a new screenshot, until the task is done. It is an agent loop whose tool is a screen. Module 31
 teaches the loop, coordinates and scaling. Three points belong here:
 
-- Images sent for computer use are subject to the vision limits above: the vision documentation says the
+- Images sent for computer use are subject to the vision limits on page 1: the vision documentation says the
   API rejects a tool-result screenshot that exceeds the model's limits instead of downscaling it, so your
   program resizes first.
 - Spatial output is approximate (page 1). Clicking by coordinates can miss.
