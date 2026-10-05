@@ -112,7 +112,7 @@ quickly, so confirm features and plan limits on the official page the day you de
    - **a**: Keep the whole list in the thread, then mark the dispute as sensitive
    - **b**: Share a Project holding the whole list, then limit who sees the dispute
    - **c**: Move the whole list to a direct message, then paste the results back
-   - **d**: Handle ordinary items in the channel, then route the HR item to its governing policy
+   - **d**: Run routine items in the channel, then send the HR case to its policy
 
 3. An analyst must revise a spreadsheet model, then refresh a deck and a memo that quote it. Which surface fits best?
    - **a**: Claude Tag in a channel, with the three files attached
@@ -154,7 +154,7 @@ This quiz covers every page of the module.
 
 3. A manager must decide on a disciplinary case about a named employee, and Claude Tag is installed in their team's
    busy channel. Which course of action matches the module?
-   - **a**: Take it to the people and policy that govern such matters, not to the tool
+   - **a**: Take it to the people and policy that govern such matters
    - **b**: Ask in the channel, with the employee's name left out of the request
    - **c**: Put the case notes in a shared Project, then ask Claude from inside it
    - **d**: Ask in the channel, then have Claude Tag delete the thread afterwards
