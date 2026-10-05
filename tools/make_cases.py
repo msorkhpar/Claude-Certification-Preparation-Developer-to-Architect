@@ -1305,7 +1305,7 @@ PRACTICES[f"{X}/77-scenario-agentic-tool-builder/unit-01/practice-1"] = {
         "wrong-denied-ignored": (["e5"], "does not refuse a denied permission that the proposal declares"),
         "wrong-gate-skipped": (["e6"], "approves a declared write outright with no gate"),
         "wrong-revise-before-refuse": (["e7"], "sends a refused tool back for revision because it also has a finding"),
-        "wrong-used-unsorted": (["e8"], "reports the permissions in the order of the scan table and not alphabetically"),
+        "wrong-used-unsorted": (["e6", "e8"], "reports the permissions in the order of the scan table and not alphabetically"),
     },
 }
 
