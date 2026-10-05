@@ -5,6 +5,9 @@ import re
 from datetime import datetime, timezone
 
 from claude_agent_sdk import ClaudeAgentOptions, HookMatcher
+import logging
+
+log = logging.getLogger(__name__)
 
 AUTO_LIMIT = 200
 ASK_LIMIT = 500
@@ -18,6 +21,7 @@ def _answer(event, **fields):
 
 async def pre_refund(input_data, tool_use_id, context):
     """PreToolUse for process_refund: allow small refunds, ask a person for middle ones, deny large ones, and fail closed on a bad amount."""
+    log.debug("pre_refund input: %r", input_data)
     if input_data.get("tool_name") != "process_refund":
         return {}
     amount = (input_data.get("tool_input") or {}).get("amount")

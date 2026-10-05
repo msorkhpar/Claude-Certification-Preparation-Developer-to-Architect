@@ -1,5 +1,7 @@
 /** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */
 
+private val log = System.getLogger("error_flow")
+
 val ALTERNATIVES = mapOf(
     "timeout" to listOf("retry later", "try a narrower query"),
     "unavailable" to listOf("use a cached source", "try another provider"),
@@ -16,6 +18,7 @@ data class Outcome(val status: String, val items: List<String> = emptyList(), va
 data class Step(val topic: String, val action: String)
 
 fun searchWithRecovery(query: String, maxAttempts: Int = 2, call: (String, Int) -> Reply): Outcome {
+    log.log(System.Logger.Level.DEBUG, "searchWithRecovery input: {0}", query)
     var attempts = 0
     while (true) {
         attempts += 1

@@ -5,6 +5,9 @@ verification first in both runs: what differs is whether the code that runs the 
 """
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+import logging
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 SYSTEM = "You are a support agent. Verify the customer's identity before any refund."

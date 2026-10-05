@@ -4,6 +4,9 @@ on which platform, and which permission rule covers which tool.
 A teaching model of the "Tools reference" page of the Claude Code documentation (read on 2026-10-03), not the product's code. It covers six tools:
 Read, Write, Edit, Bash, Grep and Glob.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 SEARCH_TOOLS = ("Grep", "Glob")
 BASE_TOOLS = ("Read", "Write", "Edit", "Bash")

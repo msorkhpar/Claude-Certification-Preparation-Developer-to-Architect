@@ -1,9 +1,14 @@
 """Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 SEVERITIES = ("low", "medium", "high")
 
 
 def submission_interval(sla_hours, window_hours=24, handling_hours=2):
+    log.debug("submission_interval input: %r", sla_hours)
     interval = sla_hours - window_hours - handling_hours
     if interval <= 0:
         raise ValueError("the SLA leaves no room to wait for a batch to fill")

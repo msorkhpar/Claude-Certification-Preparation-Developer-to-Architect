@@ -14,6 +14,8 @@ import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
 
+private val log = System.getLogger("identity_gate")
+
 /**
  * The same scripted model, which skips identity verification, run against a loop that trusts the prompt and a loop that enforces the prerequisite in code.
  *

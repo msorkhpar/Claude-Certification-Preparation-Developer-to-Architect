@@ -15,9 +15,9 @@ PRACTICES[f"{X}/51-session-state/unit-01/practice-1"] = {
         ("e8", "edge", "a run through the sdk passes resume and fork to the binary and returns the session id even after an error"),
     ],
     "plants": {
-        "wrong-ignores-changes": (["m1"], "resumes a session without a notice even when files changed"),
+        "wrong-ignores-changes": (["e1", "e2", "e5", "m1"], "resumes a session without a notice even when files changed"),
         "wrong-added-ignored": (["e1"], "does not count a new file as a difference"),
-        "wrong-half-is-fresh": (["e2"], "starts fresh when exactly half of the files changed"),
+        "wrong-half-is-fresh": (["e2", "e5"], "starts fresh when exactly half of the files changed"),
         "wrong-added-counted": (["e2"], "counts new files toward the share of changed files"),
         "wrong-age-ignored": (["e3"], "resumes a session however long it has been idle"),
         "wrong-age-inclusive": (["e3"], "starts fresh when the session was idle for exactly a week"),

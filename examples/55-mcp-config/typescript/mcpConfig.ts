@@ -4,6 +4,8 @@
 // the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`
 // expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential
 // variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.
+import { logger } from "./logger.ts";
+const log = logger("mcp_config");
 export const SCOPES = ["local", "project", "user"]; // highest precedence first
 const COVERED = new Set(["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN"]);
 const REMOTE = ["http", "sse", "ws"];

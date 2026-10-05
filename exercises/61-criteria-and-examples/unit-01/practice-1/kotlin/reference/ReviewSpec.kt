@@ -1,5 +1,7 @@
 /** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. Results are JSON-like maps. */
 
+private val log = System.getLogger("review_spec")
+
 val VAGUE = listOf("be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "when you are sure", "use your judgment")
 
 private fun present(value: Any?): Boolean = value is String && value.isNotBlank()
@@ -15,6 +17,7 @@ private fun maps(value: Any?): List<Map<String, Any?>> = (value as List<Map<Stri
 private fun asMap(value: Any?): Map<String, Any?> = (value as Map<String, Any?>?) ?: emptyMap()
 
 fun buildReviewPrompt(spec: Map<String, Any?>, diff: String): String? {
+    log.log(System.Logger.Level.DEBUG, "buildReviewPrompt input: {0}", spec)
     val criteria = maps(spec["criteria"])
     val examples = maps(spec["examples"])
     require(criteria.isNotEmpty()) { "at least one criterion is required" }

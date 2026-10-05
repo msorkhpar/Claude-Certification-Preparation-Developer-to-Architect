@@ -15,15 +15,17 @@ PRACTICES[f"{X}/68-human-review-and-calibrated-confidence/unit-01/practice-1"] =
         ("e8", "edge", "an irreversible action needs a person whatever the confidence"),
     ],
     "plants": {
-        "wrong-overall-percent": (["m1", "e1"], "gives every segment the overall percentage"),
+        "wrong-overall-percent": (["e1", "e2", "m1"], "gives every segment the overall percentage"),
         "wrong-ignores-undersampled": (["e2"], "approves automation for a segment with too few samples"),
         "wrong-highest-confidence": (["e3"], "picks the highest qualifying confidence instead of the lowest"),
-        "wrong-strict-target": (["e4"], "demands more than the target precision"),
+        "wrong-strict-target": (["e3", "e4"], "demands more than the target precision"),
         "wrong-first-n-sample": (["e5"], "samples by identifier instead of by rank"),
         "wrong-conflict-auto": (["e6"], "lets a confident extraction with a conflict through"),
         "wrong-id-order": (["e6"], "orders the review queue by identifier instead of weakest first"),
         "wrong-ignores-capacity": (["e7"], "sends everything to review regardless of capacity"),
         "wrong-irreversible-by-amount": (["e8"], "checks only the amount for an irreversible action"),
+        "wrong-percent-floors": (["e1"], "cuts a percentage down instead of rounding it"),
+        "wrong-fallback-threshold": (["e4"], "returns the highest confidence when no level meets the target"),
     },
 }
 

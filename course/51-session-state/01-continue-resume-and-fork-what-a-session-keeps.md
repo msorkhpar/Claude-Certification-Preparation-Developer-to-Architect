@@ -73,7 +73,7 @@ The example sends five runs through the real SDK against the stand-in and prints
 ```python
 """Session state, offline: what continue, resume and fork send to the binary, and when a saved session is worth resuming.
 
-The SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
+The Agent SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
 The session ids come from the script (the stand-in does not store sessions); the flags are the ones the real SDK builds. `claude-agent-sdk` 0.2.163,
 checked on 2026-10-03 against the "Work with sessions" page of the Claude Code documentation.
 """
@@ -84,6 +84,9 @@ import tempfile
 from pathlib import Path
 
 from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+import logging
+
+log = logging.getLogger(__name__)
 
 FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
 DAY = 24 * 3600
@@ -174,13 +177,15 @@ the notice for the second case
 ```typescript
 // Session state, offline: what continue, resume and fork send to the binary, and when a saved session is worth resuming.
 //
-// The SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
+// The Agent SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
 // The session ids come from the script (the stand-in does not store sessions); the flags are the ones the real SDK builds.
 // `@anthropic-ai/claude-agent-sdk` 0.3.287, checked on 2026-10-03 against the "Work with sessions" page of the Claude Code documentation.
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { logger } from "./logger.ts";
+const log = logger("session_state");
 
 const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
 

@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("provenance_loss");
 /**
  * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
  *

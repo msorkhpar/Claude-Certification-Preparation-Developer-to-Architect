@@ -1,6 +1,8 @@
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("review_gate")
+
 /** The decision of a review job and the prompt of a review run. See ../../statement.md. */
 object ReviewGate {
     val SEVERITIES = listOf("low", "medium", "high")
@@ -22,6 +24,7 @@ object ReviewGate {
 
     /** policy: min_severity, disabled_categories and fail_on. Returns exit, comments and problems. */
     fun gate(stdout: String, exitCode: Int, schema: JsonNode, policy: Map<String, Any?>): Map<String, Any?> {
+        log.log(System.Logger.Level.DEBUG, "gate input: {0}", stdout)
         val problems = mutableListOf<String>()
         if (exitCode != 0) problems += "claude exited with status $exitCode"
         val envelope = try { json.readTree(stdout) } catch (e: Exception) { null }

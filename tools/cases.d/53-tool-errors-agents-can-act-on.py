@@ -15,11 +15,11 @@ PRACTICES[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
     ],
     "plants": {
         "wrong-flag-missing": (["m1"], "reports a failed call as a tool result without the error flag"),
-        "wrong-business-retryable": (["m1"], "marks a business rule violation as worth retrying"),
+        "wrong-business-retryable": (["e2", "m1"], "marks a business rule violation as worth retrying"),
         "wrong-generic-message": (["e1"], "accepts a message such as Operation failed"),
         "wrong-unknown-kind-accepted": (["e1"], "accepts a category that is not one of the six"),
         "wrong-retries-validation": (["e2"], "retries a call that failed validation"),
-        "wrong-flat-wait": (["e2"], "waits the same time before every retry"),
+        "wrong-flat-wait": (["e2", "e3", "e5"], "waits the same time before every retry"),
         "wrong-extra-retry": (["e3"], "makes one attempt more than the retry limit allows"),
         "wrong-ignores-retry-after": (["e3"], "sleeps its own backoff when the service named a wait"),
         "wrong-empty-is-error": (["e4"], "reports a valid empty result as a failure"),
@@ -27,6 +27,7 @@ PRACTICES[f"{X}/53-tool-errors-agents-can-act-on/unit-01/practice-1"] = {
         "wrong-key-dropped": (["e5"], "leaves the idempotency key out of the arguments it retries with"),
         "wrong-mutates-args": (["e5"], "writes the idempotency key into the caller's own arguments"),
         "wrong-permission-retry-later": (["e6"], "tells the loop to retry later after a permission error"),
-        "wrong-internal-retryable": (["e7"], "marks an unexpected failure as retryable"),
+        "wrong-internal-retryable": (["e7", "m1"], "marks an unexpected failure as retryable"),
+        "wrong-internal-no-detail": (["e7"], "leaves the exception's message out of the internal error"),
     },
 }

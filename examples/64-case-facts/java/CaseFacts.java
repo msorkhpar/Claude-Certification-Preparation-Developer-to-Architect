@@ -12,6 +12,7 @@ import java.util.Map;
  * nothing here calls a model, and the numbers come from the sample data, not from a measurement.
  */
 public final class CaseFacts {
+    private static final System.Logger LOG = System.getLogger(CaseFacts.class.getName());
     static final Map<String, List<String>> TOOL_FIELDS = Map.of(
         "lookup_order", List.of("order_id", "purchase_date", "items", "return_window", "refund_amount"),
         "lookup_customer", List.of("customer_id", "tier"));

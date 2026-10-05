@@ -68,6 +68,9 @@ The example runs a three-file change through the two passes with scripted stand-
 The "model" is a set of hand-written functions, so the output shows what each pass was given and what the control flow did with the answers, and nothing about
 how a real model would review the code. The files, summaries and findings are illustrative.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 CHANGE = {
     "api.py": "def get_user(id):\n    return db.find(id)\n",
@@ -154,6 +157,8 @@ adaptive, each step planned from the last:
 //
 // The "model" is a set of hand-written functions, so the output shows what each pass was given and what the control flow did with the answers, and nothing about
 // how a real model would review the code. The files, summaries and findings are illustrative.
+import { logger } from "./logger.ts";
+const log = logger("flow");
 export const CHANGE: Record<string, string> = {
   "api.py": "def get_user(id):\n    return db.find(id)\n",
   "db.py": "def find(name):\n    return rows.get(name)\n",
@@ -242,6 +247,7 @@ import java.util.Map;
  * how a real model would review the code. The files, summaries and findings are illustrative.
  */
 public final class Flow {
+    private static final System.Logger LOG = System.getLogger(Flow.class.getName());
     static final Map<String, String> CHANGE = new LinkedHashMap<>();
     static final Map<String, String> SUMMARIES = new LinkedHashMap<>();
 
@@ -337,6 +343,8 @@ adaptive, each step planned from the last:
   status: done after 3 steps; the failure is in parse()
 ```
 ```kotlin
+private val log = System.getLogger("flow")
+
 /**
  * Two decompositions with scripted model replies: a per-file pass followed by one cross-file pass, and an adaptive loop that plans each step from the last.
  *

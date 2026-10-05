@@ -4,6 +4,10 @@ The exam guide (task 5.3) calls structured error context (failure type, the quer
 such as "search unavailable", which hides the context, and silent suppression, which reports an empty result as a success; terminating the whole workflow on one failure is the third. The five sources below and
 their outcomes are invented for the illustration; nothing here calls a model or a search tool.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 # source -> (kind, items); kind is ok, timeout or permission
 OUTCOMES = {"news": ("ok", ["n1", "n2"]), "papers": ("timeout", ["p1"]), "patents": ("ok", []), "filings": ("permission", []), "blogs": ("ok", ["b1"])}
 TRY = {"timeout": "retry later", "permission": "request access"}

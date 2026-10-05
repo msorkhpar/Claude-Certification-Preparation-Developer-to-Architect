@@ -12,6 +12,7 @@ import java.util.function.Function;
  * (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
  */
 public final class EscalationRules {
+    private static final System.Logger LOG = System.getLogger(EscalationRules.class.getName());
     /** name, sentiment, asked for a person, policy silent, what a careful person would do */
     record Case(String name, String sentiment, boolean asked, boolean policySilent, String truth) {}
 

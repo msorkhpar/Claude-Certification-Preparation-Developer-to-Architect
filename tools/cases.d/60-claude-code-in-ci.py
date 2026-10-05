@@ -2,7 +2,7 @@
 # Runs with PRACTICES and X in scope; names defined here are local to this file.
 
 PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
-    "name": "ci_review", "suite": "CiReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "name": "review_gate", "suite": "CiReviewTest", "langs": ["python", "typescript", "java", "kotlin"],
     "cases": [
         ("m1", "main", "a valid run posts the findings above the floor and outside the disabled categories"),
         ("e1", "edge", "a failed run fails the job instead of passing it silently"),
@@ -20,9 +20,9 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
         "wrong-gate-no-output-ok": (["e1"], "passes a run that succeeded without a structured output"),
         "wrong-gate-no-schema": (["e2"], "never checks the answer against the schema"),
         "wrong-gate-floor-ignored": (["m1"], "posts findings below the severity floor"),
-        "wrong-gate-disabled-ignored": (["m1", "e3"], "posts findings of a disabled category, and lets one block the job"),
+        "wrong-gate-disabled-ignored": (["e3", "m1"], "posts findings of a disabled category, and lets one block the job"),
         "wrong-gate-never-blocks": (["e3"], "never fails the job on a high finding"),
-        "wrong-gate-blocks-on-any": (["m1", "e3"], "fails the job on any posted finding, so the valid run of the main ask fails too"),
+        "wrong-gate-blocks-on-any": (["e3", "m1"], "fails the job on any posted finding, so the valid run of the main ask fails too"),
         "wrong-prompt-no-new-only": (["e4"], "leaves out the instruction to report only new or unaddressed findings"),
         "wrong-prompt-no-prior": (["e4"], "leaves the earlier findings out of the prompt"),
         "wrong-prompt-no-tests": (["e4"], "leaves the existing tests out of the prompt"),
@@ -73,5 +73,10 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-02/practice-1"] = {
         "wrong-selfpaced-as-minute": (["e5", "e7", "m1"], "turns a job without an interval into a one minute loop"),
         "wrong-no-validation": (["e7"], "accepts a trigger it does not know"),
         "wrong-cloud-sees-local-files": (["e7"], "lets a cloud run read local files"),
+        "wrong-condition-skips-repo-event": (["e2"], "a condition job that is also a repository event is left to the loop rows"),
+        "wrong-once-long-job-durable": (["e3"], "sends a one-off job that lasts more than a week to a desktop task"),
+        "wrong-local-floor-59": (["e4"], "allows a desktop schedule of 59 seconds"),
+        "wrong-loop-rounds-down": (["e5"], "rounds the interval of a fixed loop down instead of up"),
+        "wrong-expiry-after-eight-days": (["e6"], "lets a loop last eight days instead of seven"),
     },
 }

@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
  * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the methods below make visible. Nothing here calls a model.
  */
 public final class BatchAndReview {
+    private static final System.Logger LOG = System.getLogger(BatchAndReview.class.getName());
     private static final Pattern CUSTOM_ID = Pattern.compile("^[a-zA-Z0-9_-]{1,64}$");
 
     record Matched(String customId, String kind) {}

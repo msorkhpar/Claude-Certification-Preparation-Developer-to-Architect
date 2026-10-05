@@ -1,5 +1,7 @@
 import harness.Show.py
 
+private val log = System.getLogger("criteria_lint")
+
 /**
  * Three checks that keep a review prompt precise: lint a criterion for vague wording, check a set of few-shot examples, and measure the precision of each finding category from the verdicts developers gave.
  *

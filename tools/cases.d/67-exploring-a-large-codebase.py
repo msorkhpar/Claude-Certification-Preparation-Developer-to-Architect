@@ -23,5 +23,6 @@ PRACTICES[f"{X}/67-exploring-a-large-codebase/unit-01/practice-1"] = {
         "wrong-ignore-missing-file": (["e5"], "trusts the manifest without checking that the state file exists"),
         "wrong-no-continue-line": (["e6"], "leaves the instruction to continue out of the prompt"),
         "wrong-compact-without-focus": (["e7"], "compacts without telling the command what to keep"),
+        "wrong-reuse-needs-company": (["e3"], "reuses a finished agent only when the manifest lists more than one agent"),
     },
 }

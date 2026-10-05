@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("review_routing");
 /** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */
 
 export const IRREVERSIBLE = ["delete_records", "send_payment", "close_account"];
@@ -5,6 +7,7 @@ export const IRREVERSIBLE = ["delete_records", "send_payment", "close_account"];
 const percent = (correct: number, total: number): number => Math.floor((200 * correct + total) / (2 * total));
 
 export function accuracyBy(records: any[]): any[] {
+  log.debug("accuracyBy input", records);
   const groups = new Map<string, [number, number]>();
   for (const r of records) {
     const key = `${r.doc_type}/${r.field}`;

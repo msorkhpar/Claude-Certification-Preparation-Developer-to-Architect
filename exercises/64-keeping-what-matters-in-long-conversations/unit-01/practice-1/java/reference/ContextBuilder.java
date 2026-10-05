@@ -5,6 +5,7 @@ import java.util.Map;
 
 /** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */
 final class ContextBuilder {
+    private static final System.Logger LOG = System.getLogger(ContextBuilder.class.getName());
     private ContextBuilder() {}
 
     record Fact(String value, String asOf, List<String> superseded) {}
@@ -42,6 +43,7 @@ final class ContextBuilder {
     }
 
     static String buildContext(String customer, List<FactEntry> facts, String summary, List<Message> recent) {
+        LOG.log(System.Logger.Level.DEBUG, "buildContext input: {0}", customer);
         List<String> parts = new ArrayList<>();
         List<String> mine = new ArrayList<>();
         for (FactEntry f : facts) if (f.customer().equals(customer)) mine.add(f.name() + ": " + f.value() + " (as of " + f.asOf() + ")");

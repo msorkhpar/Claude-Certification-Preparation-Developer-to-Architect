@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 /** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */
 final class ReviewRouting {
+    private static final System.Logger LOG = System.getLogger(ReviewRouting.class.getName());
     private ReviewRouting() {}
 
     static final List<String> IRREVERSIBLE = List.of("delete_records", "send_payment", "close_account");
@@ -33,6 +34,7 @@ final class ReviewRouting {
     }
 
     static List<Seg> accuracyBy(List<Rec> records) {
+        LOG.log(System.Logger.Level.DEBUG, "accuracyBy input: {0}", records);
         Map<String, int[]> groups = new TreeMap<>();
         for (Rec r : records) {
             int[] g = groups.computeIfAbsent(r.docType() + "/" + r.field(), k -> new int[2]);

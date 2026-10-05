@@ -1,5 +1,7 @@
 // Session state with the Agent SDK: choose between resuming and starting fresh, say what changed, carry a summary, set the options. See ../../statement.md.
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { logger } from "../logger.ts";
+const log = logger("sessions");
 
 const WEEK_SECONDS = 7 * 24 * 3600; // a session idle for longer than this is not resumed
 const STALE_SHARE = 0.5; // more than this share of the analysed files changed or gone: start fresh
@@ -16,6 +18,7 @@ export function resolveName(name: string, index: Array<{ id: string; name: strin
 
 /** Decide how to continue from a saved record given the files as they are now. */
 export function planSession(record: Saved | null, current: { [path: string]: string }, now: number, fork = false): any {
+  log.debug("planSession input", record);
   if (record === null) return { action: "fresh", session_id: null, changed: [], deleted: [], added: [], fork: false };
   const before = record.files;
   const paths = Object.keys(before);

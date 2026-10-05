@@ -1,3 +1,5 @@
+private val log = System.getLogger("provenance_loss")
+
 /**
  * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
  *

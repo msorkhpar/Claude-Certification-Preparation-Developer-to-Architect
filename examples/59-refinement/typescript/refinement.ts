@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("refinement");
 /**
  * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.
  *

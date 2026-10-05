@@ -4,6 +4,10 @@ The exam guide (task 5.2) names the triggers (a customer asks for a person, the 
 unreliable proxies for how hard a case is. It also says that when a lookup returns several customers the agent asks for more identifiers and does not choose by a heuristic. Below, six hand-written cases
 (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 # name, sentiment, asked for a person, policy silent, what a careful person would do
 CASES = [
     ("price match with another shop", "calm", False, True, "escalate"),

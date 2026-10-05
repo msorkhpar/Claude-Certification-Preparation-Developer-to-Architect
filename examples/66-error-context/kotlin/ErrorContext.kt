@@ -1,3 +1,5 @@
+private val log = System.getLogger("error_context")
+
 /**
  * What a coordinator is told when one of five sources fails, under four ways of reporting it.
  *

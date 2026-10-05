@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 /** A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md. Results are JSON-like maps. */
 final class RefundDesk {
+    private static final System.Logger LOG = System.getLogger(RefundDesk.class.getName());
     private static final Map<String, String> MESSAGES = Map.of(
         "identity_required", "Verify the customer's identity before this action.",
         "order_not_owned", "That order does not belong to the verified customer.",
@@ -79,6 +80,7 @@ final class RefundDesk {
     }
 
     Map<String, Object> call(String name, Map<String, Object> args) {
+        LOG.log(System.Logger.Level.DEBUG, "call input: {0}", args);
         if (!TOOLS.contains(name)) return block(name, "unknown_tool", "Unknown tool: " + name);
         if (name.equals("escalate")) {
             Map<String, Object> result = run(name, args);

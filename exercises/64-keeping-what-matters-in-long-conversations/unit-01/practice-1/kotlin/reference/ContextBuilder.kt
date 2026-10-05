@@ -1,5 +1,7 @@
 /** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */
 
+private val log = System.getLogger("context_builder")
+
 data class Fact(val value: String, val asOf: String, val superseded: List<String>)
 
 data class FactEntry(val customer: String, val name: String, val value: String, val asOf: String)
@@ -28,6 +30,7 @@ fun updateFacts(facts: Map<String, Fact>, name: String, value: String, asOf: Str
 }
 
 fun buildContext(customer: String, facts: List<FactEntry>, summary: String, recent: List<Message>): String {
+    log.log(System.Logger.Level.DEBUG, "buildContext input: {0}", customer)
     val parts = mutableListOf<String>()
     val mine = facts.filter { it.customer == customer }
     if (mine.isNotEmpty()) parts += "## Case facts\n" + mine.joinToString("\n") { "${it.name}: ${it.value} (as of ${it.asOf})" }

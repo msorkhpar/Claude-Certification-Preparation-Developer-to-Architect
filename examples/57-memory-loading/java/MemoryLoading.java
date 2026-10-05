@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
  * Nothing here starts Claude Code: the "project" is a list of file paths and a map of file texts.
  */
 public final class MemoryLoading {
+    private static final System.Logger LOG = System.getLogger(MemoryLoading.class.getName());
     static final int MAX_IMPORT_HOPS = 4;
     static final Pattern IMPORT = Pattern.compile("(?<![\\w`])@([\\w./-]+)");
     private static final Pattern CODE = Pattern.compile("```.*?```|`[^`]*`", Pattern.DOTALL);

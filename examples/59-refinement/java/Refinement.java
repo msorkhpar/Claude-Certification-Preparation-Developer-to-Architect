@@ -16,6 +16,7 @@ import java.util.Objects;
  * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.
  */
 public final class Refinement {
+    private static final System.Logger LOG = System.getLogger(Refinement.class.getName());
     /** What decides the mode of a task. */
     record Task(boolean diffInOneSentence, int files, boolean architectural, int approaches) {}
 

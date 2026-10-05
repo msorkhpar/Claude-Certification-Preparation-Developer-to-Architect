@@ -11,6 +11,7 @@ import java.util.TreeMap;
  * documents are wrong more often, and the confidence says one thing while the labels say another. The numbers are invented for the illustration; the arithmetic is the lesson.
  */
 public final class CalibrationTable {
+    private static final System.Logger LOG = System.getLogger(CalibrationTable.class.getName());
     record Rec(String docType, int confidence, boolean correct) {}
 
     record TypeRow(String docType, int correct, int total, int percent) {}

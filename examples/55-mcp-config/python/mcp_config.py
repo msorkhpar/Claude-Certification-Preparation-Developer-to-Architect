@@ -8,6 +8,9 @@ variables read as empty. The set of credential names here is the documentation's
 import fnmatch
 import json
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 SCOPES = ["local", "project", "user"]  # highest precedence first
 COVERED = {"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN"}

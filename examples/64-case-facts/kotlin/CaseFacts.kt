@@ -1,3 +1,5 @@
+private val log = System.getLogger("case_facts")
+
 /**
  * What a long support conversation should keep, and where it should sit.
  *

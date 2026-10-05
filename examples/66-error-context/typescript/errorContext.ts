@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("error_context");
 /**
  * What a coordinator is told when one of five sources fails, under four ways of reporting it.
  *

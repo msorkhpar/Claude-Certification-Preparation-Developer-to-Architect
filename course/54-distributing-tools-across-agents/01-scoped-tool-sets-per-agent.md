@@ -61,6 +61,9 @@ The example makes four of the decisions of these two pages with scripted data: t
 
 No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 CATALOG = {
     "web_search": ["web"], "fetch_page": ["web"], "verify_fact": ["web", "synthesis"], "load_document": ["documents"], "extract_data_points": ["documents"],
@@ -155,6 +158,8 @@ refund decisions:
 // Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.
 //
 // No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
+import { logger } from "./logger.ts";
+const log = logger("distribution");
 
 export const CATALOG: Record<string, string[]> = {
   web_search: ["web"], fetch_page: ["web"], verify_fact: ["web", "synthesis"], load_document: ["documents"], extract_data_points: ["documents"],
@@ -250,6 +255,7 @@ import java.util.Set;
  * <p>No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
  */
 public final class Distribution {
+    private static final System.Logger LOG = System.getLogger(Distribution.class.getName());
     static final Map<String, List<String>> CATALOG = new LinkedHashMap<>();
     static final Set<String> IRREVERSIBLE = Set.of("send_report");
     static final Map<String, String> ROLES = new LinkedHashMap<>();
@@ -363,6 +369,8 @@ refund decisions:
 ```
 ```kotlin
 import harness.Show.py
+
+private val log = System.getLogger("distribution")
 
 /**
  * Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.

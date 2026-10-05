@@ -74,6 +74,9 @@ The example runs seven scripted tool calls through a small loop and prints, for 
 The tools are scripted functions, so the output shows the control flow and the text the model would be given, and nothing about how a model would
 answer. The refund service, the orders and the limits are illustrative.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class ToolError(Exception):
@@ -198,6 +201,8 @@ if __name__ == "__main__":
 //
 // The tools are scripted functions, so the output shows the control flow and the text the model would be given, and nothing about how a model would
 // answer. The refund service, the orders and the limits are illustrative.
+import { logger } from "./logger.ts";
+const log = logger("error_flow");
 
 export class ToolError extends Error {
   kind: string;
@@ -343,6 +348,7 @@ import java.util.Map;
  * answer. The refund service, the orders and the limits are illustrative.
  */
 public final class ErrorFlow {
+    private static final System.Logger LOG = System.getLogger(ErrorFlow.class.getName());
     /** A failure a tool reports about itself: its kind, a message the model can use, an optional wait the service asked for and an explanation for the customer. */
     static final class ToolError extends RuntimeException {
         final String kind;
@@ -510,6 +516,8 @@ public final class ErrorFlow {
 ```
 ```kotlin
 import harness.Show.py
+
+private val log = System.getLogger("error_flow")
 
 /**
  * What a loop does with seven failed or odd tool calls: a structured result for each, bounded retries, and the next action.

@@ -1,5 +1,7 @@
 /** A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md. Results are JSON-like maps. */
 
+private val log = System.getLogger("desk")
+
 typealias Backend = Map<String, (Map<String, Any?>) -> Map<String, Any?>>
 
 private val MESSAGES = mapOf(
@@ -44,6 +46,7 @@ class RefundDesk(private val backend: Backend, private val limitCents: Int = 100
     }
 
     fun call(name: String, args: Map<String, Any?>): Map<String, Any?> {
+        log.log(System.Logger.Level.DEBUG, "call input: {0}", args)
         if (name !in TOOLS) return block(name, "unknown_tool", "Unknown tool: $name")
         if (name == "escalate") {
             val (result, error) = run(name, args)

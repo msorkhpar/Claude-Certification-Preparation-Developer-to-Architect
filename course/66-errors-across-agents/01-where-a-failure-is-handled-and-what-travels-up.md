@@ -59,6 +59,10 @@ The exam guide (task 5.3) calls structured error context (failure type, the quer
 such as "search unavailable", which hides the context, and silent suppression, which reports an empty result as a success; terminating the whole workflow on one failure is the third. The five sources below and
 their outcomes are invented for the illustration; nothing here calls a model or a search tool.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 # source -> (kind, items); kind is ok, timeout or permission
 OUTCOMES = {"news": ("ok", ["n1", "n2"]), "papers": ("timeout", ["p1"]), "patents": ("ok", []), "filings": ("permission", []), "blogs": ("ok", ["b1"])}
 TRY = {"timeout": "retry later", "permission": "request access"}
@@ -111,6 +115,8 @@ abort on failure: aborted at papers; found n1, n2
 structured context: well supported: news, blogs; partial: papers (timeout, kept p1); no findings: patents; gaps: filings (permission, try: request access)
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("error_context");
 /**
  * What a coordinator is told when one of five sources fails, under four ways of reporting it.
  *
@@ -180,6 +186,7 @@ import java.util.Map;
  * their outcomes are invented for the illustration; nothing here calls a model or a search tool.
  */
 public final class ErrorContext {
+    private static final System.Logger LOG = System.getLogger(ErrorContext.class.getName());
     /** kind is ok, timeout or permission */
     record Outcome(String kind, List<String> items) {}
 
@@ -262,6 +269,8 @@ abort on failure: aborted at papers; found n1, n2
 structured context: well supported: news, blogs; partial: papers (timeout, kept p1); no findings: patents; gaps: filings (permission, try: request access)
 ```
 ```kotlin
+private val log = System.getLogger("error_context")
+
 /**
  * What a coordinator is told when one of five sources fails, under four ways of reporting it.
  *

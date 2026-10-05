@@ -8,6 +8,9 @@ import re
 import shlex
 import sys
 from pathlib import Path
+import logging
+
+log = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "40-workflow-lint" / "python"))
 from miniyaml import parse_yaml  # noqa: E402

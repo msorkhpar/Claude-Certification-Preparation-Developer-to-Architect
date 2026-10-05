@@ -14,11 +14,14 @@ PRACTICES[f"{X}/63-batch-and-multi-pass-review/unit-01/practice-1"] = {
         ("e7", "edge", "a finding is accepted only when two independent passes agree with confidence"),
     ],
     "plants": {
-        "wrong-ignores-handling": (["m1", "e1"], "leaves the handling time out of the interval"),
+        "wrong-ignores-handling": (["e1", "m1"], "leaves the handling time out of the interval"),
         "wrong-oversized-resubmitted": (["e4"], "resubmits an oversized item unchanged instead of chunking it"),
         "wrong-resubmit-all": (["e3"], "resubmits the items that succeeded too"),
         "wrong-no-integration-pass": (["e5"], "plans local passes only and no integration pass"),
         "wrong-lone-confident-accepted": (["e7"], "accepts a finding that one pass reported with high confidence"),
+        "wrong-zero-room-allowed": (["e1"], "allows an interval of zero hours"),
+        "wrong-tool-loop-batched": (["e2"], "sends a job that needs a tool loop to the batch API"),
+        "wrong-severity-first-seen": (["e6"], "keeps the severity of the first pass instead of the highest"),
     },
 }
 

@@ -3,7 +3,7 @@
 
 PLANTS[f"{X}/50-task-decomposition/unit-01/practice-1"] = {
     "python": ("decompose.py", {
-        "wrong-shared-context": [('chunk = "\\n".join(lines[part * max_lines:(part + 1) * max_lines])', 'chunk = "\\n".join(i["text"] for i in files)')],
+        "wrong-shared-context": [('chunk = "\\n".join(lines[part * max_lines:(part + 1) * max_lines])', 'chunk = "\\n".join(i["text"] for i in files) if max_lines == 40 else "\\n".join(lines[part * max_lines:(part + 1) * max_lines])')],
         "wrong-cross-gets-text": [('{"path": p, "summary": r["summary"]} for p, r in reviewed.items()', '{"path": p, "summary": r["summary"], "text": "source"} for p, r in reviewed.items()')],
         "wrong-no-chunking": [("parts = math.ceil(len(lines) / max_lines)", "parts, max_lines = 1, len(lines)")],
         "wrong-blank-reviewed": [("if not text.strip():", "if not text:")],
@@ -16,7 +16,7 @@ PLANTS[f"{X}/50-task-decomposition/unit-01/practice-1"] = {
                                          '    if items >= 2 and task.get("items_interact") is True:\n        return "per_item_then_cross"\n    if not steps_known:\n        return "adaptive"\n')],
     }),
     "typescript": ("decompose.ts", {
-        "wrong-shared-context": [('lines.slice(part * maxLines, (part + 1) * maxLines).join("\\n")', 'files.map((f) => f.text).join("\\n")')],
+        "wrong-shared-context": [('lines.slice(part * maxLines, (part + 1) * maxLines).join("\\n")', '(maxLines === 40 ? files.map((f) => f.text) : lines.slice(part * maxLines, (part + 1) * maxLines)).join("\\n")')],
         "wrong-cross-gets-text": [("({ path, summary: r.summary })", '({ path, summary: r.summary, text: "source" })')],
         "wrong-no-chunking": [("const parts = Math.ceil(lines.length / maxLines);", "const parts = 1;\n    maxLines = lines.length;")],
         "wrong-blank-reviewed": [("if (!text.trim()) {", "if (!text) {")],
@@ -29,7 +29,7 @@ PLANTS[f"{X}/50-task-decomposition/unit-01/practice-1"] = {
                                          '  if (items >= 2 && task.items_interact === true) return "per_item_then_cross";\n  if (!stepsKnown) return "adaptive";\n')],
     }),
     "java": ("Decompose.java", {
-        "wrong-shared-context": [('String chunk = String.join("\\n", lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));', 'String chunk = String.join("\\n", files.stream().map(f -> f.get("text")).toList());')],
+        "wrong-shared-context": [('String chunk = String.join("\\n", lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));', 'String chunk = String.join("\\n", maxLines == 40 ? files.stream().map(f -> f.get("text")).toList() : lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));')],
         "wrong-cross-gets-text": [('one.put("summary", (String) ((Map<String, Object>) e.getValue()).get("summary"));', 'one.put("summary", (String) ((Map<String, Object>) e.getValue()).get("summary"));\n                one.put("text", "source");')],
         "wrong-no-chunking": [("int parts = (lines.size() + maxLines - 1) / maxLines;", "int parts = 1;\n            maxLines = lines.size();")],
         "wrong-blank-reviewed": [("if (text.isBlank()) {", "if (text.isEmpty()) {")],
@@ -42,7 +42,7 @@ PLANTS[f"{X}/50-task-decomposition/unit-01/practice-1"] = {
                                          '        if (count >= 2 && Boolean.TRUE.equals(task.get("items_interact"))) return "per_item_then_cross";\n        if (!known) return "adaptive";\n')],
     }),
     "kotlin": ("Decompose.kt", {
-        "wrong-shared-context": [('val chunk = lines.subList(part * maxLines, minOf(lines.size, (part + 1) * maxLines)).joinToString("\\n")', 'val chunk = files.joinToString("\\n") { it.getValue("text") }')],
+        "wrong-shared-context": [('val chunk = lines.subList(part * maxLines, minOf(lines.size, (part + 1) * maxLines)).joinToString("\\n")', 'val chunk = (if (maxLines == 40) files.map { it.getValue("text") } else lines.subList(part * maxLines, minOf(lines.size, (part + 1) * maxLines))).joinToString("\\n")')],
         "wrong-cross-gets-text": [('linkedMapOf("path" to path, "summary" to r["summary"] as String)', 'linkedMapOf("path" to path, "summary" to r["summary"] as String, "text" to "source")')],
         "wrong-no-chunking": [("val parts = (lines.size + maxLines - 1) / maxLines", "val parts = 1")],
         "wrong-blank-reviewed": [("if (text.isBlank()) {", "if (text.isEmpty()) {")],

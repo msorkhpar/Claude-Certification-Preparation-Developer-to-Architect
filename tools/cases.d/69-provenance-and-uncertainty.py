@@ -17,13 +17,16 @@ PRACTICES[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
     "plants": {
         "wrong-first-wins": (["e2", "e3"], "keeps only the first value of a claim and drops the others"),
         "wrong-ignores-dates": (["e3", "e4"], "calls every difference a conflict whatever the dates"),
-        "wrong-sources-collapsed": (["m1", "e4"], "keeps only the first source of a value"),
+        "wrong-sources-collapsed": (["e4", "m1"], "keeps only the first source of a value"),
         "wrong-date-optional": (["e1"], "does not require a date"),
         "wrong-accepts-incomplete": (["e1"], "merges a finding with a missing field"),
         "wrong-gaps-hidden": (["e5"], "leaves the planned claims with no finding out of the note"),
-        "wrong-single-source-supported": (["e4"], "calls a claim with one source well supported"),
+        "wrong-single-source-supported": (["e4", "e5"], "calls a claim with one source well supported"),
         "wrong-unknown-kind-accepted": (["e8"], "renders an unknown content type"),
         "wrong-no-table": (["e6"], "renders financial data as prose"),
         "wrong-conflict-unmarked": (["e7"], "leaves the disagreement out of the prose"),
+        "wrong-conflict-keeps-one": (["e2"], "keeps only the first value of a conflict"),
+        "wrong-changed-unordered": (["e3"], "leaves the values of a changed claim in the order they came"),
+        "wrong-changed-also-contested": (["e4"], "files a changed claim under contested as well"),
     },
 }

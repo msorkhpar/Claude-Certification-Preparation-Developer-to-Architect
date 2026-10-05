@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("escalation_rules");
 /**
  * Why escalation is decided by criteria, and what to ask when a lookup finds several people.
  *

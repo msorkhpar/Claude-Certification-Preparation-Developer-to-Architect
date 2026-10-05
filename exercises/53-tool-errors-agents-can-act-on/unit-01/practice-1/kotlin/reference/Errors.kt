@@ -1,5 +1,7 @@
 /** Tool errors that an agent can act on: a structured error, bounded retries, an unknown outcome and the next action. See ../../statement.md. Results are JSON-like maps. */
 
+private val log = System.getLogger("errors")
+
 private val KINDS = mapOf("transient" to true, "validation" to false, "permission" to false, "business" to false, "outcome_unknown" to false, "internal" to false)
 private val GENERIC = setOf("", "error", "failed", "failure", "operation failed", "something went wrong", "unknown error")
 private val ACTIONS = mapOf("transient" to "retry_later", "validation" to "repair_input", "permission" to "escalate", "business" to "explain", "outcome_unknown" to "verify_first", "internal" to "escalate")
@@ -31,6 +33,7 @@ private fun isEmpty(value: Any?): Boolean = value == null || value == "" || (val
 
 /** Call a tool, recover locally from what is safe to recover from, and return a result or a structured error. */
 fun runTool(tool: (Map<String, Any?>) -> Any?, args: Map<String, Any?>, policy: Map<String, Any?>, sleep: (Int) -> Unit): Map<String, Any?> {
+    log.log(System.Logger.Level.DEBUG, "runTool input: {0}", args)
     val key = policy["idempotency_key"] as String?
     val maxRetries = policy["max_retries"] as Int? ?: 2
     val base = policy["base_delay_ms"] as Int? ?: 100

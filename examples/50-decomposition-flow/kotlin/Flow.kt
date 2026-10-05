@@ -1,3 +1,5 @@
+private val log = System.getLogger("flow")
+
 /**
  * Two decompositions with scripted model replies: a per-file pass followed by one cross-file pass, and an adaptive loop that plans each step from the last.
  *

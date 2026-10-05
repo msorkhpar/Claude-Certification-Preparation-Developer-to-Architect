@@ -55,6 +55,10 @@ The exam guide (task 5.6) says that source attribution is lost when findings are
 settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into
 a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 FINDINGS = [
     ("market growth 2024", "12%", "Firm A report", "2024-05-01"),
     ("market growth 2024", "9%", "Firm B survey", "2024-05-01"),
@@ -131,6 +135,8 @@ headcount [agreed]: 910 (Press release, 2024-03-01)
 sources named by the ledger: 5 of 5
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("provenance_loss");
 /**
  * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
  *
@@ -222,6 +228,7 @@ import java.util.Set;
  * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
  */
 public final class ProvenanceLoss {
+    private static final System.Logger LOG = System.getLogger(ProvenanceLoss.class.getName());
     record Row(String claim, String value, String source, String date) {}
 
     static final List<Row> FINDINGS = List.of(
@@ -301,6 +308,8 @@ headcount [agreed]: 910 (Press release, 2024-03-01)
 sources named by the ledger: 5 of 5
 ```
 ```kotlin
+private val log = System.getLogger("provenance_loss")
+
 /**
  * What a summary loses, and what a ledger keeps: sources, dates and disagreement.
  *

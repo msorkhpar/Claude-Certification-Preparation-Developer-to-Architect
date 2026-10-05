@@ -9,6 +9,19 @@ pick your language folder, open `starter/` and edit the file there.
 Names are Python's (`search_with_recovery`, `coordinator_plan`, `coverage_note`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `ErrorFlow` with
 the records the starter defines (`Reply`, `Outcome`, `Step`); Kotlin has top-level functions and data classes with default values (its `search_with_recovery` takes the call function as the last argument).
 
+## What is already written, and what you write
+
+The starter is a working error flow with six gaps cut out of it. Everything that is plumbing is written and correct: the loop of attempts, the tables of alternatives and transient failures, the success outcome, the first rows of the coordinator's plan and the first groups of the coverage note. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The local retry (unlocks `m1`): a transient failure (`timeout`, `unavailable`) is retried locally while the attempts are below the limit, and the success that follows is reported with its number of attempts.
+2. The valid empty result (unlocks `e1`): an `ok` reply with no items is the status `empty`, a success with no findings, never an error; with items it is `success`.
+3. The failure context (unlocks `e2`, `e3`): a failure carries what was attempted, the number of attempts, the partial results of the last attempt and the alternatives for its type, so the coordinator can act on it; a permission or invalid query error is not retried.
+4. The coordinator's actions (unlocks `e4`): a failed topic with partial results is used as it is (`use_partial`), one without them but with alternatives is retried another way (`try_alternative`), and one with neither is flagged as a gap (`flag_gap`); the run never stops.
+5. The partial and gap groups (unlocks `e5`): a failed topic with partial results is listed under `Partial` with its failure type, and one without them under `Gaps` with the failure type and the query that was attempted, so the note names the cause.
+6. The topic with no result (unlocks `e6`): a topic that has no result at all is a gap that was not searched: `topic (not searched)` under `Gaps`.
+
+`m1` needs gap 1. About eight lines in all. The steps below describe the whole flow, so you can see how your gaps are used.
+
 ## What to write
 
 A search tool is a function `call(query, attempt)` (the attempt number starts at 1) that returns either `{status: "ok", items: [...]}` or `{status: "error", type, partial: [...]}`, where `type` is

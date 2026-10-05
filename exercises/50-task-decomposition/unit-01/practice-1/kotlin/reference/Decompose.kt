@@ -1,12 +1,15 @@
 /** Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md. */
 
 /** The model's review of one file, or of one part of it: a map with "findings" (a list of text) and "summary" (text). */
+private val log = System.getLogger("decompose")
+
 typealias FilePass = (String, String, Int, Int) -> Map<String, Any?>
 typealias CrossPass = (List<Map<String, String>>) -> List<String>
 typealias StepPlanner = (String, List<Map<String, String>>) -> Any?
 
 @Suppress("UNCHECKED_CAST")
 fun reviewChanges(files: List<Map<String, String>>, filePass: FilePass, crossPass: CrossPass, maxLines: Int = 40): Map<String, Any?>? {
+    log.log(System.Logger.Level.DEBUG, "reviewChanges input: {0}", files)
     val reviewed = linkedMapOf<String, Map<String, Any?>>()
     val failed = linkedMapOf<String, String>()
     val skipped = mutableListOf<String>()

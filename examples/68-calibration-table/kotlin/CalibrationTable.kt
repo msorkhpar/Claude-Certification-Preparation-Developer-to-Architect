@@ -1,3 +1,5 @@
+private val log = System.getLogger("calibration_table")
+
 /**
  * Reading a review process honestly: one accuracy figure hides the weak segment, and a confidence score is only worth what a calibration table says it is.
  *

@@ -1,5 +1,9 @@
 """A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 VAGUE = ("be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "when you are sure", "use your judgment")
 
 
@@ -17,6 +21,7 @@ def _vague(text):
 
 
 def build_review_prompt(spec, diff):
+    log.debug("build_review_prompt input: %r", spec)
     criteria = spec.get("criteria") or []
     examples = spec.get("examples") or []
     if not criteria:

@@ -6,6 +6,7 @@ import java.util.Set;
 
 /** When a support agent resolves, asks or hands off, and what a hand-off carries. See ../../statement.md. */
 final class Escalation {
+    private static final System.Logger LOG = System.getLogger(Escalation.class.getName());
     private Escalation() {}
 
     record Case(boolean askedForPerson, int matches, boolean policyCovers, int attemptsWithoutProgress, String sentiment, int confidence) {}
@@ -19,6 +20,7 @@ final class Escalation {
     }
 
     static Decision decide(Case c, int maxAttempts) {
+        LOG.log(System.Logger.Level.DEBUG, "decide input: {0}", c);
         if (c.askedForPerson()) return new Decision("escalate", "customer asked for a person", false);
         if (c.matches() > 1) return new Decision("clarify", "ambiguous customer match", false);
         if (!c.policyCovers()) return new Decision("escalate", "policy does not cover the request", false);

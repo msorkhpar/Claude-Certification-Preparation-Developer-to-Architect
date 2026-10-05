@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("rhythm_plan");
 /** Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md. */
 
 const TRIGGERS = ["interval", "event", "condition", "once", "background"];
@@ -26,6 +28,7 @@ function local(seconds: number): Plan {
 }
 
 export function choose(job: Record<string, any>): Plan {
+  log.debug("choose input", job);
   const trigger = job.trigger ?? "interval";
   const seconds = job.interval_seconds ?? 0;
   const days = job.lasts_days ?? 1;

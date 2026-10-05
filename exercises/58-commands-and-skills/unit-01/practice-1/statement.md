@@ -8,6 +8,21 @@ and edit the files there. The tests are the same in all four languages and read 
 and the Java and Kotlin tests read the YAML front matter with Jackson's YAML module. The checks run on the course's own model of the documented rules
 (`examples/58-skill-model`, in your language). Nothing here starts Claude Code or touches the network.
 
+## What is already written, and what you write
+
+The starter is a working set of skill, command and placement files with eight gaps cut out of it. Everything that is plumbing is written and correct: the names of the review and release skills, the one-line summary of the standup command, the body of the release steps and of the personal review, and the table of the placement notes. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:
+
+1. The forked review, in `.claude/skills/review-pr/SKILL.md` (unlocks `m1`): `context: fork`, `agent: general-purpose`, an `argument-hint`, and a body that is a task with numbered steps using `$0` (the starter holds a list of guidelines, which gives a subagent nothing to do).
+2. The tool limits, in `.claude/skills/review-pr/SKILL.md` (unlocks `e2`): `allowed-tools` pre-approves only `Bash(gh pr view *)` and `Bash(gh pr diff *)` as patterns, and `disallowed-tools: Edit Write` takes the editing tools away, because `allowed-tools` only pre-approves.
+3. The release start, in `.claude/skills/release-tag/SKILL.md` (unlocks `e1`): `disable-model-invocation: true`, so that only a person starts it, and `allowed-tools` limited to `Bash(git tag *)` and `Bash(git push origin *)`.
+4. The arguments, in `.claude/skills/release-tag/SKILL.md` and `.claude/commands/standup.md` (unlocks `e3`): `arguments: [version]` for the `$version` the release body uses, and `$ARGUMENTS` in the standup text so that the author the user types reaches it.
+5. The command names, in `.claude/commands/standup.md` and `personal/review-pr-mine/SKILL.md` (unlocks `e4`): an `argument-hint` for the standup command, and a name for the personal review that differs from the team's `review-pr` and from `release-tag`, so it does not replace one.
+6. The placement rows, in `docs/placement.md` (unlocks `e5`): the team review is a project skill, the personal variant a user skill under `~/.claude/skills/`, standing standards the root `CLAUDE.md`, test-file conventions a scoped rule under `.claude/rules/`, and the release a project skill.
+7. The descriptions, in the two skills (unlocks `e6`): each says what the skill does and a `Use when ...` sentence, and stays well inside the 1,536 characters of the skill listing.
+8. The personal path, in `docs/placement.md` (unlocks `e7`): the line that names a path in a home folder is removed; no file holds a personal path, an address or a key.
+
+`m1` needs gap 1. About twelve lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
+
 ## What to write
 
 - `.claude/skills/review-pr/SKILL.md`, the team's review:

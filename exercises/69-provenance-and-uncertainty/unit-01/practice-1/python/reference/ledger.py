@@ -1,5 +1,9 @@
 """Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 REQUIRED = ("claim", "value", "source", "date")
 KINDS = ("financial", "news", "technical")
 
@@ -9,6 +13,7 @@ def check_finding(finding):
 
 
 def merge(findings):
+    log.debug("merge input: %r", findings)
     for i, f in enumerate(findings):
         missing = check_finding(f)
         if missing:

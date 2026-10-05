@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("review_gate");
 /** The decision of a review job and the prompt of a review run. See ../../statement.md. */
 import { schemaCheck } from "./schemaCheck.ts";
 
@@ -15,6 +17,7 @@ export function reviewPrompt(diff: string, prior: any[] = [], existingTests: str
 }
 
 export function gate(stdout: string, exitCode: number, schema: any, policy: any): any {
+  log.debug("gate input", stdout);
   const problems: string[] = [];
   if (exitCode !== 0) problems.push(`claude exited with status ${exitCode}`);
   let envelope: any = null;

@@ -1,6 +1,6 @@
 """Session state, offline: what continue, resume and fork send to the binary, and when a saved session is worth resuming.
 
-The SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
+The Agent SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
 The session ids come from the script (the stand-in does not store sessions); the flags are the ones the real SDK builds. `claude-agent-sdk` 0.2.163,
 checked on 2026-10-03 against the "Work with sessions" page of the Claude Code documentation.
 """
@@ -11,6 +11,9 @@ import tempfile
 from pathlib import Path
 
 from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+import logging
+
+log = logging.getLogger(__name__)
 
 FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
 DAY = 24 * 3600

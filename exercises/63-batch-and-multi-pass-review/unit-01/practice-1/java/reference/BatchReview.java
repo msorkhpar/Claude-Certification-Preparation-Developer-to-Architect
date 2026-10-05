@@ -7,6 +7,7 @@ import java.util.Set;
 
 /** Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md. */
 final class BatchReview {
+    private static final System.Logger LOG = System.getLogger(BatchReview.class.getName());
     private BatchReview() {}
 
     static final List<String> SEVERITIES = List.of("low", "medium", "high");
@@ -26,6 +27,7 @@ final class BatchReview {
     }
 
     static int submissionInterval(int slaHours, int windowHours, int handlingHours) {
+        LOG.log(System.Logger.Level.DEBUG, "submissionInterval input: {0}", slaHours);
         int interval = slaHours - windowHours - handlingHours;
         if (interval <= 0) throw new IllegalArgumentException("the SLA leaves no room to wait for a batch to fill");
         return interval;

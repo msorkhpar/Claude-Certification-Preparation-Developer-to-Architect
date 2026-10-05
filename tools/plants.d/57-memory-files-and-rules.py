@@ -18,6 +18,8 @@ _P57 = {
     "wrong-no-migration-deny": {".claude/settings.json": [('"deny": ["Edit(db/migrations/**)"]', '"deny": []')]},
     "wrong-write-rule": {".claude/settings.json": [("Edit(db/migrations/**)", "Write(db/migrations/**)")]},
     "wrong-home-path": {"CLAUDE.md": [("## Where things are\n", "## Where things are\n- My notes are in /home/dev/notes.\n")]},
+    "wrong-testing-too-wide": {".claude/rules/testing.md": [('  - "**/*.test.tsx"\n', '  - "**/*.test.tsx"\n  - "db/**/*.sql"\n')]},
+    "wrong-terraform-dead-glob": {".claude/rules/terraform.md": [('  - "terraform/**/*"\n', '  - "terraform/**/*"\n  - "infra/**/*"\n')]},
 }
 
 PLANTS[f"{X}/57-memory-files-and-rules/unit-01/practice-1"] = both("CLAUDE.md", _P57)

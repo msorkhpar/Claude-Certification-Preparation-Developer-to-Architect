@@ -11,6 +11,7 @@ import java.util.Map;
  * stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.
  */
 public final class StateManifest {
+    private static final System.Logger LOG = System.getLogger(StateManifest.class.getName());
     static final String MANIFEST = "state/manifest.txt";
 
     record Entry(String status, String path) {}

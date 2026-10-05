@@ -6,6 +6,9 @@ import expands at launch to at most four hops; AGENTS.md is read only when no CL
 Nothing here starts Claude Code: the "project" is a list of file paths and a dict of file texts.
 """
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 MAX_IMPORT_HOPS = 4
 IMPORT = re.compile(r"(?<![\w`])@([\w./-]+)")

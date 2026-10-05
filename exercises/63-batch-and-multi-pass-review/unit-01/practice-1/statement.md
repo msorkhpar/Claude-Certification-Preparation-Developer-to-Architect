@@ -10,6 +10,21 @@ Names are Python's (`submission_interval`, `choose_api`, `resubmission_plan`, `r
 the same camel-case names as static methods of `BatchReview`, with the records the starter defines (`Result`, `Step`, `Pass`, `Finding`, `Merged`); Kotlin has top-level functions and the same data
 classes. Python and TypeScript use tuples (arrays) and plain objects as the starters show.
 
+## What is already written, and what you write
+
+The starter is a working set of batch and review decisions with eight gaps cut out of it. Everything that is plumbing is written and correct: the result, plan and finding records, the loops over results, files and passes, the grouping of findings by file, line and issue, and the count of the passes that reported each. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The submission interval (unlocks `m1`): the hours between submissions are the SLA minus the window of the batch (24 hours by default) minus the handling time (2 hours by default).
+2. The SLA without room (unlocks `e1`): an interval of zero or less is refused with an error, because the SLA leaves no room to wait for a batch to fill.
+3. The choice of API (unlocks `e2`): a blocking check or a job that needs a tool loop uses the `synchronous` API; any other job uses `batch`.
+4. The items that succeeded (unlocks `e3`): an item that succeeded is not resubmitted; every other item is, by its custom id.
+5. The oversized item (unlocks `e4`): an item larger than the limit is chunked (`chunk`), not resubmitted unchanged; a rejected request (`invalid_request`) is fixed first (`fix`); anything else is resubmitted.
+6. The integration pass (unlocks `e5`): a review of more than one file gets, after the local pass of each file, one `integration` pass over all the files; a single file gets no integration pass.
+7. The merged severity and confidence (unlocks `e6`): when passes report the same finding, the merged finding keeps the highest severity and the lowest confidence.
+8. The route of a finding (unlocks `e7`): a finding is `accept`ed only when at least two independent passes reported it and its (lowest) confidence is 80 or more; every other finding goes to `verify`.
+
+`m1` needs gap 1. About twelve lines in all. The steps below describe the whole set, so you can see how your gaps are used.
+
 ## What to write
 
 - `submission_interval(sla_hours, window_hours=24, handling_hours=2)` returns the longest gap in hours between submissions that still keeps every item inside the SLA: the SLA minus the

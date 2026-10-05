@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
  * The configuration is JSON, read with Jackson.
  */
 public final class McpConfig {
+    private static final System.Logger LOG = System.getLogger(McpConfig.class.getName());
     static final List<String> SCOPES = List.of("local", "project", "user"); // highest precedence first
     static final Set<String> COVERED = Set.of("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_BEARER_TOKEN_BEDROCK", "HTTPS_PROXY", "NPM_TOKEN");
     static final Set<String> REMOTE = Set.of("http", "sse", "ws");

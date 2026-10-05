@@ -12,6 +12,7 @@ import java.util.Set;
  * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
  */
 public final class ProvenanceLoss {
+    private static final System.Logger LOG = System.getLogger(ProvenanceLoss.class.getName());
     record Row(String claim, String value, String source, String date) {}
 
     static final List<Row> FINDINGS = List.of(

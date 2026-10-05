@@ -3,6 +3,9 @@
 The tools are scripted functions, so the output shows the control flow and the text the model would be given, and nothing about how a model would
 answer. The refund service, the orders and the limits are illustrative.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class ToolError(Exception):

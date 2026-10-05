@@ -2,6 +2,9 @@
 import json
 
 from schema_check import schema_check
+import logging
+
+log = logging.getLogger(__name__)
 
 SEVERITIES = ["low", "medium", "high"]
 
@@ -22,6 +25,7 @@ def review_prompt(diff, prior=(), existing_tests=()):
 
 
 def gate(stdout, exit_code, schema, policy):
+    log.debug("gate input: %r", stdout)
     problems = []
     if exit_code != 0:
         problems.append(f"claude exited with status {exit_code}")

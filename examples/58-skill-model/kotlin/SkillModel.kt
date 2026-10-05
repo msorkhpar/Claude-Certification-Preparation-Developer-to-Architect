@@ -2,6 +2,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import harness.Show.py
 
+private val log = System.getLogger("skill_model")
+
 /**
  * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.
  *

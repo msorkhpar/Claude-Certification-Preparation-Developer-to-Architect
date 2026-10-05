@@ -5,6 +5,9 @@ a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and
 task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.
 """
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 CUSTOM_ID = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 

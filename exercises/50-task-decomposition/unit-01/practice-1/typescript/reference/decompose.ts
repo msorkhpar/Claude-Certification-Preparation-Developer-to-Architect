@@ -1,8 +1,11 @@
 // Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("decompose");
 type FilePass = (path: string, text: string, part: number, parts: number) => { findings: string[]; summary: string };
 
 // Review each file alone (long files in parts), then let one pass read only the summaries of the files that were reviewed.
 export function reviewChanges(files: Array<{ path: string; text: string }>, filePass: FilePass, crossPass: (summaries: Array<{ path: string; summary: string }>) => string[], maxLines = 40): any {
+  log.debug("reviewChanges input", files);
   const reviewed: Record<string, { findings: string[]; summary: string; parts: number }> = {};
   const failed: Record<string, string> = {};
   const skipped: string[] = [];

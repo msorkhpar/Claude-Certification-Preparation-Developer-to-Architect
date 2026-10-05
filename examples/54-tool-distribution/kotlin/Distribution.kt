@@ -1,5 +1,7 @@
 import harness.Show.py
 
+private val log = System.getLogger("distribution")
+
 /**
  * Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.
  *

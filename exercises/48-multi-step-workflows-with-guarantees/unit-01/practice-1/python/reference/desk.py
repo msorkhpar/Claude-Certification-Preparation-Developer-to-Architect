@@ -1,5 +1,9 @@
 """A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 MESSAGES = {
     "identity_required": "Verify the customer's identity before this action.",
     "order_not_owned": "That order does not belong to the verified customer.",
@@ -42,6 +46,7 @@ class RefundDesk:
         return {"content": _render(result), "is_error": False, "blocked": None}
 
     def call(self, name, args):
+        log.debug("call input: %r", args)
         if name not in TOOLS:
             return self._block(name, "unknown_tool", f"Unknown tool: {name}")
         if name == "escalate":

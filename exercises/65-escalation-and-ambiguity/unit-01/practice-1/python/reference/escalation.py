@@ -1,11 +1,16 @@
 """When a support agent resolves, asks or hands off, and what a hand-off carries. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 def _decision(action, reason, acknowledge=False):
     return {"action": action, "reason": reason, "acknowledge": acknowledge}
 
 
 def decide(case, max_attempts=2):
+    log.debug("decide input: %r", case)
     if case.get("asked_for_person", False):
         return _decision("escalate", "customer asked for a person")
     if case.get("matches", 1) > 1:

@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("ci_gate");
 /**
  * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.
  *

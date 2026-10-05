@@ -11,6 +11,21 @@ Names are Python's (`assign_tools`, `plan_turn`, `cache_impact`, `check_turn`, `
 `cacheImpact`, `checkTurn` and `authorize`; Java has the same camel-case names as static methods of `Distribute`; Kotlin has top-level functions.
 Results are maps and lists, as the examples show. A refusal is `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`).
 
+## What is already written, and what you write
+
+The starter is a working tool distributor with eight gaps cut out of it. Everything that is plumbing is written and correct: the refusal of a duplicate catalog name, an unknown tool or a role without a specialisation, the grant of an explicitly named tool, the free and none choices, the first request of a conversation and the shape of every answer. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. A role's own tools (unlocks `m1`, `e2`): a role gets the tools whose tags share one with its specialisation, in catalog order, and never an irreversible tool by tag alone.
+2. The budget (unlocks `e1`): a role with more tools than the budget is refused with an error that names the count and the budget.
+3. Forcing and its fallback (unlocks `e3`): a model that accepts forcing gets `any` or the named tool as the native tool choice; a model that rejects it gets `auto`, with the offered tools (all of them, or only the named one), strict schemas and a check of the call.
+4. The cache cost (unlocks `e4`): a changed tool list costs everything (`all`), a changed tool choice costs the cached messages (`messages`), and a repeat costs nothing (`none`).
+5. The wrong tool (unlocks `e5`): when a particular tool was required first, a reply whose first call is another tool is `wrong_tool`.
+6. The tool the policy names (unlocks `e6`): a tool that the policy does not name is refused with `unknown_tool`.
+7. The amount and the customer (unlocks `e6`): for a tool with a cap, an amount that is not a whole number above zero is refused with `bad_amount`; a call whose customer is not the verified one is refused with `not_owner`.
+8. The cap and the approval (unlocks `e7`): an amount above the cap is refused with `over_cap` and sent to a person (the cap is inclusive); an irreversible call without an approval is refused with `needs_approval`, and an approval never lifts the cap.
+
+`m1` needs gap 1. About twenty lines in all. The steps below describe the whole distributor, so you can see how your gaps are used.
+
 ## Build it in four steps
 
 ### Step 1: `assign_tools(roles, catalog, budget=5)`

@@ -8,6 +8,7 @@ import java.util.Set;
 
 /** Distributing tools across agents: scoped tool sets, the tool choice of a turn, a check of the reply and the authorisation of a call. See ../../statement.md. Results are JSON-like maps. */
 final class Distribute {
+    private static final System.Logger LOG = System.getLogger(Distribute.class.getName());
     private Distribute() {}
 
     /** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */
@@ -112,6 +113,7 @@ final class Distribute {
     /** Decide a call to a tool that cannot be undone, in the tool layer, whatever the model says. */
     @SuppressWarnings("unchecked")
     static Map<String, Object> authorize(Map<String, Object> call, Map<String, Object> policy, Collection<String> approvals) {
+        LOG.log(System.Logger.Level.DEBUG, "authorize input: {0}", call);
         Map<String, Map<String, Object>> tools = (Map<String, Map<String, Object>>) policy.getOrDefault("tools", Map.of());
         Map<String, Object> rule = tools.get((String) call.get("tool"));
         if (rule == null) return answer(false, "unknown_tool", call.get("tool") + " is not an allowed tool", false);

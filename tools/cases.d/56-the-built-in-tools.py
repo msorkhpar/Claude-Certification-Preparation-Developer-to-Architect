@@ -15,9 +15,9 @@ PRACTICES[f"{X}/56-the-built-in-tools/unit-01/practice-1"] = {
     ],
     "plants": {
         "wrong-no-src-deny": (["m1"], "drops the denial of edits under src"),
-        "wrong-bash-bare": (["m1", "e2"], "allows the whole Bash tool instead of read-only git patterns"),
+        "wrong-bash-bare": (["e2", "m1"], "allows the whole Bash tool instead of read-only git patterns"),
         "wrong-notes-everywhere": (["m1"], "allows edits to every path instead of notes only"),
-        "wrong-write-rule": (["m1", "e2"], "writes the notes rule for the Write tool, whose path rules are never matched"),
+        "wrong-write-rule": (["e2", "m1"], "writes the notes rule for the Write tool, whose path rules are never matched"),
         "wrong-no-env-deny": (["e1"], "drops the denial of reading the environment file"),
         "wrong-grep-rule": (["e1", "e2"], "writes the secrets rule for Grep instead of Read"),
         "wrong-agent-edit": (["e3"], "gives the explorer the Edit tool"),
@@ -33,5 +33,6 @@ PRACTICES[f"{X}/56-the-built-in-tools/unit-01/practice-1"] = {
         "wrong-fallback-rewrite-first": (["e6"], "rewrites the whole file before widening the anchor"),
         "wrong-fallback-no-replace-all": (["e6"], "leaves replace_all out of the remedies"),
         "wrong-home-path": (["e7"], "writes a personal home path into the plan"),
+        "wrong-extra-permission-key": (["e2"], "adds a key to the permissions block that is not allow, ask or deny"),
     },
 }

@@ -10,6 +10,20 @@ Names are Python's (`build_review_prompt`, `category_report`, `next_step`); Type
 camel-case names as static methods of `ReviewSpec` and Kotlin has top-level functions. Results are maps and lists, as the starters show. A refusal is `ValueError`
 (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`).
 
+## What is already written, and what you write
+
+The starter is a working review specification with seven gaps cut out of it. Everything that is plumbing is written and correct: the criteria and examples blocks of the prompt, the checks that a report and a skip text exist and that every example has a reason and names a criterion, the counting of accepted and dismissed findings, and the reading of a request's fields. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The prompt's diff and assembly (unlocks `m1`): the criteria come first, then the examples, then the diff last in a `<diff>` block, joined with newlines.
+2. The vague phrase (unlocks `e1`): the first phrase of VAGUE that a text contains (ignoring case) is returned, so a vague report or skip text is refused; a text with none returns nothing.
+3. The severity examples (unlocks `e2`): a criterion without a concrete example for `high` and for `low` is refused.
+4. The number and the verdicts of the examples (unlocks `e3`): two to four examples are required, with at least one `report` and one `skip` and no other verdict.
+5. The disabling of a category (unlocks `e4`): a category is disabled when it has at least `min_reviewed` reviewed findings and a precision (accepted over reviewed, two decimals) below `min_precision`.
+6. The most dismissed patterns (unlocks `e5`): the dismissed patterns are listed by count, highest first, then by name, and cut to the first three.
+7. The next step of an incomplete request (unlocks `e6`, `e7`): with something missing that has no default, an attended run asks for exactly those fields and an unattended run stops, never asking.
+
+`m1` needs gap 1. About thirteen lines in all. The steps below describe the whole specification, so you can see how your gaps are used.
+
 ## What to write
 
 - `build_review_prompt(spec, diff)`: `spec` has `criteria` (a list of `{id, report, skip, severity: {high, low}}`) and `examples` (a list of `{verdict, code, reason}`, a

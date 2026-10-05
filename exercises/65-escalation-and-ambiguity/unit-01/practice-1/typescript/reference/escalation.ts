@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("escalation");
 /** When a support agent resolves, asks or hands off, and what a hand-off carries. See ../../statement.md. */
 
 function decision(action: string, reason: string, acknowledge = false) {
@@ -5,6 +7,7 @@ function decision(action: string, reason: string, acknowledge = false) {
 }
 
 export function decide(c: any, maxAttempts = 2): { action: string; reason: string; acknowledge: boolean } {
+  log.debug("decide input", c);
   if (c.asked_for_person ?? false) return decision("escalate", "customer asked for a person");
   if ((c.matches ?? 1) > 1) return decision("clarify", "ambiguous customer match");
   if (!(c.policy_covers ?? true)) return decision("escalate", "policy does not cover the request");

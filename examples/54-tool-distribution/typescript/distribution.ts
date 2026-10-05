@@ -1,6 +1,8 @@
 // Four decisions about tools in a research and refund system: who gets which tool, what tool_choice a turn can use, whether a reply made the call it had to, and whether a refund may run.
 //
 // No model is called. The catalog, the models and the limits are illustrative; the models that reject a forced choice are the ones the "Define tools" page lists, read on 2026-10-03.
+import { logger } from "./logger.ts";
+const log = logger("distribution");
 
 export const CATALOG: Record<string, string[]> = {
   web_search: ["web"], fetch_page: ["web"], verify_fact: ["web", "synthesis"], load_document: ["documents"], extract_data_points: ["documents"],

@@ -3,6 +3,7 @@ import java.util.Map;
 
 /** Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md. */
 final class RhythmPlan {
+    private static final System.Logger LOG = System.getLogger(RhythmPlan.class.getName());
     private RhythmPlan() {}
 
     record Choice(String mechanism, String reason, int intervalMinutes) {}
@@ -35,6 +36,7 @@ final class RhythmPlan {
     }
 
     static Choice choose(Map<String, Object> job) {
+        LOG.log(System.Logger.Level.DEBUG, "choose input: {0}", job);
         String trigger = job.get("trigger") == null ? "interval" : String.valueOf(job.get("trigger"));
         int seconds = number(job, "interval_seconds", 0);
         int days = number(job, "lasts_days", 1);

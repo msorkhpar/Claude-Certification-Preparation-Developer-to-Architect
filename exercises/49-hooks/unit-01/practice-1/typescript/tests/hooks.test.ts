@@ -115,13 +115,17 @@ test("e8 a run through the sdk denies the large refund and shows the model a rea
   const options = buildOptions(d, FAKE);
   assert.ok(options !== null && options !== undefined);
   const results: Record<string, string> = {};
-  for await (const m of query({ prompt: "Refund order A-7", options })) {
-    const content = (m as any)?.message?.content;
-    if ((m as any).type === "user" && Array.isArray(content)) {
-      for (const b of content) if (b.type === "tool_result") results[b.tool_use_id] = typeof b.content === "string" ? b.content : JSON.stringify(b.content);
+  try {
+    for await (const m of query({ prompt: "Refund order A-7", options })) {
+      const content = (m as any)?.message?.content;
+      if ((m as any).type === "user" && Array.isArray(content)) {
+        for (const b of content) if (b.type === "tool_result") results[b.tool_use_id] = typeof b.content === "string" ? b.content : JSON.stringify(b.content);
+      }
     }
+  } catch (e) {
+    assert.fail(`the run did not finish: ${e}`);
   }
-  assert.deepEqual(JSON.parse(results.t1), { order: "A-7", created: "2023-11-14", status: "approved", amount: "129.50" });
-  assert.ok(!results.t2.includes("refunded") && results.t2.includes("limit"));
+  assert.deepEqual(JSON.parse(results.t1 ?? "null"), { order: "A-7", created: "2023-11-14", status: "approved", amount: "129.50" });
+  assert.ok(!(results.t2 ?? "").includes("refunded") && (results.t2 ?? "").includes("limit"));
   assert.equal(results.t3, "refunded");
 });

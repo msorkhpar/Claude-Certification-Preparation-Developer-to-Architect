@@ -1,5 +1,9 @@
 """Distributing tools across agents: scoped tool sets, the tool choice of a turn, a check of the reply and the authorisation of a call. See ../../statement.md."""
 
+import logging
+
+log = logging.getLogger(__name__)
+
 NO_FORCING = {"claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"}  # models whose API rejects tool_choice any and tool, as read on 2026-10-03
 
 
@@ -73,6 +77,7 @@ def check_turn(blocks, need, forced=None):
 
 def authorize(call, policy, approvals):
     """Decide a call to a tool that cannot be undone, in the tool layer, whatever the model says."""
+    log.debug("authorize input: %r", call)
     rule = policy.get("tools", {}).get(call.get("tool"))
     if rule is None:
         return _answer(False, "unknown_tool", f"{call.get('tool')} is not an allowed tool")

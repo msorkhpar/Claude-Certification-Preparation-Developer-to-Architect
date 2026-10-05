@@ -15,7 +15,7 @@ PRACTICES[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
         ("e8", "edge", "the hand off carries the structured facts and no transcript and refuses a case without an id"),
     ],
     "plants": {
-        "wrong-investigate-first": (["m1", "e4"], "escalates on an explicit request only when the policy also has a gap"),
+        "wrong-investigate-first": (["e4", "m1"], "escalates on an explicit request only when the policy also has a gap"),
         "wrong-angry-escalates": (["e6"], "escalates an angry customer because of the sentiment"),
         "wrong-low-confidence-escalates": (["e6"], "escalates when the model reports low confidence"),
         "wrong-picks-first-match": (["e3", "e6"], "never asks which of several matching customers is meant"),
@@ -23,5 +23,8 @@ PRACTICES[f"{X}/65-escalation-and-ambiguity/unit-01/practice-1"] = {
         "wrong-no-acknowledgement": (["e1"], "does not acknowledge a frustrated customer"),
         "wrong-clarify-all-fields": (["e7"], "asks about fields on which the matches agree"),
         "wrong-handoff-transcript": (["e8"], "attaches the whole transcript to the hand-off"),
+        "wrong-three-matches-guessed": (["e3"], "asks a clarifying question only for exactly two matches and guesses with more"),
+        "wrong-ask-loses-to-many-matches": (["e4"], "lets four or more matches outrank an explicit request for a person"),
+        "wrong-limit-off-by-one": (["e5"], "escalates only after the attempts pass the limit instead of reaching it"),
     },
 }

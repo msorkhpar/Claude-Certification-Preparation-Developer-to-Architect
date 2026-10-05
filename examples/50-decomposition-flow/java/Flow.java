@@ -10,6 +10,7 @@ import java.util.Map;
  * how a real model would review the code. The files, summaries and findings are illustrative.
  */
 public final class Flow {
+    private static final System.Logger LOG = System.getLogger(Flow.class.getName());
     static final Map<String, String> CHANGE = new LinkedHashMap<>();
     static final Map<String, String> SUMMARIES = new LinkedHashMap<>();
 

@@ -12,6 +12,7 @@ import java.util.Map;
  * Read, Write, Edit, Bash, Grep and Glob.
  */
 public final class BuiltinTools {
+    private static final System.Logger LOG = System.getLogger(BuiltinTools.class.getName());
     static final List<String> SEARCH_TOOLS = List.of("Grep", "Glob");
     static final List<String> BASE_TOOLS = List.of("Read", "Write", "Edit", "Bash");
     static final Map<String, List<String>> RULE_COVERS = Map.of("Read", List.of("Read", "Grep", "Glob"), "Edit", List.of("Edit", "Write"), "Bash", List.of("Bash")); // a Write(path) rule is never matched

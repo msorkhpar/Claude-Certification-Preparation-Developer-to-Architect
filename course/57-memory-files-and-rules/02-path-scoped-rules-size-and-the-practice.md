@@ -65,6 +65,9 @@ import expands at launch to at most four hops; AGENTS.md is read only when no CL
 Nothing here starts Claude Code: the "project" is a list of file paths and a dict of file texts.
 """
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 MAX_IMPORT_HOPS = 4
 IMPORT = re.compile(r"(?<![\w`])@([\w./-]+)")
@@ -197,6 +200,8 @@ imports: ['docs/a.md', 'docs/b.md', 'docs/c.md', 'docs/d.md']
 unresolved: ['docs/typo.md']
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("memory_loading");
 /**
  * Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.
  *
@@ -374,6 +379,7 @@ import java.util.regex.Pattern;
  * Nothing here starts Claude Code: the "project" is a list of file paths and a map of file texts.
  */
 public final class MemoryLoading {
+    private static final System.Logger LOG = System.getLogger(MemoryLoading.class.getName());
     static final int MAX_IMPORT_HOPS = 4;
     static final Pattern IMPORT = Pattern.compile("(?<![\\w`])@([\\w./-]+)");
     private static final Pattern CODE = Pattern.compile("```.*?```|`[^`]*`", Pattern.DOTALL);
@@ -546,6 +552,8 @@ unresolved: ['docs/typo.md']
 ```
 ```kotlin
 import harness.Show.py
+
+private val log = System.getLogger("memory_loading")
 
 /**
  * Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.

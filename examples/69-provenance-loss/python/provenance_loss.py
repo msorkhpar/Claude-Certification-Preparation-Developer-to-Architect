@@ -4,6 +4,10 @@ The exam guide (task 5.6) says that source attribution is lost when findings are
 settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into
 a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 FINDINGS = [
     ("market growth 2024", "12%", "Firm A report", "2024-05-01"),
     ("market growth 2024", "9%", "Firm B survey", "2024-05-01"),

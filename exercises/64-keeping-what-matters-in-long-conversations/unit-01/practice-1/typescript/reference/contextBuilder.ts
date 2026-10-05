@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("context_builder");
 /** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */
 
 export function estimateTokens(text: string): number {
@@ -27,6 +29,7 @@ export function updateFacts(facts: Record<string, any>, name: string, value: str
 }
 
 export function buildContext(customer: string, facts: any[], summary: string, recent: any[]): string {
+  log.debug("buildContext input", customer);
   const parts: string[] = [];
   const mine = facts.filter((f) => f.customer === customer);
   if (mine.length > 0) parts.push("## Case facts\n" + mine.map((f) => `${f.name}: ${f.value} (as of ${f.as_of})`).join("\n"));

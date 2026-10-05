@@ -14,6 +14,22 @@ functions and the class `ToolError`. The class `ToolError` is given in every sta
 `permission`, `business` or `timeout`), a message, and optionally `retry_after_ms` and an `explanation` for the customer. Results are maps, as the examples
 show. Waits are whole milliseconds.
 
+## What is already written, and what you write
+
+The starter is a working tool-error helper with nine gaps cut out of it. Everything that is plumbing is written and correct: the tool error class, the constants, the tool-result block, the retry loop with its bound, the arguments of every attempt and the message of an error that gives up. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The structured error (unlocks `m1`): a failed call becomes a map with `is_error` true, the `category`, the `retryable` flag of its category from KINDS, the trimmed `message` and the `attempts`.
+2. The refusals (unlocks `e1`): an unknown category and a generic message (`Operation failed`, `error`, an empty text, with or without a final period) are refused with an error.
+3. Only transient failures are retried (unlocks `e2`): a failure of any other kind (validation, permission, business) returns at once as a structured error with the tool's message and explanation.
+4. The wait between attempts (unlocks `e2`, `e3`): the wait the service asked for (`retry_after_ms`) is honoured; otherwise the wait doubles from `base`: base, 2 x base, 4 x base.
+5. The empty result (unlocks `e4`): none, an empty text, an empty list and an empty map count as a valid empty result; zero and false do not.
+6. The timeout (unlocks `e5`): a timeout on a call that is not safe to repeat (not read-only, no idempotency key) returns `outcome_unknown` with a message that says to check the state; otherwise it counts as a transient failure.
+7. The idempotency key (unlocks `e5`): when the policy has an idempotency key, every attempt carries it in a copy of the arguments; the caller's own arguments are never changed.
+8. The next action (unlocks `e6`): an error maps to the action of its category in ACTIONS; a result that is not an error is `accept_empty` when it is empty and `continue` otherwise.
+9. The unexpected exception (unlocks `e7`): an exception that is not a tool error becomes an `internal` structured error that says the tool failed unexpectedly, and the run goes on.
+
+`m1` needs gap 1. About twelve lines in all. The steps below describe the whole helper, so you can see how your gaps are used.
+
 ## Build it in four steps
 
 ### Step 1: `make_error(kind, message, explanation=None, attempts=1, attempted=None)` and `to_tool_result(tool_use_id, result)`

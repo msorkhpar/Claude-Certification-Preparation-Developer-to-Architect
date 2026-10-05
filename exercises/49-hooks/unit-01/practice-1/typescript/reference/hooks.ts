@@ -1,4 +1,6 @@
 // Hooks with the Agent SDK and Claude Code: a refund gate, output normalisation, the options that register them, and a command hook. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("hooks");
 const AUTO_LIMIT = 200;
 const ASK_LIMIT = 500;
 const STATUS: Record<number, string> = { 0: "pending", 1: "approved", 2: "declined" };
@@ -8,6 +10,7 @@ const answer = (event: string, fields: Record<string, unknown>) => ({ hookSpecif
 
 // PreToolUse for process_refund: allow small refunds, ask a person for middle ones, deny large ones, and fail closed on a bad amount.
 export async function preRefund(input: any, toolUseId?: string, context?: unknown): Promise<any> {
+  log.debug("preRefund input", input);
   if (input?.tool_name !== "process_refund") return {};
   const amount = input?.tool_input?.amount;
   if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {

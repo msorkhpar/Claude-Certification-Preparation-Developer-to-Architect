@@ -10,6 +10,19 @@ Names are Python's (`trim_record`, `update_facts`, `build_context`, `missing_fro
 camel-case names as static methods of `ContextBuilder` with the records the starter defines (`Fact`, `FactEntry`, `Message`); Kotlin has top-level functions and the same data classes.
 A token is estimated as the length of the text divided by four, rounded up (`estimate_tokens`, given).
 
+## What is already written, and what you write
+
+The starter is a working context builder with six gaps cut out of it. Everything that is plumbing is written and correct: the token estimate, the copy of the facts before a change, the new-fact case, the summary and recent-messages sections, the join of the sections and the cost loop of the window. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The trimmed record (unlocks `m1`, `e1`): only the named fields are kept, with their exact values and in the order they are named; a named field the record does not have is skipped.
+2. The newer fact (unlocks `e2`, `e3`): a fact that is as new as the stored one or newer replaces it and the replaced value is kept in `superseded` as `value@date`; an older fact that arrives late is only added to the history and does not replace the current value.
+3. The customer's facts (unlocks `e4`): only the case facts of the customer the context is built for are used; those of another customer never enter it.
+4. The case facts section (unlocks `e5`): when the customer has facts, a `## Case facts` section with one line `name: value (as of date)` each comes first, before the summary and the recent messages.
+5. The values the summary lost (unlocks `e6`): the names of the facts whose exact value does not appear in the summary are returned, so a summary that lost a value is reported.
+6. The tool call with its result (unlocks `e7`): a tool call and the result that follows it with the same id form one unit that the window keeps or drops whole; every other message is a unit of its own.
+
+`m1` needs gap 1. About sixteen lines in all. The steps below describe the whole builder, so you can see how your gaps are used.
+
 ## What to write
 
 - `trim_record(record, keep)` returns a new record with only the fields named in `keep`, in the order of `keep`, with their values unchanged. A name the record does not have is skipped.

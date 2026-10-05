@@ -9,6 +9,20 @@ Names are Python's (`accuracy_by`, `can_automate`, `calibrate_threshold`, `strat
 static methods of `ReviewRouting` with the records the starter defines (`Rec`, `Seg`, `Automation`, `Labeled`, `Item`, `Extraction`, `Routing`); Kotlin has top-level functions and data classes.
 Percentages are whole numbers, rounded half up (`(200 * correct + total) // (2 * total)`).
 
+## What is already written, and what you write
+
+The starter is a working review router with seven gaps cut out of it. Everything that is plumbing is written and correct: the rounding of a percentage, the overall figure, the order of the strata, the sorting of the stratum members, the set of irreversible actions and the shape of every answer. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The accuracy by segment (unlocks `m1`, `e1`): after the overall figure, one entry for each `document type/field` segment, sorted by name, with its correct count, its total and its rounded percentage, so that a weak segment shows next to a high overall figure.
+2. The segments that stop automation (unlocks `e2`): a segment with fewer samples than `min_n` is undersampled, and one with enough samples whose percentage is below the threshold is failing; automation needs every segment to pass.
+3. The calibrated threshold (unlocks `e3`, `e4`): the lowest confidence whose accepted items (confidence at or above it) have a precision of at least the target; none when no confidence level meets the target.
+4. The best of every stratum (unlocks `e5`): the sample takes the first `per_stratum` items of each stratum by rank (then id), so every stratum is represented by its best ranked items.
+5. What goes to review (unlocks `e6`): an extraction goes to review when it has a conflict or its confidence is below the threshold; conflicts come first, then the lowest confidence, then by id.
+6. The review capacity (unlocks `e7`): no more than `capacity` items go to review, the first ones of the queue; the rest wait in the backlog, in order.
+7. The checkpoint (unlocks `e8`): an irreversible action (`delete_records`, `send_payment`, `close_account`) needs a `human` whatever the confidence; so does an amount above the limit; any other action is `auto`.
+
+`m1` needs gap 1. About sixteen lines in all. The steps below describe the whole router, so you can see how your gaps are used.
+
 ## What to write
 
 - `accuracy_by(records)` takes records `{doc_type, field, correct}` and returns a list of `{segment, correct, total, percent}`: first the segment `overall`, then one segment per `doc_type/field`
