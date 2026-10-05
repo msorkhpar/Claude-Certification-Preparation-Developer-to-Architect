@@ -50,7 +50,7 @@ class Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<S
             text = text.replace(Regex("[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+"), "[EMAIL]")
             return text.replace(Regex("\\b(?:[0-9][ -]?){12,18}[0-9]\\b")) { m ->
                 val digits = m.value.replace(Regex("[ -]"), "")
-                if (digits.length in 13..19 && luhn(digits)) "[CARD]" else m.value
+                if (isCard(digits)) "[CARD]" else m.value
             }
         }
 
@@ -70,6 +70,16 @@ class Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<S
             val parts = path.replace('\\', '/').split("/")
             val base = parts.last()
             return base == ".env" || (base.startsWith(".env.") && base != ".env.example") || parts.dropLast(1).contains("secrets") || base.endsWith(".pem") || base.endsWith(".key")
+        }
+
+        private fun commandAllowed(words: List<String>): Boolean {
+            if (words.isEmpty() || words[0] !in setOf("ls", "cat", "pytest", "git")) return false
+            if (words[0] == "git") return words.size > 1 && words[1] in setOf("status", "diff", "log")
+            return true
+        }
+
+        private fun isCard(digits: String): Boolean {
+            return digits.length in 13..19 && luhn(digits)
         }
 
         private fun result(decision: String, reason: String = "ok"): Map<String, Any?> = linkedMapOf("decision" to decision, "reason" to reason)
@@ -121,9 +131,7 @@ class Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<S
         val words = command.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
         if (words.any { it.substringAfterLast('/') == "sudo" || it.substringAfterLast('/') == "rm" }) return result("deny", "dangerous command")
         if (shellTricks.any { it in command }) return result("deny", "chaining or redirection")
-        if (words.isEmpty() || words[0] !in setOf("ls", "cat", "pytest", "git") || (words[0] == "git" && (words.size < 2 || words[1] !in setOf("status", "diff", "log")))) {
-            return result("deny", "command not allowed")
-        }
+        if (!commandAllowed(words)) return result("deny", "command not allowed")
         if (words.drop(1).any { !it.startsWith("-") && isSecret(it) }) return result("deny", "secret file")
         if (words[0] == "pytest" && tainted) return result("ask", "untrusted content in this session")
         return result("allow")
@@ -142,8 +150,12 @@ class Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<S
     private fun email(args: Map<String, Any?>): Map<String, Any?> {
         val to = (args["to"] ?: "").toString()
         val domain = if ("@" in to) to.substringAfterLast('@').lowercase() else ""
-        if (domain !in allowedEmailDomains) return result("deny", "recipient not allowed")
         val text = "${args["subject"] ?: ""}\n${args["body"] ?: ""}"
+        return emailDecision(domain, text)
+    }
+
+    private fun emailDecision(domain: String, text: String): Map<String, Any?> {
+        if (domain !in allowedEmailDomains) return result("deny", "recipient not allowed")
         if (redact(text) != text) return result("deny", "sensitive data in the body")
         if (tainted) return result("deny", "a person must send it")
         return result("allow")

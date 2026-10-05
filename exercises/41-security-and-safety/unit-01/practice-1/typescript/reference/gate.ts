@@ -43,7 +43,7 @@ export function redact(input: string): string {
   text = text.replace(/[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+/g, "[EMAIL]");
   return text.replace(/\b(?:[0-9][ -]?){12,18}[0-9]\b/g, (m) => {
     const digits = m.replace(/[ -]/g, "");
-    return digits.length >= 13 && digits.length <= 19 && luhn(digits) ? "[CARD]" : m;
+    return isCard(digits) ? "[CARD]" : m;
   });
 }
 
@@ -62,6 +62,16 @@ function isSecret(path: string): boolean {
   const parts = path.replaceAll("\\", "/").split("/");
   const base = parts[parts.length - 1];
   return base === ".env" || (base.startsWith(".env.") && base !== ".env.example") || parts.slice(0, -1).includes("secrets") || base.endsWith(".pem") || base.endsWith(".key");
+}
+
+function commandAllowed(words: string[]): boolean {
+  if (!words.length || !["ls", "cat", "pytest", "git"].includes(words[0])) return false;
+  if (words[0] === "git") return words.length > 1 && ["status", "diff", "log"].includes(words[1]);
+  return true;
+}
+
+function isCard(digits: string): boolean {
+  return digits.length >= 13 && digits.length <= 19 && luhn(digits);
 }
 
 const result = (decision: Decision["decision"], reason = "ok"): Decision => ({ decision, reason });
@@ -124,7 +134,7 @@ export class Gate {
     const words = command.split(/\s+/).filter(Boolean);
     if (words.some((w) => ["sudo", "rm"].includes(w.split("/").at(-1) as string))) return result("deny", "dangerous command");
     if (SHELL_TRICKS.some((t) => command.includes(t))) return result("deny", "chaining or redirection");
-    if (!words.length || !["ls", "cat", "pytest", "git"].includes(words[0]) || (words[0] === "git" && (words.length < 2 || !["status", "diff", "log"].includes(words[1])))) return result("deny", "command not allowed");
+    if (!commandAllowed(words)) return result("deny", "command not allowed");
     if (words.slice(1).some((w) => !w.startsWith("-") && isSecret(w))) return result("deny", "secret file");
     if (words[0] === "pytest" && this.isTainted) return result("ask", "untrusted content in this session");
     return result("allow");
@@ -143,8 +153,12 @@ export class Gate {
   private email(args: Args): Decision {
     const to = String(args.to ?? "");
     const domain = to.includes("@") ? to.slice(to.lastIndexOf("@") + 1).toLowerCase() : "";
-    if (!this.allowedEmailDomains.includes(domain)) return result("deny", "recipient not allowed");
     const text = `${args.subject ?? ""}\n${args.body ?? ""}`;
+    return this.emailDecision(domain, text);
+  }
+
+  private emailDecision(domain: string, text: string): Decision {
+    if (!this.allowedEmailDomains.includes(domain)) return result("deny", "recipient not allowed");
     if (redact(text) !== text) return result("deny", "sensitive data in the body");
     if (this.isTainted) return result("deny", "a person must send it");
     return result("allow");

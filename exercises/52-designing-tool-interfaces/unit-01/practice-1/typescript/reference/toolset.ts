@@ -29,6 +29,36 @@ function exampleOk(example: any, properties: Obj, required: string[]): boolean {
   return Object.entries(example).every(([name, value]) => name in properties && valid(value, properties[name]));
 }
 
+function nameRules(name: string): Set<string> {
+  const found = new Set<string>();
+  if (!NAME.test(name)) found.add("bad-name");
+  if (VAGUE.has(name.toLowerCase())) found.add("vague-name");
+  return found;
+}
+
+function descriptionRules(description: string): Set<string> {
+  const found = new Set<string>();
+  const low = description.toLowerCase();
+  if ((description.match(/[.!?](?:\s|$)/g) ?? []).length < 3) found.add("short-description");
+  if (!["do not use", "not for", "instead of"].some((phrase) => low.includes(phrase))) found.add("no-boundary");
+  return found;
+}
+
+function parameterRules(properties: Obj, required: string[]): Set<string> {
+  const found = new Set<string>();
+  const specs: Obj[] = Object.values(properties).map((s) => s ?? {});
+  if (specs.some((spec) => !String(spec.description ?? "").trim())) found.add("param-undescribed");
+  if (required.some((item) => !(item in properties))) found.add("required-unknown");
+  return found;
+}
+
+function listAndHintRules(name: string, properties: Obj, hints: Obj): Set<string> {
+  const found = new Set<string>();
+  if (startsWithAny(name, READ_PREFIXES) && !("limit" in properties && "cursor" in properties)) found.add("list-unbounded");
+  if ((hints.readOnlyHint === true && startsWithAny(name, WRITE_PREFIXES)) || (hints.destructiveHint === false && startsWithAny(name, DELETE_PREFIXES))) found.add("hint-contradicts-name");
+  return found;
+}
+
 /** The rules one tool breaks, sorted and without repeats. */
 export function lintTool(tool: Obj): string[] {
   const found = new Set<string>();
@@ -37,25 +67,25 @@ export function lintTool(tool: Obj): string[] {
   const schema = tool.input_schema ?? {};
   const properties: Obj = schema.properties ?? {};
   const required: string[] = schema.required ?? [];
-  const low = description.toLowerCase();
   const specs: Obj[] = Object.values(properties).map((s) => s ?? {});
-  if (!NAME.test(name)) found.add("bad-name");
-  if (VAGUE.has(name.toLowerCase())) found.add("vague-name");
-  if ((description.match(/[.!?](?:\s|$)/g) ?? []).length < 3) found.add("short-description");
-  if (!low.includes("use when")) found.add("no-use-when");
-  if (!["do not use", "not for", "instead of"].some((phrase) => low.includes(phrase))) found.add("no-boundary");
-  if (specs.some((spec) => !String(spec.description ?? "").trim())) found.add("param-undescribed");
-  if (required.some((item) => !(item in properties))) found.add("required-unknown");
+  nameRules(name).forEach((rule) => found.add(rule));
+  descriptionRules(description).forEach((rule) => found.add(rule));
+  if (!description.toLowerCase().includes("use when")) found.add("no-use-when");
+  parameterRules(properties, required).forEach((rule) => found.add(rule));
   if (specs.some((spec) => spec.type === "string" && !("enum" in spec) && /one of|either/.test(String(spec.description ?? "").toLowerCase()))) found.add("open-set");
   if (Object.entries(properties).some(([key, spec]) => /reasoning|thinking/.test(key.toLowerCase() + " " + String((spec ?? {}).description ?? "").toLowerCase()))) found.add("reasoning-param");
   if ((tool.input_examples ?? []).some((example: any) => !exampleOk(example, properties, required))) found.add("bad-example");
-  if (startsWithAny(name, READ_PREFIXES) && !("limit" in properties && "cursor" in properties)) found.add("list-unbounded");
-  const hints: Obj = tool.annotations ?? {};
-  if ((hints.readOnlyHint === true && startsWithAny(name, WRITE_PREFIXES)) || (hints.destructiveHint === false && startsWithAny(name, DELETE_PREFIXES))) found.add("hint-contradicts-name");
+  listAndHintRules(name, properties, tool.annotations ?? {}).forEach((rule) => found.add(rule));
   return [...found].sort();
 }
 
 const words = (text: unknown) => new Set(String(text ?? "").toLowerCase().match(/[a-z]{3,}/g) ?? []);
+
+function similar(wa: Set<string>, wb: Set<string>): boolean {
+  const union = new Set([...wa, ...wb]);
+  const shared = [...wa].filter((w) => wb.has(w)).length;
+  return union.size > 0 && shared / union.size >= OVERLAP;
+}
 
 /** [tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large. */
 export function lintToolSet(tools: Obj[], maxTools = 20): string[][] {
@@ -67,9 +97,7 @@ export function lintToolSet(tools: Obj[], maxTools = 20): string[][] {
   tools.forEach((a, i) => {
     for (const b of tools.slice(i + 1)) {
       const wa = words(a.description), wb = words(b.description);
-      const union = new Set([...wa, ...wb]);
-      const shared = [...wa].filter((w) => wb.has(w)).length;
-      if (a.name !== b.name && union.size > 0 && shared / union.size >= OVERLAP) {
+      if (a.name !== b.name && similar(wa, wb)) {
         add(a.name, `overlap:${b.name}`);
         add(b.name, `overlap:${a.name}`);
       }
@@ -91,15 +119,24 @@ function decode(cursor: string, total: number): number {
   return offset;
 }
 
-/** One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on. */
-export function pageResults(items: string[], cursor: string | null = null, limit = 10, maxChars = 2000): { items: string[]; next_cursor: string | null; truncated: boolean; note: string | null } {
+function checkLimit(limit: number): number {
   if (!Number.isInteger(limit) || limit < 1) throw new Error("limit must be a whole number of at least 1");
   limit = Math.min(limit, MAX_LIMIT);
+  return limit;
+}
+
+function overCap(page: string[], used: number, item: string, maxChars: number): boolean {
+  return page.length > 0 && used + item.length > maxChars;
+}
+
+/** One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on. */
+export function pageResults(items: string[], cursor: string | null = null, limit = 10, maxChars = 2000): { items: string[]; next_cursor: string | null; truncated: boolean; note: string | null } {
+  limit = checkLimit(limit);
   const offset = cursor === null ? 0 : decode(cursor, items.length);
   const page: string[] = [];
   let used = 0;
   for (const item of items.slice(offset, offset + limit)) {
-    if (page.length && used + item.length > maxChars) break;
+    if (overCap(page, used, item, maxChars)) break;
     page.push(item);
     used += item.length;
   }

@@ -15,6 +15,23 @@ The Java and Kotlin folders give you `Json` (parse text into maps, lists, string
 compactly, keys in insertion order). Python and TypeScript have JSON built in. Decisions and records are plain data: a map with string
 keys in every language.
 
+## What is already written, and what you write
+
+The starter is a working gate with six gaps cut out of it. Everything that is plumbing is written and correct: the injection patterns and the
+`screen` function, the path resolver, the dangerous-command, chaining, secret-argument and taint checks, the URL parsing, the audit, the card
+and key redaction around the Luhn check, and the hook answer. Each gap is a small function with its signature, a comment that says what it
+receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an
+assertion. Write them in this order (the Java and Kotlin names are the camel-case forms):
+
+1. `wrap_untrusted` unlocks `m1` and `e1`: the JSON block for clean text and the withheld error for flagged text.
+2. `_is_secret` unlocks `e2`: which file names count as secrets.
+3. `_command_allowed` unlocks `e3`: the allow-list of first words, and the `git` sub-commands.
+4. `_is_card` unlocks `e6`: the length and Luhn test that decides whether a run of digits is a card number.
+5. `_email_decision` unlocks `e4` and `e5`: the domain list, the body check and the tainted-session refusal.
+6. `alerts` unlocks `e7`: actors with three denials, in the order they reached three.
+
+About twenty lines in all. The sections below describe the whole gate; the parts you do not write are there so you can see how your functions are used.
+
 ## What to write
 
 Names are written in Python style; TypeScript uses camelCase (`wrapUntrusted`, `markUntrusted`, `hookResponse`, `tainted` as a getter,

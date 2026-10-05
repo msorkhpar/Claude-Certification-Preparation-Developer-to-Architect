@@ -11,6 +11,25 @@ and `parallelSafe` (arguments `maxTools`, `maxChars`); Java has `Toolset.lintToo
 arguments. A tool is a map: `name`, `description`, `input_schema` (`properties`, each with `type`, `description` and optionally `enum`; and `required`), optionally
 `input_examples` (a list of example inputs), `annotations` (a map of Boolean hints) and, for a tool that came from a server, `server`.
 
+## What is already written, and what you write
+
+The starter is a working grader with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the type check
+for examples, the word extraction, the cursor encoding and decoding, the paging loop and its note, the pairing and sorting of a tool set, the
+hint defaults and `parallel_safe`, and the rules that are not listed below. Each gap is a small function with its signature, a comment that
+says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the
+cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `_name_rules` unlocks `e1`: `bad-name` and `vague-name`.
+2. `_description_rules` unlocks `e2`: `short-description` and `no-boundary`.
+3. `_parameter_rules` unlocks `e3`: `param-undescribed` and `required-unknown`.
+4. `_list_and_hint_rules` unlocks `e4`: `list-unbounded` and `hint-contradicts-name`.
+5. `_similar` unlocks `e5`: the overlap threshold of two descriptions.
+6. `_check_limit` unlocks `e6`: the limit that is refused below 1 and cut to 50.
+7. `_over_cap` unlocks `e7`: when the size cap ends a page, and the first item that is always taken.
+8. `effective_hints` unlocks `e8`: a tool's own hints count only from a trusted server.
+
+`m1` needs the first four. About twenty lines in all. The steps below describe the whole grader, so you can see how your functions are used.
+
 ## What to write
 
 ### Step 1: `lint_tool(tool)`

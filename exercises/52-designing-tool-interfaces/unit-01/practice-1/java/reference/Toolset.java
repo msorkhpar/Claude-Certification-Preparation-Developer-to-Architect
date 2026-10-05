@@ -54,6 +54,39 @@ final class Toolset {
         return given.entrySet().stream().allMatch(e -> properties.containsKey(e.getKey()) && valid(e.getValue(), obj(properties.get(e.getKey()))));
     }
 
+    private static Set<String> nameRules(String name) {
+        Set<String> found = new TreeSet<>();
+        if (!NAME.matcher(name).matches()) found.add("bad-name");
+        if (VAGUE.contains(name.toLowerCase(Locale.ROOT))) found.add("vague-name");
+        return found;
+    }
+
+    private static Set<String> descriptionRules(String description) {
+        Set<String> found = new TreeSet<>();
+        String low = description.toLowerCase(Locale.ROOT);
+        Matcher sentences = Pattern.compile("[.!?](?:\\s|$)").matcher(description);
+        int count = 0;
+        while (sentences.find()) count++;
+        if (count < 3) found.add("short-description");
+        if (List.of("do not use", "not for", "instead of").stream().noneMatch(low::contains)) found.add("no-boundary");
+        return found;
+    }
+
+    private static Set<String> parameterRules(Map<String, Object> properties, List<?> required) {
+        Set<String> found = new TreeSet<>();
+        List<Map<String, Object>> specs = properties.values().stream().map(Toolset::obj).toList();
+        if (specs.stream().anyMatch(spec -> str(spec.get("description")).isBlank())) found.add("param-undescribed");
+        if (required.stream().anyMatch(item -> !properties.containsKey(item))) found.add("required-unknown");
+        return found;
+    }
+
+    private static Set<String> listAndHintRules(String name, Map<String, Object> properties, Map<String, Object> hints) {
+        Set<String> found = new TreeSet<>();
+        if (startsWithAny(name, READ_PREFIXES) && !(properties.containsKey("limit") && properties.containsKey("cursor"))) found.add("list-unbounded");
+        if ((Boolean.TRUE.equals(hints.get("readOnlyHint")) && startsWithAny(name, WRITE_PREFIXES)) || (Boolean.FALSE.equals(hints.get("destructiveHint")) && startsWithAny(name, DELETE_PREFIXES))) found.add("hint-contradicts-name");
+        return found;
+    }
+
     static List<String> lintTool(Map<String, Object> tool) {
         Set<String> found = new TreeSet<>();
         String name = str(tool.get("name"));
@@ -61,24 +94,15 @@ final class Toolset {
         Map<String, Object> schema = obj(tool.get("input_schema"));
         Map<String, Object> properties = obj(schema.get("properties"));
         List<?> required = schema.get("required") instanceof List<?> r ? r : List.of();
-        String low = description.toLowerCase(Locale.ROOT);
         List<Map<String, Object>> specs = properties.values().stream().map(Toolset::obj).toList();
-        if (!NAME.matcher(name).matches()) found.add("bad-name");
-        if (VAGUE.contains(name.toLowerCase(Locale.ROOT))) found.add("vague-name");
-        Matcher sentences = Pattern.compile("[.!?](?:\\s|$)").matcher(description);
-        int count = 0;
-        while (sentences.find()) count++;
-        if (count < 3) found.add("short-description");
-        if (!low.contains("use when")) found.add("no-use-when");
-        if (List.of("do not use", "not for", "instead of").stream().noneMatch(low::contains)) found.add("no-boundary");
-        if (specs.stream().anyMatch(spec -> str(spec.get("description")).isBlank())) found.add("param-undescribed");
-        if (required.stream().anyMatch(item -> !properties.containsKey(item))) found.add("required-unknown");
+        found.addAll(nameRules(name));
+        found.addAll(descriptionRules(description));
+        if (!description.toLowerCase(Locale.ROOT).contains("use when")) found.add("no-use-when");
+        found.addAll(parameterRules(properties, required));
         if (specs.stream().anyMatch(spec -> str(spec.get("type")).equals("string") && !spec.containsKey("enum") && Pattern.compile("one of|either").matcher(str(spec.get("description")).toLowerCase(Locale.ROOT)).find())) found.add("open-set");
         if (properties.entrySet().stream().anyMatch(e -> Pattern.compile("reasoning|thinking").matcher((e.getKey() + " " + str(obj(e.getValue()).get("description"))).toLowerCase(Locale.ROOT)).find())) found.add("reasoning-param");
         if (tool.get("input_examples") instanceof List<?> examples && examples.stream().anyMatch(example -> !exampleOk(example, properties, required))) found.add("bad-example");
-        if (startsWithAny(name, READ_PREFIXES) && !(properties.containsKey("limit") && properties.containsKey("cursor"))) found.add("list-unbounded");
-        Map<String, Object> hints = obj(tool.get("annotations"));
-        if ((Boolean.TRUE.equals(hints.get("readOnlyHint")) && startsWithAny(name, WRITE_PREFIXES)) || (Boolean.FALSE.equals(hints.get("destructiveHint")) && startsWithAny(name, DELETE_PREFIXES))) found.add("hint-contradicts-name");
+        found.addAll(listAndHintRules(name, properties, obj(tool.get("annotations"))));
         return new ArrayList<>(found);
     }
 
@@ -87,6 +111,13 @@ final class Toolset {
         Matcher m = Pattern.compile("[a-z]{3,}").matcher(str(text).toLowerCase(Locale.ROOT));
         while (m.find()) out.add(m.group());
         return out;
+    }
+
+    private static boolean similar(Set<String> wa, Set<String> wb) {
+        Set<String> union = new LinkedHashSet<>(wa);
+        union.addAll(wb);
+        long shared = wa.stream().filter(wb::contains).count();
+        return !union.isEmpty() && (double) shared / union.size() >= OVERLAP;
     }
 
     static List<List<String>> lintToolSet(List<Map<String, Object>> tools) {
@@ -102,10 +133,7 @@ final class Toolset {
             for (int j = i + 1; j < tools.size(); j++) {
                 Map<String, Object> a = tools.get(i), b = tools.get(j);
                 Set<String> wa = words(a.get("description")), wb = words(b.get("description"));
-                Set<String> union = new LinkedHashSet<>(wa);
-                union.addAll(wb);
-                long shared = wa.stream().filter(wb::contains).count();
-                if (!str(a.get("name")).equals(str(b.get("name"))) && !union.isEmpty() && (double) shared / union.size() >= OVERLAP) {
+                if (!str(a.get("name")).equals(str(b.get("name"))) && similar(wa, wb)) {
                     found.add(List.of(str(a.get("name")), "overlap:" + str(b.get("name"))));
                     found.add(List.of(str(b.get("name")), "overlap:" + str(a.get("name"))));
                 }
@@ -133,6 +161,16 @@ final class Toolset {
         return offset;
     }
 
+    private static int checkLimit(int limit) {
+        if (limit < 1) throw new IllegalArgumentException("limit must be a whole number of at least 1");
+        limit = Math.min(limit, MAX_LIMIT);
+        return limit;
+    }
+
+    private static boolean overCap(List<String> page, int used, String item, int maxChars) {
+        return !page.isEmpty() && used + item.length() > maxChars;
+    }
+
     static Map<String, Object> pageResults(List<String> items) {
         return pageResults(items, null, 10, 2000);
     }
@@ -146,13 +184,12 @@ final class Toolset {
     }
 
     static Map<String, Object> pageResults(List<String> items, String cursor, int limit, int maxChars) {
-        if (limit < 1) throw new IllegalArgumentException("limit must be a whole number of at least 1");
-        limit = Math.min(limit, MAX_LIMIT);
+        limit = checkLimit(limit);
         int offset = cursor == null ? 0 : decode(cursor, items.size());
         List<String> page = new ArrayList<>();
         int used = 0;
         for (String item : items.subList(offset, Math.min(items.size(), offset + limit))) {
-            if (!page.isEmpty() && used + item.length() > maxChars) break;
+            if (overCap(page, used, item, maxChars)) break;
             page.add(item);
             used += item.length();
         }

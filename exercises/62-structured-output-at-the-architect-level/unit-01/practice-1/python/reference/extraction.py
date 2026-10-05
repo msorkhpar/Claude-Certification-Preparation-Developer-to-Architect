@@ -10,6 +10,27 @@ def _number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
+def _quote_found(quote, document):
+    return isinstance(quote, str) and quote != "" and quote in document
+
+
+def _currency_ok(currency):
+    return currency in CURRENCIES
+
+
+def _detail_missing(currency, detail):
+    return currency == "other" and not (isinstance(detail, str) and detail.strip())
+
+
+def _check_semantics(record, err):
+    items = record["line_items"]
+    if abs(sum(items) - record["calculated_total"]) > 0.005:
+        err("semantic", "calculated_total", f"{record['calculated_total']} is not the sum of the line items, {sum(items)}")
+    stated = record["stated_total"]
+    if stated is not None and abs(stated - record["calculated_total"]) > 0.005 and not record["conflict_detected"]:
+        err("semantic", "stated_total", f"the stated total {stated} differs from the calculated total {record['calculated_total']} but conflict_detected is false")
+
+
 def validate(record, document, required=()):
     errors = []
 
@@ -25,10 +46,10 @@ def validate(record, document, required=()):
         return errors
     if record["vendor"] is not None and not isinstance(record["vendor"], str):
         err("syntax", "vendor", "must be a string or null")
-    if record["currency"] not in CURRENCIES:
+    if not _currency_ok(record["currency"]):
         err("syntax", "currency", f"{record['currency']!r} is not one of {list(CURRENCIES)}")
     detail = record["currency_detail"]
-    if record["currency"] == "other" and not (isinstance(detail, str) and detail.strip()):
+    if _detail_missing(record["currency"], detail):
         err("syntax", "currency_detail", "is required when the currency is other")
     items = record["line_items"]
     if not (isinstance(items, list) and all(_number(i) for i in items)):
@@ -43,22 +64,32 @@ def validate(record, document, required=()):
         err("syntax", "provenance", "must be an object")
     if errors:
         return errors
-    if abs(sum(items) - record["calculated_total"]) > 0.005:
-        err("semantic", "calculated_total", f"{record['calculated_total']} is not the sum of the line items, {sum(items)}")
-    stated = record["stated_total"]
-    if stated is not None and abs(stated - record["calculated_total"]) > 0.005 and not record["conflict_detected"]:
-        err("semantic", "stated_total", f"the stated total {stated} differs from the calculated total {record['calculated_total']} but conflict_detected is false")
+    _check_semantics(record, err)
     for field in ("vendor", "currency", "stated_total"):
         value = record[field]
         if value is None or value == "unclear":
             continue
         quote = record["provenance"].get(field)
-        if not isinstance(quote, str) or quote == "" or quote not in document:
+        if not _quote_found(quote, document):
             err("ungrounded", field, f"{field} has no quote that appears in the document")
     for field in required:
         if record.get(field) is None or record.get(field) == "unclear":
             err("absent", field, "the document gave no value")
     return errors
+
+
+def _retryable(errors):
+    return [e for e in errors if e["kind"] in RETRYABLE]
+
+
+def _status(errors, record):
+    if errors:
+        status = "needs_review" if all(e["kind"] == "absent" for e in errors) else "failed"
+    elif record["conflict_detected"]:
+        status = "needs_review"
+    else:
+        status = "valid"
+    return status
 
 
 def extract_document(document, call_model, required=(), max_retries=2):
@@ -70,19 +101,22 @@ def extract_document(document, call_model, required=(), max_retries=2):
         errors = validate(record, document, required)
         if not errors:
             break
-        retryable = [e for e in errors if e["kind"] in RETRYABLE]
+        retryable = _retryable(errors)
         if not retryable:
             break
         if attempts > max_retries:
             break
         feedback = {"previous": record, "errors": retryable}
-    if errors:
-        status = "needs_review" if all(e["kind"] == "absent" for e in errors) else "failed"
-    elif record["conflict_detected"]:
-        status = "needs_review"
-    else:
-        status = "valid"
+    status = _status(errors, record)
     return {"status": status, "record": record, "attempts": attempts, "errors": errors}
+
+
+def _is_unset(value):
+    return value is None or value == "unclear"
+
+
+def _is_conflict(current, value, field, conflicts):
+    return current != value and field not in conflicts
 
 
 def merge_chunks(records):
@@ -93,12 +127,12 @@ def merge_chunks(records):
             if value is None or value == "unclear":
                 continue
             current = merged[field]
-            if current is None or current == "unclear":
+            if _is_unset(current):
                 merged[field] = value
                 merged["provenance"][field] = record["provenance"].get(field)
                 if field == "currency":
                     merged["currency_detail"] = record.get("currency_detail")
-            elif current != value and field not in merged["conflicts"]:
+            elif _is_conflict(current, value, field, merged["conflicts"]):
                 merged["conflicts"].append(field)
         merged["line_items"] += record.get("line_items", [])
         if record.get("conflict_detected"):
@@ -107,6 +141,10 @@ def merge_chunks(records):
     if merged["conflicts"]:
         merged["conflict_detected"] = True
     return merged
+
+
+def _report(correct, valid, total):
+    return {"all_documents": round(correct / total, 2) if total else 0.0, "validated_only": round(correct / valid, 2) if valid else 0.0, "validated": valid, "total": total}
 
 
 def accuracy(results, labels):
@@ -118,14 +156,18 @@ def accuracy(results, labels):
         if is_valid and result["record"]["vendor"] == label["vendor"] and result["record"]["stated_total"] == label["stated_total"]:
             correct += 1
     total = len(labels)
-    return {"all_documents": round(correct / total, 2) if total else 0.0, "validated_only": round(correct / valid, 2) if valid else 0.0, "validated": valid, "total": total}
+    return _report(correct, valid, total)
 
 
-def request_choice(model, tools, forced=None):
-    if model in NO_FORCING:
-        return {"tool_choice": {"type": "auto"}, "strict": True, "verify_reply": True}
+def _forced_choice(tools, forced):
     if forced is not None:
         return {"tool_choice": {"type": "tool", "name": forced}, "strict": True, "verify_reply": False}
     if len(tools) > 1:
         return {"tool_choice": {"type": "any"}, "strict": True, "verify_reply": False}
     return {"tool_choice": {"type": "tool", "name": tools[0]}, "strict": True, "verify_reply": False}
+
+
+def request_choice(model, tools, forced=None):
+    if model in NO_FORCING:
+        return {"tool_choice": {"type": "auto"}, "strict": True, "verify_reply": True}
+    return _forced_choice(tools, forced)
