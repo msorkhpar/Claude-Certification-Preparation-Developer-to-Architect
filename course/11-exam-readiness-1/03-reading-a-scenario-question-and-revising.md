@@ -4,7 +4,7 @@
 **Exams:** all
 
 **After this page you can** read a scenario question for what it really asks, rule out the distractor types the exams use,
-and run a revision routine with the course's flashcards, review bank and mock exam.
+and run a revision routine with the course's flashcards, review bank and mock exams.
 
 Written from the exam guides' own descriptions of the item format and from the Associate guide's three sample questions
 (version 1.0, July 2026, read 2026-10-02), plus the course's own quiz-writing rules. The guides do not publish a technique
@@ -91,7 +91,7 @@ The course gives you three revision tools for Level 1. Each answers a different 
 |---|---|---|
 | **Flashcards** | A set of short question-and-answer cards, one fact or distinction each | Learn and recall the terms, numbers and distinctions |
 | **Review bank** | A bank of scenario questions with answers and reasons, tagged by domain and by page | Practise applying the ideas, on a spaced schedule |
-| **Mock exam** | Thirty exam-style questions across the whole level, weighted like the Associate exam | Test readiness under time, and find weak domains |
+| **Mock exams** | Two sets of 60 exam-style questions across the whole level (pages 4 and 5), weighted like the Associate exam | Test readiness under time, and find weak domains |
 
 All three are plain data files in this module's exercises folder, and `course/README.md` documents their format. Tags let
 you filter by Associate domain (AS1 to AS7) or by module.
@@ -103,10 +103,10 @@ memory before you look, because recall effort is what strengthens memory.
 
 **A plan for the last fortnight.**
 
-1. Take the mock exam once, untimed, and mark each miss with its domain and the reason (did not know, misread, took a distractor).
+1. Take the first mock exam once, untimed, and mark each miss with its domain and the reason (did not know, misread, took a distractor).
 2. Study the weakest domains first, weighted by their share of the exam; domain 2 is the heaviest.
 3. Work the review bank for those domains on the spaced schedule, and read the page behind every miss.
-4. Take the mock exam again under exam conditions: 60 minutes for its 30 questions, no notes.
+4. Take the second mock exam under exam conditions: 120 minutes for its 60 questions, no notes.
 5. In the last two days only review flashcards and your own error list, and check the logistics of page 2 (name matches
    ID, booking time, system test or travel).
 

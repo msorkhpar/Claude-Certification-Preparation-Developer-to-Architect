@@ -51,11 +51,13 @@ across chats, but they work the same way: saved notes are put back into the cont
 stay as they were. The glossary adds a scoped fact about changing the weights: "The Claude API does not
 currently offer fine-tuning, but ask your Anthropic contact if you are interested in exploring this
 option." The statement is about the Claude API only. Amazon Bedrock, a cloud platform, offered
-fine-tuning of one older model, Claude 3 Haiku, first as a preview (2024-07) and then, from 2024-11-01, as a generally available feature in the US West (Oregon) region (the AWS "What's New" post "Fine-tuning for Anthropic's Claude 3 Haiku in Amazon Bedrock is now generally available"; the AWS
-Machine Learning Blog post "Fine-tune Anthropic's Claude 3 Haiku in Amazon Bedrock to boost model accuracy
-and quality", dated 2024-07-10, which now carries a notice that Claude 3 Haiku reached end of life on
-2026-09-10); the Anthropic page "Claude in Amazon Bedrock" lists no fine-tuning among its supported features, and none of the models in the table of
-module 3 is offered for fine-tuning on the Claude API. Changing the weights is a separate act from calling
+fine-tuning of one older model, Claude 3 Haiku: a preview in 2024-07, then general availability from
+2024-11-01 in the US West (Oregon) region (the AWS "What's New" post "Fine-tuning for Anthropic's Claude 3
+Haiku in Amazon Bedrock is now generally available"). The AWS Machine Learning Blog post "Fine-tune
+Anthropic's Claude 3 Haiku in Amazon Bedrock to boost model accuracy and quality", dated 2024-07-10, now
+carries a notice that Claude 3 Haiku reached end of life on 2026-09-10. The Anthropic page "Claude in Amazon
+Bedrock" lists no fine-tuning among its supported features, and none of the models in the table of module 3
+is offered for fine-tuning on the Claude API. Changing the weights is a separate act from calling
 the model, not something an API call does.
 
 ### Tokenizers: how text becomes numbers

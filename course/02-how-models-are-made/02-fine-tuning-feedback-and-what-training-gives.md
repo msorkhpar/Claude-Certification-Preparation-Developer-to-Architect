@@ -108,8 +108,8 @@ guarantees you need all come from what you build around the model.
 1. **Treating "trained to be honest" as "never wrong".** The glossary frames HHH as how Claude is trained,
    not a promise about each answer. Verification is still the user's job.
 2. **Thinking fine-tuning is the default way to add knowledge.** The glossary says the Claude API does not
-   currently offer fine-tuning (a statement about the Claude API, not about every platform); the standard route is to put the knowledge in the context (module 28 covers
-   retrieval).
+   currently offer fine-tuning (a statement about the Claude API, not about every platform). The standard route is to put the knowledge in the context
+   (module 28 covers retrieval).
 3. **Assuming a refusal or a style is a prompt bug.** Some behaviours come from training. A prompt can
    steer within them, but an instruction that fights the training may not win.
 

@@ -44,7 +44,7 @@ be refreshed by updating a file.
 Everything in a Project competes for the context window (module 1). On the paid plans the help centre says that when a
 Project approaches the context limit Claude enables RAG mode, retrieval of the relevant parts, which expands
 the Project's capacity. (An earlier reading of the page gave a multiplier of up to 10 times; it was not found again on
-2026-10-02, so treat the figure as checked on 2026-10-02, unverified detail.) Two consequences follow. A big knowledge base is possible, and
+2026-10-02, so treat that figure as unverified.) Two consequences follow. A big knowledge base is possible, and
 a retrieved passage is only as good as its source, so a muddled file produces muddled answers at scale.
 
 ### Sharing a Project

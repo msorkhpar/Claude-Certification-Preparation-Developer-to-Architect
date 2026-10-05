@@ -70,8 +70,8 @@ material:
 - **Generation.** Claude "is an image understanding model only"; it cannot create or edit images.
 
 Source: Vision, Claude API documentation. The page's own closing advice: "Always carefully review and
-verify Claude's image interpretations, especially for high-stakes use cases. The page adds: "Do not use Claude for tasks
-requiring perfect precision or sensitive image analysis without human oversight."
+verify Claude's image interpretations, especially for high-stakes use cases." It adds: "Do not use Claude for
+tasks requiring perfect precision or sensitive image analysis without human oversight."
 
 Images also cost tokens: each 28 by 28 pixel patch is one visual token, so an image costs about
 `ceil(width/28) x ceil(height/28)` tokens up to a per-model cap. A 1000 by 1000 image is 1,296 tokens on the

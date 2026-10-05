@@ -159,7 +159,7 @@ This quiz covers both pages of the module.
 1. Two staff members each receive a readable draft from Claude: a lesson rubric for one, a funding appeal for the other. Which pair of checks matches what each of them owns?
    - **a**: First: spelling and tone; second: sentence length and layout
    - **b**: First: pupils' reactions once it is handed out; second: donors' reactions once it is sent
-   - **c**: First: accuracy and fit to the stated outcome; second: each impact claim against its source
+   - **c**: First: accuracy and fit to the outcome; second: impact claims against sources
    - **d**: First: Claude's own rating of its accuracy; second: Claude's own rating of its sources
 
 2. A freelancer working for a charity wants Claude to write personalised thank-you notes that cite each supporter's

@@ -137,7 +137,7 @@ quickly, so confirm features and plan limits on the official page the day you de
 
 This quiz covers every page of the module.
 
-1. A finance team's monthly job reconciles bank statements into one summary. The team wants it to run weekly from
+1. A finance team's job reconciles bank statements into one summary. The team wants it to run weekly from
    the first week, in Auto approval, and to compare against last year's statements kept elsewhere on the drive.
    Which plan does the module support?
    - **a**: Keep Auto approval and open the entire drive so the comparison has what it needs

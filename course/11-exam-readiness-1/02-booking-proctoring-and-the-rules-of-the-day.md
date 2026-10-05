@@ -81,9 +81,8 @@ can describe your preparation, and the course's own questions are written fresh 
 ### Accommodations: the order matters
 
 Reasonable accommodations are available for documented disabilities or needs, in line with applicable law. The sequence
-is fixed: **request the accommodation through Pearson VUE, wait for approval, and only then schedule the exam.** The
-guide says to not schedule your appointment until the request is approved. Both the Exam Policy and the guide say the
-request must be submitted and approved before scheduling. Extra time or a break you did not arrange in advance is not
+is fixed: **request the accommodation through Pearson VUE, wait for approval, and only then schedule the exam.** Both
+the Exam Policy and the guide say the request must be submitted and approved before scheduling. Extra time or a break you did not arrange in advance is not
 available on the day, and an unapproved break counts as misconduct.
 
 ### If you do not pass
@@ -92,7 +91,7 @@ Retake waiting periods grow with each failed attempt: **14 days after the first,
 the third**, with at most **four attempts in a rolling 12 months per exam**. Each attempt costs the full fee. Not passing one
 exam does not block another. Use the percent-correct by domain on the score report to aim your revision: it tells you where
 to study, though it does not decide the result. Retake only when you have changed something about how you prepare; the
-mock exam and review bank in this module are for that.
+mock exams and review bank in this module are for that.
 
 ### The credential: validity, renewal and the badge
 

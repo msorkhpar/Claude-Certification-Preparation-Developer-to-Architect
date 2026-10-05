@@ -326,12 +326,12 @@ T=2.0 ten draws: blue falling clear falling blue falling blue blue blue green
 ```
 <!-- /example -->
 
-(The Java and Kotlin tabs print the same numbers: the example needs only the standard library of any language, and
+(Every tab prints the same numbers: the example needs only the standard library of any language, and
 the generator is a four-line recurrence.)
 
 Read the output. At T=0.5 the probability of `blue` is 0.950, and at T=0.2 all ten draws are `blue`. At
 T=2.0 `blue` falls to 0.563, the three weaker tokens together hold the rest, and the draws mix `falling`,
-`clear` and `green` in. The program prints the same lines in Python and in TypeScript.
+`clear` and `green` in. The program prints the same lines in all four languages.
 That is the whole trade: low temperature for extraction, classification and anything with one right answer;
 higher for brainstorming and varied drafting.
 
@@ -347,7 +347,7 @@ will be rejected". That covers Claude Fable 5.1, Opus 5.5 and Sonnet 5.5. The mi
 behavior." It adds that on Opus 4.7 and later a non-default value "returns a 400 error". The page "What's new
 in Claude Fable 5.1" lists "Non-default `temperature`, `top_p`, or `top_k` values return a 400 error" among the
 behaviours unchanged from Claude Fable 5. Claude Haiku 4.5 is older than that cut and is not covered by these
-sentences; this course does not rely on a sampling setting for it either. Read on 2026-10-02.
+sentences, and this course does not rely on a sampling setting for it either (module 18 returns to the difference). Read on 2026-10-02.
 
 So the lever a Claude engineer pulls for steadiness is not a number in the request. It is a narrower output
 (a fixed list of labels, a schema), a check in code, and a prompt that leaves less to chance. The same
