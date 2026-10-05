@@ -83,14 +83,14 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A project holds `AGENTS.md` for other tools and nothing named `CLAUDE.md`, and Claude follows it. An engineer adds `CLAUDE.local.md` with a sandbox address, and Claude stops following `AGENTS.md`. What explains it?",
       "options": {
-        "a": "The sandbox address contradicts a rule in the team's shared notes",
-        "b": "Local notes load first and replace everything that follows them",
-        "c": "The local note counts as an instruction file, so the fallback no longer applies",
-        "d": "Ignored files are read in place of the ones kept in version control"
+        "a": "The sandbox address contradicts a rule that the team shares",
+        "b": "Local notes load first and replace everything after them",
+        "c": "A local note ends the fallback that had applied",
+        "d": "Git-ignored files are read in place of the committed ones"
       },
       "key": "c",
       "explanation": {
-        "c": "The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file is one.",
+        "c": "The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends.",
         "a": "Ruled out because presence decides, not content: \"A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts\".",
         "b": "Ruled out because \"All discovered files are concatenated into context rather than overriding each other\", and \"In each folder the local file comes after the shared one\".",
         "d": "Ruled out because the file is ignored by git only so that it stays personal, \"which is why that file is ignored by git\", and the ignore setting plays no part in what Claude reads."
