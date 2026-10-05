@@ -26,17 +26,17 @@
       "scope": "level",
       "stem": "After a provider update, a hand-written client that worked for months throws an exception on every reply because the JSON now carries a field it has never seen. Which change fits best?",
       "options": {
-        "a": "Pin the request to an earlier documented version so replies keep their old shape",
+        "a": "Pin the request to an earlier documented version of the API",
         "b": "Pick out just the values the code uses and skip whatever else arrives",
-        "c": "Validate every reply against a strict schema and reject anything that has an extra entry",
-        "d": "Report the provider to support over the added output values breaking the contract"
+        "c": "Validate every reply against a strict schema and reject any extra entry",
+        "d": "Treat the unknown field as a transient failure and retry the call"
       },
       "key": "b",
       "explanation": {
         "b": "A client should \"Read what you need and ignore the rest\", since an unknown field is not an error (module 13, page 1).",
         "a": "Ruled out because earlier versions \"may be unavailable for new users\" and the only current value is the one already in use.",
         "c": "Ruled out because a client that fails on an unknown field \"breaks on a change the versioning page allows\".",
-        "d": "Ruled out because the versioning policy reserves the right to \"add additional values to the output\", so nothing was broken."
+        "d": "Ruled out because \"An unknown field is not an error.\", so a retry only meets the same field again."
       }
     },
     {
@@ -135,7 +135,7 @@
       "key": "c",
       "explanation": {
         "c": "In-flight calls follow Little's law: \"the number of requests in flight equals the request rate times the time each takes\", so 10 a second for 3 seconds gives 30 (module 16, page 1).",
-        "a": "Ruled out because a bound that counts only starts per second ignores the call time, and the page shows what a low bound costs: \"A bound of 20 would cap you at about 200 a minute\".",
+        "a": "Ruled out because a bound taken from the starts per second ignores the call time, and the page's own case shows the gap: \"when each call takes 6 seconds, you need about 100 in flight\", far above the per-second rate.",
         "b": "Ruled out because a bound above the need \"would only invite 429 errors\".",
         "d": "Ruled out because the rule is to \"compute the bound from the limit you must stay under\", not to match the total sent."
       }
@@ -230,7 +230,7 @@
       "options": {
         "a": "Each related action needs its own explicit deny statement as well",
         "b": "A wildcard in a deny rule is the same defect as one in an allow rule",
-        "c": "Deny statements are ignored, so in practice only a narrow allow-list can remove access",
+        "c": "A deny statement belongs in the same policy as the allow-list actions",
         "d": "Denying the invoke action alone also blocks the neighbouring conversation APIs"
       },
       "key": "d",
@@ -238,7 +238,7 @@
         "d": "Denying InvokeModel is enough because other actions \"are blocked automatically when InvokeModel is denied\" (module 23, page 1).",
         "a": "Ruled out because the page lists the neighbours, \"such as Converse and StartAsyncInvoke\", as blocked without extra statements.",
         "b": "Ruled out because the page says \"In a guardrail, the wildcard is the point\", so the wildcard is legitimate in a deny.",
-        "c": "Ruled out because a \"statement belongs in a separate guardrail\", which is where deny rules live."
+        "c": "Ruled out because \"a Deny statement belongs in a separate guardrail\", and not in the allow-list policy."
       }
     },
     {
@@ -367,17 +367,17 @@
       "scope": "level",
       "stem": "A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?",
       "options": {
-        "a": "Abandon the design of the long-running agent and start over with a new one",
-        "b": "Add a second agent on the same tier for a majority vote on answers",
-        "c": "Drop to Claude Sonnet 5.5 to lower the cost of each task run",
-        "d": "Switch to Claude Fable 5.1, which the page reserves for demanding reasoning"
+        "a": "Add a second agent on the same tier that votes on each answer",
+        "b": "Move down to Claude Sonnet 5.5 and lower the effort setting",
+        "c": "Restart on Claude Haiku 4.5 and move up only where it shows a gap",
+        "d": "Switch to Claude Fable 5.1 and compare its results on the same cases"
       },
       "key": "d",
       "explanation": {
         "d": "The overview points to Claude Fable 5.1 \"when evals at higher effort still fall short\" (module 3, page 1).",
-        "a": "Ruled out because Fable 5.1 is listed for \"demanding reasoning and long-horizon agentic work\".",
-        "b": "Ruled out because the course advises \"adding complexity only when it demonstrably improves outcomes\".",
-        "c": "Ruled out because the method is to \"move down a tier at a time until quality drops\", which comes after the target is met."
+        "a": "Ruled out because the course advises \"adding complexity only when it demonstrably improves outcomes\", and a vote adds complexity with no evidence of gain.",
+        "b": "Ruled out because the capability-first path is to \"get the quality, then work down to cheaper options\", and the quality is not yet reached.",
+        "c": "Ruled out because a cheap start is the efficiency-first path, and this agent fits the other one, which is \"Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work\"."
       }
     },
     {
@@ -430,17 +430,17 @@
       "scope": "level",
       "stem": "A team has no evaluation data yet and no sense of how hard its new feature is. Which starting plan matches the documentation's method?",
       "options": {
-        "a": "Pick the cheapest tier at once and keep it for the feature",
+        "a": "Begin with the cheapest tier and move up only if tests show a gap",
         "b": "Begin with a capable model, test on real cases, then step down a tier",
-        "c": "Use the top tier permanently for every request it handles",
-        "d": "Choose by reputation, then adjust after the first production complaint"
+        "c": "Begin on Claude Fable 5.1 and keep it until cost becomes a complaint",
+        "d": "Take the middle tier, which the price list names for most production work"
       },
       "key": "b",
       "explanation": {
         "b": "The method is to \"measure on your own cases, then move down a tier at a time\" (module 18, page 1).",
-        "a": "Ruled out because the first step is to \"start high, so that a failure means the task is hard\".",
-        "c": "Ruled out because the course notes that nothing \"says the biggest model is the safest default for every task\".",
-        "d": "Ruled out because \"A tier is right only if it passed your evaluation at the lowest cost\"."
+        "a": "Ruled out because \"If you're unsure which model to use, start with Claude Opus 5.5 for most workloads.\"",
+        "c": "Ruled out because a tier above Opus is \"earned by failing an evaluation, not assumed\".",
+        "d": "Ruled out because the price list's advice is \"where to end up once you have measured\", and nothing has been measured yet."
       }
     },
     {
@@ -493,16 +493,16 @@
       "scope": "level",
       "stem": "A drafting feature scores 62 percent on the team's fixed test set against a 90 percent target and costs more than planned. Someone proposes switching tiers immediately. What does the module advise?",
       "options": {
-        "a": "Switch tiers now and spend the saving on quality work later",
-        "b": "Judge the lower tier on the ten easiest items, then roll it out",
+        "a": "Move to the smaller tier now and raise effort until the score recovers",
+        "b": "Shorten the prompt to cut tokens and check the score afterwards",
         "c": "Rewrite several parts of the prompt together to gain accuracy quickly",
-        "d": "Hit the quality bar before looking for any saving that holds it"
+        "d": "Close the gap first, then look for a cheaper way to hold the result"
       },
       "key": "d",
       "explanation": {
         "d": "The order is \"first reach the quality bar; then look for the cheaper way to hold it\" (module 6, page 4).",
-        "a": "Ruled out because a smaller tier fits only \"where the evaluation set says quality holds\".",
-        "b": "Ruled out because the page says to \"Test the cheap tier first on the hard cases, not on the easy ones\".",
+        "a": "Ruled out because a smaller tier or lower effort fits only \"where the evaluation set says quality holds\", and here the score is far below the target.",
+        "b": "Ruled out because a cheaper prompt is one \"that keeps the same results\", and the results are not yet good enough.",
         "c": "Ruled out because \"Several simultaneous edits leave you unable to say what helped\"."
       }
     },
@@ -529,17 +529,17 @@
       "id": "03-developer-mock-exam-1#x27",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A pipeline starts two model calls at once: one drafts a reply and one checks the reply's tone, but the checker keeps failing because the draft does not exist yet. How should the team restructure it?",
+      "stem": "A pipeline starts two model calls at once: one drafts a reply and one checks the reply's tone, and every check fails with an empty input. How should the team restructure it?",
       "options": {
         "a": "Run them in sequence, so the second receives the first one's output",
-        "b": "Vote across three identical drafting calls, then check the winner",
+        "b": "Keep both calls parallel and add a third that merges draft and verdict",
         "c": "Route the draft to a specialised prompt chosen by a classifier",
         "d": "Replace both calls with an autonomous agent that decides the order of the steps"
       },
       "key": "a",
       "explanation": {
         "a": "Sectioning needs independent work, and \"Parallel calls cannot see each other's output\", so a dependent step belongs in a chain (module 34, page 1).",
-        "b": "Ruled out because sectioning means \"independent subtasks run in parallel\", which these are not.",
+        "b": "Ruled out because \"Parallel calls cannot see each other's output\", so the checker still has nothing to read.",
         "c": "Ruled out because routing \"directs it to a specialized followup task\" and does not order two calls.",
         "d": "Ruled out because an agent suits a case where \"the path cannot be written in advance\", and this path is fixed."
       }
@@ -550,7 +550,7 @@
       "scope": "level",
       "stem": "In a draft-and-review loop, the reviewer's reply is sometimes prose such as \"looks fine to me\" instead of a score the program can parse. The loop currently treats that as a pass. What should it do?",
       "options": {
-        "a": "Accept it as a pass and send the draft to the next stage",
+        "a": "Keep treating it as a pass, and add a warning to the log",
         "b": "Count the attempt as unchecked, giving it zero with a stated cause",
         "c": "Pull the first digit from the text and treat it as the grade",
         "d": "Return the latest draft to the user as it now stands"
@@ -558,7 +558,7 @@
       "key": "b",
       "explanation": {
         "b": "\"If the verdict cannot be parsed, the draft is unchecked\", so it is graded zero with a reason (module 34, page 2).",
-        "a": "Ruled out because \"a reply that is not a bare score counts as ungradable\", and an ungradable case fails.",
+        "a": "Ruled out because \"treating an unreadable reply as a pass would accept an unchecked draft\", whatever the log says.",
         "c": "Ruled out because such a parse \"turns a broken grader into a plausible number\".",
         "d": "Ruled out because \"A refinement loop can get worse\", so the page keeps the best draft and not the last."
       }
@@ -591,8 +591,8 @@
         "a": "The handler's code can still write",
         "b": "The label is enforced when the tool is served from outside the process boundary",
         "c": "The SDK rejects any write that such a tool attempts while the run is under way",
-        "d": "Tools carrying the label are always run one at a time, to stay on the safe side",
-        "e": "The label is scheduling metadata and not a guarantee"
+        "d": "Tools carrying the label are exempt from hooks, so a veto there cannot reach them",
+        "e": "The label is only a scheduling hint that nothing enforces"
       },
       "key": [
         "a",
@@ -603,7 +603,7 @@
         "e": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2).",
         "b": "Ruled out because clients treat annotations as \"untrusted unless they come from trusted servers\", wherever the tool is served.",
         "c": "Ruled out because annotations exist \"not because they enforce anything\", so the SDK does not police writes on their basis.",
-        "d": "Ruled out because the hint \"lets the tool run in parallel with other read-only tools\"."
+        "d": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\"."
       },
       "select": 2
     },
@@ -613,17 +613,17 @@
       "scope": "level",
       "stem": "A team promotes a new system prompt for a hosted agent and wants production runs to keep the previous behaviour until a person approves the switch. Which approach fits?",
       "options": {
-        "a": "Override the system field on every run",
-        "b": "Create the sessions with just the agent ID, which pins the first version",
+        "a": "Override the system field on every run with the earlier prompt text",
+        "b": "Create the sessions with just the agent ID, which keeps yesterday's version",
         "c": "Create each session with a pinned version number",
-        "d": "Edit the agent in place"
+        "d": "Set the agent's version field back to the earlier number"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"a session can instead pin a version\" so a prompt can be promoted or rolled back without a deploy (module 36, page 1).",
-        "a": "Ruled out because \"overrides replace and never merge\".",
+        "a": "Ruled out because an override applies to \"that one session\", so every run would carry the old prompt in code, where a pinned version can be \"promoted or rolled back without a deploy\".",
         "b": "Ruled out because a session made with just an agent ID \"creates the session with the latest agent version\".",
-        "d": "Ruled out because an agent's version \"starts at 1 and increments each time an update changes the agent\", so editing in place would change what production runs."
+        "d": "Ruled out because a version \"starts at 1 and increments each time an update changes the agent\", so it is a counter and not a field to set."
       }
     },
     {
@@ -672,15 +672,15 @@
       "options": {
         "a": "Write the requirement with a number in it and test the simplest option",
         "b": "Adopt it and trim the unused parts after the first release goes out",
-        "c": "Count the features each candidate offers and pick the longest list of them",
-        "d": "Pick the family by the brand that has published the most releases"
+        "c": "Adopt it, but keep the model call behind a thin function of your own",
+        "d": "Begin at the bottom row of the options table and move up on failure"
       },
       "key": "a",
       "explanation": {
         "a": "The page says to \"check whether the simplest option meets it\" (module 37, page 2).",
         "b": "Ruled out because the advice is to \"start with direct calls and add layers when a need appears\".",
-        "c": "Ruled out because \"A framework that offers persistence helps only when the product must resume\".",
-        "d": "Ruled out because \"The question is who should own the route, not which library is popular\"."
+        "c": "Ruled out because \"A framework earns its place when the feature it brings is one you need and would build badly, and not before.\"",
+        "d": "Ruled out because the table is read as an order of questions: \"Start from the top and stop at the first row that meets the requirement.\""
       }
     },
     {
@@ -873,27 +873,27 @@
       "stem": "An application defines its own function called screenshot alongside Anthropic's screen-control entry. Incoming blocks with that word are sometimes meant for one and sometimes for the other. How should dispatch work?",
       "options": {
         "a": "Reject the custom function and keep only Anthropic's entry",
-        "b": "Use the order in which the blocks arrive to decide which handler applies",
-        "c": "Check whether the block carries display dimensions, which only screen actions have",
-        "d": "Branch on the member together with the extra field that identifies the toolset"
+        "b": "Match on the name alone and send every such block to the toolset handler",
+        "c": "Look for display dimensions in the input of each call",
+        "d": "Check both the name and the toolset_name fields of each call"
       },
       "key": "d",
       "explanation": {
         "d": "\"toolset_name is what marks a block as a computer action\" (module 31, page 1).",
-        "a": "Ruled out because \"A custom tool in the same request can share a member's name\".",
-        "b": "Ruled out because the page says to \"Dispatch on the pair\" of member and field, not on arrival order.",
-        "c": "Ruled out because \"The entry takes no display size\", so blocks carry no dimensions."
+        "a": "Ruled out because \"A custom tool in the same request can share a member's name\", so both belong in one request.",
+        "b": "Ruled out because the page says to \"Dispatch on the pair\" of member and field, and a name alone cannot tell the two tools apart.",
+        "c": "Ruled out because \"The entry takes no display size\", so calls carry no dimensions."
       }
     },
     {
       "id": "03-developer-mock-exam-1#x45",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A Python MCP server rejects a blank title by raising an ordinary ValueError inside the handler, and the model never sees why the call failed. Which change fits?",
+      "stem": "A server built with the MCP Python SDK rejects a blank title by raising a ValueError inside the handler, and the model never sees why the call failed. Which change fits?",
       "options": {
-        "a": "Return a protocol error that tells the client to resend the request",
+        "a": "Return a protocol error that asks the client to resend the request",
         "b": "Print the reason to standard output for the client to relay",
-        "c": "Signal it with the SDK's dedicated exception type for expected problems",
+        "c": "Use the SDK's ToolError for a problem of this expected kind",
         "d": "Catch the exception and return an empty success result"
       },
       "key": "c",
@@ -901,7 +901,7 @@
         "c": "\"In the Python SDK, raise ToolError for an expected failure\" (module 32, page 2).",
         "a": "Ruled out because protocol errors are for \"issues with the request structure itself that models are less likely to be able to fix\".",
         "b": "Ruled out because \"The server MUST NOT write anything to its stdout that is not a valid MCP message\".",
-        "d": "Ruled out because a swallowed failure \"tells the model the call worked\"."
+        "d": "Ruled out because a swallowed failure \"tells the model the call worked\". The answer is specific to this SDK: the Agent SDK's in-process server of module 35 returns the raw exception message as an error result, but a server built with the MCP Python SDK reports an exception that is not a ToolError \"without its message\"."
       }
     },
     {
@@ -949,10 +949,10 @@
       "stem": "A team plans to drop the disposable container for its screen-driving agent because Anthropic already scans screenshots for planted instructions. Which two statements should the reviewer make? (Select two.)",
       "options": {
         "a": "Injected text can still be obeyed despite the filter",
-        "b": "Screenshots are processed by Anthropic alone, so no local safeguards apply",
+        "b": "Screenshots are stored by Anthropic and never reach the local machine",
         "c": "Such filters are a backup layer behind the first defences",
-        "d": "Dropping the container is fine once an allowlist of domains is in place",
-        "e": "The scan makes planted text harmless, so the confirmation steps can go too"
+        "d": "An allowlist of domains gives the same protection as a container",
+        "e": "The scan makes planted text harmless, and confirmations become optional"
       },
       "key": [
         "a",
@@ -962,7 +962,7 @@
         "a": "The classifiers \"are a second layer\", and \"Claude will follow commands found in content even when they conflict with your instructions\" (module 31, page 2).",
         "c": "The classifiers \"are a second layer\", and \"Claude will follow commands found in content even when they conflict with your instructions\" (module 31, page 2).",
         "b": "Ruled out because screenshots \"are captured and stored in your environment, not by Anthropic\".",
-        "d": "Ruled out because the precautions begin with \"a dedicated virtual machine or container with minimal privileges\".",
+        "d": "Ruled out because the container is there \"to prevent direct system attacks or accidents\", while an allowlist only works \"to reduce exposure to malicious content\".",
         "e": "Ruled out because the documented precautions include \"Asking a human to confirm decisions that might result in meaningful real-world consequences\", and the scan does not replace that step."
       },
       "select": 2
