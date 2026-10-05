@@ -18,7 +18,7 @@ M9.**
 | Q-L1 | A quiz polish pass over all of Level 1: one independent reader judges the whole level | done | Level 1 judged by readers; remaining WEAK items are listed in docs/process/QUIZ-POLISH.md |
 | M7a | Early site: Levels 1 and 2 built with studyforge without narration (ingest, validate, site, runner, editor) and served locally for review | **done:** served locally for review; validate 0 findings; 153 pages, 0 site console errors; practices graded in four languages, the Agent SDK practice, a page quiz, the Level 2 mock and the editor proven in a browser. Build sources stay on branch `build/site-l1-l2`. Framework gaps found (multi-file practices, Run on example blocks, flashcards and review banks, cross-site page links, a reader and a privacy-gate quirk, a doubled quiz, the editor link) are planned in the framework | Zero console errors; practices run end to end; editor opens; the owner can open it |
 | M7b | The site rebuilt without narration after each later level merges: once when Level 3 is complete (after L3-F), once when Level 4 is complete | todo | Every merged level appears; the M7a checks still pass |
-| M8 | Narration of the lesson prose of all four levels, last, after Levels 3 and 4 are merged and M7b has rebuilt the site (D15) | todo | A listened sample from every level |
+| M8 | Narration of the lesson prose of all four levels, after the first release (M9) is done (D15) | deferred until after the first release | A listened sample from every level |
 | M9 | Release-ready: exam facts and model ids re-checked, images, learner `main`, README | todo | A cold pull on a clean machine runs the course |
 
 ## Decisions
@@ -39,7 +39,7 @@ M9.**
 | D12 | Purpose | **decided:** the course is non-commercial, made for study and exam preparation; it is never sold or put behind a paywall, so material under non-commercial licences may be used with credit and keeps its licence's terms |
 | D13 | Comprehensiveness | **decided:** every module of draft 4 is kept and nothing is cut; what earlier drafts took out is restored. The course aims to be the most comprehensive course possible on its subject. Draft 5 adds how models are made, Claude for every role, Claude's apps in depth, computer use, cloud-platform set-up, two scenario capstones beyond the exam's six, four Level 4 modules (deployment and data handling, cost and capacity, multi-agent reliability, migration at scale), full exam logistics and revision aids per level. Modules no blueprint tests carry the code `X` in the exam map |
 | D14 | Quiz bar | **decided:** a batch merges when its quizzes have no FAIL from an independent reader and every automatic check passes; WEAK items go to a polish list; from Level 2 on, each writing batch runs an independent reader and one fix round inside the batch before hand-back |
-| D15 | Build order | **decided:** the site is built early, without narration, for Levels 1 and 2 so the course can be reviewed while Levels 3 and 4 are written; it is rebuilt as each later level merges; narration of all four levels comes last, after the content is final |
+| D15 | Build order | **decided:** the site is built early, without narration, for Levels 1 and 2 so the course can be reviewed while Levels 3 and 4 are written; it is rebuilt as each later level merges; narration of all four levels is left out of the first release and added after it |
 
 ## M1 rows (opened now)
 
@@ -79,7 +79,7 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 | L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | doing |
 | S-3 | Rebuild the site with Level 3 (M7b) | todo, after L3-F |
 | L4 | Level 4 batches: L4-A modules 79 to 84 and L4-B 85 to 89 **done**; L4-C 90 to 94 with the Professional capstone and Exam readiness 4 doing | doing |
-| S-4 | Rebuild the site with Level 4 (M7b), then narration of all four levels (M8), then release checks (M9) | todo, after L4 |
+| S-4 | Rebuild the site with Level 4 (M7b), then release checks (M9); narration (M8) follows the first release | todo, after L4 |
 
 ## Framework work
 
