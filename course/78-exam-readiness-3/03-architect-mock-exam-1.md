@@ -99,7 +99,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **c**: Pass it through to the backend unchanged, which the backend accepts
    - **d**: Round it to the nearest allowed value and move to the next step
 
-10. Scenario S1. A new engineer's session ignores the team rule that every endpoint validates its input. A senior engineer wrote the rule into the personal memory file in his home folder, and nothing in the repository carries it. Where should the rule go?
+10. Scenario S1. A new engineer's session ignores the team rule that every endpoint validates its input. A senior engineer wrote the rule into the personal memory file in their home folder, and nothing in the repository carries it. Where should the rule go?
    - **a**: In the project's own instruction document, committed so that everyone receives it
    - **b**: In each engineer's home-folder file, since one exists for every developer
    - **c**: In a managed policy location, which applies to everyone on a machine and cannot be excluded

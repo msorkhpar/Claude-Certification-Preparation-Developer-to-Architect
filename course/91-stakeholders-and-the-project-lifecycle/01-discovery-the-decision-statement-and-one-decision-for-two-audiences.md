@@ -395,7 +395,7 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
    - **c**: The 40,000 design, because it is the cheapest of the four and the target can be tuned later
    - **d**: Both of the designs that meet every level, so that the sponsor can pick the one preferred
 
-2. Scenario: Hugo must brief a sponsor who will decide in one meeting on whether a pilot goes ahead. His draft is six pages of tables, ending with the break-even derivation. What should the first page of the record hold?
+2. Scenario: Hugo must brief a sponsor who will decide in one meeting on whether a pilot goes ahead. Hugo's draft is six pages of tables, ending with the break-even derivation. What should the first page of the record hold?
    - **a**: The derivation of the break-even, which is the reason for every later number
    - **b**: The table by segment, so the sponsor sees the accuracy figures before anything else
    - **c**: A short summary in plain words, covering the cost, the risk and the decision requested

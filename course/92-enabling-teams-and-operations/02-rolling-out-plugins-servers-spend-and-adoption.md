@@ -508,7 +508,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 ## Quiz
 
-1. Scenario: Yusuf's organisation limit is 20000 a month and he has three groups. He proposes limits of 7000, 8000 and 6000 for them. What does the page say about that proposal?
+1. Scenario: Yusuf's organisation limit is 20000 a month and covers three groups. Yusuf proposes limits of 7000, 8000 and 6000 for them. What does the page say about that proposal?
    - **a**: It is sound, because the organisation limit stops any overspend by the groups
    - **b**: It breaks the arithmetic, since the parts could together exceed the whole
    - **c**: It is sound, because unused budget of one group is lent to the others

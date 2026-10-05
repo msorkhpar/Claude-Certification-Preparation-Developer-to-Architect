@@ -400,7 +400,7 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 <summary>Answer key</summary>
 
 1. **b**. A service level is met at its limit exactly. *a* is ruled out because "A latency of 2000 ms against a ceiling of 2000 ms is met". *c* is ruled out because the ceiling is the target, and "Met at the limit exactly" leaves no reason to raise it. *d* is ruled out because "Met at the limit exactly" settles the case without a second week.
-2. **d**. A trigger needs a number to be reached. *a* is ruled out because "A trigger that says \"if it goes wrong\" is not a trigger", whoever decides. *c* is ruled out because the record lists each assumption "with a test and a stop trigger that has a number in it" before the pilot runs. *b* is ruled out because "the stop trigger is the pilot's own", so the aim may be the sponsor's while the trigger is not.
+2. **d**. A trigger needs a number to be reached. *a* is ruled out because a trigger worded as "if it goes wrong" "is not a trigger", whoever decides. *c* is ruled out because the record lists each assumption "with a test and a stop trigger that has a number in it" before the pilot runs. *b* is ruled out because "the stop trigger is the pilot's own", so the aim may be the sponsor's while the trigger is not.
 
 </details>
 

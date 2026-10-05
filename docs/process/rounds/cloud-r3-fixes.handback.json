@@ -1,0 +1,28 @@
+{
+  "round": "cloud-r3-fixes",
+  "branch": "cloud/cloud-r3-fixes",
+  "head": "3a13f2c",
+  "gates": {
+    "python3 tools/check_quiz.py": "94-exam-readiness-4: ok",
+    "python3 tools/test_check_quiz.py": "ok   clean: key length is spread: clean",
+    "python3 tools/check_revision.py": "revision aids: ok",
+    "python3 tools/check_coverage.py": "51 topic codes, 94 modules, 0 problems",
+    "python3 tools/check_personal_data.py --modules '.*'": "personal data check: 3428 files, 0 finding(s)"
+  },
+  "changed_files": 22,
+  "fixed": [
+    "Module 86 practice statement: says that the example on page 1 checks the credential, the model and the rate, and that the practice's gateway adds a tool check between the model and the rate; names the practice's Java class Capability beside the example's CapabilityAudit. The statement still describes what the tests grade.",
+    "Review bank rb-003: the explanation follows the page sentence of course/12 page 3 (a rise in 400s usually points at your requests, or at a self-set spend limit); key, options and domain unchanged.",
+    "docs/EXAM-MAP.md line 72: Optimization changed to Optimisation; no other American spelling remains in the file.",
+    "tools/check_quiz.py: every quoted phrase of 4 or more words in a wrong option's explanation must be verbatim in the scope prose (page quiz: the page; module quiz: any page of the module; mock and pool items: the level scope); a new check_key_quotes requires the page's folded key and quiz.json to quote the same phrases (compared as sets, since a multiple-response item repeats the key text under each keyed letter).",
+    "tools/test_check_quiz.py: tests for two real quotes (clean), an altered quote, a real quote beside an invented one, a short quote beside a real one (clean), and page key against quiz.json (clean and planted). A plant in course/91 page 2 q2 was also flagged by the full check, then reverted.",
+    "Items flagged by the tightened check, fixed by splitting nested quotations into verbatim phrases (no page prose changed): 36 page 2 m4 (key), Architect mock 2 x33 (option d, plus a missing full stop after option a's quote) and x38 (key), 91 page 2 q2 (option a: escaped inner quotes removed).",
+    "course/28 page 2 m4: every quote checked against the module's prose; all five are verbatim, so no change.",
+    "course/04 page 2: 'current Opus, Sonnet and Fable models keep them by default'; Developer mock 1 x24 quote updated in the same commit.",
+    "Gendered pronouns in quiz scenarios: 90 page 2 q2 (Tomas's design), 91 page 1 q2 (Hugo's draft), 92 page 1 q2 (Amara's team), 92 page 2 q1 (Yusuf, no pronoun), Architect mock 1 x10 (their home folder), Architect pool items 5 (their notes; option a now 'The personal file') and 22 (their local scope). 92 page 2 m1 already used 'their'."
+  ],
+  "open": [
+    "Module 86 practice: the reference solutions and tests (all four languages) check the tool in the gateway ('tool not allowed', case e6) and use the class Capability, while the page 1 example checks only credential, model and rate and uses CapabilityAudit. Neither was changed, as the round requires; the register decides whether the practice or the statement should change, and runs the practice gate on the host.",
+    "course/57 page 1 opening scenario (prose, not a quiz) gives unnamed people gendered pronouns ('in her checkout', 'into his own ~/.claude/CLAUDE.md'). Outside this round's file scope, so not changed."
+  ]
+}

@@ -69,7 +69,7 @@ July 2026).
 | DV8 Evaluation, testing and debugging | 2.6% | 15, 42, 43 |
 
 The official guide numbers its domains in a different order (1 Agents and Workflows, 2 Applications
-and Integration, 3 Claude Code, 4 Eval, Testing and Debugging, 5 Model Selection and Optimization,
+and Integration, 3 Claude Code, 4 Eval, Testing and Debugging, 5 Model Selection and Optimisation,
 6 Prompt and Context Engineering, 7 Security and Safety, 8 Tools and MCPs); DV1 to DV8 are the
 course's own codes. Domain 2 is a third of the exam and covers requirements, the systems life
 cycle, API mechanics (messages, tools, streaming, vision, thinking, caching, third-party platforms,

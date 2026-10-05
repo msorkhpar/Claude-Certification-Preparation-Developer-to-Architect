@@ -60,8 +60,8 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **c**: Yes, since a star matches any depth below the folder
    - **d**: No, since a lone star stays within one level
 
-5. Scenario S2. A repository keeps shared guidance in AGENTS.md beside its memory file, and a developer adds a CLAUDE.local.md for her notes. Afterwards the assistant stops following the shared guidance. What explains it?
-   - **a**: Her file overrides the shared guidance line by line
+5. Scenario S2. A repository keeps shared guidance in AGENTS.md beside its memory file, and a developer adds a CLAUDE.local.md for their notes. Afterwards the assistant stops following the shared guidance. What explains it?
+   - **a**: The personal file overrides the shared guidance line by line
    - **b**: Local files switch off every shared file in the repository
    - **c**: Only one family is read, so its sibling needs importing
    - **d**: AGENTS.md is read only in unattended runs
@@ -162,7 +162,7 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **c**: No, but only because the agent could ask a person to approve
    - **d**: No, since writing to disk has separate rules that must be set too
 
-22. Scenario S4. A developer defines a server named github in her local scope with one address, and the committed file defines the same name with headers and another address. What does Claude Code use?
+22. Scenario S4. A developer defines a server named github in their local scope with one address, and the committed file defines the same name with headers and another address. What does Claude Code use?
    - **a**: Only the highest-ranking entry, taken whole, since no merging happens there
    - **b**: A blend, headers from one and address from the other, since merging is the default
    - **c**: The committed file's entry, since a team file always outranks a personal one
