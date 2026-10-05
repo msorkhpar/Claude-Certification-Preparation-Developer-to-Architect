@@ -5,7 +5,7 @@
 
 **After this page you can** read a trace of a Claude application from its first failing event, tell whether the integration or the model is at fault with a question that has a checkable answer, keep the evidence that support and your own team need, turn a fixed bug into a regression case, and write the module's practice, a failure diagnosis.
 
-Checked on 2026-10-03 against the Claude API documentation pages "Claude API errors", "Stop reasons and fallback" and "Handle streaming refusals", and against the Developer exam guide (version 1.0). The traces in the example and the practice are hand-written, shaped like the documented replies, and carry no live output. The example runs offline in Python and TypeScript, and the practice in Python, TypeScript, Java and Kotlin.
+Checked on 2026-10-03 against the Claude API documentation pages "Claude API errors", "Stop reasons and fallback" and "Handle streaming refusals", and against the Developer exam guide (version 1.0). The traces in the example and the practice are hand-written, shaped like the documented replies, and carry no live output. The example and the practice run offline in Python, TypeScript, Java and Kotlin.
 
 ## Why it matters
 
@@ -57,7 +57,7 @@ A trace often holds several failures. A 529 is retried and succeeds, so the appl
 
 ### A trace read in the container
 
-The example reads three hand-written traces, each a list of events. Trace A is a tool loop that ends in an empty reply, and the last user message had text after the tool result. Trace B is a 529 followed by a retry that succeeded. Trace C is a parse failure on JSON inside a code fence. The function that reads them is a small version of the practice's: it returns the first failure, its origin and the next action. The source of both languages is shown, and under each is what it printed in the container.
+The example reads three hand-written traces, each a list of events. Trace A is a tool loop that ends in an empty reply, and the last user message had text after the tool result. Trace B is a 529 followed by a retry that succeeded. Trace C is a parse failure on JSON inside a code fence. The function that reads them is a small version of the practice's: it returns the first failure, its origin and the next action. The source of all four languages is shown, and under each is what it printed in the container.
 
 <!-- example: m43-read-a-trace tabs: python,typescript,java,kotlin -->
 ```python
@@ -450,7 +450,7 @@ C: JSON in a code fence
 ```
 <!-- /example -->
 
-The three outputs show the three cases of the table. The example's table of origins is simpler than the practice's: it files every `rate_limit_error` under the service, and the spend-cap 429 that page 1 sends to the account is a case it leaves out. The practice tells the two apart by the `retry-after` header and the error code. Trace A's empty reply is the integration's: the page on stop reasons says text after a tool result teaches the model to end its turn, so the fix is to send the tool result alone, and a prompt change would not help. Trace B's 529 is the service's, the next action is a retry with back-off, and the example reports that a later response recovered. Trace C's JSON was in the text, inside a fence, so the integration's parser was too strict and the fix is to extract the object. The same text with no object in it would have been the model's, with a different recovery: validate the output and ask again. Both languages print the same text.
+The three outputs show the three cases of the table. The example's table of origins is simpler than the practice's: it files every `rate_limit_error` under the service, and the spend-cap 429 that page 1 sends to the account is a case it leaves out. The practice tells the two apart by the `retry-after` header and the error code. Trace A's empty reply is the integration's: the page on stop reasons says text after a tool result teaches the model to end its turn, so the fix is to send the tool result alone, and a prompt change would not help. Trace B's 529 is the service's, the next action is a retry with back-off, and the example reports that a later response recovered. Trace C's JSON was in the text, inside a fence, so the integration's parser was too strict and the fix is to extract the object. The same text with no object in it would have been the model's, with a different recovery: validate the output and ask again. All four languages print the same text.
 
 ### Fix at the right layer, then keep the case
 
@@ -489,7 +489,7 @@ The practice is the diagnosis function. You write, in the language of your choic
    - **c**: The account reached a limit, so raise the quota before anything else
    - **d**: The service dropped the output, so retry the same call unchanged
 
-2. Our code could not read this reply: "Sure! Here is the answer: {"label": "spam"} Hope it helps." What does the routine conclude?
+2. A team's code could not read this reply: "Sure! Here is the answer: {"label": "spam"} Hope it helps." What does the routine conclude?
    - **a**: The account lacks access to structured output, so request it
    - **b**: The model failed to produce JSON, so validate and ask it again
    - **c**: The service truncated the body, so retry the call with back-off
