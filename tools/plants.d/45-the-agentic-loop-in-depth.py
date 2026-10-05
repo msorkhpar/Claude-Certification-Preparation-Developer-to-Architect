@@ -26,7 +26,7 @@ PLANTS[f"{X}/45-the-agentic-loop-in-depth/unit-01/practice-1"] = {
         "wrong-cap-off-by-one": [("return turns >= maxTurns;", "return turns > maxTurns;")],
         "wrong-assistant-trimmed": [('messages.add(map("role", "assistant", "content", content));', 'messages.add(map("role", "assistant", "content", callsOf(content)));')],
         "wrong-error-without-flag": [("String.valueOf(error.getMessage()), true);", "String.valueOf(error.getMessage()), false);")],
-        "wrong-truncated-is-done": [('case "end_turn", "stop_sequence" -> "done";', 'case "end_turn", "stop_sequence", "max_tokens" -> "done";')],
+        "wrong-truncated-is-done": [('case "max_tokens" -> "truncated";', 'case "max_tokens" -> "done";')],
         "wrong-malformed-continues": [('        if (reason.equals("tool_use") && calls.isEmpty()) return "malformed";\n', "")],
     }),
     "kotlin": ("AgentLoop.kt", {

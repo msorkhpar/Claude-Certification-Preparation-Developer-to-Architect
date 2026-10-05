@@ -30,11 +30,13 @@ test("a protected path is blocked with exit two and a reason on standard error",
 });
 
 test("the file works as a hook process", () => {
+  const childEnv = { ...process.env };
+  delete childEnv.NODE_TEST_CONTEXT; // the hook process is a plain program, not a test run
   const file = new URL("./hookGate.ts", import.meta.url).pathname;
-  const run = spawnSync("node", [file, "--hook"], { input: JSON.stringify({ tool_name: "Bash", tool_input: { command: "git push" } }), encoding: "utf8" });
+  const run = spawnSync("node", [file, "--hook"], { input: JSON.stringify({ tool_name: "Bash", tool_input: { command: "git push" } }), encoding: "utf8", env: childEnv });
   assert.equal(run.status, 0);
   assert.equal(JSON.parse(run.stdout).hookSpecificOutput.permissionDecision, "deny");
-  const blocked = spawnSync("node", [file, "--hook"], { input: JSON.stringify({ tool_name: "Edit", tool_input: { file_path: ".env" } }), encoding: "utf8" });
+  const blocked = spawnSync("node", [file, "--hook"], { input: JSON.stringify({ tool_name: "Edit", tool_input: { file_path: ".env" } }), encoding: "utf8", env: childEnv });
   assert.equal(blocked.status, 2);
   assert.match(blocked.stderr, /Blocked/);
 });
