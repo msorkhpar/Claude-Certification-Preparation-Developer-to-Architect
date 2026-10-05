@@ -55,8 +55,7 @@ Four rules turn that table into code:
 4. **Usage is split in two.** Input tokens come from `message_start`; the output count comes from the last `message_delta`.
    The output count in `message_delta` is cumulative: replace the stored one, do not add to it.
 
-The versioning policy lets the API add event types, so ignore event types you do not know, because the API may add new
-ones. `ping` is the first example of such an event: the raw iteration of the Python and TypeScript SDKs drops it before your loop sees it.
+Under the versioning policy the API may add new event types, so ignore event types you do not know. `ping` is the first example of such an event: the raw iteration of the Python and TypeScript SDKs drops it before your loop sees it.
 
 A stream that ends without `message_stop` is an incomplete message, not a short one. The stop reason arrives in
 `message_delta`, near the end, so a cut stream has none.
