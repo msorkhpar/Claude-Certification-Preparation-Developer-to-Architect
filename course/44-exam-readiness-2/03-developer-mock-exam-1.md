@@ -9,8 +9,7 @@ This mock exam covers **the content of Levels 1 and 2** (modules 1 to 43), as th
 written in the exam's style: a short scenario with a constraint, one best answer and three plausible alternatives, each of which is a mistake a
 practitioner could make. Every question is the course's own, written fresh; no question comes from a live exam, and none repeats a question of a page
 quiz, a module quiz or the Level 1 mock exam. The facts behind each answer were read on 2026-10-02 from the official pages named on the module
-pages, so a reader who studies the pages can answer each question from the page it is drawn from. The real exam has multiple-choice and
-multiple-response items; this mock has single-answer items only.
+pages, so a reader who studies the pages can answer each question from the page it is drawn from. The real exam has multiple-choice and multiple-response items, and so does this mock: a multiple-response item ends with (Select two.) and is right only when both keyed options are chosen.
 
 ## How to take it
 
@@ -47,7 +46,7 @@ and caching (DV2) carry most of the weight, so they repay the first revision ses
 
 ## Mock exam
 
-This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one answer for each question.
+This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one answer for each question, or the number the question states.
 
 1. A team's monitoring shows its per-minute token use at about 40 percent of its tier's limit, yet 429 errors appear in sharp bursts whenever a scheduled job starts. Which explanation fits best?
    - **a**: Cached tokens are counted twice against the input limit, so the average hides the real total
@@ -61,11 +60,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Validate every reply against a strict schema and reject anything that has an extra entry
    - **d**: Report the provider to support, because adding output values breaks the contract
 
-3. A support bot caches a long prefix. After turn four the team wants a new tone rule applied to later turns on Claude Sonnet 5.5, without discarding the cached earlier part. Which approach fits best?
-   - **a**: Append an instruction with the system role after the latest user message
-   - **b**: Rewrite the top-level system field with the new rule on the next request
+3. A support bot caches a long prefix. After turn four the team wants a new tone rule applied to later turns on Claude Sonnet 5.5, without discarding the cached earlier part. Which two statements describe the approach that fits? (Select two.)
+   - **a**: Rewrite the top-level system field with the new rule on the next request
+   - **b**: Append a system-role instruction after the latest user message
    - **c**: End the list with a partial assistant message that already follows the rule
-   - **d**: Start a fresh conversation and resend a summary that includes the rule
+   - **d**: Prior content keeps its saved computation
+   - **e**: Start a fresh conversation and resend a summary that includes the rule
 
 4. A dashboard charts only the plain input count from each response and shows 50 for a call that sent a 200,000-token document from the cache. The team asks whether the figure is broken. What should they be told?
    - **a**: The field was capped at 50 because the document exceeded the context limit of that model
@@ -91,11 +91,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: About 30, from the arrival frequency times each exchange's duration
    - **d**: About 600, one slot for each request sent during the minute
 
-8. A logging layer for a streamed reply records the stop reason from the first chunk it receives and always stores a null. Where does the value arrive?
-   - **a**: In message_start, alongside the input token count
-   - **b**: In the HTTP status line of the response
-   - **c**: In a content_block_stop frame, once each block completes
-   - **d**: In the message_delta frame sent close to the finish
+8. A logging layer for a streamed reply records the stop reason from the first chunk it receives and always stores a null. Which two statements explain it? (Select two.)
+   - **a**: It arrives in the HTTP status line of the response
+   - **b**: The value arrives in the delta frame sent close to the finish
+   - **c**: It arrives in a content_block_stop frame, once each block completes
+   - **d**: An interrupted transfer never delivers one
+   - **e**: It arrives in message_start, alongside the input token count
 
 9. An operator stops a running batch and sees an interim state named canceling. What should the team expect for the requests that had already run?
    - **a**: Every one is refunded because the batch never reached its normal end
@@ -127,11 +128,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Ask for JSON in the prompt and parse whatever text comes back
    - **d**: Add an assistant message that opens a brace so that the reply begins as JSON
 
-14. A team reads PDFs through Amazon Bedrock's Converse API and finds that answers ignore every chart, although the same files work well on the Claude API. Which setting explains and fixes it?
-   - **a**: Turning on citations, since the full visual mode requires them
-   - **b**: A PDF surcharge that disables page images unless it is paid
-   - **c**: Converting each PDF to plain text first, which adds the image content
-   - **d**: Switching to base64 sources, since links hide the page images
+14. A team reads PDFs through Amazon Bedrock's Converse API and finds that answers ignore every chart, although the same files work well on the Claude API. Which two statements explain it and the fix? (Select two.)
+   - **a**: Switching to base64 sources hides the links that blocked the images
+   - **b**: A PDF surcharge disables page images unless it is paid
+   - **c**: The visual mode requires citations enabled
+   - **d**: Converting each PDF to plain text first adds the image content
+   - **e**: Without them the service falls back to basic text extraction
 
 15. A guard hook works on its author's laptop but fails for every teammate who adds it from the marketplace; the command line names an absolute path. Which fix fits?
    - **a**: Copy the program into each teammate's home directory during onboarding
@@ -163,11 +165,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Drop to Claude Sonnet 5.5, since faster models usually score higher on such tests
    - **d**: Switch to Claude Fable 5.1, which the page reserves for demanding reasoning
 
-20. A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which change fits?
-   - **a**: Pick one of the three lowest values, which that mode accepts
-   - **b**: Raise max_tokens, because the 400 reports a truncated reply
-   - **c**: Pass adaptive as the effort value so the model chooses its own
+20. A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which two statements explain it and the fix? (Select two.)
+   - **a**: That mode works at the three lowest levels
+   - **b**: Pass adaptive as the effort value so that the model chooses its own
+   - **c**: Raise max_tokens, because the 400 reports a truncated reply
    - **d**: Add temperature 0 so that the behaviour becomes deterministic
+   - **e**: At the two highest levels it is rejected
 
 21. After a deploy, a service immediately fires ten simultaneous requests that share a 30,000-token prefix with a marker on it. Usage shows ten writes and no reads. What is the fix?
    - **a**: Raise the lifetime to one hour so later entries reach the earlier one
@@ -187,11 +190,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: The excess is trimmed from the start of the input history before any processing begins
    - **d**: The output allowance is silently lowered to fit, so the reply always completes
 
-24. Two otherwise identical multi-turn services use thinking: one runs on Claude Opus 5.5 and one on Claude Haiku 4.5. The first one's conversations fill their context faster. Which fact explains the gap?
+24. Two otherwise identical multi-turn services use thinking: one runs on Claude Opus 5.5 and one on Claude Haiku 4.5. The first one's conversations fill their context faster. Which two statements explain the gap? (Select two.)
    - **a**: Haiku 4.5 has a smaller window of 64K, so its context is cleared sooner
-   - **b**: The larger model retains earlier reasoning by default, while the smaller strips it
-   - **c**: Adaptive thinking bills reasoning as input, which crowds the window on Opus
-   - **d**: Opus 5.5 can disable thinking, so it sends longer prompts to compensate for the lost reasoning
+   - **b**: Adaptive thinking bills reasoning as input, which crowds the window
+   - **c**: The larger model retains earlier reasoning by default
+   - **d**: Opus 5.5 can disable thinking, so it compensates with longer prompts
+   - **e**: The smaller model drops earlier reasoning blocks
 
 25. A drafting feature scores 62 percent on the team's fixed test set against a 90 percent target and costs more than planned. Someone proposes switching tiers immediately. What does the module advise?
    - **a**: Switch tiers now, since a lower price makes later quality work affordable
@@ -223,11 +227,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: The cap is checked once the run finishes, so overruns are unavoidable
    - **d**: The ceiling reaches down to the delegates as well
 
-30. A custom in-process tool is annotated as read-only, and the team lets it run alongside other tools without review, assuming that it cannot modify anything. What is the flaw?
-   - **a**: The label is merely scheduling metadata; the handler's code decides what happens
-   - **b**: Tools carrying the label are always run one at a time, to stay on the safe side
-   - **c**: The label is enforced when the tool is served from outside the process boundary
-   - **d**: The SDK rejects any write that such a tool attempts while the run is under way
+30. A custom in-process tool is annotated as read-only, and the team lets it run alongside other tools without review, assuming that it cannot modify anything. Which two statements explain why that assumption fails? (Select two.)
+   - **a**: The handler's code can still write
+   - **b**: The label is enforced when the tool is served from outside the process boundary
+   - **c**: The SDK rejects any write that such a tool attempts while the run is under way
+   - **d**: Tools carrying the label are always run one at a time, to stay on the safe side
+   - **e**: The label is scheduling metadata and not a guarantee
 
 31. A team promotes a new system prompt for a hosted agent and wants production runs to keep the previous behaviour until a person approves the switch. Which approach fits?
    - **a**: Override the system field on every run, since overrides merge with the saved agent
@@ -265,11 +270,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Lower the effort so the model reasons less before filling the field
    - **d**: Ask for a brief explanation in its place
 
-37. An extraction loop repairs failed replies by sending the original prompt again with the note "try again". The same mistakes keep recurring. Which redesign fits?
-   - **a**: Return the model's own answer together with every problem and its location
-   - **b**: Report only the first problem each time, to keep the note short and focused
-   - **c**: Retry without a limit, since eventual success is likely on a hard document
-   - **d**: Add a prefilled assistant turn that opens the JSON object for the model
+37. An extraction loop repairs failed replies by sending the original prompt again with the note "try again". The same mistakes keep recurring. Which two changes fit? (Select two.)
+   - **a**: Retry without a limit, since eventual success is likely on a hard document
+   - **b**: Return the model's own answer with the request
+   - **c**: List every problem with its path and message
+   - **d**: Add a prefilled assistant turn that opens the JSON object
+   - **e**: Report only the first problem each time, to keep the note short
 
 38. A retrieval service embeds both stored passages and incoming questions with the same provider call and no further options, and results are mediocre. Which change do the course pages back?
    - **a**: Truncate each passage to a single sentence before embedding
@@ -301,11 +307,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Separate returns teach Claude to avoid issuing several requests together
    - **d**: Parallel calls vanish whenever a conversation passes a certain length of history
 
-43. A developer connects forty tool-bearing servers to Claude Code and worries that every request now carries all their schemas. What does the documentation say?
-   - **a**: Each schema loads in full at session start, so the cost stays fixed per server
-   - **b**: Discovery on demand is on by default, so unused ones cost little context
-   - **c**: Servers load nothing at start, so adding more of them affects latency alone
-   - **d**: Put the schemas into CLAUDE.md, which loads when a question needs them
+43. A developer connects forty tool-bearing servers to Claude Code and worries that every request now carries all their schemas. Which two statements does the documentation support? (Select two.)
+   - **a**: Dormant integrations cost little space
+   - **b**: Discovery on demand is switched on by default
+   - **c**: The schemas belong in CLAUDE.md, which loads when a question needs them
+   - **d**: Servers load nothing at start, so adding more affects latency alone
+   - **e**: Each schema loads in full at session start, so the cost stays fixed per server
 
 44. An application defines its own function called screenshot alongside Anthropic's screen-control entry. Incoming blocks with that word are sometimes meant for one and sometimes for the other. How should dispatch work?
    - **a**: Reject the custom function, because member names are reserved
@@ -331,11 +338,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Connecting a data source, whose raw content is then kept by the provider for seven years
    - **d**: Deleting a chat, which the back end then retains for five years in a hidden archive
 
-48. A team plans to drop the disposable container for its screen-driving agent because Anthropic already scans screenshots for planted instructions. What should the reviewer say?
-   - **a**: The scan makes planted text harmless, so confirmation steps can be removed too
-   - **b**: Dropping the container is fine once an allowlist of permitted domains is in place
-   - **c**: Screenshots are processed by Anthropic alone, so no local safeguards apply to them
-   - **d**: Such filters are a backup layer; isolation, absent secrets and approvals stay first
+48. A team plans to drop the disposable container for its screen-driving agent because Anthropic already scans screenshots for planted instructions. Which two statements should the reviewer make? (Select two.)
+   - **a**: Injected text can still be obeyed despite the filter
+   - **b**: Screenshots are processed by Anthropic alone, so no local safeguards apply
+   - **c**: Such filters are a backup layer behind the first defences
+   - **d**: Dropping the container is fine once an allowlist of domains is in place
+   - **e**: The scan makes planted text harmless, so the confirmation steps can go too
 
 49. An agent loop returns a vendor lookup to Claude, and the team adds "now email the summary to finance" to the end of that same return. The instruction is routinely ignored. Which placement fits?
    - **a**: Put it in a separate user message that follows the block
@@ -372,52 +380,52 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 1. **c**. The limit works as a token bucket that is "continuously replenished up to your maximum limit", so a spike can empty it (module 12, page 2). *a* is ruled out because the page says that for most models "only uncached input tokens count toward ITPM", so cached tokens are not double counted. *b* is ruled out because the bucket refills "rather than being reset at fixed intervals", so there is no minute boundary. *d* is ruled out because the rate-limit page says "does not factor into OTPM rate limit calculations" for the max_tokens parameter.
 2. **b**. A client should "Read what you need and ignore the rest", since an unknown field is not an error (module 13, page 1). *a* is ruled out because earlier versions "may be unavailable for new users" and the only current value is the one already in use. *c* is ruled out because a client that fails on an unknown field "breaks on a change the versioning page allows". *d* is ruled out because the versioning policy reserves the right to "add additional values to the output", so nothing was broken.
-3. **a**. A message with the system role after a user turn "does not invalidate a cached prefix that came before it" (module 14, page 1). *b* is ruled out because adding the rule partway "changes the system prompt and invalidates the conversation's earlier thinking blocks". *c* is ruled out because a conversation that ends on the model's side "must end with a user message" and returns a 400. *d* is ruled out because the page assigns "the mid-conversation message for instructions that only become relevant later", so no restart is needed.
+3. **b and d**. A message with the system role after a user turn "does not invalidate a cached prefix that came before it" (module 14, page 1), so the earlier part of the conversation stays reusable. *a* is ruled out because adding the rule partway "changes the system prompt and invalidates the conversation's earlier thinking blocks". *c* is ruled out because a conversation that ends on the model's side "must end with a user message" and returns a 400. *e* is ruled out because the page assigns "the mid-conversation message for instructions that only become relevant later", so no restart is needed.
 4. **d**. The plain count "only represents tokens that appear after your last cache breakpoint", so the other two fields must be added (module 14, page 2). *a* is ruled out because the page gives the same case, "reads 50 although the total input is 200,050", and nothing was capped. *b* is ruled out because the page states that "the total input is the sum of three numbers", not one. *c* is ruled out because the page says "the input side arrives in message_start", so timing does not explain a low value.
 5. **c**. A limit set below the tier's cap returns a 400, and "Lifting the limit is the cure, not changing the request" (module 15, page 1). *a* is ruled out because a 400 is in the group where "the same request fails again", so waiting does not help. *b* is ruled out because the page explains that "A limit you set yourself, below the tier's cap, also stops requests". *d* is ruled out because an oversized body gives a different outcome: "a larger request is refused with a 413".
 6. **b**. The header sets a floor, so wait "the larger of your back-off and the header" (module 15, page 2). *a* is ruled out because the page says "it is a floor, not a suggestion", so the header cannot be treated as advice. *c* is ruled out because the header text says "Earlier retries will fail", and nothing in it is reduced by elapsed time. *d* is ruled out because the page warns that "hammering the endpoint in the meantime only fails".
 7. **c**. In-flight calls follow Little's law: "the number of requests in flight equals the request rate times the time each takes", so 10 a second for 3 seconds gives 30 (module 16, page 1). *a* is ruled out because the page defines the bound as "the number of requests in flight equals the request rate times the time each takes", which includes the duration. *b* is ruled out because a bound above the need "would only invite 429 errors". *d* is ruled out because the rule is to "compute the bound from the limit you must stay under", not to match the total sent.
-8. **d**. The stop reason "arrives in message_delta, near the end", so a cut stream has none (module 17, page 1). *a* is ruled out because the opening frame carries "an empty content and the input token count in usage", not the stop reason. *b* is ruled out because the page says "stop_reason indicates normal completion; HTTP errors indicate failures", so the status line does not hold it. *c* is ruled out because that frame means "The block at index is complete" and carries no reason.
+8. **b and d**. The stop reason "arrives in message_delta, near the end", so a cut stream has none (module 17, page 1). *a* is ruled out because "stop_reason indicates normal completion; HTTP errors indicate failures". *c* is ruled out because that frame means "The block at index is complete" and carries no reason. *e* is ruled out because the opening frame carries "an empty content and the input token count in usage", not the stop reason.
 9. **b**. Batches that are stopped "end up with a status of ended and may contain partial results", and processed work is billed (module 21, page 2). *a* is ruled out because the page says "the requests that had already run are still billed". *c* is ruled out because the batch "may contain partial results for requests that were processed before cancellation". *d* is ruled out because "Cancellation may not be instant", so the batch is not removed at once.
 10. **c**. On Bedrock the version "stays a header, as on the direct API" (module 22, page 1). *a* is ruled out because that placement is the Google Cloud rule: "anthropic_version is passed in the request body". *b* is ruled out because the contract lists the version as "which the overview lists as required". *d* is ruled out because the page treats them as separate items: "Authentication, version and body type are all a plain request needs".
 11. **b**. Google Cloud "limits request payloads to 30 MB", which many images can reach first (module 22, page 2). *a* is ruled out because the page says the request size limit "can be reached first", before any image count. *c* is ruled out because the refusal came while the count was low, and a team with many images "can reach before the token limit". *d* is ruled out because on this platform "only base64-encoded sources are currently available", so links are not an option.
 12. **d**. Denying InvokeModel is enough because other actions "are blocked automatically when InvokeModel is denied" (module 23, page 1). *a* is ruled out because the page lists the neighbours, "such as Converse and StartAsyncInvoke", as blocked without extra statements. *b* is ruled out because the page says "In a guardrail, the wildcard is the point", so the wildcard is legitimate in a deny. *c* is ruled out because a "statement belongs in a separate guardrail", which is where deny rules live.
 13. **b**. The page recommends structured outputs "when you need a response in a fixed JSON shape" (module 25, page 1). *a* is ruled out because on these models `any` and `tool` "return a 400 error" just as a named tool does. *c* is ruled out because a prompt request gives "no guarantee; the program must parse defensively". *d* is ruled out because prefilled assistant messages "return a 400 error" on these models.
-14. **a**. "Without citations, Converse falls back to basic text extraction", so enabling them restores the visual mode (module 30, page 2). *b* is ruled out because "Standard API pricing applies with no additional PDF fees". *c* is ruled out because text extraction is the mode that "cannot analyze images or charts". *d* is ruled out because on that platform "only base64 sources are available", so that is already the case.
+14. **c and e**. "Without citations, Converse falls back to basic text extraction", so enabling them restores the full visual mode (module 30, page 2). *a* is ruled out because on that platform "only base64 sources are available", so that is already the case. *b* is ruled out because "Standard API pricing applies with no additional PDF fees". *d* is ruled out because text extraction is the mode that "cannot analyze images or charts".
 15. **c**. A hook script in a plugin "cannot assume where the plugin was installed", so it uses the plugin-root variable (module 39, page 3). *a* is ruled out because the page says "The path differs on every machine", so a copied location cannot be shared. *b* is ruled out because agent fields of that kind "are ignored when loading agents from a plugin". *d* is ruled out because "Only plugin.json goes inside .claude-plugin/", so other files do not belong there.
 16. **a**. "GitHub doesn't trigger workflows on commits made with the default GITHUB_TOKEN", so an app token is needed (module 40, page 2). *b* is ruled out because the page says "workflows written for @beta need to move", which concerns versions and not triggers. *c* is ruled out because the page tells you to "Grant the least a job needs". *d* is ruled out because the page says "Use GitHub's concurrency controls to limit parallel runs", which bounds cost and does not trigger anything.
 17. **d**. Each surface "connects to the same underlying Claude Code engine", so the files carry across (module 3, page 2). *a* is ruled out because the page says "settings, and MCP servers work across all of them". *b* is ruled out because memory files "and settings that travel with the repository across its surfaces". *c* is ruled out because Claude Code is "available in the terminal, IDE extensions, a desktop app and the browser".
 18. **b**. Because a batch can outlast five minutes, "it suggests the one-hour lifetime for shared context" (module 21, page 1). *a* is ruled out because warming "targets time-to-first-token, which does not apply to batch processing". *c* is ruled out because the page says "The pricing discounts from prompt caching and Message Batches can stack". *d* is ruled out because hits depend on "identical cache_control blocks in every request".
 19. **d**. The overview points to Claude Fable 5.1 "when evals at higher effort still fall short" (module 3, page 1). *a* is ruled out because Fable 5.1 is listed for "demanding reasoning and long-horizon agentic work". *b* is ruled out because the course advises "adding complexity only when it demonstrably improves outcomes". *c* is ruled out because the method is to "move down a tier at a time until quality drops", which comes after the target is met.
-20. **a**. That mode works at the lower levels and "returns a 400 at xhigh and max" (module 19, page 1). *b* is ruled out because a cut reply is a different case, because it "arrives with status 200". *c* is ruled out because the page says "Don't pass adaptive as an effort value". *d* is ruled out because on these models "a non-default value of any of them is rejected with a 400 error".
+20. **a and e**. The mode "works at `low`, `medium` and `high` effort and returns a 400 at `xhigh` and `max`" (module 19, page 1), so the fix is one of the three lowest values. *b* is ruled out because "Don't pass adaptive as an effort value". *c* is ruled out because a cut reply is a different case, because it "arrives with status 200". *d* is ruled out because on these models "a non-default value of any of them is rejected with a 400 error".
 21. **c**. The page says to "wait for the first response before sending subsequent requests" (module 20, page 2). *a* is ruled out because a one-hour entry "writes at twice the base price" and still does not exist before the first response. *b* is ruled out because "Changing the thinking mode or the effort always discards the cached messages". *d* is ruled out because a prefix below the minimum "will be processed without caching", so the saving is lost.
 22. **b**. The method is to "measure on your own cases, then move down a tier at a time" (module 18, page 1). *a* is ruled out because the first step is to "start high, so that a failure means the task is hard". *c* is ruled out because the course notes that nothing "says the biggest model is the safest default for every task". *d* is ruled out because "A tier is right only if it passed your evaluation at the lowest cost".
 23. **a**. Input plus max_tokens beyond the window is allowed because "the request is still accepted", and generation stops at the limit (module 1, page 1). *b* is ruled out because "Older models returned a validation error instead". *c* is ruled out because chat products "manage the window on a rolling first-in, first-out basis; the API does not". *d* is ruled out because the page says "if generation then reaches the window limit it stops with" a stop reason, not a lowered allowance.
-24. **b**. Earlier thinking is kept where "current Opus, Sonnet, Fable models keep them by default" (module 4, page 2). *a* is ruled out because Haiku 4.5 has a window of "200K for Claude Haiku 4.5", and 64K is only its output ceiling. *c* is ruled out because reasoning tokens "are billed as output tokens". *d* is ruled out because the page says "Opus 5.5 use adaptive thinking that is always on".
+24. **c and e**. Earlier thinking is kept where "current Opus, Sonnet, Fable models keep them by default" (module 4, page 2), and the smaller model strips it, which is why the first service's context fills faster. *a* is ruled out because Haiku 4.5 has a window of "200K for Claude Haiku 4.5", and 64K is only its output ceiling. *b* is ruled out because reasoning tokens "are billed as output tokens". *d* is ruled out because "Opus 5.5 use adaptive thinking that is always on".
 25. **d**. The order is "first reach the quality bar; then look for the cheaper way to hold it" (module 6, page 4). *a* is ruled out because a smaller tier fits only "where the evaluation set says quality holds". *b* is ruled out because the page says to "Test the cheap tier first on the hard cases, not on the easy ones". *c* is ruled out because "Several simultaneous edits leave you unable to say what helped".
 26. **b**. The page says to "Run an effort sweep on your own evals rather than carrying settings over from an earlier model" (module 18, page 3). *a* is ruled out because a manual budget "or a manual budget_tokens, is rejected" on the newer models. *c* is ruled out because on Sonnet 5.5 "its levels are recalibrated", so no direction can be assumed. *d* is ruled out because the page promises "at least 60 days' notice before model retirement", which allows time to test instead of waiting.
 27. **a**. Sectioning needs independent work, and "Parallel calls cannot see each other's output", so a dependent step belongs in a chain (module 34, page 1). *b* is ruled out because sectioning means "independent subtasks run in parallel", which these are not. *c* is ruled out because routing "directs it to a specialized followup task" and does not order two calls. *d* is ruled out because an agent suits a case where "the path cannot be written in advance", and this path is fixed.
 28. **b**. "If the verdict cannot be parsed, the draft is unchecked", so it is graded zero with a reason (module 34, page 2). *a* is ruled out because "a reply that is not a bare score counts as ungradable", and an ungradable case fails. *c* is ruled out because such a parse "turns a broken grader into a plausible number". *d* is ruled out because "A refinement loop can get worse", so the page keeps the best draft and not the last.
 29. **d**. The page states that "the budget covers subagents too" (module 35, page 1). *a* is ruled out because the option is described as "Maximum cost before stopping". *b* is ruled out because only the turn limit "counts tool-use turns only", while the budget measures cost. *c* is ruled out because "When a limit is reached the run ends with a result whose subtype names it".
-30. **a**. "Annotations are metadata, not enforcement" (module 35, page 2). *b* is ruled out because the hint "lets the tool run in parallel with other read-only tools", not one at a time. *c* is ruled out because clients treat annotations as "untrusted unless they come from trusted servers", wherever the tool is served. *d* is ruled out because "A tool marked read-only can still write if its handler does".
+30. **a and e**. "Annotations are metadata, not enforcement", and "A tool marked read-only can still write if its handler does" (module 35, page 2). *b* is ruled out because clients treat annotations as "untrusted unless they come from trusted servers", wherever the tool is served. *c* is ruled out because "Annotations are metadata, not enforcement". *d* is ruled out because the hint "lets the tool run in parallel with other read-only tools".
 31. **c**. The page says "a session can instead pin a version" so a prompt can be promoted or rolled back without a deploy (module 36, page 1). *a* is ruled out because "overrides replace and never merge". *b* is ruled out because a session made with just an agent ID "creates the session with the latest agent version". *d* is ruled out because "Environments are not versioned".
 32. **a**. "Tool inputs and outputs still flow to Anthropic's control plane" (module 36, page 2). *b* is ruled out because "Anthropic does not inspect or verify your sandbox image", and the image is the customer's. *c* is ruled out because the page says "files, processes and network traffic stay in your environment". *d* is ruled out because the key belongs in "a secrets manager, never an image".
 33. **b**. "Validation proves the shape", and nothing more (module 37, page 1). *a* is ruled out because "A refund of 4999 cents passes the schema whether or not it is right". *c* is ruled out because only "a reply that does not validate against the output type is refused", and this one validated. *d* is ruled out because "A checkpoint is a copy of the state at a point in the graph", not a check.
 34. **a**. The page says to "check whether the simplest option meets it" (module 37, page 2). *b* is ruled out because the advice is to "start with direct calls and add layers when a need appears". *c* is ruled out because "A framework that offers persistence helps only when the product must resume". *d* is ruled out because "The question is who should own the route, not which library is popular".
 35. **c**. The page wraps pasted text in a tag "with a random id that your application generates" and says the text may carry instructions (module 24, page 1). *a* is ruled out because "Moving a pasted document above the instructions does not mark it as data". *b* is ruled out because data in the system prompt "gets the authority of an instruction". *d* is ruled out because "Tags mark where data starts and ends, but they do not make data safe".
 36. **d**. The page says to "Ask for a short explanation instead" of the reasoning (module 24, page 2). *a* is ruled out because "a 200 with refusal is not an answer", and a refusal is not a cut reply. *b* is ruled out because "The same request gets the same decision". *c* is ruled out because the page says "Do not ask for the reasoning as output", whatever the effort.
-37. **a**. The next call needs "a user message that lists each problem with its path and message" after the model's own reply (module 25, page 2). *b* is ruled out because the page says to "Collect all the problems in one pass". *c* is ruled out because "An unbounded retry on a hard document is a cost leak". *d* is ruled out because "Prefilling the assistant response returns a 400 error" on current models.
+37. **b and c**. The next call needs the model's own reply and "a user message that lists each problem with its path and message" (module 25, page 2). *a* is ruled out because "An unbounded retry on a hard document is a cost leak". *d* is ruled out because "Prefilling the assistant response returns a 400 error" on current models. *e* is ruled out because "Collect all the problems in one pass".
 38. **c**. The documentation says "Do not omit input_type or set input_type=None" (module 28, page 1). *a* is ruled out because "Too small a chunk loses context". *b* is ruled out because "Anthropic does not offer its own embedding model". *d* is ruled out because keyword scoring fails on paraphrases because "it matches words, not meaning".
 39. **d**. "A second compaction should fold the first summary into the new one", so that exactly one remains (module 29, page 1). *a* is ruled out because "exactly one block is sent per request". *b* is ruled out because the page says "an earlier summary is folded into the next one rather than stacked". *c* is ruled out because "Raising it does not enlarge the window".
 40. **c**. The setting exists for the cache, because clearing "invalidates cached prompt prefixes when content is cleared" (module 29, page 2). *a* is ruled out because exclusions are "tool names whose results are never cleared", which makes clears smaller. *b* is ruled out because keep sets "how many recent tool use and result pairs stay", which shrinks each clear further. *d* is ruled out because the trigger sets "when clearing starts; input_tokens or tool_uses" and not how much each pass frees.
 41. **d**. The page says "To get both a tool call and an explanation, use auto and say in a user message to use the tool" (module 26, page 1). *a* is ruled out because "the API prefills the assistant message to force a tool to be used", so no text comes first. *b* is ruled out because with a forced type "Claude calls exactly one tool", and no text is promised. *c* is ruled out because none "prevents Claude from using any tools".
 42. **c**. The rule is to "return one tool_result for each tool_use block, all together in the next user message" (module 26, page 3). *a* is ruled out because "By default, Claude may call multiple tools in a single response". *b* is ruled out because the switch is a field of the choice object: "It is not a top-level request parameter". *d* is ruled out because "The most common issue is formatting tool results incorrectly in the conversation history".
-43. **b**. "Tool search is on by default, so idle MCP tools consume minimal context" (module 27, page 1). *a* is ruled out because the loading table shows "tool names; full schemas on demand". *c* is ruled out because the context cost is "low until a tool is used", and not zero. *d* is ruled out because "CLAUDE.md is paid for on every request".
+43. **a and b**. "Tool search is on by default, so idle MCP tools consume minimal context" (module 27, page 1). *c* is ruled out because "CLAUDE.md is paid for on every request". *d* is ruled out because the context cost is "low until a tool is used", and not zero. *e* is ruled out because the loading table shows "tool names; full schemas on demand".
 44. **d**. "toolset_name is what marks a block as a computer action" (module 31, page 1). *a* is ruled out because "A custom tool in the same request can share a member's name". *b* is ruled out because the page says to "Dispatch on the pair" of member and field, not on arrival order. *c* is ruled out because "The entry takes no display size", so blocks carry no dimensions.
 45. **c**. "In the Python SDK, raise ToolError for an expected failure" (module 32, page 2). *a* is ruled out because protocol errors are for "issues with the request structure itself that models are less likely to be able to fix". *b* is ruled out because "The server MUST NOT write anything to its stdout that is not a valid MCP message". *d* is ruled out because a swallowed failure "tells the model the call worked".
 46. **b**. "An answer of decline or cancel is a normal outcome" (module 33, page 1). *a* is ruled out because that error is for a capability the call did not declare, "which names the missing capabilities". *c* is ruled out because the page lists three forms of answer and says "a server handles each". *d* is ruled out because a retry exists to supply information: the client "retries the original request including the additional requested information".
 47. **a**. "Giving feedback with the thumbs buttons stores the conversation for up to five years", on both plan types (module 10, page 1). *b* is ruled out because "Incognito chats are not used to improve Claude". *c* is ruled out because "Raw content fetched through a connector is excluded unless you copy it into the chat". *d* is ruled out because where improvement is off, "a deleted chat leaves the back end within 30 days".
-48. **d**. The page says "They are a second layer", behind the container, the missing secrets, the allowlist and the confirmation (module 31, page 2). *a* is ruled out because "Claude will follow commands found in content even when they conflict with your instructions". *b* is ruled out because the precautions begin with "a dedicated virtual machine or container with minimal privileges". *c* is ruled out because screenshots "are captured and stored in your environment, not by Anthropic".
+48. **a and c**. The classifiers "are a second layer", and "Claude will follow commands found in content even when they conflict with your instructions" (module 31, page 2). *b* is ruled out because screenshots "are captured and stored in your environment, not by Anthropic". *d* is ruled out because the precautions begin with "a dedicated virtual machine or container with minimal privileges". *e* is ruled out because "They are a second layer", behind the container, the missing secrets, the allowlist and the confirmation.
 49. **a**. The page says "Don't put your own instructions in tool results", so send them in a user turn after the block (module 41, page 1). *b* is ruled out because "Claude treats that content as untrusted data, so your instruction may be ignored", however often it is repeated. *c* is ruled out because third-party content goes "never in system prompts or plain user text blocks". *d* is ruled out because the JSON step applies to untrusted content: "Wrap third-party strings in a JSON object".
 50. **c**. The page says to "return an error or a stripped summary in the tool_result block instead of the raw content" (module 41, page 3). *a* is ruled out because content is returned only "if the screen reports no injection attempt". *b* is ruled out because the page adds "consider surfacing the attempt to the user", which is not a reason to end the run. *d* is ruled out because "A list of patterns catches the phrasing someone thought of and misses the paraphrase".
 51. **d**. Bare mode "never reads OAuth credentials or the system keychain", so a key must come from the environment (module 38, page 3). *a* is ruled out because bare mode "never reads OAuth credentials or the system keychain", so mounting it changes nothing. *b* is ruled out because the flag is "useful for CI and scripts where you need the same result on every machine". *c* is ruled out because the headless mode is meant to "Run Claude non-interactively for CI, pre-commit hooks, or batch processing".

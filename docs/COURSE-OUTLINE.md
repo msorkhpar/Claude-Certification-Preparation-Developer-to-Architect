@@ -50,7 +50,7 @@ A claim on a page names the versions it was checked on.
 | 8 | Claude's apps in depth | Cowork, Claude in Chrome, Claude for Microsoft 365 and Claude Tag; projects, artifacts, connectors and research worked through on real tasks; choosing the surface for a job; what each app can reach and what it must not | AS; X | quiz |
 | 9 | Claude for every role | The fluency ideas applied for builders, students, educators, non-profits, small businesses and creative work: what each audience delegates, checks and owns, and how the shared ideas of module 5 change in each setting | AS; X | quiz |
 | 10 | Safety, privacy and policy | The usage policy in practice, sensitive data and data classes (anonymise before upload), prompt injection explained for users, organisational controls at a glance, where to escalate a policy conflict | AS; DV6 | quiz |
-| 11 | Exam readiness 1 | The full exam logistics: the four exams and how to choose, booking and fees, online proctoring rules and the test-centre option, accommodations, retakes, renewal and the badge; how the exams work (format, scenario questions, scoring, eligibility); how to read a scenario question; revision aids (a flashcard set and a spaced-review question bank for Level 1); the Level 1 mock exam | all | quiz (mock), flashcards and a review bank |
+| 11 | Exam readiness 1 | The full exam logistics: the four exams and how to choose, booking and fees, online proctoring rules and the test-centre option, accommodations, retakes, renewal and the badge; how the exams work (format, scenario questions, scoring, eligibility); how to read a scenario question; revision aids (a flashcard set and a spaced-review question bank for Level 1); two Level 1 mock exams of 60 questions, with multiple-response items | all | quiz (mock), flashcards and a review bank |
 
 ## Level 2: Developer (Claude Certified Developer)
 
@@ -88,7 +88,7 @@ A claim on a page names the versions it was checked on.
 | 41 | Security and safety | Direct and indirect prompt injection, jailbreaks, delimiting untrusted input, data leakage and PII, layered input and output guardrails, least privilege, hooks that block destructive actions, secrets in development and production, identity and access monitoring | DV6; A2.3 | code: an injection-resistant tool gate |
 | 42 | Evaluation | Success criteria, test sets, code-graded and model-graded evals, refining prompts against an eval set, regression runs | DV8; A4.4 | code: an eval harness |
 | 43 | Debugging Claude applications | Classifying a failure by type and origin, choosing a recovery, reading a trace to tell the integration from the model | DV8 | code |
-| 44 | Exam readiness 2 | Developer exam strategy; revision aids (a flashcard set and a spaced-review question bank for Level 2); two Developer mock exams | DV1 to DV8 | quiz (mock), flashcards and a review bank |
+| 44 | Exam readiness 2 | Developer exam strategy; revision aids (a flashcard set and a spaced-review question bank for Level 2); two Developer mock exams with multiple-response items | DV1 to DV8 | quiz (mock), flashcards and a review bank |
 
 ## Level 3: Architect (Claude Certified Architect, Foundations)
 
@@ -130,7 +130,7 @@ introduced a topic, the Level 3 module deepens it and links back; it does not re
 | 75 | Scenario: structured data extraction | Capstone | S6 | code (capstone) and quiz |
 | 76 | Scenario: conversational AI assistant | Beyond the exam's six settings. A capstone for a multi-turn assistant: persona and system prompt, memory across sessions, context limits, safe handling of sensitive talk, escalation to a person, evaluation of conversation quality | X | code (capstone) and quiz |
 | 77 | Scenario: agentic tool builder | Beyond the exam's six settings. A capstone in which Claude builds and runs its own tools: designing a tool the agent can call, generating and sandboxing code, validating results, permissions and approval gates, auditing what the agent built | X | code (capstone) and quiz |
-| 78 | Exam readiness 3 | Architect exam strategy; revision aids (a flashcard set and a spaced-review question bank for Level 3); two Architect mock exams | A1 to A5 | quiz (mock), flashcards and a review bank |
+| 78 | Exam readiness 3 | Architect exam strategy; revision aids (a flashcard set and a spaced-review question bank for Level 3); two Architect mock exams and a scenario question pool, with multiple-response items | A1 to A5 | quiz (mock), flashcards and a review bank |
 
 ## Level 4: Architect Professional (Claude Certified Architect, Professional)
 
@@ -157,7 +157,7 @@ and links back.
 | 91 | Stakeholders and the project lifecycle | Structured discovery; explaining decisions and trade-offs to technical and executive audiences; expectations and SLAs; architecture documents and hand-off; discovery, design, hand-off, monitoring and iteration; automation boundary and organisation accountability; expectation management with segmented accuracy; pilot-to-scale validation | P6 | written design record graded on a rubric, and quiz |
 | 92 | Enabling teams and operations | Claude Code and tool environments for a team; AI-assisted developer workflows; supporting debugging and operational incidents; organisations and groups, spend caps, governing connectors and customisations, seeing adoption; server-managed settings that users cannot override, and a managed plugin marketplace; managed-settings precedence; enablement measured by outcome adoption, not activity | P7 | config |
 | 93 | Professional capstone | An enterprise scenario designed end to end, with retrieval, evaluation, observability and a written design review | P1 to P7 | code and quiz |
-| 94 | Exam readiness 4 | Professional exam strategy; revision aids (a flashcard set and a spaced-review question bank for Level 4); the Professional mock exam | P1 to P7 | quiz (mock), flashcards and a review bank |
+| 94 | Exam readiness 4 | Professional exam strategy; revision aids (a flashcard set and a spaced-review question bank for Level 4); two Professional mock exams of 63 questions, with multiple-response items | P1 to P7 | quiz (mock), flashcards and a review bank |
 
 ## Beyond the exams
 

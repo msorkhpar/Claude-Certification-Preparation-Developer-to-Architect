@@ -24,20 +24,26 @@
       "id": "03-architect-mock-exam-1#x2",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S1. A customer writes in one message that a refund is wanted on one order, an address has changed, and a charge appears twice. Nothing has been looked up yet, and the three concerns relate to an order, an address record and a card statement. What should the agent do before any tool runs?",
+      "stem": "Scenario S1. A customer writes in one message that a refund is wanted on one order, an address has changed, and a charge appears twice. Nothing has been looked up yet, and the three concerns relate to an order, an address record and a card statement. Which two steps does the page give before any tool runs? (Select two.)",
       "options": {
-        "a": "Handle only the first matter and ask the customer to send the others separately",
-        "b": "Run the three matters one after another in a single chain, so that each sees the previous conclusion",
-        "c": "Divide it into separate matters, handle each with the facts of the session, and compose one reply",
-        "d": "Pass the whole text to a person, since several concerns need human judgement"
+        "a": "Pass the whole text to a person, since several concerns need human judgement",
+        "b": "Work on them in parallel with the shared context they need",
+        "c": "Run the three matters one after another in a single chain, so that each sees the previous conclusion",
+        "d": "List the matters separately, each with its own question and result",
+        "e": "Handle only the first matter and ask the customer to send the others separately"
       },
-      "key": "c",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "c": "The page gives the first step (module 48, page 2): \"The coordinator lists the items before any tool runs\".",
-        "a": "Ruled out because nothing may be lost: \"none is lost behind another\"",
-        "b": "Ruled out because the matters share facts and not conclusions: \"Share the facts, not the conclusions.\"",
-        "d": "Ruled out because the guide asks for parallel work with shared context: \"look into each of them in parallel with the shared context they need\""
-      }
+        "b": "The coordinator lists the items before any tool runs so that each has its own question and its own result, and the guide asks it to \"look into each of them in parallel with the shared context they need\" (module 48, page 2).",
+        "d": "The coordinator lists the items before any tool runs so that each has its own question and its own result, and the guide asks it to \"look into each of them in parallel with the shared context they need\" (module 48, page 2).",
+        "a": "Ruled out because the coordinator \"lists the items before any tool runs, so that each has its own question and its own result\".",
+        "c": "Ruled out because \"Share the facts, not the conclusions.\"",
+        "e": "Ruled out because the point of listing first is that \"none is lost behind another\"."
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x3",
@@ -119,20 +125,26 @@
       "id": "03-architect-mock-exam-1#x7",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S1. A tool retries a transient billing failure, and the response carries a retry-after wait. Which design follows the page?",
+      "stem": "Scenario S1. A tool retries a transient billing failure, and the response carries a retry-after wait. Which two statements follow the page? (Select two.)",
       "options": {
-        "a": "Let the delay that the service names replace the computed value for that attempt",
-        "b": "Keep the doubling schedule, since a computed delay is more predictable for the logs",
-        "c": "Use a constant pause of one second, so that the pressure on the service stays even",
-        "d": "Ignore the hint and retry at once, since the first failure may have been a fluke"
+        "a": "Without a hint, the pause doubles from a base",
+        "b": "A constant pause of one second keeps the pressure even",
+        "c": "The computed schedule is kept even when a wait is named",
+        "d": "The delay that the service names replaces the computed value for that attempt",
+        "e": "The hint is ignored and the retry is made at once, since the failure may be a fluke"
       },
-      "key": "a",
+      "key": [
+        "a",
+        "d"
+      ],
       "explanation": {
-        "a": "The page states it (module 53, page 2): \"When the failure carries a wait (a rate limit with a `retry-after`), that value replaces the computed one for that attempt.\"",
-        "b": "Ruled out because the doubling is the default and not the rule when the service speaks: \"The wait doubles from a base: 100, 200, 400 milliseconds\"",
-        "c": "Ruled out because a constant wait presses on a struggling service: \"A constant wait keeps the pressure on a service that is already struggling\"",
-        "d": "Ruled out because the service speaks first: \"The service's word first.\""
-      }
+        "a": "The page states it: \"When the failure carries a wait (a rate limit with a `retry-after`), that value replaces the computed one for that attempt\", and otherwise \"The wait doubles from a base: 100, 200, 400 milliseconds\" (module 53, page 2).",
+        "d": "The page states it: \"When the failure carries a wait (a rate limit with a `retry-after`), that value replaces the computed one for that attempt\", and otherwise \"The wait doubles from a base: 100, 200, 400 milliseconds\" (module 53, page 2).",
+        "b": "Ruled out because \"A constant wait keeps the pressure on a service that is already struggling\".",
+        "c": "Ruled out because \"that value replaces the computed one for that attempt\".",
+        "e": "Ruled out because \"The service's word first.\""
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x8",
@@ -309,20 +321,26 @@
       "id": "03-architect-mock-exam-1#x17",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S3. A research coordinator runs under a spending cap, and its subagents have used most of it. The cap is reached while two subagents are still working. The team set the cap at twenty dollars to protect an experiment. What happens in the Agent SDK?",
+      "stem": "Scenario S3. A research coordinator runs under a spending cap, and its subagents have used most of it. The cap is reached while two subagents are still working. Which two things happen in the Agent SDK? (Select two.)",
       "options": {
-        "a": "The running subagents finish, since only the coordinator's own calls count toward the cap",
-        "b": "New spawns are refused with a budget error, background tasks stop and the run ends with a budget subtype",
-        "c": "The run is paused until the next billing period and then resumed with the subagents",
-        "d": "The cap is lowered for later subagents and the run continues on the remaining funds"
+        "a": "The run is paused until the next billing period and then resumed",
+        "b": "Starting another helper fails with a budget error",
+        "c": "The running subagents finish, since only the coordinator's own calls count toward the cap",
+        "d": "Background helpers stop and the query ends with a budget subtype",
+        "e": "The cap is lowered for later subagents and the run continues on the remaining funds"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "b": "The page states it (module 46, page 2): \"spawning another subagent fails with `Budget limit reached`\" and the query ends with the `error_max_budget_usd` subtype.",
-        "a": "Ruled out because the cap covers the team: \"the budget cap covers subagents: their spend counts toward the total.\"",
-        "c": "Ruled out because the run ends and is not paused: Claude Code \"stops any background subagents still running\" once the cap is reached",
-        "d": "Ruled out because the cap is a ceiling for the whole run, and the page treats a refused spawn as \"a normal outcome of a run that spent its budget\""
-      }
+        "b": "Once the cap is reached, \"spawning another subagent fails with `Budget limit reached`\" and Claude Code stops any background subagents still running, and the query ends with the `error_max_budget_usd` subtype (module 46, page 2).",
+        "d": "Once the cap is reached, \"spawning another subagent fails with `Budget limit reached`\" and Claude Code stops any background subagents still running, and the query ends with the `error_max_budget_usd` subtype (module 46, page 2).",
+        "a": "Ruled out because Claude Code \"stops any background subagents still running\" once the cap is reached.",
+        "c": "Ruled out because \"the budget cap covers subagents: their spend counts toward the total.\"",
+        "e": "Ruled out because a refused spawn is \"a normal outcome of a run that spent its budget\"."
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x18",
@@ -480,20 +498,26 @@
       "id": "03-architect-mock-exam-1#x26",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S3. A research system's extraction returns claims with sources. How can code catch a claim that no source supports?",
+      "stem": "Scenario S3. A research system's extraction returns claims with sources. Which two statements describe the check that lets code catch a claim that no source supports? (Select two.)",
       "options": {
-        "a": "Ask the model whether it is confident in each claim and drop those below a score that the team chooses",
-        "b": "Ask the model to double-check its own output and report if anything has changed",
-        "c": "Demand a verbatim quote per assertion and test by substring that it occurs in the text",
-        "d": "Tighten the schema so that every field has a minimum length of several words"
+        "a": "The model double-checks its own output and reports changes",
+        "b": "The schema gives every field a minimum length of several words",
+        "c": "Each assertion carries a verbatim quote, tested by plain substring",
+        "d": "A grounded value is not thereby a correct one",
+        "e": "The model reports its confidence in each claim, and low ones are dropped"
       },
-      "key": "c",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "c": "The page describes the check (module 62, page 1): \"The check is a plain substring test in code: it does not ask the model whether it is right.\"",
-        "a": "Ruled out because an attitude is not a check: \"On the exam, the answer to a precision problem is explicit categories and examples, never an adjective about confidence.\"",
-        "b": "Ruled out because a self-check shares the blind spot: \"carries the same blind spot as the finding\"",
-        "d": "Ruled out because a length limit proves nothing: \"A length limit such as `minLength` is not the answer\""
-      }
+        "c": "\"The check is a plain substring test in code: it does not ask the model whether it is right\", and \"Provenance does not prove a value is correct, only that it is grounded\" (module 62, page 1).",
+        "d": "\"The check is a plain substring test in code: it does not ask the model whether it is right\", and \"Provenance does not prove a value is correct, only that it is grounded\" (module 62, page 1).",
+        "a": "Ruled out because a self-check \"carries the same blind spot as the finding\".",
+        "b": "Ruled out because \"A length limit such as `minLength` is not the answer\".",
+        "e": "Ruled out because \"the answer to a precision problem is explicit categories and examples, never an adjective about confidence\"."
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x27",
@@ -518,20 +542,26 @@
       "id": "03-architect-mock-exam-1#x28",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S3. A research plan listed five topics, and only four were searched. The report omits the fifth. What does the coverage note do?",
+      "stem": "Scenario S3. Five topics were scheduled for research, and four were covered. The report leaves out the fifth. Which two statements describe what the coverage note does? (Select two.)",
       "options": {
-        "a": "Omits it, since the note covers only the topics that were actually searched in the run",
-        "b": "Records it as a gap marked untouched, because silence would say something false",
-        "c": "Lists it under no findings, since nothing was found for it",
-        "d": "Lists it as partial, since part of the plan was carried out"
+        "a": "The topic is listed under no findings, since nothing was found for it",
+        "b": "That section sets the plan against what happened",
+        "c": "The topic is omitted, since the note covers only what was searched",
+        "d": "Something never looked into is recorded as a gap",
+        "e": "The topic is listed as partial, since part of the plan was carried out"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "b": "The page states it (module 66, page 2): \"A topic that was never searched is a gap.\"",
-        "a": "Ruled out because omission is a false statement: \"A report that quietly omits a topic is saying something false by leaving it out\"",
-        "c": "Ruled out because no findings means searched with nothing: \"`No findings`: topics that were searched and have nothing\"",
-        "d": "Ruled out because partial means resting on part of the sources: \"`Partial`: topics that rest on part of their sources, with the cause\""
-      }
+        "b": "\"A topic that was never searched is a gap\", and the note is \"the place where the system's own plan is compared with what happened\" (module 66, page 2).",
+        "d": "\"A topic that was never searched is a gap\", and the note is \"the place where the system's own plan is compared with what happened\" (module 66, page 2).",
+        "a": "Ruled out because \"`No findings`: topics that were searched and have nothing\".",
+        "c": "Ruled out because \"A report that quietly omits a topic is saying something false by leaving it out\".",
+        "e": "Ruled out because \"`Partial`: topics that rest on part of their sources, with the cause\"."
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x29",
@@ -651,20 +681,26 @@
       "id": "03-architect-mock-exam-1#x35",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S5. A CI step sometimes loops for an hour, and its prompt already asks it to be quick. Which control bounds it?",
+      "stem": "Scenario S5. A CI step sometimes loops for an hour, and its prompt already asks it to be quick. Which two controls does the page give? (Select two.)",
       "options": {
-        "a": "A longer job timeout, so that the loop has room to end itself",
-        "b": "A second sentence in the prompt giving the number of minutes it may use",
-        "c": "An environment variable that switches on a quick mode",
-        "d": "A turn limit on the command, since a polite request is not a limit"
+        "a": "A second sentence in the prompt names the minutes it may use",
+        "b": "An environment variable switches on a quick mode",
+        "c": "The tools that run without asking are listed on the command",
+        "d": "A turn limit on the command ends the run",
+        "e": "A longer job timeout gives the loop room to end itself"
       },
-      "key": "d",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "d": "The page states it (module 74, page 1): \"`--max-turns` stops a loop, and `--allowedTools` lists what runs without asking, because nobody can approve a prompt.\"",
-        "a": "Ruled out because more time only lengthens the loop: \"A longer job timeout only lets a loop run longer.\"",
-        "b": "Ruled out because a request is not a limit: \"A prompt that asks the run to be quick is a request, not a limit.\"",
-        "c": "Ruled out because no such variable exists: \"There is no headless environment variable and no `--batch` flag on the command line\""
-      }
+        "c": "\"`--max-turns` stops a loop, and `--allowedTools` lists what runs without asking, because nobody can approve a prompt\" (module 74, page 1).",
+        "d": "\"`--max-turns` stops a loop, and `--allowedTools` lists what runs without asking, because nobody can approve a prompt\" (module 74, page 1).",
+        "a": "Ruled out because \"A prompt that asks the run to be quick is a request, not a limit.\"",
+        "b": "Ruled out because \"There is no headless environment variable and no `--batch` flag on the command line\".",
+        "e": "Ruled out because \"A longer job timeout only lets a loop run longer.\""
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x36",
@@ -708,20 +744,26 @@
       "id": "03-architect-mock-exam-1#x38",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S5. A headless review step runs in a workflow with no interactive login. How should it authenticate?",
+      "stem": "Scenario S5. A headless review step runs in a workflow with no interactive login. Which two statements describe how it should be set up? (Select two.)",
       "options": {
-        "a": "Write the key into the workflow file as a literal so that every runner has it",
-        "b": "Rely on the developer's subscription login stored in the runner's keychain",
-        "c": "Take the API key from a repository secret exposed as an environment variable",
-        "d": "Pass it in the prompt so that the model can attach it to its requests"
+        "a": "The key is written into the workflow file as a literal so that every runner has it",
+        "b": "The key is read from the developer's subscription login in the runner's keychain",
+        "c": "The key is passed in the prompt so that the model can attach it to its requests",
+        "d": "The tool list is complete and minimal, with read tools and no bare shell",
+        "e": "The API key comes from a repository secret exposed as an environment variable"
       },
-      "key": "c",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "c": "The page states it (module 60, page 1): \"A bare run needs `ANTHROPIC_API_KEY` in the environment, because it does not use a subscription login; in the workflow that is a secret reference, never a literal.\"",
-        "a": "Ruled out because a literal is wrong: \"in the workflow that is a secret reference, never a literal\"",
-        "b": "Ruled out because a bare run does not use a login: \"because it does not use a subscription login\"",
-        "d": "Ruled out because a credential is a reference: \"A credential is a reference, never a value and never a default.\""
-      }
+        "d": "A bare run needs the key in the environment, \"in the workflow that is a secret reference, never a literal\", and \"the tool list must be complete and minimal: read tools for a review, and no bare `Bash`\" (module 60, page 1).",
+        "e": "A bare run needs the key in the environment, \"in the workflow that is a secret reference, never a literal\", and \"the tool list must be complete and minimal: read tools for a review, and no bare `Bash`\" (module 60, page 1).",
+        "a": "Ruled out because \"in the workflow that is a secret reference, never a literal\".",
+        "b": "Ruled out because \"because it does not use a subscription login\".",
+        "c": "Ruled out because \"A credential is a reference, never a value and never a default.\""
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x39",
@@ -784,20 +826,26 @@
       "id": "03-architect-mock-exam-1#x42",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S5. A team puts a tool-using review into a batch. What may come back for an entry?",
+      "stem": "Scenario S5. A team puts a tool-using review into a batch. Which two results are possible? (Select two.)",
       "options": {
-        "a": "A finished answer, since a batch runs the tools itself before it replies",
-        "b": "An error, since entries that offer tools are refused at submission time",
-        "c": "A call to run something, with no later request in the group to finish it",
-        "d": "A stream of partial answers that must be reassembled by the client"
+        "a": "An entry may come back as a call to run something",
+        "b": "A multi-round procedure runs live, or each round becomes its own entry later",
+        "c": "The entry is refused at submission, since batches take no tools",
+        "d": "The entry streams partial answers that the client reassembles",
+        "e": "An entry returns a finished answer, since a batch runs the tools itself"
       },
-      "key": "c",
+      "key": [
+        "a",
+        "b"
+      ],
       "explanation": {
-        "c": "The page states it (module 63, page 1): \"A request that offers tools may come back with a tool call as its answer.\"",
-        "a": "Ruled out because a synchronous loop runs the tool: \"In a synchronous loop your code would run the tool and send the result in the next request\"",
-        "b": "Ruled out because tools are allowed: \"Tools, system prompts, earlier turns and extended thinking are allowed.\"",
-        "d": "Ruled out because results arrive as one file: \"the results come back as one file, not a stream\""
-      }
+        "a": "\"A request that offers tools may come back with a tool call as its answer\", and a workflow that needs several rounds with tools \"therefore runs synchronously, or is cut so that each round is its own entry in successive batches\" (module 63, page 1).",
+        "b": "\"A request that offers tools may come back with a tool call as its answer\", and a workflow that needs several rounds with tools \"therefore runs synchronously, or is cut so that each round is its own entry in successive batches\" (module 63, page 1).",
+        "c": "Ruled out because \"Tools, system prompts, earlier turns and extended thinking are allowed.\"",
+        "d": "Ruled out because \"the results come back as one file, not a stream\".",
+        "e": "Ruled out because \"In a synchronous loop your code would run the tool and send the result in the next request\"."
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x43",
@@ -879,20 +927,26 @@
       "id": "03-architect-mock-exam-1#x47",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S6. An extraction pass is limited to 200 lines per call, and a document has exactly 200 lines. How many parts is it cut into?",
+      "stem": "Scenario S6. An extraction pass is limited to 200 lines per call, and a document has exactly 200 lines. Which two statements follow the page? (Select two.)",
       "options": {
-        "a": "One, because a text of precisely that size still fits",
-        "b": "Two, so that the parts overlap by one line",
-        "c": "Two, since the final line always needs its own part",
-        "d": "Zero, since a document at the limit counts as too long to process"
+        "a": "The document is cut into two parts, since the final line needs its own",
+        "b": "The document is refused, since one at the limit counts as too long",
+        "c": "Only a file too long for one run is cut",
+        "d": "The document is cut into two parts that overlap by one line",
+        "e": "A file as long as the maximum is one part, not two"
       },
-      "key": "a",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "a": "The page states it (module 50, page 2): \"A file that is exactly as long as the limit is one part, not two.\"",
-        "b": "Ruled out because parts never overlap: \"The parts do not overlap, so a finding is not reported twice.\"",
-        "c": "Ruled out because only a longer file is cut: \"A file that does not fit a pass of its own is cut into parts of a fixed number of lines\"",
-        "d": "Ruled out because a file at the limit is processed: \"A file that is exactly as long as the limit is one part, not two.\""
-      }
+        "c": "The page states it: \"A file that is exactly as long as the limit is one part, not two\", and a file is cut only when \"A file that does not fit a pass of its own is cut into parts of a fixed number of lines\" (module 50, page 2).",
+        "e": "The page states it: \"A file that is exactly as long as the limit is one part, not two\", and a file is cut only when \"A file that does not fit a pass of its own is cut into parts of a fixed number of lines\" (module 50, page 2).",
+        "a": "Ruled out because \"A file that is exactly as long as the limit is one part, not two.\"",
+        "b": "Ruled out because \"A file that does not fit a pass of its own is cut into parts of a fixed number of lines\", and this one fits.",
+        "d": "Ruled out because \"The parts do not overlap, so a finding is not reported twice.\""
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x48",
@@ -917,20 +971,26 @@
       "id": "03-architect-mock-exam-1#x49",
       "page": "03-architect-mock-exam-1.md",
       "scope": "level",
-      "stem": "Scenario S6. An extraction tool rejects a date given as next Friday. Which reply lets the model repair its input?",
+      "stem": "Scenario S6. An extraction tool rejects a date given as next Friday. Which two statements describe the reply that lets the model repair its input? (Select two.)",
       "options": {
-        "a": "A protocol error with a generic code, since the input was malformed in its form",
-        "b": "A transient error with retry set, since the user may type again",
-        "c": "A flagged failure in the validation category that names the format to use",
-        "d": "A success with an empty field, so that the next stage asks again"
+        "a": "It is a success with an empty field, so that the next stage asks again",
+        "b": "It is a transient error with retry set, since the user may type again",
+        "c": "The message names the format to use",
+        "d": "It is a protocol error with a generic code, since the form was malformed",
+        "e": "It is a flagged execution error in the validation category"
       },
-      "key": "c",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "c": "The page classifies it (module 53, page 1): \"an input validation failure, so a tool execution error with the flag, and the message can say which format to use\".",
-        "a": "Ruled out because a protocol error is for a missing tool: \"A request that names a tool the server does not have is a protocol error, since there is nothing to run.\"",
-        "b": "Ruled out because the category fits the input: \"The input was wrong: a missing field, a value out of range, a bad format\"",
-        "d": "Ruled out because a message must instruct: \"Write instructive error messages.\""
-      }
+        "c": "The page classifies it: \"an input validation failure, so a tool execution error with the flag, and the message can say which format to use\" (module 53, page 1).",
+        "e": "The page classifies it: \"an input validation failure, so a tool execution error with the flag, and the message can say which format to use\" (module 53, page 1).",
+        "a": "Ruled out because \"Write instructive error messages.\"",
+        "b": "Ruled out because \"The input was wrong: a missing field, a value out of range, a bad format\".",
+        "d": "Ruled out because \"A request that names a tool the server does not have is a protocol error, since there is nothing to run.\""
+      },
+      "select": 2
     },
     {
       "id": "03-architect-mock-exam-1#x50",
@@ -1240,20 +1300,26 @@
       "id": "04-architect-mock-exam-2#x6",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S2. A developer approves a plan in plan mode and picks the option that auto-accepts edits. What does approval do to the session?",
+      "stem": "Scenario S2. A developer approves a plan in plan mode and picks the option that auto-accepts edits. Which two statements describe what approval does to the session? (Select two.)",
       "options": {
-        "a": "It exits that state and switches to the permission setting that the choice describes",
-        "b": "It stays in plan mode and queues the edits until the end of the whole session",
-        "c": "It restarts the session with the plan as its very first message",
-        "d": "It applies the plan to a copy of the repository before touching the real files of the project"
+        "a": "It applies the plan to a copy of the repository before touching the real files",
+        "b": "It adopts the permission setting that the selected choice names",
+        "c": "It leaves that condition",
+        "d": "It restarts the session with the plan as its first message",
+        "e": "It stays in plan mode and queues the edits until the end of the session"
       },
-      "key": "a",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
-        "a": "The page states it (module 59, page 1): approving \"exits plan mode and switches the session to the permission mode each approve option describes\".",
-        "b": "Ruled out because plan mode does not change the source: \"In plan mode Claude researches and proposes, and does not change your source.\"",
-        "c": "Ruled out because approval offers ways to proceed: \"approve and start editing (in auto mode, or auto-accepting edits, or approving each edit by hand)\"",
-        "d": "Ruled out because the session continues and is not copied: \"Reading is free, and shell commands are controlled by the session\""
-      }
+        "b": "Approving \"exits plan mode and switches the session to the permission mode each approve option describes\" (module 59, page 1).",
+        "c": "Approving \"exits plan mode and switches the session to the permission mode each approve option describes\" (module 59, page 1).",
+        "a": "Ruled out because \"Reading is free, and shell commands are controlled by the session\".",
+        "d": "Ruled out because \"approve and start editing (in auto mode, or auto-accepting edits, or approving each edit by hand)\".",
+        "e": "Ruled out because \"In plan mode Claude researches and proposes, and does not change your source.\""
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x7",
@@ -1354,20 +1420,26 @@
       "id": "04-architect-mock-exam-2#x12",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S2. A review prompt holds standards, a few samples and the material under review. In what order should they appear?",
+      "stem": "Scenario S2. A review prompt holds standards, a few samples and the material under review. Which two statements describe the order? (Select two.)",
       "options": {
-        "a": "The material first, so that the model reads the input before any instruction",
-        "b": "Samples first, then the material, with the standards in a trailing footer",
-        "c": "Interleaved, with each sample placed beside the part of the material it resembles",
-        "d": "Rules first, then worked cases each in its own tag, with the input to judge last"
+        "a": "Everything is interleaved, with each sample beside the part it resembles",
+        "b": "The material goes first, so the model reads the input before any instruction",
+        "c": "Samples come first, then the material, with the standards in a footer",
+        "d": "Rules lead, followed by worked cases each in its own tag",
+        "e": "The input to judge sits last"
       },
-      "key": "d",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "d": "The page gives the order (module 61, page 2): \"Examples sit between the criteria and the input, each in its own tag, with the diff last.\"",
-        "a": "Ruled out because structure separates parts: \"Structure helps the model tell instructions from examples from data\"",
-        "b": "Ruled out because the practice checks an order: \"The practice asks for the order criteria, examples, diff last, and its tests check it\"",
-        "c": "Ruled out because each case has its own tag: \"`<examples>` with one `<example>` per case, then `<diff>`\""
-      }
+        "d": "\"Examples sit between the criteria and the input, each in its own tag, with the diff last\" (module 61, page 2).",
+        "e": "\"Examples sit between the criteria and the input, each in its own tag, with the diff last\" (module 61, page 2).",
+        "a": "Ruled out because \"`<examples>` with one `<example>` per case, then `<diff>`\".",
+        "b": "Ruled out because \"Structure helps the model tell instructions from examples from data\".",
+        "c": "Ruled out because \"The practice asks for the order criteria, examples, diff last, and its tests check it\"."
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x13",
@@ -1449,20 +1521,26 @@
       "id": "04-architect-mock-exam-2#x17",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S4. Two forks of one session each try a refactor in the same working directory. What happens?",
+      "stem": "Scenario S4. Two forks of one session each try a refactor in the same working directory. Which two statements follow the page? (Select two.)",
       "options": {
-        "a": "Each gets a private copy of the whole directory, so that the two attempts are isolated",
-        "b": "Both edit the shared files, since branching copies the conversation and not the disk",
-        "c": "The second is rejected at once, since a directory admits just one branch at a time",
-        "d": "Their edits are merged automatically by the tool when the sessions end"
+        "a": "A comparison that must not collide gives each branch its own copy of the code",
+        "b": "Each fork gets a private copy of the whole directory, so the attempts are isolated",
+        "c": "Branching copies the conversation and not the disk",
+        "d": "Their edits are merged automatically when the sessions end",
+        "e": "The second fork is rejected at once, since a directory admits one branch"
       },
-      "key": "b",
+      "key": [
+        "a",
+        "c"
+      ],
       "explanation": {
-        "b": "The guide states the limit (module 51, page 1): \"Forking branches the conversation history, not the filesystem.\"",
-        "a": "Ruled out because the changes are real and shared: \"If a forked agent edits files, those changes are real and visible to any session working in the same directory.\"",
-        "c": "Ruled out because nothing refuses the second: \"Two forks that each try a refactor in the same working tree write over each other.\"",
-        "d": "Ruled out because no merge happens: \"Forking the session without isolating the files leaves both attempts editing the same checkout\""
-      }
+        "a": "\"Forking branches the conversation history, not the filesystem\", and \"For a comparison that must not collide, fork for the analysis and let each branch work in its own copy of the code\" (module 51, page 1).",
+        "c": "\"Forking branches the conversation history, not the filesystem\", and \"For a comparison that must not collide, fork for the analysis and let each branch work in its own copy of the code\" (module 51, page 1).",
+        "b": "Ruled out because \"If a forked agent edits files, those changes are real and visible to any session working in the same directory.\"",
+        "d": "Ruled out because \"Forking the session without isolating the files leaves both attempts editing the same checkout\".",
+        "e": "Ruled out because \"Two forks that each try a refactor in the same working tree write over each other.\""
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x18",
@@ -1525,20 +1603,26 @@
       "id": "04-architect-mock-exam-2#x21",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S4. A team scans code that an agent wrote for dangerous calls and runs it unattended whenever the scan is clean. What is wrong with relying on this alone?",
+      "stem": "Scenario S4. A team screens an agent's output for dangerous calls and runs it unattended whenever the screen is clean. Which two statements apply to relying on this alone? (Select two.)",
       "options": {
-        "a": "Code written by a model cannot be read by any automatic check",
-        "b": "A clean result proves nothing about what the code declares, so the proposal is ignored",
-        "c": "Running it on every proposal costs too much, so it must be sampled",
-        "d": "Detection covers only what its authors anticipated, so a disguised version slips past it"
+        "a": "Detection covers only what its authors anticipated, so a disguised version slips past",
+        "b": "Running it on every proposal costs too much, so it must be sampled, at first glance",
+        "c": "A clean result proves nothing about what the output declares, as many reviews assume",
+        "d": "Machine-written output cannot be read by any automatic check, as most teams do",
+        "e": "It still earns its place by refusing the obvious and checking what was declared"
       },
-      "key": "d",
+      "key": [
+        "a",
+        "e"
+      ],
       "explanation": {
-        "d": "The page states it (module 77, page 1): \"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it.\"",
-        "a": "Ruled out because the gate does read generated code: \"The gate in this module does read the code\"",
-        "b": "Ruled out because the scan does compare with the declaration: \"it compares what the code does with what the proposal declares\"",
-        "c": "Ruled out because the scan is cheap: \"and it costs nothing\""
-      }
+        "a": "\"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it\", yet \"it refuses the obvious, it compares what the code does with what the proposal declares\" (module 77, page 1).",
+        "e": "\"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it\", yet \"it refuses the obvious, it compares what the code does with what the proposal declares\" (module 77, page 1).",
+        "b": "Ruled out because \"and it costs nothing\".",
+        "c": "Ruled out because \"it compares what the code does with what the proposal declares\".",
+        "d": "Ruled out because \"The gate in this module does read the code\"."
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x22",
@@ -1601,20 +1685,26 @@
       "id": "04-architect-mock-exam-2#x25",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S4. A user-level file and a repository-level file give conflicting style advice. Which appears later in context?",
+      "stem": "Scenario S4. A user-level file and a repository-level file give conflicting style advice. Which two statements follow the page? (Select two.)",
       "options": {
-        "a": "The user-level one, since personal preferences are applied last in the order",
-        "b": "Neither, since conflicting advice is dropped before anything is loaded",
-        "c": "The more specific one, since loading runs from the broadest scope to the most specific",
-        "d": "Whichever was edited most recently, since the loader sorts by time"
+        "a": "The user-level file loads last, since personal preferences are applied at the end",
+        "b": "Loading runs from the broadest scope to the most specific",
+        "c": "Memory is guidance with good delivery, not an override",
+        "d": "Neither file loads, since conflicting advice is dropped",
+        "e": "The more recently edited file loads last, since the loader sorts by time"
       },
-      "key": "c",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
-        "c": "The page states it (module 57, page 1): \"from broadest scope to most specific, so a project instruction appears in context after a user instruction\".",
-        "a": "Ruled out because memory is advice and not an override: \"Memory is advice with good delivery.\"",
-        "b": "Ruled out because all discovered files are used: \"All discovered files are concatenated into context\"",
-        "d": "Ruled out because order is by scope and not by time: \"at the start of every session\""
-      }
+        "b": "The documentation lists the files \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\" (module 57, page 1).",
+        "c": "The documentation lists the files \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\" (module 57, page 1).",
+        "a": "Ruled out because \"Memory is advice with good delivery.\"",
+        "d": "Ruled out because \"All discovered files are concatenated into context\".",
+        "e": "Ruled out because \"at the start of every session\"."
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x26",
@@ -1677,20 +1767,26 @@
       "id": "04-architect-mock-exam-2#x29",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S4. A manager tells a helper to explore the whole repository and gets back a long account. What was wrong with the delegation?",
+      "stem": "Scenario S4. A manager tells a helper to explore the whole repository and gets back a long account. Which two statements describe what delegation needs? (Select two.)",
       "options": {
-        "a": "The helper should have been given write access so that it could keep notes",
-        "b": "The helper's window was too small for such a long search of the tree",
-        "c": "The brief was too broad, so the reply gave its author nothing new",
-        "d": "The summary should have been requested in a table instead of prose"
+        "a": "The question has to be specific",
+        "b": "The brief carries what the worker requires, since it inherits no conversation",
+        "c": "The helper's window is too small for such a long search",
+        "d": "The helper needs write access so that it can keep notes",
+        "e": "The summary should be requested as a table instead of prose"
       },
-      "key": "c",
+      "key": [
+        "a",
+        "b"
+      ],
       "explanation": {
-        "c": "The page states it (module 67, page 1): \"The question must be specific\".",
-        "a": "Ruled out because the explorer is read-only by design: \"with Write and Edit denied\"",
-        "b": "Ruled out because a helper reads in a separate window of its own: \"Subagents run in separate context windows\"",
-        "d": "Ruled out because the brief has to carry what the helper needs: \"the brief must carry what the subagent needs, because it does not inherit the conversation\""
-      }
+        "a": "\"The question must be specific\", and \"the brief must carry what the subagent needs, because it does not inherit the conversation\" (module 67, page 1).",
+        "b": "\"The question must be specific\", and \"the brief must carry what the subagent needs, because it does not inherit the conversation\" (module 67, page 1).",
+        "c": "Ruled out because \"Subagents run in separate context windows\".",
+        "d": "Ruled out because \"with Write and Edit denied\".",
+        "e": "Ruled out because \"the coordinator has gained nothing\"."
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x30",
@@ -1848,20 +1944,26 @@
       "id": "04-architect-mock-exam-2#x38",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S6. A team plans a weekly extraction over thousands of stored documents and wants the lowest cost. Which interface fits, and what must each entry carry?",
+      "stem": "Scenario S6. A team plans a weekly extraction over thousands of stored documents and wants the lowest cost. Which two statements describe the right approach and its entries? (Select two.)",
       "options": {
-        "a": "Batch processing, with a unique custom_id per request so that results match their inputs",
-        "b": "The synchronous interface with streaming, since results arrive sooner that way",
-        "c": "Batch processing with stream set to true, so that results arrive one by one",
-        "d": "The synchronous interface in parallel threads, since discounts need a contract"
+        "a": "The synchronous interface in parallel threads fits, since discounts need a contract",
+        "b": "Batch processing with stream set to true fits, so that results arrive one by one",
+        "c": "The synchronous interface with streaming fits, since results arrive sooner",
+        "d": "The queued interface fits, since the work can wait",
+        "e": "Each entry carries a unique identifier, as results return in any order"
       },
-      "key": "a",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "a": "The page names the shape (module 63, page 1): \"A batch entry is `{custom_id, params}`, where `params` are the parameters of a Messages request.\"",
-        "b": "Ruled out because the discount is for work that can wait: \"The half price is a reason to move work that can wait.\"",
-        "c": "Ruled out because streaming is refused: \"the results come back as one file, not a stream\"",
-        "d": "Ruled out because standard documents belong in the queue: \"Standard documents go to the batch queue\""
-      }
+        "d": "\"A batch entry is `{custom_id, params}`\", and the `custom_id` is \"the only link between a request and its result, because the results \"can be returned in any order\"\", so the half price suits work that can wait (module 63, page 1).",
+        "e": "\"A batch entry is `{custom_id, params}`\", and the `custom_id` is \"the only link between a request and its result, because the results \"can be returned in any order\"\", so the half price suits work that can wait (module 63, page 1).",
+        "a": "Ruled out because \"The half price is a reason to move work that can wait.\"",
+        "b": "Ruled out because \"the results come back as one file, not a stream\".",
+        "c": "Ruled out because \"Standard documents go to the batch queue\"."
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x39",
@@ -2019,20 +2121,26 @@
       "id": "04-architect-mock-exam-2#x47",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S1. A reply that describes a refund policy ends with the stop reason `max_tokens`, in the middle of a sentence. What should the loop do?",
+      "stem": "Scenario S1. A reply that describes a refund policy ends with the stop reason `max_tokens`, in the middle of a sentence. Which two statements describe what the loop should do? (Select two.)",
       "options": {
-        "a": "Treat the run as finished, since the model stopped producing tool calls",
-        "b": "Leave with a status of its own, because the output was cut off and a higher ceiling is the code's call",
-        "c": "Call the model again at once with identical messages, since a cut-off reply is a transient fault of the service",
-        "d": "Ask the model to repeat the answer in fewer words, since the ceiling is the reply's fault"
+        "a": "Call the model again at once with identical messages, since a cut-off reply is a fault of the service",
+        "b": "Treat a higher ceiling as the code's decision",
+        "c": "Treat the run as finished, since the model stopped producing tool calls",
+        "d": "Leave with a status of its own, as the output is cut off",
+        "e": "Ask the model to repeat the answer in fewer words, since the ceiling is the reply's fault"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "b": "The page lists the value (module 45, page 1): \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\".",
-        "a": "Ruled out because a cut-off reply is not a finished one: \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\"",
-        "c": "Ruled out because the loop continues on one value only: \"Run the calls and send the results; this is the only value that continues\"",
-        "d": "Ruled out because the loop does not guess at an unknown reason: \"A value the loop has never seen must not be guessed at.\""
-      }
+        "b": "The page lists the value: \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\" (module 45, page 1).",
+        "d": "The page lists the value: \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\" (module 45, page 1).",
+        "a": "Ruled out because \"Run the calls and send the results; this is the only value that continues\".",
+        "c": "Ruled out because \"A value the loop has never seen must not be guessed at.\"",
+        "e": "Ruled out because \"The response reached your `max_tokens` limit.\""
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x48",
@@ -2076,20 +2184,26 @@
       "id": "04-architect-mock-exam-2#x50",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S1. A hook script blocks a refund by exiting with code 2 and also prints a JSON decision. What does the guide advise?",
+      "stem": "Scenario S1. A hook script stops a refund by signalling failure to the harness and also prints a machine-readable decision. Which two statements does the guide support? (Select two.)",
       "options": {
-        "a": "Always print the JSON as well, since the exit code alone is ignored",
-        "b": "Choose a single style for that component, since mixing leaves the winner to the reference",
-        "c": "Prefer the exit code and discard the JSON, because the code is read first",
-        "d": "Print the JSON first and exit with 2 afterwards so that both are recorded"
+        "a": "Prefer the status and discard the structured output, because the status is read first",
+        "b": "A single approach is the rule for each component",
+        "c": "Print the structured output first and signal failure afterwards, so both are recorded",
+        "d": "Always print the structured output too, since the status alone is ignored",
+        "e": "Status 2 blocks with a stderr message, while status 0 with structured output gives finer control"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
-        "b": "The page quotes the guide (module 49, page 2): \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook.\"",
-        "a": "Ruled out because the winner is left open: \"Mixing them leaves it to the reference to say which wins, and a guard should not depend on that.\"",
-        "c": "Ruled out because the reason of a block goes to stderr: \"Where the reason lands depends on the event\"",
-        "d": "Ruled out because with exit 0 the JSON decides: \"No objection from the exit code; with JSON printed on standard output, the JSON decides\""
-      }
+        "b": "The guide says \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook\" (module 49, page 2).",
+        "e": "The guide says \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook\" (module 49, page 2).",
+        "a": "Ruled out because \"Where the reason lands depends on the event\".",
+        "c": "Ruled out because \"No objection from the exit code; with JSON printed on standard output, the JSON decides\".",
+        "d": "Ruled out because \"Mixing them leaves it to the reference to say which wins, and a guard should not depend on that.\""
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x51",
@@ -2152,20 +2266,26 @@
       "id": "04-architect-mock-exam-2#x54",
       "page": "04-architect-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario S1. The wrapper has no information yet about the state of the remote system. Which of these calls may be sent again after a timeout without first checking state?",
+      "stem": "Scenario S1. The wrapper has no information yet about the state of the remote system. Which two of these calls may be sent again after a timeout without first checking state? (Select two.)",
       "options": {
-        "a": "An email send, because the outbox accepted it before the timeout occurred",
-        "b": "A refund that carries an idempotency key which the service honours",
-        "c": "A refund with no key, because the amount is validated",
-        "d": "A ticket creation, because duplicates can be merged later"
+        "a": "A refund that carries an idempotency key which the service honours",
+        "b": "An email send, because the outbox accepted it before the timeout occurred",
+        "c": "A ticket creation, because duplicates can be merged later",
+        "d": "A refund with no key, because the amount is validated",
+        "e": "A lookup that only reads a record"
       },
-      "key": "b",
+      "key": [
+        "a",
+        "e"
+      ],
       "explanation": {
-        "b": "The page lists the safe cases (module 53, page 2): \"A call that carries an idempotency key that the service honours.\"",
-        "a": "Ruled out because a sent email cannot be recalled: \"an email that left the outbox cannot be called back\"",
-        "c": "Ruled out because validation does not prevent a second payment: \"a refund sent twice refunds twice\"",
-        "d": "Ruled out because a duplicate is real: \"a ticket created twice is two tickets\""
-      }
+        "a": "\"Repeating a read changes nothing, so a timed out lookup can simply be sent again\", and so can \"A call that carries an idempotency key that the service honours\" (module 53, page 2).",
+        "e": "\"Repeating a read changes nothing, so a timed out lookup can simply be sent again\", and so can \"A call that carries an idempotency key that the service honours\" (module 53, page 2).",
+        "b": "Ruled out because \"an email that left the outbox cannot be called back\".",
+        "c": "Ruled out because \"a ticket created twice is two tickets\".",
+        "d": "Ruled out because \"a refund sent twice refunds twice\"."
+      },
+      "select": 2
     },
     {
       "id": "04-architect-mock-exam-2#x55",

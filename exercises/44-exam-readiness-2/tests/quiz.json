@@ -43,20 +43,26 @@
       "id": "03-developer-mock-exam-1#x3",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A support bot caches a long prefix. After turn four the team wants a new tone rule applied to later turns on Claude Sonnet 5.5, without discarding the cached earlier part. Which approach fits best?",
+      "stem": "A support bot caches a long prefix. After turn four the team wants a new tone rule applied to later turns on Claude Sonnet 5.5, without discarding the cached earlier part. Which two statements describe the approach that fits? (Select two.)",
       "options": {
-        "a": "Append an instruction with the system role after the latest user message",
-        "b": "Rewrite the top-level system field with the new rule on the next request",
+        "a": "Rewrite the top-level system field with the new rule on the next request",
+        "b": "Append a system-role instruction after the latest user message",
         "c": "End the list with a partial assistant message that already follows the rule",
-        "d": "Start a fresh conversation and resend a summary that includes the rule"
+        "d": "Prior content keeps its saved computation",
+        "e": "Start a fresh conversation and resend a summary that includes the rule"
       },
-      "key": "a",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "a": "A message with the system role after a user turn \"does not invalidate a cached prefix that came before it\" (module 14, page 1).",
-        "b": "Ruled out because adding the rule partway \"changes the system prompt and invalidates the conversation's earlier thinking blocks\".",
+        "b": "A message with the system role after a user turn \"does not invalidate a cached prefix that came before it\" (module 14, page 1), so the earlier part of the conversation stays reusable.",
+        "d": "A message with the system role after a user turn \"does not invalidate a cached prefix that came before it\" (module 14, page 1), so the earlier part of the conversation stays reusable.",
+        "a": "Ruled out because adding the rule partway \"changes the system prompt and invalidates the conversation's earlier thinking blocks\".",
         "c": "Ruled out because a conversation that ends on the model's side \"must end with a user message\" and returns a 400.",
-        "d": "Ruled out because the page assigns \"the mid-conversation message for instructions that only become relevant later\", so no restart is needed."
-      }
+        "e": "Ruled out because the page assigns \"the mid-conversation message for instructions that only become relevant later\", so no restart is needed."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x4",
@@ -138,20 +144,26 @@
       "id": "03-developer-mock-exam-1#x8",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A logging layer for a streamed reply records the stop reason from the first chunk it receives and always stores a null. Where does the value arrive?",
+      "stem": "A logging layer for a streamed reply records the stop reason from the first chunk it receives and always stores a null. Which two statements explain it? (Select two.)",
       "options": {
-        "a": "In message_start, alongside the input token count",
-        "b": "In the HTTP status line of the response",
-        "c": "In a content_block_stop frame, once each block completes",
-        "d": "In the message_delta frame sent close to the finish"
+        "a": "It arrives in the HTTP status line of the response",
+        "b": "The value arrives in the delta frame sent close to the finish",
+        "c": "It arrives in a content_block_stop frame, once each block completes",
+        "d": "An interrupted transfer never delivers one",
+        "e": "It arrives in message_start, alongside the input token count"
       },
-      "key": "d",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
+        "b": "The stop reason \"arrives in message_delta, near the end\", so a cut stream has none (module 17, page 1).",
         "d": "The stop reason \"arrives in message_delta, near the end\", so a cut stream has none (module 17, page 1).",
-        "a": "Ruled out because the opening frame carries \"an empty content and the input token count in usage\", not the stop reason.",
-        "b": "Ruled out because the page says \"stop_reason indicates normal completion; HTTP errors indicate failures\", so the status line does not hold it.",
-        "c": "Ruled out because that frame means \"The block at index is complete\" and carries no reason."
-      }
+        "a": "Ruled out because \"stop_reason indicates normal completion; HTTP errors indicate failures\".",
+        "c": "Ruled out because that frame means \"The block at index is complete\" and carries no reason.",
+        "e": "Ruled out because the opening frame carries \"an empty content and the input token count in usage\", not the stop reason."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x9",
@@ -252,20 +264,26 @@
       "id": "03-developer-mock-exam-1#x14",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A team reads PDFs through Amazon Bedrock's Converse API and finds that answers ignore every chart, although the same files work well on the Claude API. Which setting explains and fixes it?",
+      "stem": "A team reads PDFs through Amazon Bedrock's Converse API and finds that answers ignore every chart, although the same files work well on the Claude API. Which two statements explain it and the fix? (Select two.)",
       "options": {
-        "a": "Turning on citations, since the full visual mode requires them",
-        "b": "A PDF surcharge that disables page images unless it is paid",
-        "c": "Converting each PDF to plain text first, which adds the image content",
-        "d": "Switching to base64 sources, since links hide the page images"
+        "a": "Switching to base64 sources hides the links that blocked the images",
+        "b": "A PDF surcharge disables page images unless it is paid",
+        "c": "The visual mode requires citations enabled",
+        "d": "Converting each PDF to plain text first adds the image content",
+        "e": "Without them the service falls back to basic text extraction"
       },
-      "key": "a",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "a": "\"Without citations, Converse falls back to basic text extraction\", so enabling them restores the visual mode (module 30, page 2).",
+        "c": "\"Without citations, Converse falls back to basic text extraction\", so enabling them restores the full visual mode (module 30, page 2).",
+        "e": "\"Without citations, Converse falls back to basic text extraction\", so enabling them restores the full visual mode (module 30, page 2).",
+        "a": "Ruled out because on that platform \"only base64 sources are available\", so that is already the case.",
         "b": "Ruled out because \"Standard API pricing applies with no additional PDF fees\".",
-        "c": "Ruled out because text extraction is the mode that \"cannot analyze images or charts\".",
-        "d": "Ruled out because on that platform \"only base64 sources are available\", so that is already the case."
-      }
+        "d": "Ruled out because text extraction is the mode that \"cannot analyze images or charts\"."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x15",
@@ -366,20 +384,26 @@
       "id": "03-developer-mock-exam-1#x20",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which change fits?",
+      "stem": "A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which two statements explain it and the fix? (Select two.)",
       "options": {
-        "a": "Pick one of the three lowest values, which that mode accepts",
-        "b": "Raise max_tokens, because the 400 reports a truncated reply",
-        "c": "Pass adaptive as the effort value so the model chooses its own",
-        "d": "Add temperature 0 so that the behaviour becomes deterministic"
+        "a": "That mode works at the three lowest levels",
+        "b": "Pass adaptive as the effort value so that the model chooses its own",
+        "c": "Raise max_tokens, because the 400 reports a truncated reply",
+        "d": "Add temperature 0 so that the behaviour becomes deterministic",
+        "e": "At the two highest levels it is rejected"
       },
-      "key": "a",
+      "key": [
+        "a",
+        "e"
+      ],
       "explanation": {
-        "a": "That mode works at the lower levels and \"returns a 400 at xhigh and max\" (module 19, page 1).",
-        "b": "Ruled out because a cut reply is a different case, because it \"arrives with status 200\".",
-        "c": "Ruled out because the page says \"Don't pass adaptive as an effort value\".",
+        "a": "The mode \"works at `low`, `medium` and `high` effort and returns a 400 at `xhigh` and `max`\" (module 19, page 1), so the fix is one of the three lowest values.",
+        "e": "The mode \"works at `low`, `medium` and `high` effort and returns a 400 at `xhigh` and `max`\" (module 19, page 1), so the fix is one of the three lowest values.",
+        "b": "Ruled out because \"Don't pass adaptive as an effort value\".",
+        "c": "Ruled out because a cut reply is a different case, because it \"arrives with status 200\".",
         "d": "Ruled out because on these models \"a non-default value of any of them is rejected with a 400 error\"."
-      }
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x21",
@@ -442,20 +466,26 @@
       "id": "03-developer-mock-exam-1#x24",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "Two otherwise identical multi-turn services use thinking: one runs on Claude Opus 5.5 and one on Claude Haiku 4.5. The first one's conversations fill their context faster. Which fact explains the gap?",
+      "stem": "Two otherwise identical multi-turn services use thinking: one runs on Claude Opus 5.5 and one on Claude Haiku 4.5. The first one's conversations fill their context faster. Which two statements explain the gap? (Select two.)",
       "options": {
         "a": "Haiku 4.5 has a smaller window of 64K, so its context is cleared sooner",
-        "b": "The larger model retains earlier reasoning by default, while the smaller strips it",
-        "c": "Adaptive thinking bills reasoning as input, which crowds the window on Opus",
-        "d": "Opus 5.5 can disable thinking, so it sends longer prompts to compensate for the lost reasoning"
+        "b": "Adaptive thinking bills reasoning as input, which crowds the window",
+        "c": "The larger model retains earlier reasoning by default",
+        "d": "Opus 5.5 can disable thinking, so it compensates with longer prompts",
+        "e": "The smaller model drops earlier reasoning blocks"
       },
-      "key": "b",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "b": "Earlier thinking is kept where \"current Opus, Sonnet, Fable models keep them by default\" (module 4, page 2).",
+        "c": "Earlier thinking is kept where \"current Opus, Sonnet, Fable models keep them by default\" (module 4, page 2), and the smaller model strips it, which is why the first service's context fills faster.",
+        "e": "Earlier thinking is kept where \"current Opus, Sonnet, Fable models keep them by default\" (module 4, page 2), and the smaller model strips it, which is why the first service's context fills faster.",
         "a": "Ruled out because Haiku 4.5 has a window of \"200K for Claude Haiku 4.5\", and 64K is only its output ceiling.",
-        "c": "Ruled out because reasoning tokens \"are billed as output tokens\".",
-        "d": "Ruled out because the page says \"Opus 5.5 use adaptive thinking that is always on\"."
-      }
+        "b": "Ruled out because reasoning tokens \"are billed as output tokens\".",
+        "d": "Ruled out because \"Opus 5.5 use adaptive thinking that is always on\"."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x25",
@@ -556,20 +586,26 @@
       "id": "03-developer-mock-exam-1#x30",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A custom in-process tool is annotated as read-only, and the team lets it run alongside other tools without review, assuming that it cannot modify anything. What is the flaw?",
+      "stem": "A custom in-process tool is annotated as read-only, and the team lets it run alongside other tools without review, assuming that it cannot modify anything. Which two statements explain why that assumption fails? (Select two.)",
       "options": {
-        "a": "The label is merely scheduling metadata; the handler's code decides what happens",
-        "b": "Tools carrying the label are always run one at a time, to stay on the safe side",
-        "c": "The label is enforced when the tool is served from outside the process boundary",
-        "d": "The SDK rejects any write that such a tool attempts while the run is under way"
+        "a": "The handler's code can still write",
+        "b": "The label is enforced when the tool is served from outside the process boundary",
+        "c": "The SDK rejects any write that such a tool attempts while the run is under way",
+        "d": "Tools carrying the label are always run one at a time, to stay on the safe side",
+        "e": "The label is scheduling metadata and not a guarantee"
       },
-      "key": "a",
+      "key": [
+        "a",
+        "e"
+      ],
       "explanation": {
-        "a": "\"Annotations are metadata, not enforcement\" (module 35, page 2).",
-        "b": "Ruled out because the hint \"lets the tool run in parallel with other read-only tools\", not one at a time.",
-        "c": "Ruled out because clients treat annotations as \"untrusted unless they come from trusted servers\", wherever the tool is served.",
-        "d": "Ruled out because \"A tool marked read-only can still write if its handler does\"."
-      }
+        "a": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2).",
+        "e": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2).",
+        "b": "Ruled out because clients treat annotations as \"untrusted unless they come from trusted servers\", wherever the tool is served.",
+        "c": "Ruled out because \"Annotations are metadata, not enforcement\".",
+        "d": "Ruled out because the hint \"lets the tool run in parallel with other read-only tools\"."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x31",
@@ -689,20 +725,26 @@
       "id": "03-developer-mock-exam-1#x37",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "An extraction loop repairs failed replies by sending the original prompt again with the note \"try again\". The same mistakes keep recurring. Which redesign fits?",
+      "stem": "An extraction loop repairs failed replies by sending the original prompt again with the note \"try again\". The same mistakes keep recurring. Which two changes fit? (Select two.)",
       "options": {
-        "a": "Return the model's own answer together with every problem and its location",
-        "b": "Report only the first problem each time, to keep the note short and focused",
-        "c": "Retry without a limit, since eventual success is likely on a hard document",
-        "d": "Add a prefilled assistant turn that opens the JSON object for the model"
+        "a": "Retry without a limit, since eventual success is likely on a hard document",
+        "b": "Return the model's own answer with the request",
+        "c": "List every problem with its path and message",
+        "d": "Add a prefilled assistant turn that opens the JSON object",
+        "e": "Report only the first problem each time, to keep the note short"
       },
-      "key": "a",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
-        "a": "The next call needs \"a user message that lists each problem with its path and message\" after the model's own reply (module 25, page 2).",
-        "b": "Ruled out because the page says to \"Collect all the problems in one pass\".",
-        "c": "Ruled out because \"An unbounded retry on a hard document is a cost leak\".",
-        "d": "Ruled out because \"Prefilling the assistant response returns a 400 error\" on current models."
-      }
+        "b": "The next call needs the model's own reply and \"a user message that lists each problem with its path and message\" (module 25, page 2).",
+        "c": "The next call needs the model's own reply and \"a user message that lists each problem with its path and message\" (module 25, page 2).",
+        "a": "Ruled out because \"An unbounded retry on a hard document is a cost leak\".",
+        "d": "Ruled out because \"Prefilling the assistant response returns a 400 error\" on current models.",
+        "e": "Ruled out because \"Collect all the problems in one pass\"."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x38",
@@ -803,20 +845,26 @@
       "id": "03-developer-mock-exam-1#x43",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A developer connects forty tool-bearing servers to Claude Code and worries that every request now carries all their schemas. What does the documentation say?",
+      "stem": "A developer connects forty tool-bearing servers to Claude Code and worries that every request now carries all their schemas. Which two statements does the documentation support? (Select two.)",
       "options": {
-        "a": "Each schema loads in full at session start, so the cost stays fixed per server",
-        "b": "Discovery on demand is on by default, so unused ones cost little context",
-        "c": "Servers load nothing at start, so adding more of them affects latency alone",
-        "d": "Put the schemas into CLAUDE.md, which loads when a question needs them"
+        "a": "Dormant integrations cost little space",
+        "b": "Discovery on demand is switched on by default",
+        "c": "The schemas belong in CLAUDE.md, which loads when a question needs them",
+        "d": "Servers load nothing at start, so adding more affects latency alone",
+        "e": "Each schema loads in full at session start, so the cost stays fixed per server"
       },
-      "key": "b",
+      "key": [
+        "a",
+        "b"
+      ],
       "explanation": {
+        "a": "\"Tool search is on by default, so idle MCP tools consume minimal context\" (module 27, page 1).",
         "b": "\"Tool search is on by default, so idle MCP tools consume minimal context\" (module 27, page 1).",
-        "a": "Ruled out because the loading table shows \"tool names; full schemas on demand\".",
-        "c": "Ruled out because the context cost is \"low until a tool is used\", and not zero.",
-        "d": "Ruled out because \"CLAUDE.md is paid for on every request\"."
-      }
+        "c": "Ruled out because \"CLAUDE.md is paid for on every request\".",
+        "d": "Ruled out because the context cost is \"low until a tool is used\", and not zero.",
+        "e": "Ruled out because the loading table shows \"tool names; full schemas on demand\"."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x44",
@@ -898,20 +946,26 @@
       "id": "03-developer-mock-exam-1#x48",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A team plans to drop the disposable container for its screen-driving agent because Anthropic already scans screenshots for planted instructions. What should the reviewer say?",
+      "stem": "A team plans to drop the disposable container for its screen-driving agent because Anthropic already scans screenshots for planted instructions. Which two statements should the reviewer make? (Select two.)",
       "options": {
-        "a": "The scan makes planted text harmless, so confirmation steps can be removed too",
-        "b": "Dropping the container is fine once an allowlist of permitted domains is in place",
-        "c": "Screenshots are processed by Anthropic alone, so no local safeguards apply to them",
-        "d": "Such filters are a backup layer; isolation, absent secrets and approvals stay first"
+        "a": "Injected text can still be obeyed despite the filter",
+        "b": "Screenshots are processed by Anthropic alone, so no local safeguards apply",
+        "c": "Such filters are a backup layer behind the first defences",
+        "d": "Dropping the container is fine once an allowlist of domains is in place",
+        "e": "The scan makes planted text harmless, so the confirmation steps can go too"
       },
-      "key": "d",
+      "key": [
+        "a",
+        "c"
+      ],
       "explanation": {
-        "d": "The page says \"They are a second layer\", behind the container, the missing secrets, the allowlist and the confirmation (module 31, page 2).",
-        "a": "Ruled out because \"Claude will follow commands found in content even when they conflict with your instructions\".",
-        "b": "Ruled out because the precautions begin with \"a dedicated virtual machine or container with minimal privileges\".",
-        "c": "Ruled out because screenshots \"are captured and stored in your environment, not by Anthropic\"."
-      }
+        "a": "The classifiers \"are a second layer\", and \"Claude will follow commands found in content even when they conflict with your instructions\" (module 31, page 2).",
+        "c": "The classifiers \"are a second layer\", and \"Claude will follow commands found in content even when they conflict with your instructions\" (module 31, page 2).",
+        "b": "Ruled out because screenshots \"are captured and stored in your environment, not by Anthropic\".",
+        "d": "Ruled out because the precautions begin with \"a dedicated virtual machine or container with minimal privileges\".",
+        "e": "Ruled out because \"They are a second layer\", behind the container, the missing secrets, the allowlist and the confirmation."
+      },
+      "select": 2
     },
     {
       "id": "03-developer-mock-exam-1#x49",
@@ -1069,20 +1123,26 @@
       "id": "04-developer-mock-exam-2#x4",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A hand-written reader for streamed replies waits for a final data line reading [DONE] before it closes, and it hangs on every call. Which change fits best?",
+      "stem": "A hand-written reader for streamed replies waits for a final data line reading [DONE] and hangs on every call. Which two statements explain it? (Select two.)",
       "options": {
-        "a": "Add a keep-alive ping every few seconds so that the connection is never idle",
-        "b": "Stop on the named terminal event, since that old marker no longer exists in the format",
-        "c": "Switch the call to a websocket, which signals the end of a reply by itself",
-        "d": "Raise the read timeout so that the reader waits until the marker finally arrives"
+        "a": "A longer read timeout lets the missing line finally arrive",
+        "b": "The format uses only named events",
+        "c": "A websocket is needed to signal the end of a reply",
+        "d": "A keep-alive ping is what normally marks the end of a reply",
+        "e": "The old closing marker no longer exists"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
-        "b": "The page records that \"All events are named events\" in the version the API uses, so the end of a reply is a named event (module 13, page 3).",
-        "a": "Ruled out because \"a keep-alive with no content\" is all a ping is, and it does not mark the end of a reply.",
-        "c": "Ruled out because a websocket is not needed: \"The Messages API does not need it\".",
-        "d": "Ruled out because \"the old data: [DONE] marker is gone\", so no amount of waiting will bring it."
-      }
+        "b": "The page records that \"All events are named events\" in the version the API uses, and \"the old data: [DONE] marker is gone\", so the end of a reply is a named event (module 13, page 3).",
+        "e": "The page records that \"All events are named events\" in the version the API uses, and \"the old data: [DONE] marker is gone\", so the end of a reply is a named event (module 13, page 3).",
+        "a": "Ruled out because \"the old data: [DONE] marker is gone\", so no amount of waiting will bring it.",
+        "c": "Ruled out because \"The Messages API does not need it\".",
+        "d": "Ruled out because a ping is \"a keep-alive with no content\", and it does not mark the end."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x5",
@@ -1164,39 +1224,51 @@
       "id": "04-developer-mock-exam-2#x9",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A service sends the same 30,000-token instruction block with every request and reaches its input-token ceiling long before its request ceiling. Which change lifts throughput most directly?",
+      "stem": "A service sends the same 30,000-token instruction block with every request and reaches its input-token ceiling long before its request ceiling. Which two statements describe the cause and the lever? (Select two.)",
       "options": {
-        "a": "Mark the shared prefix for caching, since cached reads are not counted toward it",
-        "b": "Raise max_tokens so that each reply carries more output per request",
-        "c": "Route requests through a second inference geography to gain a separate rate pool",
-        "d": "Create a second workspace to raise the organisation's overall allowance"
+        "a": "Reads from a cache are left out of that count",
+        "b": "Routing through a second inference geography adds a separate rate pool",
+        "c": "A second workspace raises the organisation's overall allowance",
+        "d": "Marking the shared prefix for reuse raises throughput",
+        "e": "Raising max_tokens gives each reply more output per call"
       },
-      "key": "a",
+      "key": [
+        "a",
+        "d"
+      ],
       "explanation": {
         "a": "\"Only uncached input counts toward ITPM\" for most models, so cache reads free capacity (module 16, page 2).",
-        "b": "Ruled out because the setting \"does not factor into OTPM rate limit calculations\", and the pressure here is on input.",
-        "c": "Ruled out because \"Rate limits are shared across all inference_geo values\".",
-        "d": "Ruled out because \"organisation limits always apply\" whatever the workspace."
-      }
+        "d": "\"Only uncached input counts toward ITPM\" for most models, so cache reads free capacity (module 16, page 2).",
+        "b": "Ruled out because \"Rate limits are shared across all inference_geo values\".",
+        "c": "Ruled out because \"organisation limits always apply\" whatever the workspace.",
+        "e": "Ruled out because the setting \"does not factor into OTPM rate limit calculations\", and the pressure is on input."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x10",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "An assembler for streamed replies joins `thinking_delta` fragments into the thinking text but discards `signature_delta` events as noise. What should it do with them?",
+      "stem": "An assembler for streamed replies joins `thinking_delta` fragments into the thinking text but discards the `signature_delta` events as noise. Which two statements describe what it should do? (Select two.)",
       "options": {
-        "a": "Ignore them, since only the text deltas matter for assembling the final message",
-        "b": "Append the signature text to the end of the thinking text",
-        "c": "Regenerate the signature locally from a hash of the thinking text",
-        "d": "Set the block's signature from them and send it back unchanged with the block"
+        "a": "That attribute must travel back unmodified",
+        "b": "Regenerate the value locally from a hash of the thinking text",
+        "c": "Ignore them, since only the text deltas matter for the final message",
+        "d": "Their payload becomes an attribute of the block",
+        "e": "Append their text to the end of the thinking text"
       },
-      "key": "d",
+      "key": [
+        "a",
+        "d"
+      ],
       "explanation": {
-        "d": "A signature \"must be sent back unchanged with the thinking block\" (module 17, page 1).",
-        "a": "Ruled out because the rule to \"ignore event types you do not know\" covers unknown types, and this one is documented.",
-        "b": "Ruled out because \"a signature_delta sets the signature\", and it does not extend the thinking.",
-        "c": "Ruled out because \"thinking or redacted_thinking blocks in the latest assistant message cannot be modified\"."
-      }
+        "a": "A signature \"must be sent back unchanged with the thinking block\" (module 17, page 1), and a signature_delta sets it.",
+        "d": "A signature \"must be sent back unchanged with the thinking block\" (module 17, page 1), and a signature_delta sets it.",
+        "b": "Ruled out because \"thinking or redacted_thinking blocks in the latest assistant message cannot be modified\".",
+        "c": "Ruled out because the rule to \"ignore event types you do not know\" covers unknown types, and this one is documented.",
+        "e": "Ruled out because \"a signature_delta sets the signature\", and it does not extend the thinking."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x11",
@@ -1354,20 +1426,26 @@
       "id": "04-developer-mock-exam-2#x19",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A team sends an entire 800,000-token archive with every request because the window allows it, and answers are getting worse while bills climb. Which change fits best?",
+      "stem": "A team sends an entire 800,000-token archive with every request because the window allows it, and answers worsen while bills climb. Which two statements describe the problem? (Select two.)",
       "options": {
-        "a": "Move to a model whose window is larger, so that accuracy holds as it fills",
-        "b": "Repeat the key instruction several times inside the archive for emphasis",
-        "c": "Lower the effort so that the extra tokens are processed more quickly",
-        "d": "Trim the input to what the task needs, and ask for supporting quotes from it"
+        "a": "Recall degrades as the space fills",
+        "b": "A larger window restores accuracy, since more room means better recall",
+        "c": "Lowering the effort speeds up processing of the extra tokens",
+        "d": "Repeating the key instruction inside the archive fixes the drift",
+        "e": "Extra capacity is no reason to use it all"
       },
-      "key": "d",
+      "key": [
+        "a",
+        "e"
+      ],
       "explanation": {
-        "d": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1).",
-        "a": "Ruled out because \"accuracy and recall degrade as the window fills\".",
-        "b": "Ruled out because \"more context isn't automatically better\".",
-        "c": "Ruled out because \"cost grows with every token you send\", whatever the effort."
-      }
+        "a": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1), and \"accuracy and recall degrade as the window fills\".",
+        "e": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1), and \"accuracy and recall degrade as the window fills\".",
+        "b": "Ruled out because \"accuracy and recall degrade as the window fills\".",
+        "c": "Ruled out because \"cost grows with every token you send\", whatever the effort.",
+        "d": "Ruled out because \"more context isn't automatically better\"."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x20",
@@ -1449,20 +1527,26 @@
       "id": "04-developer-mock-exam-2#x24",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A feature returns a short label, and the team wants the label to appear sooner. It proposes fast mode on Claude Opus 5.5 to cut latency. What should the review say?",
+      "stem": "A feature returns a short label, and the team wants it to appear sooner. It proposes fast mode on Claude Opus 5.5. Which two statements should the review make? (Select two.)",
       "options": {
-        "a": "Fast mode also lowers latency to the first token, so it suits any interactive feature built on it",
-        "b": "Fast mode applies, but only after the request moves to the Message Batches API",
-        "c": "Fast mode is free on Opus 5.5 and needs only a beta header on the request",
-        "d": "It raises output speed after the start, not time to the first word, so little is gained"
+        "a": "Fast mode also lowers latency to the first token for any interactive feature",
+        "b": "Fast mode applies once the work moves to the Message Batches API",
+        "c": "Time to the first word barely changes",
+        "d": "Fast mode is free on Opus 5.5 and needs only a beta header",
+        "e": "Its benefit is tokens per second once streaming begins"
       },
-      "key": "d",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "d": "\"A feature that waits for the first word gains little\" (module 19, page 2).",
+        "c": "\"A feature that waits for the first word gains little\" (module 19, page 2), because fast mode raises output speed and not the time to the first token.",
+        "e": "\"A feature that waits for the first word gains little\" (module 19, page 2), because fast mode raises output speed and not the time to the first token.",
         "a": "Ruled out because \"Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)\".",
         "b": "Ruled out because \"Fast mode is not available with the Batch API\".",
-        "c": "Ruled out because on Opus 5.5 it is priced \"twice the standard $4 and $20\"."
-      }
+        "d": "Ruled out because it is priced \"twice the standard $4 and $20\"."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x25",
@@ -1563,20 +1647,26 @@
       "id": "04-developer-mock-exam-2#x30",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A team wires its audit rule into the permission callback of its agent, yet calls to its read tools do not appear in the audit log. What is the cause, and what is the fix?",
+      "stem": "A team wires its audit rule into the permission callback of its agent, yet calls to its read tools never appear in the audit log. Which two statements describe the cause and the fix? (Select two.)",
       "options": {
-        "a": "The callback runs only for denied calls, so the audit must wait for a deny rule to fire",
-        "b": "Automatically approved requests never reach it, so the check belongs in an earlier hook",
-        "c": "Switch the permission mode to bypass, which sends every call to the callback",
-        "d": "Register a second callback in the options, which runs before the first one"
+        "a": "Registering a second callback makes it run before the first",
+        "b": "Anything allowed in advance skips it",
+        "c": "An earlier hook is the place that sees everything",
+        "d": "Switching the mode to bypass sends every call to the callback",
+        "e": "The callback runs only for denied calls, so a deny rule must fire first"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
-        "b": "\"Auto-approved tools never reach canUseTool\", while hooks run first (module 35, page 2).",
-        "a": "Ruled out because \"An allow rule approves a call before the callback is consulted\".",
-        "c": "Ruled out because a call that \"bypassPermissions approved skips the callback\".",
-        "d": "Ruled out because \"the callback sees only what nothing earlier decided\", and no callback runs first."
-      }
+        "b": "\"Auto-approved tools never reach canUseTool\", and \"To gate every call, use a `PreToolUse` hook\" (module 35, page 2).",
+        "c": "\"Auto-approved tools never reach canUseTool\", and \"To gate every call, use a `PreToolUse` hook\" (module 35, page 2).",
+        "a": "Ruled out because \"the callback sees only what nothing earlier decided\".",
+        "d": "Ruled out because a call that \"bypassPermissions approved skips the callback\".",
+        "e": "Ruled out because \"An allow rule approves a call before the callback is consulted\"."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x31",
@@ -1677,20 +1767,26 @@
       "id": "04-developer-mock-exam-2#x36",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A three-step pipeline over an 80,000-token contract resends the whole contract at every step, and costs run high. Step two only needs the clauses that step one found. Which change fits best?",
+      "stem": "A three-step pipeline over an 80,000-token contract resends the whole contract at every step, and costs run high. Step two only needs the clauses that step one found. Which two statements describe the change? (Select two.)",
       "options": {
-        "a": "Shorten the contract by deleting every clause that looks unrelated to the question",
-        "b": "Carry just the extracted excerpts onward, since later stages want nothing more",
-        "c": "Merge the three steps into one prompt so the contract is sent once",
-        "d": "Send the contract in the system prompt of each step instead of the user turn"
+        "a": "Delete every clause that looks unrelated to the question first",
+        "b": "Move the contract into the system prompt of each step",
+        "c": "Hand later stages just the extracted excerpts",
+        "d": "Later stages then carry a much smaller load",
+        "e": "Merge the three steps into one prompt so the contract goes once"
       },
-      "key": "b",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "b": "\"Pass forward only what the next step needs\" (module 24, page 2).",
+        "c": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry.",
+        "d": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry.",
         "a": "Ruled out because the method is to \"ask Claude to quote relevant parts of the documents first\", not to delete by guesswork.",
-        "c": "Ruled out because chaining is kept to \"inspect intermediate outputs or enforce a specific pipeline structure\".",
-        "d": "Ruled out because \"Each step costs the full input again\" wherever the text sits."
-      }
+        "b": "Ruled out because \"Each step costs the full input again\" wherever the text sits.",
+        "e": "Ruled out because chaining is kept to \"inspect intermediate outputs or enforce a specific pipeline structure\"."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x37",
@@ -1772,20 +1868,26 @@
       "id": "04-developer-mock-exam-2#x41",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "An assistant keeps calling a tool that keeps failing, and the loop, which only watches the stop reason, runs until the budget is gone. Which change fits best?",
+      "stem": "An assistant keeps calling a tool that keeps failing, and the loop, which only watches the stop reason, runs until the budget is gone. Which two changes fit? (Select two.)",
       "options": {
-        "a": "Count the turns, and end with a distinct status when a fixed limit is reached",
-        "b": "Make the handler return an empty string so that the tool seems to succeed",
-        "c": "Wait for the model to decide to stop, since it ends every loop by itself",
-        "d": "Rely on the SDK tool runner's default behaviour, which has no limit"
+        "a": "Make the handler return an empty string so the tool seems to succeed",
+        "b": "Wait for the model to decide to stop by itself",
+        "c": "Cap the number of model calls",
+        "d": "Report a separate outcome when the cap is reached",
+        "e": "Rely on the runner's default behaviour, which has no limit"
       },
-      "key": "a",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "a": "\"The loop needs its own limit of model calls, and a status for reaching it\" (module 26, page 2).",
-        "b": "Ruled out because \"A result that quietly returns an empty string for a failure teaches the model that the tool worked\".",
-        "c": "Ruled out because \"A model that keeps calling a tool that keeps failing never decides\".",
-        "d": "Ruled out because the runner loops \"until it reaches `max_iterations`\"."
-      }
+        "c": "\"The loop needs its own limit of model calls, and a status for reaching it\" (module 26, page 2).",
+        "d": "\"The loop needs its own limit of model calls, and a status for reaching it\" (module 26, page 2).",
+        "a": "Ruled out because \"A result that quietly returns an empty string for a failure teaches the model that the tool worked\".",
+        "b": "Ruled out because \"A model that keeps calling a tool that keeps failing never decides\".",
+        "e": "Ruled out because the runner loops \"until it reaches `max_iterations`\"."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x42",
@@ -1924,20 +2026,26 @@
       "id": "04-developer-mock-exam-2#x49",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A screen-driving loop acts on just the first step of each assistant turn and sends back a single outcome. After a turn that planned click, type and click, the next call fails with a 400. What fits best?",
+      "stem": "A screen-driving loop acts on just the first step of each assistant turn and sends back a single outcome. After a turn that planned click, type and click, the next call fails with a 400. Which two statements fit? (Select two.)",
       "options": {
-        "a": "Add a pause between turns so that the earlier request has time to finish",
-        "b": "Resend the same turn with a longer timeout on the client side",
-        "c": "Supply an answer for each block of that message, in order",
-        "d": "Lower the screenshot size so that the request fits the limit"
+        "a": "A smaller screenshot makes the request fit the limit",
+        "b": "A pause between turns gives the earlier request time to finish",
+        "c": "A longer client timeout lets the same turn go through",
+        "d": "Every block of that message needs an answer",
+        "e": "Unanswered items count as an invalid request"
       },
-      "key": "c",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "c": "The page says \"Leaving a block unanswered is an `invalid_request_error`\" (module 31, page 1).",
-        "a": "Ruled out because the failure is a missing answer and not timing: \"Every block still needs a result\".",
-        "b": "Ruled out because the cause is \"an agent loop that reads only the first block\", which a longer timeout leaves as it was.",
-        "d": "Ruled out because the page ties image size to \"the toolset takes no display dimensions and the API doesn't downscale for you\", which is a different failure."
-      }
+        "d": "\"Leaving a block unanswered is an `invalid_request_error`\" (module 31, page 1).",
+        "e": "\"Leaving a block unanswered is an `invalid_request_error`\" (module 31, page 1).",
+        "a": "Ruled out because the page ties image size to \"the toolset takes no display dimensions and the API doesn't downscale for you\".",
+        "b": "Ruled out because \"Every block still needs a result\", whatever the timing.",
+        "c": "Ruled out because the cause is \"an agent loop that reads only the first block\", which a timeout leaves as it was."
+      },
+      "select": 2
     },
     {
       "id": "04-developer-mock-exam-2#x50",

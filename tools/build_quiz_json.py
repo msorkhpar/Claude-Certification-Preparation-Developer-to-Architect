@@ -11,25 +11,27 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import ROOT, parse_page_quizzes  # noqa: E402
+from check_quiz import ROOT, parse_page_quizzes, select_count  # noqa: E402
 
 QID = {"Quiz": "q", "Module quiz": "m", "Mock exam": "x"}
 SCOPE = {"Quiz": "page", "Module quiz": "module", "Mock exam": "level"}
-GROUP = re.compile(r"(?:\*[a-d]\*(?:, and |, | and )?)+")
+GROUP = re.compile(r"(?:\*[a-e]\*(?:, and |, | and )?)+")
 
 
 def explanations(key_paragraph, key_letter):
     text = key_paragraph.strip()
-    text = re.sub(r"^\*\*[a-d]\*\*\.\s*", "", text)
+    text = re.sub(r"^\*\*[a-e](?: and [a-e])*\*\*\.\s*", "", text)
+    keys = [key_letter] if isinstance(key_letter, str) else list(key_letter)
     out = {}
     matches = list(GROUP.finditer(text))
     first = matches[0].start() if matches else len(text)
-    out[key_letter] = text[:first].strip()
+    for k in keys:
+        out[k] = text[:first].strip()
     for i, m in enumerate(matches):
         end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
         reason = text[m.end():end].strip()
         reason = re.sub(r"^(is|are) ruled out because ", "Ruled out because ", reason)
-        for letter in re.findall(r"\*([a-d])\*", m.group(0)):
+        for letter in re.findall(r"\*([a-e])\*", m.group(0)):
             out[letter] = reason
     return out
 
@@ -38,7 +40,7 @@ def key_paragraphs(md):
     result = []
     for m in re.finditer(r"^## (Quiz|Module quiz|Mock exam)\n(.*?)(?=^## |\Z)", md, re.S | re.M):
         _, _, keyblock = m.group(2).partition("<details>")
-        paras = re.findall(r"^\d+\. (\*\*[a-d]\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M)
+        paras = re.findall(r"^\d+\. (\*\*[a-e](?: and [a-e])*\*\*.*?)(?=^\d+\. |\n</details>|\Z)", keyblock, re.S | re.M)
         result.append(paras)
     return result
 
@@ -52,7 +54,7 @@ def main():
             keyparas = key_paragraphs(md)
             for (kind, questions, keys), paras in zip(parsed, keyparas):
                 for n, ((stem, opts), key, para) in enumerate(zip(questions, keys, paras), start=1):
-                    quizzes.append({
+                    entry = {
                         "id": f"{page.stem}#{QID[kind]}{n}",
                         "page": page.name,
                         "scope": SCOPE[kind],
@@ -60,7 +62,10 @@ def main():
                         "options": opts,
                         "key": key,
                         "explanation": explanations(para, key),
-                    })
+                    }
+                    if select_count(stem):
+                        entry["select"] = select_count(stem)
+                    quizzes.append(entry)
         out = ROOT / "exercises" / folder.name / "tests"
         out.mkdir(parents=True, exist_ok=True)
         (out / "quiz.json").write_text(json.dumps({"module": folder.name, "quizzes": quizzes}, indent=2, ensure_ascii=False) + "\n")

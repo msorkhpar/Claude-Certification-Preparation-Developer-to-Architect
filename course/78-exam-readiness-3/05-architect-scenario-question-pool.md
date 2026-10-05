@@ -5,7 +5,7 @@
 
 **After this page you can** practise the four scenarios that the two Architect mock exams cover only in part, and fill the gaps that those mocks leave in the scenarios S2 to S5.
 
-The real exam draws four scenarios from a bank of six and sets 60 items on them. The two mock exams of this module cover S1 and S6 twice and each of S2 to S5 once, with fifteen questions apiece. This page adds **32 questions** for S2 to S5, eight for each, so that every one of the six scenarios has a pool of at least twenty-three questions, one and a half times the fifteen that a single mock asks. Every question is the course's own, written fresh; no question comes from a live exam, and none repeats a question of a page quiz, a module quiz or a mock exam. The real exam has multiple-choice and multiple-response items; the questions on this page are single-answer items.
+The real exam draws four scenarios from a bank of six and sets 60 items on them. The two mock exams of this module cover S1 and S6 twice and each of S2 to S5 once, with fifteen questions apiece. This page adds **32 questions** for S2 to S5, eight for each, so that every one of the six scenarios has a pool of at least twenty-three questions, one and a half times the fifteen that a single mock asks. Every question is the course's own, written fresh; no question comes from a live exam, and none repeats a question of a page quiz, a module quiz or a mock exam. The real exam has multiple-choice and multiple-response items; the questions on this page are single-answer items, and the multiple-response items are in the two mock exams.
 
 ## How to use it
 
@@ -34,7 +34,7 @@ For a miss, open the page that the question's explanation names, as (module, pag
 
 ## Mock exam
 
-This question pool covers the scenarios S2 to S5 of the content of Level 3, modules 45 to 77. Choose one answer for each question.
+This question pool covers the scenarios S2 to S5 of the content of Level 3, modules 45 to 77. Choose one answer for each question, or the number the question states.
 
 1. Scenario S2. A team places a CLAUDE.md in the folder of its payments service and expects every session in the repository to carry its rules from the first message. Sessions that never touch that folder do not show them. What explains it?
    - **a**: The file loads only for sessions started by its owner, since it is a personal setting, for the time being

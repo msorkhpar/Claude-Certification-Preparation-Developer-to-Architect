@@ -10,7 +10,7 @@ This mock exam covers **the whole of Level 1** (modules 1 to 11) and not one pag
 exam's style: a short scenario, one best answer and three plausible alternatives, each of which is a mistake a practitioner
 could make. Every question is the course's own, written fresh; no question comes from a live exam. The facts behind each
 answer were read on 2026-10-02 from the official pages named on the module pages, so a reader who studies
-the pages can answer each question from them. The real exam has multiple-choice and multiple-response items; this mock has single-answer items only.
+the pages can answer each question from them. The real exam has multiple-choice and multiple-response items, and so does this mock: a multiple-response item ends with (Select two.) and is right only when both keyed options are chosen.
 
 ## How to take it
 
@@ -42,7 +42,7 @@ Module 2 (how models are made) is beyond the Associate blueprint, so this mock l
 
 ## Mock exam
 
-This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer for each question.
+This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer for each question, or the number the question states.
 
 1. A prompt template wraps pasted material in tags, but each author uses different tag names for the same sort of text, and the instructions refer to them loosely. Which rule from the page fits?
    - **a**: Give each kind of input one meaningful label, used identically everywhere
@@ -68,11 +68,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Ask for working first, then the result after a marker, so code takes just that
    - **d**: Ask for working and result mixed in one paragraph, since that reads more smoothly
 
-5. A classifier prompt lists four allowed labels, but when a ticket fits none the model invents a fifth label. Which line addresses this?
-   - **a**: Name a fallback value to use when unsure, in place of leaving a gap
-   - **b**: Lower the temperature setting so that the labels vary less from run to run
-   - **c**: Remove the allowed list so that the model can pick the closest label freely
-   - **d**: Ask the model to be more careful and precise when choosing among the labels
+5. A classifier prompt lists four allowed labels, but when a ticket fits none the model invents a fifth one. Which two changes address it? (Select two.)
+   - **a**: Lower the temperature setting so that the answers vary less
+   - **b**: Spell out the closed set in the output format
+   - **c**: Ask the model to be more careful and precise in its choice
+   - **d**: Name a fallback value for when it is unsure
+   - **e**: Remove the list so that the model can pick the closest option freely
 
 6. A team lead asks Claude to assess whether a pilot met its targets from a set of results tables, and the replies state conclusions with no support. Which emphasis does the course give for an analysis task?
    - **a**: Breadth first, many options and judgment kept for a later pass
@@ -128,11 +129,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Check the statements that would hurt if wrong against the sources cited
    - **d**: Repeat the research several times and keep the statements that every run shares
 
-15. A team adds quotes, citations, an "I don't know" option and a restricted source list to its prompt, and then tells users the answers no longer need review. How does the course treat that claim?
-   - **a**: As overreach, since such techniques reduce errors and do not remove them
-   - **b**: As sound, because grounded prompts leave hallucinations at zero in practice
-   - **c**: As reasonable, if users are told to ask Claude how sure it is
-   - **d**: As sound, because each technique adds an independent check in code
+15. A team adds quotes, citations, an "I don't know" option and a restricted source list, and then tells users the answers no longer need review. Which two statements describe how the course treats that claim? (Select two.)
+   - **a**: It is sound, because each technique adds an independent check in code
+   - **b**: It overreaches, since errors are reduced and not removed
+   - **c**: It is reasonable if users are told to ask Claude how sure it is
+   - **d**: It is sound, because grounded prompts leave hallucinations at zero
+   - **e**: Checking stays, because those steps only speed it up
 
 16. An HR assistant uploads a group photo from a company event and asks Claude to name each person pictured for a directory. What should the team expect?
    - **a**: Names looked up from the staff files after Claude checks each face against them
@@ -158,11 +160,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Ask it to state how sure it is about each rule that it gives
    - **d**: Tell it to rely solely on the supplied texts, ignoring its training
 
-20. A student uses Claude to find sources for an essay and pastes three citations into the bibliography. One of them does not exist. Which habit would have prevented this?
-   - **a**: Confirming each reference and fact in a library or database first
-   - **b**: Using the largest model available, which never invents references
-   - **c**: Telling Claude that the essay is graded so that it takes more care
-   - **d**: Asking Claude whether each reference is real before using it in the essay
+20. A student uses Claude to find sources for an essay and pastes three citations into the bibliography, one of which does not exist. Which two habits would have prevented it? (Select two.)
+   - **a**: Verify every fact that enters graded work
+   - **b**: Use the largest model available, which never invents references
+   - **c**: Tell Claude that the essay is graded so that it takes more care
+   - **d**: Confirm each reference in a library or database
+   - **e**: Ask Claude whether each reference is real before using it
 
 21. A freelance writer uses Claude to draft a short story opening and wants to be sure it is safe to publish under her own name. Which check does the course name for creative work?
    - **a**: Whether a disclosure line can be skipped, since fiction needs no notice
@@ -176,11 +179,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Start with Claude Fable 5.1, since the top tier is the safest default for everyone
    - **d**: Begin with Opus 5.5, moving to Fable 5.1 if higher-effort evaluations fall short
 
-23. A designer uses Firefox and a phone, and asks whether Claude in Chrome can be installed there. What does the course say?
-   - **a**: Yes, as a desktop extension that runs a local server on the phone
-   - **b**: A one-browser side panel, not supported elsewhere or on mobile
-   - **c**: Yes, but only on the free plan, which is the one that includes it
-   - **d**: Yes, it works in any browser that is built on the same open-source base
+23. A designer uses Firefox and a phone, and asks whether Claude in Chrome can be installed there. Which two statements does the course support? (Select two.)
+   - **a**: It is a side panel in a single browser
+   - **b**: It works only on the free plan, which is the one that includes it
+   - **c**: It works in any browser that is built on the same open-source base
+   - **d**: It installs as a desktop extension that runs a local server on the phone
+   - **e**: Other browsers and mobile are excluded
 
 24. A start-up needs Claude inside its own mobile screens, with its own conversation storage and tools. Which surface does the page choose?
    - **a**: Claude Code, since the developers will work from inside a repository
@@ -224,11 +228,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: The task is small, clear and has a visible result for a person to judge
    - **d**: The work is shaped like language, so a person must do it
 
-31. A manager sets a recurring Cowork task for the early morning and wants it to run while her laptop is shut and the desktop app is closed. What does the page say?
-   - **a**: It runs in the cloud, needing neither an awake machine nor an open client
-   - **b**: It runs on the laptop and waits until the machine is next powered up
-   - **c**: It runs only while the desktop app stays open and connected to the laptop
-   - **d**: It is not possible, because Cowork cannot schedule anything at all
+31. A manager sets a recurring Cowork task for the early morning and wants it to run while her laptop is shut and the desktop app is closed. Which two statements does the page support? (Select two.)
+   - **a**: No awake machine is needed
+   - **b**: It is not possible, because Cowork cannot schedule anything
+   - **c**: It runs only while the desktop app stays open and connected
+   - **d**: It runs on the laptop and waits until the machine is next powered up
+   - **e**: Anthropic's servers do the job
 
 32. A ceramic artist asks whether to adopt Claude across her practice. Which starting point does the creative-work course recommend?
    - **a**: Full use from the start, dropped later wherever it harms the style
@@ -260,11 +265,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Only the first draft of the rubric, since grading is a mechanical step
    - **d**: Evaluating the work and any decision with consequences for the learners
 
-37. A team lead tags Claude in a thread to compile a report, then closes Slack for the evening. A colleague adds a correction as a later message. What happens?
-   - **a**: It keeps running in the cloud and, once engaged there, follows the addition
-   - **b**: Work stops when Slack closes, because the task runs inside the browser tab
-   - **c**: It ignores the late message, since it only reads the tagged post
-   - **d**: It asks the colleague to tag it again before it reads anything new
+37. A team lead tags Claude in a thread to compile a report, then closes Slack for the evening. A colleague adds a correction as a later message. Which two statements describe what happens? (Select two.)
+   - **a**: Replies posted afterwards are followed
+   - **b**: It ignores the late addition, since it only reads the tagged post
+   - **c**: Work stops when Slack closes, because the task runs inside the browser tab
+   - **d**: It needs a fresh tag before it reads anything new
+   - **e**: The work carries on in the cloud
 
 38. A new team member wants Claude to produce the entire quarterly customer review, from data pull to final slides, in one go on day one. What does the delegation guidance suggest?
    - **a**: Hand over the entire job, since one go saves the time of reviewing steps
@@ -290,11 +296,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: A desktop extension, which hosts its endpoint on that same computer
    - **d**: A remote connector, which reaches an MCP server from Anthropic's cloud
 
-42. A power user has connected twelve connectors and notices conversations feel crowded with tool lists. Which tool-loading setting does the help centre suggest?
-   - **a**: Blocked, which removes every tool from the list for good
-   - **b**: Auto, since it is the default and suits most people in most cases
-   - **c**: On demand, which brings in an integration only when the work needs it
-   - **d**: Always allowed, which keeps the lists short by hiding the prompts
+42. A power user has connected twelve connectors and notices conversations feel crowded with tool lists. Which two statements fit the help centre's suggestion? (Select two.)
+   - **a**: Blocked removes every tool from the list for good
+   - **b**: Auto is the default and suits most people in most cases
+   - **c**: Always allowed keeps the lists short by hiding the prompts
+   - **d**: Load each integration only when the work needs it
+   - **e**: Ten or more is the point where it pays off
 
 43. A team's Project holds a pricing file that nobody has reviewed for a year, and answers drift out of date without any alert. Which practice would have prevented it?
    - **a**: Telling Claude in the instructions to flag old files whenever it notices them
@@ -320,11 +327,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Never, because the commercial rules protect every plan alike
    - **d**: Always, since chats on consumer plans train the model by default
 
-47. A user sets Claude in Chrome to its least restrictive approval mode to save clicks while she browses her bank. What does the page say about that mode?
-   - **a**: Downloads and sensitive entries are still skipped silently in that mode
-   - **b**: Claude still reviews each action for safety and blocks anything unsafe
-   - **c**: It is advised for sites she visits often, such as her bank
-   - **d**: Nothing checks its actions, so it suits only complete trust
+47. A user sets Claude in Chrome to its least restrictive approval mode to save clicks while she browses her bank. Which two statements does the page support? (Select two.)
+   - **a**: Claude still reviews each action for safety and blocks anything unsafe
+   - **b**: It is advised for sites she visits often, such as her bank
+   - **c**: It suits only complete trust
+   - **d**: Nothing checks what is done
+   - **e**: Downloads and sensitive entries are still skipped silently there
 
 48. A manager wants to paste an unreleased financial forecast, marked confidential, into a chat tool that the company has sanctioned. Which rule fits?
    - **a**: Ask Claude to forget the forecast afterwards, which satisfies the rule
@@ -338,11 +346,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: A retention setting that deletes browsing history after thirty days
    - **d**: A per-user prompt telling Claude not to use the internet
 
-50. An assistant asks a user to confirm "Send this email to everyone on the list?" while she works through a long task, and she presses Allow without a glance. What does the course say?
-   - **a**: The prompt is the control, so approving unread obeys whatever was injected
-   - **b**: It matters only if the email carries an attachment or a link
+50. An assistant asks a user to confirm "Send this email to everyone on the list?" while she works through a long task, and she presses Allow without a glance. Which two statements does the course support? (Select two.)
+   - **a**: It matters only if the email carries an attachment or a link
+   - **b**: It is a formality, since the permission was set at the start of the task
    - **c**: It is harmless, since classifiers already screen every action taken
-   - **d**: It is a formality, since the permission was already set at the start of the task
+   - **d**: Approving unread hands approval to whatever was injected
+   - **e**: The prompt is the control
 
 51. A team lead tags Claude in a public channel and asks it to summarise what the finance team said in their private channel. What will happen?
    - **a**: It reads the private room through the tools that an admin connected
@@ -392,11 +401,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: The input alone exceeds the window, so it must shrink or the window grow
    - **d**: A newer tokenizer shrank the text, so the same words now fit more easily
 
-59. A request with thinking active returns an answer cut off mid-sentence, though the output limit was set generously and the input is small. Which explanation fits?
-   - **a**: The model reached a word count that Claude sets for all answers
-   - **b**: Thinking text is free, so it cannot use any of the output budget
-   - **c**: Reasoning tokens use the same cap, so less is left for the visible text
-   - **d**: The input exceeded the window, which ends every request with an error message
+59. A request with thinking active returns an answer cut off mid-sentence, though the output limit was set generously and the input is small. Which two statements explain it? (Select two.)
+   - **a**: The input exceeded the window, which ends the request with an error
+   - **b**: Reasoning tokens count against the same cap
+   - **c**: The model reached a word count that Claude sets for answers
+   - **d**: Less room is left for the visible text
+   - **e**: Thinking text is free, so it leaves the budget alone
 
 60. A summarisation job on Claude Opus 5.5 sends short inputs but generates long answers, and the bill is higher than planned. Which price fact points to the lever?
    - **a**: Output tokens are free once the window is not full, so length is harmless
@@ -411,7 +421,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 2. **d**. A key instruction goes on its own line and is restated after long material (module 6, page 1). *a* is ruled out because the page says "More context is not automatically better". *b* is ruled out because the page says "A key instruction buried in a long paragraph is easy to underweight". *c* is ruled out because the page advises "Place your long documents and inputs near the top of your prompt, above your query, instructions, and examples".
 3. **d**. Revising the request one change at a time is the method, and re-rolling is the reflex (module 5, page 2). *a* is ruled out because "Regenerating the same request and hoping is the reflex; revising the request is the method". *b* is ruled out because the method is to "change one thing in the description", not several at once. *c* is ruled out because the page advises "ask why before asking again".
 4. **c**. Reasoning is requested before the answer and kept apart, so a program uses the answer while a person reads the steps (module 6, page 2). *a* is ruled out because "Comparing detects the variation; it does not remove it". *b* is ruled out because the page notes that "when an answer looks wrong, the steps tell you where it went wrong". *d* is ruled out because the page says to "Keep the reasoning separate from the answer".
-5. **a**. Say what to do when unsure, for example use unknown, rather than leaving the model to invent a value (module 6, page 2). *b* is ruled out because "The models this course uses do not accept them". *c* is ruled out because the format lists allowed values, where "label is one of billing, bug, account, other". *d* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap.
+5. **b and d**. Say what to do when unsure, for example use unknown, and list the values as in "label is one of billing, bug, account, other" (module 6, page 2). *a* is ruled out because "The models this course uses do not accept them". *c* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap. *e* is ruled out because the format lists allowed values, where "label is one of billing, bug, account, other".
 6. **b**. Analysis wants the material, the question and the criteria, and the evidence for each conclusion (module 6, page 3). *a* is ruled out because the brainstorming task wants "Breadth first, many options, no early judgment". *c* is ruled out because the drafting task wants "Audience, tone, length, an example of the target style". *d* is ruled out because the research task wants "Sources named, claims tied to sources".
 7. **d**. Constraints answer "What must hold?" and the output format fixes the shape, so each is its own part of the specification (module 6, page 3). *a* is ruled out because the task part answers "What exactly is to be done now?". *b* is ruled out because the role part answers "Who is doing the work?". *c* is ruled out because the documents part answers "What material to use?".
 8. **a**. Research wants sources named, claims tied to sources and a statement of what could not be found (module 6, page 3). *b* is ruled out because that set suits drafting: "Audience, tone, length, an example of the target style". *c* is ruled out because that set suits brainstorming: "Breadth first, many options, no early judgment". *d* is ruled out because that set suits analysis: "Analysis wants the material and the question".
@@ -421,15 +431,15 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 12. **b**. Low-quality or rotated images invite mistakes and invention, so the readings are verified (module 4, page 1). *a* is ruled out because the vision page says it "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images". *c* is ruled out because "Self-reported confidence is not a measure of accuracy". *d* is ruled out because "Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight".
 13. **c**. Cite and retract: ask for a supporting quote for each claim, and to drop any claim it cannot support (module 1, page 2). *a* is ruled out because "Comparing detects the variation; it does not remove it". *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *d* is ruled out because that technique tells the model "it may say so when the material is not enough", and it traces nothing.
 14. **c**. A citation shows where an answer came from, not that the source is right, so the statements that matter are checked against it (module 7, page 2). *a* is ruled out because Research needs "web search must be turned on". *b* is ruled out because "a citation shows where an answer came from, not that the source is right". *d* is ruled out because "Comparing detects the variation; it does not remove it".
-15. **a**. The techniques are mitigations and do not eliminate errors, so checking stays (module 5, page 2). *b* is ruled out because the documentation says they "don't eliminate them entirely". *c* is ruled out because "confidence is not evidence". *d* is ruled out because "These make checking faster; they do not replace it".
+15. **b and e**. The techniques are mitigations, and "These make checking faster; they do not replace it" (module 5, page 2). *a* is ruled out because "These make checking faster; they do not replace it". *c* is ruled out because "confidence is not evidence". *d* is ruled out because the documentation says they "don't eliminate them entirely".
 16. **d**. Claude cannot be used to name people in images and refuses to (module 4, page 1). *a* is ruled out because what training gives excludes "Access to your files, systems or today's date". *b* is ruled out because "Claude cannot be used to name people in images, and refuses to". *c* is ruled out because "Coordinates and localisation outputs are approximate", and the refusal still applies.
 17. **b**. Reasoning that decides something important needs a check from outside the same reasoning (module 4, page 1). *a* is ruled out because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because turning thinking up is "billed as output and slows the answer", and it does not supply a separate check. *d* is ruled out because "A confident chain of steps can contain a wrong step that makes everything after it wrong".
 18. **c**. The vision page lists spatial reasoning as approximate: coordinates and localisation outputs are approximate (module 4, page 1). *a* is ruled out because all current models "support text and image input". *b* is ruled out because the page warns about "low-quality, rotated, or very small images under 200 pixels", not about all tags. *d* is ruled out because "Claude works best when images come before text".
 19. **d**. Restricting knowledge tells the model to use only the provided documents, not its general knowledge (module 1, page 2). *a* is ruled out because "Comparing detects the variation; it does not remove it". *b* is ruled out because "A role is a request, not a credential". *c* is ruled out because "Self-reported confidence is not a measure of accuracy".
-20. **a**. A student checks every fact and citation that goes into graded work (module 9, page 1). *b* is ruled out because a hallucination includes "an invented citation, a function that does not exist". *c* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true". *d* is ruled out because "Self-reported confidence is not a measure of accuracy".
+20. **a and d**. A student checks every fact and citation that goes into graded work, because a hallucination includes "an invented citation, a function that does not exist" (module 9, page 1). *b* is ruled out because a hallucination includes "an invented citation, a function that does not exist". *c* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true". *e* is ruled out because "Self-reported confidence is not a measure of accuracy".
 21. **b**. For creative work the checks are originality, accuracy, tone and whether the piece still sounds like the maker (module 9, page 2). *a* is ruled out because "Disclosure matters more here than in many fields". *c* is ruled out because a maker keeps "the idea, the voice, the final choices and the signature". *d* is ruled out because "Self-reported confidence is not a measure of accuracy".
 22. **d**. The overview's default advice is to start with Claude Opus 5.5 for most workloads and use Claude Fable 5.1 when evals at higher effort still fall short (module 3, page 1). *a* is ruled out because "The overview's default advice is to start with Claude Opus 5.5 for most workloads". *b* is ruled out because "Having a good evaluation set is the most important step". *c* is ruled out because "the top tier for everything wastes the budget".
-23. **b**. Claude in Chrome is an extension in the Chrome side panel on the paid plans, and it is not supported on other Chromium browsers or on mobile (module 8, page 2). *a* is ruled out because "Desktop extensions are for the desktop app only". *c* is ruled out because the extension is offered "on the paid plans (Pro, Max, Team, Enterprise)". *d* is ruled out because "It is not supported on other Chromium browsers or on mobile".
+23. **a and e**. Claude in Chrome is an extension in the Chrome side panel on the paid plans, and "It is not supported on other Chromium browsers or on mobile" (module 8, page 2). *b* is ruled out because the extension is offered "on the paid plans (Pro, Max, Team, Enterprise)". *c* is ruled out because "It is not supported on other Chromium browsers or on mobile". *d* is ruled out because "Desktop extensions are for the desktop app only".
 24. **d**. A product needing Claude inside its own screens uses the Messages API (module 3, page 2). *a* is ruled out because that row is for "A developer wants help changing a codebase". *b* is ruled out because the apps row reads "Instructions and uploads, not code". *c* is ruled out because that row is for "A job runs for hours and should not tie up your servers".
 25. **a**. The Agent SDK lets you build your own agents powered by Claude Code's tools and capabilities, with full control over orchestration, tool access and permissions (module 3, page 2). *b* is ruled out because that row is for "A developer wants help changing a codebase". *c* is ruled out because that row is for "A job runs for hours and should not tie up your servers". *d* is ruled out because the API row says "Direct access to the model; your own loop, tools and state".
 26. **b**. Claude Tag is available on Team and Enterprise plans only, on Anthropic's own service, and not for organisations with zero data retention or customer-managed encryption (module 8, page 2). *a* is ruled out because it is "not for organisations with zero data retention or customer-managed encryption, because it stores channel memory and session transcripts". *c* is ruled out because the page says it is "available on Team and Enterprise plans only". *d* is ruled out because the page says it runs "on Anthropic's own service".
@@ -437,26 +447,26 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 28. **c**. A short answer stays inline, and significant, self-contained, reusable content becomes an artifact (module 7, page 2). *a* is ruled out because an artifact is made for content "typically over 15 lines, and reusable on its own". *b* is ruled out because "A short answer stays inline in the chat". *d* is ruled out because artifacts include "documents, code, web pages, images and diagrams, dashboards and interactive tools".
 29. **a**. The agent is treated like a new colleague with limited access (module 5, page 1). *b* is ruled out because the page says "Start narrow, learn how Claude does on your material, then widen". *c* is ruled out because the habit needs "a review before consequences". *d* is ruled out because the questions include "what must a person approve, who is notified of what it did, and where does it stop".
 30. **b**. A step stays with a person or code when a mistake would be hard to reverse (module 5, page 1). *a* is ruled out because a good step is "tolerant of an occasional miss that a review will catch". *c* is ruled out because "A small, clear step with a visible result is easier to judge". *d* is ruled out because a step suits Claude when it is "drafting, summarising, comparing, extracting, rewording, brainstorming".
-31. **a**. A recurring task set with /schedule runs in the cloud, so it does not need your computer awake or the desktop app open (module 8, page 1). *b* is ruled out because "Tasks run in the cloud on Anthropic's servers; sessions can continue when your computer is offline". *c* is ruled out because a recurring task "runs in the cloud, so it does not need your computer awake or the desktop app open". *d* is ruled out because "A recurring task, set with a /schedule command".
+31. **a and e**. A recurring task set with /schedule "runs in the cloud, so it does not need your computer awake or the desktop app open" (module 8, page 1). *b* is ruled out because "A recurring task, set with a /schedule command". *c* is ruled out because a recurring task "runs in the cloud, so it does not need your computer awake or the desktop app open". *d* is ruled out because "Tasks run in the cloud on Anthropic's servers; sessions can continue when your computer is offline".
 32. **d**. The course recommends a deliberate starting point of no AI, adding it only where analysis says it earns its place (module 9, page 2). *a* is ruled out because the course "recommends a deliberate starting point of no AI". *b* is ruled out because "audiences, commissioners and platforms may have rules or expectations about AI involvement". *c* is ruled out because a maker keeps "the idea, the voice, the final choices and the signature".
 33. **b**. Diligence is the official name for taking responsibility: will I stand behind this, tell people honestly what Claude did and have I protected the data (module 9, page 1). *a* is ruled out because that question belongs to the habit of describing: "Have I said what I want, so the job can be done and judged?" *c* is ruled out because the table gives that question as "Is what came back accurate, complete, fair and fit for its reader?" for the habit of judging. *d* is ruled out because that question belongs to deciding what to hand over: "Which parts of this job go to Claude, and which stay with me?"
 34. **a**. A step-by-step task on trusted live pages suits Claude in Chrome with manual approval and a clean profile (module 8, page 3). *b* is ruled out because in that setting "Claude does not pause and nothing checks its actions". *c* is ruled out because "A dedicated folder limits what an injected instruction or a mistake can reach". *d* is ruled out because Chrome is "a browser extension on the paid plans that acts on web pages for you".
 35. **c**. A task that began as a one-off and became weekly deserves a Project or a skill (module 8, page 3). *a* is ruled out because Chrome is for "A step-by-step task on a website you trust". *b* is ruled out because the page says to "revisit it when the work changes". *d* is ruled out because "Picking the most powerful surface" is named as a trap.
 36. **d**. Judging student work and consequential decisions stays with the educator (module 9, page 1). *a* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades". *b* is ruled out because "Judging student work and decisions with consequences for a student stay with the educator". *c* is ruled out because the usage policy treats "academic testing and admissions as a high-risk use needing human review".
-37. **a**. Tasks run in the cloud and, once Claude is in a thread, it follows every reply (module 8, page 2). *b* is ruled out because "Claude keeps working after you close Slack". *c* is ruled out because "once it is in a thread it follows every reply". *d* is ruled out because "once it is in a thread it follows every reply".
+37. **a and e**. Tasks run in the cloud, "Claude keeps working after you close Slack", and once in a thread it follows every reply (module 8, page 2). *b* is ruled out because "once it is in a thread it follows every reply". *c* is ruled out because "Claude keeps working after you close Slack". *d* is ruled out because a thread it has joined needs no new tag, because "once it is in a thread it follows every reply".
 38. **b**. Decide how much to hand over at once: a small, clear step with a visible result is easier to judge, so start narrow and widen (module 5, page 1). *a* is ruled out because "A good draft does not show the figures were right". *c* is ruled out because the figures need "Exact numbers, authoritative source" from code or an analyst. *d* is ruled out because "Self-reported confidence is not a measure of accuracy".
 39. **b**. A simple custom skill needs no code: Markdown instructions in the required folder structure, zipped and uploaded (module 7, page 2). *a* is ruled out because "A simple custom skill needs no code". *c* is ruled out because skills are "folders of instructions, scripts and resources that Claude loads dynamically". *d* is ruled out because partner skills are "From other companies, built to work with their connectors".
 40. **a**. Quality in is quality out: prefer final approved text, primary documents and short clean files (module 7, page 1). *b* is ruled out because "Two versions of one document side by side invite Claude to quote either", and the stem lists no duplicates. *c* is ruled out because "nothing alerts you when a file goes stale", which is about upkeep and not about the quality of what goes in. *d* is ruled out because "a citation shows where an answer came from, not that the source is right".
 41. **c**. Desktop extensions are for the desktop app only and run a server locally, while remote connectors reach a server from Anthropic's cloud (module 7, page 3). *a* is ruled out because skills are "folders of instructions, scripts and resources that Claude loads dynamically". *b* is ruled out because "a custom connector has not been verified by Anthropic". *d* is ruled out because remote connectors "reach an MCP server from Anthropic's cloud, not from your device".
-42. **c**. The page suggests On demand when you have ten or more connectors (module 7, page 3). *a* is ruled out because the page describes how "connector tools are loaded", and blocked is a permission instead. *b* is ruled out because the page suggests On demand "when you have ten or more connectors". *d* is ruled out because "each tool can be always allowed, needs approval or blocked" is a permission rule, not a loading mode.
+42. **d and e**. The page suggests On demand "when you have ten or more connectors" (module 7, page 3). *a* is ruled out because the page describes how "connector tools are loaded", and blocked is a permission instead. *b* is ruled out because the page suggests On demand "when you have ten or more connectors". *c* is ruled out because "each tool can be always allowed, needs approval or blocked" is a permission rule, not a loading mode.
 43. **b**. Each source needs an owner and a review date, because nothing alerts you when a file goes stale (module 7, page 1). *a* is ruled out because "nothing alerts you when a file goes stale". *c* is ruled out because a stale file should be "a missed appointment, not a surprise". *d* is ruled out because "Old and new documents side by side give Claude two sources to quote".
 44. **c**. Instructions are set per add-in and do not carry from Excel into Word or PowerPoint (module 8, page 2). *a* is ruled out because "Macros and VBA, and data tables, are unsupported". *b* is ruled out because cross-app work concerns files, through "Let Claude work across files". *d* is ruled out because the add-ins are "installed from Microsoft AppSource, for the paid plans".
 45. **d**. A reply that names the file it used shows at once when it used an old one (module 7, page 1). *a* is ruled out because "an instruction is a request and a deleted file is a guarantee". *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because "memory is not a substitute for a knowledge file".
 46. **b**. Consumer chats are used only if the user allows it in privacy settings, or if a conversation is flagged (module 10, page 1). *a* is ruled out because "Incognito chats are not used to improve Claude". *c* is ruled out because "By default Anthropic does not use inputs or outputs from commercial products to train models" applies to Team, Enterprise and the API. *d* is ruled out because chats are used "only if you choose to allow it in your privacy settings".
-47. **d**. Skip all approvals means nothing checks the actions, so it is for complete trust only (module 8, page 2). *a* is ruled out because even then "certain things still need your explicit approval". *b* is ruled out because that is the automatic mode, where "Claude keeps working and reviews each action for safety". *c* is ruled out because the habit is "do not manage financial accounts, legal documents or medical information through it".
+47. **c and d**. Skip all approvals means nothing checks the actions, so it is for complete trust only, and the habit is "do not manage financial accounts, legal documents or medical information through it" (module 8, page 2). *a* is ruled out because that is the automatic mode, where "Claude keeps working and reviews each action for safety". *b* is ruled out because the habit is "do not manage financial accounts, legal documents or medical information through it". *e* is ruled out because even then "certain things still need your explicit approval".
 48. **d**. Confidential data goes only in approved tools, with a need to know and often with identifiers removed (module 10, page 1). *a* is ruled out because "An instruction to forget is not a control". *b* is ruled out because confidential examples are "Contracts, unreleased financials, customer lists". *c* is ruled out because the regulated class holds "Health records, payment-card data, government IDs, personal data under GDPR".
 49. **a**. Owners can turn web search off for chat and Cowork (module 10, page 2). *b* is ruled out because "Claude in Chrome sites can be allow-listed or blocklisted". *c* is ruled out because the table lists "Retention settings, including custom retention or zero data retention for Enterprise agreements". *d* is ruled out because "A prompt is a request, not a guarantee".
-50. **a**. The confirmation prompt is the control, and pressing Allow unread hands approval to whatever was injected (module 10, page 2). *b* is ruled out because the habit is to "read each confirmation before agreeing". *c* is ruled out because "the risk is not zero". *d* is ruled out because "Do not press Allow out of habit".
+50. **d and e**. The confirmation prompt is the control, and the habit is to "read each confirmation before agreeing" (module 10, page 2). *a* is ruled out because the habit is to "read each confirmation before agreeing". *b* is ruled out because "Do not press Allow out of habit". *c* is ruled out because "the risk is not zero".
 51. **d**. Claude Tag reads other public channels only by searching, and private channels and DMs only from inside them (module 8, page 2). *a* is ruled out because "Where you tag decides what it can use and who sees the result". *b* is ruled out because "Private channels and DMs are read only from inside them". *c* is ruled out because "A Slack canvas is not readable".
 52. **c**. The policy lists undermining democratic processes, such as deceptive political content or automated messages that hide their artificial origin (module 10, page 1). *a* is ruled out because that category covers "sharing personal information without consent". *b* is ruled out because that category covers "tracking a person's location without consent or scoring people's trustworthiness". *d* is ruled out because that category lists "phishing, fake reviews, falsified documents".
 53. **d**. Disclosure: be honest about the AI's part when it matters to them, when a policy requires it or when they ask (module 5, page 2). *a* is ruled out because "Do not put in what you may not share; anonymise first". *b* is ruled out because "An error in AI-assisted work is your error to correct". *c* is ruled out because the duty is to "Consider who is affected by the work".
@@ -465,7 +475,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 56. **b**. Thinking tokens count toward the context window, and current Opus, Sonnet and Fable models keep earlier thinking by default (module 4, page 2). *a* is ruled out because current Opus, Sonnet and Fable models "keep them by default". *c* is ruled out because "Thinking tokens count toward the context window". *d* is ruled out because "It lives in the context".
 57. **a**. "Let Claude work across files" is off by default for Team and Enterprise, on by default for Pro and Max, and set per device (module 8, page 2). *b* is ruled out because a formatting convention "does not carry into Word or PowerPoint". *c* is ruled out because it "cannot open, create or switch files itself". *d* is ruled out because "Cross-app work is not supported through Bedrock, Vertex AI, Azure AI Foundry or an LLM gateway".
 58. **c**. Input that alone exceeds the window is refused with a 400 error on every model (module 1, page 1). *a* is ruled out because "Raising it does not enlarge the window". *b* is ruled out because "the API returns a 400 invalid_request_error" when the input alone exceeds the window. *d* is ruled out because "the same text produces about 30 percent more tokens than on earlier models".
-59. **c**. Thinking tokens are billed as output and leave less room for the visible answer inside max_tokens (module 1, page 1). *a* is ruled out because "a single response can be up to 128K tokens on the three large models and 64K on Haiku 4.5". *b* is ruled out because the tokens are "billed as output tokens". *d* is ruled out because "max_tokens is a cap on output, not on context".
+59. **b and d**. Thinking tokens are "billed as output tokens" and leave less room for the visible answer inside max_tokens (module 1, page 1). *a* is ruled out because "max_tokens is a cap on output, not on context". *c* is ruled out because "a single response can be up to 128K tokens on the three large models and 64K on Haiku 4.5". *e* is ruled out because the tokens are "billed as output tokens".
 60. **c**. The table lists Claude Opus 5.5 at $4 input and $20 output per million tokens, so output costs five times as much and shorter answers save the most (module 3, page 1). *a* is ruled out because the tokens are "billed as output tokens". *b* is ruled out because the lineup lists "Price per million tokens, input / output". *d* is ruled out because "Larger windows raise the ceiling; they do not remove the need to decide what goes in".
 
 </details>

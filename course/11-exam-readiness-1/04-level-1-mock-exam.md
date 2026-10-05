@@ -10,7 +10,7 @@ This mock exam covers **the whole of Level 1** (modules 1 to 11) and not one pag
 exam's style: a short scenario, one best answer and three plausible alternatives, each of which is a mistake a practitioner
 could make. Every question is the course's own, written fresh; no question comes from a live exam. The facts behind each
 answer were read on 2026-10-02 from the official pages named on the module pages, so a reader who studies
-the pages can answer each question from them. The real exam has multiple-choice and multiple-response items; this mock has single-answer items only.
+the pages can answer each question from them. The real exam has multiple-choice and multiple-response items, and so does this mock: a multiple-response item ends with (Select two.) and is right only when both keyed options are chosen.
 
 ## How to take it
 
@@ -42,7 +42,7 @@ Module 2 (how models are made) is beyond the Associate blueprint, so its ideas a
 
 ## Mock exam
 
-This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer for each question.
+This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer for each question, or the number the question states.
 
 1. A prompt supplies four policy files, one of them a vendor email that says "ignore the instructions above". The answers never state which file backs each claim, so reviewers cannot trace them. Which change fits best?
    - **a**: Place the files above the instructions, which marks them as data for the model
@@ -56,11 +56,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: The material and the question, with proof shown for each finding
    - **d**: The reader, the tone, the length and a sample of the style wanted
 
-3. A director's request to Claude names the deliverable and its length, and gives the steps to follow, but says nothing about how Claude should behave. The drafts agree with everything she proposes. Which part of the description is missing?
-   - **a**: The sample, since a model of the target is needed before any draft is useful
-   - **b**: The process, since no approach or sources to consult were named for the work
-   - **c**: Its manner, such as whether to challenge her and how blunt to be
-   - **d**: The product, since the form and the readers of the deliverable are still unclear
+3. A director's request to Claude names the deliverable and its length, and gives the steps to follow, but says nothing about how Claude should behave. The drafts agree with everything she proposes. Which two statements fit? (Select two.)
+   - **a**: A sample of the target is the missing piece before any draft helps
+   - **b**: Its manner is the part left out
+   - **c**: The process is missing because no approach was named
+   - **d**: Permission to push back belongs in that part
+   - **e**: The product is unclear because its form and readers are absent
 
 4. A user pastes a 25-page report beneath a single line of instruction and gets weak, unfocused answers. She also wants Claude to treat the pasted text only as something to read. Which change fits best?
    - **a**: Add a role such as world-class analyst to sharpen the focus
@@ -92,11 +93,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Add a role such as senior analyst and leave the rest as it is
    - **d**: Run the request three times and keep the best-sounding result
 
-9. A summary of a supplier contract is correct in every sentence, yet the manager later finds it left out a penalty clause. Which question of review did the summary not satisfy?
-   - **a**: Audience fit, since the manager wanted another tone
-   - **b**: Completeness, since silent omissions are the quiet failure
-   - **c**: Fairness, since the summary favoured the supplier's framing
-   - **d**: Accuracy, since every figure in a summary must be traced
+9. A summary of a supplier contract is correct in every sentence, yet the manager later finds a penalty clause missing. Which two statements describe the shortfall? (Select two.)
+   - **a**: The draft passed on accuracy but failed on coverage
+   - **b**: Fairness failed because the supplier's framing was favoured
+   - **c**: Audience fit failed because the manager wanted another tone
+   - **d**: Silent omissions are the quiet failure
+   - **e**: Accuracy failed because a figure was not traced
 
 10. A news desk asks Claude to confirm that a reader's photo of a flood is not AI-generated before it runs on the front page. What should the desk expect?
    - **a**: A confident answer once it has been asked to examine the image twice
@@ -128,11 +130,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: A confidence percentage placed beside each answer it gives
    - **d**: A second copy of the manuals at the end of each request
 
-15. A team sends Claude-drafted board papers weekly. Reviewers spend equal time on every sentence and still miss a wrong total. How should review be reorganised?
-   - **a**: Ask Claude to mark the sentences it is least sure of, then review only those
-   - **b**: Check nothing in routine papers, since the author already reads each draft once
-   - **c**: Give each reviewer a longer checklist of style rules to apply to the whole paper
-   - **d**: Mark the riskiest claims and verify those against the sources first
+15. A team sends Claude-drafted board papers weekly. Reviewers spend equal time on every sentence and still miss a wrong total. Which two changes fit? (Select two.)
+   - **a**: Give each reviewer a longer checklist of style rules
+   - **b**: Ask Claude to mark the sentences it is least sure of and review only those
+   - **c**: Match effort to the cost of an error
+   - **d**: Check nothing in routine papers, since the author reads each draft once
+   - **e**: Mark the riskiest claims and check them first
 
 16. An analyst asks Claude for the reasons a new policy will succeed, and the reply gives only supporters' views. The memo goes to a review committee. What is the best next step?
    - **a**: Ask Claude whether its own answer was biased and accept a no
@@ -206,11 +209,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Capabilities, speed, price and the cloud platform that hosts the model
    - **d**: Latency, accuracy, safety and the vendor's retirement dates in the tables
 
-28. A user tells Claude about her project in an incognito chat and finds that the next chat has no trace of it. Is this a fault?
-   - **a**: No: she should have used a Project, since Projects always remember everything
-   - **b**: Yes: the weights should have updated after the conversation
-   - **c**: Yes: memory failed because the conversation was too short
-   - **d**: No: such conversations are kept out of memory and history by design
+28. A user tells Claude about her project in an incognito chat and finds that the next chat has no trace of it. Which two statements are correct? (Select two.)
+   - **a**: A Project would have remembered everything she said
+   - **b**: The weights should have updated after the exchange
+   - **c**: The behaviour is intended and not a fault
+   - **d**: Memory failed because the exchange was too short
+   - **e**: That mode excludes the conversation from memory and history by design
 
 29. An FP&A analyst must trace how a revenue figure in a long workbook is derived before presenting it. Which capability of the Excel add-in helps most directly?
    - **a**: Reading closed workbooks stored in the shared drive
@@ -224,11 +228,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Build the plugin first, then test each skill after the team starts using it
    - **d**: Keep one skill and put the connectors into the Project's instructions
 
-31. A small charity asks Claude for a first draft of a grant application and receives polished text in a corporate voice that misses the funder's priorities. Which description fits the course's guidance for this audience?
-   - **a**: A list of warm, moving and professional adjectives for the whole text
-   - **b**: Only a word limit and a deadline, since sponsors judge on form
-   - **c**: The donor's criteria, mission and tone, the reader, required facts
-   - **d**: A request to sound like a larger charity with a longer record
+31. A small charity asks Claude for a first draft of a grant application and receives polished text in a corporate voice that misses the funder's priorities. Which two statements fit the course's guidance for this audience? (Select two.)
+   - **a**: Only a word limit and a deadline, since sponsors judge on form
+   - **b**: The request should list the donor's criteria
+   - **c**: It should also give the mission, tone and reader
+   - **d**: A list of warm, moving and professional adjectives for the whole text
+   - **e**: A request to sound like a larger charity with a longer record
 
 32. An online shop wants every order with a postcode outside its delivery zones flagged automatically, and 12,000 orders arrive daily. Which design is best?
    - **a**: A short program applies the geographic rule; Claude drafts customer notes
@@ -254,11 +259,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: People still check claims and decisions, and we will measure spot-check rates
    - **d**: It handles drafts and summaries, and review can shrink once the first month looks clean
 
-36. A product team asks Claude for "a settings page" and receives a generic design that breaks an existing layout. Which description matches how the course says a builder should describe the job?
-   - **a**: The problem and its limits: the user, the current state, what must stay
-   - **b**: Only the task, since Claude can infer the rest when the model is strong
-   - **c**: A longer list of adjectives about the style and mood of the page
-   - **d**: A request to produce three finished designs in one go for comparison
+36. A product team asks Claude for "a settings page" and receives a generic design that breaks an existing layout. Which two statements match how the course says a builder should describe the job? (Select two.)
+   - **a**: Add more adjectives about the style and mood of the page
+   - **b**: Name what must stay as it is
+   - **c**: Say who will use it and what is already built
+   - **d**: Give only the task, since a strong model infers the rest
+   - **e**: Ask for three finished designs in one go for comparison
 
 37. A lecturer designs a take-home essay brief and wonders whether students could simply paste it into an AI. Which check does the course list for educators?
    - **a**: Whether the brief is long enough to need several drafts from each student
@@ -284,11 +290,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Take the outdated file out of the workspace and archive it in your own storage
    - **d**: Switch on memory so that Claude learns which policy is current
 
-41. A team wants every Claude Tag reply in one Slack channel to be brief and to link its source. How should the lead set this up?
-   - **a**: Edit the model's settings so that its temperature drops to a lower value
-   - **b**: Ask each member to type the rule again in every single thread they open
-   - **c**: Set it in a Project, because Slack reads the Project's own instructions first
-   - **d**: Tell the assistant so right there, where it is saved as standing instructions
+41. A team wants every Claude Tag reply in one Slack channel to be brief and to link its source. Which two statements describe the setup? (Select two.)
+   - **a**: Ask each member to retype the rule in every thread
+   - **b**: Set it in a Project, because Slack reads Project instructions first
+   - **c**: Lower the temperature in the model's settings
+   - **d**: Admins can review and delete what is stored
+   - **e**: Say it to the assistant where the replies appear
 
 42. A team lead wants the whole organisation to use a Project of staff guidance, but salary bands may be seen only by the HR group. Which approach is right?
    - **a**: Share one Project widely and tell its instructions to withhold the salary bands
@@ -320,11 +327,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: No, since the mix still singles out a person, so generalise it further
    - **d**: Yes, since coding is the strongest technique on the list of methods in use
 
-47. A member of a Team plan finds that memory and a particular connector are missing from her settings, while a friend at another company has both. Who controls this?
-   - **a**: Her manager, who can override any setting in her own workspace
-   - **b**: The source system, which blocks anything absent from a personal allow list
-   - **c**: Claude itself, which hides tools from users it judges inexperienced
-   - **d**: The account owners, who switch features on or off organisation-wide
+47. A member of a Team plan finds that memory and a particular connector are missing from her settings, while a friend at another company has both. Which two statements explain it? (Select two.)
+   - **a**: The source system blocks anything absent from a personal allow list
+   - **b**: Claude hides tools from users it judges inexperienced
+   - **c**: The account owners switch features on or off
+   - **d**: Individuals cannot override those switches
+   - **e**: Her manager can override any setting in her own workspace
 
 48. A team on a commercial plan asks whether Anthropic may use its inputs to build better models, and how long chats are kept. Which answer is accurate?
    - **a**: They are used unless an owner opts out, and they are then kept for up to five years
@@ -344,11 +352,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Replace each name with a code and keep the key list in the same file
    - **d**: Upload everything and ask for a summary that leaves out personal details
 
-51. A manager lets Cowork reach her entire documents drive to save time, and it holds tax returns and exported passwords. What should change?
-   - **a**: Keep the access and rely on the cloud sandbox to protect everything
-   - **b**: Keep the access but switch to automatic approval for speed
-   - **c**: Connect a dedicated folder containing only the task's files
-   - **d**: Keep the access, but ask Claude to ignore the sensitive files
+51. A manager lets Cowork reach her entire documents drive to save time, and it holds tax returns and exported passwords. Which two changes fit? (Select two.)
+   - **a**: Use manual approval for sensitive material
+   - **b**: Connect a dedicated folder with only the needed items
+   - **c**: Keep the access but ask Claude to ignore the sensitive items
+   - **d**: Keep the access and rely on the cloud sandbox
+   - **e**: Keep the access but switch to automatic approval for speed
 
 52. A professional asks Claude in Chrome to shortlist conference venues while her banking site is open in another tab, and she has ten minutes before a call. Which habit best limits harm?
    - **a**: Rely on the classifiers, which screen each action
@@ -368,11 +377,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Compromising privacy or identity, since the essay may contain names
    - **d**: Misinformation, since an essay presents its claims as the student's own words
 
-55. A team's bill jumps after it starts sending full-size phone photos with each request, though the text prompts are unchanged. Which fact about images explains the jump?
+55. A team's bill jumps after it starts sending full-size phone photos with each request, though the text prompts are unchanged. Which two facts about images explain the jump? (Select two.)
    - **a**: Photos are turned into text first, which multiplies the words sent
-   - **b**: Images are priced as a flat fee that does not depend on their size
+   - **b**: Large pictures use many, up to a model's cap
    - **c**: Images count toward the window but are never billed as input
-   - **d**: Each 28 by 28 pixel patch is a token, so large pictures use many
+   - **d**: Each 28 by 28 pixel patch is a token
+   - **e**: Images are priced as a flat fee that ignores their size
 
 56. An analyst asks the Excel add-in to recalculate a what-if data table and to edit a VBA macro in the same workbook, and both requests fail. What explains it?
    - **a**: The add-in needs an Enterprise plan before it can edit macros
@@ -414,7 +424,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    ruled out because the documents must nest "each with an index or a name, so the answer can say which one it
    used".
 2. **d**. A drafting task wants audience, tone and an example of the target style (module 5, page 1). *a* is ruled out because that is the brainstorming task: "brainstorming wants breadth first and judgment later". *b* is ruled out because that is the research task: "research wants sources named and unsupported claims flagged". *c* is ruled out because that is the analysis task: "Analysis wants the material and the question".
-3. **c**. A good description covers product, process and performance, and the performance part says how Claude should behave, including whether to challenge you (module 5, page 1). *a* is ruled out because the page adds an example only "when a style matters", and the stem raises behaviour instead. *b* is ruled out because the stem gives the steps, and the page describes that part as "The steps or approach you want followed, what to consult, what to ignore". *d* is ruled out because the page defines it as "The deliverable, its form (an email, a table, a list of options), its length and its audience".
+3. **b and d**. The performance part says how Claude should behave, including "whether to challenge you" (module 5, page 1), and the stem leaves it out. *a* is ruled out because the page adds an example only "when a style matters". *c* is ruled out because the page describes that part as "The steps or approach you want followed, what to consult, what to ignore". *e* is ruled out because the page defines it as "The deliverable, its form (an email, a table, a list of options), its length and its audience".
 4. **b**. Long inputs go near the top, tagged as data, with the query at the end (module 6, pages 1 and 2). *a* is
    ruled out because "A role is a request, not a credential", so it changes voice and not focus on the material. *d*
    is ruled out because "Moving a pasted document above the instructions does not mark it as data". *c* is ruled out
@@ -430,7 +440,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    ruled out because "Stacking adjectives instead of constraints" gives conflicting, unverifiable demands. *c* is
    ruled out because "A role is a request, not a credential", so a role does not supply missing figures. *d* is
    ruled out because "Regenerating the same request and hoping is the reflex; revising the request is the method".
-9. **b**. An accurate summary can still leave out the clause that matters, which is a completeness failure (module 5, page 2). *a* is ruled out because the page's example is "An accurate technical answer can be wrong for a board", which concerns the reader and not a missing clause. *c* is ruled out because the page ties that question to a different symptom: "Bias in a response often comes from the framing of the request". *d* is ruled out because the page says a summary "can be accurate in every sentence and still leave out the clause that matters".
+9. **a and d**. A summary "can be accurate in every sentence and still leave out the clause that matters" (module 5, page 2), which is a completeness failure. *b* is ruled out because "Bias in a response often comes from the framing of the request". *c* is ruled out because the page's example is "An accurate technical answer can be wrong for a board", which concerns the reader. *e* is ruled out because the page says a summary "can be accurate in every sentence and still leave out the clause that matters".
 10. **c**. Claude cannot determine whether an image is AI-generated, so that judgement rests on other checks (module 4, page 1). *a* is ruled out because "Always carefully review and verify Claude's image interpretations". *b* is ruled out because Claude "cannot determine whether an image is AI-generated". *d* is ruled out because all current models "support text and image input".
 11. **d**. The page asks to read Claude's work in proportion to what is at stake: a summary you can skim, and work going to a customer gets a careful read (module 8, page 2). *a* is ruled out because "something going to a customer or changing a system gets a careful read". *b* is ruled out because the habit is to "read Claude's work in proportion to what is at stake". *c* is ruled out because "A summary you can skim".
 12. **b**. Output varies by sampling and infrastructure, so one run proves nothing (module 1, page 2). *a* is ruled
@@ -446,7 +456,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    ruled out because "A prompt sentence does not remove sampling" and a setting does not give the model a way to say
    it does not know. *c* is ruled out because "asking a model how sure it is does not make a wrong answer right".
    *d* is ruled out because "more context isn't automatically better", and the manuals are already supplied.
-15. **d**. Checking in proportion to the cost of being wrong puts the effort on figures and citations (module 5, page 2). *a* is ruled out because the page holds that "Self-reported confidence is not a measure of accuracy". *b* is ruled out because the page states "You own what you send, whoever drafted it". *c* is ruled out because the page warns that "Readers check tone and grammar, which are visible", and skip the figures.
+15. **c and e**. Checking in proportion to the cost of being wrong puts the effort on figures and citations, because "You own what you send, whoever drafted it" (module 5, page 2). *a* is ruled out because "Readers check tone and grammar, which are visible", and skip the figures. *b* is ruled out because "Self-reported confidence is not a measure of accuracy". *d* is ruled out because "You own what you send, whoever drafted it".
 16. **c**. Bias often comes from the framing of the request, so the request is revised and both framings are
    reviewed (module 5, page 2). *a* is ruled out because asking the model "for its confidence does not verify
    anything". *b* is ruled out because the fairness question is whether the output will "present one side as the
@@ -473,10 +483,10 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    the whole transcript brings the rot with it.
 26. **a**. Research runs many linked searches with citations and needs web search on (module 7, page 2). *b* is ruled out because a Project suits "Recurring work with fixed rules and reference files". *c* is ruled out because plain chat is for "A one-off question, a draft, a quick comparison". *d* is ruled out because an artifact is for "A document, deck, dashboard or small tool to hand to someone", not for gathering sources.
 27. **a**. The page starts with four criteria: capabilities (what the task needs), speed, cost and effort (module 3, page 1). *b* is ruled out because the page starts with "capabilities (what the task needs)", and brand and release date are not among its criteria. *c* is ruled out because the page ends its list with "cost (development and production), and effort", and names no hosting platform. *d* is ruled out because the page's criteria include "cost (development and production)", which this set leaves out.
-28. **d**. Incognito chats are kept out of memory and history on purpose (modules 7 and 10). *b* is ruled out because "Weights are fixed at inference time". *c* is ruled out because incognito chats "keep a conversation out of memory and history", so memory did not fail. *a* is ruled out because "Each project has its own separate memory space and dedicated project summary", and a Project does not remember everything.
+28. **c and e**. Incognito chats "keep a conversation out of memory and history" on purpose (modules 7 and 10). *a* is ruled out because "Each project has its own separate memory space and dedicated project summary". *b* is ruled out because "Weights are fixed at inference time". *d* is ruled out because incognito chats "keep a conversation out of memory and history", so memory did not fail.
 29. **c**. The add-in answers with clickable cell-level citations (module 8, page 2). *b* is ruled out because it is "Not recommended for final client deliverables without human review". *d* is ruled out because "Macros and VBA, and data tables, are unsupported". *a* is ruled out because "Claude can read and write only files that are open at that moment".
 30. **b**. The Academy lesson recommends starting with one skill, testing it and then scaling to a plugin you share (module 8, page 1). *a* is ruled out because "a plugin bundles skills, connectors and sub-agents around a job". *c* is ruled out because the lesson "recommends starting with one skill, testing it and then scaling to a plugin you share". *d* is ruled out because "Where a skill is one playbook, a plugin is several, plus the connectors they depend on".
-31. **c**. A non-profit describes the funder's criteria, its mission and voice, the audience and the facts that must appear (module 9, page 2). *a* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap. *b* is ruled out because the setting involves "limited resources, several stakeholders to whom the organisation answers, and mission-driven work". *d* is ruled out because the officer checks "whether a draft overstates what the programme achieved".
+31. **b and c**. A non-profit describes the funder's criteria, its mission and voice, the audience and the facts that must appear, and avoids "Stacking adjectives instead of constraints" (module 9, page 2). *a* is ruled out because the setting involves "limited resources, several stakeholders to whom the organisation answers, and mission-driven work". *d* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap. *e* is ruled out because the officer checks "whether a draft overstates what the programme achieved".
 32. **a**. A rule that fits in one line belongs in code (module 4, page 2). *b* is ruled out because code is "Cheaper, faster, deterministic, testable". *c* is ruled out because "A prompt is a request, not a guarantee", and a sample leaves the rest unchecked. *d* is ruled out because "If you can write the rule, write it; add a model only for the cases the rule cannot express".
 33. **b**. The pattern is least reach, least action, and most visibility to the right people (module 8, page 3). *a* is ruled out because "Prefer a surface and an approval mode where a person confirms the consequential steps". *c* is ruled out because "Picking the most powerful surface" is named as a trap. *d* is ruled out because "Ignoring who sees the result" is named as a trap.
 34. **b**. Chores 1 and 3 are language-shaped work that a review can catch, while the supplier decision and exact
@@ -489,7 +499,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    rate, an example set, a before and after on time)". *d* is ruled out because "A good draft does not show the
    figures were right", so review cannot shrink on a clean run. *c* is ruled out because the message must also say
    "what it speeds up (first drafts, summaries, comparisons, variations)".
-36. **a**. A builder describes the problem and the constraints: who the user is, what exists, what must not change and what done looks like (module 9, page 1). *b* is ruled out because builders describe "the problem and the constraints, not only the task". *c* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap. *d* is ruled out because "Start narrow, learn how Claude does on your material, then widen".
+36. **b and c**. A builder describes "the problem and the constraints, not only the task" (module 9, page 1): who the user is, what exists, what must not change and what done looks like. *a* is ruled out because the page names "Stacking adjectives instead of constraints" as a trap. *d* is ruled out because builders describe "the problem and the constraints, not only the task". *e* is ruled out because "Start narrow, learn how Claude does on your material, then widen".
 37. **d**. Educators check whether an assignment can be completed by pasting it into an AI, and whether that matters (module 9, page 1). *a* is ruled out because educators check "accuracy of the content taught, bias or stereotypes in examples, reading level, alignment with the stated outcome". *b* is ruled out because "Names, grades and records fall under the organisation's rules". *c* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades".
 38. **d**. High-volume low-stakes drafting suits a faster, cheaper model with a spot check, and a customer's money
    does not go out on trust (module 9, page 2). *a* is ruled out because "the top tier for everything wastes the
@@ -501,7 +511,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    page 1). *a* is ruled out because "Judge the source before you add it", and a merged file adds a new unchecked
    source. *b* is ruled out because "an instruction is a request and a deleted file is a guarantee", so the conflict
    stays possible. *d* is ruled out because "memory is not a substitute for a knowledge file".
-41. **d**. Standing instructions are set by telling Claude in the channel, and they go to channel memory (module 8, page 2). *b* is ruled out because "they go to channel memory, which admins can review and delete", so members need not repeat them. *c* is ruled out because "Project instructions apply to every chat in that Project", not to Slack. *a* is ruled out because "The models this course uses do not accept them", so a temperature setting is not available.
+41. **d and e**. Standing instructions "go to channel memory, which admins can review and delete" (module 8, page 2). *a* is ruled out because "they go to channel memory, which admins can review and delete", so members need not repeat them. *b* is ruled out because "Project instructions apply to every chat in that Project". *c* is ruled out because "The models this course uses do not accept them".
 42. **d**. Sharing shows the instructions and every file to everyone with access, so the bands live in a separate
    Project that only HR can open (module 7, page 1). *a* is ruled out because the guidance is "Treat sharing as publishing",
    and an instruction is a request. *b* is ruled out because can view gives "read-only access to contents, knowledge
@@ -514,7 +524,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    reusable on its own". *c* is ruled out because "Their use counts against their own plan limits, not the
    creator's". *d* is ruled out because "each person connects their own apps even in a shared artifact".
 46. **c**. A rare combination can identify a person without a name, so the data is generalised further (module 10, page 1). *a* is ruled out because the page says "a rare job title, a small town and an exact date can identify a person without a name". *b* is ruled out because the page states "Pseudonymised data is still personal data under many rules". *d* is ruled out because the list of techniques runs from strongest to weakest, and it starts with "Aggregate. Send totals and trends, not rows".
-47. **d**. Owners enable features for the organisation, and members cannot use what is off (module 10, page 2). *a* is ruled out because "the people who run the organisation hold settings that individuals cannot override". *b* is ruled out because "an owner must enable connectors for the organisation before members can use them". *c* is ruled out because "Owners enable connectors, memory, skills and other features for the organisation; members cannot use what is off".
+47. **c and d**. "Owners enable connectors, memory, skills and other features for the organisation; members cannot use what is off" (module 10, page 2). *a* is ruled out because "an owner must enable connectors for the organisation before members can use them". *b* is ruled out because "Owners enable connectors, memory, skills and other features for the organisation; members cannot use what is off". *e* is ruled out because "the people who run the organisation hold settings that individuals cannot override".
 48. **d**. Commercial products are not used to train models by default, and data is deleted within 30 days by
    default (module 10, page 1). *a* is ruled out because "By default Anthropic does not use inputs or outputs from
    commercial products to train models". *b* is ruled out because "Inputs and outputs are deleted within 30 days by
@@ -525,14 +535,14 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    columns hide names and details". *c* is ruled out because "Pseudonymised data is still personal data under many
    rules, because the key can reverse it". *d* is ruled out because asking for a summary without personal details
    "is a request, and it does not satisfy a policy control".
-51. **c**. A dedicated working folder limits what a mistake or an injected instruction can reach (module 8, page 1). *b* is ruled out because the habit is to "use Manual approval for sensitive files, new tools and hard-to-undo actions". *a* is ruled out because the isolation "doesn't limit what Claude reads or does" through connected tools. *d* is ruled out because the habit is to "grant access selectively and avoid financial documents, credentials and personal records".
+51. **a and b**. A dedicated working folder limits what a mistake or an injected instruction can reach, and the habit is to "use Manual approval for sensitive files, new tools and hard-to-undo actions" (module 8, page 1). *c* is ruled out because the habit is to "grant access selectively and avoid financial documents, credentials and personal records". *d* is ruled out because the isolation "doesn't limit what Claude reads or does" through connected tools. *e* is ruled out because the habit is to "use Manual approval for sensitive files, new tools and hard-to-undo actions".
 52. **d**. A separate profile and manual approval limit what Claude can see and do (module 8, page 2). *a* is ruled
    out because the page says plainly that "the risk is not zero". *b* is ruled out because "whatever is visible in
    them becomes part of the conversation". *c* is ruled out because in that mode "Claude does not pause and nothing
    checks its actions".
 53. **b**. Remote tools can change after you approve them, so the connector list is reviewed on a schedule (module 7, page 3). *a* is ruled out because "a custom connector has not been verified by Anthropic". *c* is ruled out because "Remote tools can change after you approve them". *d* is ruled out because the checklist says "re-check the ones whose provider changed".
 54. **b**. The Usage Policy lists plagiarising or submitting AI-assisted work without proper permission or attribution under fraudulent, abusive or predatory practices (module 10, page 1). *a* is ruled out because the policy singles out "uses where output directly affects individuals or consumers". *c* is ruled out because that category covers "sharing personal information without consent". *d* is ruled out because that category is "creating or spreading misinformation, including false medical or scientific information and impersonation".
-55. **d**. Each 28 by 28 pixel patch is one visual token, so an image costs about ceil(width/28) x ceil(height/28) tokens up to a per-model cap (module 4, page 1). *a* is ruled out because "A 1000 by 1000 image is 1,296 tokens on the page's table". *b* is ruled out because an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap". *c* is ruled out because "each 28 by 28 pixel patch is one visual token".
+55. **b and d**. Each 28 by 28 pixel patch is one visual token, so an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap" (module 4, page 1). *a* is ruled out because "A 1000 by 1000 image is 1,296 tokens on the page's table". *c* is ruled out because "each 28 by 28 pixel patch is one visual token". *e* is ruled out because an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap".
 56. **c**. The page lists macros and VBA, and data tables, as unsupported (module 8, page 2). *a* is ruled out because the add-ins are "installed from Microsoft AppSource, for the paid plans". *b* is ruled out because "Macros and VBA, and data tables, are unsupported". *d* is ruled out because cross-app work concerns files and uses "Let Claude work across files".
 57. **d**. The method is to diagnose first, change one thing and compare on the same inputs, and a faster lower-cost
    tier answers both the bill and the deadline. *a* is ruled out because the habit is to "Change one thing at a time

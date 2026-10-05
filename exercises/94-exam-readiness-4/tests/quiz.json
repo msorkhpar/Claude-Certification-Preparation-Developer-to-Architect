@@ -5,20 +5,26 @@
       "id": "03-professional-mock-exam#x1",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Lowell Freight's invoice job takes every vendor invoice through the same five steps in the same order: read the PDF, match the order, check the amount, flag exceptions and post. A developer proposes an agent that picks its own steps, because agents are flexible. Which rung does the page support?",
+      "stem": "Scenario: Lowell Freight's invoice job takes every vendor invoice through the same five steps in the same order: read the PDF, match the order, check the amount, flag exceptions and post. A developer proposes an agent that picks its own steps, because agents are flexible. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "An agent, since the flexibility of choosing steps is worth its price on every job",
-        "b": "A team of agents, so that each of the five steps has a worker that answers for it",
-        "c": "A workflow, since a path fixed in advance is run by code",
-        "d": "One call that carries the PDF and a long prompt, since the order of steps is a detail"
+        "a": "An agent suits it, since flexibility is worth its price on every job",
+        "b": "Code that fixes the sequence is cheaper, testable and auditable",
+        "c": "A single call with a long prompt suits it, since the sequence is a detail",
+        "d": "A team of agents suits it, with one worker answering for each stage",
+        "e": "A workflow suits it, since the path is known in advance"
       },
-      "key": "c",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
-        "c": "The path is known, so the code runs it: \"If you can write the steps down and their order, the code should run them\" (module 79, page 1).",
+        "b": "The path is known, so the code should run it: \"If you can write the steps down and their order, the code should run them, because deterministic orchestration is cheaper, testable and auditable\" (module 79, page 1). The workflow rung is chosen when \"The path is known in advance and the steps differ in kind\".",
+        "e": "The path is known, so the code should run it: \"If you can write the steps down and their order, the code should run them, because deterministic orchestration is cheaper, testable and auditable\" (module 79, page 1). The workflow rung is chosen when \"The path is known in advance and the steps differ in kind\".",
         "a": "Ruled out because \"Only then does autonomy earn its price\", and the path here needs no model to decide what to do next.",
-        "b": "Ruled out because \"A team that fails the first test is a worse single agent\", and these steps are not independent parts.",
-        "d": "Ruled out because a single call suits a task that is \"one transformation with the input in hand\", and this job has five steps."
-      }
+        "c": "Ruled out because a single call suits \"one transformation with the input in hand\", and five steps in an order are more than that.",
+        "d": "Ruled out because the team rung needs \"the volume of reading exceeds one context\", and the steps here run one after another."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x2",
@@ -157,20 +163,26 @@
       "id": "03-professional-mock-exam#x9",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which pattern does the capstone choose?",
+      "stem": "Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which two statements does the capstone support? (Select two.)",
       "options": {
-        "a": "An augmented call inside a small fixed workflow, since the route is predetermined",
-        "b": "A team of agents, since the documents are many and change often",
-        "c": "One agent with every tool, since a single agent is easier to audit by the team over time",
-        "d": "One plain call with all the policy text pasted into every prompt"
+        "a": "One agent holding every tool suits it, since a single agent is simpler to audit",
+        "b": "A coordinated crew would cost about 15 times a chat, and the value does not pay it",
+        "c": "One plain call with all the policy text pasted in suits it, since the route is simple",
+        "d": "A team of agents suits it, since the documents are many and change often",
+        "e": "A small fixed workflow around a retrieval-backed call suits the known path"
       },
-      "key": "a",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
-        "a": "The capstone sets the rung: \"an augmented call with a small fixed workflow, not an agent, because the path is known\" (module 93, page 1).",
-        "b": "Ruled out because \"A team of agents would cost about 15 times a chat, and the value does not pay it\".",
-        "c": "Ruled out because \"The pattern is the lowest rung that meets the need\", and an agent with every tool is a higher one.",
-        "d": "Ruled out because the design needs \"Retrieve by the reader's rights\", which a pasted text does not give."
-      }
+        "b": "The capstone sets the rung: \"an augmented call with a small fixed workflow, not an agent, because the path is known\", and it notes \"A team of agents would cost about 15 times a chat, and the value does not pay it\" (module 93, page 1).",
+        "e": "The capstone sets the rung: \"an augmented call with a small fixed workflow, not an agent, because the path is known\", and it notes \"A team of agents would cost about 15 times a chat, and the value does not pay it\" (module 93, page 1).",
+        "a": "Ruled out because autonomous agents come with \"higher costs, and the potential for compounding errors\".",
+        "c": "Ruled out because the design needs \"The index is replaced when a document changes\", and pasted text goes stale.",
+        "d": "Ruled out because the capstone chooses \"an augmented call with a small fixed workflow, not an agent, because the path is known\"."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x10",
@@ -252,20 +264,26 @@
       "id": "03-professional-mock-exam#x14",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Hollin Labs upgrades its assistant to a newer release and copies across a prompt sentence that fixed an over-eager habit on the older one. Nobody has tested the sentence on the release. What does the page advise?",
+      "stem": "Scenario: Hollin Labs upgrades its assistant to a newer release and copies across a prompt sentence that fixed an over-eager habit on the older one. Nobody has tested the sentence on the release. Which two steps does the page support? (Select two.)",
       "options": {
         "a": "Keep the line, since models in one family behave alike under the same wording",
-        "b": "Drop every line that was added to fix a habit, since new models need no such lines",
+        "b": "Treat the technique as measured on the old model until re-checked against your own evals",
         "c": "Keep the line and add a second one that repeats it in stronger words",
-        "d": "Run the evaluation set on the new model and keep the line only if the results support it"
+        "d": "Drop every line that fixed a habit, since new models need no such lines",
+        "e": "Run the evaluation set on the new model and see whether the results back the line"
       },
-      "key": "d",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
-        "d": "Technique is measured per model: \"treat it as measured on that model and re-check it against your own evals\" (module 82, page 2).",
-        "a": "Ruled out because the trap names this belief: \"models in one family behave alike\" is the tempting mistake, and the exam rejects it.",
-        "b": "Ruled out because the page says an instruction \"can be unnecessary or harmful on another\" model, which is a reason to test it and not to assume it away.",
-        "c": "Ruled out because a stronger repeat is another untested change, and the design answer is \"an evaluation set that runs on every candidate model and every prompt change\"."
-      }
+        "b": "The guide says \"where a technique names a specific model, treat it as measured on that model and re-check it against your own evals before applying it to another\", so the design runs an evaluation set on every candidate model and prompt change (module 82, page 2).",
+        "e": "The guide says \"where a technique names a specific model, treat it as measured on that model and re-check it against your own evals before applying it to another\", so the design runs an evaluation set on every candidate model and prompt change (module 82, page 2).",
+        "a": "Ruled out because \"Copy the prompt that worked on the current model; models in one family behave alike\" is the page's rejected trap.",
+        "c": "Ruled out because \"a technique is measured on a model, so it is re-checked against your own evaluation before it is applied to another\".",
+        "d": "Ruled out because \"an instruction that fixed a behaviour on one model can be unnecessary or harmful on another\", so it is tested, not dropped by default."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x15",
@@ -366,20 +384,26 @@
       "id": "03-professional-mock-exam#x20",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Quay Retail's assistant must give each branch's refund total for February. The figures sit in a table, and the team has cut the table into text chunks, after which the model adds the numbers by eye and gets them wrong. Which mechanism fits?",
+      "stem": "Scenario: Quay Retail's assistant must give each branch's refund total for February. The figures sit in a table, and the team has cut the table into text chunks, after which the model adds the numbers by eye and gets them wrong. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "An embedding index over the rows, which matches the meaning of each figure",
-        "b": "A database query issued through a tool, which sums and filters exactly",
-        "c": "A longer chunk size, so that every branch's rows arrive together in one chunk",
-        "d": "A keyword index on the word refund, which finds every row that mentions it"
+        "a": "A longer chunk size brings every branch's rows together and so fixes the sums",
+        "b": "An embedding index over the rows matches the meaning of each figure and so the sums",
+        "c": "Slicing the rows into fragments leaves the sums to guesswork",
+        "d": "A keyword index on the word refund finds every row and so totals them",
+        "e": "A database query issued through a tool sums and filters exactly"
       },
-      "key": "b",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "b": "When the answer lives in a table, the page names the mechanism: \"A structured query run by a tool\", which is \"Exact, and able to total or filter\" (module 85, page 1).",
-        "a": "Ruled out because an embedding index \"can miss crucial exact matches\" and adds no figures, so exact totals are not its job.",
-        "c": "Ruled out because longer chunks keep the original fault: \"The table is cut into chunks and the model adds numbers by eye\".",
-        "d": "Ruled out because a keyword index is the one that \"matches the exact string\" of an identifier, and it still leaves the model to add the rows."
-      }
+        "c": "When the answer lives in a table or a database the mechanism is a structured query run by a tool, which is \"Exact, and able to total or filter\", while cutting the table \"adds numbers by eye\" is the failure it avoids (module 85, page 1).",
+        "e": "When the answer lives in a table or a database the mechanism is a structured query run by a tool, which is \"Exact, and able to total or filter\", while cutting the table \"adds numbers by eye\" is the failure it avoids (module 85, page 1).",
+        "a": "Ruled out because the failure the page names is \"The table is cut into chunks and the model adds numbers by eye\".",
+        "b": "Ruled out because embedding models \"can miss crucial exact matches\", and add nothing up.",
+        "d": "Ruled out because a keyword index \"matches the exact string\", and it does not total or filter."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x21",
@@ -480,20 +504,26 @@
       "id": "03-professional-mock-exam#x26",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Pewter Labs merges its 40 tools into 8 tools, each with a switch argument, hoping to cure wrong tool selection. Selection does not improve. Why not?",
+      "stem": "Scenario: Pewter Labs merges its 40 tools into 8 tools, each with a switch argument, hoping to cure wrong tool selection. Selection does not improve. Which two statements explain it? (Select two.)",
       "options": {
-        "a": "Eight tools are still more than the model can read in a single request, so the list must shrink",
-        "b": "The choice among behaviours is hidden, and nothing was removed",
-        "c": "A switch argument is a sampling parameter, which a new model refuses outright",
-        "d": "Merged tools lose their descriptions, so selection has no information left to use"
+        "a": "A switch argument is a setting that a newer model refuses",
+        "b": "Eight tools are still more than a request can hold, so the list must shrink",
+        "c": "The choice among behaviours is hidden from the model's own judgement",
+        "d": "Merged tools lose their descriptions, so selection has no information left",
+        "e": "The number of capabilities is the same as before the change"
       },
-      "key": "b",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "b": "Merging \"hides the behaviours from the model's own choice and leaves the number of capabilities the same\" (module 86, page 2).",
-        "a": "Ruled out because the page puts the trouble where \"once you exceed 30–50 available tools\", and eight is far below that.",
-        "c": "Ruled out because the sampling parameters are `temperature`, `top_p` and `top_k`, for which \"a non-default value returns the error\", and a switch argument is none of them.",
-        "d": "Ruled out because the page names the cause as one that \"hides the behaviours from the model's own choice\", not lost descriptions."
-      }
+        "c": "Merging \"hides the behaviours from the model's own choice and leaves the number of capabilities the same\" (module 86, page 2), so nothing was removed and the choice is only moved into an argument.",
+        "e": "Merging \"hides the behaviours from the model's own choice and leaves the number of capabilities the same\" (module 86, page 2), so nothing was removed and the choice is only moved into an argument.",
+        "a": "Ruled out because the merge is rejected for a different reason: \"Merging tools into one with a mode argument is not a cure\".",
+        "b": "Ruled out because the page puts trouble where Claude's ability to pick the right tool \"degrades once you exceed\" the thirty to fifty mark, and eight is far below it.",
+        "d": "Ruled out because \"the descriptions are what the model chooses by\", and a merge keeps them."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x27",
@@ -632,20 +662,26 @@
       "id": "03-professional-mock-exam#x34",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Arden Insurance runs a live test of a new prompt. After 300 trials in each arm the new prompt is two points ahead, and the owner wants to stop and ship while it is in front. What does the page advise?",
+      "stem": "Scenario: Arden Insurance runs a live test of a new prompt. After 300 trials in each arm the new prompt is two points ahead, and the owner wants to stop and ship while it is in front. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "Gather the sample that was planned, since quitting on a lead gives false wins",
-        "b": "Stop now, since a lead after 300 trials in each arm is enough evidence",
-        "c": "Run the same 300 trials again, since a repeat will confirm the lead",
-        "d": "Add the trials that arrive until the lead grows to five points or more"
+        "a": "Add trials until the lead reaches five points, then ship",
+        "b": "Quitting on a lead gives false wins",
+        "c": "Gather the sample that was planned before reading the result",
+        "d": "Run the same 300 trials again, since a repeat will confirm the lead",
+        "e": "Stop now, since the larger number is the better version"
       },
-      "key": "a",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
-        "a": "The page names the rule: \"Do not stop by who is ahead\" (module 88, page 2).",
-        "b": "Ruled out because \"Stopping or extending a test according to who is ahead produces false wins\".",
-        "c": "Ruled out because \"Running the same cases again repeats the same sample and adds no information\".",
-        "d": "Ruled out because the sample is fixed first: \"Decide the metric and the sample before you look\"."
-      }
+        "b": "The page names the rule: \"Do not stop by who is ahead\", because \"Stopping or extending a test according to who is ahead produces false wins\", so the planned cases are collected first (module 88, page 2).",
+        "c": "The page names the rule: \"Do not stop by who is ahead\", because \"Stopping or extending a test according to who is ahead produces false wins\", so the planned cases are collected first (module 88, page 2).",
+        "a": "Ruled out because \"Decide the metric and the sample before you look.\"",
+        "d": "Ruled out because \"Running the same cases again repeats the same sample and adds no information.\"",
+        "e": "Ruled out because \"The larger number is not the better version.\""
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x35",
@@ -708,20 +744,26 @@
       "id": "03-professional-mock-exam#x38",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Ivy Retail's gate allows the bill to grow by 25 percent. The new model's total comes out at 25 percent above the old one, and no other check fails. What does the cost check return?",
+      "stem": "Scenario: Ivy Retail's gate allows the bill to grow by 25 percent. The new model's total comes out at 25 percent above the old one, and no other check fails. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "It fails, since any rise is a reason to refuse the change",
-        "b": "It passes, since an increase equal to the limit is within the budget",
-        "c": "It fails, since a rise at the limit leaves no room for later growth",
-        "d": "It passes only if the latency check shows an improvement as well"
+        "a": "The check passes only if the latency check also improves",
+        "b": "One point beyond the limit is refused",
+        "c": "A rise exactly at the limit passes",
+        "d": "A rise at the limit leaves no room for later growth, so it fails",
+        "e": "Any rise is a reason to refuse, so the cost check fails"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
         "b": "The edge is stated: \"A rise exactly at the budget passes and one point over it is refused\" (module 89, page 2).",
-        "a": "Ruled out because the check refuses only a rise beyond the budget, and cost is judged \"against a budget set before the run\".",
-        "c": "Ruled out because the check is made \"against a budget set before the run\", and the rule keeps no reserve beyond it.",
-        "d": "Ruled out because the five checks are each judged on their own, and \"every failing check adds a reason\"."
-      }
+        "c": "The edge is stated: \"A rise exactly at the budget passes and one point over it is refused\" (module 89, page 2).",
+        "a": "Ruled out because \"The example's gate has five checks, in a fixed order, and every failing check adds a reason\".",
+        "d": "Ruled out because \"The budget is set from the re-baselined cost of the first page\", so the arithmetic decides and not a margin.",
+        "e": "Ruled out because the check is made \"against a budget set before the run\"."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x39",
@@ -841,20 +883,26 @@
       "id": "03-professional-mock-exam#x45",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. What does the page advise?",
+      "stem": "Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)",
       "options": {
-        "a": "Accept the gap, since names carry no risk once the addresses are removed",
-        "b": "Add a stronger detector for personal details and plant every kind of identifier in the tests",
-        "c": "Add a line to the system prompt telling the model to disregard any names",
-        "d": "Switch the layer off, since a pattern that misses names gives a false comfort to the whole team"
+        "a": "Add a line to the system prompt telling the model to disregard names",
+        "b": "Switch the layer off, since a pattern that misses names gives false comfort",
+        "c": "Plant identifiers of every kind in tests and verify that none gets into the request",
+        "d": "Add a stronger detector, or keep the free text away from the provider",
+        "e": "Accept the gap, since names carry no risk once the addresses are gone"
       },
-      "key": "b",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "b": "A layer needs testing against what it claims to remove: \"tests that plant identifiers of every kind and check that none reaches the request\" (module 83, page 2).",
-        "a": "Ruled out because \"A person's name has no fixed shape, so a pattern layer leaves it in\", and the page treats that as a gap to close.",
-        "c": "Ruled out because \"the data has already crossed the boundary, nothing proves the instruction was followed\".",
-        "d": "Ruled out because the layer still removes the shapes it finds, and the page says it \"cannot leak what it never had\"."
-      }
+        "c": "A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for \"a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind\" (module 83, page 2).",
+        "d": "A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for \"a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind\" (module 83, page 2).",
+        "a": "Ruled out because \"the instruction is read by the model that has already received the data\".",
+        "b": "Ruled out because \"a reviewer can test the layer with sample text, which cannot be done for an instruction\".",
+        "e": "Ruled out because \"A layer that has not been tested against the identifiers it claims to remove is a hope with code around it.\""
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x46",
@@ -917,20 +965,26 @@
       "id": "03-professional-mock-exam#x49",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Odell Health's register row for an unfair outcome names the parity report as its control, and a reviewer asks what the residual column should say.",
+      "stem": "Scenario: Odell Health's register row for an unfair outcome names the parity report as its control, and a reviewer asks what the row should say. Which two entries does the page support? (Select two.)",
       "options": {
-        "a": "Prevented, since every group is measured before an answer goes out",
-        "b": "Nil, since a gap that is measured leaves no risk behind it at all",
-        "c": "Monitored and not prevented, since the measure fixes nothing itself",
-        "d": "Moved to the vendor, since the model is theirs and not the deployer's"
+        "a": "The residual reads nil, since a measured gap leaves no risk",
+        "b": "The residual moves to the vendor, since the model is theirs",
+        "c": "The residual reads prevented, since every group is measured before an answer goes out",
+        "d": "The residual reads monitored and not prevented",
+        "e": "That measure needs an owner, since it repairs nothing itself"
       },
-      "key": "c",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "c": "The report is a measure with an owner, not a repair: \"monitored and not prevented\" is the wording the page gives the residual column (module 90, page 2).",
-        "a": "Ruled out because \"The report does not fix anything on its own\", so nothing is prevented before an answer goes out.",
-        "b": "Ruled out because \"The design cannot prevent unfairness by saying so; it measures it\", and a measured gap is a risk that remains.",
-        "d": "Ruled out because the duty stays with the deployment: \"A model does not make a system compliant\", and the vendor does not take the risk over."
-      }
+        "d": "The report is a measure with an owner and not a repair: \"The report does not fix anything on its own\", which is why the residual column says \"monitored and not prevented\" (module 90, page 2).",
+        "e": "The report is a measure with an owner and not a repair: \"The report does not fix anything on its own\", which is why the residual column says \"monitored and not prevented\" (module 90, page 2).",
+        "a": "Ruled out because \"a headline average hides a failing group exactly as it hides a failing segment\".",
+        "b": "Ruled out because \"Compliance belongs to the deployment and its agreements.\"",
+        "c": "Ruled out because \"The design cannot prevent unfairness by saying so; it measures it.\""
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x50",
@@ -1012,20 +1066,26 @@
       "id": "03-professional-mock-exam#x54",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: A sponsor at Cairn Utilities asks that an assistant be \"fast and accurate\". The architect wants to turn the wish into requirements. When is a requirement complete?",
+      "stem": "Scenario: A sponsor at Cairn Utilities asks that an assistant be \"fast and accurate\". The architect wants to turn the wish into a specification. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "When the sponsor has signed it and the engineers have read it once",
-        "b": "When it has a number, a way to measure it and a person who owns it",
-        "c": "When it is written in a sentence that avoids technical terms entirely",
-        "d": "When it names the model that will be used to meet it in production"
+        "a": "A requirement lacking any of those goes back to the stakeholder as a question",
+        "b": "A requirement is complete when it is written without technical terms",
+        "c": "A requirement is complete once it carries a figure, a method of measuring it and a named owner",
+        "d": "A requirement is complete when it names the model that will meet it",
+        "e": "A requirement is complete when the sponsor has signed it and engineers have read it once"
       },
-      "key": "b",
+      "key": [
+        "a",
+        "c"
+      ],
       "explanation": {
-        "b": "The page says: \"A requirement is complete when it has a number, a way to measure it and a person who owns it\" (module 91, page 1).",
-        "a": "Ruled out because \"Fast\", \"accurate\" and \"safe\" are not answers, \"because nobody can fail them\", and a signature adds no number.",
-        "c": "Ruled out because plain language is for the sponsor's summary, and a requirement missing a number goes \"back to the stakeholder as a question\".",
-        "d": "Ruled out because naming a model answers none of the three: \"a requirement missing one of the three goes back to the stakeholder as a question\"."
-      }
+        "a": "The page says \"A requirement is complete when it has a number, a way to measure it and a person who owns it; a requirement missing one of the three goes back to the stakeholder as a question\" (module 91, page 1).",
+        "c": "The page says \"A requirement is complete when it has a number, a way to measure it and a person who owns it; a requirement missing one of the three goes back to the stakeholder as a question\" (module 91, page 1).",
+        "b": "Ruled out because \"A useful discovery asks, and writes down, each of these.\"",
+        "d": "Ruled out because the heading reads \"Discovery ends in numbers and an owner\".",
+        "e": "Ruled out because \"Fast\", \"accurate\" and \"safe\" are not answers, \"because nobody can fail them\"."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x55",
@@ -1145,20 +1205,26 @@
       "id": "03-professional-mock-exam#x61",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: A platform team caps effort at high in managed settings and must decide whether teams may tighten the ceiling for their own projects. A project file sets medium and a user file sets max. Which ceiling is in force, and what does that say of the design?",
+      "stem": "Scenario: A platform team caps effort at high in managed settings. A project file sets medium and a user file sets max. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "High, since managed settings outrank every other level for this key",
-        "b": "The lowest of the three, since the stricter choice stands",
-        "c": "Max, since the user file is read last and so wins",
-        "d": "High, since a project file may not lower an organisation's cap"
+        "a": "The project file's cap is ignored, since only managed settings may set one",
+        "b": "The most restrictive setting wins, so the middle value is in force",
+        "c": "Max is in force, since the user file is read last",
+        "d": "High is in force, since managed settings outrank every other level for this key",
+        "e": "Nobody can loosen the organisation's ceiling, though a developer may tighten it"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
         "b": "The page gives the rule: \"when several levels set a cap, the lowest applies, so a developer may lower the organisation's cap and nobody can raise it\" (module 92, page 1).",
-        "a": "Ruled out because the key is one of the two that go the other way, where \"a stricter value is always welcome\".",
-        "c": "Ruled out because \"nobody can raise it\", and a higher cap in a lower file has no effect.",
-        "d": "Ruled out because \"a developer may lower the organisation's cap\"."
-      }
+        "e": "The page gives the rule: \"when several levels set a cap, the lowest applies, so a developer may lower the organisation's cap and nobody can raise it\" (module 92, page 1).",
+        "a": "Ruled out because \"when several levels set a cap, the lowest applies\".",
+        "c": "Ruled out because \"a cap of `xhigh` or `max` in the managed file would be no cap at all for the levels it was meant to hold back\".",
+        "d": "Ruled out because the key is one of the two that go the other way, where \"a stricter value is always welcome\"."
+      },
+      "select": 2
     },
     {
       "id": "03-professional-mock-exam#x62",
@@ -1335,20 +1401,26 @@
       "id": "04-professional-mock-exam-2#x8",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: At Northwind Insurance about 15 percent of claims are disputed, and nobody can list the steps in advance, though a handler will decide each one anyway. Which design does the worked example reach for them?",
+      "stem": "Scenario: At Northwind Insurance about 15 percent of claims are disputed, and nobody can list the steps in advance, though a handler will decide each one anyway. Which two statements does the worked example support? (Select two.)",
       "options": {
-        "a": "A single call that receives the claim text and returns an approval",
-        "b": "An assistant that gathers the file and leaves the ruling to a person",
-        "c": "A team of agents that investigates each dispute in parallel and rules on it",
-        "d": "A workflow of fixed calls that rules on each dispute in a set order"
+        "a": "A single call receives the claim text and returns an approval",
+        "b": "An assistant gathers the file for the person who rules",
+        "c": "A coordinated crew investigates each dispute in parallel and rules on it",
+        "d": "A workflow of fixed calls rules on each dispute in a set order",
+        "e": "None of the decisions here calls for a team of agents"
       },
-      "key": "b",
+      "key": [
+        "b",
+        "e"
+      ],
       "explanation": {
-        "b": "The path cannot be listed, but a person decides anyway, so the design is an assistant that gathers the file for the person (module 79, page 1). The example names the routine claims for a workflow and the policy questions for an augmented call, and \"No decision calls for a team of agents\".",
-        "a": "Ruled out because a ruling that carries accountability stays with a person, and \"The model prepares the file; a qualified person decides.\"",
-        "c": "Ruled out because the page concludes \"No decision calls for a team of agents\".",
-        "d": "Ruled out because a fixed order suits work where \"The path is known in advance\", and these paths are not."
-      }
+        "b": "For disputes the design is an assistant that gathers the file for the person, and the example concludes \"No decision calls for a team of agents\" (module 79, page 1). The page says \"The model prepares the file; a qualified person decides.\"",
+        "e": "For disputes the design is an assistant that gathers the file for the person, and the example concludes \"No decision calls for a team of agents\" (module 79, page 1). The page says \"The model prepares the file; a qualified person decides.\"",
+        "a": "Ruled out because \"Automate decisions that are reversible, cheap to get wrong and easy to audit afterwards\".",
+        "c": "Ruled out because \"The model prepares the file; a qualified person decides.\"",
+        "d": "Ruled out because \"Only then does autonomy earn its price\", and a fixed order suits only a path known in advance."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x9",
@@ -1373,20 +1445,26 @@
       "id": "04-professional-mock-exam-2#x10",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: A research run at Pike Biotech crashes after a payment tool acts but before its result is written to the store. The next run starts from the store. How is the effect kept from happening twice?",
+      "stem": "Scenario: A research run at Pike Biotech crashes after a payment tool acts but before the run writes its result to the store. The next run starts from the store. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "Write the results at the end of the run, so that a crash is never half done",
-        "b": "Mint a fresh identifier for the next run, since a new run is a new intention",
-        "c": "Skip the task on the next run, since its effect already happened",
-        "d": "Resume with the recorded identifier, so that the first receipt comes back"
+        "a": "A fresh identifier is minted, since a new run is a new intention",
+        "b": "The unsaved task is retried under the identifier already recorded for it",
+        "c": "Results are written at the end of the run, so a crash is never half done",
+        "d": "The vendor's endpoint returns the first receipt and does not pay again",
+        "e": "The task is skipped, since its effect already happened"
       },
-      "key": "d",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "d": "A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The checkpoint and the key together cover both halves of the gap. The page puts it as \"The checkpoint and the idempotency key cover the two halves of the same gap\".",
-        "a": "Ruled out because the page says \"Write on success, immediately.\"",
-        "b": "Ruled out because \"The key names the intention, not the attempt.\"",
-        "c": "Ruled out because the store holds no result for it, so it would be reported as missing; the page pairs the two halves: \"The checkpoint and the idempotency key cover the two halves of the same gap.\""
-      }
+        "b": "A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The page says \"The checkpoint and the idempotency key cover the two halves of the same gap.\"",
+        "d": "A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The page says \"The checkpoint and the idempotency key cover the two halves of the same gap.\"",
+        "a": "Ruled out because \"The key names the intention, not the attempt.\"",
+        "c": "Ruled out because \"Write on success, immediately.\"",
+        "e": "Ruled out because \"The checkpoint and the idempotency key cover the two halves of the same gap.\""
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x11",
@@ -1411,20 +1489,26 @@
       "id": "04-professional-mock-exam-2#x12",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. How should the design behave?",
+      "stem": "Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. Which two statements describe the right behaviour? (Select two.)",
       "options": {
-        "a": "Drop the lowest-priority static module, since every module has a rank",
-        "b": "Send it anyway and let the model discard the surplus, since models skip what does not fit",
-        "c": "Decline to send it, since a cut rulebook is worse than no answer",
-        "d": "Trim the end of the policy until the request fits, since the opening lines matter most"
+        "a": "The end of the policy is trimmed until the request fits",
+        "b": "The request is sent anyway and the model discards the surplus",
+        "c": "Building stops rather than a truncated policy being sent",
+        "d": "The lowest-priority static block is dropped, since every block has a rank",
+        "e": "Rule-bearing blocks are never dropped, whatever the ceiling"
       },
-      "key": "c",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "c": "The static modules are never dropped, so when only they remain and they still exceed the budget, the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\".",
-        "a": "Ruled out because priority applies to dynamic modules: \"each dynamic module has a priority\".",
+        "c": "The static modules are never dropped, and when only they remain and still exceed the budget the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\".",
+        "e": "The static modules are never dropped, and when only they remain and still exceed the budget the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\".",
+        "a": "Ruled out because \"When the request is too long, truncate the end of the system prompt\" is rejected, because \"static modules hold the rules and are never cut\".",
         "b": "Ruled out because \"A silent truncation would be worse than a refusal.\"",
-        "d": "Ruled out because the page says \"When the request is too long, truncate the end of the system prompt\" is rejected, because \"static modules hold the rules and are never cut\"."
-      }
+        "d": "Ruled out because \"each dynamic module has a priority\", and the static ones have none to lose."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x13",
@@ -1582,20 +1666,26 @@
       "id": "04-professional-mock-exam-2#x21",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the form that exception names, where each lookup depends on the last result. A single top-k list fails on it. Which mechanism does the page match to this?",
+      "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the form that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A cached prompt that holds the whole rulebook, since nothing can then be missed",
-        "b": "A structured query run by a tool, since a form is a record",
-        "c": "An agent that searches, issuing one query after another",
-        "d": "A keyword index with a larger k, since more results reach more links"
+        "a": "A keyword index with a larger k is the fit, since more results reach more links",
+        "b": "A cached prompt that holds the whole rulebook is the fit, since nothing can then be missed",
+        "c": "An agent that searches issues one query after another",
+        "d": "A structured query run by a tool is the fit, since a form is a record",
+        "e": "A single top-k list cannot follow a chain"
       },
-      "key": "c",
+      "key": [
+        "c",
+        "e"
+      ],
       "explanation": {
-        "c": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because a single top-k list cannot follow a chain (module 85, page 1). The page puts it as \"A single top-k list that cannot follow a chain\".",
-        "a": "Ruled out because the page reserves that for a corpus \"under about 200,000 tokens\", and a bank's rulebook may not fit that case.",
-        "b": "Ruled out because that mechanism fits when \"The answer lives in a table or a database\", and these are linked passages.",
-        "d": "Ruled out because \"A single top-k list that cannot follow a chain\" is the failure the page names."
-      }
+        "c": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because \"A single top-k list that cannot follow a chain\" is the failure the page names (module 85, page 1).",
+        "e": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because \"A single top-k list that cannot follow a chain\" is the failure the page names (module 85, page 1).",
+        "a": "Ruled out because \"One index's misses are never seen\" is the risk of leaning on a single list.",
+        "b": "Ruled out because the page reserves that for a corpus \"under about 200,000 tokens\".",
+        "d": "Ruled out because that mechanism fits when \"The answer lives in a table or a database\"."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x22",
@@ -1658,20 +1748,26 @@
       "id": "04-professional-mock-exam-2#x25",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. What should the job do?",
+      "stem": "Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. Which two changes does the page call for? (Select two.)",
       "options": {
-        "a": "Purge the stale records of retired and revised sources before loading the latest versions",
-        "b": "Run the same job twice a night, since a second pass will catch the leaflet",
-        "c": "Lower the number of results returned, so that the old leaflet falls out of the top",
-        "d": "Re-embed every chunk with the same model, since vectors can drift"
+        "a": "Lower the number of results returned, so that the old leaflet falls out of the top",
+        "b": "Drop a revised source's earlier copy before loading its replacement",
+        "c": "Delete the records of retired sources",
+        "d": "Run the same job twice a night, since a second pass will catch the leaflet",
+        "e": "Re-embed every chunk with the same model, since vectors can drift"
       },
-      "key": "a",
+      "key": [
+        "b",
+        "c"
+      ],
       "explanation": {
-        "a": "A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). The page says that for a withdrawn document \"the removal is a correctness and, for personal data, a compliance matter, not a tidiness one\".",
-        "b": "Ruled out because \"A re-index that runs less often than the documents change leaves old text in the index between runs\", and a repeat of an adding job removes nothing.",
-        "c": "Ruled out because the old chunk \"competes with the new one for a place in the top results\", and a smaller list only hides it sometimes.",
-        "d": "Ruled out because \"Vectors made by two models are not in one space\", and the fault here is a record that should be gone, not a space mismatch."
-      }
+        "b": "A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). For a withdrawn document \"the removal is a correctness and, for personal data, a compliance matter, not a tidiness one\".",
+        "c": "A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). For a withdrawn document \"the removal is a correctness and, for personal data, a compliance matter, not a tidiness one\".",
+        "a": "Ruled out because the old chunk \"competes with the new one for a place in the top results\".",
+        "d": "Ruled out because \"A re-index that runs less often than the documents change leaves old text in the index between runs\".",
+        "e": "Ruled out because \"Vectors made by two models are not in one space\"."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x26",
@@ -1791,20 +1887,26 @@
       "id": "04-professional-mock-exam-2#x32",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. What does the page advise first?",
+      "stem": "Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A shadow run, which exposes no user and compares outputs case by case",
-        "b": "A comparison of average segment accuracies, since averages summarise the change",
-        "c": "An A/B test on all users, since it is the one test that predicts reaction",
-        "d": "Release to half of users, since a large exposure gives the clearest data"
+        "a": "Release to half of users, since a large exposure gives the clearest data",
+        "b": "An A/B test on all users comes first, since it alone predicts reaction",
+        "c": "Exposure to real users follows once the shadow run says the change is safe to show",
+        "d": "A shadow run exposes no user to a degradation",
+        "e": "Compare average segment accuracies, since averages summarise the change"
       },
-      "key": "a",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "a": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, so it exposes no one to a regression (module 88, page 2). It costs a second round of inference and gives no signal about user reaction, which is why the A/B test follows it. The page puts it as \"A shadow run sends copies of live requests to the new version, keeps the answers away from users\".",
-        "b": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price.\"",
-        "c": "Ruled out because \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show.\"",
-        "d": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it, so that is not a gate.\""
-      }
+        "c": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, and \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show\" (module 88, page 2).",
+        "d": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, and \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show\" (module 88, page 2).",
+        "a": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it, so that is not a gate.\"",
+        "b": "Ruled out because \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show.\"",
+        "e": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price.\""
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x33",
@@ -1943,20 +2045,26 @@
       "id": "04-professional-mock-exam-2#x40",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Tavern Group moves an assistant to a model whose replies include adaptive thinking, and many replies are now cut off mid-sentence though max_tokens is unchanged. What explains it, and what is the fix?",
+      "stem": "Scenario: Tavern Group moves an assistant to a model whose replies include adaptive thinking, and many replies are now cut off mid-sentence though max_tokens is unchanged. Which two statements explain it and the fix? (Select two.)",
       "options": {
-        "a": "Reasoning draws on the same cap, so the limit needs to be raised and re-measured",
+        "a": "Thinking is off by default, so a safety filter stops the reply",
         "b": "The reply format changed, so the parser must read the first block as text",
-        "c": "Thinking is off by default, so the reply is being stopped by the safety filter, in the usual way",
-        "d": "The prices changed, so the limit must be lowered to keep the old bill"
+        "c": "Reasoning shares the same ceiling as the visible text",
+        "d": "Raise the ceiling, recount the usage and re-baseline cost",
+        "e": "The prices changed, so the limit must be lowered to keep the old bill"
       },
-      "key": "a",
+      "key": [
+        "c",
+        "d"
+      ],
       "explanation": {
-        "a": "On this model `max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens, so a limit sized for the old model cuts replies short (module 89, page 1). The fix is to raise it, recount the tokens and re-baseline cost. The page puts it as \"thinking tokens are billed as output tokens\".",
+        "c": "On this model max_tokens covers thinking plus text, and \"thinking tokens are billed as output tokens\", so a limit sized for the old model cuts replies short (module 89, page 1). The checklist says to \"Recount tokens and re-baseline cost\".",
+        "d": "On this model max_tokens covers thinking plus text, and \"thinking tokens are billed as output tokens\", so a limit sized for the old model cuts replies short (module 89, page 1). The checklist says to \"Recount tokens and re-baseline cost\".",
+        "a": "Ruled out because \"a request with no `thinking` field runs with adaptive thinking\".",
         "b": "Ruled out because the page says \"Read content blocks by `type`\", which is a different failure from a cut-off reply.",
-        "c": "Ruled out because the guide says \"a request with no `thinking` field runs with adaptive thinking\".",
-        "d": "Ruled out because \"thinking tokens are billed as output tokens\", and a lower cap would cut more replies short."
-      }
+        "e": "Ruled out because \"thinking tokens are billed as output tokens\", and a lower cap would cut more replies short."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x41",
@@ -2000,20 +2108,26 @@
       "id": "04-professional-mock-exam-2#x43",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. What does the review find?",
+      "stem": "Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "Neither matters, since de-identified input removes the duty entirely",
-        "b": "Two separate arrangements, and the agreement-based one is unavailable there",
+        "a": "One arrangement covers both, since zero retention implies the agreement",
+        "b": "Neither matters, since de-identified input removes the duty",
         "c": "Both are offered there, since the platform shares the Claude API's policy",
-        "d": "One arrangement, since zero retention implies the agreement for health data"
+        "d": "The agreement-based one is offered on the first-party API alone",
+        "e": "Storing nothing and holding a contract are two different arrangements"
       },
-      "key": "b",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "b": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting, and the latter applies to the Claude API only (module 83, page 1). The review finds that the platform cannot meet the health-data requirement. The page puts it as \"Zero data retention and HIPAA readiness are different things\".",
-        "a": "Ruled out because \"Neither arrangement removes the need to de-identify\", and a design adds it on top.",
-        "c": "Ruled out because HIPAA readiness applies to \"The Claude API only, not Claude Platform on AWS or Microsoft Foundry\".",
-        "d": "Ruled out because the page contrasts them: \"Zero data retention and HIPAA readiness are different things\"."
-      }
+        "d": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting that applies to the Claude API only (module 83, page 1). The page says \"Zero data retention and HIPAA readiness are different things\".",
+        "e": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting that applies to the Claude API only (module 83, page 1). The page says \"Zero data retention and HIPAA readiness are different things\".",
+        "a": "Ruled out because the page contrasts them: \"Zero data retention and HIPAA readiness are different things\".",
+        "b": "Ruled out because \"Neither arrangement removes the need to de-identify\".",
+        "c": "Ruled out because HIPAA readiness applies to \"The Claude API only, not Claude Platform on AWS or Microsoft Foundry\"."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x44",
@@ -2095,20 +2209,26 @@
       "id": "04-professional-mock-exam-2#x48",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. What should the design do under the page's rule?",
+      "stem": "Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. Which two statements follow the page's rule? (Select two.)",
       "options": {
-        "a": "Switch the input screen off too, since two checks are down together",
-        "b": "Let replies go on with a mark showing the screen did not run",
-        "c": "Hold every reply until the check returns, since a failed control must stop work",
-        "d": "Treat the outage as a pass and drop the record of it"
+        "a": "Every reply is held until the check returns, since a failed control must stop work",
+        "b": "The outage counts as a pass and leaves no trace",
+        "c": "The input screen is switched off too, since two checks are down together",
+        "d": "The record keeps the gap visible",
+        "e": "Replies go on carrying a mark that the screen did not run"
       },
-      "key": "b",
+      "key": [
+        "d",
+        "e"
+      ],
       "explanation": {
-        "b": "Only an output or monitor control of the ordinary tier may proceed with a flag, because the cost of the gap is a delay in noticing and other controls still check the answers (module 90, page 1). The record carries the mark. The page puts it as \"Only an output or monitor control of the ordinary tier may proceed with a flag\".",
-        "a": "Ruled out because \"a control on the input or the action layer, and any control of the high tier, holds.\"",
-        "c": "Ruled out because \"Only an output or monitor control of the ordinary tier may proceed with a flag.\"",
-        "d": "Ruled out because the page asks that the gap \"shows in the record\", with a mark such as `auto (unscreened)`."
-      }
+        "d": "\"Only an output or monitor control of the ordinary tier may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
+        "e": "\"Only an output or monitor control of the ordinary tier may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1).",
+        "a": "Ruled out because \"Only an output or monitor control of the ordinary tier may proceed with a flag.\"",
+        "b": "Ruled out because the page wants the gap to show \"so that the gap shows in the record\".",
+        "c": "Ruled out because \"a control on the input or the action layer, and any control of the high tier, holds.\""
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x49",
@@ -2209,20 +2329,26 @@
       "id": "04-professional-mock-exam-2#x54",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: An architect at Dalby Foods shows the sponsor only the option she recommends, and the sponsor asks why nobody considered the simple thing. What does the page say a record must hold?",
+      "stem": "Scenario: An architect at Dalby Foods shows the sponsor only the option she recommends, and the sponsor asks why nobody considered the simple thing. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "Two options, the recommended one and its nearest rival",
-        "b": "The recommended option with a longer argument in its favour",
-        "c": "Four or more options, the weak ones included, each with a reason",
-        "d": "Every option the vendor has ever listed, ranked by novelty"
+        "a": "Four or more alternatives belong in the record, the weak ones among them",
+        "b": "Each alternative has a monthly cost, a verdict on the service levels, a status and a reason",
+        "c": "A longer argument for the recommended option is the cure",
+        "d": "Two alternatives suffice, the recommended one and its nearest rival",
+        "e": "Every option the vendor ever listed belongs in the record, ranked by novelty"
       },
-      "key": "c",
+      "key": [
+        "a",
+        "b"
+      ],
       "explanation": {
-        "c": "A record compares at least four options, including obviously wrong ones, because the reader's first question is why not the simple thing (module 91, page 1). Each has a monthly cost, whether it meets the service levels, a status and a reason. The page puts it as \"at least four, including the ones that are obviously wrong\".",
-        "a": "Ruled out because the page asks for \"at least four, including the ones that are obviously wrong\".",
-        "b": "Ruled out because \"A design record that shows one option is an announcement.\"",
-        "d": "Ruled out because the page ranks by cost: \"among those that meet them the cheapest wins\", and asks for a reason in a sentence."
-      }
+        "a": "A record compares at least four options, including obviously wrong ones, because the reader's first question is why not the simple thing (module 91, page 1). Each has \"a monthly cost, whether it meets the service levels, a status and a reason\".",
+        "b": "A record compares at least four options, including obviously wrong ones, because the reader's first question is why not the simple thing (module 91, page 1). Each has \"a monthly cost, whether it meets the service levels, a status and a reason\".",
+        "c": "Ruled out because \"A design record that shows one option is an announcement.\"",
+        "d": "Ruled out because the page asks for \"at least four, including the ones that are obviously wrong\".",
+        "e": "Ruled out because \"among those that meet them the cheapest wins\", and the newest is not a criterion."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x55",
@@ -2323,20 +2449,26 @@
       "id": "04-professional-mock-exam-2#x60",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Dunmow Group sets an organisation spend limit of 20,000, group limits of 6,000, 8,000 and 6,000, and gives one member a ceiling of 9,000 in the 6,000 group. What is wrong with the member's figure?",
+      "stem": "Scenario: Dunmow Group sets an organisation spend limit of 20,000, group limits of 6,000, 8,000 and 6,000, and gives one member a ceiling of 9,000 in the 6,000 group. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "It breaks the sum, since the groups together would then exceed the organisation",
-        "b": "It is fine, since the organisation limit is the safety net that catches overspend",
-        "c": "Nothing, since the member may exceed a group's limit with the organisation's consent",
-        "d": "It is unreachable, since an individual cap stays within the smallest share"
+        "a": "The groups together exceed the organisation, which breaks the sum",
+        "b": "That individual figure is unreachable",
+        "c": "The organisation limit is a safety net that makes the other figures optional",
+        "d": "The three shares sum to the grand total exactly",
+        "e": "Nothing is wrong, since the member may exceed a group's limit with the organisation's consent"
       },
-      "key": "d",
+      "key": [
+        "b",
+        "d"
+      ],
       "explanation": {
-        "d": "A member's limit is no higher than the smallest group's, and a larger one is a number that can never be reached (module 92, page 2). The group limits here add up exactly to the organisation's 20,000. The page puts it as \"a member limit above a group's own makes the member limit a number that can never be reached\".",
-        "a": "Ruled out because the groups add up exactly: \"a total of exactly 20000 passes and 20001 does not\".",
-        "b": "Ruled out because \"make the groups add up exactly\", because the organisation limit decides first otherwise.",
-        "c": "Ruled out because the page says \"a member limit above a group's own makes the member limit a number that can never be reached\"."
-      }
+        "b": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2).",
+        "d": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2).",
+        "a": "Ruled out because \"a total of exactly 20000 passes and 20001 does not\".",
+        "c": "Ruled out because \"make the groups add up exactly\", because the organisation limit decides first otherwise.",
+        "e": "Ruled out because \"a member limit above a group's own makes the member limit a number that can never be reached\"."
+      },
+      "select": 2
     },
     {
       "id": "04-professional-mock-exam-2#x61",
