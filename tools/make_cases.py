@@ -866,7 +866,7 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
         "wrong-gate-floor-ignored": (["m1"], "posts findings below the severity floor"),
         "wrong-gate-disabled-ignored": (["m1"], "posts findings of a disabled category"),
         "wrong-gate-never-blocks": (["e3"], "never fails the job on a high finding"),
-        "wrong-gate-blocks-on-any": (["e3"], "fails the job on any posted finding"),
+        "wrong-gate-blocks-on-any": (["m1", "e3"], "fails the job on any posted finding, so the valid run of the main ask fails too"),
         "wrong-prompt-no-new-only": (["e4"], "leaves out the instruction to report only new or unaddressed findings"),
         "wrong-prompt-no-prior": (["e4"], "leaves the earlier findings out of the prompt"),
         "wrong-prompt-no-tests": (["e4"], "leaves the existing tests out of the prompt"),
