@@ -17,7 +17,7 @@ The starter holds the files unfinished. All JSON files are strict JSON: a commen
 
 ## What to write
 
-1. **The marketplace file.** A `name` of `example-org-tools`, a `description`, an `owner` with a `name` (an e-mail in the owner must be `contact@example.com`) and a `plugins` array of three entries,
+1. **The marketplace file.** A `name` of `example-org-tools`, a `description`, an `owner` with a `name` (an e-mail, if you give one, ends in `@example.com`) and a `plugins` array of three entries,
    `standards-kit`, `lint-helper` and `db-tools`. Entry names are unique and use letters, digits, dots, underscores and hyphens only. No plugin name, and not the marketplace name,
    may be reserved or pass as an Anthropic or official one.
 2. **The three sources.** `standards-kit` is a relative path, `"./plugins/standards-kit"`: it starts with `./`, stays inside the marketplace and names a folder that exists. `lint-helper` is a
