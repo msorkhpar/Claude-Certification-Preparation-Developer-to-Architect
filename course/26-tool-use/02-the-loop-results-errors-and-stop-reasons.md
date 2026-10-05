@@ -62,8 +62,8 @@ practice does the check before the handler runs: a key from the schema's `requir
 the handler is not called. With `strict: true` the case disappears: "To eliminate invalid tool calls entirely, use strict tool use".
 An unknown tool name gets an error result too (`Unknown tool: NAME`), since the loop should not crash on a hallucinated name.
 
-The loop must not turn an error into success. The three outcomes of a call are a value, an error result and, for a call that was
-never run, an error result that says so. A result that quietly returns an empty string for a failure teaches the model that the
+The loop must not turn an error into success. A call ends in a value or in an error result, and a call that was
+never run gets an error result that says so. A result that quietly returns an empty string for a failure teaches the model that the
 tool worked.
 
 ### Results that are not text
@@ -84,7 +84,7 @@ The loop exits on any stop reason other than `tool_use`. The documentation's tab
 | `refusal` | Claude declined | status `refused`; the same request is not repeated (a fallback model is a separate option) |
 | `pause_turn` | "A server-tool loop reached its iteration limit" | send the assistant content back and call again |
 
-For `pause_turn` the page's key points are to send the assistant response back as it is, keep the same `tools` array, and remember
+For `pause_turn` the documentation's key points are to send the assistant response back as it is, keep the same `tools` array, and remember
 that this "is different from `tool_use`, which requires `tool_result` blocks". The default iteration limit of the server-side
 loop is 10.
 
@@ -498,8 +498,8 @@ final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data 
 
 Read the output. The model was called twice, with stop reasons `tool_use` and `end_turn`. After the first reply the message list is
 user, assistant, user, assistant, and the three results sit in one user message with the ids `toolu_01` to `toolu_03` in order. The
-tool definitions sent carry no handler: the model sees the schema, and "never sees your implementation". `auto` was sent unchanged on both requests; the loop
-would drop a forced choice after the first request, which is the course's own rule and is covered on the next page.
+tool definitions sent carry no handler: the model sees the schema, and "never sees your implementation". `auto` was sent unchanged on both requests; a forced choice would be dropped here after the first request (the practice sends
+`auto` instead), which is the course's own rule and is covered on the next page.
 
 Java and Kotlin readers: the practice on the third page builds this loop in your language.
 
