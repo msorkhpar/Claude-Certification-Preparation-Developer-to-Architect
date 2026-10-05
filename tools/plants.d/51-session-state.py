@@ -1,0 +1,41 @@
+# Planted wrong solutions of module 51-session-state: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/51-session-state/unit-01/practice-1"] = {
+    "python": ("sessions.py", {
+        "wrong-ignores-changes": [("    elif changed or deleted or added:", "    elif False:")],
+        "wrong-added-ignored": [("    elif changed or deleted or added:", "    elif changed or deleted:")],
+        "wrong-half-is-fresh": [("share > STALE_SHARE", "share >= STALE_SHARE")],
+        "wrong-added-counted": [("(len(changed) + len(deleted)) / len(before)", "(len(changed) + len(deleted) + len(added)) / len(before)")],
+        "wrong-age-ignored": [(' or now - record["last_used"] > WEEK_SECONDS', "")],
+        "wrong-age-inclusive": [('now - record["last_used"] > WEEK_SECONDS', 'now - record["last_used"] >= WEEK_SECONDS')],
+        "wrong-fork-without-session": [('"fork": bool(fork) and resumed}', '"fork": bool(fork)}')],
+        "wrong-notice-when-nothing": [('    if not lines:\n        return ""\n', '    if not lines:\n        lines.append("- none")\n')],
+        "wrong-summary-after-task": [('return f"{summary}\\n\\n{task}"', 'return f"{task}\\n\\n{summary}"')],
+        "wrong-summary-keeps-repeats": [("if text and text not in seen:", "if text:")],
+        "wrong-files-unsorted": [("for path in sorted(files)]", "for path in files]")],
+        "wrong-fork-alone": [('        if plan["fork"]:\n            options["fork_session"] = True', '    if plan["fork"]:\n        options["fork_session"] = True')],
+        "wrong-continue-many": [("if len(sessions_in_directory) != 1:", "if len(sessions_in_directory) == 0:")],
+        "wrong-name-first-match": [("if len(ids) > 1:", "if len(ids) > 5:")],
+        "wrong-id-only-on-success": [("                session_id, result = message.session_id, message.result", '                if message.subtype == "success":\n                    session_id, result = message.session_id, message.result')],
+        "wrong-no-fork-flag": [('options["fork_session"] = True', 'options["fork_session"] = False')],
+    }),
+    "typescript": ("sessions.ts", {
+        "wrong-ignores-changes": [("else if (changed.length || deleted.length || added.length)", "else if (false)")],
+        "wrong-added-ignored": [("else if (changed.length || deleted.length || added.length)", "else if (changed.length || deleted.length)")],
+        "wrong-half-is-fresh": [("share > STALE_SHARE", "share >= STALE_SHARE")],
+        "wrong-added-counted": [("(changed.length + deleted.length) / paths.length", "(changed.length + deleted.length + added.length) / paths.length")],
+        "wrong-age-ignored": [(" || now - record.last_used > WEEK_SECONDS", "")],
+        "wrong-age-inclusive": [("now - record.last_used > WEEK_SECONDS", "now - record.last_used >= WEEK_SECONDS")],
+        "wrong-fork-without-session": [("fork: Boolean(fork) && resumed }", "fork: Boolean(fork) }")],
+        "wrong-notice-when-nothing": [('  if (!lines.length) return "";', '  if (!lines.length) lines.push("- none");')],
+        "wrong-summary-after-task": [("return `${summary}\\n\\n${task}`;", "return `${task}\\n\\n${summary}`;")],
+        "wrong-summary-keeps-repeats": [("if (text && !seen.includes(text)) seen.push(text);", "if (text) seen.push(text);")],
+        "wrong-files-unsorted": [("Object.keys(files).sort().map(", "Object.keys(files).map(")],
+        "wrong-fork-alone": [("    if (plan.fork) options.forkSession = true;\n  }", "  }\n  if (plan.fork) options.forkSession = true;")],
+        "wrong-continue-many": [("if (sessionsInDirectory.length !== 1)", "if (sessionsInDirectory.length === 0)")],
+        "wrong-name-first-match": [("if (ids.length > 1)", "if (ids.length > 5)")],
+        "wrong-id-only-on-success": [("        sessionId = message.session_id;", '        if (message.subtype === "success") sessionId = message.session_id;')],
+        "wrong-no-fork-flag": [("options.forkSession = true;", "options.forkSession = false;")],
+    }),
+}

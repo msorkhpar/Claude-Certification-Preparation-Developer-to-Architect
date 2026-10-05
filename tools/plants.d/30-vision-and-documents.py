@@ -1,0 +1,41 @@
+# Planted wrong solutions of module 30-vision-and-documents: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
+    "python": ("vision.py", {
+        "wrong-edge-only-resize": [(" and visual_tokens(w, h) <= max_tokens", "")],
+        "wrong-text-first": [('content.append({"type": "text", "text": question})', 'content.insert(0, {"type": "text", "text": question})')],
+        "wrong-no-labels": [("if len(images) > 1:", "if False:")],
+        "wrong-padded-coordinates": [("return (x / resized_w * width, y / resized_h * height)", "return (x / resized_w * width, y / (math.ceil(resized_h / 28) * 28) * height)")],
+        "wrong-same-limit-all-models": [("if len(images) > (100 if context < 1_000_000 else 600):", "if len(images) > 600:")],
+        "wrong-many-image-rule": [('if many and max(it["width"], it["height"]) > 2000:', "if False:")],
+        "wrong-exact-silent": [('            if exact:\n                raise RequestError(f"items[{i}].dimensions", f"would be resized to {seen[0]}x{seen[1]}")\n', "")],
+    }),
+    "typescript": ("vision.ts", {
+        "wrong-edge-only-resize": [(" && visualTokens(w, h) <= maxTokens", "")],
+        "wrong-text-first": [('content.push({ type: "text", text: question });', 'content.unshift({ type: "text", text: question });')],
+        "wrong-no-labels": [("if (images.length > 1)", "if (false)")],
+        "wrong-padded-coordinates": [("return [(cx / resizedW) * width, (cy / resizedH) * height];", "return [(cx / resizedW) * width, (cy / (Math.ceil(resizedH / 28) * 28)) * height];")],
+        "wrong-same-limit-all-models": [("if (images.length > limit)", "if (images.length > 600)")],
+        "wrong-many-image-rule": [("if (many && Math.max(w, h) > 2000)", "if (false && Math.max(w, h) > 2000)")],
+        "wrong-exact-silent": [("      if (exact) throw new RequestError(`items[${i}].dimensions`, `would be resized to ${seen[0]}x${seen[1]}`);\n", "")],
+    }),
+    "java": ("Vision.java", {
+        "wrong-edge-only-resize": [(" && visualTokens(w, h) <= maxTokens", "")],
+        "wrong-text-first": [('content.add(map("type", "text", "text", question));', 'content.add(0, map("type", "text", "text", question));')],
+        "wrong-no-labels": [("if (images > 1) content.add", "if (images > 1000) content.add")],
+        "wrong-padded-coordinates": [("return new double[] {cx / r[0] * width, cy / r[1] * height};", "return new double[] {cx / r[0] * width, cy / (Math.ceilDiv(r[1], 28) * 28) * height};")],
+        "wrong-same-limit-all-models": [("if (images > limit)", "if (images > 600)")],
+        "wrong-many-image-rule": [("if (many && Math.max(w, h) > 2000)", "if (false && Math.max(w, h) > 2000)")],
+        "wrong-exact-silent": [('                if (exact) throw new RequestError("items[" + i + "].dimensions", "would be resized to " + seen[0] + "x" + seen[1]);\n', "")],
+    }),
+    "kotlin": ("Vision.kt", {
+        "wrong-edge-only-resize": [(" && visualTokens(w, h) <= maxTokens", "")],
+        "wrong-text-first": [('content.add(mapOf("type" to "text", "text" to question))', 'content.add(0, mapOf("type" to "text", "text" to question))')],
+        "wrong-no-labels": [("if (images > 1) content.add(", "if (images > 1000) content.add(")],
+        "wrong-padded-coordinates": [("return Pair(cx / rw * width, cy / rh * height)", "return Pair(cx / rw * width, cy / (ceil(rh / 28.0).toInt() * 28) * height)")],
+        "wrong-same-limit-all-models": [("if (images > limit)", "if (images > 600)")],
+        "wrong-many-image-rule": [("if (many && max(w, h) > 2000)", "if (false && max(w, h) > 2000)")],
+        "wrong-exact-silent": [('            if (exact) throw RequestError("items[$i].dimensions", "would be resized to ${seen.first}x${seen.second}")\n', "")],
+    }),
+}

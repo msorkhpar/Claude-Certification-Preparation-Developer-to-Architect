@@ -1,0 +1,53 @@
+# Planted wrong solutions of module 76-scenario-conversational-ai-assistant: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/76-scenario-conversational-ai-assistant/unit-01/practice-1"] = {
+    "python": ("conversation_review.py", {
+        "wrong-safety-any-hand-off": [('c["risk"] and c["handoff"] != "safety"', 'c["risk"] and c["handoff"] == "none"')],
+        "wrong-overlong-inclusive": [('c["turns"] > policy["max_turns"]', 'c["turns"] >= policy["max_turns"]')],
+        "wrong-repeat-strict": [('repeat_ok = repeated * 100 <= policy["max_repeat"] * n', 'repeat_ok = repeated * 100 < policy["max_repeat"] * n')],
+        "wrong-weak-inclusive": [('done * 100 < policy["min_resolved"] * len(group)', 'done * 100 <= policy["min_resolved"] * len(group)')],
+        "wrong-weak-ignores-min-n": [('"weak": len(group) >= policy["min_n"] and done', '"weak": done')],
+        "wrong-min-n-strict": [('len(group) >= policy["min_n"]', 'len(group) > policy["min_n"]')],
+        "wrong-over-escalated-counts-risk": [('c["handoff"] != "none" and not c["needed_person"] and not c["risk"])', 'c["handoff"] != "none" and not c["needed_person"])')],
+        "wrong-resolved-ignores-hand-off": [('resolved = sum(1 for c in conversations if c["resolved"] and c["handoff"] == "none")', 'resolved = sum(1 for c in conversations if c["resolved"])')],
+        "wrong-rounding-floor": [("return (200 * count + total) // (2 * total) if total else 0", "return 100 * count // total if total else 0")],
+        "wrong-safety-never-holds": [("    elif safety_missed:", "    elif safety_missed > len(conversations):")],
+    }),
+    "typescript": ("conversationReview.ts", {
+        "wrong-safety-any-hand-off": [('c.risk && c.handoff !== "safety"', 'c.risk && c.handoff === "none"')],
+        "wrong-overlong-inclusive": [("c.turns > policy.max_turns", "c.turns >= policy.max_turns")],
+        "wrong-repeat-strict": [("const repeatOk = repeated * 100 <= policy.max_repeat * n;", "const repeatOk = repeated * 100 < policy.max_repeat * n;")],
+        "wrong-weak-inclusive": [("done * 100 < policy.min_resolved * group.length", "done * 100 <= policy.min_resolved * group.length")],
+        "wrong-weak-ignores-min-n": [("weak: group.length >= policy.min_n && done", "weak: done")],
+        "wrong-min-n-strict": [("group.length >= policy.min_n", "group.length > policy.min_n")],
+        "wrong-over-escalated-counts-risk": [('c.handoff !== "none" && !c.needed_person && !c.risk', 'c.handoff !== "none" && !c.needed_person')],
+        "wrong-resolved-ignores-hand-off": [('const resolved = count((c) => c.resolved && c.handoff === "none");', "const resolved = count((c) => c.resolved);")],
+        "wrong-rounding-floor": [("return total ? Math.floor((200 * count + total) / (2 * total)) : 0;", "return total ? Math.floor((100 * count) / total) : 0;")],
+        "wrong-safety-never-holds": [("  else if (safetyMissed) reason", "  else if (safetyMissed > conversations.length) reason")],
+    }),
+    "java": ("ConversationReview.java", {
+        "wrong-safety-any-hand-off": [('c.risk() && !c.handoff().equals("safety")', 'c.risk() && c.handoff().equals("none")')],
+        "wrong-overlong-inclusive": [("c.turns() > policy.maxTurns()", "c.turns() >= policy.maxTurns()")],
+        "wrong-repeat-strict": [("boolean repeatOk = repeated * 100 <= policy.maxRepeat() * n;", "boolean repeatOk = repeated * 100 < policy.maxRepeat() * n;")],
+        "wrong-weak-inclusive": [("done * 100 < policy.minResolved() * group.size()", "done * 100 <= policy.minResolved() * group.size()")],
+        "wrong-weak-ignores-min-n": [("group.size() >= policy.minN() && done", "done")],
+        "wrong-min-n-strict": [("group.size() >= policy.minN()", "group.size() > policy.minN()")],
+        "wrong-over-escalated-counts-risk": [('!c.handoff().equals("none") && !c.neededPerson() && !c.risk()', '!c.handoff().equals("none") && !c.neededPerson()')],
+        "wrong-resolved-ignores-hand-off": [('int resolved = (int) conversations.stream().filter(c -> c.resolved() && c.handoff().equals("none")).count();', "int resolved = (int) conversations.stream().filter(c -> c.resolved()).count();")],
+        "wrong-rounding-floor": [("return total > 0 ? (200 * count + total) / (2 * total) : 0;", "return total > 0 ? 100 * count / total : 0;")],
+        "wrong-safety-never-holds": [("else if (safetyMissed > 0) reason", "else if (safetyMissed > n) reason")],
+    }),
+    "kotlin": ("ConversationReview.kt", {
+        "wrong-safety-any-hand-off": [('it.risk && it.handoff != "safety"', 'it.risk && it.handoff == "none"')],
+        "wrong-overlong-inclusive": [("it.turns > policy.maxTurns", "it.turns >= policy.maxTurns")],
+        "wrong-repeat-strict": [("val repeatOk = repeated * 100 <= policy.maxRepeat * n", "val repeatOk = repeated * 100 < policy.maxRepeat * n")],
+        "wrong-weak-inclusive": [("done * 100 < policy.minResolved * group.size", "done * 100 <= policy.minResolved * group.size")],
+        "wrong-weak-ignores-min-n": [("group.size >= policy.minN && done", "done")],
+        "wrong-min-n-strict": [("group.size >= policy.minN", "group.size > policy.minN")],
+        "wrong-over-escalated-counts-risk": [('it.handoff != "none" && !it.neededPerson && !it.risk', 'it.handoff != "none" && !it.neededPerson')],
+        "wrong-resolved-ignores-hand-off": [('val resolved = conversations.count { it.resolved && it.handoff == "none" }', "val resolved = conversations.count { it.resolved }")],
+        "wrong-rounding-floor": [("if (total > 0) (200 * count + total) / (2 * total) else 0", "if (total > 0) 100 * count / total else 0")],
+        "wrong-safety-never-holds": [("        safetyMissed > 0 -> ", "        safetyMissed > n -> ")],
+    }),
+}

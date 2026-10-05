@@ -1,0 +1,40 @@
+# Case lists of module 62-structured-output-at-the-architect-level: one entry per practice (see tools/make_cases.py).
+# Runs with PRACTICES and X in scope; names defined here are local to this file.
+
+PRACTICES[f"{X}/62-structured-output-at-the-architect-level/unit-01/practice-1"] = {
+    "name": "extraction", "suite": "ExtractionTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "a document with every value present and quoted comes back valid on the first attempt"),
+        ("e1", "edge", "a value the document does not give is null and needs no quote while an invented value fails as ungrounded"),
+        ("e2", "edge", "a retry carries the original document the failed record and only the errors a second look can fix"),
+        ("e3", "edge", "a required value that the model reports as absent is not retried and goes to review"),
+        ("e4", "edge", "retries stop after the limit and the document is marked failed"),
+        ("e5", "edge", "a total that differs from the line items is a semantic error and a flagged conflict goes to review without a retry"),
+        ("e6", "edge", "currency takes unclear and other with a detail and rejects anything else as a syntax error"),
+        ("e7", "edge", "chunk results merge by keeping the first value and recording a conflict when two chunks disagree"),
+        ("e8", "edge", "accuracy counts every document and not only the validated ones"),
+        ("e9", "edge", "the request forces a tool where the model allows it and falls back to auto with a reply check where it does not"),
+    ],
+    "plants": {
+        "wrong-grounding-skipped": (["e1", "e2"], "accepts a quote that does not appear in the document"),
+        "wrong-null-needs-quote": (["e1", "e3"], "demands a quote for a value that is null"),
+        "wrong-feedback-all-errors": (["e2"], "sends every error back, including the ones a second look cannot fix"),
+        "wrong-feedback-no-previous": (["e2"], "leaves the failed record out of the retry"),
+        "wrong-retry-absent": (["e3"], "retries a value that the model reported as absent"),
+        "wrong-absent-failed": (["e3"], "marks a document with only absent values as failed instead of sending it to review"),
+        "wrong-extra-retry": (["e4"], "makes one retry more than the limit"),
+        "wrong-sum-unchecked": (["e5"], "never compares the line items with the calculated total"),
+        "wrong-conflict-error": (["e5"], "treats a conflict the model flagged as a semantic error"),
+        "wrong-conflict-valid": (["e5"], "marks a document with a flagged conflict as valid"),
+        "wrong-unclear-needs-quote": (["e2", "e6"], "demands a quote for a currency that is unclear"),
+        "wrong-other-no-detail": (["e6"], "accepts the currency other without a detail"),
+        "wrong-currency-open": (["e4", "e6"], "accepts any currency string"),
+        "wrong-merge-last-wins": (["e7"], "lets a later chunk replace an earlier value"),
+        "wrong-merge-no-conflict": (["e7"], "never records a conflict between chunks"),
+        "wrong-accuracy-validated-only": (["e8"], "divides by the validated documents and calls it accuracy"),
+        "wrong-accuracy-missing-skipped": (["e8"], "leaves the documents without a result out of the count"),
+        "wrong-force-always": (["e9"], "forces a tool on models that reject a forced choice"),
+        "wrong-any-for-single": (["e9"], "uses any where one named tool is enough"),
+        "wrong-no-verify": (["e9"], "does not ask for a reply check on the fallback"),
+    },
+}

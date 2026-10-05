@@ -1,0 +1,144 @@
+# Planted wrong solutions of module 60-claude-code-in-ci: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+_WF, _CM, _SC = ".github/workflows/claude-review.yml", "CLAUDE.md", "review-schema.json"
+
+_CFG60 = {
+    "wrong-vague-criteria": {_CM: [("## Skip\n", "## Skip\n- Be conservative and only report high-confidence findings.\n")]},
+    "wrong-no-severity-example": {_CM: [("- high: data loss or a security hole, for example `DELETE FROM orders` built from request input.", "- high: data loss or a security hole.")]},
+    "wrong-no-fixtures": {_CM: [("build their data from `tests/fixtures/`", "build their data inline")]},
+    "wrong-home-path": {_CM: [("## Skip\n", "## Skip\n- My notes are in /home/dev/notes.\n")]},
+    "wrong-schema-severity-open": {_SC: [('"severity": {"type": "string", "enum": ["low", "medium", "high"]},', '"severity": {"type": "string"},')]},
+    "wrong-schema-draft-2020": {_SC: [('{\n  "type": "object",\n  "properties": {\n    "findings"', '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "type": "object",\n  "properties": {\n    "findings"')]},
+    "wrong-schema-min-length": {_SC: [('"issue": {"type": "string"},', '"issue": {"type": "string", "minLength": 1},')]},
+    "wrong-schema-pattern-optional": {_SC: [('"suggested_fix", "detected_pattern"],', '"suggested_fix"],')]},
+    "wrong-schema-extra-allowed": {_SC: [('        "additionalProperties": false', '        "additionalProperties": true')]},
+    "wrong-no-print": {_WF: [('claude --bare -p "Review', 'claude --bare "Review')]},
+    "wrong-no-json": {_WF: [("            --output-format json \\\n", "")]},
+    "wrong-no-schema-flag": {_WF: [('            --json-schema "$(cat review-schema.json)" \\\n', "")]},
+    "wrong-no-max-turns": {_WF: [("            --max-turns 8 \\\n", "")]},
+    "wrong-bash-tool": {_WF: [('--allowedTools "Read,Grep,Glob"', '--allowedTools "Read,Grep,Glob,Bash"')]},
+    "wrong-no-bare": {_WF: [("claude --bare -p", "claude -p")]},
+    "wrong-bare-no-context": {_WF: [("            --append-system-prompt-file CLAUDE.md \\\n", "")]},
+    "wrong-literal-key": {_WF: [("ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}", "ANTHROPIC_API_KEY: sk-ant-api03-EXAMPLEKEY123456")]},
+    "wrong-no-timeout": {_WF: [("    timeout-minutes: 15\n", "")]},
+    "wrong-write-permission": {_WF: [("      contents: read\n", "      contents: write\n")]},
+}
+
+_PY60 = {
+    "wrong-gate-nonzero-ignored": {"review_gate.py": [("    if exit_code != 0:", "    if False:")]},
+    "wrong-gate-error-ignored": {"review_gate.py": [('    if envelope.get("is_error") or envelope.get("subtype") != "success":', "    if False:")]},
+    "wrong-gate-no-output-ok": {"review_gate.py": [('output = envelope.get("structured_output")', 'output = envelope.get("structured_output") or {"findings": []}')]},
+    "wrong-gate-no-schema": {"review_gate.py": [('        problems += [f"schema {e}" for e in schema_check(output, schema)]', "        pass")]},
+    "wrong-gate-floor-ignored": {"review_gate.py": [(' and SEVERITIES.index(f["severity"]) >= floor]', "]")]},
+    "wrong-gate-disabled-ignored": {"review_gate.py": [('if f["category"] not in policy["disabled_categories"] and ', "if ")]},
+    "wrong-gate-never-blocks": {"review_gate.py": [('blocked = any(c["severity"] in policy["fail_on"] for c in comments)', "blocked = False")]},
+    "wrong-gate-blocks-on-any": {"review_gate.py": [('blocked = any(c["severity"] in policy["fail_on"] for c in comments)', "blocked = bool(comments)")]},
+    "wrong-prompt-no-new-only": {"review_gate.py": [(', "Report only findings that are new or still unaddressed."]', "]")]},
+    "wrong-prompt-no-prior": {"review_gate.py": [('    if prior:\n        lines += ["<already_reported>"]', '    if False:\n        lines += ["<already_reported>"]')]},
+    "wrong-prompt-no-tests": {"review_gate.py": [('    if existing_tests:\n        lines += ["<existing_tests>"]', '    if False:\n        lines += ["<existing_tests>"]')]},
+    "wrong-prompt-diff-first": {"review_gate.py": [('    lines += ["<diff>", diff, "</diff>"]', '    lines = ["<diff>", diff, "</diff>"] + lines')]},
+}
+
+_TS60 = {
+    "wrong-gate-nonzero-ignored": {"reviewGate.ts": [("if (exitCode !== 0) problems.push(", "if (false) problems.push(")]},
+    "wrong-gate-error-ignored": {"reviewGate.ts": [('if (envelope.is_error || envelope.subtype !== "success") problems.push(', "if (false) problems.push(")]},
+    "wrong-gate-no-output-ok": {"reviewGate.ts": [("const output = envelope.structured_output;", "const output = envelope.structured_output ?? { findings: [] };")]},
+    "wrong-gate-no-schema": {"reviewGate.ts": [("else problems.push(...schemaCheck(output, schema).map((e: string) => `schema ${e}`));", "else void 0;")]},
+    "wrong-gate-floor-ignored": {"reviewGate.ts": [(" && SEVERITIES.indexOf(f.severity) >= floor)", ")")]},
+    "wrong-gate-disabled-ignored": {"reviewGate.ts": [("!policy.disabled_categories.includes(f.category) && ", "")]},
+    "wrong-gate-never-blocks": {"reviewGate.ts": [("const blocked = comments.some((c: any) => policy.fail_on.includes(c.severity));", "const blocked = false;")]},
+    "wrong-gate-blocks-on-any": {"reviewGate.ts": [("const blocked = comments.some((c: any) => policy.fail_on.includes(c.severity));", "const blocked = comments.length > 0;")]},
+    "wrong-prompt-no-new-only": {"reviewGate.ts": [(', "Report only findings that are new or still unaddressed."];', "];")]},
+    "wrong-prompt-no-prior": {"reviewGate.ts": [('if (prior.length > 0) lines.push("<already_reported>", ', 'if (false) lines.push("<already_reported>", ')]},
+    "wrong-prompt-no-tests": {"reviewGate.ts": [('if (existingTests.length > 0) lines.push("<existing_tests>", ', 'if (false) lines.push("<existing_tests>", ')]},
+    "wrong-prompt-diff-first": {"reviewGate.ts": [('lines.push("<diff>", diff, "</diff>");', 'lines.unshift("<diff>", diff, "</diff>");')]},
+}
+
+_JAVA60 = {
+    "wrong-gate-nonzero-ignored": {"ReviewGate.java": [("if (exitCode != 0) problems.add(", "if (false) problems.add(")]},
+    "wrong-gate-error-ignored": {"ReviewGate.java": [('if (envelope.path("is_error").asBoolean(false) || subtype == null || !subtype.isTextual() || !subtype.asText().equals("success")) {', "if (false) {")]},
+    "wrong-gate-no-output-ok": {"ReviewGate.java": [('JsonNode output = envelope.get("structured_output");\n', 'JsonNode output = envelope.get("structured_output");\n        if (output == null || output.isNull()) output = JSON.createObjectNode().set("findings", JSON.createArrayNode());\n')]},
+    "wrong-gate-no-schema": {"ReviewGate.java": [('else for (String e : SchemaCheck.schemaCheck(output, schema)) problems.add("schema " + e);', "else { }")]},
+    "wrong-gate-floor-ignored": {"ReviewGate.java": [('if (disabled.contains(f.get("category").asText()) || SEVERITIES.indexOf(f.get("severity").asText()) < floor) continue;', 'if (disabled.contains(f.get("category").asText())) continue;')]},
+    "wrong-gate-disabled-ignored": {"ReviewGate.java": [('if (disabled.contains(f.get("category").asText()) || SEVERITIES.indexOf(f.get("severity").asText()) < floor) continue;', 'if (SEVERITIES.indexOf(f.get("severity").asText()) < floor) continue;')]},
+    "wrong-gate-never-blocks": {"ReviewGate.java": [('boolean blocked = comments.stream().anyMatch(c -> failOn.contains((String) c.get("severity")));', "boolean blocked = false;")]},
+    "wrong-gate-blocks-on-any": {"ReviewGate.java": [('boolean blocked = comments.stream().anyMatch(c -> failOn.contains((String) c.get("severity")));', "boolean blocked = !comments.isEmpty();")]},
+    "wrong-prompt-no-new-only": {"ReviewGate.java": [(', "Report only findings that are new or still unaddressed."));', "));")]},
+    "wrong-prompt-no-prior": {"ReviewGate.java": [('        if (!prior.isEmpty()) {\n            lines.add("<already_reported>");', '        if (false) {\n            lines.add("<already_reported>");')]},
+    "wrong-prompt-no-tests": {"ReviewGate.java": [('        if (!existingTests.isEmpty()) {\n            lines.add("<existing_tests>");', '        if (false) {\n            lines.add("<existing_tests>");')]},
+    "wrong-prompt-diff-first": {"ReviewGate.java": [('lines.addAll(List.of("<diff>", diff, "</diff>"));', 'lines.addAll(0, List.of("<diff>", diff, "</diff>"));')]},
+}
+
+_KT60 = {
+    "wrong-gate-nonzero-ignored": {"ReviewGate.kt": [("if (exitCode != 0) problems += ", "if (false) problems += ")]},
+    "wrong-gate-error-ignored": {"ReviewGate.kt": [('if (envelope.path("is_error").asBoolean(false) || subtype == null || !subtype.isTextual || subtype.asText() != "success") {', "if (false) {")]},
+    "wrong-gate-no-output-ok": {"ReviewGate.kt": [('val output = envelope.get("structured_output")\n', 'val output = envelope.get("structured_output")?.takeUnless { it.isNull } ?: json.readTree("{\\"findings\\": []}")\n')]},
+    "wrong-gate-no-schema": {"ReviewGate.kt": [('else problems += SchemaCheck.schemaCheck(output, schema).map { "schema $it" }', "else Unit")]},
+    "wrong-gate-floor-ignored": {"ReviewGate.kt": [(' && SEVERITIES.indexOf(it.get("severity").asText()) >= floor }', " }")]},
+    "wrong-gate-disabled-ignored": {"ReviewGate.kt": [('.filter { it.get("category").asText() !in disabled && SEVERITIES', ".filter { SEVERITIES")]},
+    "wrong-gate-never-blocks": {"ReviewGate.kt": [('return decision(if (comments.any { it["severity"] in failOn }) 1 else 0, comments, emptyList())', "return decision(0, comments, emptyList())")]},
+    "wrong-gate-blocks-on-any": {"ReviewGate.kt": [('return decision(if (comments.any { it["severity"] in failOn }) 1 else 0, comments, emptyList())', "return decision(if (comments.isNotEmpty()) 1 else 0, comments, emptyList())")]},
+    "wrong-prompt-no-new-only": {"ReviewGate.kt": [(', "Report only findings that are new or still unaddressed.")', ")")]},
+    "wrong-prompt-no-prior": {"ReviewGate.kt": [('if (prior.isNotEmpty()) lines += listOf("<already_reported>")', 'if (false) lines += listOf("<already_reported>")')]},
+    "wrong-prompt-no-tests": {"ReviewGate.kt": [('if (existingTests.isNotEmpty()) lines += listOf("<existing_tests>")', 'if (false) lines += listOf("<existing_tests>")')]},
+    "wrong-prompt-diff-first": {"ReviewGate.kt": [('lines += listOf("<diff>", diff, "</diff>")', 'lines.addAll(0, listOf("<diff>", diff, "</diff>"))')]},
+}
+
+PLANTS[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {"python": ("review_gate.py", {**_CFG60, **_PY60}), "typescript": ("reviewGate.ts", {**_CFG60, **_TS60}),
+                                                          "java": ("ReviewGate.java", {**_CFG60, **_JAVA60}), "kotlin": ("ReviewGate.kt", {**_CFG60, **_KT60})}
+
+PLANTS[f"{X}/60-claude-code-in-ci/unit-02/practice-1"] = {
+    "python": ("rhythm_plan.py", {
+        "wrong-ci-only-for-intervals": [('if job.get("ci", False):', 'if job.get("ci", False) and trigger == "interval":')],
+        "wrong-event-always-watched": [('if job.get("repo_event", False) or machine_off:', "if False:")],
+        "wrong-event-polled": [('return _pick("monitor", "push-not-poll")', 'return _pick("loop-fixed", "fixed-cadence", 5)')],
+        "wrong-seconds-floor": [("return math.ceil(seconds / 60)", "return seconds // 60")],
+        "wrong-no-expiry": [("if days > LOOP_EXPIRY_DAYS:", "if False:")],
+        "wrong-cloud-any-interval": [("if seconds < CLOUD_MIN_SECONDS:", "if seconds < 0:")],
+        "wrong-once-ignores-machine-off": [('        if machine_off:\n            return _pick("routine", "survives-closed-machine")\n', "")],
+        "wrong-closed-session-ignored": [("    if not session_open:\n        return _local(seconds)\n", "")],
+        "wrong-selfpaced-as-minute": [('    if seconds == 0:\n        return _pick("loop-self-paced", "pace-by-what-is-seen")\n', "")],
+        "wrong-no-validation": [("if trigger not in TRIGGERS:", "if False:")],
+        "wrong-cloud-sees-local-files": [("if machine_off and local_files:", "if False:")],
+    }),
+    "typescript": ("rhythmPlan.ts", {
+        "wrong-ci-only-for-intervals": [('if (job.ci ?? false) return pick("headless-run"', 'if ((job.ci ?? false) && trigger === "interval") return pick("headless-run"')],
+        "wrong-event-always-watched": [("if ((job.repo_event ?? false) || machineOff) return", "if (false) return")],
+        "wrong-event-polled": [('return pick("monitor", "push-not-poll");', 'return pick("loop-fixed", "fixed-cadence", 5);')],
+        "wrong-seconds-floor": [("return Math.ceil(seconds / 60);", "return Math.floor(seconds / 60);")],
+        "wrong-no-expiry": [("if (days > LOOP_EXPIRY_DAYS) return", "if (false) return")],
+        "wrong-cloud-any-interval": [("if (seconds < CLOUD_MIN_SECONDS) throw", "if (seconds < 0) throw")],
+        "wrong-once-ignores-machine-off": [('    if (machineOff) return pick("routine", "survives-closed-machine");\n', "")],
+        "wrong-closed-session-ignored": [("  if (!sessionOpen) return local(seconds);\n", "")],
+        "wrong-selfpaced-as-minute": [('  if (seconds === 0) return pick("loop-self-paced", "pace-by-what-is-seen");\n', "")],
+        "wrong-no-validation": [("if (!TRIGGERS.includes(trigger)) throw", "if (false) throw")],
+        "wrong-cloud-sees-local-files": [("if (machineOff && localFiles) throw", "if (false) throw")],
+    }),
+    "java": ("RhythmPlan.java", {
+        "wrong-ci-only-for-intervals": [('if (flag(job, "ci", false)) return', 'if (flag(job, "ci", false) && trigger.equals("interval")) return')],
+        "wrong-event-always-watched": [('if (flag(job, "repo_event", false) || machineOff) return', "if (false) return")],
+        "wrong-event-polled": [('return new Choice("monitor", "push-not-poll", 0);', 'return new Choice("loop-fixed", "fixed-cadence", 5);')],
+        "wrong-seconds-floor": [("return Math.ceilDiv(seconds, 60);", "return Math.floorDiv(seconds, 60);")],
+        "wrong-no-expiry": [("if (days > LOOP_EXPIRY_DAYS) return", "if (false) return")],
+        "wrong-cloud-any-interval": [("if (seconds < CLOUD_MIN_SECONDS) throw", "if (seconds < 0) throw")],
+        "wrong-once-ignores-machine-off": [('            if (machineOff) return new Choice("routine", "survives-closed-machine", 0);\n', "")],
+        "wrong-closed-session-ignored": [("        if (!sessionOpen) return local(seconds);\n", "")],
+        "wrong-selfpaced-as-minute": [('        if (seconds == 0) return new Choice("loop-self-paced", "pace-by-what-is-seen", 0);\n', "")],
+        "wrong-no-validation": [("if (!TRIGGERS.contains(trigger)) throw", "if (false) throw")],
+        "wrong-cloud-sees-local-files": [("if (machineOff && localFiles) throw", "if (false) throw")],
+    }),
+    "kotlin": ("RhythmPlan.kt", {
+        "wrong-ci-only-for-intervals": [('if (flag(job, "ci", false)) return', 'if (flag(job, "ci", false) && trigger == "interval") return')],
+        "wrong-event-always-watched": [('if (flag(job, "repo_event", false) || machineOff) return', "if (false) return")],
+        "wrong-event-polled": [('return Choice("monitor", "push-not-poll", 0)', 'return Choice("loop-fixed", "fixed-cadence", 5)')],
+        "wrong-seconds-floor": [("Math.ceilDiv(seconds, 60)", "Math.floorDiv(seconds, 60)")],
+        "wrong-no-expiry": [("if (days > LOOP_EXPIRY_DAYS) return", "if (false) return")],
+        "wrong-cloud-any-interval": [("require(seconds >= CLOUD_MIN_SECONDS)", "require(seconds >= 0)")],
+        "wrong-once-ignores-machine-off": [('        if (machineOff) return Choice("routine", "survives-closed-machine", 0)\n', "")],
+        "wrong-closed-session-ignored": [("    if (!sessionOpen) return local(seconds)\n", "")],
+        "wrong-selfpaced-as-minute": [('    if (seconds == 0) return Choice("loop-self-paced", "pace-by-what-is-seen", 0)\n', "")],
+        "wrong-no-validation": [("require(trigger in TRIGGERS)", "require(true)")],
+        "wrong-cloud-sees-local-files": [("require(!(machineOff && localFiles))", "require(true)")],
+    }),
+}

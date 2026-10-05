@@ -1,0 +1,53 @@
+# Planted wrong solutions of module 75-scenario-structured-data-extraction: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/75-scenario-structured-data-extraction/unit-01/practice-1"] = {
+    "python": ("run_audit.py", {
+        "wrong-validated-denominator": [("accuracy_all = percent(right, n)", 'accuracy_all = percent(right, counts["valid"])')],
+        "wrong-target-strict": [("meets_target = n > 0 and right * 100 >= target * n", "meets_target = n > 0 and right * 100 > target * n")],
+        "wrong-segment-strict": [('"automate": len(group) >= min_n and ok * 100 >= target * len(group)}', '"automate": len(group) >= min_n and ok * 100 > target * len(group)}')],
+        "wrong-min-n-strict": [("len(group) >= min_n and", "len(group) > min_n and")],
+        "wrong-gap-inclusive": [("overstated = accuracy_validated - accuracy_all > gap", "overstated = accuracy_validated - accuracy_all >= gap")],
+        "wrong-unchecked-any-status": [('unchecked = sum(1 for r in runs if r["status"] == "valid" and not r["sum_ok"])', 'unchecked = sum(1 for r in runs if not r["sum_ok"])')],
+        "wrong-fix-order": [('    elif invented:\n        first_fix = "make_fields_nullable"\n    elif wasted:\n        first_fix = "stop_retrying_absent"\n',
+                             '    elif wasted:\n        first_fix = "stop_retrying_absent"\n    elif invented:\n        first_fix = "make_fields_nullable"\n')],
+        "wrong-rounding-floor": [("return (200 * correct + total) // (2 * total) if total else 0", "return 100 * correct // total if total else 0")],
+        "wrong-empty-meets-target": [("meets_target = n > 0 and right * 100", "meets_target = right * 100")],
+    }),
+    "typescript": ("runAudit.ts", {
+        "wrong-validated-denominator": [("const accuracyAll = percent(right, n);", "const accuracyAll = percent(right, valid);")],
+        "wrong-target-strict": [("const meetsTarget = n > 0 && right * 100 >= target * n;", "const meetsTarget = n > 0 && right * 100 > target * n;")],
+        "wrong-segment-strict": [("ok * 100 >= target * group.length }", "ok * 100 > target * group.length }")],
+        "wrong-min-n-strict": [("group.length >= min_n &&", "group.length > min_n &&")],
+        "wrong-gap-inclusive": [("const overstated = accuracyValidated - accuracyAll > gap;", "const overstated = accuracyValidated - accuracyAll >= gap;")],
+        "wrong-unchecked-any-status": [('const unchecked = count((r) => r.status === "valid" && !r.sum_ok);', "const unchecked = count((r) => !r.sum_ok);")],
+        "wrong-fix-order": [('  else if (invented) firstFix = "make_fields_nullable";\n  else if (wasted) firstFix = "stop_retrying_absent";\n',
+                             '  else if (wasted) firstFix = "stop_retrying_absent";\n  else if (invented) firstFix = "make_fields_nullable";\n')],
+        "wrong-rounding-floor": [("return total ? Math.floor((200 * correct + total) / (2 * total)) : 0;", "return total ? Math.floor((100 * correct) / total) : 0;")],
+        "wrong-empty-meets-target": [("const meetsTarget = n > 0 && right", "const meetsTarget = right")],
+    }),
+    "java": ("RunAudit.java", {
+        "wrong-validated-denominator": [("int accuracyAll = percent(right, n);", "int accuracyAll = percent(right, valid);")],
+        "wrong-target-strict": [("boolean meetsTarget = n > 0 && right * 100 >= policy.target() * n;", "boolean meetsTarget = n > 0 && right * 100 > policy.target() * n;")],
+        "wrong-segment-strict": [("ok * 100 >= policy.target() * group.size()", "ok * 100 > policy.target() * group.size()")],
+        "wrong-min-n-strict": [("group.size() >= policy.minN()", "group.size() > policy.minN()")],
+        "wrong-gap-inclusive": [("boolean overstated = accuracyValidated - accuracyAll > policy.gap();", "boolean overstated = accuracyValidated - accuracyAll >= policy.gap();")],
+        "wrong-unchecked-any-status": [('filter(r -> r.status().equals("valid") && !r.sumOk()).count();', "filter(r -> !r.sumOk()).count();")],
+        "wrong-fix-order": [('        else if (invented > 0) firstFix = "make_fields_nullable";\n        else if (wasted > 0) firstFix = "stop_retrying_absent";\n',
+                             '        else if (wasted > 0) firstFix = "stop_retrying_absent";\n        else if (invented > 0) firstFix = "make_fields_nullable";\n')],
+        "wrong-rounding-floor": [("return total > 0 ? (200 * correct + total) / (2 * total) : 0;", "return total > 0 ? 100 * correct / total : 0;")],
+        "wrong-empty-meets-target": [("boolean meetsTarget = n > 0 && right", "boolean meetsTarget = right")],
+    }),
+    "kotlin": ("RunAudit.kt", {
+        "wrong-validated-denominator": [("val accuracyAll = percent(right, n)", "val accuracyAll = percent(right, valid)")],
+        "wrong-target-strict": [("val meetsTarget = n > 0 && right * 100 >= policy.target * n", "val meetsTarget = n > 0 && right * 100 > policy.target * n")],
+        "wrong-segment-strict": [("ok * 100 >= policy.target * group.size", "ok * 100 > policy.target * group.size")],
+        "wrong-min-n-strict": [("group.size >= policy.minN", "group.size > policy.minN")],
+        "wrong-gap-inclusive": [("val overstated = accuracyValidated - accuracyAll > policy.gap", "val overstated = accuracyValidated - accuracyAll >= policy.gap")],
+        "wrong-unchecked-any-status": [('runs.count { it.status == "valid" && !it.sumOk }', "runs.count { !it.sumOk }")],
+        "wrong-fix-order": [('        invented > 0 -> "make_fields_nullable"\n        wasted > 0 -> "stop_retrying_absent"\n',
+                             '        wasted > 0 -> "stop_retrying_absent"\n        invented > 0 -> "make_fields_nullable"\n')],
+        "wrong-rounding-floor": [("if (total > 0) (200 * correct + total) / (2 * total) else 0", "if (total > 0) 100 * correct / total else 0")],
+        "wrong-empty-meets-target": [("val meetsTarget = n > 0 && right", "val meetsTarget = right")],
+    }),
+}

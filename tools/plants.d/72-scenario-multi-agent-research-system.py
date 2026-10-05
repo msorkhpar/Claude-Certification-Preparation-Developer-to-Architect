@@ -1,0 +1,53 @@
+# Planted wrong solutions of module 72-scenario-multi-agent-research-system: exact replacements against the practice's reference (see tools/make_plants.py).
+# Runs with PLANTS, X and both() in scope; names defined here are local to this file.
+
+PLANTS[f"{X}/72-scenario-multi-agent-research-system/unit-01/practice-1"] = {
+    "python": ("synthesis.py", {
+        "wrong-complete-by-errors": [('"status": "partial" if gaps else "complete"', '"status": "partial" if errors else "complete"')],
+        "wrong-conflict-first-wins": [("        if len(values) > 1:", "        if False:")],
+        "wrong-partial-covers": [('ok_scopes = {r["scope"] for r in results if r["status"] == "ok" and r["findings"]}', 'ok_scopes = {r["scope"] for r in results if (r["status"] == "ok" and r["findings"]) or (r["error"] and r["error"]["partial"])}')],
+        "wrong-empty-covers": [('if r["status"] == "ok" and r["findings"]}', 'if r["status"] == "ok"}')],
+        "wrong-partial-dropped": [('seen += [(f, True) for f in r["error"]["partial"]]', 'seen += [(f, True) for f in r["error"]["partial"][:0]]')],
+        "wrong-resolved-error-kept": [('for r in results if r["status"] == "error" and r["scope"] not in covered]', 'for r in results if r["status"] == "error"]')],
+        "wrong-sources-duplicated": [('sources = _same(sources, {"source": f["source"], "date": f["date"]})', 'sources = sources + [{"source": f["source"], "date": f["date"]}]')],
+        "wrong-claims-unsorted": [("for claim in sorted(by_claim):", "for claim in by_claim:")],
+        "wrong-note-silent": [('"note": "not covered: " + ", ".join(parts) if parts else "all scopes covered"', '"note": "all scopes covered"')],
+        "wrong-partial-flag-any": [('"partial": all(p for _, p in group)', '"partial": any(p for _, p in group)')],
+    }),
+    "typescript": ("synthesis.ts", {
+        "wrong-complete-by-errors": [('status: gaps.length > 0 ? "partial" : "complete"', 'status: errors.length > 0 ? "partial" : "complete"')],
+        "wrong-conflict-first-wins": [("if (values.length > 1) {", "if (false) {")],
+        "wrong-partial-covers": [('results.filter((r) => r.status === "ok" && r.findings.length > 0).map((r) => r.scope)', 'results.filter((r) => (r.status === "ok" && r.findings.length > 0) || (r.error?.partial.length ?? 0) > 0).map((r) => r.scope)')],
+        "wrong-empty-covers": [('results.filter((r) => r.status === "ok" && r.findings.length > 0)', 'results.filter((r) => r.status === "ok")')],
+        "wrong-partial-dropped": [("else r.error!.partial.forEach((f) => seen.push([f, true]));", "else r.error!.partial.slice(0, 0).forEach((f) => seen.push([f, true]));")],
+        "wrong-resolved-error-kept": [('results.filter((r) => r.status === "error" && !covered.includes(r.scope))', 'results.filter((r) => r.status === "error")')],
+        "wrong-sources-duplicated": [("sources = same(sources, { source: f.source, date: f.date });", "sources = [...sources, { source: f.source, date: f.date }];")],
+        "wrong-claims-unsorted": [("for (const claim of [...byClaim.keys()].sort()) {", "for (const claim of [...byClaim.keys()]) {")],
+        "wrong-note-silent": [('note: parts.length > 0 ? "not covered: " + parts.join(", ") : "all scopes covered" }', 'note: "all scopes covered" }')],
+        "wrong-partial-flag-any": [("partial: group.every(([, p]) => p) }", "partial: group.some(([, p]) => p) }")],
+    }),
+    "java": ("Synthesis.java", {
+        "wrong-complete-by-errors": [('gaps.isEmpty() ? "complete" : "partial"', 'errors.isEmpty() ? "complete" : "partial"')],
+        "wrong-conflict-first-wins": [("if (values.size() > 1) {", "if (values.size() > 5) {")],
+        "wrong-partial-covers": [('r.status().equals("ok") && !r.findings().isEmpty()).map(Result::scope)', '(r.status().equals("ok") && !r.findings().isEmpty()) || (r.error() != null && !r.error().partial().isEmpty())).map(Result::scope)')],
+        "wrong-empty-covers": [('r.status().equals("ok") && !r.findings().isEmpty()).map(Result::scope)', 'r.status().equals("ok")).map(Result::scope)')],
+        "wrong-partial-dropped": [("else r.error().partial().forEach(f -> seen.add(new Seen(f, true)));", "else r.error().partial().stream().limit(0).forEach(f -> seen.add(new Seen(f, true)));")],
+        "wrong-resolved-error-kept": [('results.stream().filter(r -> r.status().equals("error") && !covered.contains(r.scope()))', 'results.stream().filter(r -> r.status().equals("error"))')],
+        "wrong-sources-duplicated": [("for (Seen s : group) addNew(sources, new Source(s.finding().source(), s.finding().date()));", "for (Seen s : group) sources.add(new Source(s.finding().source(), s.finding().date()));")],
+        "wrong-claims-unsorted": [("Map<String, List<Seen>> byClaim = new TreeMap<>();", "Map<String, List<Seen>> byClaim = new LinkedHashMap<>();")],
+        "wrong-note-silent": [('parts.isEmpty() ? "all scopes covered" : "not covered: " + String.join(", ", parts));', '"all scopes covered");')],
+        "wrong-partial-flag-any": [("group.stream().allMatch(Seen::partial)", "group.stream().anyMatch(Seen::partial)")],
+    }),
+    "kotlin": ("Synthesis.kt", {
+        "wrong-complete-by-errors": [('if (gaps.isEmpty()) "complete" else "partial"', 'if (errors.isEmpty()) "complete" else "partial"')],
+        "wrong-conflict-first-wins": [("if (values.size > 1) {", "if (values.size > 5) {")],
+        "wrong-partial-covers": [('results.filter { it.status == "ok" && it.findings.isNotEmpty() }.map { it.scope }', 'results.filter { (it.status == "ok" && it.findings.isNotEmpty()) || (it.error != null && it.error.partial.isNotEmpty()) }.map { it.scope }')],
+        "wrong-empty-covers": [('results.filter { it.status == "ok" && it.findings.isNotEmpty() }', 'results.filter { it.status == "ok" }')],
+        "wrong-partial-dropped": [("r.error!!.partial.forEach { seen += it to true }", "r.error!!.partial.take(0).forEach { seen += it to true }")],
+        "wrong-resolved-error-kept": [('results.filter { it.status == "error" && it.scope !in covered }', 'results.filter { it.status == "error" }')],
+        "wrong-sources-duplicated": [("group.forEach { (f, _) -> sources.addNew(Source(f.source, f.date)) }", "group.forEach { (f, _) -> sources.add(Source(f.source, f.date)) }")],
+        "wrong-claims-unsorted": [("seen.groupBy { it.first.claim }.toSortedMap()", "seen.groupBy { it.first.claim }")],
+        "wrong-note-silent": [('if (parts.isEmpty()) "all scopes covered" else "not covered: " + parts.joinToString(", "))', '"all scopes covered")')],
+        "wrong-partial-flag-any": [("group.all { it.second }", "group.any { it.second }")],
+    }),
+}

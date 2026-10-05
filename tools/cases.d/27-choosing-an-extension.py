@@ -1,0 +1,40 @@
+# Case lists of module 27-choosing-an-extension: one entry per practice (see tools/make_cases.py).
+# Runs with PRACTICES and X in scope; names defined here are local to this file.
+
+PRACTICES[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
+    "name": "extension_choice", "suite": "ExtensionChoiceTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "every situation of the bank gets its mechanism and its reason"),
+        ("e1", "edge", "a rule that must hold goes to a hook whatever else is true"),
+        ("e2", "edge", "an outside system needs a server and noisy work alone needs a subagent"),
+        ("e3", "edge", "knowledge goes to the file or skill that loads it at the right time"),
+        ("e4", "edge", "a plugin carries a skill hook subagent or server to a second repository and nothing else"),
+        ("e5", "edge", "in an application the platform may supply the schema and only a remote server replaces your own tool"),
+        ("e6", "edge", "an unknown value is an error and a missing key takes its default"),
+        ("e7", "edge", "a pipeline a condition a long command and an event are not intervals"),
+        ("e8", "edge", "an interval is a loop in the session and a routine or desktop task when it must outlive it"),
+        ("e9", "edge", "a personal preference goes to a style a status line or a key binding and knowledge keeps its own rules"),
+    ],
+    "plants": {
+        "wrong-guarantee-needs-no-knowledge": (["e1", "m1"], "treats a rule as a hook only when no instruction text goes with it, so a rule with a convention is left to a sentence"),
+        "wrong-server-skipped-when-noisy": (["e2", "m1"], "sends an outside system to a subagent when the work is also noisy"),
+        "wrong-scope-ignored": (["e3", "e4", "m1"], "puts a path-scoped convention in the always-loaded file"),
+        "wrong-one-reason-for-skills": (["e3", "e4", "m1"], "gives a repeatable procedure the reason code of a reference"),
+        "wrong-plugin-at-one-repo": (["e1", "e2", "e3", "e4", "m1"], "makes a plugin even when only one repository needs the setup"),
+        "wrong-plugin-for-conventions": (["e4", "e9", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
+        "wrong-api-provided-schema-ignored": (["e5", "m1"], "writes your own tool in an application even when the platform supplies the schema"),
+        "wrong-api-server-without-remote": (["e5"], "uses the connector in an application when no remote server exists"),
+        "wrong-no-validation": (["e6"], "accepts a knowledge kind it does not know"),
+        "wrong-fallthrough-skill": (["e3", "e4", "e6", "m1"], "answers a situation that needs nothing special with a skill"),
+        "wrong-timing-outranks-hook": (["e1"], "lets a schedule or an event decide before a rule that must hold every time"),
+        "wrong-timing-outranks-noisy": (["e2"], "lets a schedule or an event decide before noisy work that needs its own context"),
+        "wrong-no-timing-validation": (["e6"], "accepts a timing it does not know"),
+        "wrong-away-sees-local-files": (["e6"], "lets a run with the computer off read local files"),
+        "wrong-pipeline-as-loop": (["e7", "m1"], "treats a pipeline job as an ordinary job in the session"),
+        "wrong-event-polled": (["e7", "m1"], "polls an event on a loop instead of watching its stream"),
+        "wrong-no-expiry": (["e8", "m1"], "keeps a month-long job on a loop that expires after seven days"),
+        "wrong-loop-while-away": (["e8", "m1"], "keeps an interval job on a loop when the computer will be off"),
+        "wrong-voice-in-instruction-file": (["e9", "m1"], "puts a response style in the instruction file"),
+        "wrong-display-as-style": (["e9", "m1"], "uses a response style for what a status line shows"),
+    },
+}
