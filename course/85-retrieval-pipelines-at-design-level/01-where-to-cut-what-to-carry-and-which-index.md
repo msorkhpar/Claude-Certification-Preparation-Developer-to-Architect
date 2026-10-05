@@ -30,7 +30,7 @@ Each row has a cheap default and an expensive correction. The architect's work i
 
 A fixed-size cut ignores what the words mean. The example's refund policy holds a rule and its exception in one sentence: "Items marked final sale cannot be returned, except when they arrive damaged." Cut every 12 words, the policy becomes 4 chunks and the sentence falls across two of them, so no chunk holds the whole rule and an answer built from the first half is wrong. Cut at the headings, the policy becomes 3 chunks and the sentence stays whole.
 
-Two common repairs leave the cause alone. A smaller window cuts in more places and separates more sentences from their neighbours. Returning more chunks per question does not help either, because no chunk holds the whole rule. And changing the index changes how the pieces are scored, not where they were cut.
+Three common repairs leave the cause alone. A smaller window cuts in more places and separates more sentences from their neighbours. Returning more chunks per question does not help either, because no chunk holds the whole rule. And changing the index changes how the pieces are scored, not where they were cut.
 
 A heading, a clause number, a function, a table row and a support ticket are the joints of their kinds of data. A contract is cut by clause, a spreadsheet by row, source code by function and a transcript by speaker turn. When a unit is longer than the limit, split it at sentence ends and repeat the same prefix on every part, as the practice does. Size then follows from the unit. Anthropic's post says that "chunk size, chunk boundary, and chunk overlap" can affect retrieval performance and recommends experimenting, which in practice means choosing by measurement on your own questions (page 2).
 
