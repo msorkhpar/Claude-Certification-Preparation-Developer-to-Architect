@@ -36,7 +36,7 @@ Facts to hold on 2026-10-02:
 - **Effort steers it.** With adaptive thinking "the model decides how much to think, steered by effort";
   the default effort is `high` for Fable 5.1 and Sonnet 5.5 and `medium` for Opus 5.5.
 - **It lives in the context.** Thinking tokens count toward the context window. Whether thinking from
-  earlier turns is kept depends on the model: current Opus, Sonnet, Fable models keep them by default, and
+  earlier turns is kept depends on the model: current Opus, Sonnet and Fable models keep them by default, and
   earlier models and Haiku strip them.
 
 Sources: Thinking; Context windows; Models overview, Claude API documentation.
