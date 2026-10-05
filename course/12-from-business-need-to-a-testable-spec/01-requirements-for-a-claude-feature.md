@@ -30,7 +30,7 @@ can count words and look for a product name. The habit to build is to write each
 2. **The observable result**: the shape, the length, the fields, the refusal, the error.
 3. **The check**: a script, a rubric with a grader, or a person with a checklist.
 
-A Claude feature adds a fourth kind of requirement that ordinary software rarely needs, because the component in the
+A Claude feature adds a kind of requirement that ordinary software rarely needs, because the component in the
 middle is a model: **what counts as a good enough answer, how often it may be wrong, and what the system does when it
 is**. The model's output is not a fixed function of its input, so a requirement about answer quality is stated as a
 rate over a set of examples, not as a single expected string.
@@ -77,7 +77,7 @@ so that a change can be judged and not just admired.
 
 Three more things belong in the first version of a spec:
 
-- **Out of scope.** "Summaries are for agents, never shown to customers" removes a whole class of policy questions.
+- **Out of scope.** "Summaries are for support agents, never shown to customers" removes a whole class of policy questions.
 - **Who decides.** If the model's answer drives an action (a refund, a ticket closure), the requirement says whether a
   person approves it. A guarantee that must always hold belongs in code, not in a prompt; the spec says which rules
   those are.
