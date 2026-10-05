@@ -30,7 +30,7 @@ The fields to know:
 
 Bound a subagent by listing its tools. A reviewer needs `Read`, `Grep` and `Glob`, and a reviewer with no `tools` line can edit files and run commands. A file with no `name` is skipped without a message, and so is one with a `name` but no `description`, so a subagent that never appears is usually a frontmatter problem.
 
-Where the file lives sets who has it, and the same name resolves by priority: managed settings first, then the command line, then project, then user, and a plugin's `agents/` directory last, at priority 5.
+Where the file lives sets who has it, and the same name resolves by priority: managed settings first, then the command line, then project, then user, and a plugin's `agents/` directory last, at priority 5, the lowest.
 
 ### Subagent memory
 
@@ -56,7 +56,7 @@ A command hook is a process. "When an event fires, Claude Code passes event-spec
 
 Exit 0 with a JSON object on standard output is the structured answer. For `PreToolUse`, put `hookSpecificOutput` with `hookEventName: "PreToolUse"`, `permissionDecision` as `allow`, `deny` or `ask`, and `permissionDecisionReason`. Both forms can block. The JSON form lets you say `ask` and carries a reason that is shown to the person.
 
-Several hooks can match one call, and they run in parallel. "For `PreToolUse` permission decisions, the most restrictive answer applies, in the order `deny`, `defer`, `ask`, `allow`." A logging hook that exits 0 does not weaken a guard hook that denies.
+Several hooks can match one call, and they run in parallel. "For `PreToolUse` permission decisions, the most restrictive answer applies, in the order `deny`, `defer`, `ask`, `allow`." A logging hook that exits 0 does not weaken a guard hook that denies. `defer` is a decision for programs that run `claude -p` and read its JSON output: it pauses the run at a tool call so the caller can collect an answer and resume, and Claude Code honors it only in that non-interactive mode and only when the turn makes a single tool call.
 
 Two practical points. A hook that guards a rule must read the whole command and not a prefix. A deny rule `Bash(git push *)` misses `git -C . push`, a push behind an environment assignment, a push inside `sh -c`, and one after `&&`, and a hook can normalise those spellings. And keep the matcher narrow: the documentation warns that an empty or `.*` matcher on a permission hook "would auto-approve every tool permission prompt".
 
@@ -831,27 +831,27 @@ The program is a hook and a linter. Plain, it runs seven events through the gate
 
 1. A reviewer subagent's file has no `tools` line. What can it do?
    - **a**: Read only, because a review of code needs nothing more than reading it
-   - **b**: Use every tool of the session, including editing and running commands
-   - **c**: Nothing at all, because an empty list gives the subagent no tools to use
+   - **b**: Nothing at all, because an empty list gives the subagent no tools to use
+   - **c**: Use every tool of the session, including editing and running commands
    - **d**: Use only the tools that the main conversation allows without asking first
 
 2. A hook script is meant to stop `git push`. Which behaviour stops the call?
-   - **a**: Printing a warning to standard output and exiting with code 1
-   - **b**: Exiting with code 0 after logging the command to a file
-   - **c**: Exiting with code 3 after writing a reason to standard error
-   - **d**: Exiting with code 2 with the reason written to standard error
+   - **a**: Exiting with code 2 with the reason written to standard error
+   - **b**: Printing a warning to standard output and exiting with code 1
+   - **c**: Exiting with code 0 after logging the command to a file
+   - **d**: Exiting with code 3 after writing a reason to standard error
 
-3. A team wants the learnings of a subagent to travel with the repository. Which memory choice fits?
-   - **a**: The user scope, which lives in the home directory of each single person
-   - **b**: The project scope, whose directory is committed alongside the code
-   - **c**: The local scope, whose directory is deliberately kept out of commits
-   - **d**: No scope applies, because memory is always private to a single machine
+3. A subagent builds notes on a repository, and teammates should receive them through version control. Which `memory` value fits?
+   - **a**: `user`, whose directory sits in each person's home folder
+   - **b**: `local`, whose directory is kept out of commits
+   - **c**: `team`, whose directory is shared by every teammate
+   - **d**: `project`, whose directory is committed alongside the sources
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "Omit it and the subagent inherits every tool", and "a reviewer with no `tools` line can edit files and run commands". *a* is ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: "Bound a subagent by listing its tools." *c* is ruled out because the table says "Omit it and the subagent inherits every tool", which is the opposite of none. *d* is ruled out because a subagent has "specific tool access, and independent permissions", and an omitted list does not narrow it to the main conversation's pre-approvals.
-2. **d**. The page says "Exit 2: Claude Code blocks the action. Write a reason to stderr." *a* is ruled out because with an exit code of 1 and plain-text output "the action proceeds as a non-blocking error", and a warning does not stop the call. *b* is ruled out because "Exit 0: no objection", and a logging hook "does not weaken a guard hook" and does not block either. *c* is ruled out because exit code 3 is an "other exit code", and the page says to "Treat it as a bug in the hook, because it does not stop the call."
-3. **b**. The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is "project-specific and shareable via version control", so it can be committed alongside the code. *a* is ruled out because the `user` scope is `~/.claude/agent-memory/<name>/`, for an agent that "should remember across all projects", in each person's home directory. *c* is ruled out because the `local` scope is for knowledge that "should not be checked in". *d* is ruled out because the project scope's directory "shareable via version control" is the page's own counterexample, so not every memory is private.
+1. **c**. The page says "Omit it and the subagent inherits every tool", and "a reviewer with no `tools` line can edit files and run commands". *a* is ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: "Bound a subagent by listing its tools." *b* is ruled out because the table says "Omit it and the subagent inherits every tool", which is the opposite of none. *d* is ruled out because a subagent has "specific tool access, and independent permissions", and an omitted list does not narrow it to the main conversation's pre-approvals.
+2. **a**. The page says "Exit 2: Claude Code blocks the action. Write a reason to stderr." *b* is ruled out because with an exit code of 1 and plain-text output "the action proceeds as a non-blocking error", and a warning does not stop the call. *c* is ruled out because "Exit 0: no objection", and a logging hook "does not weaken a guard hook" and does not block either. *d* is ruled out because exit code 3 is an "other exit code", and the page says to "Treat it as a bug in the hook, because it does not stop the call."
+3. **d**. The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is "shareable via version control". *a* is ruled out because the `user` scope is for a case where "The agent should remember across all projects", and its directory is under `~/.claude/`, outside the repository. *b* is ruled out because the `local` scope is for knowledge that is "project-specific and should not be checked in". *c* is ruled out because the field takes one of three values, and the page's own example is flagged: "memory must be user, project or local".
 
 </details>

@@ -61,28 +61,28 @@ The practice builds a plugin called `release-kit` and the team settings that ena
 ## Quiz
 
 1. A plugin declares a dependency on `~2.1.0`, and the dependency's maintainer publishes 2.1.4 and then 2.2.0. Which version do the plugin's users receive?
-   - **a**: 2.1.4, because the range takes patch updates and not the 2.2 line
-   - **b**: 2.2.0, because a range always follows the newest release that exists
-   - **c**: 2.1.0, because a range freezes the first version that it matched once
-   - **d**: Neither, because ranges are resolved only for plugins that carry no version
+   - **a**: 2.2.0, because a range always follows the newest release that exists
+   - **b**: 2.1.0, because a range freezes the first version that it matched once
+   - **c**: Neither, because ranges are resolved only for plugins that carry no version
+   - **d**: 2.1.4, because the range takes patch updates and not the 2.2 line
 
-2. A team wants every contributor to receive a tool bundle without a manual install. Where does the configuration go?
-   - **a**: The repository's own `.claude/settings.json`, naming a marketplace and an enabled plugin
-   - **b**: Each person's home settings file, copied by hand from a wiki page the team keeps
-   - **c**: The plugin manifest, which lists the people who should install the bundle on their machines
-   - **d**: The project memory file, which names the bundle in a sentence for Claude to read each time
+2. A team wants contributors to get a plugin when they open the repository, with no manual install step. Where does the configuration go?
+   - **a**: The `plugin.json` manifest, in its `dependencies` array
+   - **b**: The project's `.claude/settings.json`, under two named keys
+   - **c**: The `marketplace.json` catalog, in the entry for that bundle
+   - **d**: Each person's launch command, using the `--plugin-dir` flag
 
 3. An agent file shipped inside a plugin sets `permissionMode: bypassPermissions` to run quietly. What happens?
-   - **a**: The plugin fails to load, because the loader rejects the whole file
-   - **b**: The agent skips every prompt, exactly as the value says it should
-   - **c**: The value is dropped at load time, because the loader skips such fields
+   - **a**: The value is dropped at load time, because the loader skips such fields
+   - **b**: The plugin fails to load, because the loader rejects the whole file
+   - **c**: The agent skips every prompt, exactly as the value says it should
    - **d**: The agent runs quietly, but only in a folder that the person has trusted
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says with `~2.1.0` "users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`." *b* is ruled out because a pinned range does not follow the newest release: "Without a version constraint, a dependency moves to each new release its marketplace publishes". *c* is ruled out because the dependency "installs at the highest git tag that satisfies this range", which is 2.1.4 and not the first match. *d* is ruled out because "resolution is by git tag" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained.
-2. **a**. The page says to set two keys in the repository's `.claude/settings.json`, so that the marketplace and the enabled plugin reach every contributor. *b* is ruled out because hand copying is what the shared file replaces, and the page gives the repository's file as the way "to give a repository's contributors a plugin without each of them installing it". *c* is ruled out because the manifest is "a `plugin.json` file, called the manifest, that names the plugin", and it lists dependencies and not people. *d* is ruled out because the page says to "set two keys in the repository's `.claude/settings.json`", which is configuration and not a sentence in a memory file.
-3. **c**. The page says "These fields are ignored when loading agents from a plugin." *b* is ruled out because the fields are "ignored when loading agents from a plugin", so the agent keeps its normal prompts. *a* is ruled out because "These fields are ignored when loading agents from a plugin", so the file still loads. *d* is ruled out because the fields are "ignored" whatever the folder, and trust only decides whether `extraKnownMarketplaces` applies. The page names the fix: "Ship the guard in `hooks/hooks.json`."
+1. **d**. The page says with `~2.1.0` "users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`." *a* is ruled out because a pinned range does not follow the newest release: "Without a version constraint, a dependency moves to each new release its marketplace publishes". *b* is ruled out because the dependency "installs at the highest git tag that satisfies this range", which is 2.1.4 and not the first match. *c* is ruled out because "resolution is by git tag" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained.
+2. **b**. The page says to "set two keys in the repository's `.claude/settings.json`", so that the marketplace and the enabled plugin reach every contributor. *a* is ruled out because the manifest is "called the manifest, that names the plugin", so it describes the plugin and does not reach contributors who have not installed it. *c* is ruled out because the catalog is only where plugins are listed, and the page has the repository name it: "Add the marketplace under `extraKnownMarketplaces`, keyed by the marketplace's own `name`". *d* is ruled out because `--plugin-dir` "loads a plugin for one session without installing it", so it is neither shared nor lasting.
+3. **a**. The page says "These fields are ignored when loading agents from a plugin." *c* is ruled out because the fields are "ignored when loading agents from a plugin", so the agent keeps its normal prompts. *b* is ruled out because "These fields are ignored when loading agents from a plugin", so the file still loads. *d* is ruled out because the fields are "ignored" whatever the folder, and trust only decides whether `extraKnownMarketplaces` applies. The page names the fix: "Ship the guard in `hooks/hooks.json`."
 
 </details>
