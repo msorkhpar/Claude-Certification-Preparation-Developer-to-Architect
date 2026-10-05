@@ -77,7 +77,7 @@ The practice sets up a small repository, the invoice API, for Claude Code. You w
    - **d**: Start the session with `--permission-mode dontAsk`
 
 3. A script lists `--allowedTools "Bash"` so that a headless review can run `git diff`. What is wrong with it?
-   - **a**: It pre-approves every shell command, because a bare tool name matches them all
+   - **a**: It pre-approves every shell command, because a bare name matches all
    - **b**: It is rejected at start, because a tool name must carry a pattern
    - **c**: It is skipped by a bare run, because `--bare` ignores a tool list
    - **d**: It approves nothing, because only `dontAsk` can pre-approve a tool
