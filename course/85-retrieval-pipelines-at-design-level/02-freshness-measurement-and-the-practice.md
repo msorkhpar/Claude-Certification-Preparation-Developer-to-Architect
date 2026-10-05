@@ -808,7 +808,7 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 
 ## Quiz
 
-1. A team reports 90 percent retrieval recall. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
+1. A team reports a retrieval recall of nine in ten. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
    - **a**: 90 percent, since only questions that returned something can be judged
    - **b**: 68 percent, since a blank query still belongs in the denominator
    - **c**: 100 percent, since every result that was returned held the relevant chunk
