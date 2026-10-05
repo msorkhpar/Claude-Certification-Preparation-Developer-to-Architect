@@ -134,7 +134,7 @@ raising, and a test that expects an exception there fails.
 
 3. A team adds an image to the fifth message of a long conversation. Which parts of the cache are invalidated?
    - **a**: Only the tool list, while the instructions and the dialogue stay intact
-   - **b**: Only the dialogue blocks; the tool list and instructions stay intact
+   - **b**: Only the dialogue blocks, while the tool list and instructions stay intact
    - **c**: The instructions and the dialogue, while the tool list stays intact
    - **d**: Nothing, since pictures sit outside the cached text
 
@@ -153,7 +153,7 @@ This quiz covers both pages of the module.
 
 1. A service fires ten calls together, all sharing a 30,000-token prefix, against a cold cache. What does the module predict?
    - **a**: One writes and nine read, since all ten share the same hash and the same prefix
-   - **b**: Each one writes, as the entry appears only once a first reply starts
+   - **b**: Each one writes, since the entry appears only once a first reply starts
    - **c**: All read, since the entry is created the moment a request arrives
    - **d**: One writes and nine fail, since an entry allows a single writer
 
