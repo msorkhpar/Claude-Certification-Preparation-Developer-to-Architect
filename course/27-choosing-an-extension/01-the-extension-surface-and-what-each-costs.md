@@ -67,8 +67,8 @@ skills, "which load on demand". A skill with side effects should use `disable-mo
 only you trigger them." And a hook costs nothing in context unless its output is added as messages, which makes it the right place
 for a linter run or a log line.
 
-The same table says what happens to MCP when there are many tools. "Tool search is on by default, so idle MCP tools consume minimal
-context." For a skill, the wording of its description matters: "Claude matches your task against skill descriptions to decide which
+The documentation adds what happens to MCP when there are many tools. "Tool search is on by default, so idle MCP tools consume minimal
+context." The two statements agree: only tool names load at the start, and a full schema is fetched when it is needed. For a skill, the wording of its description matters: "Claude matches your task against skill descriptions to decide which
 are relevant. If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help."
 
 ### Triggers: add a feature when the need shows up
