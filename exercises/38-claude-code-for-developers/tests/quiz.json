@@ -5,19 +5,19 @@
       "id": "01-install-the-loop-and-permission-modes#q1",
       "page": "01-install-the-loop-and-permission-modes.md",
       "scope": "page",
-      "stem": "A developer wants Claude to propose a change for review, with no edits written until a person approves. Which start fits?",
+      "stem": "A developer wants Claude to study a repository and show a written draft before any file on disk changes. Which start fits?",
       "options": {
-        "a": "The `bypassPermissions` mode, which shows each step before running it",
-        "b": "The `acceptEdits` mode, which proposes and then writes each edit",
-        "c": "The `dontAsk` mode, which reads the files and asks for approval",
-        "d": "The `plan` mode, which reads the project and drafts steps first"
+        "a": "The `default` mode, which asks about each action one by one",
+        "b": "The `acceptEdits` mode, which writes edits without asking",
+        "c": "The `plan` mode, entered by pressing `Shift+Tab`",
+        "d": "The `dontAsk` mode, which denies whatever would prompt"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The page says \"Claude reads files and proposes a plan but makes no edits until you approve\", and `claude --permission-mode plan` starts there.",
-        "b": "Ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\" without asking, so edits are written.",
-        "c": "Ruled out because `dontAsk` runs \"Reads and pre-approved tools; anything that would prompt is denied\", and it denies and does not ask for approval.",
-        "a": "Ruled out because `bypassPermissions` runs \"Everything\" without asking, and is for \"Isolated containers and VMs only\"."
+        "c": "The page says \"Claude reads files and proposes a plan but makes no edits until you approve\", and `claude --permission-mode plan` starts there.",
+        "a": "Ruled out because the table lists `default` (Manual) for \"Reviewing every action yourself\", so it prompts action by action and no draft comes first.",
+        "b": "Ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\" without asking, so edits land on disk at once.",
+        "d": "Ruled out because `dontAsk` runs \"Reads and pre-approved tools; anything that would prompt is denied\", so it denies and shows no draft."
       }
     },
     {
@@ -26,15 +26,15 @@
       "scope": "page",
       "stem": "A repository's shared settings file sets the starting permission mode to `bypassPermissions`. What happens when a teammate opens it?",
       "options": {
-        "a": "The value is ignored, and each edit and command asks first",
-        "b": "The session starts in auto mode for every teammate who opens it",
+        "a": "The session starts in auto mode for every teammate who opens it",
+        "b": "The value is ignored, and each edit and command asks first",
         "c": "The session starts in plan mode until the file is approved",
         "d": "Every teammate is asked once to accept the project file's mode"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "The page says a `\"bypassPermissions\"` set in those two files \"doesn't take effect either, and the session starts in Manual mode\".",
-        "b": "Ruled out because that is exactly what the rule prevents, since \"the value doesn't take effect\".",
+        "b": "The page says a `\"bypassPermissions\"` set in those two files \"doesn't take effect either, and the session starts in Manual mode\".",
+        "a": "Ruled out because that is exactly what the rule prevents, since \"the value doesn't take effect\".",
         "c": "Ruled out because the page names Manual mode and not plan mode: \"the session starts in Manual mode\".",
         "d": "Ruled out because \"The other values apply from any settings file\", and these two are the exceptions, so no prompt is shown."
       }
@@ -43,37 +43,37 @@
       "id": "01-install-the-loop-and-permission-modes#q3",
       "page": "01-install-the-loop-and-permission-modes.md",
       "scope": "page",
-      "stem": "A long conversation has drifted, and early instructions seem forgotten. Where does the page say persistent rules belong?",
+      "stem": "Rules given early in a long conversation stop being followed. Where should a rule that must always apply be kept?",
       "options": {
-        "a": "In the first message of every session, typed out again by hand each time",
-        "b": "In the `/compact` summary, which is then written by the person alone",
-        "c": "In the project memory file, loaded when a session starts",
-        "d": "In a rewind checkpoint, which restores the earlier messages in full"
+        "a": "In a `/compact` summary, which condenses the thread so far",
+        "b": "In a `/clear` command, which starts fresh on a new task",
+        "c": "In a rewind checkpoint, which snapshots files before each edit",
+        "d": "In `CLAUDE.md`, which sits outside the running chat"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "The page says \"Put persistent rules in CLAUDE.md\", because \"Claude compacts automatically, but instructions from early in the conversation can get lost.\"",
-        "a": "Ruled out because \"Each new session starts with a fresh context window\", and typing rules again is what the memory file replaces.",
-        "b": "Ruled out because \"Claude compacts automatically, but instructions from early in the conversation can get lost\", so a summary is what loses them.",
-        "d": "Ruled out because \"file edits are reversible\" by a checkpoint, and a checkpoint restores files and is not a place to store rules."
+        "d": "The page says \"Put persistent rules in CLAUDE.md\", because \"Claude compacts automatically, but instructions from early in the conversation can get lost.\"",
+        "a": "Ruled out because \"Claude compacts automatically, but instructions from early in the conversation can get lost\", so a summary is where they are lost.",
+        "b": "Ruled out because `/clear` is described as one that \"starts fresh on a new task while keeping project memory\", so the rules must already be in the memory file.",
+        "c": "Ruled out because checkpoints \"only cover file changes\", so a checkpoint holds files and not rules."
       }
     },
     {
       "id": "02-memory-settings-and-permission-rules#q1",
       "page": "02-memory-settings-and-permission-rules.md",
       "scope": "page",
-      "stem": "A team wants to block reads of `.env` for every developer, and also adds a line about it to the memory file. Which statement is right?",
+      "stem": "A team keeps credentials in `.env` and wants Claude never to open them. A sentence about it goes in the memory file, and a deny entry goes in the shared settings. Which one actually stops it?",
       "options": {
-        "a": "The memory line enforces it, because that file loads at the start of a session",
-        "b": "The deny entry enforces it, while the text only asks Claude",
-        "c": "Both enforce it equally, since each is read before the first tool call",
-        "d": "Neither enforces it, because project files never override a user file"
+        "a": "The `Read` rule, which is checked before each call runs",
+        "b": "The memory sentence, which Claude Code enforces once it loads",
+        "c": "Both entries equally, since each is read before any tool call",
+        "d": "Neither entry, since a project file never beats a user file"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The page says \"Claude treats them as context, not enforced configuration\", and \"To block an action regardless of what Claude decides, use a PreToolUse hook instead\", and a deny rule is checked before anything runs.",
-        "a": "Ruled out because memory files are \"context, not enforced configuration\".",
-        "c": "Ruled out because a memory file is loaded at the start but only asks, while deny rules are \"evaluated in order: deny, then ask, then allow\".",
+        "a": "The page says \"Claude treats them as context, not enforced configuration\", while \"Rules are evaluated in order: deny, then ask, then allow.\"",
+        "b": "Ruled out because memory files are \"context, not enforced configuration\", so the sentence only asks.",
+        "c": "Ruled out because a memory file is loaded \"at the start of every conversation\" and still only asks, while a deny rule sits first in \"deny, then ask, then allow\".",
         "d": "Ruled out because \"A key set at a higher level overrides the same key set lower down\" is about the same key, and since \"they combine across layers\", a project deny still applies."
       }
     },
@@ -103,15 +103,15 @@
       "stem": "A developer wants to use a cheaper model on their own machine without changing it for the team. Where does the setting go?",
       "options": {
         "a": "The shared project file, which is committed with the code of the team",
-        "b": "The local project file, which is kept out of version control",
-        "c": "The managed settings, which override every other layer of the settings",
+        "b": "The managed settings, which override every other layer of the settings",
+        "c": "The local project file, which is kept out of version control",
         "d": "The memory file, which names the model in one plain sentence of text"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "The page puts \"A personal override\" in the local file, which \"belongs in `.gitignore`\".",
+        "c": "The page puts \"A personal override\" in the local file, which \"belongs in `.gitignore`\".",
         "a": "Ruled out because \"The team's choices go in the shared project file, which is committed\", so the choice would reach the whole team.",
-        "c": "Ruled out because managed settings are for \"A rule that must hold regardless of what any developer writes\", and are not a personal file.",
+        "b": "Ruled out because managed settings are for \"A rule that must hold regardless of what any developer writes\", and are not a personal file.",
         "d": "Ruled out because the memory file \"asks\" and does not set a model: \"A memory file asks and a hook enforces.\""
       }
     },
@@ -121,15 +121,15 @@
       "scope": "page",
       "stem": "A CI job runs `claude -p` to review each diff and must give the same result on every runner. Which flag is the key part?",
       "options": {
-        "a": "`--bare`, because it skips the local setup that discovery finds",
-        "b": "`--output-format json`, because it gives a script structured text to parse",
+        "a": "`--output-format json`, because it gives a script structured text to parse",
+        "b": "`--bare`, because it skips the local setup that discovery finds",
         "c": "`--max-turns`, because it limits how many agentic turns a single run takes",
         "d": "`--max-budget-usd`, because it caps the amount that a single run may spend"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "The page says `--bare` is \"useful for CI and scripts where you need the same result on every machine.\"",
-        "b": "Ruled out because \"Use `json` when a script parses the result\", which shapes the output and does not remove local configuration.",
+        "b": "The page says `--bare` is \"useful for CI and scripts where you need the same result on every machine.\"",
+        "a": "Ruled out because \"Use `json` when a script parses the result\", which shapes the output and does not remove local configuration.",
         "c": "Ruled out because \"`--max-turns` limits the number of agentic turns\", which bounds a run and does not make two runners agree.",
         "d": "Ruled out because \"`--max-budget-usd` caps the spend\", which is a bound on cost and not on configuration."
       }
@@ -138,19 +138,19 @@
       "id": "03-commands-headless-runs-and-the-practice#q2",
       "page": "03-commands-headless-runs-and-the-practice.md",
       "scope": "page",
-      "stem": "A custom command edits code and then calls an issue tracker. Which setting makes sure only a person can start it?",
+      "stem": "A command's workflow deploys code and posts to an external service. How is Claude kept from launching it on its own judgement?",
       "options": {
-        "a": "The value true on disable-model-invocation in its frontmatter",
-        "b": "A hint in the argument field of the command's frontmatter block",
-        "c": "A deny rule for the command in the project settings file of the team",
-        "d": "Placing the file in the user directory instead of in the project"
+        "a": "Add an `argument-hint` line to its frontmatter",
+        "b": "Save it as a command file and not as a skill folder",
+        "c": "Set `disable-model-invocation: true` in its frontmatter",
+        "d": "Start the session with `--permission-mode dontAsk`"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page says setting `disable-model-invocation: true` tells it to \"prevent Claude from automatically loading this skill\", so only a person can start it.",
-        "b": "Ruled out because `argument-hint` is \"a hint such as `[issue-number]` shown in autocomplete\" and controls no one.",
-        "c": "Ruled out because the page says such a command \"should run when you type it and not when Claude decides it fits\", and gives the frontmatter field for that.",
-        "d": "Ruled out because a skill's location sets who has it, and the page says \"Custom commands have been merged into skills\" and work the same way."
+        "c": "The page says setting `disable-model-invocation: true` tells it to \"prevent Claude from automatically loading this skill\", so only a person can start it.",
+        "a": "Ruled out because `argument-hint` is \"a hint such as `[issue-number]` shown in autocomplete\" and controls nobody.",
+        "b": "Ruled out because a command file and a skill \"both create `/deploy` and work the same way\", so the file kind changes nothing.",
+        "d": "Ruled out because `dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt\", which decides tool approval and not who may load a command."
       }
     },
     {
@@ -159,36 +159,36 @@
       "scope": "page",
       "stem": "A script lists `--allowedTools \"Bash\"` so that a headless review can run `git diff`. What is wrong with it?",
       "options": {
-        "a": "It fails to start at all, since a tool name must carry a pattern",
-        "b": "It is ignored by the run, because bare mode never reads the tool list",
-        "c": "It approves every shell command, and a pattern limits the scope",
-        "d": "It asks for approval, because a bare name is treated as an ask rule"
+        "a": "It pre-approves every shell command, because a bare tool name matches them all",
+        "b": "It is rejected at start, because a tool name must carry a pattern",
+        "c": "It is skipped by a bare run, because `--bare` ignores a tool list",
+        "d": "It approves nothing, because only `dontAsk` can pre-approve a tool"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The trap says \"`--allowedTools \"Bash\"` approves every command. List `Bash(git diff *)` and its like.\"",
-        "a": "Ruled out because the page says \"List patterns and not whole tools that change things\", as a recommendation, and a bare `Read` is accepted.",
-        "b": "Ruled out because bare mode \"never reads OAuth credentials or the system keychain\", and the tool list is passed with the flag and is not discovered.",
-        "d": "Ruled out because \"`--permission-mode dontAsk` runs reads and pre-approved tools\", and a pre-approved tool does not ask."
+        "a": "The trap says \"`--allowedTools \"Bash\"` approves every command. List `Bash(git diff *)` and its like.\"",
+        "b": "Ruled out because the page says \"List patterns and not whole tools that change things\", a recommendation and not a parsing rule, and its own example lists a bare `Read`.",
+        "c": "Ruled out because `--bare` skips \"auto-discovery of hooks, skills, custom commands, subagents, installed plugins, MCP servers, auto memory, and CLAUDE.md\", and a flag passed on the command line is not discovered.",
+        "d": "Ruled out because the flag itself \"pre-approves specific tools, in quotes and separated by commas\", while `dontAsk` merely \"runs reads and pre-approved tools\"."
       }
     },
     {
       "id": "03-commands-headless-runs-and-the-practice#m1",
       "page": "03-commands-headless-runs-and-the-practice.md",
       "scope": "module",
-      "stem": "A team begins a new repository and wants first project instructions quickly, then wants them trimmed. Which pair of steps fits?",
+      "stem": "A new repository has no memory file, and a developer needs a useful one by the end of the day. Which sequence fits?",
       "options": {
-        "a": "Copy a very large template, then import it from a short file",
-        "b": "Generate a draft with `/init`, then cut what Claude finds alone",
-        "c": "Write every convention by hand, then run `/compact` to shorten it",
-        "d": "Ask for a very long draft, then rely on the classifier to skip extras"
+        "a": "Pull in a very large template with imports, then keep the main file short",
+        "b": "Write every convention by hand, then run `/compact` on that file",
+        "c": "Run `/init`, then add every convention the team has ever used",
+        "d": "Run `/init`, then delete lines Claude would have found anyway"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The page says `/init` \"analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers\", then to \"cut what Claude would have found anyway\".",
+        "d": "The page says `/init` \"analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers\", then to \"cut what Claude would have found anyway\".",
         "a": "Ruled out because imports \"don't reduce its context cost, because imported files also load at launch\".",
-        "c": "Ruled out because \"Longer files consume more context and reduce adherence\", and `/compact` summarises a conversation and not a file.",
-        "d": "Ruled out because the classifier reviews \"actions instead of you\" and does not shorten files."
+        "b": "Ruled out because `/compact` is for the conversation: \"use `/context` to see what fills the window and `/compact` to summarise it\".",
+        "c": "Ruled out because \"Longer files consume more context and reduce adherence\", so adding everything works against the file."
       }
     },
     {
@@ -197,16 +197,16 @@
       "scope": "module",
       "stem": "A nightly script runs `claude -p` and sometimes loops on tool calls for an hour. Which pair of flags bounds it?",
       "options": {
-        "a": "A permission mode and a tool list for the run",
-        "b": "A bare switch and a JSON output format on the run",
-        "c": "A turn limit and a spend cap on the run",
+        "a": "A turn limit and a spend cap on the run",
+        "b": "A permission mode and a tool list for the run",
+        "c": "A bare switch and a JSON output format on the run",
         "d": "A resume flag and a fork flag for the next run"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The page says \"`--max-turns` limits the number of agentic turns, and `--max-budget-usd` caps the spend.\"",
-        "b": "Ruled out because \"Use `json` when a script parses the result\", and bare mode only skips discovery, so neither bounds a loop.",
-        "a": "Ruled out because \"`--permission-mode dontAsk` runs reads and pre-approved tools\", which decides what may run and not how long.",
+        "a": "The page says \"`--max-turns` limits the number of agentic turns, and `--max-budget-usd` caps the spend.\"",
+        "c": "Ruled out because \"Use `json` when a script parses the result\", and bare mode only skips discovery, so neither bounds a loop.",
+        "b": "Ruled out because \"`--permission-mode dontAsk` runs reads and pre-approved tools\", which decides what may run and not how long.",
         "d": "Ruled out because `--resume` reopens a session \"under the same session ID and appends new messages to the existing conversation\", which continues a loop and does not bound it."
       }
     },
@@ -218,14 +218,14 @@
       "options": {
         "a": "`bypassPermissions`, with the runner as the only boundary",
         "b": "`auto`, with the classifier left to judge every single call",
-        "c": "`acceptEdits`, with edits approved for the whole checkout",
-        "d": "`dontAsk`, with `Read` and read-only git patterns listed"
+        "c": "`dontAsk`, with `Read` and read-only git patterns listed",
+        "d": "`acceptEdits`, with edits approved for the whole checkout"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The page says `--permission-mode dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt, which fits a script\", with `Read` and read-only git patterns.",
+        "c": "The page says `--permission-mode dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt, which fits a script\", with `Read` and read-only git patterns.",
         "b": "Ruled out because auto mode \"reviews actions instead of you\" and runs most calls, not reads alone.",
-        "c": "Ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\", which is more than reads.",
+        "d": "Ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\", which is more than reads.",
         "a": "Ruled out because `bypassPermissions` is for \"Isolated containers and VMs only\", and it runs everything."
       }
     },
@@ -233,19 +233,19 @@
       "id": "03-commands-headless-runs-and-the-practice#m4",
       "page": "03-commands-headless-runs-and-the-practice.md",
       "scope": "module",
-      "stem": "A session started in Manual mode has been running for hours. The developer wants code changes to apply without a prompt while shell work still asks. Which mode fits?",
+      "stem": "A developer in Manual mode is tired of approving each source change, but wants a prompt before every other action. Which mode fits?",
       "options": {
-        "a": "`plan`, which runs changes after one approval has been given once",
-        "b": "`acceptEdits`, which runs file edits plus filesystem commands",
-        "c": "`dontAsk`, which approves changes and asks about every shell call",
-        "d": "`auto`, which asks about changes and runs shell work unseen for good"
+        "a": "`plan`, which makes no edits until a plan is approved",
+        "b": "`acceptEdits`, which lets edits and filesystem commands run",
+        "c": "`dontAsk`, which denies each action that would prompt",
+        "d": "`auto`, where a second model reviews the actions instead"
       },
       "key": "b",
       "explanation": {
-        "b": "The table gives `acceptEdits` \"Reads, file edits, and common filesystem commands\", and shell commands that are not filesystem commands still ask.",
-        "a": "Ruled out because plan mode \"makes no edits until you approve\" a plan and is for exploring.",
-        "c": "Ruled out because `dontAsk` \"denies anything that would prompt\", and so it does not ask about shell work.",
-        "d": "Ruled out because auto mode has \"a second model, the classifier\" review calls instead of asking, and it runs far more than edits."
+        "b": "The table gives `acceptEdits` \"Reads, file edits, and common filesystem commands\", and other shell commands still ask.",
+        "a": "Ruled out because plan mode is where \"Claude reads files and proposes a plan but makes no edits until you approve\", so changes wait for approval.",
+        "c": "Ruled out because `dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt\", so nothing asks.",
+        "d": "Ruled out because auto mode runs \"Everything, with background safety checks\", so shell work does not prompt either."
       }
     }
   ]
