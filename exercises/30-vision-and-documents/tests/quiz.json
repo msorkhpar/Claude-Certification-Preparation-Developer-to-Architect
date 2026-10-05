@@ -10,14 +10,14 @@
         "a": "Send the pages through Amazon Bedrock, which has no per-image limit at all",
         "b": "Raise the output limit so that the reply has room to describe all thirty of them",
         "c": "Convert each page to GIF so that the stricter size limit stops counting it",
-        "d": "Downscale every file until neither side exceeds 2000 px"
+        "d": "Downscale every file until neither side is longer than 2000 px, keeping all of them together"
       },
       "key": "d",
       "explanation": {
         "d": "The page says to resize each image \"so that neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks.\"",
         "b": "Ruled out because the stricter limit is \"a stricter per-image dimension limit\", which concerns the size of each file and not the reply.",
-        "c": "Ruled out because \"Animations are unsupported, and only the first frame is used\", which changes nothing about the dimension limit.",
-        "a": "Ruled out because on Amazon Bedrock \"only base64-encoded sources are currently available\", and the limit still applies to every image."
+        "c": "Ruled out because \"Every `image` block counts\" toward the stricter limit, whatever its format.",
+        "a": "Ruled out because the limits table gives Amazon Bedrock its own cap, \"Size of one image, Amazon Bedrock and Google Cloud (base64)\", so a per-image limit exists there too."
       }
     },
     {
