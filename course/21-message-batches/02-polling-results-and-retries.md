@@ -61,7 +61,7 @@ The four types are not all alike. The table is the course's own advice, built fr
 | `errored` with `invalid_request_error` | the request is wrong | fix it first; the same request fails again |
 | `errored` with another type | a fault that is not in the request | resubmit unchanged |
 | `expired` | the batch ran out of time first | resubmit unchanged |
-| `canceled` | you cancelled the batch | resubmit if you still want it |
+| `canceled` | you canceled the batch | resubmit if you still want it |
 
 The page adds the isolation fact: "the failure of one request in a batch does not affect the processing of other requests." So a
 batch with a hundred bad requests still returns the other answers. Collect the failures into a new, smaller batch.

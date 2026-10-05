@@ -37,7 +37,7 @@ works synchronously will work in a batch, with the exceptions below.
 messages, multi-turn conversations, extended thinking and most beta features. Because each request is independent, one batch can
 mix kinds of request. Three parameters are refused with a validation error:
 
-| Parameter | Why the page gives |
+| Parameter | Reason the page gives |
 |---|---|
 | `stream: true` | "Batch results come back as a single file, not a stream." |
 | `speed` | "Fast mode tunes synchronous latency, which doesn't apply to asynchronous batch processing." |
