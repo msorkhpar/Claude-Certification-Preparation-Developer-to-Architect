@@ -297,7 +297,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 1. Scenario: Cobalt Logistics has three proposals for a returns-handling service. One has no way to learn from wrong answers, one is a workflow and one is a team of agents. A board member wants the cheapest. What should the architect do first?
    - **a**: Reject the cheapest design if the board has not yet seen its performance figures on live data
-   - **b**: Compare the three on the same four stages and drop any that lacks one of them
+   - **b**: Judge all of them on the same four stages and drop any that lacks one
    - **c**: Ask each team to run its design on a hundred real returns and compare the token bills
    - **d**: Choose the workflow because workflows cost less than an agent on this workload
 
@@ -310,7 +310,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A review applies the same questions to every design, and the missing stage is the first finding. *a* is ruled out because a design with a missing stage is rejected first: "no prompt can fix" it, and live figures do not repair it. *c* is ruled out because price is compared only "among those that pass the review". *d* is ruled out because the page prices a workflow at "one chat per step", so a long workflow can cost more than the rung above it.
+1. **b**. A review applies the same questions to every design, and the missing stage is the first finding. *a* is ruled out because rejection follows a missing stage, not missing live figures: "a design with a missing stage or an unapproved write is rejected first". *c* is ruled out because price is compared only "among those that pass the review". *d* is ruled out because the page prices a workflow at "one chat per step", so a long workflow can cost more than the rung above it.
 2. **c**. Two of the three conditions hold and the third fails, so no autonomous rung pays. *a* is ruled out because "a team that fails the third loses money on every run". *b* is ruled out because the page says "it needs independence, volume and value together", and adding agents raises cost, not value. *d* is ruled out because for this task "its value is below what even one agent costs".
 
 </details>
