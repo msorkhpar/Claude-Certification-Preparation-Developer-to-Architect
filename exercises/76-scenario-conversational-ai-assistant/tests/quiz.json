@@ -1,0 +1,195 @@
+{
+  "module": "76-scenario-conversational-ai-assistant",
+  "quizzes": [
+    {
+      "id": "01-the-assistant-persona-memory-and-the-window#q1",
+      "page": "01-the-assistant-persona-memory-and-the-window.md",
+      "scope": "page",
+      "stem": "A customer's message to the example assistant asks to speak to a human and, in the same sentence, says they might hurt themselves. Where does the route lead?",
+      "options": {
+        "a": "To a request hand-off, since asking for a person is stated first in the sentence",
+        "b": "To a safety hand-off, since a signal of risk is checked first",
+        "c": "To the model, which weighs the two parts of the message together before it replies",
+        "d": "To a stalled hand-off, after the second unanswered question in the conversation"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Risk is checked first.",
+        "a": "Ruled out because the order puts safety above a request: \"a signal of risk goes to a person, a request for a person is honoured, a stalled conversation is handed over after two misses\".",
+        "c": "Ruled out because the decision is made before the model sees the message: \"Before the model sees a message, code checks it in a fixed order\".",
+        "d": "Ruled out because the stall comes last: \"a message that asks for a human and also signals risk is a safety hand-off\"."
+      }
+    },
+    {
+      "id": "01-the-assistant-persona-memory-and-the-window#q2",
+      "page": "01-the-assistant-persona-memory-and-the-window.md",
+      "scope": "page",
+      "stem": "The example recalls two facts for a customer on 2026-10-04: an address saved on 2026-09-20 and a plan saved on 2025-12-01, with a limit of thirty days. What does the assistant do with them?",
+      "options": {
+        "a": "Treats both as current, since nobody has complained about either of them in the meantime",
+        "b": "Uses the postal one and has the subscription one confirmed before relying on it",
+        "c": "Drops both facts from the conversation, since a memory that is not read each day goes stale",
+        "d": "Verifies both facts with the person before saying anything else to them in the conversation"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The address is current and the plan is marked to be verified.",
+        "a": "Ruled out because an old fact is not trusted: \"a fact that has not been touched for months is more likely to be wrong than one from last week\".",
+        "c": "Ruled out because the old fact is checked and not thrown away: \"so that the assistant asks the customer before it relies on an address from last year\".",
+        "d": "Ruled out because only the old fact needs confirming: \"the example marks each fact `current` when it is no older than a limit, and `verify` when it is older\"."
+      }
+    },
+    {
+      "id": "01-the-assistant-persona-memory-and-the-window#q3",
+      "page": "01-the-assistant-persona-memory-and-the-window.md",
+      "scope": "page",
+      "stem": "A team stores memory files for all customers under one directory and serves any path that begins with `/memories`. A request arrives for `/memories/../../secrets.env`. What is the documentation's guidance?",
+      "options": {
+        "a": "Allow it, because the string begins with the expected prefix of the memory area",
+        "b": "Let the model decide whether the file is sensitive before anything is returned to it",
+        "c": "Check each one in every command and refuse whatever resolves outside the root",
+        "d": "Rely on the model, which usually refuses to touch files that it was never asked about"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Every path is validated.",
+        "a": "Ruled out because the prefix is not enough: \"A malicious path such as `/memories/../../secrets.env` can reach files outside the `/memories` directory\".",
+        "b": "Ruled out because a decision by the model is a request and not a guarantee: \"A refusal that usually happens is a request, and a handler that strips is a guarantee.\"",
+        "d": "is ruled out for the same reason: \"Claude usually refuses to write sensitive information to memory files\"."
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#q1",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "page",
+      "stem": "In a reviewed batch of 200 conversations, 199 are excellent, and one customer's message about their own safety got a product tip. The average quality score is 98. What does the review decide?",
+      "options": {
+        "a": "Ship it, since the average clears any reasonable bar by a wide margin",
+        "b": "Hold it until such cases are routed to a person every time",
+        "c": "Ship it with a note, since one case in two hundred is within normal noise",
+        "d": "Hold it only if the next batch shows a second case of the same kind"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A missed signal holds the release.",
+        "a": "Ruled out because the average is not the test: \"A safety miss is not averaged: one missed signal holds the release however good the rest is.\"",
+        "c": "Ruled out because the safety count has no noise allowance: \"the review has one number that is never averaged and several that are\".",
+        "d": "Ruled out because one case is enough: \"A safety miss is not averaged: one missed signal holds the release however good the rest is.\""
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#q2",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "page",
+      "stem": "A conversation is handed over after a signal of risk. What should the assistant do while the person takes over?",
+      "options": {
+        "a": "Keep the conversation going as usual, to avoid alarming the customer before the person arrives",
+        "b": "Acknowledge the message, say that someone is coming, and stop advising",
+        "c": "Offer a diagnosis of what the customer is going through and a plan to address it",
+        "d": "Finish the order question first, then mention that a person may join afterwards"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The assistant acknowledges and hands over.",
+        "a": "Ruled out because the assistant does not keep chatting: \"it does not diagnose, advise or keep chatting about the order\".",
+        "c": "Ruled out because it does not diagnose: \"it does not diagnose, advise or keep chatting about the order\".",
+        "d": "Ruled out because the order question waits: \"the assistant acknowledges the message and says that a person will take over\"."
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#q3",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "page",
+      "stem": "A policy allows at most 10 percent repeated questions. A batch of 20 conversations has 2 of them. Does the batch pass that check?",
+      "options": {
+        "a": "No, because any repeated question counts against the assistant in a review",
+        "b": "No, because the limit has to be stayed under and cannot simply be touched",
+        "c": "Yes, since the share equals the limit and a limit is met when reached",
+        "d": "Yes, but only when the repeats all came from a single customer in the batch"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "Two of twenty is exactly ten percent.",
+        "a": "Ruled out because the policy allows some: \"A limit is met at the limit, so exactly ten percent repeated questions pass and twenty do not.\"",
+        "b": "is ruled out for the same reason: \"A limit is met at the limit, so exactly ten percent repeated questions pass and twenty do not.\"",
+        "d": "Ruled out because the source of the repeats plays no part: \"The share of conversations in which the assistant asked the same question twice.\""
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#m1",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "module",
+      "stem": "Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. The prompt tells the assistant to hand over on any sign of distress, and the team finds three missed signals in a week. What is the first fix?",
+      "options": {
+        "a": "Add three more examples of distress to the system prompt, in capitals",
+        "b": "Route such messages in code before the model sees them",
+        "c": "Raise the assistant's confidence threshold before it answers anything",
+        "d": "Ask the model to rate every customer message for distress and hand over above a score"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The route is code.",
+        "a": "Ruled out because a prompt is a request: \"Put every rule in the system prompt, in capitals.\"",
+        "c": "Ruled out because a confidence threshold is the model's own judgement: \"It fails because it makes a probabilistic judgement the only barrier on the one decision that must not be missed\".",
+        "d": "is ruled out for the same reason: \"What the design must not do is make the model the only layer.\""
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#m2",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "module",
+      "stem": "Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A returning shopper is greeted with an address saved 200 days ago, and the policy limit is thirty days. What should the assistant do first?",
+      "options": {
+        "a": "Use it as it stands, since a saved address is the best evidence there is",
+        "b": "Use it and ask the person about it at the end of the call",
+        "c": "Delete every stored fact older than the limit without telling anyone",
+        "d": "Have the person confirm it before relying on it"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "An old fact is checked with the person before it is relied on: \"an old fact is verified before it is used\".",
+        "a": "Ruled out because an old fact is not trusted: \"a fact that has not been touched for months is more likely to be wrong than one from last week\".",
+        "b": "Ruled out because an old fact is verified before use: \"so that the assistant asks the customer before it relies on an address from last year\".",
+        "c": "Ruled out because an old fact is verified and not discarded: \"A recalled fact is a claim with a date\"."
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#m3",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "module",
+      "stem": "Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A segment of three conversations has none resolved by the assistant, the floor is 80 percent and the minimum is three. What does the review say about it?",
+      "options": {
+        "a": "It is weak, since the count is enough to judge and the result is short of the bar",
+        "b": "The segment is not weak, as three conversations are too few to judge",
+        "c": "The segment is weak only when a fourth conversation confirms the pattern",
+        "d": "The segment is not weak, as a person settled some of the conversations"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A segment at the minimum and below the floor is weak.",
+        "b": "Ruled out because the minimum is met: \"two unresolved conversations prove nothing and three begin to\".",
+        "c": "Ruled out because the minimum is a floor and not a margin: \"only when it has at least a minimum number of conversations\".",
+        "d": "Ruled out because a settlement by a person is not the assistant's: \"A conversation that a person settled is a good outcome and is not the assistant's.\""
+      }
+    },
+    {
+      "id": "02-sensitive-talk-hand-offs-and-judging-a-conversation#m4",
+      "page": "02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "scope": "module",
+      "stem": "Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A conversation with forty turns ends in a stalled hand-off. Is it counted as overlong?",
+      "options": {
+        "a": "Yes, since forty turns is above any sensible limit",
+        "b": "Yes, because a stall proves that the assistant should have stopped earlier",
+        "c": "No, since a person took over, and the measure covers only cases that nobody took over",
+        "d": "No, because stalled hand-offs are excluded from every figure in the review"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A hand-over takes the conversation out of the measure.",
+        "a": "Ruled out because the length alone is not the test: \"A conversation with more turns than the limit and no hand-off.\"",
+        "b": "Ruled out because the stall is a hand-off: \"A conversation that was handed over is not overlong, because somebody took over.\"",
+        "d": "Ruled out because the hand-off is counted elsewhere: \"A hand-off nobody needed and that had no safety signal behind it is over-escalation\"."
+      }
+    }
+  ]
+}

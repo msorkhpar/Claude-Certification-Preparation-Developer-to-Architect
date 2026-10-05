@@ -1,0 +1,136 @@
+{
+  "practice": "77-scenario-agentic-tool-builder/unit-01/practice-1",
+  "name": "tool_review",
+  "tests": {
+    "java": "ToolReviewTest",
+    "kotlin": "ToolReviewTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_well_formed_read_only_tool_is_approved_and_leaves_an_audit_line",
+      "typescript": "m1 a well formed read only tool is approved and leaves an audit line",
+      "java": "m1_aWellFormedReadOnlyToolIsApprovedAndLeavesAnAuditLine",
+      "kotlin": "m1_aWellFormedReadOnlyToolIsApprovedAndLeavesAnAuditLine"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_description_needs_at_least_the_minimum_number_of_words",
+      "typescript": "e1 a description needs at least the minimum number of words",
+      "java": "e1_aDescriptionNeedsAtLeastTheMinimumNumberOfWords",
+      "kotlin": "e1_aDescriptionNeedsAtLeastTheMinimumNumberOfWords"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_timeout_and_the_memory_may_equal_their_limits_and_not_exceed_them",
+      "typescript": "e2 the timeout and the memory may equal their limits and not exceed them",
+      "java": "e2_theTimeoutAndTheMemoryMayEqualTheirLimitsAndNotExceedThem",
+      "kotlin": "e2_theTimeoutAndTheMemoryMayEqualTheirLimitsAndNotExceedThem"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_name_is_lower_case_snake_case_of_at_most_sixty_four_characters",
+      "typescript": "e3 a name is lower case snake case of at most sixty four characters",
+      "java": "e3_aNameIsLowerCaseSnakeCaseOfAtMostSixtyFourCharacters",
+      "kotlin": "e3_aNameIsLowerCaseSnakeCaseOfAtMostSixtyFourCharacters"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_forbidden_calls_in_the_code_refuse_the_tool_and_are_all_listed_in_order",
+      "typescript": "e4 forbidden calls in the code refuse the tool and are all listed in order",
+      "java": "e4_forbiddenCallsInTheCodeRefuseTheToolAndAreAllListedInOrder",
+      "kotlin": "e4_forbiddenCallsInTheCodeRefuseTheToolAndAreAllListedInOrder"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_permission_the_code_uses_without_declaring_it_or_a_denied_one_refuses_the_tool",
+      "typescript": "e5 a permission the code uses without declaring it or a denied one refuses the tool",
+      "java": "e5_aPermissionTheCodeUsesWithoutDeclaringItOrADeniedOneRefusesTheTool",
+      "kotlin": "e5_aPermissionTheCodeUsesWithoutDeclaringItOrADeniedOneRefusesTheTool"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_declared_write_is_approved_only_with_a_gate_and_a_read_alone_is_approved_outright",
+      "typescript": "e6 a declared write is approved only with a gate and a read alone is approved outright",
+      "java": "e6_aDeclaredWriteIsApprovedOnlyWithAGateAndAReadAloneIsApprovedOutright",
+      "kotlin": "e6_aDeclaredWriteIsApprovedOnlyWithAGateAndAReadAloneIsApprovedOutright"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_refusal_beats_a_revision_and_a_revision_beats_a_gate",
+      "typescript": "e7 a refusal beats a revision and a revision beats a gate",
+      "java": "e7_aRefusalBeatsARevisionAndARevisionBeatsAGate",
+      "kotlin": "e7_aRefusalBeatsARevisionAndARevisionBeatsAGate"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_the_permissions_the_code_uses_are_reported_in_alphabetical_order",
+      "typescript": "e8 the permissions the code uses are reported in alphabetical order",
+      "java": "e8_thePermissionsTheCodeUsesAreReportedInAlphabeticalOrder",
+      "kotlin": "e8_thePermissionsTheCodeUsesAreReportedInAlphabeticalOrder"
+    }
+  },
+  "plants": {
+    "wrong-description-inclusive": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "calls a description too short when it has exactly the minimum number of words"
+    },
+    "wrong-timeout-inclusive": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "flags a timeout that equals the limit"
+    },
+    "wrong-memory-inclusive": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "flags a memory request that equals the limit"
+    },
+    "wrong-name-too-long": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "rejects a name of exactly sixty four characters"
+    },
+    "wrong-forbidden-first-only": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "lists only the first forbidden call"
+    },
+    "wrong-undeclared-ignored": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not refuse a permission that the code uses and the proposal does not declare"
+    },
+    "wrong-denied-ignored": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not refuse a denied permission that the proposal declares"
+    },
+    "wrong-gate-skipped": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "approves a declared write outright with no gate"
+    },
+    "wrong-revise-before-refuse": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "sends a refused tool back for revision because it also has a finding"
+    },
+    "wrong-used-unsorted": {
+      "caught_by": [
+        "e6",
+        "e8"
+      ],
+      "defect": "reports the permissions in the order of the scan table and not alphabetically"
+    }
+  }
+}

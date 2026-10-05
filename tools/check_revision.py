@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Check the revision aids of Level 1 (exercises/11-exam-readiness-1) and Level 2 (exercises/44-exam-readiness-2):
+"""Check the revision aids of Level 1 (exercises/11-exam-readiness-1), Level 2 (exercises/44-exam-readiness-2) and
+Level 3 (exercises/78-exam-readiness-3):
 flashcards.json and review-bank.json in each folder.
 
 Rules:
   - both files have the documented shape (see course/README.md); ids are unique and in order;
-  - every card and item names a course page that exists, a module of its level (1 to 11, or 12 to 43) and the domains of
-    its exam (Associate AS1 to AS7, Developer DV1 to DV8);
+  - every card and item names a course page that exists, a module of its level (1 to 11, 12 to 43, or 45 to 77) and the domains of
+    its exam (Associate AS1 to AS7, Developer DV1 to DV8, Architect A1 to A5);
   - Level 1: every module has at least 5 cards and 4 bank items, and every Associate domain at least 5 cards and 4 items;
     Level 2: every module 12 to 43 has at least 4 cards and 2 bank items, and every Developer domain at least 12 cards and
-    8 items; a Level 2 bank item is also not a near-duplicate (Jaccard 0.5 on stem and key stems) of any quiz or mock question;
+    8 items; Level 3 has the same minimums for modules 45 to 77 and the Architect domains; a Level 2 or 3 bank item is also not a near-duplicate (Jaccard 0.5 on stem and key stems) of any quiz or mock question;
   - a card's front and back are non-empty and short (front <= 200, back <= 420 characters);
   - a bank item has options a to d, a key among them, an explanation, no doubled word or cut-off ending, a key that
     does not echo its stem, a key at most 1.3 times the mean distractor length, a stem that is not a quiz question,
@@ -30,6 +31,8 @@ LEVELS = {
         "mins": (5, 4, 5, 4), "label": "Level 1", "near": False},
     2: {"dir": ROOT / "exercises" / "44-exam-readiness-2", "modules": range(12, 44), "domains": {f"DV{i}" for i in range(1, 9)},
         "mins": (4, 2, 12, 8), "label": "Level 2", "near": True},
+    3: {"dir": ROOT / "exercises" / "78-exam-readiness-3", "modules": range(45, 78), "domains": {f"A{i}" for i in range(1, 6)},
+        "mins": (4, 2, 12, 8), "label": "Level 3", "near": True},
 }
 
 

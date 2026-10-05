@@ -61,6 +61,11 @@ item = {"id": "rb-001", "module": 42, "page": page, "domains": ["DV8"],
 expect("plant: Level 2 item that restates a quiz question", cr.check_bank({"intervals_days": [1, 3], "items": [item]}, set(), l2, quiz), True, "near-duplicate")
 expect("plant: Level 2 card in a Level 1 module", cr.check_cards({"cards": [{"id": "fc-001", "module": 5, "page": page, "domains": ["DV8"], "front": "q", "back": "a"}]}, l2), True, "module must be 12 to 43")
 expect("plant: Level 2 card with an Associate domain", cr.check_cards({"cards": [{"id": "fc-001", "module": 42, "page": page, "domains": ["AS1"], "front": "q", "back": "a"}]}, l2), True, "domains")
+# Level 3 rules: modules 45 to 77 and the Architect domains
+l3 = cr.LEVELS[3]
+page3 = "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md"
+expect("plant: Level 3 card in a Level 2 module", cr.check_cards({"cards": [{"id": "fc-001", "module": 42, "page": page, "domains": ["A2"], "front": "q", "back": "a"}]}, l3), True, "module must be 45 to 77")
+expect("plant: Level 3 card with a Developer domain", cr.check_cards({"cards": [{"id": "fc-001", "module": 53, "page": page3, "domains": ["DV5"], "front": "q", "back": "a"}]}, l3), True, "domains")
 if failures:
     print(f"{len(failures)} plant(s) not caught: {failures}")
     sys.exit(1)

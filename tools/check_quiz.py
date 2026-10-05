@@ -65,6 +65,10 @@ def stem_of(stem):
 
 
 QID = {"Quiz": "q", "Module quiz": "m", "Mock exam": "x"}
+# A mock question is checked against the prose of the modules up to the number given here (44 when a module is not listed).
+MOCK_SCOPE = {78: 77}
+# Mock modules whose key explanation must name the page that answers it, as (module N, page M).
+NAMED_PAGE_MOCKS = ("44", "78")
 MIN_QUOTE_WORDS = 4
 MAX_STEM_OVERLAP = 0.5
 QUOTE = re.compile(r'"([^"]+)"')
@@ -314,10 +318,12 @@ def check_module(folder):
                     page_stems[f"{page.stem}#q{n}"] = stem
     level_prose, level_stems = None, {}
     if any(k == "Mock exam" for pg in pages for k, _, _ in parse_page_quizzes(pg.read_text())):
+        top = MOCK_SCOPE.get(int(folder.name[:2]), 44)
+        in_scope = lambda f: f.is_dir() and re.match(r"\d\d-", f.name) and int(f.name[:2]) <= top
         level_prose = "\n".join(prose_of(pg.read_text()) for f in sorted(ROOT.joinpath("course").iterdir())
-                                if f.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", f.name) for pg in sorted(f.glob("*.md")))
+                                if in_scope(f) for pg in sorted(f.glob("*.md")))
         for f in sorted(ROOT.joinpath("course").iterdir()):
-            if f.is_dir() and re.match(r"(0[1-9]|[12][0-9]|3[0-9]|4[0-4])-", f.name):
+            if in_scope(f):
                 for pg in sorted(f.glob("*.md")):
                     for kind, questions, _ in parse_page_quizzes(pg.read_text()):
                         for n, (stem, _) in enumerate(questions, start=1):
@@ -351,7 +357,7 @@ def check_module(folder):
                     problems += check_duplicate(qid, stem, page_stems)
                 if kind == "Mock exam":
                     problems += check_duplicate(qid, stem, {k: v for k, v in level_stems.items() if not k.startswith(page.stem + "#")})
-                    if folder.name.startswith("44-"):
+                    if folder.name[:2] in NAMED_PAGE_MOCKS:
                         problems += check_named_page(qid, q.get("explanation", {}).get(q["key"], ""))
                 paras = key_paragraphs(md)
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)

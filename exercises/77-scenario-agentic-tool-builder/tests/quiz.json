@@ -1,0 +1,195 @@
+{
+  "module": "77-scenario-agentic-tool-builder",
+  "quizzes": [
+    {
+      "id": "01-the-tool-builder-what-the-agent-may-write#q1",
+      "page": "01-the-tool-builder-what-the-agent-may-write.md",
+      "scope": "page",
+      "stem": "A generated tool declares that it reads files, and its code fetches a web page. What does the gate in this module's practice do?",
+      "options": {
+        "a": "Approves it with a gate, since reading and fetching are both low-risk effects here",
+        "b": "Refuses it, since the proposal never mentioned that effect",
+        "c": "Sends it back for a better description, since the declaration was incomplete",
+        "d": "Runs it once in a container to see whether the fetch succeeds as intended"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "Code that does more than it declared is refused.",
+        "a": "Ruled out because the difference is the finding: \"the gate compares what the code does with what was declared and refuses the difference\".",
+        "c": "Ruled out because a refusal is not a revision: \"Code that does more than it declared\".",
+        "d": "Ruled out because nothing proposed is run to find out: \"Containment is the environment's job.\""
+      }
+    },
+    {
+      "id": "01-the-tool-builder-what-the-agent-may-write#q2",
+      "page": "01-the-tool-builder-what-the-agent-may-write.md",
+      "scope": "page",
+      "stem": "A team runs generated tools in a container that has no network access, no secrets and a short lifetime. A colleague says that the code scan is therefore unnecessary. What is the best reply?",
+      "options": {
+        "a": "It is a cheap first check for the obvious, and the surroundings hold back the rest",
+        "b": "The scan is unnecessary only when the container is also given the secrets it needs to work",
+        "c": "The scan is the real protection, and the container only adds some speed to each run",
+        "d": "The scan is unnecessary, since containers make generated tools safe whatever their code does"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "The scan is the cheap first check.",
+        "b": "Ruled out because the container holds no secrets: \"The lesson for a team that runs generated code itself is the same, and it is a list of absences: no network, no secrets, no shared state, a short life and limits on time and memory.\"",
+        "c": "Ruled out because the scan finds only what its authors thought of: \"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it.\"",
+        "d": "Ruled out because the scan still does useful work: \"The scan is useful for what it does well: it refuses the obvious\"."
+      }
+    },
+    {
+      "id": "01-the-tool-builder-what-the-agent-may-write#q3",
+      "page": "01-the-tool-builder-what-the-agent-may-write.md",
+      "scope": "page",
+      "stem": "In the example, a tool that was approved by the reviewer returns a result without the field that its schema promised. What happens to the result?",
+      "options": {
+        "a": "It is passed to the agent with a warning attached to the front of the result",
+        "b": "It is filled with a default and passed on, so that the run can continue",
+        "c": "It is refused before the agent uses it, and the audit records a rejection",
+        "d": "It is rejected, and the reviewer's approval is withdrawn for every later tool in the run"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A result is checked before the agent uses it.",
+        "a": "Ruled out because a result that does not match is not passed on: \"a result that does not match its schema is rejected before the agent sees it\".",
+        "b": "Ruled out because the check does not repair data: \"Treat the result as data and check it against its schema\".",
+        "d": "Ruled out because the approval covers one proposal: \"the approval covers the proposal that was reviewed and not a later version\"."
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#q1",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "page",
+      "stem": "A proposal has a forbidden call in its code and a description of a single line. What does the gate decide, and what does the report list?",
+      "options": {
+        "a": "A revision request, since the short text is the first problem the gate meets",
+        "b": "A refusal, with the weakness of the text still noted beside it",
+        "c": "An approval behind a gate, since the forbidden call may be removed later in the run",
+        "d": "A refusal, with the finding dropped because a refused tool is never revised"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "A refusal wins and the findings stay in the report.",
+        "a": "Ruled out because a refusal comes first: \"A refusal comes before a revision, because a fix cannot make a forbidden call acceptable and a revision would invite the agent to try.\"",
+        "c": "Ruled out because the refusal stands: \"A proposal with a refusal is refused, whatever else is true of it.\"",
+        "d": "Ruled out because the findings are kept: \"The report keeps the findings of a refused proposal, so the agent, and the log, can see everything that was wrong and not only the first thing.\""
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#q2",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "page",
+      "stem": "A policy allows a timeout of at most 10 seconds, and a proposal asks for exactly 10. What does the gate do?",
+      "options": {
+        "a": "Flags it, since a limit should leave some room below it for safety",
+        "b": "Flags it, since only a request below the limit counts as safe to run",
+        "c": "Accepts the figure, since a request that reaches the ceiling has not passed it",
+        "d": "Accepts it, but only after a person has signed the proposal off"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A limit is inclusive.",
+        "a": "Ruled out because the margin is not the gate's to add: \"the margin belongs in the number that the policy sets\".",
+        "b": "Ruled out because the value is allowed: \"A limit is a number that the policy allows, so a value equal to the limit is allowed.\"",
+        "d": "Ruled out because a timeout within the limit needs no person: \"The timeout may equal its limit and the memory may equal its limit, and one second or one megabyte more is flagged.\""
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#q3",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "page",
+      "stem": "A reviewer approved a tool last week. Today the agent submits a changed version with an added write. What happens?",
+      "options": {
+        "a": "It goes through the gate again as a new proposal",
+        "b": "It runs behind a gate if the old version had been gated as well",
+        "c": "It runs, because the approval covers every version of that tool",
+        "d": "It is refused, because a tool may be approved once and never changed"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "A changed tool is a new proposal.",
+        "c": "Ruled out because the approval is not blanket: \"An approval belongs to one proposal.\"",
+        "b": "Ruled out because the earlier gating does not carry over: \"the person approved what they read and not what the agent might write next\".",
+        "d": "Ruled out because a changed tool is not forbidden, only reviewed again: \"A changed tool is a new proposal and goes through the gate again\"."
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#m1",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A tool's code opens a file for writing, while the proposal declares only reading, and the policy sends writes to a person. What does the gate do?",
+      "options": {
+        "a": "Refuses it, since an effect nobody mentioned cannot be approved on its behalf",
+        "b": "Sends it back for a revision of the description, since the declaration is thin",
+        "c": "Approves it behind a gate, since the policy already covers writes",
+        "d": "Approves it outright, since a read is declared and the write is minor"
+      },
+      "key": "a",
+      "explanation": {
+        "a": "An undeclared effect is refused.",
+        "c": "Ruled out because the gate approves only what was declared: \"Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page.\"",
+        "b": "Ruled out because a refusal is not a revision: \"The first group is about trust: the proposal contradicts itself or the rules.\"",
+        "d": "Ruled out because the gap is the finding: \"A proposal with a refusal is refused, whatever else is true of it.\""
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#m2",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A team proposes to run generated tools in a container and to drop the gate, because the container limits the damage. Which gap remains?",
+      "options": {
+        "a": "Nothing, since a container makes every tool safe to run",
+        "b": "Nothing compares the claim with the code, and nothing waits for a person",
+        "c": "The container's speed, which is lower than that of a direct run",
+        "d": "The agent's description of the tool, which a container cannot read"
+      },
+      "key": "b",
+      "explanation": {
+        "b": "The container holds the run, and the gate decides what is proposed.",
+        "a": "Ruled out because a container is only one of the five jobs: \"Containment is the environment's job.\"",
+        "c": "Ruled out because speed is not the gap: \"the example is about the decisions around a run\".",
+        "d": "Ruled out because the gate reads the description: \"a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema\"."
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#m3",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. Which record satisfies the audit part of the design?",
+      "options": {
+        "a": "A file that the agent keeps and updates for itself after every one of its runs",
+        "b": "A summary that the agent writes by itself at the end of each working day",
+        "c": "The agent's own account of which of its tools it considers to be the risky ones",
+        "d": "One line per decision and per run, kept where its subject has no access"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The audit is kept out of the agent's reach.",
+        "a": "Ruled out because an editable file is not an audit: \"A log that the agent can edit is not an audit.\"",
+        "b": "Ruled out because a summary by the agent is its own account: \"The record has to be written by the gate and the runner and kept where the agent has no write access\".",
+        "c": "Ruled out because the agent's view of risk is a claim: \"the declaration is the claim to be checked\"."
+      }
+    },
+    {
+      "id": "02-reviewing-a-proposal-and-the-practice#m4",
+      "page": "02-reviewing-a-proposal-and-the-practice.md",
+      "scope": "module",
+      "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A proposed name is 64 characters of lower-case letters, digits and underscores, starting with a letter. What does the gate do with the name?",
+      "options": {
+        "a": "Flags it, since the longest name has to leave a spare character",
+        "b": "Flags it, because names this long are hard for the model to choose",
+        "c": "Accepts it, as it sits at the ceiling for such labels and not above it",
+        "d": "Accepts it only if the description is also at least 64 words"
+      },
+      "key": "c",
+      "explanation": {
+        "c": "A name may be 64 characters.",
+        "a": "Ruled out because the length is allowed: \"A name may be 64 characters long, and 65 is too long.\"",
+        "b": "Ruled out because the gate checks the form and not the model's taste: \"Four things only send it back: a name that is not in the fixed form\".",
+        "d": "Ruled out because the description has its own minimum: \"The description needs at least the minimum number of words, and exactly the minimum is enough.\""
+      }
+    }
+  ]
+}

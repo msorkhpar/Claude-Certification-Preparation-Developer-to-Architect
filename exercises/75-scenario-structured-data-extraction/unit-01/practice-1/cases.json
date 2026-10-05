@@ -1,0 +1,133 @@
+{
+  "practice": "75-scenario-structured-data-extraction/unit-01/practice-1",
+  "name": "run_audit",
+  "tests": {
+    "java": "RunAuditTest",
+    "kotlin": "RunAuditTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_mixed_run_gets_every_count_both_accuracies_the_segments_and_the_first_fix",
+      "typescript": "m1 a mixed run gets every count both accuracies the segments and the first fix",
+      "java": "m1_aMixedRunGetsEveryCountBothAccuraciesTheSegmentsAndTheFirstFix",
+      "kotlin": "m1_aMixedRunGetsEveryCountBothAccuraciesTheSegmentsAndTheFirstFix"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_an_empty_run_has_zero_figures_no_segments_and_never_meets_the_target",
+      "typescript": "e1 an empty run has zero figures no segments and never meets the target",
+      "java": "e1_anEmptyRunHasZeroFiguresNoSegmentsAndNeverMeetsTheTarget",
+      "kotlin": "e1_anEmptyRunHasZeroFiguresNoSegmentsAndNeverMeetsTheTarget"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_run_meets_the_target_at_exactly_the_target_and_not_below_it",
+      "typescript": "e2 the run meets the target at exactly the target and not below it",
+      "java": "e2_theRunMeetsTheTargetAtExactlyTheTargetAndNotBelowIt",
+      "kotlin": "e2_theRunMeetsTheTargetAtExactlyTheTargetAndNotBelowIt"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_kind_needs_at_least_the_minimum_number_of_documents_to_be_automated",
+      "typescript": "e3 a kind needs at least the minimum number of documents to be automated",
+      "java": "e3_aKindNeedsAtLeastTheMinimumNumberOfDocumentsToBeAutomated",
+      "kotlin": "e3_aKindNeedsAtLeastTheMinimumNumberOfDocumentsToBeAutomated"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_kind_is_automated_at_exactly_the_target_accuracy_and_not_below_it",
+      "typescript": "e4 a kind is automated at exactly the target accuracy and not below it",
+      "java": "e4_aKindIsAutomatedAtExactlyTheTargetAccuracyAndNotBelowIt",
+      "kotlin": "e4_aKindIsAutomatedAtExactlyTheTargetAccuracyAndNotBelowIt"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_figure_is_overstated_only_when_the_validated_accuracy_exceeds_the_all_document_accuracy_by_more_than_the_gap",
+      "typescript": "e5 the figure is overstated only when the validated accuracy exceeds the all document accuracy by more than the gap",
+      "java": "e5_theFigureIsOverstatedOnlyWhenTheValidatedAccuracyExceedsTheAllDocumentAccuracyByMoreThanTheGap",
+      "kotlin": "e5_theFigureIsOverstatedOnlyWhenTheValidatedAccuracyExceedsTheAllDocumentAccuracyByMoreThanTheGap"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_each_shape_counts_documents_once_and_an_unchecked_total_counts_only_documents_accepted_as_valid",
+      "typescript": "e6 each shape counts documents once and an unchecked total counts only documents accepted as valid",
+      "java": "e6_eachShapeCountsDocumentsOnceAndAnUncheckedTotalCountsOnlyDocumentsAcceptedAsValid",
+      "kotlin": "e6_eachShapeCountsDocumentsOnceAndAnUncheckedTotalCountsOnlyDocumentsAcceptedAsValid"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_first_fix_follows_the_order_of_what_costs_most",
+      "typescript": "e7 the first fix follows the order of what costs most",
+      "java": "e7_theFirstFixFollowsTheOrderOfWhatCostsMost",
+      "kotlin": "e7_theFirstFixFollowsTheOrderOfWhatCostsMost"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_percentages_are_whole_numbers_rounded_half_up",
+      "typescript": "e8 percentages are whole numbers rounded half up",
+      "java": "e8_percentagesAreWholeNumbersRoundedHalfUp",
+      "kotlin": "e8_percentagesAreWholeNumbersRoundedHalfUp"
+    }
+  },
+  "plants": {
+    "wrong-validated-denominator": {
+      "caught_by": [
+        "m1",
+        "e5",
+        "e7"
+      ],
+      "defect": "divides the correct documents by the valid ones and calls that the accuracy of the run"
+    },
+    "wrong-target-strict": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "requires the accuracy to be above the target and not at it"
+    },
+    "wrong-segment-strict": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "automates a kind only when its accuracy is above the target and not at it"
+    },
+    "wrong-min-n-strict": {
+      "caught_by": [
+        "m1",
+        "e3"
+      ],
+      "defect": "automates a kind only when it has more documents than the minimum and not at least that many"
+    },
+    "wrong-gap-inclusive": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "calls the figure overstated when the gap equals the limit"
+    },
+    "wrong-unchecked-any-status": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "counts an unchecked total in documents that were never accepted as valid"
+    },
+    "wrong-fix-order": {
+      "caught_by": [
+        "m1",
+        "e7"
+      ],
+      "defect": "puts the wasted retries before the invented values in the order of fixes"
+    },
+    "wrong-rounding-floor": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "rounds a percentage down and not half up"
+    },
+    "wrong-empty-meets-target": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "says an empty run meets the target"
+    }
+  }
+}

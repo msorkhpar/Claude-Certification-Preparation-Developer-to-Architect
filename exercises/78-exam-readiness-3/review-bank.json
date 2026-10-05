@@ -1,0 +1,1697 @@
+{
+  "level": 3,
+  "format": 1,
+  "title": "Level 3 spaced-review question bank",
+  "intervals_days": [
+    1,
+    3,
+    7,
+    14,
+    30
+  ],
+  "items": [
+    {
+      "id": "rb-001",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A reply from the model contains a request to run a tool, and also a closing sentence that reads like a conclusion. What should the loop do?",
+      "options": {
+        "a": "Treat the sentence as the answer and finish, to save a turn",
+        "b": "Carry out what was asked and go on to the next turn",
+        "c": "Ask the model to repeat the reply without the request",
+        "d": "End the run and report that the reply was ambiguous"
+      },
+      "key": "b",
+      "explanation": "A reply that holds a tool request is not the end, whatever its text says; the model's stop value marks the end of a turn."
+    },
+    {
+      "id": "rb-002",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A team reads the usage figure on a lead agent's result and reports it as the cost of a whole research run with four helpers. What is wrong?",
+      "options": {
+        "a": "Helpers are free of charge when the lead agent pays for the window",
+        "b": "The count covers a single loop, and a separate field exists for the entire tree",
+        "c": "The figure is correct, because a lead agent sums its helpers automatically",
+        "d": "The figure counts only output tokens, so input must be added by hand"
+      },
+      "key": "b",
+      "explanation": "The usage figure counts a single loop; the documentation names the field for the whole tree of agents."
+    },
+    {
+      "id": "rb-003",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "Two lookups in a plan depend on each other: the second needs the first one's result. How should they be issued?",
+      "options": {
+        "a": "In two separate turns, because calls made together carry no promised order",
+        "b": "In one turn, listed in the order in which they are needed by the plan",
+        "c": "In one turn, with a note telling the SDK to run them in sequence",
+        "d": "In parallel, and then repair the second call if it happens to fail"
+      },
+      "key": "a",
+      "explanation": "The model decides what to ask for within one turn and the SDK promises no order among calls made together, so a dependency needs two turns."
+    },
+    {
+      "id": "rb-004",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/01-hub-and-spoke-and-what-the-coordinator-owns.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A coordinator located the failing file and the precise message before delegating a fix. What must the helper's prompt contain?",
+      "options": {
+        "a": "Only the goal, because the helper will rediscover the rest on its own",
+        "b": "The path, the error text and the decisions already taken",
+        "c": "A pointer to the coordinator's conversation, which the helper can read",
+        "d": "Nothing extra, since subagents inherit what the lead knows"
+      },
+      "key": "b",
+      "explanation": "A subagent's context starts fresh, so its brief is the only channel for what the coordinator already found."
+    },
+    {
+      "id": "rb-005",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "Two research helpers return largely the same findings. Where should the team look for the cause?",
+      "options": {
+        "a": "At the model tier, which is too small to tell the topics apart in a long run",
+        "b": "At the merge step, which should have removed repeated lines before the report in the end",
+        "c": "At the helpers' tool lists, which are probably too long for a narrow task",
+        "d": "At the briefs, which neither split the scope nor said what each part leaves out"
+      },
+      "key": "d",
+      "explanation": "Overlap comes from the briefs, since subagents cannot see each other and only the brief divides the work."
+    },
+    {
+      "id": "rb-006",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A question asks for one dated fact that a single search can answer. How large should the team be?",
+      "options": {
+        "a": "Three workers, so that the answer is cross-checked every time",
+        "b": "One worker with a few tool calls, since effort should follow the ask",
+        "c": "A coordinator plus one worker per source type, as the default shape at that point",
+        "d": "As many as the budget allows, because more agents never hurt"
+      },
+      "key": "b",
+      "explanation": "The documentation's guidance is that simple fact-finding needs just one agent with a few tool calls; the team scales with the ask."
+    },
+    {
+      "id": "rb-007",
+      "module": 47,
+      "page": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A subagent for one narrow job exists, but the model almost never delegates to it. What is the first thing to change?",
+      "options": {
+        "a": "Its model, to a larger tier that follows instructions more closely",
+        "b": "Its name, to something longer and more formal in style",
+        "c": "Its system prompt, to say in capitals that it is very important",
+        "d": "Its description, so that it says when the helper should be called"
+      },
+      "key": "d",
+      "explanation": "The model reads the description to decide whether to delegate, so the description must state when the agent applies."
+    },
+    {
+      "id": "rb-008",
+      "module": 47,
+      "page": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A coordinator needs a helper's result before it can write the next step, but the work was launched without waiting. What was missing?",
+      "options": {
+        "a": "A higher turn limit on the coordinator",
+        "b": "A request for a foreground run",
+        "c": "A hook that blocks until the helper finishes",
+        "d": "A larger context window for the helper"
+      },
+      "key": "b",
+      "explanation": "The documented default is a background launch, so a coordinator that needs the result first has to ask for a foreground run."
+    },
+    {
+      "id": "rb-009",
+      "module": 47,
+      "page": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "Two helpers cite the same fact from different sources. How should their results come back so that the combining step keeps both sources?",
+      "options": {
+        "a": "As one paragraph of prose for each helper, joined together in order",
+        "b": "As a single combined score for each helper's results across the run",
+        "c": "With each claim and its origin in separate fields, joined on the claim",
+        "d": "With the sources dropped, since the claim is what matters to the reader"
+      },
+      "key": "c",
+      "explanation": "Content and metadata in separate fields let the merge recognise one claim and keep every source."
+    },
+    {
+      "id": "rb-010",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/01-prompt-or-code-where-a-guarantee-lives.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A refund tool is called before the customer's identity check. What should the gate return?",
+      "options": {
+        "a": "An empty success, so the model carries on without a result",
+        "b": "A flagged failure that names the missing step",
+        "c": "A generic error with no detail, to avoid revealing the rules",
+        "d": "Nothing at all, leaving the call unanswered until a timeout"
+      },
+      "key": "b",
+      "explanation": "Every call needs an answer, and an error that names the missing step lets the model do it and try again."
+    },
+    {
+      "id": "rb-011",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/01-prompt-or-code-where-a-guarantee-lives.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A team forces the lookup tool on the first request to make sure verification happens before refunds. A refund still follows a failed check on turn five. Why?",
+      "options": {
+        "a": "Forced choices expire after a fixed number of seconds",
+        "b": "Refund tools ignore any choice setting by design",
+        "c": "The model disables the setting once it has used the tool",
+        "d": "The choice binds only the call that sets it"
+      },
+      "key": "d",
+      "explanation": "A forced tool choice applies to the request that sets it, and nothing carries it to later calls."
+    },
+    {
+      "id": "rb-012",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A hand-off to a person is routed through a verification step, and a fault in that step leaves customers stranded. What is the design flaw?",
+      "options": {
+        "a": "The route to a person should be slower, to discourage its use",
+        "b": "The verification step should be removed from every path",
+        "c": "The way out depends on the very safeguard that tripped",
+        "d": "The hand-off should be decided by the model alone"
+      },
+      "key": "c",
+      "explanation": "An escape route must not sit behind a prerequisite that may be what failed."
+    },
+    {
+      "id": "rb-013",
+      "module": 49,
+      "page": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A hook should lint only when a command that changes files runs, but it fires on every command. What is the usual fix?",
+      "options": {
+        "a": "Match on the file path in the matcher, which is able to read tool inputs",
+        "b": "Run it only in the first turn of each session, then switch it off",
+        "c": "Attach it to the editing tools and test the path inside the callback",
+        "d": "Add a line to the prompt asking the model to avoid every other tool"
+      },
+      "key": "c",
+      "explanation": "A matcher sees only the name of the tool, so the path must be read from the input inside the callback."
+    },
+    {
+      "id": "rb-014",
+      "module": 49,
+      "page": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A team wants a payment checked before it is sent. Which placement works?",
+      "options": {
+        "a": "A hook that runs ahead of the call and holds it back when needed",
+        "b": "A hook that runs after the tool returns and reports the outcome at that moment",
+        "c": "A hook on the session start, with a reminder of the policy",
+        "d": "A hook on the final answer, which reviews what was done"
+      },
+      "key": "a",
+      "explanation": "A post hook runs after the effect, so the money has already moved; the control belongs ahead of the call."
+    },
+    {
+      "id": "rb-015",
+      "module": 49,
+      "page": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A gate hook waits for a person to approve an action and no reply arrives before its deadline. What should happen?",
+      "options": {
+        "a": "The operation is withheld and the model is told that no approval came",
+        "b": "The action runs, since silence means that nobody objected to it",
+        "c": "The action runs once and is logged for a later review by a person",
+        "d": "The whole session is closed and returns an error result to the caller"
+      },
+      "key": "a",
+      "explanation": "A timed-out gate is the safe case: nothing runs and the model is told."
+    },
+    {
+      "id": "rb-016",
+      "module": 50,
+      "page": "course/50-task-decomposition/01-fixed-chain-or-adaptive-plan.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A change touches fourteen files in separate packages. What review shape does the page prefer?",
+      "options": {
+        "a": "One review of all fourteen files in a single long prompt",
+        "b": "A review of the three largest files, assuming the rest follow",
+        "c": "A full pass over each document in its own context",
+        "d": "Reviews of the files in sequence, each seeing the previous reports"
+      },
+      "key": "c",
+      "explanation": "Each file gets a full review in its own context, and a second pass sees the relations between them."
+    },
+    {
+      "id": "rb-017",
+      "module": 50,
+      "page": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A planning loop proposes the same subtask for the third time. What should it do?",
+      "options": {
+        "a": "Raise the turn ceiling so that it can try again",
+        "b": "Halt with a stuck status that names the repeated step",
+        "c": "Drop the subtask quietly and finish the others",
+        "d": "Rephrase the subtask so that it counts as new"
+      },
+      "key": "b",
+      "explanation": "A repeated subtask is a lack of progress, and a status says so."
+    },
+    {
+      "id": "rb-018",
+      "module": 50,
+      "page": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "Between two review passes the first pass must hand its findings to the second. What should the hand-over contain?",
+      "options": {
+        "a": "A name and a short summary for each part, with what it offers and expects",
+        "b": "The complete text of the files that the first pass has read so far",
+        "c": "The number of findings that the first pass made in each part",
+        "d": "Nothing at all, since the second pass will read the same files again"
+      },
+      "key": "a",
+      "explanation": "Summaries are the interface between the passes."
+    },
+    {
+      "id": "rb-019",
+      "module": 51,
+      "page": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A developer wants to try a risky refactor from the middle of a saved session without losing the original line of work. What should be done?",
+      "options": {
+        "a": "Resume the same id twice at once and edit both",
+        "b": "Resume with the stored id and the fork option",
+        "c": "Start a new session and paste the old transcript",
+        "d": "Edit the stored session file and keep a backup"
+      },
+      "key": "b",
+      "explanation": "Fork is an option set together with a resume id; it branches a copy and leaves the original usable."
+    },
+    {
+      "id": "rb-020",
+      "module": 51,
+      "page": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A resumed session gives slow, costly first answers after a weekend. What is the likely cause?",
+      "options": {
+        "a": "The saved session has been compressed and must be unpacked",
+        "b": "The prompt cache expired while the work sat idle over two days",
+        "c": "The model was downgraded while the session was idle",
+        "d": "Resuming always repeats every tool call from the start"
+      },
+      "key": "b",
+      "explanation": "The prompt cache expires after a long pause, so the next request reads the history once more."
+    },
+    {
+      "id": "rb-021",
+      "module": 51,
+      "page": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "After an agent's edits went wrong, a developer wants the files back as they were an hour ago. Which feature does that?",
+      "options": {
+        "a": "Resuming the conversation from an earlier message in the transcript",
+        "b": "Forking the session at the point where the hour began",
+        "c": "Checkpointing, which snapshots changes and reverts them",
+        "d": "Clearing the context and starting the work again from the beginning"
+      },
+      "key": "c",
+      "explanation": "Only a snapshot of the files can return them to an earlier state; conversation features do not touch the files."
+    },
+    {
+      "id": "rb-022",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "Logs show that an agent picks a customer lookup when asked about orders. Both tools have a one-line summary. What does the page rank first?",
+      "options": {
+        "a": "Describe the inputs of each one, with sample requests and where it stops",
+        "b": "Add many worked order examples to the system prompt for the model",
+        "c": "Route each request with keyword rules before the model reads it",
+        "d": "Merge the two tools into one that guesses which backend to ask"
+      },
+      "key": "a",
+      "explanation": "The cause is thin descriptions, and the first fix is to make each say what it takes and where it stops."
+    },
+    {
+      "id": "rb-023",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "An agent calls a tool that finds records, and a broad question returns thousands of them in one reply. What should the tool return?",
+      "options": {
+        "a": "The first hundred hits, with no note about the rest of the results",
+        "b": "One page with a cursor, plus a note on how to narrow the query",
+        "c": "Every hit, because the model can ignore whatever it does not need",
+        "d": "A count only, with no hits at all until the agent asks twice"
+      },
+      "key": "b",
+      "explanation": "A page with a cursor bounds the result, and the note tells the agent how to go on."
+    },
+    {
+      "id": "rb-024",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "After two rounds of rewording, the agent still chooses between two tools at random. What does the page conclude?",
+      "options": {
+        "a": "The model is too weak and should be replaced by a larger tier of the family for the team",
+        "b": "The prompt needs a stronger instruction to choose with great care each time",
+        "c": "More worked examples will eventually separate the tools for the model",
+        "d": "The interface needs a redesign, because the texts cannot separate the options"
+      },
+      "key": "d",
+      "explanation": "Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault."
+    },
+    {
+      "id": "rb-025",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A tool fails with only the text 'operation failed'. What should the reply add so that an agent can act?",
+      "options": {
+        "a": "A longer stack trace copied from the server and shown to the agent",
+        "b": "An apology that is meant to be shown to the customer in the reply",
+        "c": "The kind of problem, whether a retry helps and what to do next",
+        "d": "A numeric code whose meaning only the developers know by heart"
+      },
+      "key": "c",
+      "explanation": "The agent can only choose a recovery if the reply says which one applies."
+    },
+    {
+      "id": "rb-026",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A payment call timed out and nobody knows whether it went through. What should the agent do?",
+      "options": {
+        "a": "Repeat the call at once, since a retry is always safe for a payment",
+        "b": "Tell the customer that the payment failed and ask them to try again",
+        "c": "Cancel the whole order to be on the safe side and start it over",
+        "d": "Read the records for the order, then decide if any work remains"
+      },
+      "key": "d",
+      "explanation": "A write that may have happened is followed by a read, not by a blind repeat."
+    },
+    {
+      "id": "rb-027",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A search helper times out and its coordinator must choose between a retry and another route. What should the failure carry?",
+      "options": {
+        "a": "The kind of fault, the query, partial findings and other paths to try",
+        "b": "Only the word failed, kept short so that the coordinator can read it fast",
+        "c": "The full transcript of the helper's own session, from start to end",
+        "d": "A guess at who is to blame for the delay, with a rough estimate"
+      },
+      "key": "a",
+      "explanation": "The coordinator needs the context to choose a recovery."
+    },
+    {
+      "id": "rb-028",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A research helper needs to confirm easy facts, but giving it a full web search causes misuse. What does the page propose?",
+      "options": {
+        "a": "A narrow verifier for light checks, with hard cases sent through the hub",
+        "b": "The full version with a warning in its prompt about careful use",
+        "c": "No extra tool, with all checks done by the coordinator itself",
+        "d": "A second full version of it as a backup for the first"
+      },
+      "key": "a",
+      "explanation": "A narrow tool serves the frequent case and the coordinator keeps the rare one."
+    },
+    {
+      "id": "rb-029",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A team edits the wording of one tool between runs and finds that saved prompt reads stop. What explains it?",
+      "options": {
+        "a": "Saved reads work only for plain text that carries no tool definitions at all in the meantime",
+        "b": "Definitions form the first layer, so a change invalidates every layer after it",
+        "c": "Edits to a tool reset the model's memory of the earlier turns of the chat",
+        "d": "The saved reads expire whenever any file in the working directory is saved"
+      },
+      "key": "b",
+      "explanation": "Changing the definitions changes the first layer of the cache, and every layer after it."
+    },
+    {
+      "id": "rb-030",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "An irreversible call is within the spending cap. What does the page require?",
+      "options": {
+        "a": "Automatic approval, since the spending cap already applies to the call",
+        "b": "A flagged refusal that waits for a person's sign-off on that request",
+        "c": "A second model's opinion given in place of a person's decision",
+        "d": "A warning written to the log after the call has already run"
+      },
+      "key": "b",
+      "explanation": "An irreversible call waits for a person even under the cap."
+    },
+    {
+      "id": "rb-031",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A remote server entry sets an Authorization header from ANTHROPIC_API_KEY, and the server sees it empty. What is the likely reason?",
+      "options": {
+        "a": "The variable is too long to fit in a header value for that endpoint on that path",
+        "b": "Remote servers refuse every header unless the user types it by hand",
+        "c": "The header is sent only after the first tool call of the session",
+        "d": "Nothing is sent for credential labels of that kind to a far endpoint"
+      },
+      "key": "d",
+      "explanation": "Credential names such as this one read as empty toward a remote endpoint."
+    },
+    {
+      "id": "rb-032",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A tool's description is long, with the rule that tells when to prefer it in the last paragraph. What should change?",
+      "options": {
+        "a": "Move the whole description into the system prompt and shorten the tool's own text",
+        "b": "Cut it down to the tool's name only, to keep the definition small",
+        "c": "Add an example of a wrong call at the end of the description",
+        "d": "Say when it beats pattern matching and what comes back, point first"
+      },
+      "key": "d",
+      "explanation": "The description is what the model chooses by, so it must say when to prefer the tool, with the point first."
+    },
+    {
+      "id": "rb-033",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A team connects one server whose single tool does everything. Why does that make permissions hard?",
+      "options": {
+        "a": "Permission rules apply only to the built-in tools of the product",
+        "b": "Servers that offer a single tool cannot be denied by any rule",
+        "c": "Each call of such a server needs a separate approval prompt",
+        "d": "A rule allows or denies one by name, so lone entry leaves nothing to narrow"
+      },
+      "key": "d",
+      "explanation": "A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope."
+    },
+    {
+      "id": "rb-034",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/01-what-each-tool-is-for-and-how-edit-fails.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "An agent must list every test file that ends in a given suffix. Which built-in does that?",
+      "options": {
+        "a": "The content search with a regular expression, run across the tree",
+        "b": "The reader, called on each folder in turn until all are covered",
+        "c": "The shell with a listing command piped into a filter",
+        "d": "The pattern search that matches names, supplied with the product"
+      },
+      "key": "d",
+      "explanation": "The job is matching names, which is what a name pattern search is for."
+    },
+    {
+      "id": "rb-035",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A deny rule blocks reading a secrets folder. Can the agent still write a file in that folder?",
+      "options": {
+        "a": "No, because a ban on viewing covers the tools that change content there",
+        "b": "Yes, because only views were denied in the settings of the project",
+        "c": "Yes, but after an approval prompt appears for each write",
+        "d": "Through the shell, which sits outside such rules"
+      },
+      "key": "a",
+      "explanation": "A read denial covers the tools that change content at the same path."
+    },
+    {
+      "id": "rb-036",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A deny rule on one text-search tool does not stop a search on a Linux machine. Why?",
+      "options": {
+        "a": "Deny rules apply to tools that have already been loaded in the session",
+        "b": "Linux ignores permission rules for searches in the working directory",
+        "c": "The default set lacks a dedicated grep utility there, and a shell does the work",
+        "d": "Such rules work when the tool name is written in uppercase"
+      },
+      "key": "c",
+      "explanation": "On macOS, Linux and WSL the default set has no Grep, so only a shell entry sees those lookups."
+    },
+    {
+      "id": "rb-037",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A developer wants personal preferences for one project that never reach teammates. Where do they belong?",
+      "options": {
+        "a": "The root instruction file, which every clone shares",
+        "b": "A rule file with no path list in the shared folder",
+        "c": "The home-folder file that applies to every project",
+        "d": "A git-ignored local file beside the root instruction file"
+      },
+      "key": "d",
+      "explanation": "The local file is personal to one project and is kept out of version control."
+    },
+    {
+      "id": "rb-038",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A team restricts a testing guideline to test files by path, yet it loads on every file. Its frontmatter has a stray tab. What happened?",
+      "options": {
+        "a": "The header block did not parse, so the entry applies everywhere",
+        "b": "A tab makes a rule apply to the whole directory tree under the project",
+        "c": "The rule loads once for each tab character that it contains",
+        "d": "Errors in the frontmatter switch the rule off completely"
+      },
+      "key": "a",
+      "explanation": "When the frontmatter does not parse, the rule is treated as unscoped."
+    },
+    {
+      "id": "rb-039",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A project holds an AGENTS.md and a git-ignored personal file named for CLAUDE.md. Is the AGENTS.md read?",
+      "options": {
+        "a": "Yes, because AGENTS.md is read in every project, whatever else exists there",
+        "b": "No, because the fallback runs only when no memory document exists, and that memo is one",
+        "c": "Yes, but only when the local file happens to be completely empty",
+        "d": "No, because AGENTS.md is read only in headless runs and never in a session"
+      },
+      "key": "b",
+      "explanation": "AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts."
+    },
+    {
+      "id": "rb-040",
+      "module": 58,
+      "page": "course/58-commands-and-skills/01-commands-and-skills-are-one-mechanism.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A command file and a skill carry the same name. Which does Claude use?",
+      "options": {
+        "a": "The older format, since it was created first and is therefore the original",
+        "b": "Both of them, one after the other in alphabetical order of path",
+        "c": "The newer format, which takes precedence over the older one",
+        "d": "Neither, since a name that is shared makes the lookup ambiguous"
+      },
+      "key": "c",
+      "explanation": "The product merged the two formats and gives the skill precedence over a command file of the same name."
+    },
+    {
+      "id": "rb-041",
+      "module": 58,
+      "page": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A skill lists an item in its allowed-tools field. What does that field do?",
+      "options": {
+        "a": "It removes the other tools from the session while the skill runs",
+        "b": "It makes that item available in later sessions of the project",
+        "c": "It pre-approves the named entry, with nothing else restricted by it",
+        "d": "It forbids the model from using a further skill during the run"
+      },
+      "key": "c",
+      "explanation": "The field pre-approves and restricts nothing."
+    },
+    {
+      "id": "rb-042",
+      "module": 58,
+      "page": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A forked skill's body is only a list of style guidelines, and it returns nothing useful. Why?",
+      "options": {
+        "a": "The text is the helper's prompt, and formatting advice alone gives it no task",
+        "b": "Forked skills are unable to read their own file when they start",
+        "c": "Guidelines are ignored by a helper unless they are numbered",
+        "d": "The helper needs a larger model tier than the main session"
+      },
+      "key": "a",
+      "explanation": "A forked skill's body is its prompt, and guidelines without a task give the helper nothing to do."
+    },
+    {
+      "id": "rb-043",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/01-plan-mode-or-direct-execution.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A request touches many files and has two plausible designs. How should the work start?",
+      "options": {
+        "a": "With edits in the most likely files, followed by a review of the diff",
+        "b": "With a test run first, to see which checks fail at the start",
+        "c": "With one sentence in the prompt asking the model to be careful",
+        "d": "In plan mode, researching first and settling the approach before any edit"
+      },
+      "key": "d",
+      "explanation": "Many files and several valid approaches both argue for planning first."
+    },
+    {
+      "id": "rb-044",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "An instruction is read differently each time it runs. Which fix does the page prefer?",
+      "options": {
+        "a": "A longer description of the intent, written out in plain prose",
+        "b": "A stronger word such as always or never in front of the rule",
+        "c": "Two or three exact inputs paired with the required outputs",
+        "d": "A request to the model to explain how it reads the rule"
+      },
+      "key": "c",
+      "explanation": "Exact examples remove the ambiguity that causes inconsistent reading."
+    },
+    {
+      "id": "rb-045",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A developer has corrected the same mistake three times and the session keeps drifting. What is the documented step?",
+      "options": {
+        "a": "Make a fourth correction in the same session, with firmer wording",
+        "b": "Switch to a larger model and keep the same long session going",
+        "c": "Wait for the context to compact itself and then try once more",
+        "d": "Clear the context and write a better first prompt, carrying what was learned"
+      },
+      "key": "d",
+      "explanation": "After more than two failed corrections the documented fix is to clear the context and write a better first prompt."
+    },
+    {
+      "id": "rb-046",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/01-a-headless-run-its-json-and-the-job-status.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A job needs a review in a form that a script can read. Which options give a validated object?",
+      "options": {
+        "a": "The text format with a request for a table",
+        "b": "The JSON output setting together with a JSON schema",
+        "c": "The streaming format with a final marker line",
+        "d": "The default format and a regular expression"
+      },
+      "key": "b",
+      "explanation": "The schema makes the answer a validated object in the structured output field."
+    },
+    {
+      "id": "rb-047",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A job that reviews code posts the same findings again after each push. What is the fix?",
+      "options": {
+        "a": "Raise the sampling temperature, so that each run gives more variety",
+        "b": "Add earlier reports to the prompt and ask for new issues only",
+        "c": "Resume the earlier run inside the new job, to carry its memory",
+        "d": "Ask for fewer findings in the criteria of the review prompt"
+      },
+      "key": "b",
+      "explanation": "A run has no memory of the last one, so what was reported must be in the prompt."
+    },
+    {
+      "id": "rb-048",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A review job run in the minimal startup mode ignores the project's review rules. Why, and what is the fix?",
+      "options": {
+        "a": "Bare mode switches off all rules, so none can be added to it at all",
+        "b": "The rules load only on a scheduled run and never on a push",
+        "c": "The rules must first move into the settings file of the project",
+        "d": "Skipping the memory file is the cause, so a prompt-file option supplies them"
+      },
+      "key": "d",
+      "explanation": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand."
+    },
+    {
+      "id": "rb-049",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/01-explicit-criteria-and-the-trust-in-a-category.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A review prompt says 'be conservative', and developers still see noisy findings. What changes the output?",
+      "options": {
+        "a": "Name the patterns to flag and the ones to leave alone",
+        "b": "Add the word very in front of conservative in the sentence",
+        "c": "Lower the limit on the number of findings that each run can report",
+        "d": "Run the review twice and keep only the findings that overlap"
+      },
+      "key": "a",
+      "explanation": "Naming the patterns to report and to skip is what changes the output."
+    },
+    {
+      "id": "rb-050",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "An unattended run lacks a required field that has no default. What should it do?",
+      "options": {
+        "a": "Ask the developer a question and wait for an answer to come back",
+        "b": "Stop with a plain failure that names what is absent",
+        "c": "Fill the field with a likely value and go on with the run",
+        "d": "Skip the task and report that the run was a success"
+      },
+      "key": "b",
+      "explanation": "An unattended run cannot ask, and a required field with no default cannot be assumed."
+    },
+    {
+      "id": "rb-051",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "Reviewers dismiss most findings from one category. What does the page suggest?",
+      "options": {
+        "a": "Fix the criteria for that one group and keep the others enabled",
+        "b": "Disable all groups until the trust of the reviewers has returned",
+        "c": "Raise the severity floor for the findings of each group at once",
+        "d": "Remove the reviewers' ability to dismiss a finding"
+      },
+      "key": "a",
+      "explanation": "The recorded pattern shows where the dismissals come from, so only that part is adjusted."
+    },
+    {
+      "id": "rb-052",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "An invoice schema makes every field required, and some vendor names in the output do not occur in the documents. What is the first fix?",
+      "options": {
+        "a": "Add a line to the prompt asking the model not to invent anything",
+        "b": "Allow a null where the source does not give a value",
+        "c": "Raise the sampling temperature of the model for that one field",
+        "d": "Add a second model whose job is to rewrite the vendor names"
+      },
+      "key": "b",
+      "explanation": "A field that may be missing from the source should be nullable so that the model is not pushed to fabricate."
+    },
+    {
+      "id": "rb-053",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "Line items add up to 90 and the total field reads 100, yet the record passes its strict schema. What follows?",
+      "options": {
+        "a": "Shape is promised and meaning is not, so code must compare the sums",
+        "b": "The schema is wrong and must be made stricter with more fields",
+        "c": "The model should be asked to add up the items more carefully",
+        "d": "The record is valid, since the schema accepted it as it stands"
+      },
+      "key": "a",
+      "explanation": "Strict schemas do not prevent semantic errors, and a sum is one."
+    },
+    {
+      "id": "rb-054",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A record's total disagrees with its line items and a retry gives the same difference. What does the page treat the case as?",
+      "options": {
+        "a": "A conflict to route to a person, with the discrepancy noted",
+        "b": "A model fault that a larger model would fix on the next attempt",
+        "c": "A schema fault that a new field in the schema would remove",
+        "d": "A transient error that a retry will clear if it is repeated"
+      },
+      "key": "a",
+      "explanation": "A flagged conflict is information about a bad source, and a second look finds the same difference."
+    },
+    {
+      "id": "rb-055",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A merge verdict holds up a developer, and a weekly dependency scan has no deadline. Which one goes through the batch interface?",
+      "options": {
+        "a": "Both of them, with polling to learn when the verdict is ready",
+        "b": "The verdict only, since a blocking check is the more valuable",
+        "c": "Neither of them, since batches cannot carry long text inputs",
+        "d": "The one on the calendar, leaving the blocking check on the immediate path"
+      },
+      "key": "d",
+      "explanation": "A merge verdict is a blocking check that cannot wait for a window without a latency guarantee."
+    },
+    {
+      "id": "rb-056",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A second pass in the same session approves a change that the first pass wrote. Why is that weak?",
+      "options": {
+        "a": "Two passes inside one session always return exactly the same text of the work",
+        "b": "The second pass quietly uses a cheaper tier by default",
+        "c": "A session limits itself to a single review of any change",
+        "d": "The reasoning behind the edit is still present and biases the check"
+      },
+      "key": "d",
+      "explanation": "The reasoning that justified the code is still in the context, so a fresh instance sees the change without it."
+    },
+    {
+      "id": "rb-057",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A prompt is ready for a million documents. What does the page do first?",
+      "options": {
+        "a": "Submit the whole corpus in one batch at once, to save cost on the run",
+        "b": "Run the first ten documents only and assume the rest will behave",
+        "c": "A varied sample run synchronously, with long and incomplete inputs among it",
+        "d": "Ask the model to estimate its own accuracy and trust the figure"
+      },
+      "key": "c",
+      "explanation": "A prompt is proven on a sample that includes the awkward documents, run synchronously so the answer comes at once."
+    },
+    {
+      "id": "rb-058",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/01-case-facts-trimmed-results-and-position.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Amounts and dates drift in a long support chat after the history is condensed. What is the fix?",
+      "options": {
+        "a": "Condense the history less often, so that fewer rounds can occur",
+        "b": "Ask the model to repeat the figures at the end of each reply",
+        "c": "Switch to a model with a longer window and keep the same text",
+        "d": "A structured block of exact values, sent with every request"
+      },
+      "key": "d",
+      "explanation": "The exact values leave the text that gets condensed, so no round of condensing can round them off."
+    },
+    {
+      "id": "rb-059",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Two records give different delivery dates, and the older one arrives later. Which is current?",
+      "options": {
+        "a": "The one carrying the newer stamp",
+        "b": "The one that arrived last in the stream of incoming records",
+        "c": "The one that the customer happened to mention in the chat",
+        "d": "Neither of them, until a person has decided which to keep"
+      },
+      "key": "a",
+      "explanation": "The date decides, so the late older value goes to the history and the current value is untouched."
+    },
+    {
+      "id": "rb-060",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "An agent serves several customers and must never show one the records of another. Where is the control?",
+      "options": {
+        "a": "In the system prompt, with an instruction to stay within the customer's data",
+        "b": "In the model itself, which has been trained to separate customers",
+        "c": "In code that filters by the authenticated key before the context is built",
+        "d": "In the reply, which is checked afterwards for names of other people"
+      },
+      "key": "c",
+      "explanation": "The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything."
+    },
+    {
+      "id": "rb-061",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/01-when-to-escalate-and-when-not-to.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A customer writes 'let me talk to a person'. What does the agent do first?",
+      "options": {
+        "a": "Look up the account and try to solve the problem",
+        "b": "Hand over at once, without investigating the account",
+        "c": "Ask why the customer wants a person",
+        "d": "Offer a discount to keep the conversation"
+      },
+      "key": "b",
+      "explanation": "An explicit request for a person is honoured at once, with no investigation first."
+    },
+    {
+      "id": "rb-062",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A name matches three customers. Which handling does the page prefer?",
+      "options": {
+        "a": "The account with the most recent activity, on the assumption that it is meant",
+        "b": "The first match in the list, confirmed with the caller at the end",
+        "c": "An identifier that tells them apart, such as the email held on file",
+        "d": "A merged view of all three accounts shown in one reply"
+      },
+      "key": "c",
+      "explanation": "The agent asks for something that tells the candidates apart and leaves the choice to the caller's answer."
+    },
+    {
+      "id": "rb-063",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Two tries at a refund have made no progress. What should happen?",
+      "options": {
+        "a": "It tries a third time with a rephrased prompt and a gentler tone",
+        "b": "It stops at the cap and hands over a short summary of what was tried",
+        "c": "It closes the case as resolved and sends a satisfaction survey",
+        "d": "It asks the customer to call back later when the system is quiet"
+      },
+      "key": "b",
+      "explanation": "Two attempts without progress hit the third trigger, and the hand-off carries what was tried."
+    },
+    {
+      "id": "rb-064",
+      "module": 66,
+      "page": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A search helper hits a transient timeout. Who should retry?",
+      "options": {
+        "a": "The coordinator, which repeats every failed call on the helper's behalf",
+        "b": "The user, who is given a notice of failure and asked to retry",
+        "c": "The worker itself, passing up only what it cannot resolve",
+        "d": "Nobody, since a timeout in a search is always final and fatal"
+      },
+      "key": "c",
+      "explanation": "The subagent holds the query and the work done, so it retries what is transient and reports only what survives."
+    },
+    {
+      "id": "rb-065",
+      "module": 66,
+      "page": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A helper returns an empty list after a timeout, and the coordinator takes it as 'no results'. What is wrong?",
+      "options": {
+        "a": "Empty lists should be reported to the user as failures of the run",
+        "b": "The coordinator should simply wait longer for the list to fill",
+        "c": "Timeouts should be hidden from the coordinator to keep it simple",
+        "d": "A failure and a reply with no matches differ in kind and in handling"
+      },
+      "key": "d",
+      "explanation": "A failure and a valid empty result are different values with different handling."
+    },
+    {
+      "id": "rb-066",
+      "module": 66,
+      "page": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "One of four research topics is shut to the agent. What should the run do?",
+      "options": {
+        "a": "Stop at once and discard everything that has been gathered so far",
+        "b": "Carry on with the other three and log the closed area as a gap to reopen",
+        "c": "Fill the topic from the model's memory and mark it as covered",
+        "d": "Retry the closed topic over and over until it finally opens"
+      },
+      "key": "b",
+      "explanation": "Terminating on one failure wastes the other work, and a refusal is recorded as a gap with the way to get access."
+    },
+    {
+      "id": "rb-067",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "An exploration of a large codebase fills the context with files of little value. Which technique keeps the lead's context small?",
+      "options": {
+        "a": "Open the whole tree in one long conversation and trim the context later",
+        "b": "Keep all of the files and rely on automatic summarising to cope",
+        "c": "Ask the model to forget the old files once it has read them",
+        "d": "Read-only helpers answer each question and return only a summary"
+      },
+      "key": "d",
+      "explanation": "Each narrow question goes to a read-only subagent, and the coordinator receives only a summary."
+    },
+    {
+      "id": "rb-068",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "After a crash, some helpers have stored progress and some do not. What is the recovery?",
+      "options": {
+        "a": "Restart every helper from nothing, whether or not it kept anything",
+        "b": "Continue all helpers from their last reported status line",
+        "c": "Continue those that kept something, and begin the others afresh",
+        "d": "Ask the helpers which of them ought to be restarted"
+      },
+      "key": "c",
+      "explanation": "The agents with files continue from them and the others start over, since the file outranks the status."
+    },
+    {
+      "id": "rb-069",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Which kind of helper can be resumed later with its own history?",
+      "options": {
+        "a": "The built-in exploring subagent that ships with the product",
+        "b": "Any helper that was launched in the background of a session",
+        "c": "A custom subagent, not the built-in one",
+        "d": "Only a helper that has already finished its job successfully"
+      },
+      "key": "c",
+      "explanation": "A custom subagent can be resumed with its history, and the built-in one cannot."
+    },
+    {
+      "id": "rb-070",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "An extraction pipeline reports 96 percent overall, and the team proposes dropping review. What should come first?",
+      "options": {
+        "a": "A larger sample drawn from the easy documents of the stream",
+        "b": "A second run of the same pipeline with a stronger model",
+        "c": "A breakdown by document kind and by field",
+        "d": "A vote among the reviewers about whether the figure feels right"
+      },
+      "key": "c",
+      "explanation": "The overall figure is an average dominated by the large easy segment, so each kind and field is measured on its own."
+    },
+    {
+      "id": "rb-071",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A reviewing team can read only half of the flagged items today. Which half comes first?",
+      "options": {
+        "a": "The oldest items, in order of arrival",
+        "b": "The most certain items, to clear them quickly",
+        "c": "Conflicts and the least certain entries",
+        "d": "A random half, for fairness"
+      },
+      "key": "c",
+      "explanation": "Conflicts and the lowest confidence are read first and the overflow waits, visibly, in a backlog."
+    },
+    {
+      "id": "rb-072",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "An agent's refund over a limit may go ahead when its confidence is high. What does the page say?",
+      "options": {
+        "a": "Yes, since high confidence is the very purpose of the score",
+        "b": "Yes, whenever the score is above ninety percent on the record",
+        "c": "No, since an action on the irreversible list always needs a person",
+        "d": "No, unless the customer has asked for the refund twice"
+      },
+      "key": "c",
+      "explanation": "An action on the irreversible list always needs a person, whatever the confidence."
+    },
+    {
+      "id": "rb-073",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/01-keeping-claims-tied-to-their-sources-conflicts-and-dates.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Two sources give different figures for the same measure. How should the report present them?",
+      "options": {
+        "a": "The higher value, shown as the safer estimate for the reader",
+        "b": "Both values, each with its origin and a note that they disagree",
+        "c": "The average of the two values, rounded to a convenient figure",
+        "d": "The value from the more recent source only, with no mention of the other"
+      },
+      "key": "b",
+      "explanation": "The guide's answer is annotating conflicts with source attribution rather than arbitrarily selecting one value."
+    },
+    {
+      "id": "rb-074",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A summarising stage must not lose where each claim came from. What does the page require?",
+      "options": {
+        "a": "A list of the sources placed at the end of the final report",
+        "b": "A note in the prompt asking the model to remember its sources",
+        "c": "Each statement paired with its origin as structured data at every exchange",
+        "d": "One source named for the whole run, in the title of the report"
+      },
+      "key": "c",
+      "explanation": "A compression step keeps the origin next to the text it produces, so the pairing survives every step."
+    },
+    {
+      "id": "rb-075",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A subagent cannot trace a statement to any source. What should it return?",
+      "options": {
+        "a": "Report it as unattributed in a separate place, or leave it out",
+        "b": "Return it with a source guessed from the topic of the question",
+        "c": "Return it as established, since it sounds right to the model",
+        "d": "Return it with a high confidence figure attached to the claim"
+      },
+      "key": "a",
+      "explanation": "A statement with no source is reported separately as unsourced, or left out."
+    },
+    {
+      "id": "rb-076",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/01-the-scenario-the-layers-and-the-first-fix.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A support agent moves money too early because tools can be called in any sequence. What is the first fix?",
+      "options": {
+        "a": "Add a much stronger sentence about the order to the prompt",
+        "b": "Rename the tools so that the right order is obvious from them",
+        "c": "Review the transcripts once a week and correct the mistakes",
+        "d": "Enforce the order of calls in the dispatcher, in code"
+      },
+      "key": "d",
+      "explanation": "Money that moved wrongly cannot be recalled, so the cause is fixed first, in code."
+    },
+    {
+      "id": "rb-077",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A team celebrates a lower escalation rate. Which check shows whether it is a real success?",
+      "options": {
+        "a": "If cases settled alone although a person was needed did not rise",
+        "b": "Whether the average session has become shorter over the month",
+        "c": "Whether the model's own stated confidence has risen over time",
+        "d": "Whether customers now write fewer messages in each conversation over the month"
+      },
+      "key": "a",
+      "explanation": "A lower escalation rate is a success only if no case that needed a person was settled alone."
+    },
+    {
+      "id": "rb-078",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "State from one support ticket reaches the next one. What is the fix?",
+      "options": {
+        "a": "Clear the conversation every ten minutes during a long working day",
+        "b": "Ask the model to forget the earlier ticket when the next begins",
+        "c": "Run the tickets in strict alphabetical order of customer name",
+        "d": "Create a fresh instance per case so that nothing outlives it"
+      },
+      "key": "d",
+      "explanation": "A state that belongs to one case cannot reach another."
+    },
+    {
+      "id": "rb-079",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "Where should a team's review command live so that a new teammate gets it with the first checkout?",
+      "options": {
+        "a": "The home folder of its author, where personal commands usually sit",
+        "b": "A list of commands written inside the root memory file",
+        "c": "A settings array of commands that Claude Code reads at start",
+        "d": "The project's own configuration directory, committed with the sources"
+      },
+      "key": "d",
+      "explanation": "A command file in the project's own folder is committed and reaches every clone."
+    },
+    {
+      "id": "rb-080",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A rule's paths entry names a directory, src/api, and the rule never loads. What is wrong?",
+      "options": {
+        "a": "A bare label is not a glob, so it matches no file",
+        "b": "The folder is too deep in the tree for any rule to reach it",
+        "c": "Rules load only for files that sit at the root of the project",
+        "d": "The entry needs a trailing space after the name to be read"
+      },
+      "key": "a",
+      "explanation": "A bare folder name is not a glob; write a folder as src/api/** so that it matches files beneath."
+    },
+    {
+      "id": "rb-081",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "Which task is best started by thinking through the design first and which by a single edit?",
+      "options": {
+        "a": "Both of them in plan mode, as a rule of the team",
+        "b": "Both of them directly, with a test run after each change",
+        "c": "Restructuring a monolith in plan mode, and a typo fix done directly",
+        "d": "The typo fix in plan mode, and the monolith done directly"
+      },
+      "key": "c",
+      "explanation": "Small clear work is direct and open design is plan."
+    },
+    {
+      "id": "rb-082",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/01-the-research-system-who-owns-coverage.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "A research report lacks a whole topic, yet every helper did its job. What does the team check first?",
+      "options": {
+        "a": "The tool list of each of the helpers that took part in the run",
+        "b": "The prompt of the report writer that produced the final text",
+        "c": "The coordinator's plan, compared with the scopes of the question",
+        "d": "The index of the search provider that the helpers queried"
+      },
+      "key": "c",
+      "explanation": "The subagents did what they were assigned, so the plan is what to check."
+    },
+    {
+      "id": "rb-083",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A run covered three of four scopes and one source pair disagrees. What does the report carry?",
+      "options": {
+        "a": "A complete status, since three scopes out of four is a majority",
+        "b": "A partial status, listing the missing area and the conflict",
+        "c": "A failed status, with no report at all for the reader",
+        "d": "A complete status, with the disagreement quietly removed"
+      },
+      "key": "b",
+      "explanation": "A missing scope makes the run partial, and a conflict is reported next to it."
+    },
+    {
+      "id": "rb-084",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A search for one scope times out, and an alternative query exists. What should the run do?",
+      "options": {
+        "a": "Retry the first query again and again until it finally succeeds",
+        "b": "Retry once through the substitute, then give the area up",
+        "c": "Skip the scope without any mention in the final report",
+        "d": "Report the scope as covered, since an alternative query was tried"
+      },
+      "key": "b",
+      "explanation": "One retry through the alternative, then an honest gap."
+    },
+    {
+      "id": "rb-085",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "An agent should write only inside a generated folder. Which rule does that?",
+      "options": {
+        "a": "An edit permission limited to that directory, instead of one for the whole tool",
+        "b": "An allow rule for the Write tool with no path attached to it at all",
+        "c": "A line in the prompt that names the directory and asks for great care",
+        "d": "A deny rule for every other directory, written out one by one"
+      },
+      "key": "a",
+      "explanation": "An allow rule that covers the whole tool is the fault; a path keeps the rule to one folder."
+    },
+    {
+      "id": "rb-086",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A server definition file holds a token header with a literal value. What does the audit say?",
+      "options": {
+        "a": "A secret sits in a committed document, so a variable reference should replace it",
+        "b": "Nothing is wrong, since tokens in such a file are public by design",
+        "c": "The header is fine as long as the repository itself is private",
+        "d": "The header only needs to be renamed so that it looks less like a secret"
+      },
+      "key": "a",
+      "explanation": "A header whose name says token and whose value has no variable reference is a secret in the file."
+    },
+    {
+      "id": "rb-087",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A team note about server setup must list what?",
+      "options": {
+        "a": "Only the variables that hold secrets, since the rest are harmless",
+        "b": "Only the variables that already carry a default value",
+        "c": "The names of the tools that the servers offer to the agent",
+        "d": "Every variable that the backends need in order to start up"
+      },
+      "key": "d",
+      "explanation": "Every variable that appears in the project's server file has to appear in the note."
+    },
+    {
+      "id": "rb-088",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A build job launches Claude Code with a prompt and stalls until the runner times it out. Which change fixes the step?",
+      "options": {
+        "a": "Add the print flag so that the run answers and exits",
+        "b": "Redirect standard input from an empty file at the start of the step",
+        "c": "Set an environment variable that tells the tool it runs headless",
+        "d": "Add a flag on the command line that turns the run into a batch"
+      },
+      "key": "a",
+      "explanation": "The print flag is the documented way to run without a person; the other options do not exist or are workarounds."
+    },
+    {
+      "id": "rb-089",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A nightly digest and a merge gate both call the model. Which one fits the batch interface?",
+      "options": {
+        "a": "The gate, since a merge check is the more important of the two",
+        "b": "Both of them, with a fallback to real time if the batch is slow",
+        "c": "Neither of them, since the results of a batch arrive out of order",
+        "d": "The summary job, since nobody waits for it"
+      },
+      "key": "d",
+      "explanation": "Nobody waits for the digest and a developer waits for the gate."
+    },
+    {
+      "id": "rb-090",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "stem": "A review of a large change is split into passes. Which split does the page use?",
+      "options": {
+        "a": "One single pass over the whole change in a long prompt",
+        "b": "A separate pass for each persona of reviewer on the team",
+        "c": "A separate pass for each severity level of finding",
+        "d": "A pass for each file, then an integration pass over the findings"
+      },
+      "key": "d",
+      "explanation": "A pass for each file, then the integration pass."
+    },
+    {
+      "id": "rb-091",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "domains": [
+        "A4"
+      ],
+      "stem": "A document does not contain a required value. What does the pipeline do after the first attempt?",
+      "options": {
+        "a": "Retries with a higher temperature until a value appears",
+        "b": "Fills the value in from similar documents that were seen before",
+        "c": "Sends it to a person, since no retry gives what the page omits",
+        "d": "Marks the record valid with the field left empty"
+      },
+      "key": "c",
+      "explanation": "A missing value is routed, not retried."
+    },
+    {
+      "id": "rb-092",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A kind of document has exactly the minimum count and accuracy exactly at the target. Is it automated?",
+      "options": {
+        "a": "No, because accuracy must exceed the target and not merely equal it",
+        "b": "No, because fifty documents is never enough for any kind",
+        "c": "Only after another month of data has been collected for the kind",
+        "d": "Yes, if that tally meets the floor, since both tests are inclusive"
+      },
+      "key": "d",
+      "explanation": "Both comparisons are inclusive, so reaching the evidence is enough."
+    },
+    {
+      "id": "rb-093",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Accuracy on validated records is higher than accuracy on all records by exactly the policy margin. Is the figure overstated?",
+      "options": {
+        "a": "No, since a difference that only reaches the limit does not exceed it",
+        "b": "Yes, since any positive difference at all makes the figure overstated",
+        "c": "Yes, since the figure is rounded before the two are compared",
+        "d": "Only if the target is missed as well as the gap being reached"
+      },
+      "key": "a",
+      "explanation": "A difference that reaches the gap is not overstated."
+    },
+    {
+      "id": "rb-094",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "A message from a user shows signs of risk. What happens first?",
+      "options": {
+        "a": "The assistant answers the message first and then offers some help",
+        "b": "The assistant asks a few clarifying questions about the situation",
+        "c": "It goes to a safety hand-off before any other handling",
+        "d": "The assistant logs the message for the weekly review by the team"
+      },
+      "key": "c",
+      "explanation": "Risk is checked first."
+    },
+    {
+      "id": "rb-095",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Three of twenty sampled conversations repeated a question, and the policy accepts up to ten percent. What does the review conclude?",
+      "options": {
+        "a": "The batch fails, since the share is above the ceiling",
+        "b": "The batch passes, since three is close enough to two in a small run",
+        "c": "The batch passes, since only a repeat of a whole conversation would count",
+        "d": "The review waits for a fourth sample before it concludes anything"
+      },
+      "key": "a",
+      "explanation": "Three of twenty is fifteen percent, which is above ten, and a limit is met only at the limit or below."
+    },
+    {
+      "id": "rb-096",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "A recalled plan is ten months old and the policy limit is thirty days, yet the assistant states its renewal terms as current. What went wrong?",
+      "options": {
+        "a": "Stated as current, since a saved plan is the best evidence there is",
+        "b": "Checked with the person first, and not asserted as true today",
+        "c": "Dropped from the store silently, as nothing so old can be right",
+        "d": "Stated with a warning added at the end of the reply"
+      },
+      "key": "b",
+      "explanation": "An old fact is verified before it is used, so the plan should have been confirmed with the person first."
+    },
+    {
+      "id": "rb-097",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+      "domains": [
+        "A2"
+      ],
+      "stem": "Generated tool code fetches a page that its proposal never mentioned. What is the decision?",
+      "options": {
+        "a": "Approval, with a note added for the reviewer to read later in the week",
+        "b": "A refusal, because behaviour beyond what was announced is not approved",
+        "c": "Revision, with a request to add the network effect to the proposal",
+        "d": "Approval behind a gate, since the network needs a person to look"
+      },
+      "key": "b",
+      "explanation": "An undeclared effect cannot be approved on its behalf."
+    },
+    {
+      "id": "rb-098",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "stem": "An approved tool is edited by the agent. What must happen before it runs next?",
+      "options": {
+        "a": "Nothing needs to happen, since the first approval still stands",
+        "b": "The agent states in the log that the change is only a small one",
+        "c": "It goes through the gate as a new proposal",
+        "d": "A log entry is written afterwards to record what was changed"
+      },
+      "key": "c",
+      "explanation": "A changed tool is a new proposal, since the person approved what they read."
+    },
+    {
+      "id": "rb-099",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "stem": "Where should the audit of tool decisions and runs be kept?",
+      "options": {
+        "a": "Where the agent has no write access, written by the gate and the runner",
+        "b": "In a file that the agent maintains for its own convenience",
+        "c": "In the agent's own memory, which it can consult at any time",
+        "d": "In the output of the tool itself, one line for every call"
+      },
+      "key": "a",
+      "explanation": "A log that the agent can edit is not an audit."
+    }
+  ]
+}
