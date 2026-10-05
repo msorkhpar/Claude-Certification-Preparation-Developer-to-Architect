@@ -424,7 +424,7 @@ is easy to test, which is the idea of this module's practice.
 3. A team adds the deploy permission to its invoker role just in case. What does the Google page warn?
    - **a**: It blocks the predict permission until the deploy one is removed
    - **b**: It makes every prediction slower on the endpoint that holds it
-   - **c**: It might allow exporting other models from the project
+   - **c**: It opens a route to exporting other models held in the project
    - **d**: It has no effect at all, because deploy only adds serving capacity
 
 <details>
