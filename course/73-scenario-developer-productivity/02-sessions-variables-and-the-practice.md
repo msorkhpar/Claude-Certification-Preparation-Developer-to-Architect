@@ -87,7 +87,7 @@ This quiz covers both pages of the module.
    - **d**: A permission rule approves the whole tool rather than one path of it
 
 2. Scenario S4, a helper that explores a legacy system and generates boilerplate. Which entry does the check for typed-in credentials report?
-   - **a**: A header named Authorization whose value is `Bearer example-token-123`
+   - **a**: A header named Authorization whose value is `Bearer <token>`
    - **b**: A header named Authorization whose value is `Bearer ${TICKETS_TOKEN}`
    - **c**: A header named X-Trace whose value is `abc`, sent with every request
    - **d**: A variable named REGION whose value is `eu`, passed to the local server

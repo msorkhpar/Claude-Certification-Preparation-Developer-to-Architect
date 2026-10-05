@@ -2240,7 +2240,7 @@ PLANTS[f"{X}/72-scenario-multi-agent-research-system/unit-01/practice-1"] = {
 _P73 = {
     "wrong-unknown-server": {".claude/agents/explorer.md": [("mcp__docs__search", "mcp__wiki__search")]},
     "wrong-settings-ghost": {".claude/settings.json": [('"mcp__tickets__get_ticket"]', '"mcp__ticket__get_ticket"]')]},
-    "wrong-literal-token": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer abc123token")]},
+    "wrong-literal-token": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer <token>")]},
     "wrong-token-default": {".mcp.json": [("Bearer ${TICKETS_TOKEN}", "Bearer ${TICKETS_TOKEN:-changeme}")]},
     "wrong-explorer-bash": {".claude/agents/explorer.md": [("tools: Read, Grep, Glob, mcp__docs__search", "tools: Read, Grep, Glob, Bash, mcp__docs__search")]},
     "wrong-explorer-inherits": {".claude/agents/explorer.md": [("tools: Read, Grep, Glob, mcp__docs__search\n", "")]},
