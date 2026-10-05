@@ -20,7 +20,7 @@ A team has a new prompt that raised the score on its offline set. It is tried on
 An A/B test sends live traffic to two versions at random and compares an outcome. Its first enemy is chance: with few cases, two equal versions will differ, and a gap of that size can be chance alone. The example's test is the plain two-proportion comparison, done at 95 percent: the gap must be large enough that equal versions would show it less than about one time in twenty. Four rules make it honest.
 
 - **Decide the metric and the sample before you look.** One primary metric, set in advance, and a minimum number of cases per arm. The example's minimum is 200; below it the verdict is `too few cases`, whatever the gap.
-- **The larger number is not the better version.** With 80 cases in an arm, a gap of five points is within chance. The same gap on 500 cases each can be clear. In the example, 410 right of 500 against 438 is a clear gain, and 410 against 431 is not.
+- **The larger number is not the better version.** With 80 cases in an arm, a gap of five points is within chance. The same gap on 500 cases each can be clear. In the example, 410 right of 500 against 438 is a clear gain, and 410 against 425 is not.
 - **Do not stop by who is ahead.** Stopping or extending a test according to who is ahead produces false wins. Running the same cases again repeats the same sample and adds no information. Collect the cases you planned.
 - **Name the direction.** A clear difference can go either way. The verdict says `new is better` or `old is better`, and a test that can only report wins is not a test.
 
@@ -663,7 +663,7 @@ The practice is in [`exercises/88-evaluation-and-optimisation`](../../exercises/
 
 1. A new prompt is tried on 80 live cases in each arm and scores five points higher than the current one. What should the team conclude?
    - **a**: Adopt the new prompt now, because five points is the larger number and both arms have the same size
-   - **b**: Too small a sample to tell, so gather the planned numbers and see whether the gap clears the bar
+   - **b**: Too small a sample to tell, so gather the planned numbers
    - **c**: Run the same 80 cases again and average the two results, to get a steadier estimate
    - **d**: Extend the test only if the new prompt is behind, and stop at once if it is ahead
 
@@ -688,12 +688,12 @@ This quiz covers both pages of the module.
 1. A reply to a policy question is confident and wrong. The right passage was not among the chunks the model was given. Which first step fits?
    - **a**: Lower the temperature so that the wording of the answers stops varying between runs
    - **b**: Move the question to a larger model, which is more likely to know what the policy says than the current one is
-   - **c**: Inspect the index and the splitting of documents upstream of the generation stage, because the evidence never arrived
+   - **c**: Inspect the index and how the documents are split
    - **d**: Add more examples of confident replies to the prompt, so that the style is consistent
 
 2. A team's check for its research agent demands exactly three searches in a fixed order, and it fails runs that reach the right answer by another route. What should the check judge instead?
    - **a**: Whether the runs repeated the same steps, because identical steps prove reliability
-   - **b**: Whether the outcome is correct, and then whether the process behind it was sensible
+   - **b**: Whether the outcome is correct, then whether the process was sensible
    - **c**: The number of tool calls, since fewer calls mean a better agent
    - **d**: The final text, without any look at how it was reached
 
@@ -701,7 +701,7 @@ This quiz covers both pages of the module.
    - **a**: Test on the examples that sit in the prompt, since those are already written down
    - **b**: Wait until the full set has been built and checked, because a small set of examples cannot show a change at all
    - **c**: Keep judging by feel until launch, and begin to measure once real users arrive
-   - **d**: Start now with a small set of real queries, since big first-round effects show up in just a few
+   - **d**: Start now with a small set of real queries
 
 <details>
 <summary>Answer key</summary>
