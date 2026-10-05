@@ -49,7 +49,7 @@ The command line writes the file for you. `claude mcp add --transport http share
 
 ### Environment expansion: credentials by reference
 
-"Claude Code supports environment variable expansion in `.mcp.json` files, allowing teams to share configurations while maintaining flexibility for machine-specific paths and sensitive values like API keys." Two forms exist: `${VAR}` "expands to the value of environment variable `VAR`", and `${VAR:-default}` "expands to `VAR` if set, otherwise uses `default`". Expansion applies to five places: `command` (the server executable path), `args`, `env`, `url` ("for HTTP server types") and `headers` ("for HTTP server authentication"). The documentation's list names `headers` among them ("`headers`: for HTTP server authentication"), so a header value is a place where expansion applies. Anywhere else the text stays as written.
+"Claude Code supports environment variable expansion in `.mcp.json` files, allowing teams to share configurations while maintaining flexibility for machine-specific paths and sensitive values like API keys." Two forms exist: `${VAR}` "expands to the value of environment variable `VAR`", and `${VAR:-default}` "expands to `VAR` if set, otherwise uses `default`". Expansion applies to five places: `command` (the server executable path), `args`, `env`, `url` ("for HTTP server types") and `headers` ("for HTTP server authentication"). Anywhere else the text stays as written.
 
 Four rules decide whether a shared file works.
 
@@ -858,8 +858,8 @@ These are the wrong answers that the exam's options for this task statement offe
 1. A team commits `.mcp.json` with the header `Bearer ${NPM_TOKEN}` for a hosted package registry. Every developer exports the variable, yet the registry answers 401. What is the cause?
    - **a**: The file loads only after an interactive approval that the developers skipped
    - **b**: Header values are expanded only for entries that start a local process
-   - **c**: Claude Code sends nothing for names that carry sign-in secrets of this kind
-   - **d**: A variable in a header needs a fallback after the dash and colon before use
+   - **c**: Claude Code reads names of this kind, which carry sign-in secrets, as empty
+   - **d**: A variable in a header needs a fallback after the colon and dash before use
 
 2. A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Where should it be registered?
    - **a**: Local scope, the default for a newly added server
@@ -870,7 +870,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Credential names such as this one read as empty toward a remote endpoint. *a* is ruled out because a server that waits for approval is not connected at all: "claude mcp list shows it as pending", and it does not answer with a 401. *b* is ruled out because the documentation lists the places where expansion applies: "`headers`: for HTTP server authentication". *d* is ruled out because a default is optional, and the plain form works: "expands to the value of environment variable".
+1. **c**. Credential names such as this one read as empty toward a remote endpoint. *a* is ruled out because a server that waits for approval is not connected at all: "claude mcp list shows it as pending", and it does not answer with a 401. *b* is ruled out because the documentation lists the places where expansion applies: `headers` ("for HTTP server authentication"). *d* is ruled out because a default is optional, and the plain form works: "expands to the value of environment variable".
 2. **a**. Local scope is the default and belongs to its owner and that one project. The guide names user-level scope for personal servers, and the product has a third scope between the two, which is the one that fits a single repository. *b* is ruled out because "Selecting the wrong scope for a personal tool can leak credentials into a shared repo". *c* is ruled out because user scope is for "services you frequently use across different projects", which is wider than this repository. *d* is ruled out because that file holds settings and not servers: "while the general local settings file is `.claude/settings.local.json` in the project".
 
 </details>

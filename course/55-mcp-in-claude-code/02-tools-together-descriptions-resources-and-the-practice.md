@@ -103,7 +103,7 @@ This quiz covers both pages of the module.
 2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A CI job runs `claude -p` on a fresh clone, and a pull request has added a server to `.mcp.json` that nobody on the team has seen. What happens when the job starts?
    - **a**: It stays pending until a person approves it in an interactive session
    - **b**: It is skipped, because an unattended run has no trust dialog to accept
-   - **c**: It loads with no prompt, so edits to the file need the same review as source changes
+   - **c**: It loads without asking, since the run has no person to approve it
    - **d**: It loads only if the repository's own settings file approves it in advance
 
 3. Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file, and sessions start with crowded context. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?

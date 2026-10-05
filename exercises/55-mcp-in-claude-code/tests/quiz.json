@@ -9,14 +9,14 @@
       "options": {
         "a": "The file loads only after an interactive approval that the developers skipped",
         "b": "Header values are expanded only for entries that start a local process",
-        "c": "Claude Code sends nothing for names that carry sign-in secrets of this kind",
-        "d": "A variable in a header needs a fallback after the dash and colon before use"
+        "c": "Claude Code reads names of this kind, which carry sign-in secrets, as empty",
+        "d": "A variable in a header needs a fallback after the colon and dash before use"
       },
       "key": "c",
       "explanation": {
         "c": "Credential names such as this one read as empty toward a remote endpoint.",
         "a": "Ruled out because a server that waits for approval is not connected at all: \"claude mcp list shows it as pending\", and it does not answer with a 401.",
-        "b": "Ruled out because the documentation lists the places where expansion applies: \"`headers`: for HTTP server authentication\".",
+        "b": "Ruled out because the documentation lists the places where expansion applies: `headers` (\"for HTTP server authentication\").",
         "d": "Ruled out because a default is optional, and the plain form works: \"expands to the value of environment variable\"."
       }
     },
@@ -123,7 +123,7 @@
       "options": {
         "a": "It stays pending until a person approves it in an interactive session",
         "b": "It is skipped, because an unattended run has no trust dialog to accept",
-        "c": "It loads with no prompt, so edits to the file need the same review as source changes",
+        "c": "It loads without asking, since the run has no person to approve it",
         "d": "It loads only if the repository's own settings file approves it in advance"
       },
       "key": "c",
