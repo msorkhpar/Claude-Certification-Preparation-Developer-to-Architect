@@ -89,22 +89,22 @@ These are the wrong answers that the exam's scenarios offer for this task statem
 ## Quiz
 
 3. In an adaptive investigation the step chooser keeps proposing "list the test files", which was already done, and the loop hits its step limit each time. What is the best change?
-   - **a**: Double the step limit so that the planner has room to move on by itself
+   - **a**: Double the step limit and let the planner move on by itself
    - **b**: Halt with a stuck status once a task repeats, and name the repeated one
-   - **c**: Remove the planner's history so that every request is judged on its own
+   - **c**: Remove the planner's history and judge every request on its own
    - **d**: Let the worker skip the repeated subtask silently and carry on with the next
 
 4. A large review runs one pass per module and then a final pass across modules. What should the final pass receive?
-   - **a**: The full text of every module, so that it can read the code that it compares
-   - **b**: The findings of the earlier passes together with the diff of the whole change
-   - **c**: The diff of the whole change, because the modules are in the repository already
+   - **a**: The complete text of each module, laid side by side for comparison
+   - **b**: The findings of the earlier passes, with no account of the modules
+   - **c**: The changed lines of every module, copied out of each pass
    - **d**: A name and a short summary for each, listing what it offers and what it expects
 
 <details>
 <summary>Answer key</summary>
 
 3. **b**. A repeated subtask is a lack of progress, and a status says so. *a* is ruled out because the limit is a backstop and the cause is the lack of progress: "A loop that runs into it needs a progress check". *c* is ruled out because the history is what lets the planner see what it has done: "The planner is given the goal and the steps done so far". *d* is ruled out because a silent skip leaves no status behind: "so that a reader of the result can tell them apart".
-4. **d**. Summaries are the interface between the passes. *a* is ruled out because the text would bring the overload back: "the one overloaded request that the split removed". *b* is ruled out because the diff is the text that this pass is not given, and findings alone say nothing about what the files offer: "what the file offers (the functions and types others use, with their parameters)". *c* is ruled out because the final pass needs each file's conclusions: "The cross pass needs what each file pass concluded about what the file offers".
+4. **d**. Summaries are the interface between the passes. *a* is ruled out because the text would bring the overload back: "the one overloaded request that the split removed". *b* is ruled out because findings alone say nothing about what the files offer: "what the file offers (the functions and types others use, with their parameters)". *c* is ruled out because copied text brings the problem back: "A summary that copies the file brings the problem back."
 
 </details>
 
@@ -113,29 +113,29 @@ These are the wrong answers that the exam's scenarios offer for this task statem
 This quiz covers both pages of the module.
 
 1. A platform team runs one fixed checklist (lint, test, report) over forty unrelated systems. A colleague wants an adaptive planner for each because it is more capable. What is the best answer?
-   - **a**: Use it, because a planner improves on a fixed checklist of steps in every respect
+   - **a**: Use it on each system
    - **b**: Use one planner for the forty of them in a single shared session instead
-   - **c**: Use the plain sequence on each, as the steps are known and none affects another
-   - **d**: Use a pass for each plus a cross pass, because that many items need a cross pass
+   - **c**: Use the plain sequence on each
+   - **d**: Use a pass for each plus a cross pass
 
 2. A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?
    - **a**: Ask it to restate the goal more carefully before each step
-   - **b**: Plan every step up front, so that no drift is possible
+   - **b**: Plan every step up front and run the plan unchanged
    - **c**: Give it the result of each action, such as a test run
-   - **d**: Switch to a fixed chain, which cannot drift from the code
+   - **d**: Switch to a fixed chain that runs the same steps every time
 
 
-3. A source file has four thousand lines, which is too long for one pass. How should it be handled?
-   - **a**: Send its first part only, because the beginning of a file is the most important
+3. A source file has four thousand lines, which is too long for one pass. By the practice's own rule for long files, how should it be handled?
+   - **a**: Send its first part only and skip the remainder
    - **b**: Summarise the file in one sentence and use the sentence in its place
-   - **c**: Send the whole file anyway, because splitting loses what connects its separate parts
-   - **d**: Inspect it in labelled parts, and let the joined summaries carry what spans them
+   - **c**: Send the whole file anyway and trust the pass to keep its parts connected
+   - **d**: Cut it into labelled parts and join their summaries into one entry
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. Known steps and independent items call for the simplest shape. *a* is ruled out because capability has a price: "Agentic systems often trade latency and cost for better task performance." *b* is ruled out because the systems do not interact, so nothing is gained by a shared planner: "A fixed chain, run once for each item". *d* is ruled out because a cross pass is for items that affect each other: "Items that do not (forty services, each given the same checklist) need only the chain, run forty times."
-2. **c**. The planner needs ground truth from each step, not its own earlier guesses. *a* is ruled out because the source of the drift is what it is shown: "a plan that is made from the model's own previous guesses drifts". *b* is ruled out because an up-front plan has no results to use: "the plan is made before any ground truth exists". *d* is ruled out because an open-ended job in a fixed chain gives "a pipeline that marches through steps that no longer make sense", and ground truth, not a chain, cures the drift.
+2. **c**. The planner needs ground truth from each step, not its own earlier guesses. *a* is ruled out because the source of the drift is what it is shown: "a plan that is made from the model's own previous guesses drifts". *b* is ruled out because an up-front plan has no results to use: "the plan is made before any ground truth exists". *d* is ruled out because a chain has no planner to drift and no way to use what a step found: "If step two finds that step three is pointless, the chain runs step three."
 
 3. **d**. Parts keep each pass small and the summary joins them. *a* is ruled out because the rest of the file would never be reviewed: "A file that does not fit a pass of its own is cut into parts of a fixed number of lines". *b* is ruled out because a sentence does not carry the interfaces: "what the file offers (the functions and types others use, with their parameters)". *c* is ruled out because the whole file brings back the problem of the split: "spends that budget on text before the review begins".
 
