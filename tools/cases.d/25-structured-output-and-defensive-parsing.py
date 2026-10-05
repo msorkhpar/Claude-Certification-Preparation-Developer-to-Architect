@@ -14,7 +14,7 @@ PRACTICES[f"{X}/25-structured-output-and-defensive-parsing/unit-01/practice-1"] 
     ],
     "plants": {
         "wrong-no-prose-skip": (["e1"], "reads the whole reply as JSON and fails on prose around the object"),
-        "wrong-generic-retry": (["e2"], "re-prompts without telling the model which fields were wrong"),
+        "wrong-generic-retry": (["e2"], "tells the model about only the first problem when it re-prompts"),
         "wrong-extra-attempt": (["e3"], "makes one call more than the attempt limit"),
         "wrong-retry-refusal": (["e4"], "treats a refusal as a bad reply and asks again"),
         "wrong-no-grounding": (["e5"], "accepts a quote that the document does not contain"),

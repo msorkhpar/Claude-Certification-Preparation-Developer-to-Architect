@@ -13,9 +13,9 @@ PRACTICES[f"{X}/28-retrieval/unit-01/practice-1"] = {
         ("e6", "edge", "a context sentence makes a bare chunk findable"),
     ],
     "plants": {
-        "wrong-no-overlap": (["e1"], "moves the window by its whole size, so the overlap is lost"),
+        "wrong-overlap-not-checked": (["e1"], "accepts an overlap that is not below the window size"),
         "wrong-no-idf": (["e2"], "scores every matching word the same, common or rare"),
-        "wrong-fuse-by-votes": (["e3"], "counts the lists that hold an id and ignores its rank in them"),
+        "wrong-fuse-empty-invents-id": (["e3"], "returns an invented id when there is nothing to fuse"),
         "wrong-rerank-ascending": (["e4"], "puts the lowest scored chunk first"),
         "wrong-pool-ignored": (["e4"], "reranks the whole ranking instead of the first pool ids"),
         "wrong-recall-by-chunk": (["e5"], "counts the chunks of a relevant document each time"),

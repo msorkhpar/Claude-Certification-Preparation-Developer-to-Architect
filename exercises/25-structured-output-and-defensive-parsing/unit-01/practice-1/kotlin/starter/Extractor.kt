@@ -134,7 +134,8 @@ private fun earlyStatus(reply: Map<String, Any?>): String? {
     // TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.
     // Receives a reply. Returns "refused" when its stop_reason is "refusal", "truncated" when it is "max_tokens", else null.
     // Example: a reply with stop_reason "max_tokens" -> "truncated"
-    return null
+    // The starter says "truncated" for every reply, so it stops after one call; write the real rule.
+    return "truncated"
 }
 
 /** Ask, parse, validate and, on a problem, re-prompt with the errors, at most [maxAttempts] calls. */

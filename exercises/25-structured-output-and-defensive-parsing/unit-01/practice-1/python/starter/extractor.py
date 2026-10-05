@@ -147,9 +147,10 @@ def _early_status(reply):
     """TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.
 
     Receives a reply. Returns "refused" when its stop_reason is "refusal", "truncated" when it is "max_tokens", else None.
-    Example: _early_status({"stop_reason": "max_tokens"}) -> "truncated" 
+    Example: _early_status({"stop_reason": "max_tokens"}) -> "truncated"
+    The starter says "truncated" for every reply, so it stops after one call; write the real rule.
     """
-    return None
+    return "truncated"
 
 
 def extract(ask, document, schema, max_attempts=3, evidence_fields=()):
