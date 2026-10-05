@@ -59,8 +59,8 @@ request", and a larger schema fails with "Schema is too complex for compilation.
 
 ### The limits move into your program
 
-A rule such as "the total is at least 0" cannot go in the schema. The SDK helpers deal with it in steps, and the second one is
-the one to remember. They "Remove unsupported constraints", "Update descriptions by adding each unsupported constraint to the field's
+A rule such as "the total is at least 0" cannot go in the schema. Most SDK helpers deal with it in a list of five steps, and the second one is
+the one to remember. Among them they "Remove unsupported constraints", "Update descriptions by adding each unsupported constraint to the field's
 description" and then validate the reply against the original schema "if the helper validates responses". The documentation sums it
 up: "Claude receives a simplified schema, but a helper that validates responses still enforces every constraint in your code."
 
