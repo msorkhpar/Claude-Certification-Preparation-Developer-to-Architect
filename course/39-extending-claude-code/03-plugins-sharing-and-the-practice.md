@@ -1,6 +1,6 @@
 # Plugins, dependencies, sharing and the practice
 
-**Level:** Developer · **Module 39:** Extending Claude Code · **Page 3 of 4**
+**Level:** Developer · **Module 39:** Extending Claude Code · **Page 3 of 5**
 **Exams:** DV1, DV7; A3.2
 
 **After this page you can** package skills, agents and hooks as a plugin, declare a dependency with a version range, share a plugin with a team through the repository's settings, say what a plugin may and may not configure, and finish the module's practice.

@@ -1,0 +1,144 @@
+{
+  "practice": "60-claude-code-in-ci/unit-02/practice-1",
+  "name": "rhythm_plan",
+  "tests": {
+    "java": "RhythmPlanTest",
+    "kotlin": "RhythmPlanTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_every_job_of_the_bank_gets_its_mechanism_its_reason_and_its_interval",
+      "typescript": "m1 every job of the bank gets its mechanism its reason and its interval",
+      "java": "m1_everyJobOfTheBankGetsItsMechanismItsReasonAndItsInterval",
+      "kotlin": "m1_everyJobOfTheBankGetsItsMechanismItsReasonAndItsInterval"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_pipeline_job_is_a_headless_run_whatever_else_is_true",
+      "typescript": "e1 a pipeline job is a headless run whatever else is true",
+      "java": "e1_aPipelineJobIsAHeadlessRunWhateverElseIsTrue",
+      "kotlin": "e1_aPipelineJobIsAHeadlessRunWhateverElseIsTrue"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_condition_or_a_background_command_decides_before_an_event_and_an_event_is_watched_unless_it_must_run_unattended",
+      "typescript": "e2 a condition or a background command decides before an event and an event is watched unless it must run unattended",
+      "java": "e2_aConditionOrABackgroundCommandDecidesBeforeAnEventAndAnEventIsWatchedUnlessItMustRunUnattended",
+      "kotlin": "e2_aConditionOrABackgroundCommandDecidesBeforeAnEventAndAnEventIsWatchedUnlessItMustRunUnattended"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_one_off_job_fires_in_the_session_unless_the_machine_is_off_or_the_session_is_closed",
+      "typescript": "e3 a one off job fires in the session unless the machine is off or the session is closed",
+      "java": "e3_aOneOffJobFiresInTheSessionUnlessTheMachineIsOffOrTheSessionIsClosed",
+      "kotlin": "e3_aOneOffJobFiresInTheSessionUnlessTheMachineIsOffOrTheSessionIsClosed"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_cloud_schedule_is_refused_below_one_hour_and_a_desktop_schedule_below_one_minute",
+      "typescript": "e4 a cloud schedule is refused below one hour and a desktop schedule below one minute",
+      "java": "e4_aCloudScheduleIsRefusedBelowOneHourAndADesktopScheduleBelowOneMinute",
+      "kotlin": "e4_aCloudScheduleIsRefusedBelowOneHourAndADesktopScheduleBelowOneMinute"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_fixed_loop_rounds_seconds_up_to_whole_minutes_and_no_interval_means_self_paced",
+      "typescript": "e5 a fixed loop rounds seconds up to whole minutes and no interval means self paced",
+      "java": "e5_aFixedLoopRoundsSecondsUpToWholeMinutesAndNoIntervalMeansSelfPaced",
+      "kotlin": "e5_aFixedLoopRoundsSecondsUpToWholeMinutesAndNoIntervalMeansSelfPaced"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_recurring_loop_lasts_seven_days_so_a_longer_job_needs_a_durable_home",
+      "typescript": "e6 a recurring loop lasts seven days so a longer job needs a durable home",
+      "java": "e6_aRecurringLoopLastsSevenDaysSoALongerJobNeedsADurableHome",
+      "kotlin": "e6_aRecurringLoopLastsSevenDaysSoALongerJobNeedsADurableHome"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_an_unknown_value_is_an_error_a_cloud_run_cannot_see_local_files_and_a_missing_key_takes_its_default",
+      "typescript": "e7 an unknown value is an error a cloud run cannot see local files and a missing key takes its default",
+      "java": "e7_anUnknownValueIsAnErrorACloudRunCannotSeeLocalFilesAndAMissingKeyTakesItsDefault",
+      "kotlin": "e7_anUnknownValueIsAnErrorACloudRunCannotSeeLocalFilesAndAMissingKeyTakesItsDefault"
+    }
+  },
+  "plants": {
+    "wrong-ci-only-for-intervals": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "treats a pipeline job as headless only when it also runs on an interval"
+    },
+    "wrong-event-always-watched": {
+      "caught_by": [
+        "e2",
+        "m1"
+      ],
+      "defect": "watches an event in the session even when it must run with nobody present"
+    },
+    "wrong-event-polled": {
+      "caught_by": [
+        "e2",
+        "m1"
+      ],
+      "defect": "polls an event on a fixed loop instead of watching its output"
+    },
+    "wrong-seconds-floor": {
+      "caught_by": [
+        "e4",
+        "e5"
+      ],
+      "defect": "rounds seconds down to whole minutes instead of up"
+    },
+    "wrong-no-expiry": {
+      "caught_by": [
+        "e4",
+        "e6",
+        "m1"
+      ],
+      "defect": "keeps a job on a loop after the seven days a recurring task lasts"
+    },
+    "wrong-cloud-any-interval": {
+      "caught_by": [
+        "e4",
+        "e6"
+      ],
+      "defect": "accepts a cloud schedule that runs more often than hourly"
+    },
+    "wrong-once-ignores-machine-off": {
+      "caught_by": [
+        "e3",
+        "m1"
+      ],
+      "defect": "fires a one off job in the session even when the machine will be off"
+    },
+    "wrong-closed-session-ignored": {
+      "caught_by": [
+        "e4",
+        "m1"
+      ],
+      "defect": "keeps a job on a loop when no session will be open"
+    },
+    "wrong-selfpaced-as-minute": {
+      "caught_by": [
+        "e5",
+        "e7",
+        "m1"
+      ],
+      "defect": "turns a job without an interval into a one minute loop"
+    },
+    "wrong-no-validation": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "accepts a trigger it does not know"
+    },
+    "wrong-cloud-sees-local-files": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "lets a cloud run read local files"
+    }
+  }
+}

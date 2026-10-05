@@ -24,6 +24,9 @@ Commands "control Claude Code from inside a session." A command "is only recogni
 | Before shipping | `/diff` for what changed, `/code-review` for the current diff |
 | Between sessions | `/clear` for a fresh task, `/resume`, `/branch` |
 | When something is wrong | `/rewind` to a checkpoint, `/doctor` for a setup checkup |
+| Work that runs on its own | `/loop` for a prompt on an interval, `/goal` for work until a check holds, `/schedule` for a routine in the cloud, `/tasks` for background work, `/background` to detach a session (module 60, page 3) |
+| Large or checked changes | the bundled skills `/batch` for a change split across a codebase, `/simplify` for a cleanup of the diff and `/verify` to run the app and watch the result (read on the commands page of the documentation, 2026-10-04) |
+| Making it yours | `/output-style`, `/statusline` and `/keybindings` (module 39, page 5) |
 
 Starting a repository is a two-step habit. Run `/init`, which "analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers". Then edit the result by hand, cut what Claude would have found anyway, and add what it would get wrong. Run `/permissions` and write the rules you settled on into the shared settings file so that they travel with the repository.
 

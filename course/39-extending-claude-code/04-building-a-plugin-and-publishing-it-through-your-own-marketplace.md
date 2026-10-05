@@ -1,6 +1,6 @@
 # Building a plugin and publishing it through your own marketplace
 
-**Level:** Developer · **Module 39:** Extending Claude Code · **Page 4 of 4**
+**Level:** Developer · **Module 39:** Extending Claude Code · **Page 4 of 5**
 **Exams:** DV1, DV7; A3.2
 
 **After this page you can** build a plugin that bundles a skill, a hook and an MCP server, say where its version lives, write the `marketplace.json` that lists it, choose between the source kinds and pin each to a tag and a commit, declare dependencies inside and across marketplaces, give a team the marketplace through the repository's settings, rename or retire a plugin without breaking installs, and say how a marketplace that an administrator requires differs (module 92 teaches that side).
@@ -136,7 +136,7 @@ The practice is in [`exercises/39-extending-claude-code`](../../exercises/39-ext
 
 ## Module quiz
 
-This quiz covers all four pages of the module.
+This quiz covers all five pages of the module.
 
 1. A team needs one rule enforced for every command, with an explanation given to Claude, and the rule must hold in every project that installs their tooling. Which design fits?
    - **a**: A skill in each repository that tells Claude to avoid the action

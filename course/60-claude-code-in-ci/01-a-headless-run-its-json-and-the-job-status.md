@@ -1,6 +1,6 @@
 # A headless run, its JSON and the job status
 
-**Level:** Architect · **Module 60:** Claude Code in CI · **Page 1 of 2**
+**Level:** Architect · **Module 60:** Claude Code in CI · **Page 1 of 3**
 **Exams:** A3.6; S5
 
 **After this page you can** run Claude Code without a person with `-p`, ask for one machine-readable object with `--output-format json` and `--json-schema`, read the answer from `structured_output`, give the run a turn limit and read-only tools, and write the gate that fails the job whenever the run did not produce a valid answer.

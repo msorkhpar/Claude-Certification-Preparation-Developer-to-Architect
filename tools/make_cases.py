@@ -33,6 +33,9 @@ PRACTICES[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
         ("e4", "edge", "a plugin carries a skill hook subagent or server to a second repository and nothing else"),
         ("e5", "edge", "in an application the platform may supply the schema and only a remote server replaces your own tool"),
         ("e6", "edge", "an unknown value is an error and a missing key takes its default"),
+        ("e7", "edge", "a pipeline a condition a long command and an event are not intervals"),
+        ("e8", "edge", "an interval is a loop in the session and a routine or desktop task when it must outlive it"),
+        ("e9", "edge", "a personal preference goes to a style a status line or a key binding and knowledge keeps its own rules"),
     ],
     "plants": {
         "wrong-guarantee-needs-no-knowledge": (["e1", "m1"], "treats a rule as a hook only when no instruction text goes with it, so a rule with a convention is left to a sentence"),
@@ -40,11 +43,21 @@ PRACTICES[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
         "wrong-scope-ignored": (["e3", "e4", "m1"], "puts a path-scoped convention in the always-loaded file"),
         "wrong-one-reason-for-skills": (["e3", "e4", "m1"], "gives a repeatable procedure the reason code of a reference"),
         "wrong-plugin-at-one-repo": (["e1", "e2", "e3", "e4", "m1"], "makes a plugin even when only one repository needs the setup"),
-        "wrong-plugin-for-conventions": (["e4", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
+        "wrong-plugin-for-conventions": (["e4", "e9", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
         "wrong-api-provided-schema-ignored": (["e5", "m1"], "writes your own tool in an application even when the platform supplies the schema"),
         "wrong-api-server-without-remote": (["e5"], "uses the connector in an application when no remote server exists"),
         "wrong-no-validation": (["e6"], "accepts a knowledge kind it does not know"),
         "wrong-fallthrough-skill": (["e3", "e4", "e6", "m1"], "answers a situation that needs nothing special with a skill"),
+        "wrong-timing-outranks-hook": (["e1"], "lets a schedule or an event decide before a rule that must hold every time"),
+        "wrong-timing-outranks-noisy": (["e2"], "lets a schedule or an event decide before noisy work that needs its own context"),
+        "wrong-no-timing-validation": (["e6"], "accepts a timing it does not know"),
+        "wrong-away-sees-local-files": (["e6"], "lets a run with the computer off read local files"),
+        "wrong-pipeline-as-loop": (["e7", "m1"], "treats a pipeline job as an ordinary job in the session"),
+        "wrong-event-polled": (["e7", "m1"], "polls an event on a loop instead of watching its stream"),
+        "wrong-no-expiry": (["e8", "m1"], "keeps a month-long job on a loop that expires after seven days"),
+        "wrong-loop-while-away": (["e8", "m1"], "keeps an interval job on a loop when the computer will be off"),
+        "wrong-voice-in-instruction-file": (["e9", "m1"], "puts a response style in the instruction file"),
+        "wrong-display-as-style": (["e9", "m1"], "uses a response style for what a status line shows"),
     },
 }
 
@@ -281,6 +294,36 @@ PRACTICES[f"{X}/39-extending-claude-code/unit-02/practice-1"] = {
         "wrong-enable-external-plugin": (["e6"], "enables a plugin from an external source, which the repository settings alone do not install"),
         "wrong-rename-dangling": (["e7"], "renames a former plugin to a name that no entry has"),
         "wrong-personal-path": (["e8"], "puts a home-folder path in the marketplace description"),
+    },
+}
+
+PRACTICES[f"{X}/39-extending-claude-code/unit-03/practice-1"] = {
+    "name": "personal_setup", "suite": "PersonalSetupTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "the user level holds a style a status line and a keybindings file that fit together"),
+        ("e1", "edge", "the style file keeps the coding instructions and carries only documented fields"),
+        ("e2", "edge", "the status line reads only fields the session sends and refreshes no faster than every second"),
+        ("e3", "edge", "the keybindings use real contexts and actions free keys and a null to unbind"),
+        ("e4", "edge", "personal settings stay in the user files and the project file stays shared"),
+        ("e5", "edge", "the local settings file is kept out of git"),
+        ("e6", "edge", "no file holds a personal path an address a key or an unfinished marker"),
+    ],
+    "plants": {
+        "wrong-style-name-case": (["m1"], "selects the style by a name that differs from the style file in its capitals, which silently gives the default style"),
+        "wrong-status-command-outside-user-folder": (["m1", "e2"], "points the status line at a script that is not in the .claude folder of the user"),
+        "wrong-style-drops-coding": (["e1"], "turns off the coding instructions of a style that only changes how replies read"),
+        "wrong-style-field-misspelled": (["e1"], "misspells a front matter field, which Claude Code ignores without an error"),
+        "wrong-status-field-unknown": (["e2"], "reads a field that the session JSON does not carry"),
+        "wrong-status-refresh-zero": (["e2"], "sets a refresh interval below the one second minimum"),
+        "wrong-key-reserved": (["e3"], "rebinds Ctrl+C, which cannot be rebound"),
+        "wrong-key-context-case": (["e3"], "writes a context name in lower case"),
+        "wrong-key-modifier-typo": (["e3"], "misspells a modifier in a keystroke"),
+        "wrong-no-unbind": (["e3"], "frees no default key with a null binding"),
+        "wrong-style-in-project-file": (["e4"], "puts the personal style in the shared project file"),
+        "wrong-local-style-lowercase": (["e4"], "overrides the style locally with a name in lower case"),
+        "wrong-local-file-tracked": (["e5"], "leaves the local settings file out of the ignore file"),
+        "wrong-home-path-in-script": (["e6"], "writes a home folder path into the status line script"),
+        "wrong-address-in-style": (["e6"], "writes an e-mail address into the style description"),
     },
 }
 
@@ -949,6 +992,33 @@ PRACTICES[f"{X}/60-claude-code-in-ci/unit-01/practice-1"] = {
         "wrong-no-severity-example": (["e7"], "leaves the high severity without an example"),
         "wrong-no-fixtures": (["e7"], "leaves the fixtures folder out of the testing standards"),
         "wrong-home-path": (["e8"], "writes a personal home path into the project file"),
+    },
+}
+
+PRACTICES[f"{X}/60-claude-code-in-ci/unit-02/practice-1"] = {
+    "name": "rhythm_plan", "suite": "RhythmPlanTest", "langs": ["python", "typescript", "java", "kotlin"],
+    "cases": [
+        ("m1", "main", "every job of the bank gets its mechanism its reason and its interval"),
+        ("e1", "edge", "a pipeline job is a headless run whatever else is true"),
+        ("e2", "edge", "a condition or a background command decides before an event and an event is watched unless it must run unattended"),
+        ("e3", "edge", "a one off job fires in the session unless the machine is off or the session is closed"),
+        ("e4", "edge", "a cloud schedule is refused below one hour and a desktop schedule below one minute"),
+        ("e5", "edge", "a fixed loop rounds seconds up to whole minutes and no interval means self paced"),
+        ("e6", "edge", "a recurring loop lasts seven days so a longer job needs a durable home"),
+        ("e7", "edge", "an unknown value is an error a cloud run cannot see local files and a missing key takes its default"),
+    ],
+    "plants": {
+        "wrong-ci-only-for-intervals": (["e1"], "treats a pipeline job as headless only when it also runs on an interval"),
+        "wrong-event-always-watched": (["e2", "m1"], "watches an event in the session even when it must run with nobody present"),
+        "wrong-event-polled": (["e2", "m1"], "polls an event on a fixed loop instead of watching its output"),
+        "wrong-seconds-floor": (["e4", "e5"], "rounds seconds down to whole minutes instead of up"),
+        "wrong-no-expiry": (["e4", "e6", "m1"], "keeps a job on a loop after the seven days a recurring task lasts"),
+        "wrong-cloud-any-interval": (["e4", "e6"], "accepts a cloud schedule that runs more often than hourly"),
+        "wrong-once-ignores-machine-off": (["e3", "m1"], "fires a one off job in the session even when the machine will be off"),
+        "wrong-closed-session-ignored": (["e4", "m1"], "keeps a job on a loop when no session will be open"),
+        "wrong-selfpaced-as-minute": (["e5", "e7", "m1"], "turns a job without an interval into a one minute loop"),
+        "wrong-no-validation": (["e7"], "accepts a trigger it does not know"),
+        "wrong-cloud-sees-local-files": (["e7"], "lets a cloud run read local files"),
     },
 }
 

@@ -3,9 +3,9 @@
 **Level:** Developer · **Module 27:** Choosing an extension · **Page 3 of 3**
 **Exams:** DV5, DV7
 
-**After this page you can** turn a situation into a few yes-or-no features, pick the mechanism that fits (an instruction file, a path-scoped rule, a skill, a subagent, a hook, an MCP server, a plugin, a built-in tool or a tool you define yourself), give the reason in one phrase, say what goes wrong with the tempting alternative, and write the decision function of the module's practice.
+**After this page you can** turn a situation into a few yes-or-no features, pick the mechanism that fits (an instruction file, a path-scoped rule, a skill, a subagent, a hook, an MCP server, a plugin, a built-in tool or a tool you define yourself, and for work that runs on a clock, on an event or with nobody there, a loop, a routine, a desktop task, a monitor, a background task, a goal or a headless run; for a personal preference, an output style, the status line or a key binding), give the reason in one phrase, say what goes wrong with the tempting alternative, and write the decision function of the module's practice.
 
-Checked on 2026-10-04 against the Claude Code documentation (Extend Claude Code, How Claude remembers your project, and the plugin pages on components and the manifest), which mention behaviour up to Claude Code v2.1.288. No Claude Code session was started for this page and nothing was installed: every statement about Claude Code is read from those pages. The decision function of the practice is the course's own model of the documented rules, not a feature of Claude Code, and the practice tests run offline in the course container, in Python, TypeScript, Java and Kotlin.
+Checked on 2026-10-04 against the Claude Code documentation (Extend Claude Code, How Claude remembers your project, the plugin pages on components and the manifest, and for the rows 19 to 28 the pages Run prompts on a schedule, Automate work with routines, Schedule recurring tasks in Claude Code Desktop, Keep Claude working toward a goal, Tools reference, Run Claude Code programmatically, Output styles, Customize your status line and Customize keyboard shortcuts), which mention behaviour up to Claude Code v2.1.288. No Claude Code session was started for this page and nothing was installed: every statement about Claude Code is read from those pages. The decision function of the practice is the course's own model of the documented rules, not a feature of Claude Code, and the practice tests run offline in the course container, in Python, TypeScript, Java and Kotlin.
 
 ## Why it matters
 
@@ -25,8 +25,10 @@ A scenario is long and the decision rests on a few facts. Ask these questions of
 | Is it something Claude must be told? Then what kind: a convention, reference material, or a procedure? | an instruction file or a path rule for a convention; a skill for the other two |
 | Is it wanted in a second repository, and is it a skill, hook, subagent or server? | a plugin that carries it |
 | Does a built-in tool already do it? | no extension at all |
+| Does it run on a clock, on an event, until a check holds, or while Claude keeps working? Then who is there: an open session, a pipeline, or nobody with the computer off? | a loop, a monitor, a goal or a background task in the session; a routine or a desktop task when it must outlive the session; a headless run in a pipeline (module 60, page 3) |
+| Is it one person's preference: how replies read, what the bottom bar shows, which key does what? | an output style, the status line or a key binding; none of them is shared project knowledge |
 
-The order is the point. A rule that must hold is a hook even when it also comes with a convention to state, because the documentation says "An instruction like "never edit `.env`" in CLAUDE.md or a skill is a request, not a guarantee." A connection to a database is an MCP server even when a procedure goes with it, because MCP "gives Claude purpose-built tools for an external system, with the connection and authentication handled by the server". Only after those two is the question about knowledge worth asking.
+The order is the point. A rule that must hold is a hook even when it also comes with a convention to state, because the documentation says "An instruction like "never edit `.env`" in CLAUDE.md or a skill is a request, not a guarantee." A connection to a database is an MCP server even when a procedure goes with it, because MCP "gives Claude purpose-built tools for an external system, with the connection and authentication handled by the server". Only after those two is the question about knowledge worth asking. The two new rows come between the guarantee, the connection and the noise on one side and the knowledge on the other: a rule that must hold still outranks a schedule, and a schedule is a clock, never a file of instructions.
 
 ### Reasons, in one phrase
 
@@ -46,6 +48,16 @@ The practice names each choice with a reason code, and the codes are the vocabul
 | `own-schema-and-code` | in an application, you define the tool and run its code |
 | `provided-schema` | in an application, the platform supplies the schema of a built-in tool |
 | `remote-server` | in an application, a hosted server can be reached through the connector |
+| `session-rhythm` | a loop re-runs a prompt on an interval while the session stays open |
+| `runs-unattended` | a routine runs in the cloud with the computer off, from a schedule or an event |
+| `durable-and-local` | a desktop task keeps its schedule and sees local files, and is not limited to seven days |
+| `push-not-poll` | a monitor receives each line of a stream as it arrives, with no polling |
+| `work-while-it-runs` | a background task lets Claude go on while a long command runs |
+| `no-person-present` | a headless run in a pipeline has nobody to answer a prompt, so its exit status and its JSON decide the job |
+| `until-condition-holds` | a goal evaluates a condition after every turn and ends when it holds |
+| `response-voice` | an output style sets the voice, length and format of every reply |
+| `personal-display` | the status line shows what a script prints from the session's JSON |
+| `personal-keys` | the keybindings file maps keys to actions for one person |
 
 A skill with a slash name needs a word. The documentation says "Custom commands have been merged into skills. A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and work the same way." The decision function has one answer for both, `skill`, and module 58 teaches the difference in the files.
 
@@ -53,13 +65,15 @@ A skill with a slash name needs a word. The documentation says "Custom commands 
 
 ### What goes wrong with the tempting choice
 
-Every row of the bank below names the failure of the alternative. The failures fall into five kinds, and spotting the kind is faster than weighing the options:
+Every row of the bank below names the failure of the alternative. The failures fall into seven kinds, and spotting the kind is faster than weighing the options:
 
 - **Request instead of enforcement.** Anything written in text, CLAUDE.md, a skill or an output style, is followed as an instruction. The memory page says Claude "treats them as context, not enforced configuration. To block an action regardless of what Claude decides, use a PreToolUse hook instead."
 - **Paid on every request.** An instruction file is "Persistent context loaded every conversation" and reference material in it is paid for on each request, so the guidance is to keep the file under 200 lines.
 - **Not loaded when needed.** A skill is chosen by its description: "If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help." A convention that must always be known does not belong where it may be missed.
 - **Added to the main window.** A skill "adds to your main window", so it floods the conversation with work that only a subagent keeps out.
 - **Not carried.** "A `CLAUDE.md` at the plugin root isn't loaded as context", so a plugin cannot deliver a convention to another repository.
+- **The wrong clock.** A loop is "session-scoped": "Tasks only fire while Claude Code is running and idle", and a recurring one "expires 7 days after creation". A routine "runs on Anthropic-managed cloud infrastructure" from a fresh clone and has a minimum interval of one hour. Each is wrong where the other is right.
+- **The wrong owner.** An output style, the status line and the keybindings file are a person's own setup; a line in the instruction file tells Claude something and changes none of them.
 
 ### Three worked examples
 
@@ -71,7 +85,7 @@ Every row of the bank below names the failure of the alternative. The failures f
 
 ### The scenario bank
 
-Eighteen situations, with the choice, the reason and the failure of the alternative that tempts. The practice asks for the first two columns of each row, expressed as features.
+Twenty-eight situations, with the choice, the reason and the failure of the alternative that tempts. The practice asks for the first two columns of each row, expressed as features.
 
 | # | Situation | Choice | Reason | The tempting alternative fails because |
 |---|---|---|---|---|
@@ -93,6 +107,18 @@ Eighteen situations, with the choice, the reason and the failure of the alternat
 | 16 | An application lets Claude look up an order by id in its own database | tool you define | `own-schema-and-code` | no Claude Code extension exists in an API call; the schema and the code are yours |
 | 17 | An application lets Claude edit text files in a sandbox | built-in tool of the platform | `provided-schema` | writing your own schema repeats what the platform already defines |
 | 18 | An application needs a vendor's hosted calendar server | remote server through the connector | `remote-server` | rebuilding it as your own tool repeats work and owns its login |
+| 19 | Check the deploy every five minutes while I keep working in this session | loop | `session-rhythm` | a routine starts from a fresh clone in the cloud and runs at most once an hour |
+| 20 | Every weeknight at 2 a.m., triage the issue tracker with the laptop closed | routine | `runs-unattended` | a loop only fires while Claude Code is running and idle, so closing the terminal stops it |
+| 21 | Flag each error line of a log as it appears | monitor | `push-not-poll` | a loop re-runs a prompt on an interval, where a monitor receives each line as it is written |
+| 22 | A dev server must keep running while Claude edits the code | background task | `work-while-it-runs` | a command in the foreground holds the conversation until it finishes or reaches its timeout |
+| 23 | The team's pipeline must fail the merge check when the review fails | headless run in the pipeline | `no-person-present` | a routine's green status only says the session started and exited without an infrastructure error, not that the task worked, and it gives the pipeline no exit status |
+| 24 | Keep working until every test in `test/auth` passes and the linter is clean | goal | `until-condition-holds` | a loop fires on a clock and stops on a clock, whether or not the check holds |
+| 25 | Every reply should lead with the result and skip the narration | output style | `response-voice` | a skill loads only when invoked or when the task matches, so it does not shape every reply |
+| 26 | Show the context percentage and the git branch at the bottom of my screen | status line | `personal-display` | an output style changes what Claude is told to write, not the bar under the prompt |
+| 27 | Run the dependency audit daily for a month on my machine, with my uncommitted changes | desktop task | `durable-and-local` | a loop's recurring task expires after seven days, and a routine starts from a fresh clone without local files |
+| 28 | Ctrl+S stashes my prompt and I want that key to do nothing | key binding | `personal-keys` | a line in the instruction file tells Claude something, but the keys are read from `~/.claude/keybindings.json` |
+
+Rows 19 to 28 add the mechanisms that run on a clock or for one person. Their order is the one the practice uses: a pipeline job is a headless run whatever its schedule says, a condition or a long command is not an interval, an event is watched with a monitor unless it must run with nobody there, and only an interval is a loop, for at most seven days in an open session. Module 60, page 3, teaches each of them; module 39, page 5, teaches the three personal settings.
 
 Rows 10, 11, 14 and 15 show the plugin rule: from the second repository on, a plugin is the carrier of a skill, hook, subagent or server, and not of an instruction file. Row 12 shows an order that surprises: the hook outranks the connection, and the hook can then use the server, as in the documentation's pattern "A hook triggers external actions through MCP".
 
@@ -102,13 +128,13 @@ Rows 16 to 18 leave Claude Code. In an application that calls the Messages API t
 
 ## Traps
 
-1. **Choosing by the noun in the scenario.** A scenario that says "database" does not mean MCP if the need is a note about the schema, and one that says "review" does not mean a subagent if the work is small. Ask the questions of the table, in order.
+1. **Choosing by the noun in the scenario.** A scenario that says "database" does not mean MCP if the need is a note about the schema, and one that says "review" does not mean a subagent if the work is small. Ask the questions of the table, in order. The same holds for time: "every ten minutes until the tests pass" sounds like a loop, but a loop fires between turns on a clock whether or not the check holds, while a goal is evaluated after every turn and ends when the check is met. Choose by what should start the next turn, a time or a result.
 2. **A plugin for a convention.** The plugin carries skills, hooks, subagents and servers. An instruction file at its root is not loaded, so the convention needs its own file in each repository, or a personal one.
 3. **Two answers, one chosen.** A scenario with an outside system and a procedure needs both an MCP server and a skill. The question asks for the one that provides what the situation lacks first, and that is the connection.
 
 ## The practice
 
-The practice is in [`exercises/27-choosing-an-extension`](../../exercises/27-choosing-an-extension/unit-01/practice-1/statement.md). You write `choose`, which takes a situation described by the features above and returns the mechanism and the reason code, applying the rules in the order the page gives them. It is graded in Python, TypeScript, Java and Kotlin, offline; the statement lists seven cases, and the first holds the eighteen situations of the bank as features.
+The practice is in [`exercises/27-choosing-an-extension`](../../exercises/27-choosing-an-extension/unit-01/practice-1/statement.md). You write `choose`, which takes a situation described by the features above and returns the mechanism and the reason code, applying the rules in the order the page gives them. It is graded in Python, TypeScript, Java and Kotlin, offline; the statement lists ten cases, and the first holds the twenty-eight situations of the bank as features. The function is the course's model of the documented rules: no Claude Code session ran for it.
 
 ## Quiz
 

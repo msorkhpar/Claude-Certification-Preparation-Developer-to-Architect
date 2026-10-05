@@ -49,6 +49,16 @@ BANK = [
     ("s16", {"surface": 'api'}, "api-tool", "own-schema-and-code"),
     ("s17", {"surface": 'api', "builtin_covers": True}, "builtin-tool", "provided-schema"),
     ("s18", {"surface": 'api', "external_system": True, "remote_server": True}, "mcp", "remote-server"),
+    ("s19", {"timing": "interval"}, "loop", "session-rhythm"),
+    ("s20", {"timing": "interval", "presence": "away"}, "routine", "runs-unattended"),
+    ("s21", {"timing": "event"}, "monitor", "push-not-poll"),
+    ("s22", {"timing": "background"}, "background-task", "work-while-it-runs"),
+    ("s23", {"presence": "pipeline"}, "headless-ci", "no-person-present"),
+    ("s24", {"timing": "condition"}, "goal", "until-condition-holds"),
+    ("s25", {"personal": "voice"}, "output-style", "response-voice"),
+    ("s26", {"personal": "display"}, "status-line", "personal-display"),
+    ("s27", {"timing": "interval", "lasts_days": 30, "local_files": True}, "desktop-task", "durable-and-local"),
+    ("s28", {"personal": "keys"}, "keybinding", "personal-keys"),
 ]
 
 
@@ -58,14 +68,14 @@ def test_m1_every_situation_of_the_bank_gets_its_mechanism_and_its_reason():
 
 
 def test_e1_a_rule_that_must_hold_goes_to_a_hook_whatever_else_is_true():
-    for s in sweep([("knowledge", ['none', 'convention', 'reference', 'procedure']), ("external_system", [False, True]), ("noisy", [False, True]), ("path_scoped", [False, True])], {"guarantee": True}):
+    for s in sweep([("knowledge", ['none', 'convention', 'reference', 'procedure']), ("external_system", [False, True]), ("noisy", [False, True]), ("path_scoped", [False, True]), ("timing", ['none', 'interval', 'event', 'condition', 'background']), ("presence", ['session', 'pipeline', 'away']), ("personal", ["none", "voice"])], {"guarantee": True}):
         assert choose(s) == {"mechanism": "hook", "reason": "must-hold-every-time"}, s
 
 
 def test_e2_an_outside_system_needs_a_server_and_noisy_work_alone_needs_a_subagent():
-    for s in sweep([("knowledge", ['none', 'convention', 'reference', 'procedure']), ("noisy", [False, True]), ("path_scoped", [False, True])], {"external_system": True}):
+    for s in sweep([("knowledge", ['none', 'convention', 'reference', 'procedure']), ("noisy", [False, True]), ("path_scoped", [False, True]), ("timing", ['none', 'interval', 'event', 'condition', 'background']), ("presence", ['session', 'pipeline', 'away'])], {"external_system": True}):
         assert choose(s) == {"mechanism": "mcp", "reason": "external-system"}, s
-    for s in sweep([("knowledge", ['none', 'convention', 'reference', 'procedure']), ("path_scoped", [False, True])], {"noisy": True}):
+    for s in sweep([("knowledge", ['none', 'convention', 'reference', 'procedure']), ("path_scoped", [False, True]), ("timing", ['none', 'interval', 'event', 'condition', 'background']), ("presence", ['session', 'pipeline', 'away'])], {"noisy": True}):
         assert choose(s) == {"mechanism": "subagent", "reason": "isolate-context"}, s
 
 
@@ -109,3 +119,41 @@ def test_e6_an_unknown_value_is_an_error_and_a_missing_key_takes_its_default():
     assert refused({"repos": 0}), '{"repos": 0} must be an error'
     assert refused({"repos": -1}), '{"repos": -1} must be an error'
     assert refused({"surface": 'api', "knowledge": 'tips'}), '{"surface": "api", "knowledge": "tips"} must be an error'
+    assert refused({"timing": "weekly"}), "{\"timing\": \"weekly\"} must be an error"
+    assert refused({"presence": "cloud"}), "{\"presence\": \"cloud\"} must be an error"
+    assert refused({"personal": "theme"}), "{\"personal\": \"theme\"} must be an error"
+    assert refused({"lasts_days": 0}), "{\"lasts_days\": 0} must be an error"
+    assert refused({"presence": "away", "local_files": True, "timing": "interval"}), "{\"presence\": \"away\", \"local_files\": True, \"timing\": \"interval\"} must be an error"
+    assert refused({"surface": "api", "timing": "weekly"}), "{\"surface\": \"api\", \"timing\": \"weekly\"} must be an error"
+
+
+def test_e7_a_pipeline_a_condition_a_long_command_and_an_event_are_not_intervals():
+    assert choose({"presence": "pipeline"}) == {"mechanism": "headless-ci", "reason": "no-person-present"}, "{\"presence\": \"pipeline\"}"
+    assert choose({"presence": "pipeline", "timing": "interval", "lasts_days": 30}) == {"mechanism": "headless-ci", "reason": "no-person-present"}, "{\"presence\": \"pipeline\", \"timing\": \"interval\", \"lasts_days\": 30}"
+    assert choose({"timing": "condition", "lasts_days": 30}) == {"mechanism": "goal", "reason": "until-condition-holds"}, "{\"timing\": \"condition\", \"lasts_days\": 30}"
+    assert choose({"timing": "condition", "presence": "away"}) == {"mechanism": "goal", "reason": "until-condition-holds"}, "{\"timing\": \"condition\", \"presence\": \"away\"}"
+    assert choose({"timing": "background", "presence": "away"}) == {"mechanism": "background-task", "reason": "work-while-it-runs"}, "{\"timing\": \"background\", \"presence\": \"away\"}"
+    assert choose({"timing": "event"}) == {"mechanism": "monitor", "reason": "push-not-poll"}, "{\"timing\": \"event\"}"
+    assert choose({"timing": "event", "presence": "away"}) == {"mechanism": "routine", "reason": "runs-unattended"}, "{\"timing\": \"event\", \"presence\": \"away\"}"
+
+
+def test_e8_an_interval_is_a_loop_in_the_session_and_a_routine_or_desktop_task_when_it_must_outlive_it():
+    assert choose({"timing": "interval", "lasts_days": 7}) == {"mechanism": "loop", "reason": "session-rhythm"}, "{\"timing\": \"interval\", \"lasts_days\": 7}"
+    assert choose({"timing": "interval", "lasts_days": 8}) == {"mechanism": "routine", "reason": "runs-unattended"}, "{\"timing\": \"interval\", \"lasts_days\": 8}"
+    assert choose({"timing": "interval", "lasts_days": 8, "local_files": True}) == {"mechanism": "desktop-task", "reason": "durable-and-local"}, "{\"timing\": \"interval\", \"lasts_days\": 8, \"local_files\": True}"
+    assert choose({"timing": "interval", "local_files": True}) == {"mechanism": "loop", "reason": "session-rhythm"}, "{\"timing\": \"interval\", \"local_files\": True}"
+    assert choose({"timing": "interval", "presence": "away", "lasts_days": 30}) == {"mechanism": "routine", "reason": "runs-unattended"}, "{\"timing\": \"interval\", \"presence\": \"away\", \"lasts_days\": 30}"
+    assert choose({"timing": "interval", "presence": "away"}) == {"mechanism": "routine", "reason": "runs-unattended"}, "{\"timing\": \"interval\", \"presence\": \"away\"}"
+    assert choose({"timing": "interval", "presence": "session"}) == {"mechanism": "loop", "reason": "session-rhythm"}, "{\"timing\": \"interval\", \"presence\": \"session\"}"
+
+
+def test_e9_a_personal_preference_goes_to_a_style_a_status_line_or_a_key_binding_and_knowledge_keeps_its_own_rules():
+    assert choose({"personal": "voice"}) == {"mechanism": "output-style", "reason": "response-voice"}, "{\"personal\": \"voice\"}"
+    assert choose({"personal": "display"}) == {"mechanism": "status-line", "reason": "personal-display"}, "{\"personal\": \"display\"}"
+    assert choose({"personal": "keys"}) == {"mechanism": "keybinding", "reason": "personal-keys"}, "{\"personal\": \"keys\"}"
+    assert choose({"personal": "voice", "knowledge": "convention"}) == {"mechanism": "output-style", "reason": "response-voice"}, "{\"personal\": \"voice\", \"knowledge\": \"convention\"}"
+    assert choose({"personal": "keys", "knowledge": "reference", "repos": 4}) == {"mechanism": "keybinding", "reason": "personal-keys"}, "{\"personal\": \"keys\", \"knowledge\": \"reference\", \"repos\": 4}"
+    assert choose({"personal": "display", "repos": 3}) == {"mechanism": "status-line", "reason": "personal-display"}, "{\"personal\": \"display\", \"repos\": 3}"
+    assert choose({"personal": "none", "knowledge": "convention"}) == {"mechanism": "claude-md", "reason": "always-known"}, "{\"personal\": \"none\", \"knowledge\": \"convention\"}"
+    assert choose({"personal": "voice", "timing": "interval"}) == {"mechanism": "loop", "reason": "session-rhythm"}, "{\"personal\": \"voice\", \"timing\": \"interval\"}"
+    assert choose({"personal": "voice", "surface": "api"}) == {"mechanism": "api-tool", "reason": "own-schema-and-code"}, "{\"personal\": \"voice\", \"surface\": \"api\"}"

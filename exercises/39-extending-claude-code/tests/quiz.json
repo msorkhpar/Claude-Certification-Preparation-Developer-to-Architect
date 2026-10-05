@@ -304,6 +304,63 @@
         "c": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\".",
         "d": "Ruled out because \"Omit it and the subagent inherits every tool\", and without `memory` the subagent keeps no knowledge across conversations."
       }
+    },
+    {
+      "id": "05-making-claude-code-yours-output-styles-the-status-line-and-keybindings#q1",
+      "page": "05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+      "scope": "page",
+      "stem": "A developer selects a built-in style in a settings file with `\"outputStyle\": \"explanatory\"`. Replies keep Claude Code's standard wording and no error appears. What is the cause?",
+      "options": {
+        "a": "The session must be restarted first, because styles are read only at launch",
+        "b": "Project files cannot set a style at all, so the value belongs in the user folder",
+        "c": "A hook must apply the choice on each reply, because settings only suggest it to Claude",
+        "d": "The value must match a name exactly, or the default applies without a message"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"A value that doesn't match a style name exactly, such as `explanatory`, gives you the Default style\", with no error.",
+        "a": "Ruled out because \"Claude uses the new style starting with your next message\", and a built-in style needs no restart; only a style file created in a running session does.",
+        "b": "Ruled out because \"A project's own settings files take precedence over that value\", so a project file can set a style.",
+        "c": "Ruled out because a style is applied by Claude Code itself: \"Claude Code sends the active style's instructions with every request\", and no hook is involved."
+      }
+    },
+    {
+      "id": "05-making-claude-code-yours-output-styles-the-status-line-and-keybindings#q2",
+      "page": "05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+      "scope": "page",
+      "stem": "A keybindings file sets `ctrl+s` to `null` and `ctrl+c` to a custom action. What results?",
+      "options": {
+        "a": "Both keys change as written, and a warning appears on the screen at once",
+        "b": "Ctrl+C is rebound as written, and Ctrl+S keeps stashing the prompt as before",
+        "c": "Both keys are freed together, and Ctrl+C then does nothing at all in the chat",
+        "d": "Ctrl+S is freed, and Ctrl+C keeps its default because it is reserved"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says `null` \"frees the one key it is written against\", and that reserved keys cannot be rebound: \"These shortcuts cannot be rebound.\"",
+        "a": "Ruled out because Claude Code \"writes a warning to the debug log\", not to the screen, and the reserved key does not change.",
+        "b": "Ruled out because `null` \"frees the one key it is written against\", so Ctrl+S stops stashing.",
+        "c": "Ruled out because \"These shortcuts cannot be rebound\", and Ctrl+C is reserved, so it keeps interrupting."
+      }
+    },
+    {
+      "id": "05-making-claude-code-yours-output-styles-the-status-line-and-keybindings#q3",
+      "page": "05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+      "scope": "page",
+      "stem": "One developer's `~/.claude/settings.json` names an output style, while the repository's `.claude/settings.json` names a different one. Which does the session use?",
+      "options": {
+        "a": "The personal choice, because a developer's own file always wins for that person",
+        "b": "Whichever file was saved last, because Claude Code compares modification times",
+        "c": "Neither choice, because a key set at two levels is rejected as a conflict",
+        "d": "The project's choice, because that level outranks the user level"
+      },
+      "key": "d",
+      "explanation": {
+        "d": "The page says \"Claude Code uses the value from the highest level that sets it\", and the shared project settings sit above the user settings.",
+        "a": "Ruled out because \"A key at a higher level overrides the same key anywhere below it\", and the user level is the lowest of the files.",
+        "b": "Ruled out because the documentation gives \"their order, highest precedence first\", and no file date is involved.",
+        "c": "Ruled out because \"Claude Code uses the value from the highest level that sets it\", so two levels are resolved by order and not rejected."
+      }
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Subagents, their memory, and hooks
 
-**Level:** Developer · **Module 39:** Extending Claude Code · **Page 2 of 4**
+**Level:** Developer · **Module 39:** Extending Claude Code · **Page 2 of 5**
 **Exams:** DV1, DV7; A3.2
 
 **After this page you can** define a subagent with a bounded toolset, choose a memory scope for it, say which of its fields a plugin ignores, write a hook that blocks a destructive command or an edit to a protected file, and read a hook's exit codes and JSON answer correctly.

@@ -1,6 +1,6 @@
 # What the run knows: context, independence and the practice
 
-**Level:** Architect · **Module 60:** Claude Code in CI · **Page 2 of 2**
+**Level:** Architect · **Module 60:** Claude Code in CI · **Page 2 of 3**
 **Exams:** A3.6; S5
 
 **After this page you can** give a CI run the project context it needs, keep the reviewer independent of the session that wrote the code, put earlier findings and existing tests in the prompt so that a re-run reports only what is new, write review criteria that a run can follow, and write the module's practice.
@@ -797,7 +797,7 @@ The practice is in [`exercises/60-claude-code-in-ci`](../../exercises/60-claude-
 
 ## Module quiz
 
-This quiz covers both pages of the module.
+This quiz covers all three pages of the module.
 
 1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?
    - **a**: Ask the same session to think harder before it approves
