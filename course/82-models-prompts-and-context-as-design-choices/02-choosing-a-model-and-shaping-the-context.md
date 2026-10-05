@@ -87,10 +87,10 @@ These are the wrong answers the exam's options for this domain offer, each with 
 This quiz covers both pages of the module.
 
 1. Scenario: Plover Insurance's assembler receives a dynamic module with the placeholder {claim_id}, and the caller supplies no value for it. What should the assembler do?
-   - **a**: Send the request with the placeholder left in the text as it stands
-   - **b**: Refuse to build the request and name what is absent
-   - **c**: Send it with the placeholder replaced by an empty string instead
-   - **d**: Fill the gap with a guess drawn from the previous call of the same caller
+   - **a**: Send the request, leaving the placeholder in its text
+   - **b**: Refuse to build the request, naming the absent item
+   - **c**: Send it, replacing the placeholder with an empty string
+   - **d**: Fill the gap with a guess, drawn from the caller's previous call
 
 2. Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?
    - **a**: Take the largest model for safety, and place the long text last in the request
@@ -99,16 +99,16 @@ This quiz covers both pages of the module.
    - **d**: Take the cheapest that is capable and quick enough, and put the bulky constant passage first
 
 3. Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?
-   - **a**: All four as static modules, so that the whole request can be cached together
-   - **b**: Rules and question as static modules, with policy and chat as dynamic ones
-   - **c**: Stable parts as static modules, per-visit parts as dynamic ones, the older talk at lower priority
-   - **d**: All four as dynamic modules, so that no edit to any piece can block the others
+   - **a**: All four as static modules, so that they are cached together
+   - **b**: Rules and question as static modules, policy and chat as dynamic ones
+   - **c**: Fixed guidance as static modules, per-visit text as dynamic ones
+   - **d**: All four as dynamic modules, so that any piece is edited freely
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A missing value is a defect in the caller, so the assembler refuses and names it. *a* is ruled out because "A request that goes out with `{customer}` in its text" is sent with a gap that nobody checks. *c* is ruled out because a blank is the same silent defect, and "A missing variable is an error". *d* is ruled out because a guess invents data nobody supplied, and a request with a gap "is a defect that no model will report".
 2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload", and the page says "static modules first, in the order given, then the dynamic ones". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
-3. **c**. The pieces that never change go first as static modules, and the per-request pieces follow, with the less useful one given a lower priority so that it is shed first. *a* is ruled out because "A static module whose text holds a `{variable}` is refused", and the question changes on every request. *b* is ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against "static modules first, in the order given, then the dynamic ones". *d* is ruled out because the cache works on "the request from its start up to a marked breakpoint", so with no static modules there is nothing to cache.
+3. **c**. The pieces that never change go first as static modules, and the per-request pieces follow as dynamic ones, so that the stable prefix can be cached. *a* is ruled out because "A static module whose text holds a `{variable}` is refused", and the question changes on every request. *b* is ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against "static modules first, in the order given, then the dynamic ones". *d* is ruled out because the cache works on "the request from its start up to a marked breakpoint", so with no static modules there is nothing to cache.
 
 </details>
