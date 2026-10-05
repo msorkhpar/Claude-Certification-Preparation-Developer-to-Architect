@@ -28,6 +28,7 @@ import java.util.Map;
  * verification first in both runs: what differs is whether the code that runs the tools checks it.
  */
 public final class IdentityGate {
+    private static final System.Logger LOG = System.getLogger(IdentityGate.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String SYSTEM = "You are a support agent. Verify the customer's identity before any refund.";
 

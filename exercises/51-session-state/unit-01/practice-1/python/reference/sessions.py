@@ -1,5 +1,8 @@
 """Session state with the Agent SDK: choose between resuming and starting fresh, say what changed, carry a summary, set the options. See ../../statement.md."""
 from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+import logging
+
+log = logging.getLogger(__name__)
 
 WEEK_SECONDS = 7 * 24 * 3600  # a session idle for longer than this is not resumed
 STALE_SHARE = 0.5  # more than this share of the analysed files changed or gone: start fresh
@@ -17,6 +20,7 @@ def resolve_name(name, index):
 
 def plan_session(record, current, now, fork=False):
     """Decide how to continue from a saved record ({id, name, last_used, files: {path: digest}}) given the files as they are now."""
+    log.debug("plan_session input: %r", record)
     if record is None:
         return {"action": "fresh", "session_id": None, "changed": [], "deleted": [], "added": [], "fork": False}
     before = record["files"]

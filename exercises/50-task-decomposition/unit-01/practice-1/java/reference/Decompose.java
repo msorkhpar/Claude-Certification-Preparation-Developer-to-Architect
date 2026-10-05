@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 /** Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md. Results are JSON-like maps. */
 final class Decompose {
+    private static final System.Logger LOG = System.getLogger(Decompose.class.getName());
     private Decompose() {}
 
     /** The model's review of one file, or of one part of it: a map with "findings" (a list of text) and "summary" (text). */
@@ -27,6 +28,7 @@ final class Decompose {
 
     @SuppressWarnings("unchecked")
     static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass, int maxLines) {
+        LOG.log(System.Logger.Level.DEBUG, "reviewChanges input: {0}", files);
         Map<String, Object> reviewed = new LinkedHashMap<>();
         Map<String, Object> failed = new LinkedHashMap<>();
         List<String> skipped = new ArrayList<>();

@@ -8,6 +8,23 @@ SDK; a Java or Kotlin team writes the command hook in any language, since the pr
 Pick your language folder (`python` or `typescript`), open `starter/` and edit the file there. The tests never call a model: the last case
 runs the real SDK against the course's stand-in for the Claude Code binary.
 
+## What is already written, and what you write
+
+The starter is a working set of hooks with ten gaps cut out of it. Everything that is plumbing is written and correct: the constants, the `_answer` helper, the date conversion, the parsing of a tool's output, the shape of the returned objects, and the structure of the options and of the settings block. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript names are the camel-case forms where a name is given):
+
+1. The three tiers (unlocks `m1`, `e1`): a refund up to 200 is allowed (written), one up to 500 asks a person, and a larger one is denied, each with a reason that names the amount; each limit belongs to the lower tier.
+2. The tool filter (unlocks `e2`): a call to any other tool is left alone: the hook answers `{}`.
+3. The amount check (unlocks `e2`): a missing, boolean, text, zero, negative or infinite amount is denied with a reason, never allowed.
+4. The date and the status word (unlocks `e3`): a numeric `created` becomes a `YYYY-MM-DD` date (a value above 1e11 is read as milliseconds) and an integer `status` becomes its word from STATUS, or `unknown`.
+5. The amount (unlocks `e3`): an integer `amount_cents` is removed and replaced by `amount` as a decimal text with two places; a value that is not an integer stays where it is.
+6. The already readable output (unlocks `e4`): when the normalised output equals the input, the hook answers `{}` and does not rewrite it.
+7. The registered hooks (unlocks `e5`, `e8`): the refund gate is registered on the matcher `process_refund` and the normaliser on `get_order|get_refund`, each with a timeout of at most 10 seconds.
+8. Bad hook input (unlocks `e6`): input that is not a JSON object blocks the call with exit code 2 and a reason (fail closed).
+9. The blocked commands (unlocks `e6`): a Bash command that matches a pattern of BLOCKED_COMMANDS blocks with exit code 2 and that pattern's reason.
+10. The settings block (unlocks `e7`): the `PreToolUse` entry for the matcher `Bash` runs the command with the given timeout.
+
+`m1` needs gap 1. About twenty lines in all. The steps below describe the whole module, so you can see how your gaps are used.
+
 ## What to write
 
 Names are Python's; the TypeScript names are `preRefund`, `postNormalise`, `buildOptions`, `commandHook` and `settingsHooks`, and

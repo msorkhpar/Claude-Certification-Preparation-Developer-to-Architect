@@ -121,6 +121,6 @@ def test_e8_a_run_through_the_sdk_denies_the_large_refund_and_shows_the_model_a_
             for b in m.content:
                 if isinstance(b, ToolResultBlock):
                     results[b.tool_use_id] = b.content if isinstance(b.content, str) else json.dumps(b.content)
-    assert json.loads(results["t1"]) == {"order": "A-7", "created": "2023-11-14", "status": "approved", "amount": "129.50"}
-    assert "refunded" not in results["t2"] and "limit" in results["t2"]
-    assert results["t3"] == "refunded"
+    assert json.loads(results.get("t1") or "null") == {"order": "A-7", "created": "2023-11-14", "status": "approved", "amount": "129.50"}
+    assert "refunded" not in results.get("t2", "") and "limit" in results.get("t2", "")
+    assert results.get("t3") == "refunded"

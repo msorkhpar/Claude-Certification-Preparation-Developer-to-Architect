@@ -8,6 +8,8 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { logger } from "./logger.ts";
+const log = logger("hook_gates");
 
 export const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
 const GUARD = new URL("../guard_hook.py", import.meta.url).pathname;

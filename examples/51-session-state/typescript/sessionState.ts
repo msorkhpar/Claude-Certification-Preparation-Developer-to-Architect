@@ -7,6 +7,8 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { logger } from "./logger.ts";
+const log = logger("session_state");
 
 const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
 

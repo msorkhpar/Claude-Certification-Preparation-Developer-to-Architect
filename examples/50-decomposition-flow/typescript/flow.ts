@@ -2,6 +2,8 @@
 //
 // The "model" is a set of hand-written functions, so the output shows what each pass was given and what the control flow did with the answers, and nothing about
 // how a real model would review the code. The files, summaries and findings are illustrative.
+import { logger } from "./logger.ts";
+const log = logger("flow");
 export const CHANGE: Record<string, string> = {
   "api.py": "def get_user(id):\n    return db.find(id)\n",
   "db.py": "def find(name):\n    return rows.get(name)\n",

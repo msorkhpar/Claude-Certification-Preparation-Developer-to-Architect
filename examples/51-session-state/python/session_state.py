@@ -11,6 +11,9 @@ import tempfile
 from pathlib import Path
 
 from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+import logging
+
+log = logging.getLogger(__name__)
 
 FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
 DAY = 24 * 3600

@@ -1,9 +1,13 @@
 """Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md."""
 import math
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def review_changes(files, file_pass, cross_pass, max_lines=40):
     """Review each file alone (long files in parts), then let one pass read only the summaries of the files that were reviewed."""
+    log.debug("review_changes input: %r", files)
     reviewed, failed, skipped = {}, {}, []
     for item in files:
         path, text = item["path"], item["text"]

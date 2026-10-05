@@ -20,6 +20,7 @@ PRACTICES[f"{X}/48-multi-step-workflows-with-guarantees/unit-01/practice-1"] = {
         "wrong-no-lockout": (["e5"], "never locks the desk after repeated failed checks"),
         "wrong-exceeds-ignored": (["e3"], "refunds more than what is left on the order"),
         "wrong-zero-amount-ok": (["e3"], "accepts a refund of zero cents"),
-        "wrong-handoff-no-blocks": (["e6"], "leaves the refusals out of the hand-off"),
+        "wrong-unknown-message": (["e6"], "words the unknown tool message differently"),
+        "wrong-handoff-no-blocks": (["e4", "e6"], "leaves the refusals out of the hand-off"),
     },
 }

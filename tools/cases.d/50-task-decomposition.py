@@ -14,7 +14,7 @@ PRACTICES[f"{X}/50-task-decomposition/unit-01/practice-1"] = {
     ],
     "plants": {
         "wrong-shared-context": (["e1"], "gives each file pass the text of every file"),
-        "wrong-cross-gets-text": (["e1"], "hands the cross pass the file text beside the summaries"),
+        "wrong-cross-gets-text": (["e1", "e3", "m1"], "hands the cross pass the file text beside the summaries"),
         "wrong-no-chunking": (["e2"], "sends a long file in one piece whatever the limit"),
         "wrong-blank-reviewed": (["e2"], "reviews a file that holds only blank lines"),
         "wrong-failed-in-cross": (["e3"], "keeps a failed file among the reviewed ones"),

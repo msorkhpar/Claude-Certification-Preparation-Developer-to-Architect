@@ -4,6 +4,8 @@
 // verification first in both runs: what differs is whether the code that runs the tools checks it.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("identity_gate");
 
 export const MODEL = "claude-sonnet-5-5";
 export const SYSTEM = "You are a support agent. Verify the customer's identity before any refund.";

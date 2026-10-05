@@ -1,4 +1,6 @@
 // A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("desk");
 const MESSAGES: Record<string, string> = {
   identity_required: "Verify the customer's identity before this action.",
   order_not_owned: "That order does not belong to the verified customer.",
@@ -56,6 +58,7 @@ export class RefundDesk {
   }
 
   call(name: string, args: any): Result {
+    log.debug("call input", args);
     if (!TOOLS.includes(name)) return this.block(name, "unknown_tool", `Unknown tool: ${name}`);
     if (name === "escalate") {
       const { result, error } = this.run(name, args);

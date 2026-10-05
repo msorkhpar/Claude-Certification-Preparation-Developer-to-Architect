@@ -14,6 +14,23 @@ Names are Python's; the TypeScript names are in camel case (`resolveName`, `plan
 `session_id`, `changed`, `deleted`, `added` and `fork`. In TypeScript the SDK options are `resume`, `forkSession` and `continue`; in Python `resume`,
 `fork_session` and `continue_conversation`.
 
+## What is already written, and what you write
+
+The starter is a working session planner with ten gaps cut out of it. Everything that is plumbing is written and correct: the constants, the choice among `resume`, `resume_with_notice` and `fresh_with_summary`, the layout of the summary, the name lookup and the SDK call that reads the result. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript names are the camel-case forms where a name is given):
+
+1. The three lists of differences (unlocks `m1`, `e1`): `changed` holds the saved files whose digest differs, `deleted` the saved files that are gone and `added` the files that are new, each sorted.
+2. The share of changed files (unlocks `m1`, `e2`): (changed + deleted) divided by the number of saved files, and 0 when none were saved; new files are not counted.
+3. The age limit (unlocks `e3`): a session idle for more than a week (`WEEK_SECONDS`) starts fresh; exactly a week is still resumed.
+4. The fork flag (unlocks `e4`): a fork is planned only from a session that is resumed; a fresh start never forks.
+5. The lines of the change notice (unlocks `e5`): one line `- changed: ...`, `- deleted: ...` or `- new: ...` for each list that is not empty, naming only the files that differ.
+6. The clean list (unlocks `e6`): blank items and repeated items are dropped from a list of the summary, the first copy kept in its place, each trimmed.
+7. The first prompt (unlocks `e5`): a resumed session with changes gets the notice, then a blank line, then the task; a fresh start gets the summary, a blank line, then the task; an unchanged resume gets the task alone.
+8. The resume and fork options (unlocks `e7`): a plan with a session id sets `resume` to it, and sets the fork option only when the plan forks; a fresh plan sets neither.
+9. The continue guard (unlocks `e7`): `continue` is refused unless exactly one session exists in the directory.
+10. The result message (unlocks `e8`): the session id and the result text are read from the result message, which carries them even when it reports an error.
+
+`m1` needs gaps 1 and 2. About twenty lines in all. The steps below describe the whole planner, so you can see how your gaps are used.
+
 ## What to write
 
 ### Step 1: `plan_session(record, current, now, fork=False)`

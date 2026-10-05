@@ -17,6 +17,21 @@ backend is a set of functions that the tests script, and the tests play the mode
 | `lookup_order` result | `order_id`, `customer_id`, `total_cents` and `refunded_cents` (whole numbers) |
 | `process_refund` input | `order_id` and `amount_cents`; the result has a `refund_id` |
 
+## What is already written, and what you write
+
+The starter is a working refund desk with eight gaps cut out of it. Everything that is plumbing is written and correct: the desk's state and its snapshot, the refusal result with its messages, the backend call that turns an exception into an error result, the rendering of a result, the order lookup and refund bookkeeping, and the `handoff` record. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order:
+
+1. The outcome of an identity check unlocks `m1`, `e5`: a successful `verify_identity` result makes its customer the verified one and resets the failures; any other result clears the verified customer, adds a failure and, at three in a row, locks the desk.
+2. The identity prerequisite unlocks `e1`: every call but `verify_identity` and `escalate` is refused with `identity_required` while no customer is verified.
+3. The ownership check unlocks `e2`: an order whose `customer_id` is not the verified customer is refused with `order_not_owned` and not kept.
+4. The amount check unlocks `e3`: an amount that is not a whole number above zero is refused with `bad_amount`; a boolean, a decimal, a string or a missing amount counts as not whole.
+5. The check against what is left unlocks `e3`: an amount above the order's `total_cents` minus its `refunded_cents` is refused with `exceeds_order`.
+6. The limit unlocks `e4`: an amount above `limit_cents` is never executed: it is refused with `needs_human`.
+7. The unknown tool unlocks `e6`: a name that is not one of the four tools is refused with `unknown_tool` and the message `Unknown tool: NAME`.
+8. The recommended action unlocks `e4`, `e5`: `verify_identity_manually` when the desk is locked, otherwise `review_refund` when the most recent refusal was `needs_human`, otherwise `review_case`.
+
+`m1` needs gap 1. Every other case needs it too, because each one starts by verifying a customer. About sixteen lines in all. The steps below describe the whole desk, so you can see how your gaps are used.
+
 ## What to write
 
 A class `RefundDesk(backend, limit_cents=10000)` (`RefundDesk(backend, limitCents)` in TypeScript and Kotlin, a constructor with an optional

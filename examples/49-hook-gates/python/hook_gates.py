@@ -14,6 +14,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher, PermissionResultAllow, PermissionResultDeny, ResultMessage, ToolResultBlock, ToolUseBlock, UserMessage, query)
+import logging
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve()
 FAKE = str(HERE.parents[3] / "harness" / "fake_claude.py")

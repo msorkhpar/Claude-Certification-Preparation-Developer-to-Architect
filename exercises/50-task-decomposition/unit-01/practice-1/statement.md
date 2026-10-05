@@ -11,6 +11,22 @@ argument `maxLines` for `max_lines`, `maxSteps` for `max_steps`; Java has `Decom
 `Decompose.chooseStrategy` with an interface `FilePass`; Kotlin has top-level functions of the same names and the type aliases `FilePass`,
 `CrossPass` and `StepPlanner`. Results are maps, as the examples show.
 
+## What is already written, and what you write
+
+The starter is a working task decomposer with nine gaps cut out of it. Everything that is plumbing is written and correct: the loops over the files and over the steps, the result maps, the calls to the worker, the step limit and the check of the task's fields. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The call of the file pass unlocks `m1`, `e1`: each part of a file goes to the file pass alone, with the path, the part's text, the part number and the number of parts; its findings are collected and its summaries joined.
+2. The blank file unlocks `e2`: a file that holds only blank lines is added to `skipped` and never sent to the file pass.
+3. The number of parts unlocks `e2`: a file of N lines is reviewed in ceil(N / max_lines) parts.
+4. The failing file unlocks `e3`: a file whose pass throws is recorded in `failed` with the error message, left out of `files`, and does not stop the other files.
+5. The two file rule unlocks `e3`: the cross pass runs only when at least two files were reviewed.
+6. The call of the cross pass unlocks `m1`, `e1`: the cross pass gets one entry `{path, summary}` per reviewed file, never the file text.
+7. The history for the planner unlocks `e4`: the planner is asked again after each step with a copy of the steps so far.
+8. The stuck rules unlocks `e5`: an empty next step ends with `stuck` and "no next step"; a subtask already done (ignoring case) ends with `stuck` and "repeated subtask: NAME".
+9. The strategy unlocks `e6`: `adaptive` when the steps are not known, `per_item_then_cross` when they are known, there are two items or more and they interact, otherwise `fixed_chain`.
+
+`m1` needs gaps 1 and 6. About eighteen lines in all. The steps below describe the whole decomposer, so you can see how your gaps are used.
+
 ## Build it in three steps
 
 ### Step 1: `review_changes(files, file_pass, cross_pass, max_lines=40)`
