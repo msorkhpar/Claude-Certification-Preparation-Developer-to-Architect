@@ -21,7 +21,7 @@ public class TryIt {
         List<Object> script = new ArrayList<>(List.of(new Errors.ToolError("transient", "The billing service timed out after 5 s."),
             new Errors.ToolError("transient", "The billing service timed out after 5 s."), "refund R-1 created"));
         List<Integer> waits = new ArrayList<>();
-        Function<Map<String, Object>, Object> tool = args -> {
+        Function<Map<String, Object>, Object> tool = call -> {
             Object step = script.remove(0);
             if (step instanceof RuntimeException e) throw e;
             return step;

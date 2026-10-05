@@ -23,13 +23,13 @@ public class TryIt {
 
         // A scripted backend, like the one the tests use: four functions that answer with fixed data.
         Map<String, Function<Map<String, Object>, Map<String, Object>>> backend = new LinkedHashMap<>();
-        backend.put("verify_identity", args -> "1234".equals(args.get("code")) ? Map.of("verified", "yes", "customer_id", "C1") : Map.of("verified", "no"));
-        backend.put("lookup_order", args -> new LinkedHashMap<>(order));
-        backend.put("process_refund", args -> {
-            refunds.add(args);
-            return Map.of("refund_id", "R" + refunds.size(), "amount_cents", args.get("amount_cents"));
+        backend.put("verify_identity", call -> "1234".equals(call.get("code")) ? Map.of("verified", "yes", "customer_id", "C1") : Map.of("verified", "no"));
+        backend.put("lookup_order", call -> new LinkedHashMap<>(order));
+        backend.put("process_refund", call -> {
+            refunds.add(call);
+            return Map.of("refund_id", "R" + refunds.size(), "amount_cents", call.get("amount_cents"));
         });
-        backend.put("escalate", args -> Map.of("ticket_id", "T1"));
+        backend.put("escalate", call -> Map.of("ticket_id", "T1"));
         RefundDesk desk = new RefundDesk(backend);
 
         // The model breaks the order of the steps: a refund before identity is verified must be blocked in code.
