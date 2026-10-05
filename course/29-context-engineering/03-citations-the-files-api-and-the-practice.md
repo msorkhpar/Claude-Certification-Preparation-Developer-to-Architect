@@ -730,7 +730,7 @@ Sources:
 Read the output. The conversation has 12 messages and about 628 tokens by the example's rough counter; clearing all but the newest two
 results brings it to about 328 and replaces three results, with every call kept. The request carried the beta header
 `context-management-2025-06-27` and an edit with a trigger of 30,000, a keep of 3 and `web_search` excluded. The reply reported 8 tool uses
-and 50,000 input tokens cleared. The citation check found no problem in the real answer and a `text_mismatch` after the tampering, and the
+and 50,000 input tokens cleared. The citation check found no problem in the untouched answer and a `text_mismatch` after the tampering, and the
 footnotes number the grass sentence once although two blocks cite it.
 
 Java and Kotlin readers: the practice follows in your language, and its functions are plain list and map code.
