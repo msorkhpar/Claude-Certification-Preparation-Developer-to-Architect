@@ -107,29 +107,29 @@ An eval grades a set of cases once. The same checks can run on every live reply:
 
 ## Quiz
 
-1. A team's classifier must return one of three labels, and a script has to compare it with the expected label on 2,000 cases overnight. Which grader fits?
+1. A fraud-triage step must output one of three fixed words, and 2,000 stored cases are scored overnight with nobody waiting on a person. Which grader fits?
    - **a**: A model grader that rates each answer on a scale
-   - **b**: Normalised exact match with the reference answer
-   - **c**: A human reviewer who reads a sample of the output
+   - **b**: Matching after trimming white space and lower-casing
+   - **c**: A person who reads a sample of the output
    - **d**: Cosine similarity between embeddings of both texts
 
-2. A model that scores output replies "Score: 4, because the tone is polite" for one case, and the harness cannot parse it. How should the harness record that case?
-   - **a**: As a score of 4 read from the first digit of the text
-   - **b**: As a pass, since the reply mentions a score above the threshold
-   - **c**: As a skipped case that is left out of the pass rate
-   - **d**: As a failure with the reason that the reply was ungradable
+2. A judge model replies "Score: 4, because the tone is polite" for one case, while the harness expects a bare number. How should the harness record that case?
+   - **a**: A pass at score 4, read from the digit in the text
+   - **b**: A skipped case, kept out of the pass rate
+   - **c**: A grader retry, repeated until a bare number returns
+   - **d**: A failure, marked ungradable in the report
 
 3. A check expects the field `count` to equal the number 3, and the application's output holds the string "3". The grader compares both sides as text and passes it. What is wrong?
-   - **a**: Nothing is wrong, because the digits are the same in both forms of the value
-   - **b**: The type differs, and a program reading the value would reject it
-   - **c**: The check should have used a model grader to judge the number
-   - **d**: The expected value should have been written as a string instead
+   - **a**: The check is too strict, so it should accept both forms of the value
+   - **b**: The types differ, so a program reading the value would reject it
+   - **c**: The grader is code, so a model should judge the number instead
+   - **d**: The expectation is wrong, so it should be written as a string
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The table lists exact match for "A categorical answer: a label, a choice", and the course's rule is to "use the first one that can decide the case". *a* is ruled out because a model grader belongs to "A judgement no code can make", and a label comparison is not that. *c* is ruled out because a human grader decides "Anything, slowly", and 2,000 overnight cases need an automated grader, since the page says to "Structure questions to allow for automated grading". *d* is ruled out because similarity scores answer "Whether two texts say the same thing", which is a different question from whether two labels are equal.
-2. **d**. The page says "a reply that is not a bare score counts as ungradable, and an ungradable case fails". *b* is ruled out because the contract is "Output only the number", and the page says "an ungradable case fails" whatever the prose mentions. *c* is ruled out because a skipped case would hide the grader's drift, while the course says to "Count the ungradable cases in the report". *a* is ruled out because "a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade".
-3. **b**. The page says that a grader comparing both sides as text "passes values that a program reading the field would reject". *a* is ruled out because "A structure check also compares types", and matching digits do not make matching types. *c* is ruled out because a structure check decides this by parsing, and a model grader belongs to "A judgement no code can make". *d* is ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: "Comparing JSON fields as text".
+1. **b**. The table lists exact match for "A categorical answer: a label, a choice", and the course's rule is to "use the first one that can decide the case". *a* is ruled out because a model grader belongs to "A judgement no code can make", and a fixed word is not that. *c* is ruled out because a human grader decides "Anything, slowly", and 2,000 overnight cases need an automated grader, since the page says to "Structure questions to allow for automated grading". *d* is ruled out because similarity scores answer "Whether two texts say the same thing", which is a different question from whether two fixed words are equal.
+2. **d**. The page says "a reply that is not a bare score counts as ungradable, and an ungradable case fails", and to "Count the ungradable cases in the report". *c* is ruled out because the contract is "Output only the number" and the page says "an ungradable case fails", so a reply that breaks it is not retried until it passes. *b* is ruled out because a skipped case would hide the grader's drift, and the course says to "Count the ungradable cases in the report". *a* is ruled out because "a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade".
+3. **b**. The page says that a grader comparing both sides as text "passes values that a program reading the field would reject". *a* is ruled out because "A structure check also compares types", and a check that accepts both forms would pass the failure it exists to catch. *c* is ruled out because a structure check decides this by parsing, and a model grader belongs to "A judgement no code can make". *d* is ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: "Comparing JSON fields as text".
 
 </details>

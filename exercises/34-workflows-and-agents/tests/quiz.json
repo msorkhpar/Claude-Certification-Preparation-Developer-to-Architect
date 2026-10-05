@@ -5,38 +5,38 @@
       "id": "01-workflow-or-agent-and-the-first-patterns#q1",
       "page": "01-workflow-or-agent-and-the-first-patterns.md",
       "scope": "page",
-      "stem": "A team's support bot always runs the same three steps in the same order, written in code, and calls a model in each step. What does Anthropic's article call this kind of system?",
+      "stem": "A support bot runs three model calls in one order, wired together by the application's code. How does the article classify it?",
       "options": {
-        "a": "An agent, because a model is called inside every step",
-        "b": "An agent, because the sequence repeats until it is finished",
-        "c": "A router, because each step picks the one that follows",
-        "d": "A workflow, because the program fixes the route in advance"
+        "a": "An agent, because the model decides each next step in a loop",
+        "b": "A router, because a classifier hands the input to a specialist",
+        "c": "A sectioning pattern, because independent subtasks run side by side",
+        "d": "A workflow, because the sequence is fixed before the first request"
       },
       "key": "d",
       "explanation": {
         "d": "The page says \"Workflows are systems where LLMs and tools are orchestrated through predefined code paths.\"",
-        "a": "Ruled out because agents \"are systems where LLMs dynamically direct their own processes and tool usage\", and here the program does the directing.",
-        "b": "Ruled out because the page says agents \"are typically just LLMs using tools based on environmental feedback in a loop\", which is a loop chosen by the model, not a fixed sequence.",
-        "c": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", while here the order of the steps is fixed in code and no step picks the next."
+        "a": "Ruled out because agents \"are typically just LLMs using tools based on environmental feedback in a loop\", and here the program, not the model, sets the order.",
+        "b": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", while in this bot no step picks which task follows.",
+        "c": "Ruled out because sectioning is \"Breaking a task into independent subtasks run in parallel\", while these three calls run one after another."
       }
     },
     {
       "id": "01-workflow-or-agent-and-the-first-patterns#q2",
       "page": "01-workflow-or-agent-and-the-first-patterns.md",
       "scope": "page",
-      "stem": "A product team wants an assistant to answer questions from a small knowledge base and is considering a multi-agent design. What does the article recommend as a starting point?",
+      "stem": "A product team wants an assistant that answers questions from a small document set, and is weighing a multi-agent design. What does the article recommend as the starting point?",
       "options": {
-        "a": "A single call with retrieval, since the simplest solution is preferred",
-        "b": "A framework with a graphical builder, to avoid writing prompts by hand",
-        "c": "An autonomous agent, since a small base leaves no path to hard-code",
-        "d": "A network of cooperating agents, since complexity improves every task"
+        "a": "A single model call that adds retrieval and examples",
+        "b": "A routing workflow with one specialist prompt for each topic",
+        "c": "A framework whose layers hide the prompts and the replies",
+        "d": "An agent that plans its own search steps in a loop"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"we recommend finding the simplest solution possible, and only increasing complexity when needed\", and that \"optimizing single LLM calls with retrieval and in-context examples is usually enough\".",
-        "d": "Ruled out because \"Agentic systems often trade latency and cost for better task performance\", so complexity is not free.",
-        "b": "Ruled out because \"We suggest that developers start by using LLM APIs directly\".",
-        "c": "Ruled out because agents suit \"open-ended problems where it's difficult or impossible to predict the required number of steps\", and a small knowledge base is not one."
+        "a": "The page says \"optimizing single LLM calls with retrieval and in-context examples is usually enough\".",
+        "b": "Ruled out because a workflow is also an agentic system, and the page says to find \"the simplest solution possible, and only increasing complexity when needed\".",
+        "c": "Ruled out because frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses\".",
+        "d": "Ruled out because the article reserves agents for \"open-ended problems where it's difficult or impossible to predict the required number of steps\"."
       }
     },
     {
@@ -81,19 +81,19 @@
       "id": "02-orchestrators-evaluators-agents-and-the-practice#q2",
       "page": "02-orchestrators-evaluators-agents-and-the-practice.md",
       "scope": "page",
-      "stem": "In the article's terms, which description marks the point where a system stops being a workflow and becomes an agent?",
+      "stem": "A pipeline makes many calls, uses search and code execution, and runs for minutes while the user waits. What would make the article call it an agent?",
       "options": {
-        "a": "It calls a model more than once to finish a single user request",
-        "b": "It uses tools such as search or code execution during its work",
-        "c": "It runs for a long time, so the user waits for the final result",
-        "d": "It lets the model choose the next step and the tools to use"
+        "a": "Making its calls in parallel and not in sequence",
+        "b": "Using further tools such as a browser or a database",
+        "c": "Running for hours and not minutes before it answers",
+        "d": "Letting the LLM, not the program, choose each next step"
       },
       "key": "d",
       "explanation": {
         "d": "The page says agents are systems \"where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks\".",
-        "a": "Ruled out because workflows are \"orchestrated through predefined code paths\", and they may call a model many times.",
-        "b": "Ruled out because the building block of every pattern is \"an LLM enhanced with augmentations such as retrieval, tools, and memory\", so workflows use tools too.",
-        "c": "Ruled out because the line is drawn by who directs the path, which the page says in \"dynamically direct their own processes and tool usage\", and not by how long it runs."
+        "a": "Ruled out because \"Sectioning splits the task into independent parts\" and the page says \"All of them are workflows\", so parallel calls stay a workflow.",
+        "b": "Ruled out because every pattern calls \"an LLM enhanced with augmentations such as retrieval, tools, and memory\", so tools do not mark an agent.",
+        "c": "Ruled out because the line is drawn by who decides, as in \"dynamically direct their own processes and tool usage\", and not by how long a run lasts."
       }
     },
     {
@@ -119,57 +119,57 @@
       "id": "02-orchestrators-evaluators-agents-and-the-practice#m1",
       "page": "02-orchestrators-evaluators-agents-and-the-practice.md",
       "scope": "module",
-      "stem": "A team replaces a working three-step chain with a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?",
+      "stem": "A team swaps a working three-step chain for a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?",
       "options": {
-        "a": "Add more layers, since abstraction makes patterns easier to debug later",
-        "b": "Call the LLM APIs directly, since that keeps each request and reply in view",
-        "c": "Switch to a graphical builder, since it shows the prompts on screen",
-        "d": "Keep that library, since the article says frameworks are required"
+        "a": "Keep the framework, and add a second one to watch it",
+        "b": "Return to direct LLM API calls, and read any code beneath",
+        "c": "Move the sequence into an agent so that the model finds the path",
+        "d": "Wrap the framework in one more layer that logs each call"
       },
       "key": "b",
       "explanation": {
         "b": "The first page says \"We suggest that developers start by using LLM APIs directly\", and to understand the code under any framework.",
         "a": "Ruled out because frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug\".",
-        "d": "Ruled out because the article's advice is \"don't hesitate to reduce abstraction layers and build with basic components as you move to production\".",
-        "c": "Ruled out because the advice is \"We suggest that developers start by using LLM APIs directly\", and a graphical builder adds a layer, while frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug\"."
+        "c": "Ruled out because agents are for \"open-ended problems where it's difficult or impossible to predict the required number of steps\", and a fixed sequence is not one.",
+        "d": "Ruled out because the article says \"don't hesitate to reduce abstraction layers and build with basic components as you move to production\", not to add one."
       }
     },
     {
       "id": "02-orchestrators-evaluators-agents-and-the-practice#m2",
       "page": "02-orchestrators-evaluators-agents-and-the-practice.md",
       "scope": "module",
-      "stem": "A router's classifier replies with a label in capitals and a full stop. What should the program do before it looks the label up?",
+      "stem": "A classifier's output comes back as `REFUNDS.`, with capitals and a full stop, but the program's table is keyed by lowercase names. What should the program do before the table lookup?",
       "options": {
-        "a": "Clean the text into a key, then use the default only if nothing matches",
-        "b": "Send the raw reply to the default route, without trying to match it",
-        "c": "Ask the user which route is meant, then use the answer as the key",
-        "d": "Reject the reply, then call the classifier again until it matches exactly"
+        "a": "Normalize the text into a form that matches a known route",
+        "b": "Retry the classifier until an output matches a name exactly",
+        "c": "Send the output to the default route without a lookup",
+        "d": "Hand the output to a person who picks the route"
       },
       "key": "a",
       "explanation": {
-        "a": "The first page says the program normalizes the label, looks it up, and sends anything unknown to a default route.",
-        "d": "Ruled out because the example's reply `refunds?` is not a route, \"so the question takes the default\", with no second call to the classifier.",
-        "b": "Ruled out because \"The program normalizes the label, looks it up, and sends anything unknown to a default route.\", so a reply that matches after cleaning is not unknown.",
-        "c": "Ruled out because \"The failure to design for is a label that matches no route.\", and the program handles it with a default and not with a question."
+        "a": "The first page says \"The program normalizes the label, looks it up, and sends anything unknown to a default route.\"",
+        "b": "Ruled out because the page sends \"anything unknown to a default route\" and describes no second call to the classifier.",
+        "c": "Ruled out because the program \"normalizes the label, looks it up\", so a reply that matches after cleaning is not sent straight to the default.",
+        "d": "Ruled out because \"The failure to design for is a label that matches no route.\", and the program meets it with a default and not with a person."
       }
     },
     {
       "id": "02-orchestrators-evaluators-agents-and-the-practice#m3",
       "page": "02-orchestrators-evaluators-agents-and-the-practice.md",
       "scope": "module",
-      "stem": "In the article's wording, what does voting do that sectioning does not?",
+      "stem": "A code review sends one snippet to the model three times in parallel and applies a threshold to the answers. Which variation is this?",
       "options": {
-        "a": "It runs one task repeatedly and counts the results",
-        "b": "It needs a different model for each call that it makes",
-        "c": "It waits for each call to finish before the next one starts",
-        "d": "It splits one task into independent pieces for separate calls"
+        "a": "Sectioning, where independent subtasks run side by side",
+        "b": "Chaining, where each call processes the output of an earlier one",
+        "c": "Routing, where a classifier picks a specialized followup",
+        "d": "Voting, where repeated runs of one task are counted"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The first page defines voting as \"Running the same task multiple times to get diverse outputs\", and says \"a vote is a count and a threshold\".",
-        "d": "Ruled out because that is sectioning: \"Breaking a task into independent subtasks run in parallel\".",
-        "b": "Ruled out because \"a vote is a count and a threshold\", which the program applies, and no second model is involved.",
-        "c": "Ruled out because \"When a program can run model calls at the same time and combine them in code, it has two variations.\", and voting is one of them."
+        "d": "The first page defines voting as \"Running the same task multiple times to get diverse outputs\", and says \"a vote is a count and a threshold\".",
+        "a": "Ruled out because sectioning is \"Breaking a task into independent subtasks run in parallel\", and here one task is repeated.",
+        "b": "Ruled out because chaining is for steps \"where each LLM call processes the output of the previous one\", and these runs do not depend on each other.",
+        "c": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", and here nothing is classified."
       }
     },
     {

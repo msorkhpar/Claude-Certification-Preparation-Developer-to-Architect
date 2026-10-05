@@ -29,11 +29,11 @@ Settings are JSON files. The settings page gives their order, highest first: man
 
 Pick the layer by who the setting is for. The team's choices go in the shared project file, which is committed: the permission rules that every developer needs, the default model for the repository. A personal override goes in the local file, which belongs in `.gitignore`: this developer's preferred model, a path on their machine. A choice for every project that one person works on goes in the user file. A rule that must hold regardless of what any developer writes goes in managed settings, which nothing below it can override.
 
-Two safeguards live here. A shared or local file cannot set `defaultMode` to `auto` or `bypassPermissions`, as page 1 showed. And project permission rules wait for workspace trust: a rule in a repository you have just cloned does not apply before you have trusted the folder.
+Two safeguards live here. A shared or local file cannot set `defaultMode` to `auto` or `bypassPermissions`, as page 1 showed. And project allow rules wait for workspace trust: an allow rule in a repository you have just cloned does not apply before you have trusted the folder, while deny and ask rules apply at once, since they only restrict.
 
 ### Permission rules
 
-A rule names a tool and optionally a pattern, and it has one of three effects. "Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." So "An allow rule can't carve an exception out of a deny rule": a broad deny of `Bash(aws *)` blocks `aws s3 ls` even when a narrower allow names it. A call that no rule matches falls to the mode: in Manual, a read runs and anything else asks.
+A rule names a tool and optionally a pattern, and it has one of three effects. "Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." So "An allow rule can't carve an exception out of a deny rule": a broad deny of `Bash(aws *)` blocks `aws s3 ls` even when a narrower allow names it. A call that no rule matches falls to the mode: in Manual, a read runs and anything else asks. The Agent SDK page of module 35 lists the mode as its own step between the ask and allow rules; for a mode that only falls through, such as the default, the result is the same.
 
 The shapes to know:
 
@@ -860,11 +860,11 @@ The example merges layers and decides calls. It starts with a user file that all
 
 ## Quiz
 
-1. A team wants to block reads of `.env` for every developer, and also adds a line about it to the memory file. Which statement is right?
-   - **a**: The memory line enforces it, because that file loads at the start of a session
-   - **b**: The deny entry enforces it, while the text only asks Claude
-   - **c**: Both enforce it equally, since each is read before the first tool call
-   - **d**: Neither enforces it, because project files never override a user file
+1. A repository holds credentials in `.env`, and Claude must never open them. One teammate writes a sentence about it in the memory file, and another adds a path block to the shared configuration. Which one actually stops it?
+   - **a**: The `Read` rule, which is checked before each call runs
+   - **b**: The memory sentence, which Claude Code enforces once it loads
+   - **c**: Both entries equally, since each is read before any tool call
+   - **d**: Neither entry, since a project file never beats a user file
 
 2. A settings file allows `Bash(git log *)` and another layer lists `Bash(git *)` under deny. What happens when Claude runs `git log --oneline`?
    - **a**: It is allowed, because the allow rule names the narrower command here
@@ -874,15 +874,15 @@ The example merges layers and decides calls. It starts with a user file that all
 
 3. A developer wants to use a cheaper model on their own machine without changing it for the team. Where does the setting go?
    - **a**: The shared project file, which is committed with the code of the team
-   - **b**: The local project file, which is kept out of version control
-   - **c**: The managed settings, which override every other layer of the settings
+   - **b**: The managed settings, which override every other layer of the settings
+   - **c**: The local project file, which is kept out of version control
    - **d**: The memory file, which names the model in one plain sentence of text
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "Claude treats them as context, not enforced configuration", and "To block an action regardless of what Claude decides, use a PreToolUse hook instead", and a deny rule is checked before anything runs. *a* is ruled out because memory files are "context, not enforced configuration". *c* is ruled out because a memory file is loaded at the start but only asks, while deny rules are "evaluated in order: deny, then ask, then allow". *d* is ruled out because "A key set at a higher level overrides the same key set lower down" is about the same key, and since "they combine across layers", a project deny still applies.
+1. **a**. The page says "Claude treats them as context, not enforced configuration", while "Rules are evaluated in order: deny, then ask, then allow." *b* is ruled out because memory files are "context, not enforced configuration", so the sentence only asks. *c* is ruled out because a memory file is loaded "at the start of every conversation" and still only asks, while a deny rule sits first in "deny, then ask, then allow". *d* is ruled out because "A key set at a higher level overrides the same key set lower down" is about the same key, and since "they combine across layers", a project deny still applies.
 2. **d**. The page says "Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." *a* is ruled out because "rule specificity doesn't change the order", so a narrower allow does not win. *c* is ruled out because the first match decides and the rules never cancel: "An allow rule can't carve an exception out of a deny rule". *b* is ruled out because "they combine across layers", so the later layer does not replace the earlier one.
-3. **b**. The page puts "A personal override" in the local file, which "belongs in `.gitignore`". *a* is ruled out because "The team's choices go in the shared project file, which is committed", so the choice would reach the whole team. *c* is ruled out because managed settings are for "A rule that must hold regardless of what any developer writes", and are not a personal file. *d* is ruled out because the memory file "asks" and does not set a model: "A memory file asks and a hook enforces."
+3. **c**. The page puts "A personal override" in the local file, which "belongs in `.gitignore`". *a* is ruled out because "The team's choices go in the shared project file, which is committed", so the choice would reach the whole team. *b* is ruled out because managed settings are for "A rule that must hold regardless of what any developer writes", and are not a personal file. *d* is ruled out because the memory file "asks" and does not set a model: "A memory file asks and a hook enforces."
 
 </details>

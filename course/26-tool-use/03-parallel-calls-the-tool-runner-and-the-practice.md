@@ -66,6 +66,7 @@ the field, in four cases:
 The last rule for the loop is the course's own reasoning, not a documented rule, and it is about repetition. A forced choice (`any` or `tool`) applies to the first request only. If it were sent
 again, the model would have to call a tool each time and could never give a final answer. From the second request on the loop sends
 `{"type": "auto"}`, while `auto` and `none` are sent unchanged every time.
+The reason is in the documented meaning: `tool` "forces Claude to always use a particular tool", and for `any` and `tool` "the API prefills the assistant message to force a tool to be used".
 
 ### The tool runner
 
@@ -134,17 +135,17 @@ first request.
    - **d**: Alongside `max_tokens`, at the top level of the body
 
 3. A loop forced `{"type": "tool", "name": "lookup"}` on every request. What goes wrong?
-   - **a**: The system prompt is dropped from every request
-   - **b**: The tool results are rejected with a 400 error
+   - **a**: The model writes a plan in text before each tool call
+   - **b**: The model swaps in another tool when it judges one fits better
    - **c**: No final answer in plain text could ever come out
-   - **d**: Parallel calls turn on in place of the single forced call
+   - **d**: Plain-text replies still arrive as usual after the first call
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says to "return one `tool_result` for each `tool_use` block, all together in the next user message", and to send `is_error: true` for a call that was not run or failed. *b* is ruled out because "Skipping a result leaves a `tool_use` without its answer". *c* is ruled out because every result is "matched by `tool_use_id`, with every result before any text", and a plain message names no call. *d* is ruled out because the wrong form is "a separate user message for each tool result".
 2. **a**. The page says "Set `disable_parallel_tool_use: true` inside the `tool_choice` object." *d* is ruled out because "It is not a top-level request parameter." *b* is ruled out because "It is a field of the `tool_choice` object." *c* is ruled out because "the field is part of the request body", and a line in a prompt has no such effect.
-3. **c**. The page says "If it were sent again, the model would have to call a tool each time and could never give a final answer." *b* is ruled out because acceptance depends on the formatting rule to "return one `tool_result` for each `tool_use` block". *a* is ruled out because the choice changes how the model replies, and the page names no effect on the system prompt: "Force the first request only." *d* is ruled out because for `any` or `tool` with the flag set, "Claude calls exactly one tool".
+3. **c**. The page says "If it were sent again, the model would have to call a tool each time and could never give a final answer." *a* is ruled out because "the API prefills the assistant message to force a tool to be used", so no plan in text comes before the call. *b* is ruled out because the `tool` value "forces Claude to always use a particular tool", with a `name`. *d* is ruled out because "the model would have to call a tool each time", so a plain-text reply never arrives.
 
 </details>
 

@@ -445,29 +445,29 @@ A list of patterns catches the phrasing someone thought of and misses the paraph
 
 ## Quiz
 
-1. A support bot is used by a customer who deliberately writes inputs to bypass its rules. Which threat model is this?
-   - **a**: A data breach, where stored records are copied from the server
+1. A customer of a support bot rephrases requests again and again until it drops its restrictions. Which threat model is this?
+   - **a**: A jailbreak, where the user is the one attacking
    - **b**: An indirect injection, where a third party's content is the carrier
    - **c**: A prompt leak, where the model reveals what it was told to keep
-   - **d**: A jailbreak, where the person typing is the one attacking
+   - **d**: A model weakness, where Claude cannot resist any attack
 
 2. An assistant summarises inbound emails, and one email says to forward the customer list. Where should the email body be placed?
-   - **a**: Inside a tool result, encoded as a JSON string that names its source
-   - **b**: Inside the system prompt, so that it has the highest priority of all
-   - **c**: Inside a plain user turn, concatenated after the instruction text
+   - **a**: Inside the system prompt, so that it has the highest priority of all
+   - **b**: Inside a plain user turn, concatenated after the instruction text
+   - **c**: Inside a tool result, encoded as a JSON string that names its source
    - **d**: Inside the tool description, so the tool explains its own input to Claude
 
-3. A team adds a list of known attack phrases and considers the agent protected. What is wrong?
-   - **a**: It runs at the wrong time, because such a list works only after the reply
-   - **b**: It is not allowed, because pattern lists block harmless text
-   - **c**: A rewording passes it, so it cannot stand as the only layer
-   - **d**: It is too weak to matter, so it should be dropped from the design
+3. A team adds a list of known attack strings and considers the agent protected. What is wrong?
+   - **a**: Pattern lists block harmless text, so they are not allowed in a design
+   - **b**: The list screens at the wrong time, so it belongs after the reply
+   - **c**: The list is too short, so a longer list would be enough
+   - **d**: A paraphrase passes it, so it cannot be the only layer
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The table gives jailbreaks and direct injection "The user of your application" as the adversary, so the person typing is the attacker, who "crafts inputs intended to bypass your guardrails". *b* is ruled out because indirect injection has "A third party whose content Claude reads" as the adversary, and the user is trusted. *c* is ruled out because the page defines the attack as "attempts to make Claude ignore its guidelines or your instructions", and a leak exposes what was meant to stay hidden, which this user is not after. *a* is ruled out because nothing in the scenario copies stored records, and the page defines the attack as an attempt "to make Claude ignore its guidelines or your instructions".
-2. **a**. The page says "Put untrusted content only in tool results", and to "JSON-encode untrusted content", with a source named: "Tell Claude what the content is and where it came from." *b* is ruled out because the page says "never in `system` prompts or plain user `text` blocks". *c* is ruled out for the same reason, and concatenation is the trap: "The attacker writes the closing delimiter." *d* is ruled out because the tool description may say what the content is, but the body itself belongs in the result, and "Don't put your own instructions in tool results" is a separate rule about who writes what.
-3. **c**. The page says "A list of patterns catches the phrasing someone thought of and misses the paraphrase", and the example's last line shows one passing. *b* is ruled out because the page does not forbid pattern lists: "Input validation filters known injection patterns before they reach Claude" is one of its defences. *a* is ruled out because the page says to "screen tool outputs with a small model" before Claude acts, and not after the reply. *d* is ruled out because "Treat every screen as one layer that reduces risk", and the page keeps it as a layer beside structure and privilege, "not in place of them", so it is neither a cure nor worthless.
+1. **a**. The table gives jailbreaks and direct injection "The user of your application" as the adversary, so the person typing is the attacker, who "crafts inputs intended to bypass your guardrails". *b* is ruled out because indirect injection has "A third party whose content Claude reads" as the adversary, and the user is "Trusted". *c* is ruled out because the page defines the attack as "attempts to make Claude ignore its guidelines or your instructions", which is a push past restrictions and not an exposure of the prompt. *d* is ruled out because Claude "is inherently resilient to such attacks, the additional steps on this page strengthen your guardrails", so the attacker is the person and not a flaw of the model.
+2. **c**. The page says "Put untrusted content only in tool results", and to "JSON-encode untrusted content", with a source named: "Tell Claude what the content is and where it came from." *a* is ruled out because the page says "never in `system` prompts or plain user `text` blocks". *b* is ruled out because a plain user turn is the other place the page rules out, and concatenation is the trap: "The attacker writes the closing delimiter." *d* is ruled out because the tool description may say what the content is, but the body itself belongs in the result, and "Don't put your own instructions in tool results" is a separate rule about who writes what.
+3. **d**. The page says "A list of patterns catches the phrasing someone thought of and misses the paraphrase", and the example's last line shows one passing. *a* is ruled out because the page does not forbid pattern lists: "Input validation filters known injection patterns before they reach Claude" is one of its defences. *b* is ruled out because the page says to "screen tool outputs with a small model" before Claude acts, and not after the reply. *c* is ruled out because "The structural measures do not depend on guessing the attack", so more patterns are no substitute for structure and privilege.
 
 </details>

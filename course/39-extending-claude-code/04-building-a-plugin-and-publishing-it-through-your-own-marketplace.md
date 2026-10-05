@@ -108,29 +108,29 @@ The practice is in [`exercises/39-extending-claude-code`](../../exercises/39-ext
 ## Quiz
 
 1. A team pushes fresh commits to a plugin whose manifest still says `"version": "1.0.0"`. What reaches installed users?
-   - **a**: The copy they already hold, until the number is raised
-   - **b**: The fresh commits at the next launch, since a push always counts
-   - **c**: The fresh commits once the marketplace entry repeats that number
-   - **d**: The fresh commits, since the commit hash is the version
+   - **a**: The fresh commits at the next launch, since a push always counts
+   - **b**: The fresh commits once the marketplace entry repeats that number
+   - **c**: The fresh commits, since the commit hash is the version
+   - **d**: The copy they already hold, until the number is raised
 
 2. A catalog entry calls a bundle `reviewer-kit`, while the bundle's own manifest says `review-kit`. What happens when someone installs it under the manifest's name?
    - **a**: An ambiguity message asks which of the two names was meant
-   - **b**: A not-found message naming what was typed
-   - **c**: A success message, with the entry name as the skill prefix
+   - **b**: A success message, with the entry name as the skill prefix
+   - **c**: A not-found message naming what was typed
    - **d**: A success message, once the catalog has been added again
 
 3. A repository's settings turn on a bundle whose catalog entry points at a repository of its own. A contributor trusts the folder and starts a session. What do they see?
-   - **a**: The bundle loaded, since trust is the only condition that applies
-   - **b**: A prompt that lists the hooks of the bundle before it installs
-   - **c**: A notice that it is enabled but not installed, until they install it
+   - **a**: A notice that it is enabled but not installed, until they install it
+   - **b**: The bundle loaded, since trust is the only condition that applies
+   - **c**: A prompt that lists the hooks of the bundle before it installs
    - **d**: The bundle loaded once the marketplace is added to managed settings
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says users stay on their cached copy until the string changes. *b* is ruled out because if the version is not changed, "users don't receive them". *c* is ruled out because "Don't set `version` in both `plugin.json` and the marketplace entry", and Claude Code "then uses the manifest value without warning". *d* is ruled out because the commit hash counts only when neither place sets a version: "When neither is set", the commit SHA of the source.
-2. **b**. The page says "When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin "<manifest-name>" not found in marketplace "<marketplace>"`." *a* is ruled out because the entry name is "the key Claude Code writes under `enabledPlugins`", and nothing offers a choice between the two names. *c* is ruled out because "the manifest name is the prefix of its skills", and the entry name never replaces it. *d* is ruled out because "When the two names differ and someone installs by the manifest name, Claude Code reports" a failure, and re-adding the catalog changes neither name.
-3. **c**. The page says "Each contributor sees `Plugin "<name>" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`." *a* is ruled out because "Only a relative-path plugin installs from the file alone". *b* is ruled out because "Nothing installs, and nothing prompts, until each contributor runs the install." *d* is ruled out because "A repository's own settings reach only the contributors who trust the folder", which is a different channel from managed settings.
+1. **d**. The page says users stay on their cached copy until the string changes. *a* is ruled out because if the version is not changed, "users don't receive them". *b* is ruled out because "Don't set `version` in both `plugin.json` and the marketplace entry", and Claude Code "then uses the manifest value without warning". *c* is ruled out because the commit hash counts only when neither place sets a version: "When neither is set", the commit SHA of the source.
+2. **c**. The page says "When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin "<manifest-name>" not found in marketplace "<marketplace>"`." *a* is ruled out because the entry name is "the key Claude Code writes under `enabledPlugins`", and nothing offers a choice between the two names. *b* is ruled out because "the manifest name is the prefix of its skills", and the entry name never replaces it. *d* is ruled out because "When the two names differ and someone installs by the manifest name, Claude Code reports" a failure, and re-adding the catalog changes neither name.
+3. **a**. The page says "Each contributor sees `Plugin "<name>" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`." *b* is ruled out because "Only a relative-path plugin installs from the file alone". *c* is ruled out because "Nothing installs, and nothing prompts, until each contributor runs the install." *d* is ruled out because "A repository's own settings reach only the contributors who trust the folder", which is a different channel from managed settings.
 
 </details>
 
@@ -144,21 +144,21 @@ This quiz covers all five pages of the module.
    - **c**: A subagent in the plugin that reviews each command before it runs
    - **d**: A line in each memory file that forbids the action by its name
 
-2. One skill drafts release summaries and another tags and ships a release. Which pair of settings fits?
-   - **a**: The first for a person alone, the second on automatic loading
-   - **b**: Both on automatic loading, so that Claude can finish unaided
-   - **c**: The first on automatic loading, the second for a person alone
-   - **d**: Both for a person alone, so that neither is ever loaded at all
+2. One skill drafts release summaries, and another tags and ships a release. Which pair of settings fits?
+   - **a**: Automatic loading off for the first, left on for the second
+   - **b**: Automatic loading left on for both, with `Bash` pre-approved on the second
+   - **c**: Automatic loading off for both, with nothing pre-approved on either
+   - **d**: Automatic loading left on for the first, off for the second
 
 3. A repository's `.claude/settings.json` registers a marketplace and enables a plugin, but a new contributor has not yet approved the folder. What happens?
    - **a**: The entries apply only to managed settings, never to a repository
    - **b**: The plugin installs at once, because the file is in the repository
-   - **c**: A prompt appears for each plugin, listing its hooks and its scripts
-   - **d**: Claude Code ignores the entries without a message until trust is given
+   - **c**: Claude Code ignores the entries without a message until trust is given
+   - **d**: A prompt appears for each plugin, listing its hooks and its scripts
 
 4. A subagent should review code and remember wording the team prefers, with that knowledge committed with the code. Which fields fit?
-   - **a**: Every tool and the user memory scope
-   - **b**: Read-only tools and the project memory scope
+   - **a**: Read-only tools and the project memory scope
+   - **b**: Every tool and the user memory scope
    - **c**: Read-only tools and the local memory scope
    - **d**: Every tool and no memory field at all
 
@@ -166,8 +166,8 @@ This quiz covers all five pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The hooks section gives "deterministic control: certain actions always happen rather than relying on the LLM to choose to run them", exit 2 blocks and "Write a reason to stderr", and a plugin carries the hook to every project that enables it. *a* is ruled out because "a skill is instructions Claude may follow", and not a rule that holds. *c* is ruled out because a subagent is "An isolated context that returns summarised results" and is not a gate for every command. *d* is ruled out because a memory file holds "Persistent context loaded every conversation", which is guidance and not enforcement.
-2. **c**. The page says "A skill that writes release notes is harmless and Claude can start it when asked", while a skill with side effects needs `disable-model-invocation: true`. *b* is ruled out because for a skill with side effects "a person should start it". *a* is ruled out because it reverses the safety, and the first sentence of the page's reasoning is "A skill that writes release notes is harmless and Claude can start it when asked". *d* is ruled out because "Claude loads it by itself when your request matches its description", and the harmless skill gains from that.
-3. **d**. The page says the entries "apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message." *b* is ruled out because trust comes first: "A repository cannot install code on a machine that has not trusted it." *c* is ruled out because the page says "Claude Code ignores them without a message", which describes no prompt. *a* is ruled out because the page says "the same two keys go in managed settings" for a whole organisation, and the repository's file covers its own contributors.
-4. **b**. The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is "shareable via version control". *a* is ruled out because "Omit it and the subagent inherits every tool", and the `user` scope lives in the home directory and is not committed. *c* is ruled out because the `local` scope is for knowledge that "should not be checked in". *d* is ruled out because "Omit it and the subagent inherits every tool", and without `memory` the subagent keeps no knowledge across conversations.
+2. **d**. The page says "A skill that writes release notes is harmless and Claude can start it when asked", while a skill with side effects needs `disable-model-invocation: true`. *a* is ruled out because a skill that tags a release "has side effects, and a person should start it", and this reversal leaves that skill to Claude. *b* is ruled out because "`allowed-tools: Bash` approves every shell command for that turn", and a skill with side effects should not load by itself either. *c* is ruled out because "Claude loads it by itself when your request matches its description", and the harmless skill gains from that.
+3. **c**. The page says the entries "apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message." *b* is ruled out because trust comes first: "A repository cannot install code on a machine that has not trusted it." *d* is ruled out because the page says "Claude Code ignores them without a message", which describes no prompt. *a* is ruled out because the page says "the same two keys go in managed settings" for a whole organisation, and the repository's file covers its own contributors.
+4. **a**. The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is "shareable via version control". *b* is ruled out because "Omit it and the subagent inherits every tool", and the `user` scope lives in the home directory and is not committed. *c* is ruled out because the `local` scope is for knowledge that "should not be checked in". *d* is ruled out because "Omit it and the subagent inherits every tool", and without `memory` the subagent keeps no knowledge across conversations.
 
 </details>

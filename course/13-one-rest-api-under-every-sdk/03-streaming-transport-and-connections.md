@@ -100,7 +100,7 @@ for an idle-connection timeout. So:
    purpose; a client that says streaming does not work behind a corporate proxy is describing buffering.
 
 The SDKs add a safeguard on top: for a non-streaming request that is expected to take longer than about ten minutes,
-the Python SDK raises a `ValueError` and the others raise an error too; passing `stream=True` or overriding the
+the Python SDK raises a `ValueError`, and the TypeScript, Java and Go SDKs raise an error too; passing `stream=True` or overriding the
 timeout disables it. That is a design hint and not an obstacle: if you see it, you wanted streaming.
 
 ## Traps

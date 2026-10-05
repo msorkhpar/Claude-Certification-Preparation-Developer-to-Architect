@@ -65,29 +65,29 @@ The practice sets up a small repository, the invoice API, for Claude Code. You w
 ## Quiz
 
 1. A CI job runs `claude -p` to review each diff and must give the same result on every runner. Which flag is the key part?
-   - **a**: `--bare`, because it skips the local setup that discovery finds
-   - **b**: `--output-format json`, because it gives a script structured text to parse
+   - **a**: `--output-format json`, because it gives a script structured text to parse
+   - **b**: `--bare`, because it skips the local setup that discovery finds
    - **c**: `--max-turns`, because it limits how many agentic turns a single run takes
    - **d**: `--max-budget-usd`, because it caps the amount that a single run may spend
 
-2. A custom command edits code and then calls an issue tracker. Which setting makes sure only a person can start it?
-   - **a**: The value true on disable-model-invocation in its frontmatter
-   - **b**: A hint in the argument field of the command's frontmatter block
-   - **c**: A deny rule for the command in the project settings file of the team
-   - **d**: Placing the file in the user directory instead of in the project
+2. A command's workflow deploys code and posts to an external service. How is Claude kept from launching it on its own judgement?
+   - **a**: Add an `argument-hint` line to its frontmatter
+   - **b**: Save it as a command file and not as a skill folder
+   - **c**: Set `disable-model-invocation: true` in its frontmatter
+   - **d**: Start the session with `--permission-mode dontAsk`
 
 3. A script lists `--allowedTools "Bash"` so that a headless review can run `git diff`. What is wrong with it?
-   - **a**: It fails to start at all, since a tool name must carry a pattern
-   - **b**: It is ignored by the run, because bare mode never reads the tool list
-   - **c**: It approves every shell command, and a pattern limits the scope
-   - **d**: It asks for approval, because a bare name is treated as an ask rule
+   - **a**: It pre-approves every shell command, because a bare tool name matches them all
+   - **b**: It is rejected at start, because a tool name must carry a pattern
+   - **c**: It is skipped by a bare run, because `--bare` ignores a tool list
+   - **d**: It approves nothing, because only `dontAsk` can pre-approve a tool
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says `--bare` is "useful for CI and scripts where you need the same result on every machine." *b* is ruled out because "Use `json` when a script parses the result", which shapes the output and does not remove local configuration. *c* is ruled out because "`--max-turns` limits the number of agentic turns", which bounds a run and does not make two runners agree. *d* is ruled out because "`--max-budget-usd` caps the spend", which is a bound on cost and not on configuration.
-2. **a**. The page says setting `disable-model-invocation: true` tells it to "prevent Claude from automatically loading this skill", so only a person can start it. *b* is ruled out because `argument-hint` is "a hint such as `[issue-number]` shown in autocomplete" and controls no one. *c* is ruled out because the page says such a command "should run when you type it and not when Claude decides it fits", and gives the frontmatter field for that. *d* is ruled out because a skill's location sets who has it, and the page says "Custom commands have been merged into skills" and work the same way.
-3. **c**. The trap says "`--allowedTools "Bash"` approves every command. List `Bash(git diff *)` and its like." *a* is ruled out because the page says "List patterns and not whole tools that change things", as a recommendation, and a bare `Read` is accepted. *b* is ruled out because bare mode "never reads OAuth credentials or the system keychain", and the tool list is passed with the flag and is not discovered. *d* is ruled out because "`--permission-mode dontAsk` runs reads and pre-approved tools", and a pre-approved tool does not ask.
+1. **b**. The page says `--bare` is "useful for CI and scripts where you need the same result on every machine." *a* is ruled out because "Use `json` when a script parses the result", which shapes the output and does not remove local configuration. *c* is ruled out because "`--max-turns` limits the number of agentic turns", which bounds a run and does not make two runners agree. *d* is ruled out because "`--max-budget-usd` caps the spend", which is a bound on cost and not on configuration.
+2. **c**. The page says setting `disable-model-invocation: true` tells it to "prevent Claude from automatically loading this skill", so only a person can start it. *a* is ruled out because `argument-hint` is "a hint such as `[issue-number]` shown in autocomplete" and controls nobody. *b* is ruled out because a command file and a skill "both create `/deploy` and work the same way", so the file kind changes nothing. *d* is ruled out because `dontAsk` "runs reads and pre-approved tools and denies anything that would prompt", which decides tool approval and not who may load a command.
+3. **a**. The trap says "`--allowedTools "Bash"` approves every command. List `Bash(git diff *)` and its like." *b* is ruled out because the page says "List patterns and not whole tools that change things", a recommendation and not a parsing rule, and its own example lists a bare `Read`. *c* is ruled out because `--bare` skips "auto-discovery of hooks, skills, custom commands, subagents, installed plugins, MCP servers, auto memory, and CLAUDE.md", and a flag passed on the command line is not discovered. *d* is ruled out because the flag itself "pre-approves specific tools, in quotes and separated by commas", while `dontAsk` merely "runs reads and pre-approved tools".
 
 </details>
 
@@ -95,36 +95,36 @@ The practice sets up a small repository, the invoice API, for Claude Code. You w
 
 This quiz covers all three pages of the module.
 
-1. A team begins a new repository and wants first project instructions quickly, then wants them trimmed. Which pair of steps fits?
-   - **a**: Copy a very large template, then import it from a short file
-   - **b**: Generate a draft with `/init`, then cut what Claude finds alone
-   - **c**: Write every convention by hand, then run `/compact` to shorten it
-   - **d**: Ask for a very long draft, then rely on the classifier to skip extras
+1. A new repository has no memory file, and a developer needs a useful one by the end of the day. Which sequence fits?
+   - **a**: Pull in a very large template with imports, then keep the main file short
+   - **b**: Write every convention by hand, then run `/compact` on that file
+   - **c**: Run `/init`, then add every convention the team has ever used
+   - **d**: Run `/init`, then delete lines Claude would have found anyway
 
 2. A nightly script runs `claude -p` and sometimes loops on tool calls for an hour. Which pair of flags bounds it?
-   - **a**: A permission mode and a tool list for the run
-   - **b**: A bare switch and a JSON output format on the run
-   - **c**: A turn limit and a spend cap on the run
+   - **a**: A turn limit and a spend cap on the run
+   - **b**: A permission mode and a tool list for the run
+   - **c**: A bare switch and a JSON output format on the run
    - **d**: A resume flag and a fork flag for the next run
 
 3. A team wants the review script to inspect code and change nothing, with no prompt ever shown. Which setup fits?
    - **a**: `bypassPermissions`, with the runner as the only boundary
    - **b**: `auto`, with the classifier left to judge every single call
-   - **c**: `acceptEdits`, with edits approved for the whole checkout
-   - **d**: `dontAsk`, with `Read` and read-only git patterns listed
+   - **c**: `dontAsk`, with `Read` and read-only git patterns listed
+   - **d**: `acceptEdits`, with edits approved for the whole checkout
 
-4. A session started in Manual mode has been running for hours. The developer wants code changes to apply without a prompt while shell work still asks. Which mode fits?
-   - **a**: `plan`, which runs changes after one approval has been given once
-   - **b**: `acceptEdits`, which runs file edits plus filesystem commands
-   - **c**: `dontAsk`, which approves changes and asks about every shell call
-   - **d**: `auto`, which asks about changes and runs shell work unseen for good
+4. A developer in Manual mode is tired of approving each source change, but wants a prompt before every other action. Which mode fits?
+   - **a**: `plan`, which makes no edits until a plan is approved
+   - **b**: `acceptEdits`, which lets edits and filesystem commands run
+   - **c**: `dontAsk`, which denies each action that would prompt
+   - **d**: `auto`, where a second model reviews the actions instead
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says `/init` "analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers", then to "cut what Claude would have found anyway". *a* is ruled out because imports "don't reduce its context cost, because imported files also load at launch". *c* is ruled out because "Longer files consume more context and reduce adherence", and `/compact` summarises a conversation and not a file. *d* is ruled out because the classifier reviews "actions instead of you" and does not shorten files.
-2. **c**. The page says "`--max-turns` limits the number of agentic turns, and `--max-budget-usd` caps the spend." *b* is ruled out because "Use `json` when a script parses the result", and bare mode only skips discovery, so neither bounds a loop. *a* is ruled out because "`--permission-mode dontAsk` runs reads and pre-approved tools", which decides what may run and not how long. *d* is ruled out because `--resume` reopens a session "under the same session ID and appends new messages to the existing conversation", which continues a loop and does not bound it.
-3. **d**. The page says `--permission-mode dontAsk` "runs reads and pre-approved tools and denies anything that would prompt, which fits a script", with `Read` and read-only git patterns. *b* is ruled out because auto mode "reviews actions instead of you" and runs most calls, not reads alone. *c* is ruled out because `acceptEdits` runs "Reads, file edits, and common filesystem commands", which is more than reads. *a* is ruled out because `bypassPermissions` is for "Isolated containers and VMs only", and it runs everything.
-4. **b**. The table gives `acceptEdits` "Reads, file edits, and common filesystem commands", and shell commands that are not filesystem commands still ask. *a* is ruled out because plan mode "makes no edits until you approve" a plan and is for exploring. *c* is ruled out because `dontAsk` "denies anything that would prompt", and so it does not ask about shell work. *d* is ruled out because auto mode has "a second model, the classifier" review calls instead of asking, and it runs far more than edits.
+1. **d**. The page says `/init` "analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers", then to "cut what Claude would have found anyway". *a* is ruled out because imports "don't reduce its context cost, because imported files also load at launch". *b* is ruled out because `/compact` is for the conversation: "use `/context` to see what fills the window and `/compact` to summarise it". *c* is ruled out because "Longer files consume more context and reduce adherence", so adding everything works against the file.
+2. **a**. The page says "`--max-turns` limits the number of agentic turns, and `--max-budget-usd` caps the spend." *c* is ruled out because "Use `json` when a script parses the result", and bare mode only skips discovery, so neither bounds a loop. *b* is ruled out because "`--permission-mode dontAsk` runs reads and pre-approved tools", which decides what may run and not how long. *d* is ruled out because `--resume` reopens a session "under the same session ID and appends new messages to the existing conversation", which continues a loop and does not bound it.
+3. **c**. The page says `--permission-mode dontAsk` "runs reads and pre-approved tools and denies anything that would prompt, which fits a script", with `Read` and read-only git patterns. *b* is ruled out because auto mode "reviews actions instead of you" and runs most calls, not reads alone. *d* is ruled out because `acceptEdits` runs "Reads, file edits, and common filesystem commands", which is more than reads. *a* is ruled out because `bypassPermissions` is for "Isolated containers and VMs only", and it runs everything.
+4. **b**. The table gives `acceptEdits` "Reads, file edits, and common filesystem commands", and other shell commands still ask. *a* is ruled out because plan mode is where "Claude reads files and proposes a plan but makes no edits until you approve", so changes wait for approval. *c* is ruled out because `dontAsk` "runs reads and pre-approved tools and denies anything that would prompt", so nothing asks. *d* is ruled out because auto mode runs "Everything, with background safety checks", so shell work does not prompt either.
 
 </details>

@@ -282,18 +282,18 @@ The tests grade the flags that reach the binary, the file and shell policy, the 
    - **c**: The turn limit stops the run before the push can be asked
    - **d**: The callback allows only the list command, so the push is skipped
 
-3. The example's output shows six MCP messages for two custom tool calls. How should a reader treat that number?
-   - **a**: As what the real binary sends for any pair of custom tools
-   - **b**: As a count that the SDK promises in its documentation
-   - **c**: As the stand-in's own sequence, not a figure for the real binary
-   - **d**: As a protocol limit of three messages for each tool call
+3. The example's output lists six MCP messages for two custom tool calls. What does the page say that number is?
+   - **a**: It is the number of messages that the real binary sends for two tools
+   - **b**: It is a protocol limit of three messages for each tool
+   - **c**: It is the sequence that the stand-in itself produces
+   - **d**: It is a count measured on the real binary and recorded here
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says both SDKs let you choose the executable that they start, `cli_path` in Python and `pathToClaudeCodeExecutable` in TypeScript, so the SDK code runs for real. *d* is ruled out because "the SDK code in your program runs for real", which is the point of the method. *b* is ruled out because "the binary sends control requests back when it needs your process", and the SDK answers them, so they belong to the code under test. *c* is ruled out because "A script, a JSON file named in an environment variable, lists the steps of a run", so what is replaced is the binary behind the script and not the prompt.
 2. **a**. The page says "The push never reaches the callback. The hook runs first and denies it", which follows the order of page 2. *d* is ruled out because the callback is asked about three calls (the two custom tools and the list command), "but not the push, which the hook had already decided". *b* is ruled out because the stand-in applies "a simplified copy of the documented behaviour", and its hook step is the SDK's registered hook, not a filter on remotes. *c* is ruled out because the options allow six turns and "the run ends in success after five".
-3. **c**. The page says "The MCP count is the stand-in's own sequence of an initialize, a notification and a tool call for each custom tool, so it is not a number to expect from the real binary." *a* is ruled out because it "is not a number to expect from the real binary". *b* is ruled out because "The MCP count is the stand-in's own sequence", and no documentation promises it. *d* is ruled out because the three messages are "the stand-in's own sequence", and not a limit of the protocol.
+3. **c**. The page says "The MCP count is the stand-in's own sequence of an initialize, a notification and a tool call for each custom tool". *a* is ruled out because the count is "not a number to expect from the real binary". *b* is ruled out because the three messages are "an initialize, a notification and a tool call for each custom tool", the stand-in's own sequence and not a limit of the protocol. *d* is ruled out because the page says "It is not the real binary, and nothing here shows how the real binary words its messages or schedules its calls."
 
 </details>
 
@@ -307,11 +307,11 @@ This quiz covers all three pages of the module.
    - **c**: Managed Agents, which expose the loop as a Java library
    - **d**: The Client SDK's tool runner, which is the same loop as the Agent SDK
 
-2. In the course example, a denied push appears as "Permission denied: Nothing is pushed from an agent". Which part of that text is the stand-in's own wording?
-   - **a**: The reason after the colon, which the hook returned
-   - **b**: The whole line, since the real binary words denials in the same way
-   - **c**: The prefix before the colon
-   - **d**: Nothing, because the stand-in copies the real binary's messages exactly
+2. In the example output a denied push appears as "Permission denied: Nothing is pushed from an agent". Which part is written by the example's own hook and not by the stand-in's code?
+   - **a**: The words Permission denied, before the colon
+   - **b**: The whole line, from the first word to the last
+   - **c**: The reason that follows the colon
+   - **d**: No part of the line, which is copied from the real binary
 
 3. An agent in production must not run unbounded. Which two limits does the SDK offer?
    - **a**: A cap on tokens for each message and a cap on wall-clock time
@@ -329,7 +329,7 @@ This quiz covers all three pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The first page says the documentation's route for other languages is to run the CLI as a subprocess, with the `-p` flag and `--output-format json`. *a* is ruled out because the SDK is "programmable in Python and TypeScript", and there is no Java edition. *d* is ruled out because for the Client SDK "You write the tool loop yourself, or let the client SDK's beta tool runner drive it", which is not the Agent SDK's loop. *c* is ruled out because Managed Agents are "A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox", and not a library.
-2. **c**. The third page says "The prefix Permission denied: in front of it is the stand-in's wording and not the real binary's." *a* is ruled out because the reason is the hook's own text: "which is the text of your hook". *b* is ruled out because the prefix "is the stand-in's wording and not the real binary's". *d* is ruled out because the stand-in applies "a simplified copy of the documented behaviour, not the real binary".
+2. **c**. The third page says the reason "is the text of your hook". *a* is ruled out because "The prefix Permission denied: in front of it is the stand-in's wording and not the real binary's." *b* is ruled out because part of the line, the reason, is "which is the text of your hook", so the line is not all the stand-in's. *d* is ruled out because "It is not the real binary, and nothing here shows how the real binary words its messages or schedules its calls."
 3. **d**. The first page lists `max_turns` ("Maximum tool-use round trips") and `max_budget_usd` ("Maximum cost before stopping"). *a* is ruled out because the two options are "Maximum tool-use round trips" and "Maximum cost before stopping", with no per-message token cap. *b* is ruled out because `max_turns` "counts tool-use turns only", and no file cap exists. *c* is ruled out because without limits "the loop runs until Claude finishes on its own", and hooks and tools are not what the two options count.
 4. **b**. The second page says "allowed_tools does not constrain bypassPermissions", and that the way to block specific tools in that mode is deny rules. *a* is ruled out because "allowed_tools does not constrain bypassPermissions." *d* is ruled out because "This does not restrict Claude to only these tools", in any mode. *c* is ruled out because "Auto-approved tools never reach canUseTool", so the callback does not see them.
 

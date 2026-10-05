@@ -101,11 +101,11 @@ Module 15 builds the retry machinery, with attempts and time budgets, `retry-aft
 
 ## Quiz
 
-1. A service sends a request with a prefilled assistant message to a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?
+1. A service starts Claude's reply with prefilled text on a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?
    - **a**: Retry each call with exponential back-off and jitter
-   - **b**: Hand the problem to the billing owner of the organisation
-   - **c**: Move the traffic to a fallback model and keep the same request
-   - **d**: Drop the pre-written closing block so that the user speaks last
+   - **b**: Extend the timeout so that each call has longer to finish
+   - **c**: Reword the system prompt so that Claude continues the text
+   - **d**: Rebuild the request so that the user speaks last
 
 2. A reply to a long-document summary ends mid-sentence, with status 200 and a stop reason of `max_tokens`. What is the origin and the right fix?
    - **a**: The integration's limit, so raise it or continue the turn
@@ -114,15 +114,15 @@ Module 15 builds the retry machinery, with attempts and time budgets, `retry-aft
    - **d**: The account, so ask for a higher quota on the organisation
 
 3. An assistant's reply arrives with status 200 and a stop reason of `refusal`. The team's dashboard shows nothing wrong. What does the documentation imply?
-   - **a**: Nothing is wrong, because the dashboard counts only failed calls
-   - **b**: The same request will usually succeed if it is sent again unchanged
-   - **c**: Monitoring built on error rates misses it, so it needs a separate signal
-   - **d**: The model is overloaded and the call should wait for a retry header
+   - **a**: Nothing failed, so the dashboard is right to show no alert
+   - **b**: A resend will usually work, so the team should retry as is
+   - **c**: Error-rate alerts miss it, so a separate signal is needed
+   - **d**: The service is overloaded, so the call should wait for a header
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The errors page lists the rejected prefill under "Common validation errors": "This model does not support assistant message prefill. The conversation must end with a user message." The module adds that a migration error has the recovery "change the request". *a* is ruled out because "A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure". *c* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and the 400 is a rejected request. *b* is ruled out because billing problems are the 402 row, "Your credential or account (401, 402, 403, a spend cap)", and this is a 400.
+1. **d**. The errors page lists the rejected prefill under "Common validation errors": "This model does not support assistant message prefill. The conversation must end with a user message." The module adds that a migration error has the recovery "change the request". *a* is ruled out because "A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure". *b* is ruled out because a timeout is the 504 recovery, where the table says "Change the call: stream, or use a batch", while every migration row has the same recovery: "change the request". *c* is ruled out because "None is cured by a retry, a longer timeout or a different prompt", and a reworded system prompt is a different prompt.
 2. **a**. The table reads `max_tokens` as "Integration: the limit is yours" with the recovery "Raise `max_tokens` or continue the response". *c* is ruled out because a retry repeats the same limit, and the page says "A cut-off reply is usually your setting". *b* is ruled out because the trap says "A reply cut by `max_tokens` needs a larger limit or a continuation, and no wording will change it". *d* is ruled out because the status is 200 and no quota was exceeded: stop reasons are "part of the response body" and not account errors.
 3. **c**. The page says "Refusals are responses, not errors", so "monitoring built only on error rates won't surface it". *a* is ruled out because the refusal is a real failure of the request, and the course's advice is to "track refusals as their own signal". *b* is ruled out because "Re-sending a refused request to the same model usually results in another refusal". *d* is ruled out because waiting for a retry header is the recovery for capacity failures: "Wait for the header, or back off with jitter, then retry", while this reply has status 200.
 

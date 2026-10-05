@@ -5,19 +5,19 @@
       "id": "01-injection-jailbreaks-and-untrusted-input#q1",
       "page": "01-injection-jailbreaks-and-untrusted-input.md",
       "scope": "page",
-      "stem": "A support bot is used by a customer who deliberately writes inputs to bypass its rules. Which threat model is this?",
+      "stem": "A customer of a support bot rephrases requests again and again until it drops its restrictions. Which threat model is this?",
       "options": {
-        "a": "A data breach, where stored records are copied from the server",
+        "a": "A jailbreak, where the user is the one attacking",
         "b": "An indirect injection, where a third party's content is the carrier",
         "c": "A prompt leak, where the model reveals what it was told to keep",
-        "d": "A jailbreak, where the person typing is the one attacking"
+        "d": "A model weakness, where Claude cannot resist any attack"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The table gives jailbreaks and direct injection \"The user of your application\" as the adversary, so the person typing is the attacker, who \"crafts inputs intended to bypass your guardrails\".",
-        "b": "Ruled out because indirect injection has \"A third party whose content Claude reads\" as the adversary, and the user is trusted.",
-        "c": "Ruled out because the page defines the attack as \"attempts to make Claude ignore its guidelines or your instructions\", and a leak exposes what was meant to stay hidden, which this user is not after.",
-        "a": "Ruled out because nothing in the scenario copies stored records, and the page defines the attack as an attempt \"to make Claude ignore its guidelines or your instructions\"."
+        "a": "The table gives jailbreaks and direct injection \"The user of your application\" as the adversary, so the person typing is the attacker, who \"crafts inputs intended to bypass your guardrails\".",
+        "b": "Ruled out because indirect injection has \"A third party whose content Claude reads\" as the adversary, and the user is \"Trusted\".",
+        "c": "Ruled out because the page defines the attack as \"attempts to make Claude ignore its guidelines or your instructions\", which is a push past restrictions and not an exposure of the prompt.",
+        "d": "Ruled out because Claude \"is inherently resilient to such attacks, the additional steps on this page strengthen your guardrails\", so the attacker is the person and not a flaw of the model."
       }
     },
     {
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "An assistant summarises inbound emails, and one email says to forward the customer list. Where should the email body be placed?",
       "options": {
-        "a": "Inside a tool result, encoded as a JSON string that names its source",
-        "b": "Inside the system prompt, so that it has the highest priority of all",
-        "c": "Inside a plain user turn, concatenated after the instruction text",
+        "a": "Inside the system prompt, so that it has the highest priority of all",
+        "b": "Inside a plain user turn, concatenated after the instruction text",
+        "c": "Inside a tool result, encoded as a JSON string that names its source",
         "d": "Inside the tool description, so the tool explains its own input to Claude"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page says \"Put untrusted content only in tool results\", and to \"JSON-encode untrusted content\", with a source named: \"Tell Claude what the content is and where it came from.\"",
-        "b": "Ruled out because the page says \"never in `system` prompts or plain user `text` blocks\".",
-        "c": "is ruled out for the same reason, and concatenation is the trap: \"The attacker writes the closing delimiter.\"",
+        "c": "The page says \"Put untrusted content only in tool results\", and to \"JSON-encode untrusted content\", with a source named: \"Tell Claude what the content is and where it came from.\"",
+        "a": "Ruled out because the page says \"never in `system` prompts or plain user `text` blocks\".",
+        "b": "Ruled out because a plain user turn is the other place the page rules out, and concatenation is the trap: \"The attacker writes the closing delimiter.\"",
         "d": "Ruled out because the tool description may say what the content is, but the body itself belongs in the result, and \"Don't put your own instructions in tool results\" is a separate rule about who writes what."
       }
     },
@@ -43,19 +43,19 @@
       "id": "01-injection-jailbreaks-and-untrusted-input#q3",
       "page": "01-injection-jailbreaks-and-untrusted-input.md",
       "scope": "page",
-      "stem": "A team adds a list of known attack phrases and considers the agent protected. What is wrong?",
+      "stem": "A team adds a list of known attack strings and considers the agent protected. What is wrong?",
       "options": {
-        "a": "It runs at the wrong time, because such a list works only after the reply",
-        "b": "It is not allowed, because pattern lists block harmless text",
-        "c": "A rewording passes it, so it cannot stand as the only layer",
-        "d": "It is too weak to matter, so it should be dropped from the design"
+        "a": "Pattern lists block harmless text, so they are not allowed in a design",
+        "b": "The list screens at the wrong time, so it belongs after the reply",
+        "c": "The list is too short, so a longer list would be enough",
+        "d": "A paraphrase passes it, so it cannot be the only layer"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "The page says \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\", and the example's last line shows one passing.",
-        "b": "Ruled out because the page does not forbid pattern lists: \"Input validation filters known injection patterns before they reach Claude\" is one of its defences.",
-        "a": "Ruled out because the page says to \"screen tool outputs with a small model\" before Claude acts, and not after the reply.",
-        "d": "Ruled out because \"Treat every screen as one layer that reduces risk\", and the page keeps it as a layer beside structure and privilege, \"not in place of them\", so it is neither a cure nor worthless."
+        "d": "The page says \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\", and the example's last line shows one passing.",
+        "a": "Ruled out because the page does not forbid pattern lists: \"Input validation filters known injection patterns before they reach Claude\" is one of its defences.",
+        "b": "Ruled out because the page says to \"screen tool outputs with a small model\" before Claude acts, and not after the reply.",
+        "c": "Ruled out because \"The structural measures do not depend on guessing the attack\", so more patterns are no substitute for structure and privilege."
       }
     },
     {
@@ -65,35 +65,35 @@
       "stem": "An agent reads web pages and can send mail to any address. Which change best reduces what an injected instruction can do?",
       "options": {
         "a": "Add a sentence to the system prompt that forbids sending any mail",
-        "b": "Limit the tool to a short list of approved recipient domains",
-        "c": "Screen each page with a pattern list before the agent sees the text",
-        "d": "Ask the model to explain why it wants to send a message at all"
+        "b": "Screen each page with a pattern list before the agent sees the text",
+        "c": "Ask the model to explain why it wants to send a message at all",
+        "d": "Limit the tool to a short list of approved recipient domains"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The table gives the narrow answer for actions: mail goes \"only to listed domains\", so a hostile instruction gets at most those recipients.",
+        "d": "The table gives the narrow answer for actions: mail goes \"only to listed domains\", so a hostile instruction gets at most those recipients.",
         "a": "Ruled out because \"Whatever the injected text asks for, the agent can do only what its grants allow\", and a sentence in a prompt is not a grant.",
-        "c": "Ruled out because the grants stay the same after a screen, and the page says to \"run tools in sandboxed environments, and scope permissions as narrowly as possible\".",
-        "d": "Ruled out because an explanation from the model changes no grant, and the page says \"don't give Claude access to secrets it doesn't need\"."
+        "b": "Ruled out because the grants stay the same after a screen, and the page says to \"run tools in sandboxed environments, and scope permissions as narrowly as possible\".",
+        "c": "Ruled out because an explanation from the model changes no grant, and the page says \"don't give Claude access to secrets it doesn't need\"."
       }
     },
     {
       "id": "02-least-privilege-hooks-sandboxes-and-secrets#q2",
       "page": "02-least-privilege-hooks-sandboxes-and-secrets.md",
       "scope": "page",
-      "stem": "A deny entry blocks `Bash(git push *)`, and the agent runs `git -C . push origin main`. What happens?",
+      "stem": "A deny entry for `Bash(git push *)` does not stop the agent's `git -C . push origin main`. Which change closes that gap?",
       "options": {
-        "a": "The call is approved, because rules never apply to a command that has options",
-        "b": "The rule matches, because git ignores the options before the subcommand",
-        "c": "The sandbox blocks it, because the network is closed to shell commands",
-        "d": "The rule misses it, since the typed text differs from the pattern"
+        "a": "A second deny entry for each other spelling that comes up",
+        "b": "A hook that parses the line and checks the real subcommand",
+        "c": "A line in the memory file that forbids any push to the remote",
+        "d": "An allow entry for `git -C . push` that outranks the deny entry"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The page says a deny rule \"matches the text as written\", so `git -C . push` is a different string and the rule misses it, and \"A hook can parse the command into its parts\".",
-        "b": "Ruled out because the match is on text as written, so \"A hook can parse the command into its parts\" is the page's remedy and git's own option handling is not what the rule sees.",
-        "c": "Ruled out because \"Permission rules decide whether an action may run. A sandbox decides what a running action can reach\", and the sandbox does not replace the rule.",
-        "a": "Ruled out because the page says \"a push behind `&&` or inside `sh -c` is a different string\", so a rule written for one spelling does not cover the other, and a rule is not exempt for a command with options."
+        "b": "The page says a deny rule \"matches the text as written\", so `git -C . push` is a different string, and \"A hook can parse the command into its parts\".",
+        "a": "Ruled out because \"a push behind `&&` or inside `sh -c` is a different string\", so every new spelling is a new gap, and a list can never be complete.",
+        "c": "Ruled out because \"A memory line asks, and a hook enforces.\"",
+        "d": "Ruled out because deny rules \"are checked before everything else\", so an allow entry outranks nothing and would only approve the push."
       }
     },
     {
@@ -102,36 +102,36 @@
       "scope": "page",
       "stem": "A team turns on the Bash isolation boundary with an empty domain list and assumes the WebFetch tool is blocked too. Why is that wrong?",
       "options": {
-        "a": "It governs network calls only, while shell commands run outside it",
-        "b": "It governs shell commands only, while built-in web access follows permission rules",
-        "c": "It governs every tool alike, so the fetch is blocked by the empty list",
-        "d": "It governs hooks only, while shell commands follow permission rules"
+        "a": "An empty list means no limit, so every domain stays reachable",
+        "b": "The fetch tool runs inside the boundary, but its proxy lets that call through",
+        "c": "It covers shell commands only, so built-in web access follows permission rules",
+        "d": "Only MCP servers sit outside the boundary, and every built-in tool runs within it"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "The page says \"The sandbox covers shell commands only\", and that the built-in file and web tools \"follow permission rules instead\", so `allowedDomains` \"doesn't limit WebFetch\".",
-        "a": "Ruled out because the sandbox is \"a boundary that the operating system enforces around the shell commands\", so shell commands are restricted and not free.",
-        "c": "Ruled out because \"The sandbox covers shell commands only\", and the web tools are not among them.",
-        "d": "Ruled out because \"Claude's file tools, MCP servers, and hooks run outside it\"."
+        "c": "The page says \"The sandbox covers shell commands only\", and that the built-in file and web tools \"follow permission rules instead\", so `allowedDomains` \"doesn't limit WebFetch\".",
+        "a": "Ruled out because network access goes \"through a proxy on your machine that checks each host against your allowed domains, which start empty\", so an empty list allows nothing from the shell.",
+        "b": "Ruled out because \"Claude's file tools, MCP servers, and hooks run outside it\", and the web tools \"follow permission rules instead\".",
+        "d": "Ruled out because the built-in file and web tools \"follow permission rules instead\", so they are outside it too."
       }
     },
     {
       "id": "03-guardrails-monitoring-and-the-practice#q1",
       "page": "03-guardrails-monitoring-and-the-practice.md",
       "scope": "page",
-      "stem": "A team wants to notice a user who keeps trying to defeat the rules of its application. What does the documentation suggest?",
+      "stem": "A team wants to spot a user who keeps probing the application's guardrails. Which monitoring rule fits?",
       "options": {
-        "a": "Adjust its responses to the offender, and consider throttling or a ban",
-        "b": "Tighten the system prompt, so that it refuses harder next time",
-        "c": "Keep no logs of refused requests, so that no attack leaves a record",
-        "d": "Raise the request limit of that person, so the rules are tested less often"
+        "a": "Alert on every question put to a person, since each may be an attack",
+        "b": "Add up denials across all actors, and alert on the total",
+        "c": "Count denials for each actor, and alert at a threshold",
+        "d": "Tighten the system prompt, so the model refuses harder next time"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page quotes the documentation: \"Adjust responses and consider throttling or banning users who repeatedly attempt to circumvent your application's guardrails\", and says that needs a record and a threshold.",
-        "b": "Ruled out because the page says leak-proofing and extra prompt text \"can add complexity that may degrade performance\", and a longer prompt records nothing.",
-        "c": "Ruled out because \"A control that blocks should also record\", and without a record you cannot answer \"who tried what\".",
-        "d": "Ruled out because the page says to \"consider throttling or banning users who repeatedly attempt to circumvent your application's guardrails\", and a higher limit gives them room instead."
+        "c": "The page says the response to repeat offenders \"needs a threshold\", and \"The practice uses three denials by one actor, which raises an alert\".",
+        "a": "Ruled out because \"An `ask` is the gate working, and alerts on it bury the real ones.\"",
+        "b": "Ruled out because the alert is per actor: \"three denials by one actor\", and a pooled total names nobody.",
+        "d": "Ruled out because \"A control that blocks should also record\", and a stricter prompt records nothing."
       }
     },
     {
@@ -140,36 +140,36 @@
       "scope": "page",
       "stem": "A team wants to cut the risk of a prompt leak without hurting the work. Which step adds no complexity?",
       "options": {
-        "a": "Remove proprietary details that are not needed for the job",
+        "a": "Screen every reply with a prompted model that looks for leaked text",
         "b": "Add many rules that forbid repeating text from the instructions",
-        "c": "Rewrite the prompt so that instructions are stated twice over",
-        "d": "Stop monitoring altogether, because screening slows down replies"
+        "c": "Rewrite the prompt with tighter wording before any monitoring",
+        "d": "Leave out proprietary details that the task does not need"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The page says \"If Claude doesn't need it to perform the task, don't include it\", and that a secret not in the prompt \"cannot leak from it\".",
+        "d": "The page says \"If Claude doesn't need it to perform the task, don't include it\", and that a secret not in the prompt \"cannot leak from it\".",
+        "a": "Ruled out because the page ranks it behind the cheapest step: \"The cheapest to apply is the third, because it adds no complexity.\"",
         "b": "Ruled out because leak-proofing \"can add complexity that may degrade performance\".",
-        "c": "Ruled out because the page lists no such step and warns against added complexity: \"While no method is foolproof, the strategies below can significantly reduce the risk\".",
-        "d": "Ruled out because the page says to try monitoring first: \"output screening and post-processing, to try to catch instances of prompt leak.\""
+        "c": "Ruled out because the first advice is to \"try monitoring before prompt engineering\"."
       }
     },
     {
       "id": "03-guardrails-monitoring-and-the-practice#q3",
       "page": "03-guardrails-monitoring-and-the-practice.md",
       "scope": "page",
-      "stem": "A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it do?",
+      "stem": "A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it record?",
       "options": {
-        "a": "Skip the audit entirely for calls that carry a secret of any kind",
-        "b": "Store the raw arguments, because the audit needs every detail of the call",
-        "c": "Replace the secret with a fixed marker before the record is saved",
-        "d": "Encrypt the record and keep the key in the same file as the record"
+        "a": "The arguments, with the secret replaced by a fixed marker",
+        "b": "The raw arguments, since an audit wants the full detail",
+        "c": "No entry for a call that happens to carry a secret value",
+        "d": "The tool and the decision, with the arguments left out entirely"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The page says to record \"the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own\".",
+        "a": "The page says to record \"the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own\".",
         "b": "Ruled out because the audit keeps \"the arguments with secrets redacted\" and not the raw ones.",
-        "a": "Ruled out because the audit exists to answer \"who tried what, which denials repeat, which sessions were tainted\", and a call that carries a secret is one worth recording.",
-        "d": "Ruled out because a key kept beside the record is still in the log, and \"a log that holds a raw key has become a leak of its own\", whatever the file is encrypted with."
+        "c": "Ruled out because the audit exists to answer \"who tried what, which denials repeat, which sessions were tainted\", and a call that carries a secret is one worth recording.",
+        "d": "Ruled out because the record holds \"the tool, the decision, the reason and the arguments with secrets redacted\", so the arguments stay in it."
       }
     },
     {
@@ -178,17 +178,17 @@
       "scope": "module",
       "stem": "A mail assistant reads inbound messages. Which combination gives the best protection against a hostile message?",
       "options": {
-        "a": "A longer system prompt, with a firm tone in every instruction given",
-        "b": "Encoded results, narrow tools and a gate that tightens once outside text is present",
-        "c": "A pattern list on its own, run before the model reads each inbound message",
-        "d": "A larger context window, so that the model can weigh each message better"
+        "a": "A pattern list, a firm tone in the prompt and a larger context window",
+        "b": "Encoded results, narrow tools and a gate that tightens after outside text",
+        "c": "Encoded results, a pattern list and broad tools kept for convenience",
+        "d": "Narrow tools and a gate, with the message text placed in the system prompt"
       },
       "key": "b",
       "explanation": {
         "b": "The layers table puts structure (JSON encoding), privilege (narrow tools, \"a stricter gate after untrusted text was read\") and a decision gate in the path of one request.",
-        "a": "Ruled out because \"Whatever the injected text asks for, the agent can do only what its grants allow\", and tone adds no grant.",
-        "c": "Ruled out because a pattern list \"catches the phrasing someone thought of and misses the paraphrase\".",
-        "d": "Ruled out because a larger window changes nothing about who wrote the text, and the page's structure rule is to \"Put untrusted content only in tool results\"."
+        "a": "Ruled out because a pattern list \"catches the phrasing someone thought of and misses the paraphrase\", and \"Whatever the injected text asks for, the agent can do only what its grants allow\", so tone adds no grant.",
+        "c": "Ruled out because \"An agent that can read a file, send mail to anyone and has the production key can leak.\"",
+        "d": "Ruled out because the page says untrusted content goes \"never in `system` prompts or plain user `text` blocks\"."
       }
     },
     {
@@ -197,17 +197,17 @@
       "scope": "module",
       "stem": "After an agent has read an untrusted web page, which request should be refused or escalated?",
       "options": {
-        "a": "Listing a directory, which is a read-only command",
-        "b": "Reading a file inside the project folder, which changes nothing",
-        "c": "Sending mail, which is left for a person to do",
-        "d": "Fetching a plain address with no query string and no fragment"
+        "a": "Reading a file inside the project folder",
+        "b": "Fetching a plain address with no query string and no fragment",
+        "c": "Sending mail to an outside recipient",
+        "d": "Running a read-only command such as `git status`"
       },
       "key": "c",
       "explanation": {
         "c": "The page says that in a tainted session \"Sending mail is refused until a person does it\".",
-        "b": "Ruled out because \"Reads stay allowed, since they change nothing\".",
-        "a": "Ruled out because \"Reads stay allowed, since they change nothing\", and a read-only command is a read.",
-        "d": "Ruled out because only a network call \"that carries data in its URL, a query string or a fragment asks\", so a plain address stays allowed."
+        "a": "Ruled out because \"Reads stay allowed, since they change nothing\".",
+        "b": "Ruled out because only a network call \"that carries data in its URL, a query string or a fragment asks\", so a plain address stays allowed.",
+        "d": "Ruled out because the practice gate \"limits `bash` to read-only commands and refuses chaining\", so a read-only command stays allowed."
       }
     },
     {
@@ -216,17 +216,17 @@
       "scope": "module",
       "stem": "A team builds a hook to stop recursive forced deletes. Which design choice should the hook follow?",
       "options": {
-        "a": "Block every shell command, whatever its purpose or its origin",
-        "b": "Match the text `rm -rf` and allow whatever it cannot parse at all",
-        "c": "Match the text `rm -rf` and rely on the model's own caution alone",
-        "d": "Parse the command into parts, see through wrappers and block what it cannot read"
+        "a": "Parse the line into parts, fail closed, and stay silent on safe ones",
+        "b": "Match the text `rm -rf` and allow whatever it cannot parse",
+        "c": "Match the text `rm -rf` and rely on the model's caution for the rest",
+        "d": "Answer `allow` on every safe command so the call goes straight through"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The page says a hook can \"parse the command into its parts\", should \"fail closed\", and that a command \"that cannot be parsed, or an event the hook cannot read, is blocked and not waved through\".",
+        "a": "The page says a hook can \"parse the command into its parts\", should \"fail closed\", and that a command \"that cannot be parsed, or an event the hook cannot read, is blocked and not waved through\".",
         "b": "Ruled out because \"A guard that exits 0 on a parse error is a guard an attacker can walk through\".",
         "c": "Ruled out because \"A memory line asks, and a hook enforces\", and the model's caution is not a control.",
-        "a": "Ruled out because the page asks for a guard on the destructive case and no opinion on the safe case: \"it should answer the safe case with no opinion\"."
+        "d": "Ruled out because the hook \"should answer the safe case with no opinion and not with an allow, so that it never overrides a stricter rule elsewhere\"."
       }
     },
     {
@@ -235,17 +235,17 @@
       "scope": "module",
       "stem": "A team's key is stored in the environment for a CI job. Which practice fits both CI and an agent in production?",
       "options": {
-        "a": "Write the value into the workflow file, so every runner has it",
-        "b": "Keep the value outside the model's reach, and redact it in logs",
-        "c": "Put the value in the memory file, so Claude never forgets it",
-        "d": "Print the value in the first line of the audit for later checks"
+        "a": "Track the `.env` file so every runner receives the same value",
+        "b": "Pass it to the agent's sandbox as an ordinary environment variable",
+        "c": "Log the value once at the start so later checks can compare it",
+        "d": "Keep the value out of the model's reach, and redact it in logs"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The page says \"a secret never enters anything the model can read or a file anyone can commit\", and \"In logs and results, redact before writing.\"",
-        "a": "Ruled out because \"Never commit API keys or OAuth tokens directly to your repository.\"",
-        "c": "Ruled out because a memory file is read by the model and committed, and the rule is that a secret \"never enters anything the model can read\".",
-        "d": "Ruled out because \"A key that appears in a tool result or an audit line has left your control.\""
+        "d": "The page says \"a secret never enters anything the model can read or a file anyone can commit\", and \"In logs and results, redact before writing.\"",
+        "a": "Ruled out because keys are \"loaded from an untracked file such as `.env`\", and a secret never enters \"a file anyone can commit\".",
+        "b": "Ruled out because for production agents, \"keep the value out of the sandbox\".",
+        "c": "Ruled out because \"A key that appears in a tool result or an audit line has left your control.\""
       }
     }
   ]

@@ -80,7 +80,7 @@ from that page:
 - Choose by the three factors it lists: dataset and domain fit, "Inference performance" and "Customization".
 - For retrieval, use the `input_type` parameter to say whether the text is a query or a document, and "Do not omit `input_type` or set
   `input_type=None`." The provider then prepends a different prompt to each, which can lead to better retrieval quality.
-- Separate models are offered for code, law and finance, and a family of rerankers (`rerank-2.5`) takes a query and a list of documents
+- Separate models are offered for code, law and finance, and a family of rerankers (the current `rerank-3`, and `rerank-2.5` before it) takes a query and a list of documents
   and returns them ranked.
 
 The course does not call an embedding service. The practice's `embed(text)` hashes letter trigrams into 64 buckets and scales the

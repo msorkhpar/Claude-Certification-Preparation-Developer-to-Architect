@@ -670,10 +670,10 @@ The toy screen is 2560 by 1440. The area limit binds first (a scale of 0.5585, a
 ## Quiz
 
 1. A team adds the computer use toolset to a request and expects Claude to press keys on the machine. Which part performs the keystroke?
-   - **a**: Claude itself, through a remote link that the toolset opens
+   - **a**: Claude itself, through a remote link the toolset opens
    - **b**: An Anthropic server that replays the call on the desktop
    - **c**: The beta header on the request, which enables key presses
-   - **d**: Your own program, inside an environment that you set up
+   - **d**: Your own program, in an environment it controls
 
 2. A single reply from Claude contains a click, a text entry and a screenshot request, and the click fails. What should the application send back for the last two calls?
    - **a**: Error results with the fixed halt wording, and neither action run

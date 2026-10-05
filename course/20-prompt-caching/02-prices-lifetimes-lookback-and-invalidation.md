@@ -76,8 +76,8 @@ does a run of consecutive `tool_result` blocks.
 
 A ✘ is invalidated and a ✓ stays valid. The page words two of the rows this way: "Adding/removing images anywhere in the prompt affects message blocks" and "Enabling/disabling web search modifies the system prompt". The last row ties back to module 19: choose the thinking mode and effort once for a
 conversation. Two other facts from the page belong beside the table. Caches are isolated per workspace on the Claude API, Claude
-Platform on AWS and Microsoft Foundry, while Bedrock and Google Cloud isolate per organization only, so a team that splits traffic across workspaces
-splits its cache too. And tool definitions serialized with unstable key order, as some languages do, break the match: keep the order stable.
+Platform on AWS and Microsoft Foundry, while Bedrock and Google Cloud isolate per organisation only, so a team that splits traffic across workspaces
+splits its cache too. And tool definitions serialised with unstable key order, as some languages do, break the match: keep the order stable.
 
 ### Pre-warming
 
@@ -184,6 +184,6 @@ This quiz covers both pages of the module.
 1. **b**. The page says a cache entry "only becomes available after the first response begins", so all ten write. *a* is ruled out because the entry "only becomes available after the first response begins", so the others have nothing to read. *c* is ruled out because the same sentence says it is available only "after the first response begins". *d* is ruled out because the advice is "wait for the first response before sending subsequent requests", not that extra requests fail.
 2. **a**. A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds. *b* is ruled out because the first send alone costs more than that: "5-minute cache write tokens are 1.25 times the base input tokens price". *c* is ruled out because that figure is the one-hour case, from "1-hour cache write tokens are 2 times the base input tokens price". *d* is ruled out because the second send is a read: "Cache read tokens are 0.1 times the base input tokens price".
 3. **a**. The page says "Cache entries with longer TTL must appear before shorter TTLs". *b* is ruled out because the writes are billed differently: "1-hour cache write tokens are 2 times the base input tokens price". *c* is ruled out because "The usage object then splits the writes" by lifetime, so both can be written. *d* is ruled out because "You can use both 1-hour and 5-minute cache controls in the same request" when ordered correctly.
-4. **c**. The planner puts "a volatile block moves to the very end of the request", after the last breakpoint. *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because the prompt already clears 512 tokens and usage shows writes, and the cause is "a volatile block moves to the very end" in the plan. *d* is ruled out because "You can define up to 4 cache breakpoints", yet an earlier changing block still changes the hash.
+4. **c**. The planner puts "a volatile block moves to the very end of the request", after the last breakpoint. *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because padding only helps a prefix that falls short, since "A prefix shorter than the model's minimum is not cached", and writes on every call show that this prompt is cached and is not short. *d* is ruled out because "You can define up to 4 cache breakpoints", yet an earlier changing block still changes the hash.
 
 </details>

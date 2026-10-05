@@ -57,8 +57,8 @@ The page's advice is "Toggle between turns, not within them." In practice, choos
 message arrives and keep it until the model's final answer.
 
 Forced tool use interacts with thinking too. Manual extended thinking supports only `tool_choice` of `auto` or `none`. Adaptive
-thinking supports forced tool use, except on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1. On
-those models, use `auto` and get a structured result another way.
+thinking supports forced tool use, except on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1 (the
+last shares the specifications of Fable 5.1 and is offered by invitation only). On those models, use `auto` and get a structured result another way.
 
 ### What breaks the cache
 
@@ -145,7 +145,7 @@ effort. Each setting is valid alone, and the pair returns a 400.
 <summary>Answer key</summary>
 
 1. **b**. The page says fast mode "is available on the Claude API (first-party) only" and prices it at twice the standard rate. *a* is ruled out because "it is not available on Claude Platform on AWS or partner-operated cloud platforms". *c* is ruled out because the table gives "fast mode (Opus only)" to streaming, and gives lowering the effort to "Too slow to finish". *d* is ruled out because "Fast mode is not available with the Batch API."
-2. **d**. The page says the API does not error: it "silently disables thinking for that request". *b* is ruled out by that same sentence, since the stated behavior is "silently disables thinking for that request" and not a 400. *c* is ruled out because the changed request is the one that loses thinking: "silently disables thinking for that request". *a* is ruled out because "A tool-use loop is one assistant turn."
+2. **d**. The page says the API does not error: it "silently disables thinking for that request". *b* is ruled out by that same sentence, since the stated behaviour is "silently disables thinking for that request" and not a 400. *c* is ruled out because the changed request is the one that loses thinking: "silently disables thinking for that request". *a* is ruled out because "A tool-use loop is one assistant turn."
 3. **b**. The page says changing the thinking mode or the effort "always discards the cached messages". *a* is ruled out because the messages are the part that "always discards the cached messages" names, while tools and system are model-specific. *c* is ruled out because the resolved configuration "is rendered into the prompt", so it is not applied after the prefix. *d* is ruled out because the messages are discarded on any change: "always discards the cached messages".
 
 </details>

@@ -24,7 +24,7 @@ A scoped deny rule is different again. `disallowed_tools=["Bash(rm *)"]` leaves 
 
 ### The order of evaluation
 
-When Claude requests a tool, the SDK checks in this order: hooks, deny rules, ask rules, the permission mode, allow rules and, last, the `canUseTool` callback. Each step can end the decision. Hooks run first, so a hook can deny a call outright, and the warning on the permissions page is plain that "hooks run before every other step, and a hook deny applies even in bypassPermissions mode". A deny rule blocks even in `bypassPermissions`. An allow rule approves a call before the callback is consulted. The callback sees only what nothing earlier decided.
+When Claude requests a tool, the SDK checks in this order: hooks, deny rules, ask rules, the permission mode, allow rules and, last, the `canUseTool` callback. Each step can end the decision. Hooks run first, so a hook can deny a call outright, and the warning on the permissions page is plain that "hooks run before every other step, and a hook deny applies even in bypassPermissions mode". A deny rule blocks even in `bypassPermissions`. An allow rule approves a call before the callback is consulted. The callback sees only what nothing earlier decided. Among the rules, a deny is checked before an ask and an ask before an allow, and a call that no rule matches is left to the mode and then the callback; module 38 gives the same rule order for Claude Code.
 
 Three consequences follow, and the documentation states each.
 
@@ -60,17 +60,17 @@ Two details of tools matter in production. First, annotations. Setting `readOnly
 
 ## Quiz
 
-1. A developer puts Read and Grep in allowed_tools, expecting the agent to be unable to run shell commands. What happens?
-   - **a**: Every other tool is removed from the agent's context
-   - **b**: Others stay reachable, and only those two are pre-approved
-   - **c**: The run fails at startup because the list is incomplete
-   - **d**: Unlisted tools are approved automatically, with no prompt at all
+1. A developer lists Read and Grep in allowed_tools, and expects shell commands to be out of reach. What happens?
+   - **a**: Bash is removed from the agent's context before the first turn
+   - **b**: Bash remains available, and its calls fall through to the mode
+   - **c**: Bash calls are denied in every permission mode
+   - **d**: Bash calls are approved automatically with no prompt
 
-2. A hook returns a denial for a tool call that a matching allow rule would approve. Which result follows?
-   - **a**: It runs, with the allow rule overriding the denial
-   - **b**: It runs only when the permission mode is bypassPermissions
-   - **c**: It goes to the permission callback for the final decision
-   - **d**: It is blocked, with the earliest step deciding the outcome
+2. A PreToolUse hook returns deny for a call that a matching allow rule would approve, in acceptEdits mode. What happens to the call?
+   - **a**: It runs, and the allow rule wins
+   - **b**: It goes to the callback, which decides
+   - **c**: It waits for the permission mode to decide
+   - **d**: It is blocked, and no later step is consulted
 
 3. A custom in-process tool divides by zero and the handler throws without catching. What does Claude see?
    - **a**: Nothing, because the query aborts before any result is produced
@@ -81,8 +81,8 @@ Two details of tools matter in production. First, annotations. Setting `readOnly
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says allowed_tools "does not restrict Claude to only these tools", and that unlisted tools "fall through to permission_mode and can_use_tool". *a* is ruled out because "This does not restrict Claude to only these tools." *d* is ruled out because unlisted tools do not default to approval: they "fall through to permission_mode and can_use_tool". *c* is ruled out because "Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool."
-2. **d**. The page gives the order as hooks, deny rules, ask rules, the mode, allow rules and the callback, and says a hook can deny a call outright. *a* is ruled out because the order puts hooks first and "If any hook returns deny, the operation is blocked regardless of other hooks." *b* is ruled out because "hooks run before every other step, and a hook deny applies even in bypassPermissions mode". *c* is ruled out because "hooks run before every other step", while the callback is the last step and sees only what nothing earlier decided.
+1. **b**. The page says allowed_tools "does not restrict Claude to only these tools", and that unlisted tools "fall through to permission_mode and can_use_tool". *a* is ruled out because only a bare name in disallowed_tools "removes the tool from Claude's context altogether", and allowed_tools is not that setting. *c* is ruled out because allowed_tools "auto-approves the tools you list", so it approves and does not deny. *d* is ruled out because "Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool."
+2. **d**. The page says "Hooks run first, so a hook can deny a call outright", and "Each step can end the decision." *a* is ruled out because "hooks run before every other step, and a hook deny applies even in bypassPermissions mode", so an allow rule cannot override it. *b* is ruled out because "The callback sees only what nothing earlier decided.", and the hook has decided. *c* is ruled out because the mode is checked after the hooks, and "Hooks run first, so a hook can deny a call outright".
 3. **b**. The page says the in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on. *a* is ruled out because "A handler error doesn't stop the agent loop." *d* is ruled out because the result is an error result "that carries the raw exception message", not a stripped one. *c* is ruled out because "Claude sees the message you compose" only when the handler catches the error and returns is_error, and an uncaught exception does not do that.
 
 </details>

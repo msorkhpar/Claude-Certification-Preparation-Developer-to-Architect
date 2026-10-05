@@ -69,27 +69,27 @@ Personal data (PII) is a leak path of its own. Three habits cover most of it. Co
 
 1. An agent reads web pages and can send mail to any address. Which change best reduces what an injected instruction can do?
    - **a**: Add a sentence to the system prompt that forbids sending any mail
-   - **b**: Limit the tool to a short list of approved recipient domains
-   - **c**: Screen each page with a pattern list before the agent sees the text
-   - **d**: Ask the model to explain why it wants to send a message at all
+   - **b**: Screen each page with a pattern list before the agent sees the text
+   - **c**: Ask the model to explain why it wants to send a message at all
+   - **d**: Limit the tool to a short list of approved recipient domains
 
-2. A deny entry blocks `Bash(git push *)`, and the agent runs `git -C . push origin main`. What happens?
-   - **a**: The call is approved, because rules never apply to a command that has options
-   - **b**: The rule matches, because git ignores the options before the subcommand
-   - **c**: The sandbox blocks it, because the network is closed to shell commands
-   - **d**: The rule misses it, since the typed text differs from the pattern
+2. A deny entry for `Bash(git push *)` does not stop the agent's `git -C . push origin main`. Which change closes that gap?
+   - **a**: A second deny entry for each other spelling that comes up
+   - **b**: A hook that parses the line and checks the real subcommand
+   - **c**: A line in the memory file that forbids any push to the remote
+   - **d**: An allow entry for `git -C . push` that outranks the deny entry
 
 3. A team turns on the Bash isolation boundary with an empty domain list and assumes the WebFetch tool is blocked too. Why is that wrong?
-   - **a**: It governs network calls only, while shell commands run outside it
-   - **b**: It governs shell commands only, while built-in web access follows permission rules
-   - **c**: It governs every tool alike, so the fetch is blocked by the empty list
-   - **d**: It governs hooks only, while shell commands follow permission rules
+   - **a**: An empty list means no limit, so every domain stays reachable
+   - **b**: The fetch tool runs inside the boundary, but its proxy lets that call through
+   - **c**: It covers shell commands only, so built-in web access follows permission rules
+   - **d**: Only MCP servers sit outside the boundary, and every built-in tool runs within it
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The table gives the narrow answer for actions: mail goes "only to listed domains", so a hostile instruction gets at most those recipients. *a* is ruled out because "Whatever the injected text asks for, the agent can do only what its grants allow", and a sentence in a prompt is not a grant. *c* is ruled out because the grants stay the same after a screen, and the page says to "run tools in sandboxed environments, and scope permissions as narrowly as possible". *d* is ruled out because an explanation from the model changes no grant, and the page says "don't give Claude access to secrets it doesn't need".
-2. **d**. The page says a deny rule "matches the text as written", so `git -C . push` is a different string and the rule misses it, and "A hook can parse the command into its parts". *b* is ruled out because the match is on text as written, so "A hook can parse the command into its parts" is the page's remedy and git's own option handling is not what the rule sees. *c* is ruled out because "Permission rules decide whether an action may run. A sandbox decides what a running action can reach", and the sandbox does not replace the rule. *a* is ruled out because the page says "a push behind `&&` or inside `sh -c` is a different string", so a rule written for one spelling does not cover the other, and a rule is not exempt for a command with options.
-3. **b**. The page says "The sandbox covers shell commands only", and that the built-in file and web tools "follow permission rules instead", so `allowedDomains` "doesn't limit WebFetch". *a* is ruled out because the sandbox is "a boundary that the operating system enforces around the shell commands", so shell commands are restricted and not free. *c* is ruled out because "The sandbox covers shell commands only", and the web tools are not among them. *d* is ruled out because "Claude's file tools, MCP servers, and hooks run outside it".
+1. **d**. The table gives the narrow answer for actions: mail goes "only to listed domains", so a hostile instruction gets at most those recipients. *a* is ruled out because "Whatever the injected text asks for, the agent can do only what its grants allow", and a sentence in a prompt is not a grant. *b* is ruled out because the grants stay the same after a screen, and the page says to "run tools in sandboxed environments, and scope permissions as narrowly as possible". *c* is ruled out because an explanation from the model changes no grant, and the page says "don't give Claude access to secrets it doesn't need".
+2. **b**. The page says a deny rule "matches the text as written", so `git -C . push` is a different string, and "A hook can parse the command into its parts". *a* is ruled out because "a push behind `&&` or inside `sh -c` is a different string", so every new spelling is a new gap, and a list can never be complete. *c* is ruled out because "A memory line asks, and a hook enforces." *d* is ruled out because deny rules "are checked before everything else", so an allow entry outranks nothing and would only approve the push.
+3. **c**. The page says "The sandbox covers shell commands only", and that the built-in file and web tools "follow permission rules instead", so `allowedDomains` "doesn't limit WebFetch". *a* is ruled out because network access goes "through a proxy on your machine that checks each host against your allowed domains, which start empty", so an empty list allows nothing from the shell. *b* is ruled out because "Claude's file tools, MCP servers, and hooks run outside it", and the web tools "follow permission rules instead". *d* is ruled out because the built-in file and web tools "follow permission rules instead", so they are outside it too.
 
 </details>

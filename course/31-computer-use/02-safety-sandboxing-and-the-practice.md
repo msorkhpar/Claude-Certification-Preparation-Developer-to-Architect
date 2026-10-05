@@ -38,7 +38,7 @@ Prompting helps in four documented ways. Put the instruction text before the scr
 
 ### Long loops: screenshots fill the context
 
-Long agent loops "accumulate screenshots quickly", roughly 1,000 to 1,800 input tokens each, and the toolset itself adds about 4,500 input tokens to a request, of which about 410 belong to `zoom`. There is a second limit that surprises people. "Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit." A loop that keeps its screenshot history reaches that count within a few dozen turns. The documented choices are to resize each screenshot so that neither side exceeds 2000 px, or to prune older screenshots so that 20 or fewer remain.
+Long agent loops "accumulate screenshots quickly", roughly 1,000 to 1,800 input tokens each, and the toolset itself adds about 4,500 input tokens to a request, of which about 410 belong to `zoom`. There is a second limit that surprises people. "Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit." A loop that keeps its screenshot history passes that count once it holds a 21st screenshot. The documented choices are to resize each screenshot so that neither side exceeds 2000 px, or to prune older screenshots so that 20 or fewer remain.
 
 Pruning has a cost for the cache: "Dropping a screenshot every turn changes the prefix every turn and invalidates the cache." The documentation suggests pruning in batches, for example keeping the last three screenshots and pruning every 25 turns. For Claude Fable 5.1, Claude Opus 5.5 and Claude Sonnet 5.5 it goes further and says to avoid pruning on the client, because removing an earlier screenshot invalidates every later thinking block in every request that still carries those turns. It prefers resizing to 2000 px or less and server-side tool result clearing, which drops old results from the context. The practice's `prune_screenshots` is the plain client-side version, and it shows the mechanism and its edge cases (a count of 0, a count above the number of screenshots, an input that must not change). It is not the recommended choice for these models, and the lesson says so because a function that passes its tests is not thereby the documented advice.
 
@@ -60,10 +60,10 @@ The practice is in `exercises/31-computer-use/unit-01/practice-1/statement.md`, 
 ## Quiz
 
 1. An agent browses supplier websites in a container that holds the team's admin password, so that it can log in to portals. A hidden line on one page tells the agent to send the password to an outside address. Which precaution from the documentation addresses this exposure?
-   - **a**: Rely on the classifiers alone, since they replace the other precautions
-   - **b**: Keep secrets away from the machine and allow only listed destinations
-   - **c**: Use a larger screen so that hidden text is displayed more clearly
-   - **d**: Add a line to the prompt that tells Claude to ignore text on web pages
+   - **a**: Rely on the classifiers to replace the other precautions
+   - **b**: Keep sensitive data away from the model's machine
+   - **c**: Use a larger screen so hidden text is displayed more clearly
+   - **d**: Add a line to the prompt telling Claude to ignore web text
 
 2. After many turns, a loop that keeps every screenshot starts to fail. What does the documentation give as the reason?
    - **a**: The API rejects any conversation that holds more than ten screenshots in total
@@ -72,17 +72,17 @@ The practice is in `exercises/31-computer-use/unit-01/practice-1/statement.md`, 
    - **d**: A request holding over twenty pictures puts a stricter limit on all of them
 
 3. A loop on Claude Sonnet 5.5 keeps growing its context with screenshots, and an engineer proposes dropping the oldest one each turn on the client. What does the documentation advise?
-   - **a**: Drop one every turn, which keeps the cached prefix byte-identical
-   - **b**: Resize to 2000 px or less per side and let the server clear earlier results
-   - **c**: Keep the whole history, because only the first screenshot counts
-   - **d**: Remove them in groups of three on the client, with no other side effects
+   - **a**: Drop the oldest one from the history on the client every turn
+   - **b**: Let the server clear older tool results
+   - **c**: Keep all of them, since only the first twenty are counted
+   - **d**: Remove them in batches of three on the client
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page lists two precautions for this: "Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft", and "Limiting internet access to an allowlist of domains to reduce exposure to malicious content." *a* is ruled out because "The precautions above remain important even with these classifiers in place." *d* is ruled out because "Claude will follow commands found in content even when they conflict with your instructions", so a line in the prompt is not a control. *c* is ruled out because the commands may be "instructions embedded in webpages or images", and a larger screen only shows them better.
+1. **b**. The page lists this precaution: "Avoiding giving the model access to sensitive data, such as account login information, to prevent information theft". *a* is ruled out because "The precautions above remain important even with these classifiers in place." *d* is ruled out because "Claude will follow commands found in content even when they conflict with your instructions", so a line in the prompt is not a control. *c* is ruled out because the commands may be "instructions embedded in webpages or images", and a larger screen only shows them better.
 2. **d**. The page quotes the documentation: "Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit." *a* is ruled out because the limit is "more than 20 images" in a single request, not ten in a conversation. *b* is ruled out because "Pricing follows the standard tool use pricing", with no quota unit per screenshot. *c* is ruled out because "All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment", so the application holds and prunes them, not Claude.
-3. **b**. The page says the documentation prefers resizing screenshots to "2000 px or less" per side and server-side tool result clearing, which drops old results from the context. *a* is ruled out because "Dropping a screenshot every turn changes the prefix every turn and invalidates the cache." *d* is ruled out because removing an earlier screenshot "invalidates every later thinking block in every request that still carries those turns". *c* is ruled out because every image in a request over 20 images "is held to a stricter per-side limit", not only the later ones.
+3. **b**. The page says the documentation prefers resizing screenshots to "2000 px or less" per side and server-side tool result clearing, which drops old results from the context. *a* is ruled out because "Dropping a screenshot every turn changes the prefix every turn and invalidates the cache." *d* is ruled out because removing an earlier screenshot "invalidates every later thinking block in every request that still carries those turns". *c* is ruled out because "Once a single request carries more than 20 images, every image in it is held to a stricter per-side limit."
 
 </details>
 
@@ -97,28 +97,28 @@ This quiz covers both pages of the module.
    - **d**: The entry gains width and height fields that match the screen
 
 2. A payment form appears in the middle of a batch that the app has already started. Where must the check by a person sit?
-   - **a**: Ahead of every single block, since one turn finishes several steps
-   - **b**: Only at the start of the task, when the user's request arrives
-   - **c**: Never, because classifiers steer the model away from unsafe clicks
-   - **d**: Once, after every block has run and the screen has been captured
+   - **a**: Before each block runs, one by one
+   - **b**: When the user's request arrives at the app
+   - **c**: After the whole batch has finished running
+   - **d**: In the classifier layer, instead of a person
 
 3. An application sizes screenshots with the rule of the practice, on a model of the high-resolution tier. What is the effect?
-   - **a**: It works everywhere, but finer detail that the larger budget allows is lost
-   - **b**: Coordinates from Claude must now be multiplied instead of divided
-   - **c**: The tier needs a beta header, so requests without it fail
-   - **d**: The API rejects the screenshots, since they fall below a minimum size
+   - **a**: Detail that the larger budget would allow is lost
+   - **b**: Coordinates from Claude must be multiplied instead of divided
+   - **c**: Requests without a beta header fail
+   - **d**: The API rejects screenshots below a minimum size
 
 4. A compliance team asks where the screenshots from a computer use session are kept. What is the documented answer?
-   - **a**: In a vault that Anthropic holds for every session by default
-   - **b**: In the Files API, where the workspace can read them later
-   - **c**: In the customer's own environment, and not at Anthropic
-   - **d**: Nowhere, since screenshots are deleted as soon as Claude answers
+   - **a**: In a vault that Anthropic holds for each session
+   - **b**: In the Files API, where the workspace can read them
+   - **c**: In an environment that the customer controls
+   - **d**: Nowhere, since they are deleted once Claude answers
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The first page says "Claude 5.5 and later models support computer use only through this toolset" and that "The request needs no beta header." *a* is ruled out because "Claude 5.5 and later models support computer use only through this toolset", so the old entry does not carry over. *d* is ruled out because the entry rejects the display fields, and "coordinates are always in the pixel space of the screenshots you return". *c* is ruled out because "The request needs no beta header."
-2. **a**. The first page says that "a batch can finish a multistep action inside one turn", so the check goes before each block runs. *d* is ruled out because the page says to "make that check before each block runs", and a check after the batch comes too late. *b* is ruled out because the documentation asks for "Asking a human to confirm decisions that might result in meaningful real-world consequences", and a payment appears at a point the first request never named. *c* is ruled out because the classifier layer is a second one: "That layer is not a replacement".
+2. **a**. The first page says that "a batch can finish a multistep action inside one turn", so the check goes before each block runs. *c* is ruled out because the page says to "make that check before each block runs", and a check after the batch comes too late. *b* is ruled out because the documentation asks for "Asking a human to confirm decisions that might result in meaningful real-world consequences", and a payment appears at a point the first request never named. *d* is ruled out because the classifier layer is a second one: "That layer is not a replacement".
 3. **a**. The first page says the rule of the practice is "safe on every model", and "it costs detail on a high-resolution model". *d* is ruled out because the rule "is safe on every model", and the page names no minimum size. *b* is ruled out because "scale Claude's coordinates back up before applying them to the real display" holds for any scale. *c* is ruled out because "The request needs no beta header."
 4. **c**. The second page quotes the documentation: "All screenshots, mouse actions, keyboard inputs, and any files involved in a session are captured and stored in your environment, not by Anthropic." *a* is ruled out because "Anthropic processes the images and action requests in real time as part of the API call". *b* is ruled out because "Computer use is a client-side tool." *d* is ruled out because the documentation says "Always carefully review and verify Claude's computer use actions and logs", which needs logs to exist.
 

@@ -57,29 +57,29 @@ Which mode a session starts in follows an order: the `--permission-mode` flag fi
 
 ## Quiz
 
-1. A developer wants Claude to propose a change for review, with no edits written until a person approves. Which start fits?
-   - **a**: The `bypassPermissions` mode, which shows each step before running it
-   - **b**: The `acceptEdits` mode, which proposes and then writes each edit
-   - **c**: The `dontAsk` mode, which reads the files and asks for approval
-   - **d**: The `plan` mode, which reads the project and drafts steps first
+1. A developer wants Claude to study a repository and show a written draft before any file on disk changes. Which start fits?
+   - **a**: The `default` mode, which asks about each action one by one
+   - **b**: The `acceptEdits` mode, which writes edits without asking
+   - **c**: The `plan` mode, entered by pressing `Shift+Tab`
+   - **d**: The `dontAsk` mode, which denies whatever would prompt
 
 2. A repository's shared settings file sets the starting permission mode to `bypassPermissions`. What happens when a teammate opens it?
-   - **a**: The value is ignored, and each edit and command asks first
-   - **b**: The session starts in auto mode for every teammate who opens it
+   - **a**: The session starts in auto mode for every teammate who opens it
+   - **b**: The value is ignored, and each edit and command asks first
    - **c**: The session starts in plan mode until the file is approved
    - **d**: Every teammate is asked once to accept the project file's mode
 
-3. A long conversation has drifted, and early instructions seem forgotten. Where does the page say persistent rules belong?
-   - **a**: In the first message of every session, typed out again by hand each time
-   - **b**: In the `/compact` summary, which is then written by the person alone
-   - **c**: In the project memory file, loaded when a session starts
-   - **d**: In a rewind checkpoint, which restores the earlier messages in full
+3. Rules given early in a long conversation stop being followed. Where should a rule that must always apply be kept?
+   - **a**: In a `/compact` summary, which condenses the thread so far
+   - **b**: In a `/clear` command, which starts fresh on a new task
+   - **c**: In a rewind checkpoint, which snapshots files before each edit
+   - **d**: In `CLAUDE.md`, which sits outside the running chat
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "Claude reads files and proposes a plan but makes no edits until you approve", and `claude --permission-mode plan` starts there. *b* is ruled out because `acceptEdits` runs "Reads, file edits, and common filesystem commands" without asking, so edits are written. *c* is ruled out because `dontAsk` runs "Reads and pre-approved tools; anything that would prompt is denied", and it denies and does not ask for approval. *a* is ruled out because `bypassPermissions` runs "Everything" without asking, and is for "Isolated containers and VMs only".
-2. **a**. The page says a `"bypassPermissions"` set in those two files "doesn't take effect either, and the session starts in Manual mode". *b* is ruled out because that is exactly what the rule prevents, since "the value doesn't take effect". *c* is ruled out because the page names Manual mode and not plan mode: "the session starts in Manual mode". *d* is ruled out because "The other values apply from any settings file", and these two are the exceptions, so no prompt is shown.
-3. **c**. The page says "Put persistent rules in CLAUDE.md", because "Claude compacts automatically, but instructions from early in the conversation can get lost." *a* is ruled out because "Each new session starts with a fresh context window", and typing rules again is what the memory file replaces. *b* is ruled out because "Claude compacts automatically, but instructions from early in the conversation can get lost", so a summary is what loses them. *d* is ruled out because "file edits are reversible" by a checkpoint, and a checkpoint restores files and is not a place to store rules.
+1. **c**. The page says "Claude reads files and proposes a plan but makes no edits until you approve", and `claude --permission-mode plan` starts there. *a* is ruled out because the table lists `default` (Manual) for "Reviewing every action yourself", so it prompts action by action and no draft comes first. *b* is ruled out because `acceptEdits` runs "Reads, file edits, and common filesystem commands" without asking, so edits land on disk at once. *d* is ruled out because `dontAsk` runs "Reads and pre-approved tools; anything that would prompt is denied", so it denies and shows no draft.
+2. **b**. The page says a `"bypassPermissions"` set in those two files "doesn't take effect either, and the session starts in Manual mode". *a* is ruled out because that is exactly what the rule prevents, since "the value doesn't take effect". *c* is ruled out because the page names Manual mode and not plan mode: "the session starts in Manual mode". *d* is ruled out because "The other values apply from any settings file", and these two are the exceptions, so no prompt is shown.
+3. **d**. The page says "Put persistent rules in CLAUDE.md", because "Claude compacts automatically, but instructions from early in the conversation can get lost." *a* is ruled out because "Claude compacts automatically, but instructions from early in the conversation can get lost", so a summary is where they are lost. *b* is ruled out because `/clear` is described as one that "starts fresh on a new task while keeping project memory", so the rules must already be in the memory file. *c* is ruled out because checkpoints "only cover file changes", so a checkpoint holds files and not rules.
 
 </details>

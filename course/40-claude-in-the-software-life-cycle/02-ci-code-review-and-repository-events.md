@@ -620,23 +620,23 @@ The practice puts Claude into a small repository. You fix a mention workflow tha
    - **d**: A write permission on the contents of the repository for the job
 
 2. A review job should inspect the code and post findings. Which permission set fits?
-   - **a**: Write access to every scope, so the job never fails for a missing grant
-   - **b**: Write access to the contents, so that findings can be committed to the branch
-   - **c**: No permissions at all, because comments need no access to the code
-   - **d**: Read access to the contents, plus the scopes for comments and authentication
+   - **a**: Write on the contents, with scopes for comments and authentication
+   - **b**: No access to the contents, with scopes for comments and authentication
+   - **c**: Read on the contents alone, with nothing else granted to the job
+   - **d**: Read on the contents, with scopes for comments and authentication
 
-3. A team wants Claude's review to stop a merge until findings are fixed. What does Code Review do?
-   - **a**: It marks its check run failed whenever a finding is rated important
-   - **b**: It leaves its check run neutral, so the decision stays with a person
-   - **c**: It approves the pull request when no finding is rated important
-   - **d**: It requests changes from the author on every finding it posts
+3. Code Review's findings are posted on a pull request, and a team wants them to hold up the merge button. What does the review's check run do?
+   - **a**: It fails whenever a finding is rated important, so merging stops
+   - **b**: It ends neutral every time, so nothing waits on it
+   - **c**: It approves the pull request, so a clean review lifts any block
+   - **d**: It requests changes from the author, so each finding must be fixed
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "Without the `if`, a runner starts for every comment in the repository", and the guard is `if: contains(github.event.comment.body, '@claude')`. *a* is ruled out because the timeout bounds one run and does not stop runs from starting: the page lists it with "workflow-level timeouts to avoid runaway jobs". *c* is ruled out because "Set `--max-turns` in `claude_args` to limit iterations", which acts inside a run and does not stop one from starting. *d* is ruled out because write access is a permission and not a trigger filter, and the page says "Grant the least a job needs".
-2. **d**. The page says "A job that only reviews needs `contents: read`", and the review example reads pull requests and issues as well, and has the `id-token: write` permission for authentication. *b* is ruled out because the page says "Reading is enough to review", and write access lets a compromised run change the repository. *c* is ruled out because "A job that only reviews needs `contents: read`", so some access to the code is required. *a* is ruled out because the page says "Grant the least a job needs", and a grant of every scope is the opposite.
-3. **b**. The page says "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules." *a* is ruled out because the same sentence says the check run "always completes with a neutral conclusion", so it never fails. *c* is ruled out because findings "don't approve or block" a pull request, and so an empty review is no approval. *d* is ruled out because findings are posted "as inline comments", and Code Review "so it advises, and a person merges".
+2. **d**. The page says "A job that only reviews needs `contents: read`", and the review example reads pull requests and issues as well, and has the `id-token: write` permission for authentication. *a* is ruled out because "A job that implements changes needs `contents: write`, `pull-requests: write` and `issues: write`", and a review only reads, so the extra write access lets a compromised run change the repository. *b* is ruled out because "A job that only reviews needs `contents: read`", so some access to the code is required. *c* is ruled out because the review example includes `id-token: write`, which the documentation calls "required for the Claude Code GitHub Action's default GitHub App authentication".
+3. **b**. The page says "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules." *a* is ruled out because the check run "always completes with a neutral conclusion", so no rating makes it fail. *c* is ruled out because findings "don't approve or block your PR", so a clean review approves nothing either. *d* is ruled out because findings are posted "as inline comments", and the page says "So it advises, and a person merges."
 
 </details>
 
@@ -674,6 +674,6 @@ This quiz covers both pages of the module.
 1. **b**. The page says `REVIEW.md` holds "review-only instructions", and that you use it "to say what your team wants flagged, at what severity, and how findings are reported". *a* is ruled out because `CLAUDE.md` is "shared project instructions that Claude Code uses for all tasks, not just reviews". *c* is ruled out because the first page gives that file "Team permission rules, default model, hooks, plugins", which are settings and not review instructions. *d* is ruled out because the changelog explains versions of prompts, and the first page says it must have "A changelog entry for every change" and not review rules.
 2. **a**. The first page says the changelog's "latest heading equals the file's version", so a mismatch means a change nobody recorded. *b* is ruled out because the rule is only a heading that is "whose latest heading equals the file's version", and it names no age comparison. *c* is ruled out because the only rule is "whose latest heading equals the file's version", with no winner, so a reviewer asks for the missing entry. *d* is ruled out because the page says "A reviewer reading the pull request sees what changed and why", which makes it part of the review.
 3. **a**. The page says to guard the job with `if: contains(github.event.comment.body, '@claude')`, and for an implementation run to "leave it `false` so that a second comment does not kill work in progress." *b* is ruled out because "Without the `if`, a runner starts for every comment in the repository". *c* is ruled out because `cancel-in-progress: true` suits a review: "so a new push replaces the review of an outdated commit". *d* is ruled out because it lacks the guard, and "Without the `if`, a runner starts for every comment in the repository".
-4. **c**. The page says a routine is "a saved Claude Code configuration", with a scheduled trigger, and it runs on cloud infrastructure so it keeps working "while your laptop is closed". *b* is ruled out because "its job starts only when the comment mentions the bot", and the job here is nightly. *a* is ruled out because the page lists "Triggers are scheduled (hourly, nightly, weekly, or once)" for routines, and a hook has no schedule and no open session. *d* is ruled out because "Triggers are scheduled (hourly, nightly, weekly, or once)" belongs to a routine, and a subagent has no clock.
+4. **c**. The page says a routine is "a saved Claude Code configuration", with a scheduled trigger, and it runs on cloud infrastructure so it keeps working "while your laptop is closed". *b* is ruled out because "its job starts only when the comment mentions the bot", and the job here is nightly. *a* is ruled out because hooks are among the things the shared settings file holds, "Team permission rules, default model, hooks, plugins", and they run inside a session on a machine, while a routine keeps working "while your laptop is closed". *d* is ruled out because subagents are files the repository lists as "Team skills and subagents", which a session loads when it starts, so nothing starts one at midnight, and only a routine "is a saved Claude Code configuration" that runs "automatically".
 
 </details>

@@ -69,16 +69,16 @@ The SDKs the course pins differ here, and the course checked it by running them.
 ## Quiz
 
 1. An AI application connects to a ticketing system and a document store, both exposed through MCP. How is the connecting side organized?
-   - **a**: One client multiplexes both servers over a single shared connection
-   - **b**: The host talks to each server directly, with no client component
-   - **c**: Each server creates a client inside itself to call the application back
-   - **d**: The host creates one client per server, each holding its own link
+   - **a**: One shared client multiplexes both servers over one connection
+   - **b**: The host talks to each server itself, with no client component
+   - **c**: Each server creates a client inside itself to call back
+   - **d**: The host creates one client for each server
 
-2. A developer offers three things: a ready-made instruction that a user selects from a menu, a function the model may call to book flights, and a read-only data document that the application attaches as context. Which primitives fit, in that order?
-   - **a**: A prompt, a tool, a resource
-   - **b**: A resource, a prompt, a tool
-   - **c**: A tool, a prompt, a resource
-   - **d**: A tool, a resource, a prompt
+2. A server publishes a read-only database schema, and the host app chooses when to attach it to the model's context. Which primitive does this describe?
+   - **a**: A tool, which the model decides to call
+   - **b**: A prompt, which a person picks from a menu
+   - **c**: A resource, which the application accesses directly
+   - **d**: A sampling request, which the server sends to the client
 
 3. How does a client written for the 2026-07-28 revision tell a server which protocol version it speaks?
    - **a**: An initialize exchange that opens a session and fixes it for later calls
@@ -89,8 +89,8 @@ The SDKs the course pins differ here, and the course checked it by running them.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "The MCP host accomplishes this by creating one MCP client for each MCP server", and that each client "maintains a dedicated connection with its corresponding MCP server". *a* is ruled out because each client "maintains a dedicated connection with its corresponding MCP server", so none is shared. *b* is ruled out because the client is "A component that maintains a connection to an MCP server and obtains context from an MCP server for the MCP host to use". *c* is ruled out because it is the host that does the creating: "The MCP host accomplishes this by creating one MCP client for each MCP server".
-2. **a**. The menu entry is a prompt, because "Prompts are picked by a person, for example from a menu". A function the model calls is a tool, because tools "are model-controlled, meaning AI models can discover and invoke them automatically". Read-only data that the application attaches is a resource, which the application "can access this information directly and decide how to use it". *d* is ruled out because it puts a tool first, and the first item is the one that "Prompts are picked by a person, for example from a menu" describes. *b* is ruled out because it puts a resource first, and a resource is the one the application "can access this information directly and decide how to use it", not a person at a menu. *c* is ruled out because it puts the tool first as well, and it makes the data document a prompt, though a resource gives "read-only access to information".
+1. **d**. The page says "The MCP host accomplishes this by creating one MCP client for each MCP server", and that each client "maintains a dedicated connection with its corresponding MCP server". *a* is ruled out because each client "maintains a dedicated connection with its corresponding MCP server", so none is shared. *b* is ruled out because "The host does not talk to a server itself." *c* is ruled out because it is the host that does the creating: "The MCP host accomplishes this by creating one MCP client for each MCP server".
+2. **c**. A schema is data that the application attaches, and the page says a resource gives "read-only access to information, such as a file or a database schema" which the application "can access this information directly and decide how to use it". *a* is ruled out because a tool is one of the "Functions that the model can call", not passive data. *b* is ruled out because "Prompts are picked by a person, for example from a menu", and here the application, not a person, chooses. *d* is ruled out because sampling is the case where "the server asks the client's model for a completion", which moves no data to the model's context.
 3. **c**. The page says "Every request declares the protocol version it is using" in its metadata field, and that the server "accepts or rejects each request independently". *a* is ruled out because the legacy versions "establish a session with an initialize handshake", and the modern ones have none. *b* is ruled out because the server "accepts or rejects each request independently", so nothing is remembered from a first call. *d* is ruled out because a client "is free to invoke any RPC inline", so discovery is optional.
 
 </details>

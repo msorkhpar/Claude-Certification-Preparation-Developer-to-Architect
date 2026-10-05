@@ -8,15 +8,15 @@
       "stem": "A description reads only \"Release helper\", and Claude never loads that skill when users ask for a changelog. What is the first fix?",
       "options": {
         "a": "Raise the tool grant so that the skill may run any shell command",
-        "b": "Move the folder into the enterprise location so it takes priority",
-        "c": "Add the value true on the model-invocation field in the frontmatter",
-        "d": "State what it does and when to use it, in everyday words"
+        "b": "State what it does and when to use it, in everyday words",
+        "c": "Move the folder into the enterprise location so it takes priority",
+        "d": "Add the value true on the model-invocation field in the frontmatter"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The page says the description is \"What the skill does and when to use it. Claude uses this to decide when to apply the skill.\"",
-        "b": "Ruled out because location decides which skill wins when \"two skills share a name\", and has no bearing on whether Claude matches a request.",
-        "c": "Ruled out because the table says `true` \"stops Claude from starting it by itself\", which is the opposite of what the team wants.",
+        "b": "The page says the description is \"What the skill does and when to use it. Claude uses this to decide when to apply the skill.\"",
+        "c": "Ruled out because location decides which skill wins when \"two skills share a name\", and has no bearing on whether Claude matches a request.",
+        "d": "Ruled out because the table says `true` \"stops Claude from starting it by itself\", which is the opposite of what the team wants.",
         "a": "Ruled out because a tool grant is for \"Tools Claude may use without asking while the skill runs\", and a skill that is never loaded never runs."
       }
     },
@@ -24,19 +24,19 @@
       "id": "01-skills-and-how-they-compare#q2",
       "page": "01-skills-and-how-they-compare.md",
       "scope": "page",
-      "stem": "A team requires that no agent ever pushes to the main branch. Which extension fits best?",
+      "stem": "A team needs to guarantee that no agent pushes to the main branch, whatever Claude decides in a given turn. Which extension fits best?",
       "options": {
-        "a": "A hook that blocks the command, because it always runs and cannot be skipped",
-        "b": "A line in the project memory file that forbids pushing to that branch",
-        "c": "A skill whose instructions tell Claude never to push to the main branch",
-        "d": "A subagent that reviews each command before Claude is allowed to run it"
+        "a": "A memory line, which loads as persistent context in each conversation",
+        "b": "A skill, which holds instructions that Claude may follow",
+        "c": "A hook, which runs as a program on every matching event",
+        "d": "A subagent, which is an isolated context returning summaries"
       },
-      "key": "a",
+      "key": "c",
       "explanation": {
-        "a": "The page says \"A rule that must never be broken belongs in a hook or a deny rule\", and a hook, unlike guidance, is \"a program that always runs\".",
-        "c": "Ruled out because \"a skill is instructions Claude may follow\".",
-        "b": "Ruled out because a memory file is guidance of the same kind, and the page says \"Persistent context loaded every conversation\" is for conventions and \"always do X\" rules.",
-        "d": "Ruled out because a subagent is \"An isolated context that returns summarised results\" for side tasks, and not a gate that every command must pass."
+        "c": "The page says \"A rule that must never be broken belongs in a hook or a deny rule\", and a hook is \"a program that always runs\".",
+        "a": "Ruled out because the table calls it \"Persistent context loaded every conversation\" for conventions, which is guidance Claude may still get wrong, and the page says a rule that must never be broken needs a hook or a deny rule.",
+        "b": "Ruled out because \"a skill is instructions Claude may follow\", and an instruction that may be followed is not a guarantee.",
+        "d": "Ruled out because a subagent is \"An isolated context that returns summarised results\" for \"A side task that would flood the conversation\", and not a gate that every command must pass."
       }
     },
     {
@@ -45,16 +45,16 @@
       "scope": "page",
       "stem": "A skill tags a release and creates a GitHub release. Which frontmatter is right?",
       "options": {
-        "a": "Automatic invocation on, with the whole Bash tool pre-approved",
-        "b": "Automatic invocation on, with the two command patterns pre-approved",
-        "c": "Automatic invocation off, with two command patterns pre-approved",
+        "a": "Automatic invocation off, with two command patterns pre-approved",
+        "b": "Automatic invocation on, with the whole Bash tool pre-approved",
+        "c": "Automatic invocation on, with the two command patterns pre-approved",
         "d": "Automatic invocation off, with the whole Bash tool pre-approved"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The page says a task skill with side effects should set `disable-model-invocation: true`, and that `allowed-tools: Bash(git tag *) Bash(gh release create *)` \"approves two command families\".",
-        "a": "Ruled out because the page says bare `Bash` \"approves every shell command for that turn\".",
-        "b": "Ruled out because \"a person should start it\" when a skill has side effects.",
+        "a": "The page says a task skill with side effects should set `disable-model-invocation: true`, and that `allowed-tools: Bash(git tag *) Bash(gh release create *)` \"approves two command families\".",
+        "b": "Ruled out because the page says bare `Bash` \"approves every shell command for that turn\".",
+        "c": "Ruled out because \"a person should start it\" when a skill has side effects.",
         "d": "Ruled out because it keeps the person in control but the page says bare `Bash` \"turns a narrow skill into an open one\"."
       }
     },
@@ -65,15 +65,15 @@
       "stem": "A reviewer subagent's file has no `tools` line. What can it do?",
       "options": {
         "a": "Read only, because a review of code needs nothing more than reading it",
-        "b": "Use every tool of the session, including editing and running commands",
-        "c": "Nothing at all, because an empty list gives the subagent no tools to use",
+        "b": "Nothing at all, because an empty list gives the subagent no tools to use",
+        "c": "Use every tool of the session, including editing and running commands",
         "d": "Use only the tools that the main conversation allows without asking first"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "The page says \"Omit it and the subagent inherits every tool\", and \"a reviewer with no `tools` line can edit files and run commands\".",
+        "c": "The page says \"Omit it and the subagent inherits every tool\", and \"a reviewer with no `tools` line can edit files and run commands\".",
         "a": "Ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: \"Bound a subagent by listing its tools.\"",
-        "c": "Ruled out because the table says \"Omit it and the subagent inherits every tool\", which is the opposite of none.",
+        "b": "Ruled out because the table says \"Omit it and the subagent inherits every tool\", which is the opposite of none.",
         "d": "Ruled out because a subagent has \"specific tool access, and independent permissions\", and an omitted list does not narrow it to the main conversation's pre-approvals."
       }
     },
@@ -83,36 +83,36 @@
       "scope": "page",
       "stem": "A hook script is meant to stop `git push`. Which behaviour stops the call?",
       "options": {
-        "a": "Printing a warning to standard output and exiting with code 1",
-        "b": "Exiting with code 0 after logging the command to a file",
-        "c": "Exiting with code 3 after writing a reason to standard error",
-        "d": "Exiting with code 2 with the reason written to standard error"
+        "a": "Exiting with code 2 with the reason written to standard error",
+        "b": "Printing a warning to standard output and exiting with code 1",
+        "c": "Exiting with code 0 after logging the command to a file",
+        "d": "Exiting with code 3 after writing a reason to standard error"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The page says \"Exit 2: Claude Code blocks the action. Write a reason to stderr.\"",
-        "a": "Ruled out because with an exit code of 1 and plain-text output \"the action proceeds as a non-blocking error\", and a warning does not stop the call.",
-        "b": "Ruled out because \"Exit 0: no objection\", and a logging hook \"does not weaken a guard hook\" and does not block either.",
-        "c": "Ruled out because exit code 3 is an \"other exit code\", and the page says to \"Treat it as a bug in the hook, because it does not stop the call.\""
+        "a": "The page says \"Exit 2: Claude Code blocks the action. Write a reason to stderr.\"",
+        "b": "Ruled out because with an exit code of 1 and plain-text output \"the action proceeds as a non-blocking error\", and a warning does not stop the call.",
+        "c": "Ruled out because \"Exit 0: no objection\", and a logging hook \"does not weaken a guard hook\" and does not block either.",
+        "d": "Ruled out because exit code 3 is an \"other exit code\", and the page says to \"Treat it as a bug in the hook, because it does not stop the call.\""
       }
     },
     {
       "id": "02-subagents-and-hooks#q3",
       "page": "02-subagents-and-hooks.md",
       "scope": "page",
-      "stem": "A team wants the learnings of a subagent to travel with the repository. Which memory choice fits?",
+      "stem": "A subagent builds notes on a repository, and teammates should receive them through version control. Which `memory` value fits?",
       "options": {
-        "a": "The user scope, which lives in the home directory of each single person",
-        "b": "The project scope, whose directory is committed alongside the code",
-        "c": "The local scope, whose directory is deliberately kept out of commits",
-        "d": "No scope applies, because memory is always private to a single machine"
+        "a": "`user`, whose directory sits in each person's home folder",
+        "b": "`local`, whose directory is kept out of commits",
+        "c": "`team`, whose directory is shared by every teammate",
+        "d": "`project`, whose directory is committed alongside the sources"
       },
-      "key": "b",
+      "key": "d",
       "explanation": {
-        "b": "The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is \"project-specific and shareable via version control\", so it can be committed alongside the code.",
-        "a": "Ruled out because the `user` scope is `~/.claude/agent-memory/<name>/`, for an agent that \"should remember across all projects\", in each person's home directory.",
-        "c": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\".",
-        "d": "Ruled out because the project scope's directory \"shareable via version control\" is the page's own counterexample, so not every memory is private."
+        "d": "The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is \"shareable via version control\".",
+        "a": "Ruled out because the `user` scope is for a case where \"The agent should remember across all projects\", and its directory is under `~/.claude/`, outside the repository.",
+        "b": "Ruled out because the `local` scope is for knowledge that is \"project-specific and should not be checked in\".",
+        "c": "Ruled out because the field takes one of three values, and the page's own example is flagged: \"memory must be user, project or local\"."
       }
     },
     {
@@ -121,36 +121,36 @@
       "scope": "page",
       "stem": "A plugin declares a dependency on `~2.1.0`, and the dependency's maintainer publishes 2.1.4 and then 2.2.0. Which version do the plugin's users receive?",
       "options": {
-        "a": "2.1.4, because the range takes patch updates and not the 2.2 line",
-        "b": "2.2.0, because a range always follows the newest release that exists",
-        "c": "2.1.0, because a range freezes the first version that it matched once",
-        "d": "Neither, because ranges are resolved only for plugins that carry no version"
+        "a": "2.2.0, because a range always follows the newest release that exists",
+        "b": "2.1.0, because a range freezes the first version that it matched once",
+        "c": "Neither, because ranges are resolved only for plugins that carry no version",
+        "d": "2.1.4, because the range takes patch updates and not the 2.2 line"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The page says with `~2.1.0` \"users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`.\"",
-        "b": "Ruled out because a pinned range does not follow the newest release: \"Without a version constraint, a dependency moves to each new release its marketplace publishes\".",
-        "c": "Ruled out because the dependency \"installs at the highest git tag that satisfies this range\", which is 2.1.4 and not the first match.",
-        "d": "Ruled out because \"resolution is by git tag\" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained."
+        "d": "The page says with `~2.1.0` \"users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`.\"",
+        "a": "Ruled out because a pinned range does not follow the newest release: \"Without a version constraint, a dependency moves to each new release its marketplace publishes\".",
+        "b": "Ruled out because the dependency \"installs at the highest git tag that satisfies this range\", which is 2.1.4 and not the first match.",
+        "c": "Ruled out because \"resolution is by git tag\" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained."
       }
     },
     {
       "id": "03-plugins-sharing-and-the-practice#q2",
       "page": "03-plugins-sharing-and-the-practice.md",
       "scope": "page",
-      "stem": "A team wants every contributor to receive a tool bundle without a manual install. Where does the configuration go?",
+      "stem": "A team wants contributors to get a plugin when they open the repository, with no manual install step. Where does the configuration go?",
       "options": {
-        "a": "The repository's own `.claude/settings.json`, naming a marketplace and an enabled plugin",
-        "b": "Each person's home settings file, copied by hand from a wiki page the team keeps",
-        "c": "The plugin manifest, which lists the people who should install the bundle on their machines",
-        "d": "The project memory file, which names the bundle in a sentence for Claude to read each time"
+        "a": "The `plugin.json` manifest, in its `dependencies` array",
+        "b": "The project's `.claude/settings.json`, under two named keys",
+        "c": "The `marketplace.json` catalog, in the entry for that bundle",
+        "d": "Each person's launch command, using the `--plugin-dir` flag"
       },
-      "key": "a",
+      "key": "b",
       "explanation": {
-        "a": "The page says to set two keys in the repository's `.claude/settings.json`, so that the marketplace and the enabled plugin reach every contributor.",
-        "b": "Ruled out because hand copying is what the shared file replaces, and the page gives the repository's file as the way \"to give a repository's contributors a plugin without each of them installing it\".",
-        "c": "Ruled out because the manifest is \"a `plugin.json` file, called the manifest, that names the plugin\", and it lists dependencies and not people.",
-        "d": "Ruled out because the page says to \"set two keys in the repository's `.claude/settings.json`\", which is configuration and not a sentence in a memory file."
+        "b": "The page says to \"set two keys in the repository's `.claude/settings.json`\", so that the marketplace and the enabled plugin reach every contributor.",
+        "a": "Ruled out because the manifest is \"called the manifest, that names the plugin\", so it describes the plugin and does not reach contributors who have not installed it.",
+        "c": "Ruled out because the catalog is only where plugins are listed, and the page has the repository name it: \"Add the marketplace under `extraKnownMarketplaces`, keyed by the marketplace's own `name`\".",
+        "d": "Ruled out because `--plugin-dir` \"loads a plugin for one session without installing it\", so it is neither shared nor lasting."
       }
     },
     {
@@ -159,16 +159,16 @@
       "scope": "page",
       "stem": "An agent file shipped inside a plugin sets `permissionMode: bypassPermissions` to run quietly. What happens?",
       "options": {
-        "a": "The plugin fails to load, because the loader rejects the whole file",
-        "b": "The agent skips every prompt, exactly as the value says it should",
-        "c": "The value is dropped at load time, because the loader skips such fields",
+        "a": "The value is dropped at load time, because the loader skips such fields",
+        "b": "The plugin fails to load, because the loader rejects the whole file",
+        "c": "The agent skips every prompt, exactly as the value says it should",
         "d": "The agent runs quietly, but only in a folder that the person has trusted"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The page says \"These fields are ignored when loading agents from a plugin.\"",
-        "b": "Ruled out because the fields are \"ignored when loading agents from a plugin\", so the agent keeps its normal prompts.",
-        "a": "Ruled out because \"These fields are ignored when loading agents from a plugin\", so the file still loads.",
+        "a": "The page says \"These fields are ignored when loading agents from a plugin.\"",
+        "c": "Ruled out because the fields are \"ignored when loading agents from a plugin\", so the agent keeps its normal prompts.",
+        "b": "Ruled out because \"These fields are ignored when loading agents from a plugin\", so the file still loads.",
         "d": "Ruled out because the fields are \"ignored\" whatever the folder, and trust only decides whether `extraKnownMarketplaces` applies. The page names the fix: \"Ship the guard in `hooks/hooks.json`.\""
       }
     },
@@ -178,17 +178,17 @@
       "scope": "page",
       "stem": "A team pushes fresh commits to a plugin whose manifest still says `\"version\": \"1.0.0\"`. What reaches installed users?",
       "options": {
-        "a": "The copy they already hold, until the number is raised",
-        "b": "The fresh commits at the next launch, since a push always counts",
-        "c": "The fresh commits once the marketplace entry repeats that number",
-        "d": "The fresh commits, since the commit hash is the version"
+        "a": "The fresh commits at the next launch, since a push always counts",
+        "b": "The fresh commits once the marketplace entry repeats that number",
+        "c": "The fresh commits, since the commit hash is the version",
+        "d": "The copy they already hold, until the number is raised"
       },
-      "key": "a",
+      "key": "d",
       "explanation": {
-        "a": "The page says users stay on their cached copy until the string changes.",
-        "b": "Ruled out because if the version is not changed, \"users don't receive them\".",
-        "c": "Ruled out because \"Don't set `version` in both `plugin.json` and the marketplace entry\", and Claude Code \"then uses the manifest value without warning\".",
-        "d": "Ruled out because the commit hash counts only when neither place sets a version: \"When neither is set\", the commit SHA of the source."
+        "d": "The page says users stay on their cached copy until the string changes.",
+        "a": "Ruled out because if the version is not changed, \"users don't receive them\".",
+        "b": "Ruled out because \"Don't set `version` in both `plugin.json` and the marketplace entry\", and Claude Code \"then uses the manifest value without warning\".",
+        "c": "Ruled out because the commit hash counts only when neither place sets a version: \"When neither is set\", the commit SHA of the source."
       }
     },
     {
@@ -198,15 +198,15 @@
       "stem": "A catalog entry calls a bundle `reviewer-kit`, while the bundle's own manifest says `review-kit`. What happens when someone installs it under the manifest's name?",
       "options": {
         "a": "An ambiguity message asks which of the two names was meant",
-        "b": "A not-found message naming what was typed",
-        "c": "A success message, with the entry name as the skill prefix",
+        "b": "A success message, with the entry name as the skill prefix",
+        "c": "A not-found message naming what was typed",
         "d": "A success message, once the catalog has been added again"
       },
-      "key": "b",
+      "key": "c",
       "explanation": {
-        "b": "The page says \"When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin \"<manifest-name>\" not found in marketplace \"<marketplace>\"`.\"",
+        "c": "The page says \"When the two names differ and someone installs by the manifest name, Claude Code reports `Plugin \"<manifest-name>\" not found in marketplace \"<marketplace>\"`.\"",
         "a": "Ruled out because the entry name is \"the key Claude Code writes under `enabledPlugins`\", and nothing offers a choice between the two names.",
-        "c": "Ruled out because \"the manifest name is the prefix of its skills\", and the entry name never replaces it.",
+        "b": "Ruled out because \"the manifest name is the prefix of its skills\", and the entry name never replaces it.",
         "d": "Ruled out because \"When the two names differ and someone installs by the manifest name, Claude Code reports\" a failure, and re-adding the catalog changes neither name."
       }
     },
@@ -216,16 +216,16 @@
       "scope": "page",
       "stem": "A repository's settings turn on a bundle whose catalog entry points at a repository of its own. A contributor trusts the folder and starts a session. What do they see?",
       "options": {
-        "a": "The bundle loaded, since trust is the only condition that applies",
-        "b": "A prompt that lists the hooks of the bundle before it installs",
-        "c": "A notice that it is enabled but not installed, until they install it",
+        "a": "A notice that it is enabled but not installed, until they install it",
+        "b": "The bundle loaded, since trust is the only condition that applies",
+        "c": "A prompt that lists the hooks of the bundle before it installs",
         "d": "The bundle loaded once the marketplace is added to managed settings"
       },
-      "key": "c",
+      "key": "a",
       "explanation": {
-        "c": "The page says \"Each contributor sees `Plugin \"<name>\" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`.\"",
-        "a": "Ruled out because \"Only a relative-path plugin installs from the file alone\".",
-        "b": "Ruled out because \"Nothing installs, and nothing prompts, until each contributor runs the install.\"",
+        "a": "The page says \"Each contributor sees `Plugin \"<name>\" is enabled in project settings but isn't installed here` in the `/plugin` Errors tab until they run `claude plugin install <name>@<marketplace> --scope project`.\"",
+        "b": "Ruled out because \"Only a relative-path plugin installs from the file alone\".",
+        "c": "Ruled out because \"Nothing installs, and nothing prompts, until each contributor runs the install.\"",
         "d": "Ruled out because \"A repository's own settings reach only the contributors who trust the folder\", which is a different channel from managed settings."
       }
     },
@@ -252,19 +252,19 @@
       "id": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace#m2",
       "page": "04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
       "scope": "module",
-      "stem": "One skill drafts release summaries and another tags and ships a release. Which pair of settings fits?",
+      "stem": "One skill drafts release summaries, and another tags and ships a release. Which pair of settings fits?",
       "options": {
-        "a": "The first for a person alone, the second on automatic loading",
-        "b": "Both on automatic loading, so that Claude can finish unaided",
-        "c": "The first on automatic loading, the second for a person alone",
-        "d": "Both for a person alone, so that neither is ever loaded at all"
+        "a": "Automatic loading off for the first, left on for the second",
+        "b": "Automatic loading left on for both, with `Bash` pre-approved on the second",
+        "c": "Automatic loading off for both, with nothing pre-approved on either",
+        "d": "Automatic loading left on for the first, off for the second"
       },
-      "key": "c",
+      "key": "d",
       "explanation": {
-        "c": "The page says \"A skill that writes release notes is harmless and Claude can start it when asked\", while a skill with side effects needs `disable-model-invocation: true`.",
-        "b": "Ruled out because for a skill with side effects \"a person should start it\".",
-        "a": "Ruled out because it reverses the safety, and the first sentence of the page's reasoning is \"A skill that writes release notes is harmless and Claude can start it when asked\".",
-        "d": "Ruled out because \"Claude loads it by itself when your request matches its description\", and the harmless skill gains from that."
+        "d": "The page says \"A skill that writes release notes is harmless and Claude can start it when asked\", while a skill with side effects needs `disable-model-invocation: true`.",
+        "a": "Ruled out because a skill that tags a release \"has side effects, and a person should start it\", and this reversal leaves that skill to Claude.",
+        "b": "Ruled out because \"`allowed-tools: Bash` approves every shell command for that turn\", and a skill with side effects should not load by itself either.",
+        "c": "Ruled out because \"Claude loads it by itself when your request matches its description\", and the harmless skill gains from that."
       }
     },
     {
@@ -275,14 +275,14 @@
       "options": {
         "a": "The entries apply only to managed settings, never to a repository",
         "b": "The plugin installs at once, because the file is in the repository",
-        "c": "A prompt appears for each plugin, listing its hooks and its scripts",
-        "d": "Claude Code ignores the entries without a message until trust is given"
+        "c": "Claude Code ignores the entries without a message until trust is given",
+        "d": "A prompt appears for each plugin, listing its hooks and its scripts"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The page says the entries \"apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message.\"",
+        "c": "The page says the entries \"apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message.\"",
         "b": "Ruled out because trust comes first: \"A repository cannot install code on a machine that has not trusted it.\"",
-        "c": "Ruled out because the page says \"Claude Code ignores them without a message\", which describes no prompt.",
+        "d": "Ruled out because the page says \"Claude Code ignores them without a message\", which describes no prompt.",
         "a": "Ruled out because the page says \"the same two keys go in managed settings\" for a whole organisation, and the repository's file covers its own contributors."
       }
     },
@@ -292,15 +292,15 @@
       "scope": "module",
       "stem": "A subagent should review code and remember wording the team prefers, with that knowledge committed with the code. Which fields fit?",
       "options": {
-        "a": "Every tool and the user memory scope",
-        "b": "Read-only tools and the project memory scope",
+        "a": "Read-only tools and the project memory scope",
+        "b": "Every tool and the user memory scope",
         "c": "Read-only tools and the local memory scope",
         "d": "Every tool and no memory field at all"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is \"shareable via version control\".",
-        "a": "Ruled out because \"Omit it and the subagent inherits every tool\", and the `user` scope lives in the home directory and is not committed.",
+        "a": "The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is \"shareable via version control\".",
+        "b": "Ruled out because \"Omit it and the subagent inherits every tool\", and the `user` scope lives in the home directory and is not committed.",
         "c": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\".",
         "d": "Ruled out because \"Omit it and the subagent inherits every tool\", and without `memory` the subagent keeps no knowledge across conversations."
       }
@@ -311,17 +311,17 @@
       "scope": "page",
       "stem": "A developer selects a built-in style in a settings file with `\"outputStyle\": \"explanatory\"`. Replies keep Claude Code's standard wording and no error appears. What is the cause?",
       "options": {
-        "a": "The session must be restarted first, because styles are read only at launch",
-        "b": "Project files cannot set a style at all, so the value belongs in the user folder",
-        "c": "A hook must apply the choice on each reply, because settings only suggest it to Claude",
-        "d": "The value must match a name exactly, or the default applies without a message"
+        "a": "The value must match a name exactly, or the default applies without a message",
+        "b": "The session must be restarted first, because styles are read only at launch",
+        "c": "Project files cannot set a style at all, so the value belongs in the user folder",
+        "d": "A hook must apply the choice on each reply, because settings only suggest it to Claude"
       },
-      "key": "d",
+      "key": "a",
       "explanation": {
-        "d": "The page says \"A value that doesn't match a style name exactly, such as `explanatory`, gives you the Default style\", with no error.",
-        "a": "Ruled out because \"Claude uses the new style starting with your next message\", and a built-in style needs no restart; only a style file created in a running session does.",
-        "b": "Ruled out because \"A project's own settings files take precedence over that value\", so a project file can set a style.",
-        "c": "Ruled out because a style is applied by Claude Code itself: \"Claude Code sends the active style's instructions with every request\", and no hook is involved."
+        "a": "The page says \"A value that doesn't match a style name exactly, such as `explanatory`, gives you the Default style\", with no error.",
+        "b": "Ruled out because \"Claude uses the new style starting with your next message\", and a built-in style needs no restart; only a style file created in a running session does.",
+        "c": "Ruled out because \"A project's own settings files take precedence over that value\", so a project file can set a style.",
+        "d": "Ruled out because a style is applied by Claude Code itself: \"Claude Code sends the active style's instructions with every request\", and no hook is involved."
       }
     },
     {
@@ -332,15 +332,15 @@
       "options": {
         "a": "Both keys change as written, and a warning appears on the screen at once",
         "b": "Ctrl+C is rebound as written, and Ctrl+S keeps stashing the prompt as before",
-        "c": "Both keys are freed together, and Ctrl+C then does nothing at all in the chat",
-        "d": "Ctrl+S is freed, and Ctrl+C keeps its default because it is reserved"
+        "c": "Ctrl+S is freed, and Ctrl+C keeps its default because it is reserved",
+        "d": "Both keys are freed together, and Ctrl+C then does nothing at all in the chat"
       },
-      "key": "d",
+      "key": "c",
       "explanation": {
-        "d": "The page says `null` \"frees the one key it is written against\", and that reserved keys cannot be rebound: \"These shortcuts cannot be rebound.\"",
+        "c": "The page says `null` \"frees the one key it is written against\", and that reserved keys cannot be rebound: \"These shortcuts cannot be rebound.\"",
         "a": "Ruled out because Claude Code \"writes a warning to the debug log\", not to the screen, and the reserved key does not change.",
         "b": "Ruled out because `null` \"frees the one key it is written against\", so Ctrl+S stops stashing.",
-        "c": "Ruled out because \"These shortcuts cannot be rebound\", and Ctrl+C is reserved, so it keeps interrupting."
+        "d": "Ruled out because \"These shortcuts cannot be rebound\", and Ctrl+C is reserved, so it keeps interrupting."
       }
     },
     {
@@ -350,16 +350,16 @@
       "stem": "One developer's `~/.claude/settings.json` names an output style, while the repository's `.claude/settings.json` names a different one. Which does the session use?",
       "options": {
         "a": "The personal choice, because a developer's own file always wins for that person",
-        "b": "Whichever file was saved last, because Claude Code compares modification times",
-        "c": "Neither choice, because a key set at two levels is rejected as a conflict",
-        "d": "The project's choice, because that level outranks the user level"
+        "b": "The project's choice, because that level outranks the user level",
+        "c": "Whichever file was saved last, because Claude Code compares modification times",
+        "d": "Neither choice, because a key set at two levels is rejected as a conflict"
       },
-      "key": "d",
+      "key": "b",
       "explanation": {
-        "d": "The page says \"Claude Code uses the value from the highest level that sets it\", and the shared project settings sit above the user settings.",
+        "b": "The page says \"Claude Code uses the value from the highest level that sets it\", and the shared project settings sit above the user settings.",
         "a": "Ruled out because \"A key at a higher level overrides the same key anywhere below it\", and the user level is the lowest of the files.",
-        "b": "Ruled out because the documentation gives \"their order, highest precedence first\", and no file date is involved.",
-        "c": "Ruled out because \"Claude Code uses the value from the highest level that sets it\", so two levels are resolved by order and not rejected."
+        "c": "Ruled out because the documentation gives \"their order, highest precedence first\", and no file date is involved.",
+        "d": "Ruled out because \"Claude Code uses the value from the highest level that sets it\", so two levels are resolved by order and not rejected."
       }
     }
   ]

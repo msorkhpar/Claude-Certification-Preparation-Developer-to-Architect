@@ -100,10 +100,10 @@ The wording is hand-written for this page. Each clause names a data set, a metri
 ## Quiz
 
 1. A team's goal reads "the extraction model should work well". Which rewrite meets the documentation's four traits of a good criterion?
-   - **a**: Reach full accuracy on all fields so that no invoice ever needs a manual check
-   - **b**: Make the model as accurate as an expert human reviewer on every invoice
+   - **a**: Reach 100 percent accuracy on every field, so that no invoice needs a manual check
+   - **b**: Lift field-level F1 above 0.9 on the 40 invoices used to write the prompt
    - **c**: Improve extraction until reviewers feel the output is clearly better
-   - **d**: Raise the field-level F1 above 0.9 on 500 held-out invoices, beating today's 0.86
+   - **d**: Lift field-level F1 above 0.9 on 500 held-out invoices, beating today's 0.86
 
 2. A support bot's eval set contains 40 polite, well-formed questions. Production shows empty messages, pasted logs and abusive input. What is the best change to the set?
    - **a**: Add tagged cases for those awkward situations, sampled from live traffic
@@ -120,7 +120,7 @@ The wording is hand-written for this page. Each clause names a data set, a metri
 <details>
 <summary>Answer key</summary>
 
-1. **d**. It names a metric (F1), a threshold above the current baseline, and a data set the model was not tuned on, which are the parts of the page's good example: "a held-out test set* of 10,000 diverse Twitter posts (Relevant), which is a 5% improvement over the current baseline (Achievable)". *b* is ruled out because a target fails the Achievable trait when "The target is beyond what current frontier models can do", and matching an expert on every invoice is such a target; it also names no metric. *c* is ruled out because a feeling has no number, while a criterion must "Use quantitative metrics or well-defined qualitative scales". *a* is ruled out because full accuracy on every field ignores "Base your targets on industry benchmarks, prior experiments, AI research, or expert knowledge".
+1. **d**. It names a metric (F1), a threshold above the current baseline, and a data set the model was not tuned on, which are the parts of the page's good example: "a held-out test set* of 10,000 diverse Twitter posts (Relevant), which is a 5% improvement over the current baseline (Achievable)". *b* is ruled out because it scores the model on the cases the prompt was written from, and trap 3 says "Keep cases the prompt has never been shaped by". *c* is ruled out because a feeling has no number, while a criterion must "Use quantitative metrics or well-defined qualitative scales". *a* is ruled out because a target fails the Achievable trait when "The target is beyond what current frontier models can do", and perfect accuracy on every field is such a target.
 2. **a**. The first principle is to "Design evals that mirror your real-world task distribution", and its list of edge cases includes "poor, harmful or irrelevant user input" for chat use cases, and a set of polite questions has none. *b* is ruled out because the page says "More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals". *c* is ruled out because a stricter threshold on the same easy cases still measures a different task and, in the page's words, "Don't forget to factor in edge cases!". *d* is ruled out because the course's advice is to "Write the awkward inputs by hand", and more polite questions add none.
 3. **c**. The page's example speaks of a "held-out test set", which is "data you did not tune on", and only that can say how the prompt will do on new input. *a* is ruled out because a stricter grader on the same set still scores the cases the prompt was shaped by, and the trap says "Keep cases the prompt has never been shaped by". *b* is ruled out because a list of changes records effort and carries no score, while the page asks for "Some ways to empirically test against those criteria". *d* is ruled out because repeating the tuned set only averages out noise, and the trap says "The score is then a memory test".
 

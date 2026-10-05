@@ -50,7 +50,7 @@ Secrets stay out of the sandbox through vaults: you register credentials once an
 
 ### Cost and the session budget
 
-A session budget is "an optional hard spend ceiling you set when you create a session." The platform prices what the session consumes at public list rates, and the total is its list cost: model tokens at each model's list price, web searches at $10 per 1,000, and "Session running time, at $0.08 per hour". Your billed price can be lower, because "List cost is not your contracted price."
+A session budget is "an optional hard spend ceiling you set when you create a session." The platform prices what the session consumes at public list rates, and the total is its list cost: model tokens at each model's list price, web searches at $10 per 1,000, and "Session running time, at $0.08 per hour". Your billed price can be lower, because "List cost is not your contracted price." The documentation lists these three items and no other.
 
 The amount is whole US cents written as a string: `"125"` is $1.25, and `"25.00"` is rejected so that no float rounding applies. A budget is set when the session is created, and it can later be changed or removed. The cap is checked between requests, so it bounds new work and not the exact total: "The request in flight when the cap is crossed still finishes." A session at its cap does not die. It goes idle with a stop reason of `budget_reached`, history and sandbox kept, and it accepts only events that settle work in progress (tool results and confirmations, and `user.interrupt`). A `user.message` is rejected with a 400. Raising the cap above the consumed list cost resumes it.
 
@@ -717,24 +717,24 @@ The example is two lint functions and a price. `check_environment` flags the thr
    - **c**: The environment is created with unrestricted networking instead
    - **d**: The packages install after a warning that the agent can ignore
 
-2. An agent keeps the default toolset policy and the sandbox has unrestricted networking. What should the team change first?
-   - **a**: Move the agent to a model with a smaller context window
+2. A cloud agent reads untrusted pages, keeps the default toolset policy and has `limited` networking with a few allowed hosts. Which change limits what a prompt injection can send out through those hosts?
+   - **a**: Replace the allowed hosts with wildcard patterns
    - **b**: Switch the toolset to custom tools so that no policy applies
-   - **c**: Add a longer system prompt that forbids any outbound request
-   - **d**: Set bash to `always_ask` and name the allowed hosts
+   - **c**: Restrict the web tools with an allowed domains list
+   - **d**: Make bash wait for approval before each command
 
-3. A team sets a session budget of `"500"`. The session pauses with a list cost of 503 cents. What does this show?
-   - **a**: A billing error, because the platform must stop exactly at the cap
-   - **b**: Expected behaviour, because the request in flight finishes
-   - **c**: A failed enforcement, because the cap is checked mid-request
-   - **d**: A crash, because a session cannot outlive its budget
+3. A session created with a budget of `"500"` goes idle with a list cost of 503 cents. How should the team read this?
+   - **a**: As intended, with the running request allowed to finish
+   - **b**: As a billing error that the platform should refund
+   - **c**: As a failed check that ran in the middle of a request
+   - **d**: As a crash that ended the session for good
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "If the environment uses `limited` networking, also set `networking.allow_package_managers` to `true`; otherwise the request is rejected with a 400 error." *a* is ruled out because the page requires "also set `networking.allow_package_managers` to `true`", and listing hosts alone does not open the registries. *c* is ruled out because only "a create request that omits it gets `unrestricted`", and here the field is set to `limited`. *d* is ruled out because the page names a rejection and not a warning: "otherwise the request is rejected with a 400 error."
-2. **d**. The page advises to "set the `bash` tool's policy to `always_ask` or `auto`", and its first trap says to set `networking` and list the hosts. *a* is ruled out because "Access is granted by host and not by action", so a smaller context window changes neither. *c* is ruled out because the page's advice is to "set the `bash` tool's policy to `always_ask` or `auto`", and a prompt is not a policy. *b* is ruled out because "Custom tools are executed by your application and controlled by you", so they would move the risk into your code and not remove it.
-3. **b**. The page says "The request in flight when the cap is crossed still finishes", so a paused session can read a fraction past the cap. *a* is ruled out because "it bounds new work and not the exact total", so the platform is not required to stop at the cap. *d* is ruled out because "A session at its cap does not die", and its history and sandbox are kept. *c* is ruled out because "The cap is checked between requests, so it bounds new work", which is the designed behaviour and not a failure.
+2. **d**. The page advises to "set the `bash` tool's policy to `always_ask` or `auto`". *a* is ruled out because "The sandbox can send any request to an allowed host", so wider host patterns open more places to send to. *b* is ruled out because "Custom tools are executed by your application and controlled by you", so they would move the risk into your code and not remove it. *c* is ruled out because the `web_search` and `web_fetch` tools "run on Anthropic's servers, so `networking` does not govern them", and a domain list on them leaves the sandbox's own route open.
+3. **a**. The page says "The request in flight when the cap is crossed still finishes", so a paused session can read a fraction past the cap. *b* is ruled out because "it bounds new work and not the exact total", so a figure past the cap is not an error. *c* is ruled out because "The cap is checked between requests, so it bounds new work", and not in the middle of a request. *d* is ruled out because "A session at its cap does not die." Its history and sandbox are kept.
 
 </details>
 
@@ -742,11 +742,11 @@ The example is two lint functions and a price. `check_environment` flags the thr
 
 This quiz covers both pages of the module.
 
-1. A hospital group must keep patient files inside its own network but wants Anthropic to run the agent loop. Which choice fits, and what must the group still do?
-   - **a**: A cloud environment with `unrestricted` networking and a strict system prompt
-   - **b**: A self-hosted sandbox, securing the image and the egress rules itself
-   - **c**: The Messages API with the files pasted into the system prompt of each call
-   - **d**: A cloud environment, since Anthropic hardens it and nothing else is needed
+1. A hospital group must keep patient files inside its own network but wants Anthropic to run the agent loop. Which setup fits?
+   - **a**: A cloud sandbox with `limited` networking and a few allowed hosts
+   - **b**: A self-hosted sandbox whose tools execute on local machines
+   - **c**: The Messages API with the files pasted into each prompt
+   - **d**: The Agent SDK running in the group's own process
 
 2. A developer migrates an Agent SDK service whose `can_use_tool` callback approved reads and refused pushes. What replaces that callback in Managed Agents?
    - **a**: A per-tool permission policy, with confirmations sent as events
@@ -760,18 +760,18 @@ This quiz covers both pages of the module.
    - **c**: Every call pauses until a person has confirmed it
    - **d**: A denied call can be overridden by the client with a confirmation
 
-4. A finance team asks for the cost of one long session before approving a budget. Which items does the list cost include?
-   - **a**: Model tokens and the storage of the event history afterward
-   - **b**: Model tokens only, since the sandbox is free to run
-   - **c**: Model tokens, web searches and the running time
-   - **d**: Model tokens and every package the environment installs
+4. A finance team wants to know what one long session's reported cost contains. Which items make up that total?
+   - **a**: Model tokens, event-history storage and disk space
+   - **b**: Model tokens alone, with sandbox time left free
+   - **c**: Model tokens, web searches and running time
+   - **d**: Model tokens and web searches, with running time billed apart
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says self-hosting moves execution into your infrastructure while "keep the orchestration on Anthropic's side", and that "Without egress restrictions, a compromised tool execution can reach arbitrary external hosts", so the group owns image and egress. *a* is ruled out because "The sandbox can send any request to an allowed host", and `unrestricted` means "Full outbound network access, except for a general safety blocklist", which is the opposite of keeping files inside. *c* is ruled out because the Messages API is the choice for "Custom agent loops and fine-grained control", and pasting files sends them to Anthropic on every call. *d* is ruled out because a cloud sandbox runs in Anthropic's infrastructure, where the files would be stored, and the first page lists "self-hosted execution for compliance or data residency" as its own reason to choose another option.
+1. **b**. The page says "Self-hosted sandboxes keep the orchestration on Anthropic's side but move tool execution into infrastructure you control", and the group still owns the image and the egress rules. *a* is ruled out because "By default tools run in Anthropic's sandboxes.", so the files would be processed on Anthropic's side. *c* is ruled out because "You write the loop on the Messages API.", and the group wants Anthropic to run the loop. *d* is ruled out because "You embed Claude Code's loop with the Agent SDK, in a process you operate.", so the group, not Anthropic, would run it.
 2. **a**. The first page says `permission_mode` and `can_use_tool` "become a per-tool permission policy", and a paused call is answered with a `user.tool_confirmation` event. *b* is ruled out because the migration "becomes an agent created once" from that object. *c* is ruled out because `networking` controls the sandbox's outbound traffic, and "so `networking` does not govern them" for the search and fetch tools. *d* is ruled out because an override "must list every tool the session should have", and removing a tool is not an approval step.
 3. **a**. The page says "If you relay untrusted end-user input in `user.message` events, the server reads that input as your intent too." *b* is ruled out because what you post in `user.message` events "counts as your intent", so the server reads it. *c* is ruled out because "`auto` is not a human checkpoint", and a safe call "runs before anyone sees it". *d* is ruled out because a denied call is final: "your client cannot override the denial."
-4. **c**. The page lists "model tokens at each model's list price, web searches at $10 per 1,000" and "Session running time, at $0.08 per hour". *b* is ruled out because running time is priced: "Session running time, at $0.08 per hour". *a* is ruled out because the page prices "model tokens at each model's list price", web searches and running time, and no storage. *d* is ruled out because the page names no charge for packages, and prices "what the session consumes" only.
+4. **c**. The page says the total is "model tokens at each model's list price, web searches at $10 per 1,000, and "Session running time, at $0.08 per hour"". *a* is ruled out because "The documentation lists these three items and no other.", and storage and disk are not among them. *b* is ruled out because running time is priced: "Session running time, at $0.08 per hour". *d* is ruled out because running time is one of the three items of "the total is its list cost", not a separate bill.
 
 </details>

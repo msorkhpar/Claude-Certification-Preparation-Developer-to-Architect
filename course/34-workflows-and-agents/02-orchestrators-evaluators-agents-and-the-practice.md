@@ -61,11 +61,11 @@ The practice is in `exercises/34-workflows-and-agents/unit-01/practice-1/stateme
    - **c**: Routing, with one handler for each file extension
    - **d**: Voting, with the same edit run several times for agreement
 
-2. In the article's terms, which description marks the point where a system stops being a workflow and becomes an agent?
-   - **a**: It calls a model more than once to finish a single user request
-   - **b**: It uses tools such as search or code execution during its work
-   - **c**: It runs for a long time, so the user waits for the final result
-   - **d**: It lets the model choose the next step and the tools to use
+2. A pipeline makes many calls, uses search and code execution, and runs for minutes while the user waits. What would make the article call it an agent?
+   - **a**: Making its calls in parallel and not in sequence
+   - **b**: Using further tools such as a browser or a database
+   - **c**: Running for hours and not minutes before it answers
+   - **d**: Letting the LLM, not the program, choose each next step
 
 3. A draft-and-review loop has no accepted draft after the allowed rounds. What does the practice's refine function return?
    - **a**: The last draft, since later revisions always improve on earlier ones
@@ -77,7 +77,7 @@ The practice is in `exercises/34-workflows-and-agents/unit-01/practice-1/stateme
 <summary>Answer key</summary>
 
 1. **b**. The page says orchestrator-workers is "well-suited for complex tasks where you can't predict the subtasks needed", with coding as its example. *a* is ruled out because chaining is ideal when the task "can be easily and cleanly decomposed into fixed subtasks", and here the number of files is not known. *d* is ruled out because "Running the same task multiple times to get diverse outputs" is voting, which repeats one task and does not split a task. *c* is ruled out because routing "works well for complex tasks where there are distinct categories that are better handled separately", which is a choice of one path and not a plan with a variable length.
-2. **d**. The page says agents are systems "where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks". *a* is ruled out because workflows are "orchestrated through predefined code paths", and they may call a model many times. *b* is ruled out because the building block of every pattern is "an LLM enhanced with augmentations such as retrieval, tools, and memory", so workflows use tools too. *c* is ruled out because the line is drawn by who directs the path, which the page says in "dynamically direct their own processes and tool usage", and not by how long it runs.
+2. **d**. The page says agents are systems "where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks". *a* is ruled out because "Sectioning splits the task into independent parts" and the page says "All of them are workflows", so parallel calls stay a workflow. *b* is ruled out because every pattern calls "an LLM enhanced with augmentations such as retrieval, tools, and memory", so tools do not mark an agent. *c* is ruled out because the line is drawn by who decides, as in "dynamically direct their own processes and tool usage", and not by how long a run lasts.
 3. **b**. The page says that after the maximum rounds "the best draft wins, not the last one", and the earliest wins a tie. *a* is ruled out because "a late revision can be worse", which is why the best draft wins. *d* is ruled out because agents and loops "include stopping conditions (such as a maximum number of iterations) to maintain control", so reaching the maximum is a planned end and not a failure. *c* is ruled out because "The autonomous nature of agents means higher costs, and the potential for compounding errors", which is the cost of a loop with no exit.
 
 </details>
@@ -86,23 +86,23 @@ The practice is in `exercises/34-workflows-and-agents/unit-01/practice-1/stateme
 
 This quiz covers both pages of the module.
 
-1. A team replaces a working three-step chain with a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?
-   - **a**: Add more layers, since abstraction makes patterns easier to debug later
-   - **b**: Call the LLM APIs directly, since that keeps each request and reply in view
-   - **c**: Switch to a graphical builder, since it shows the prompts on screen
-   - **d**: Keep that library, since the article says frameworks are required
+1. A team swaps a working three-step chain for a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?
+   - **a**: Keep the framework, and add a second one to watch it
+   - **b**: Return to direct LLM API calls, and read any code beneath
+   - **c**: Move the sequence into an agent so that the model finds the path
+   - **d**: Wrap the framework in one more layer that logs each call
 
-2. A router's classifier replies with a label in capitals and a full stop. What should the program do before it looks the label up?
-   - **a**: Clean the text into a key, then use the default only if nothing matches
-   - **b**: Send the raw reply to the default route, without trying to match it
-   - **c**: Ask the user which route is meant, then use the answer as the key
-   - **d**: Reject the reply, then call the classifier again until it matches exactly
+2. A classifier's output comes back as `REFUNDS.`, with capitals and a full stop, but the program's table is keyed by lowercase names. What should the program do before the table lookup?
+   - **a**: Normalize the text into a form that matches a known route
+   - **b**: Retry the classifier until an output matches a name exactly
+   - **c**: Send the output to the default route without a lookup
+   - **d**: Hand the output to a person who picks the route
 
-3. In the article's wording, what does voting do that sectioning does not?
-   - **a**: It runs one task repeatedly and counts the results
-   - **b**: It needs a different model for each call that it makes
-   - **c**: It waits for each call to finish before the next one starts
-   - **d**: It splits one task into independent pieces for separate calls
+3. A code review sends one snippet to the model three times in parallel and applies a threshold to the answers. Which variation is this?
+   - **a**: Sectioning, where independent subtasks run side by side
+   - **b**: Chaining, where each call processes the output of an earlier one
+   - **c**: Routing, where a classifier picks a specialized followup
+   - **d**: Voting, where repeated runs of one task are counted
 
 4. A fan-out workflow plans three subtasks and one worker throws an exception. What does the practice's orchestrator do?
    - **a**: Stops the run and reports a failure, since a missing result makes the answer unsafe
@@ -113,9 +113,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The first page says "We suggest that developers start by using LLM APIs directly", and to understand the code under any framework. *a* is ruled out because frameworks "often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug". *d* is ruled out because the article's advice is "don't hesitate to reduce abstraction layers and build with basic components as you move to production". *c* is ruled out because the advice is "We suggest that developers start by using LLM APIs directly", and a graphical builder adds a layer, while frameworks "often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug".
-2. **a**. The first page says the program normalizes the label, looks it up, and sends anything unknown to a default route. *d* is ruled out because the example's reply `refunds?` is not a route, "so the question takes the default", with no second call to the classifier. *b* is ruled out because "The program normalizes the label, looks it up, and sends anything unknown to a default route.", so a reply that matches after cleaning is not unknown. *c* is ruled out because "The failure to design for is a label that matches no route.", and the program handles it with a default and not with a question.
-3. **a**. The first page defines voting as "Running the same task multiple times to get diverse outputs", and says "a vote is a count and a threshold". *d* is ruled out because that is sectioning: "Breaking a task into independent subtasks run in parallel". *b* is ruled out because "a vote is a count and a threshold", which the program applies, and no second model is involved. *c* is ruled out because "When a program can run model calls at the same time and combine them in code, it has two variations.", and voting is one of them.
+1. **b**. The first page says "We suggest that developers start by using LLM APIs directly", and to understand the code under any framework. *a* is ruled out because frameworks "often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug". *c* is ruled out because agents are for "open-ended problems where it's difficult or impossible to predict the required number of steps", and a fixed sequence is not one. *d* is ruled out because the article says "don't hesitate to reduce abstraction layers and build with basic components as you move to production", not to add one.
+2. **a**. The first page says "The program normalizes the label, looks it up, and sends anything unknown to a default route." *b* is ruled out because the page sends "anything unknown to a default route" and describes no second call to the classifier. *c* is ruled out because the program "normalizes the label, looks it up", so a reply that matches after cleaning is not sent straight to the default. *d* is ruled out because "The failure to design for is a label that matches no route.", and the program meets it with a default and not with a person.
+3. **d**. The first page defines voting as "Running the same task multiple times to get diverse outputs", and says "a vote is a count and a threshold". *a* is ruled out because sectioning is "Breaking a task into independent subtasks run in parallel", and here one task is repeated. *b* is ruled out because chaining is for steps "where each LLM call processes the output of the previous one", and these runs do not depend on each other. *c* is ruled out because "Routing classifies an input and directs it to a specialized followup task", and here nothing is classified.
 4. **c**. The second page says one failure must not stop the others, "the subtask is marked failed and the rest run", and a partial result is reported as partial. *a* is ruled out because the page says "one failure must not stop the others". *b* is ruled out because "A worker can fail, and one failure must not stop the others", and the page describes no retry. *d* is ruled out because the page says "A partial result is reported as partial", so the failure is visible.
 
 </details>

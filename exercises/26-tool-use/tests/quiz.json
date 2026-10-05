@@ -26,7 +26,7 @@
       "scope": "page",
       "stem": "Which description follows the documentation's advice for a tool named `get_stock_price`?",
       "options": {
-        "a": "Returns the latest USD price of a listed ticker. Use it when asked for a stock's current price; nothing else comes back.",
+        "a": "Returns the latest USD quote for a listed ticker. Use it when asked what one share costs now; no history comes back.",
         "b": "A general finance tool that the model may call for anything about companies, markets, prices or news anywhere in the world",
         "c": "Gets the stock price for a ticker symbol, so the model can call it whenever any ticker is named in a message",
         "d": "Price lookup tool, which the model should call on every single message that it receives from any user of the application"
@@ -72,9 +72,9 @@
       "key": "b",
       "explanation": {
         "b": "The page says \"Write instructive error messages\", with \"what went wrong and what Claude should try next\".",
-        "a": "Ruled out because the model should \"incorporate this error into its response to the user\", which needs the loop to continue.",
+        "a": "Ruled out because the loop is to \"continue the conversation forward with a `tool_result` that indicates the error\", not to end it.",
         "c": "Ruled out because \"An exception that becomes an empty string tells the model the call worked.\"",
-        "d": "Ruled out because the error result is how the model learns of the failure: \"you can also continue the conversation forward with a `tool_result` that indicates the error\"."
+        "d": "Ruled out because the model must be told of the failure: \"Claude will then incorporate this error into its response to the user.\""
       }
     },
     {
@@ -159,17 +159,17 @@
       "scope": "page",
       "stem": "A loop forced `{\"type\": \"tool\", \"name\": \"lookup\"}` on every request. What goes wrong?",
       "options": {
-        "a": "The system prompt is dropped from every request",
-        "b": "The tool results are rejected with a 400 error",
+        "a": "The model writes a plan in text before each tool call",
+        "b": "The model swaps in another tool when it judges one fits better",
         "c": "No final answer in plain text could ever come out",
-        "d": "Parallel calls turn on in place of the single forced call"
+        "d": "Plain-text replies still arrive as usual after the first call"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"If it were sent again, the model would have to call a tool each time and could never give a final answer.\"",
-        "b": "Ruled out because acceptance depends on the formatting rule to \"return one `tool_result` for each `tool_use` block\".",
-        "a": "Ruled out because the choice changes how the model replies, and the page names no effect on the system prompt: \"Force the first request only.\"",
-        "d": "Ruled out because for `any` or `tool` with the flag set, \"Claude calls exactly one tool\"."
+        "a": "Ruled out because \"the API prefills the assistant message to force a tool to be used\", so no plan in text comes before the call.",
+        "b": "Ruled out because the `tool` value \"forces Claude to always use a particular tool\", with a `name`.",
+        "d": "Ruled out because \"the model would have to call a tool each time\", so a plain-text reply never arrives."
       }
     },
     {

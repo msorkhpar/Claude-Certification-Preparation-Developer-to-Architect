@@ -54,7 +54,7 @@ of your own. It keeps a long conversation or agent task inside the context windo
 response quality degrades as a conversation grows." For long conversations and agent workflows the context windows page calls it
 "the primary strategy for context management". The documentation compares three ways to compact:
 
-| | On demand | At a token threshold | Your own summarizer |
+| | On demand | At a token threshold | Your own summariser |
 |---|---|---|---|
 | Who decides when | you, by sending a request | the API, when input tokens reach the trigger | you |
 | Code you write | a loop that requests the summary and swaps it in | one parameter on ordinary requests | the summarization call and the history rewrite |

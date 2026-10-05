@@ -53,7 +53,7 @@
       "key": "c",
       "explanation": {
         "c": "The page says the subtype \"is the primary way to check termination state\".",
-        "a": "Ruled out because the subtype \"is the primary way to check termination state\", and the stop reason of one message is not the end of the run.",
+        "a": "Ruled out because \"When a limit is reached the run ends with a result whose subtype names it\", so the outcome sits on the result and not on one assistant message.",
         "b": "Ruled out because \"The result field holds the final text output and is only present on the success variant, so always check the subtype before reading it.\"",
         "d": "Ruled out because the instruction is \"Check the subtype field to determine whether the task succeeded or hit a limit.\", and the exit code and the raise only follow the error result."
       }
@@ -62,38 +62,38 @@
       "id": "02-tools-permissions-hooks-and-custom-tools#q1",
       "page": "02-tools-permissions-hooks-and-custom-tools.md",
       "scope": "page",
-      "stem": "A developer puts Read and Grep in allowed_tools, expecting the agent to be unable to run shell commands. What happens?",
+      "stem": "A developer lists Read and Grep in allowed_tools, and expects shell commands to be out of reach. What happens?",
       "options": {
-        "a": "Every other tool is removed from the agent's context",
-        "b": "Others stay reachable, and only those two are pre-approved",
-        "c": "The run fails at startup because the list is incomplete",
-        "d": "Unlisted tools are approved automatically, with no prompt at all"
+        "a": "Bash is removed from the agent's context before the first turn",
+        "b": "Bash remains available, and its calls fall through to the mode",
+        "c": "Bash calls are denied in every permission mode",
+        "d": "Bash calls are approved automatically with no prompt"
       },
       "key": "b",
       "explanation": {
         "b": "The page says allowed_tools \"does not restrict Claude to only these tools\", and that unlisted tools \"fall through to permission_mode and can_use_tool\".",
-        "a": "Ruled out because \"This does not restrict Claude to only these tools.\"",
-        "d": "Ruled out because unlisted tools do not default to approval: they \"fall through to permission_mode and can_use_tool\".",
-        "c": "Ruled out because \"Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool.\""
+        "a": "Ruled out because only a bare name in disallowed_tools \"removes the tool from Claude's context altogether\", and allowed_tools is not that setting.",
+        "c": "Ruled out because allowed_tools \"auto-approves the tools you list\", so it approves and does not deny.",
+        "d": "Ruled out because \"Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool.\""
       }
     },
     {
       "id": "02-tools-permissions-hooks-and-custom-tools#q2",
       "page": "02-tools-permissions-hooks-and-custom-tools.md",
       "scope": "page",
-      "stem": "A hook returns a denial for a tool call that a matching allow rule would approve. Which result follows?",
+      "stem": "A PreToolUse hook returns deny for a call that a matching allow rule would approve, in acceptEdits mode. What happens to the call?",
       "options": {
-        "a": "It runs, with the allow rule overriding the denial",
-        "b": "It runs only when the permission mode is bypassPermissions",
-        "c": "It goes to the permission callback for the final decision",
-        "d": "It is blocked, with the earliest step deciding the outcome"
+        "a": "It runs, and the allow rule wins",
+        "b": "It goes to the callback, which decides",
+        "c": "It waits for the permission mode to decide",
+        "d": "It is blocked, and no later step is consulted"
       },
       "key": "d",
       "explanation": {
-        "d": "The page gives the order as hooks, deny rules, ask rules, the mode, allow rules and the callback, and says a hook can deny a call outright.",
-        "a": "Ruled out because the order puts hooks first and \"If any hook returns deny, the operation is blocked regardless of other hooks.\"",
-        "b": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\".",
-        "c": "Ruled out because \"hooks run before every other step\", while the callback is the last step and sees only what nothing earlier decided."
+        "d": "The page says \"Hooks run first, so a hook can deny a call outright\", and \"Each step can end the decision.\"",
+        "a": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\", so an allow rule cannot override it.",
+        "b": "Ruled out because \"The callback sees only what nothing earlier decided.\", and the hook has decided.",
+        "c": "Ruled out because the mode is checked after the hooks, and \"Hooks run first, so a hook can deny a call outright\"."
       }
     },
     {
@@ -157,19 +157,19 @@
       "id": "03-driving-the-sdk-offline-and-the-practice#q3",
       "page": "03-driving-the-sdk-offline-and-the-practice.md",
       "scope": "page",
-      "stem": "The example's output shows six MCP messages for two custom tool calls. How should a reader treat that number?",
+      "stem": "The example's output lists six MCP messages for two custom tool calls. What does the page say that number is?",
       "options": {
-        "a": "As what the real binary sends for any pair of custom tools",
-        "b": "As a count that the SDK promises in its documentation",
-        "c": "As the stand-in's own sequence, not a figure for the real binary",
-        "d": "As a protocol limit of three messages for each tool call"
+        "a": "It is the number of messages that the real binary sends for two tools",
+        "b": "It is a protocol limit of three messages for each tool",
+        "c": "It is the sequence that the stand-in itself produces",
+        "d": "It is a count measured on the real binary and recorded here"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says \"The MCP count is the stand-in's own sequence of an initialize, a notification and a tool call for each custom tool, so it is not a number to expect from the real binary.\"",
-        "a": "Ruled out because it \"is not a number to expect from the real binary\".",
-        "b": "Ruled out because \"The MCP count is the stand-in's own sequence\", and no documentation promises it.",
-        "d": "Ruled out because the three messages are \"the stand-in's own sequence\", and not a limit of the protocol."
+        "c": "The page says \"The MCP count is the stand-in's own sequence of an initialize, a notification and a tool call for each custom tool\".",
+        "a": "Ruled out because the count is \"not a number to expect from the real binary\".",
+        "b": "Ruled out because the three messages are \"an initialize, a notification and a tool call for each custom tool\", the stand-in's own sequence and not a limit of the protocol.",
+        "d": "Ruled out because the page says \"It is not the real binary, and nothing here shows how the real binary words its messages or schedules its calls.\""
       }
     },
     {
@@ -195,19 +195,19 @@
       "id": "03-driving-the-sdk-offline-and-the-practice#m2",
       "page": "03-driving-the-sdk-offline-and-the-practice.md",
       "scope": "module",
-      "stem": "In the course example, a denied push appears as \"Permission denied: Nothing is pushed from an agent\". Which part of that text is the stand-in's own wording?",
+      "stem": "In the example output a denied push appears as \"Permission denied: Nothing is pushed from an agent\". Which part is written by the example's own hook and not by the stand-in's code?",
       "options": {
-        "a": "The reason after the colon, which the hook returned",
-        "b": "The whole line, since the real binary words denials in the same way",
-        "c": "The prefix before the colon",
-        "d": "Nothing, because the stand-in copies the real binary's messages exactly"
+        "a": "The words Permission denied, before the colon",
+        "b": "The whole line, from the first word to the last",
+        "c": "The reason that follows the colon",
+        "d": "No part of the line, which is copied from the real binary"
       },
       "key": "c",
       "explanation": {
-        "c": "The third page says \"The prefix Permission denied: in front of it is the stand-in's wording and not the real binary's.\"",
-        "a": "Ruled out because the reason is the hook's own text: \"which is the text of your hook\".",
-        "b": "Ruled out because the prefix \"is the stand-in's wording and not the real binary's\".",
-        "d": "Ruled out because the stand-in applies \"a simplified copy of the documented behaviour, not the real binary\"."
+        "c": "The third page says the reason \"is the text of your hook\".",
+        "a": "Ruled out because \"The prefix Permission denied: in front of it is the stand-in's wording and not the real binary's.\"",
+        "b": "Ruled out because part of the line, the reason, is \"which is the text of your hook\", so the line is not all the stand-in's.",
+        "d": "Ruled out because \"It is not the real binary, and nothing here shows how the real binary words its messages or schedules its calls.\""
       }
     },
     {

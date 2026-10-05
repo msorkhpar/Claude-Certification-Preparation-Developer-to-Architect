@@ -62,30 +62,30 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
 
 ## Quiz
 
-1. A team wants to notice a user who keeps trying to defeat the rules of its application. What does the documentation suggest?
-   - **a**: Adjust its responses to the offender, and consider throttling or a ban
-   - **b**: Tighten the system prompt, so that it refuses harder next time
-   - **c**: Keep no logs of refused requests, so that no attack leaves a record
-   - **d**: Raise the request limit of that person, so the rules are tested less often
+1. A team wants to spot a user who keeps probing the application's guardrails. Which monitoring rule fits?
+   - **a**: Alert on every question put to a person, since each may be an attack
+   - **b**: Add up denials across all actors, and alert on the total
+   - **c**: Count denials for each actor, and alert at a threshold
+   - **d**: Tighten the system prompt, so the model refuses harder next time
 
 2. A team wants to cut the risk of a prompt leak without hurting the work. Which step adds no complexity?
-   - **a**: Remove proprietary details that are not needed for the job
+   - **a**: Screen every reply with a prompted model that looks for leaked text
    - **b**: Add many rules that forbid repeating text from the instructions
-   - **c**: Rewrite the prompt so that instructions are stated twice over
-   - **d**: Stop monitoring altogether, because screening slows down replies
+   - **c**: Rewrite the prompt with tighter wording before any monitoring
+   - **d**: Leave out proprietary details that the task does not need
 
-3. A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it do?
-   - **a**: Skip the audit entirely for calls that carry a secret of any kind
-   - **b**: Store the raw arguments, because the audit needs every detail of the call
-   - **c**: Replace the secret with a fixed marker before the record is saved
-   - **d**: Encrypt the record and keep the key in the same file as the record
+3. A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it record?
+   - **a**: The arguments, with the secret replaced by a fixed marker
+   - **b**: The raw arguments, since an audit wants the full detail
+   - **c**: No entry for a call that happens to carry a secret value
+   - **d**: The tool and the decision, with the arguments left out entirely
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page quotes the documentation: "Adjust responses and consider throttling or banning users who repeatedly attempt to circumvent your application's guardrails", and says that needs a record and a threshold. *b* is ruled out because the page says leak-proofing and extra prompt text "can add complexity that may degrade performance", and a longer prompt records nothing. *c* is ruled out because "A control that blocks should also record", and without a record you cannot answer "who tried what". *d* is ruled out because the page says to "consider throttling or banning users who repeatedly attempt to circumvent your application's guardrails", and a higher limit gives them room instead.
-2. **a**. The page says "If Claude doesn't need it to perform the task, don't include it", and that a secret not in the prompt "cannot leak from it". *b* is ruled out because leak-proofing "can add complexity that may degrade performance". *c* is ruled out because the page lists no such step and warns against added complexity: "While no method is foolproof, the strategies below can significantly reduce the risk". *d* is ruled out because the page says to try monitoring first: "output screening and post-processing, to try to catch instances of prompt leak."
-3. **c**. The page says to record "the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own". *b* is ruled out because the audit keeps "the arguments with secrets redacted" and not the raw ones. *a* is ruled out because the audit exists to answer "who tried what, which denials repeat, which sessions were tainted", and a call that carries a secret is one worth recording. *d* is ruled out because a key kept beside the record is still in the log, and "a log that holds a raw key has become a leak of its own", whatever the file is encrypted with.
+1. **c**. The page says the response to repeat offenders "needs a threshold", and "The practice uses three denials by one actor, which raises an alert". *a* is ruled out because "An `ask` is the gate working, and alerts on it bury the real ones." *b* is ruled out because the alert is per actor: "three denials by one actor", and a pooled total names nobody. *d* is ruled out because "A control that blocks should also record", and a stricter prompt records nothing.
+2. **d**. The page says "If Claude doesn't need it to perform the task, don't include it", and that a secret not in the prompt "cannot leak from it". *a* is ruled out because the page ranks it behind the cheapest step: "The cheapest to apply is the third, because it adds no complexity." *b* is ruled out because leak-proofing "can add complexity that may degrade performance". *c* is ruled out because the first advice is to "try monitoring before prompt engineering".
+3. **a**. The page says to record "the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own". *b* is ruled out because the audit keeps "the arguments with secrets redacted" and not the raw ones. *c* is ruled out because the audit exists to answer "who tried what, which denials repeat, which sessions were tainted", and a call that carries a secret is one worth recording. *d* is ruled out because the record holds "the tool, the decision, the reason and the arguments with secrets redacted", so the arguments stay in it.
 
 </details>
 
@@ -94,35 +94,35 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
 This quiz covers all three pages of the module.
 
 1. A mail assistant reads inbound messages. Which combination gives the best protection against a hostile message?
-   - **a**: A longer system prompt, with a firm tone in every instruction given
-   - **b**: Encoded results, narrow tools and a gate that tightens once outside text is present
-   - **c**: A pattern list on its own, run before the model reads each inbound message
-   - **d**: A larger context window, so that the model can weigh each message better
+   - **a**: A pattern list, a firm tone in the prompt and a larger context window
+   - **b**: Encoded results, narrow tools and a gate that tightens after outside text
+   - **c**: Encoded results, a pattern list and broad tools kept for convenience
+   - **d**: Narrow tools and a gate, with the message text placed in the system prompt
 
 2. After an agent has read an untrusted web page, which request should be refused or escalated?
-   - **a**: Listing a directory, which is a read-only command
-   - **b**: Reading a file inside the project folder, which changes nothing
-   - **c**: Sending mail, which is left for a person to do
-   - **d**: Fetching a plain address with no query string and no fragment
+   - **a**: Reading a file inside the project folder
+   - **b**: Fetching a plain address with no query string and no fragment
+   - **c**: Sending mail to an outside recipient
+   - **d**: Running a read-only command such as `git status`
 
 3. A team builds a hook to stop recursive forced deletes. Which design choice should the hook follow?
-   - **a**: Block every shell command, whatever its purpose or its origin
-   - **b**: Match the text `rm -rf` and allow whatever it cannot parse at all
-   - **c**: Match the text `rm -rf` and rely on the model's own caution alone
-   - **d**: Parse the command into parts, see through wrappers and block what it cannot read
+   - **a**: Parse the line into parts, fail closed, and stay silent on safe ones
+   - **b**: Match the text `rm -rf` and allow whatever it cannot parse
+   - **c**: Match the text `rm -rf` and rely on the model's caution for the rest
+   - **d**: Answer `allow` on every safe command so the call goes straight through
 
 4. A team's key is stored in the environment for a CI job. Which practice fits both CI and an agent in production?
-   - **a**: Write the value into the workflow file, so every runner has it
-   - **b**: Keep the value outside the model's reach, and redact it in logs
-   - **c**: Put the value in the memory file, so Claude never forgets it
-   - **d**: Print the value in the first line of the audit for later checks
+   - **a**: Track the `.env` file so every runner receives the same value
+   - **b**: Pass it to the agent's sandbox as an ordinary environment variable
+   - **c**: Log the value once at the start so later checks can compare it
+   - **d**: Keep the value out of the model's reach, and redact it in logs
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The layers table puts structure (JSON encoding), privilege (narrow tools, "a stricter gate after untrusted text was read") and a decision gate in the path of one request. *a* is ruled out because "Whatever the injected text asks for, the agent can do only what its grants allow", and tone adds no grant. *c* is ruled out because a pattern list "catches the phrasing someone thought of and misses the paraphrase". *d* is ruled out because a larger window changes nothing about who wrote the text, and the page's structure rule is to "Put untrusted content only in tool results".
-2. **c**. The page says that in a tainted session "Sending mail is refused until a person does it". *b* is ruled out because "Reads stay allowed, since they change nothing". *a* is ruled out because "Reads stay allowed, since they change nothing", and a read-only command is a read. *d* is ruled out because only a network call "that carries data in its URL, a query string or a fragment asks", so a plain address stays allowed.
-3. **d**. The page says a hook can "parse the command into its parts", should "fail closed", and that a command "that cannot be parsed, or an event the hook cannot read, is blocked and not waved through". *b* is ruled out because "A guard that exits 0 on a parse error is a guard an attacker can walk through". *c* is ruled out because "A memory line asks, and a hook enforces", and the model's caution is not a control. *a* is ruled out because the page asks for a guard on the destructive case and no opinion on the safe case: "it should answer the safe case with no opinion".
-4. **b**. The page says "a secret never enters anything the model can read or a file anyone can commit", and "In logs and results, redact before writing." *a* is ruled out because "Never commit API keys or OAuth tokens directly to your repository." *c* is ruled out because a memory file is read by the model and committed, and the rule is that a secret "never enters anything the model can read". *d* is ruled out because "A key that appears in a tool result or an audit line has left your control."
+1. **b**. The layers table puts structure (JSON encoding), privilege (narrow tools, "a stricter gate after untrusted text was read") and a decision gate in the path of one request. *a* is ruled out because a pattern list "catches the phrasing someone thought of and misses the paraphrase", and "Whatever the injected text asks for, the agent can do only what its grants allow", so tone adds no grant. *c* is ruled out because "An agent that can read a file, send mail to anyone and has the production key can leak." *d* is ruled out because the page says untrusted content goes "never in `system` prompts or plain user `text` blocks".
+2. **c**. The page says that in a tainted session "Sending mail is refused until a person does it". *a* is ruled out because "Reads stay allowed, since they change nothing". *b* is ruled out because only a network call "that carries data in its URL, a query string or a fragment asks", so a plain address stays allowed. *d* is ruled out because the practice gate "limits `bash` to read-only commands and refuses chaining", so a read-only command stays allowed.
+3. **a**. The page says a hook can "parse the command into its parts", should "fail closed", and that a command "that cannot be parsed, or an event the hook cannot read, is blocked and not waved through". *b* is ruled out because "A guard that exits 0 on a parse error is a guard an attacker can walk through". *c* is ruled out because "A memory line asks, and a hook enforces", and the model's caution is not a control. *d* is ruled out because the hook "should answer the safe case with no opinion and not with an allow, so that it never overrides a stricter rule elsewhere".
+4. **d**. The page says "a secret never enters anything the model can read or a file anyone can commit", and "In logs and results, redact before writing." *a* is ruled out because keys are "loaded from an untracked file such as `.env`", and a secret never enters "a file anyone can commit". *b* is ruled out because for production agents, "keep the value out of the sandbox". *c* is ruled out because "A key that appears in a tool result or an audit line has left your control."
 
 </details>

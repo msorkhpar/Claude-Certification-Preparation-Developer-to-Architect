@@ -187,7 +187,7 @@
       "explanation": {
         "c": "The planner puts \"a volatile block moves to the very end of the request\", after the last breakpoint.",
         "b": "Ruled out because \"Changes at each level invalidate that level and all subsequent levels\", whatever the TTL.",
-        "a": "Ruled out because the prompt already clears 512 tokens and usage shows writes, and the cause is \"a volatile block moves to the very end\" in the plan.",
+        "a": "Ruled out because padding only helps a prefix that falls short, since \"A prefix shorter than the model's minimum is not cached\", and writes on every call show that this prompt is cached and is not short.",
         "d": "Ruled out because \"You can define up to 4 cache breakpoints\", yet an earlier changing block still changes the hash."
       }
     }

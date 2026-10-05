@@ -131,7 +131,7 @@ accepts a forced choice, set `tool_choice`; otherwise prompt for it.
    - **d**: Their program, after it reads the `tool_use` block in the reply
 
 2. Which description follows the documentation's advice for a tool named `get_stock_price`?
-   - **a**: Returns the latest USD price of a listed ticker. Use it when asked for a stock's current price; nothing else comes back.
+   - **a**: Returns the latest USD quote for a listed ticker. Use it when asked what one share costs now; no history comes back.
    - **b**: A general finance tool that the model may call for anything about companies, markets, prices or news anywhere in the world
    - **c**: Gets the stock price for a ticker symbol, so the model can call it whenever any ticker is named in a message
    - **d**: Price lookup tool, which the model should call on every single message that it receives from any user of the application
