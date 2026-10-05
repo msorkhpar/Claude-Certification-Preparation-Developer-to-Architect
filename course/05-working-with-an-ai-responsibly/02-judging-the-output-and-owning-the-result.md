@@ -163,7 +163,7 @@ This quiz covers both pages of the module.
    - **a**: Send the table on as filled, trusting the figures that fit the layout
    - **b**: Ask for a confidence beside each entry, then keep the entries marked high
    - **c**: Fill the unknown cost with the average of the other rows and label it an estimate
-   - **d**: Have it flag any missing value, keep the gap, and check the rest against the source
+   - **d**: Have it flag missing values, keep the gap, and check the rest at source
 
 <details>
 <summary>Answer key</summary>
