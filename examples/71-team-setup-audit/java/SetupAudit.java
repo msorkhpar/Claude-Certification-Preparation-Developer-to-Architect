@@ -19,6 +19,7 @@ import java.util.stream.Stream;
  * at launch; a command file under .claude/commands/ in the project is shared through version control; permission rules sit in .claude/settings.json. Nothing here starts Claude Code.
  */
 public final class SetupAudit {
+    private static final System.Logger LOG = System.getLogger(SetupAudit.class.getName());
     static final Path HERE = Path.of("..").toAbsolutePath().normalize();
 
     /** A glob as a regular expression: ** crosses folders, * stays inside one, ? is one character. */

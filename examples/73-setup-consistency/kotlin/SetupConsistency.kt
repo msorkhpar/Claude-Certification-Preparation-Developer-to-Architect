@@ -3,6 +3,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
 
+private val log = System.getLogger("setup_consistency")
+
 /**
  * Check that the pieces of a developer-productivity setup agree with each other: the servers of the project file, the tools of each subagent, the permission rules and the credentials.
  *

@@ -14,7 +14,6 @@ PRACTICES[f"{X}/73-scenario-developer-productivity/unit-01/practice-1"] = {
         ("e7", "edge", "no file holds a personal path an address or a key"),
     ],
     "plants": {
-        "wrong-unknown-server": (["m1", "e2"], "gives the explorer a tool of a server that is not configured"),
         "wrong-settings-ghost": (["m1"], "allows a ticket tool under a server name that is not configured"),
         "wrong-literal-token": (["e1"], "writes the token into the header"),
         "wrong-token-default": (["e1"], "gives the token variable a default value"),
@@ -22,7 +21,6 @@ PRACTICES[f"{X}/73-scenario-developer-productivity/unit-01/practice-1"] = {
         "wrong-explorer-inherits": (["e2"], "leaves the tools line out, so the explorer inherits every tool"),
         "wrong-explorer-description": (["e2"], "describes the explorer without saying when to use it"),
         "wrong-scaffolder-bash": (["e3"], "gives the scaffolder the Bash tool"),
-        "wrong-edit-bare": (["e3", "e5"], "allows the Edit tool for every path"),
         "wrong-write-wide": (["e3"], "adds a Write path rule for the source folder, which Claude Code never consults"),
         "wrong-tickets-wildcard": (["e4"], "allows every ticket tool, creating and deleting included"),
         "wrong-no-delete-deny": (["e4"], "leaves deleting a ticket open"),

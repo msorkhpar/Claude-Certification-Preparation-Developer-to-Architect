@@ -3,6 +3,9 @@
 //
 // The subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The
 // shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("research_run");
+
 export const REQUIRED = ["visual arts", "music", "writing", "film"];
 
 type Finding = [claim: string, value: string, source: string, date: string];

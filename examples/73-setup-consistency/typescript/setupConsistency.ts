@@ -4,9 +4,12 @@
 // documented behaviour (checked 2026-10-04): the project's .mcp.json holds the servers and expands ${VAR} and ${VAR:-default} from the environment; an MCP tool is named
 // mcp__<server>__<tool> in permission rules and in a subagent's tools field; a subagent that omits tools inherits every tool available to subagents; project subagents live in
 // .claude/agents/. Nothing here starts Claude Code or an MCP server.
+import { logger } from "./logger.ts";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+const log = logger("setup_consistency");
+
 
 export const HERE = fileURLToPath(new URL("..", import.meta.url));
 const SECRET_KEY = /token|key|secret|authorization/i;

@@ -9,6 +9,20 @@ Kotlin; pick your language folder, open `starter/` and edit the file there.
 Names are Python's (`synthesize`); TypeScript has the same name and the same fields. Java has the static method `Synthesis.synthesize` and the records `Finding`, `Failure`, `Result`, `Claim`,
 `Conflict` and `Report`; Kotlin has the top-level function `synthesize` and the data classes of the same names.
 
+## What is already written, and what you write
+
+The starter is a working synthesis step with seven gaps cut out of it. The plumbing is written and correct: collecting the findings of `ok` results and of the `partial` lists, grouping them by claim, telling a conflict (two or more values) from an agreed claim, and building the report from the pieces. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):
+
+1. `covered_scopes` unlocks `e1` and `e5`, and the coverage in every case: the covered scopes and the gaps.
+2. `sources_of` unlocks `e6`: the sources of a claim, in arrival order, without duplicates.
+3. `observed_values` unlocks `e3`: the values and sources of a conflicting claim.
+4. `all_partial` unlocks `e4`: whether every finding of a claim came from a partial list.
+5. `unresolved_errors` unlocks `e2` and `e4`: the errors that a later result did not make up for.
+6. `partial_scopes` unlocks `e4`: the gaps that a failed search still returned findings for.
+7. `coverage_note` unlocks `e1`, `e2` and `e5`: the sentence about what is not covered.
+
+About fifteen lines in all. The sections below describe the whole step.
+
 ## What to write
 
 A finding is `{claim, value, source, date}`. A result of a subagent is `{scope, status, findings, error}`: `status` is `ok` (with `findings`) or `error` (with `error`, an object

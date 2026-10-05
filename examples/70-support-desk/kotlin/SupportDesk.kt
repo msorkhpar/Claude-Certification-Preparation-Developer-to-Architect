@@ -1,3 +1,5 @@
+private val log = System.getLogger("support_desk")
+
 /**
  * A support agent's whole control surface in one dispatcher: the identity gate, errors the loop can act on, a stall guard and the three escalation triggers.
  *

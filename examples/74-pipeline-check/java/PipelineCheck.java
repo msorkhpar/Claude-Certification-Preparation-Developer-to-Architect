@@ -16,6 +16,7 @@ import java.util.List;
  * Claude.
  */
 public final class PipelineCheck {
+    private static final System.Logger LOG = System.getLogger(PipelineCheck.class.getName());
     static final Path HERE = Path.of("..").toAbsolutePath().normalize();
     private static final List<String> WRITERS = List.of("Bash", "Edit", "Write");
     private static final ObjectMapper JSON = new ObjectMapper();

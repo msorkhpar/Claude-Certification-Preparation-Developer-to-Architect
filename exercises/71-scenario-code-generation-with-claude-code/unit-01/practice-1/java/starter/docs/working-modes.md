@@ -1,3 +1,4 @@
+<!-- TODO 8 of 8 (unlocks e4): set the Mode of every row to `plan` or `direct`: open design work is `plan`, clear small work is `direct`. -->
 # Plan mode or direct execution
 
 | Task | Mode | Why |

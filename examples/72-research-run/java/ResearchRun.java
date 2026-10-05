@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
  * shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.
  */
 public final class ResearchRun {
+    private static final System.Logger LOG = System.getLogger(ResearchRun.class.getName());
     static final List<String> REQUIRED = List.of("visual arts", "music", "writing", "film");
 
     record Finding(String claim, String value, String source, String date) {}

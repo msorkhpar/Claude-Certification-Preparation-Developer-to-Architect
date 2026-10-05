@@ -3,6 +3,9 @@
 // The model is a script of the calls it asks for, in the shapes of the tool_use blocks of module 26, without the client: this example is about the code that
 // runs the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own
 // design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("support_desk");
+
 export const LIMIT = 10_000; // cents: a refund above it is a person's decision
 export const STALL = 3; // the same call this many times in a row is no progress
 

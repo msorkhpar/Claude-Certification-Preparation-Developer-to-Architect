@@ -3,9 +3,12 @@
 // The projects are two small folders of plain files, project-before and project-after, beside this example. The checks are this course's own checklist, built on the
 // documented behaviour (checked 2026-10-04): a rule file under .claude/rules/ with a paths list loads when Claude works with a matching file and one without paths loads
 // at launch; a command file under .claude/commands/ in the project is shared through version control; permission rules sit in .claude/settings.json. Nothing here starts Claude Code.
+import { logger } from "./logger.ts";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+const log = logger("setup_audit");
+
 
 export const HERE = fileURLToPath(new URL("..", import.meta.url));
 

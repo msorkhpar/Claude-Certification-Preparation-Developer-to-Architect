@@ -2,11 +2,10 @@
 # Runs with PLANTS, X and both() in scope; names defined here are local to this file.
 
 _P71 = {
-    "wrong-components-unscoped": {".claude/rules/components.md": [('---\npaths:\n  - "src/ui/**/*.tsx"\n---\n\n', "")]},
+    "wrong-docs-unscoped": {".claude/rules/docs.md": [('---\npaths:\n  - "docs/**/*.md"\n---\n\n', "")]},
     "wrong-handlers-wide": {".claude/rules/handlers.md": [('  - "server/handlers/**/*.ts"', '  - "**/*.ts"')]},
     "wrong-tests-folder": {".claude/rules/tests.md": [('  - "**/*.spec.ts"\n  - "**/*.spec.tsx"\n', '  - "src/ui/**/*.spec.tsx"\n')]},
     "wrong-tests-ts-only": {".claude/rules/tests.md": [('  - "**/*.spec.tsx"\n', "")]},
-    "wrong-database-bare-folder": {".claude/rules/database.md": [('  - "server/db/**/*.ts"', '  - "server/db"')]},
     "wrong-root-keeps-hooks": {"CLAUDE.md": [("- Run `npm test` before finishing a task.\n", "- Run `npm test` before finishing a task.\n- Write function components that use hooks.\n")]},
     "wrong-root-long": {"CLAUDE.md": [("# Dispatch app\n", "# Dispatch app\n" + "- Background note: kept for history, it changes no behaviour.\n" * 30)]},
     "wrong-review-bare-bash": {".claude/commands/review.md": [("allowed-tools: Read Grep Glob Bash(git diff *)", "allowed-tools: Read Grep Glob Bash")]},

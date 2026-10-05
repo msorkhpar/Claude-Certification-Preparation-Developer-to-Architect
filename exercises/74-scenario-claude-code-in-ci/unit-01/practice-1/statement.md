@@ -7,6 +7,19 @@ read your files. The pipeline's shape (job, audience, api, passes, session, cont
 the batch behaviour are the documented ones (checked 2026-10-04). It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language
 folder holds its own copy of the files.
 
+## What is already written, and what you write
+
+The starter is the draft of the CI setup with six gaps cut out of it. Part of the criteria and of the test prompt is written, and the schema has its properties; the pipeline file holds three jobs whose settings are wrong. Each gap is marked by a `TODO n of 6` comment in the markdown files (JSON takes none) that says what is missing, with one example and the cases it unlocks. Delete the comment when the file is done. A file holds no program, so there is no logger to write here: the tests read the files and report the failing case with its message. Write them in this order:
+
+1. `ci/pipeline.json`, the `pre-merge-review` job, unlocks `m1`, `e1`, `e2` and `e4`: real time, two passes, a fresh session with the earlier findings, read tools only.
+2. `ci/pipeline.json`, the `debt-report` and `test-generation` jobs, unlock `m1` and `e3`: the API for the audience, and a headless, bounded command.
+3. `ci/review.schema.json` unlocks `e3`: severity as a closed list, and the required fields.
+4. `ci/review-criteria.md` unlocks `e5` and `e7`: the severity section with an example for each level, and no personal path.
+5. `ci/testgen-prompt.md` unlocks `e6`: the existing tests and what a useful test is.
+6. The review command in `ci/pipeline.json` unlocks `e3` and `e4`: `-p`, the JSON output, the schema, the turn limit and the read tools.
+
+About twenty lines in all. The sections below describe the whole setup.
+
 ## What to write
 
 The project folder holds a `ci/` folder with four files.
