@@ -561,6 +561,58 @@ PLANTS[f"{X}/29-context-engineering/unit-01/practice-1"] = {
 # --- PLANTS END ---
 
 
+# ===== Level 2: module 27 =====
+PLANTS[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
+    "python": ("extension_choice.py", {
+        "wrong-guarantee-needs-no-knowledge": [('if situation.get("guarantee", False):', 'if situation.get("guarantee", False) and knowledge == "none":')],
+        "wrong-server-skipped-when-noisy": [('elif situation.get("external_system", False):', 'elif situation.get("external_system", False) and not situation.get("noisy", False):')],
+        "wrong-scope-ignored": [('if situation.get("path_scoped", False) else', "if False else")],
+        "wrong-one-reason-for-skills": [('_pick("skill", "repeatable-procedure")', '_pick("skill", "on-demand-reference")')],
+        "wrong-plugin-at-one-repo": [("if repos >= 2 and", "if repos >= 1 and")],
+        "wrong-plugin-for-conventions": [(' and choice["mechanism"] in CARRIED:', ":")],
+        "wrong-api-provided-schema-ignored": [('if situation.get("builtin_covers", False):', "if False:")],
+        "wrong-api-server-without-remote": [(' and situation.get("remote_server", False):', ":")],
+        "wrong-no-validation": [("if knowledge not in KNOWLEDGE:", "if False:")],
+        "wrong-fallthrough-skill": [('_pick("builtin-tool", "built-in-covers")', '_pick("skill", "on-demand-reference")')],
+    }),
+    "typescript": ("extensionChoice.ts", {
+        "wrong-guarantee-needs-no-knowledge": [("if (s.guarantee ?? false) choice", 'if ((s.guarantee ?? false) && knowledge === "none") choice')],
+        "wrong-server-skipped-when-noisy": [("else if (s.external_system ?? false) choice", "else if ((s.external_system ?? false) && !(s.noisy ?? false)) choice")],
+        "wrong-scope-ignored": [("(s.path_scoped ?? false) ?", "false ?")],
+        "wrong-one-reason-for-skills": [('pick("skill", "repeatable-procedure")', 'pick("skill", "on-demand-reference")')],
+        "wrong-plugin-at-one-repo": [("if (repos >= 2 && CARRIED", "if (repos >= 1 && CARRIED")],
+        "wrong-plugin-for-conventions": [(" && CARRIED.includes(choice.mechanism)", "")],
+        "wrong-api-provided-schema-ignored": [("if (s.builtin_covers ?? false) return", "if (false) return")],
+        "wrong-api-server-without-remote": [(" && (s.remote_server ?? false)", "")],
+        "wrong-no-validation": [("if (!KNOWLEDGE.includes(knowledge)) throw", "if (false) throw")],
+        "wrong-fallthrough-skill": [('pick("builtin-tool", "built-in-covers")', 'pick("skill", "on-demand-reference")')],
+    }),
+    "java": ("ExtensionChoice.java", {
+        "wrong-guarantee-needs-no-knowledge": [('if (flag(situation, "guarantee")) choice', 'if (flag(situation, "guarantee") && knowledge.equals("none")) choice')],
+        "wrong-server-skipped-when-noisy": [('else if (flag(situation, "external_system")) choice', 'else if (flag(situation, "external_system") && !flag(situation, "noisy")) choice')],
+        "wrong-scope-ignored": [('flag(situation, "path_scoped") ?', "false ?")],
+        "wrong-one-reason-for-skills": [('new Choice("skill", "repeatable-procedure")', 'new Choice("skill", "on-demand-reference")')],
+        "wrong-plugin-at-one-repo": [("if (repos >= 2 &&", "if (repos >= 1 &&")],
+        "wrong-plugin-for-conventions": [(" && CARRIED.contains(choice.mechanism())", "")],
+        "wrong-api-provided-schema-ignored": [('if (flag(situation, "builtin_covers")) return', "if (false) return")],
+        "wrong-api-server-without-remote": [(' && flag(situation, "remote_server")', "")],
+        "wrong-no-validation": [("if (!KNOWLEDGE.contains(knowledge)) throw", "if (false) throw")],
+        "wrong-fallthrough-skill": [('new Choice("builtin-tool", "built-in-covers")', 'new Choice("skill", "on-demand-reference")')],
+    }),
+    "kotlin": ("ExtensionChoice.kt", {
+        "wrong-guarantee-needs-no-knowledge": [('flag(situation, "guarantee") ->', 'flag(situation, "guarantee") && knowledge == "none" ->')],
+        "wrong-server-skipped-when-noisy": [('flag(situation, "external_system") -> Choice("mcp", "external-system")', 'flag(situation, "external_system") && !flag(situation, "noisy") -> Choice("mcp", "external-system")')],
+        "wrong-scope-ignored": [('if (flag(situation, "path_scoped")) Choice("path-rule"', 'if (false) Choice("path-rule"')],
+        "wrong-one-reason-for-skills": [('Choice("skill", "repeatable-procedure")', 'Choice("skill", "on-demand-reference")')],
+        "wrong-plugin-at-one-repo": [("repos >= 2 &&", "repos >= 1 &&")],
+        "wrong-plugin-for-conventions": [(" && choice.mechanism in CARRIED", "")],
+        "wrong-api-provided-schema-ignored": [('if (flag(situation, "builtin_covers")) return', "if (false) return")],
+        "wrong-api-server-without-remote": [(' && flag(situation, "remote_server")', "")],
+        "wrong-no-validation": [("require(knowledge in KNOWLEDGE)", "require(true)")],
+        "wrong-fallthrough-skill": [('else -> Choice("builtin-tool", "built-in-covers")', 'else -> Choice("skill", "on-demand-reference")')],
+    }),
+}
+
 # ===== Level 2: modules 30 to 35 =====
 PLANTS[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
     "python": ("vision.py", {
@@ -820,6 +872,25 @@ PLANTS[f"{X}/39-extending-claude-code/unit-01/practice-1"] = both("scripts/guard
     "wrong-agent-bypass": {"agents/changelog-reviewer.md": [("memory: project\n", "memory: project\npermissionMode: bypassPermissions\n")]},
     "wrong-dependency-unpinned": {".claude-plugin/plugin.json": [('{ "name": "secrets-vault", "version": "~2.1.0" }', '"secrets-vault"')]},
     "wrong-marketplace-mismatch": {".claude/settings.json": [('"release-kit@acme-tools": true', '"release-kit@acme-plugins": true')]},
+})
+
+PLANTS[f"{X}/39-extending-claude-code/unit-02/practice-1"] = both(".claude-plugin/marketplace.json", {
+    "wrong-entry-name-mismatch": [('"name": "standards-kit",\n      "source": "./plugins/standards-kit"', '"name": "standards-toolkit",\n      "source": "./plugins/standards-kit"')],
+    "wrong-dotdot-source": [('"source": "./plugins/standards-kit"', '"source": "./plugins/../plugins/standards-kit"')],
+    "wrong-reserved-marketplace-name": [('"name": "example-org-tools",\n  "description"', '"name": "claude-plugins-official",\n  "description"')],
+    "wrong-hooks-without-wrapper": {"plugins/standards-kit/hooks/hooks.json": [('  "hooks": {\n    "PreToolUse"', '  "handlers": {\n    "PreToolUse"')]},
+    "wrong-hook-script-path": {"plugins/standards-kit/hooks/hooks.json": [('"\\"${CLAUDE_PLUGIN_ROOT}\\"/scripts/protect.sh"', '"scripts/protect.sh"')]},
+    "wrong-version-in-both": [('"description": "Changelog skill, edit guard and ticket server for the platform team"\n', '"description": "Changelog skill, edit guard and ticket server for the platform team",\n      "version": "1.0.0"\n')],
+    "wrong-version-not-semver": {"plugins/standards-kit/.claude-plugin/plugin.json": [('"version": "1.0.0"', '"version": "1.0"')]},
+    "wrong-short-sha": [('"sha": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"', '"sha": "a1b2c3d4e5f6"')],
+    "wrong-url-shorthand": [('"source": "github",\n        "repo": "example-org/lint-helper",', '"source": "url",\n        "url": "example-org/lint-helper",')],
+    "wrong-no-pin": [(',\n        "sha": "0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c"', "")],
+    "wrong-dependency-unconstrained": {"plugins/standards-kit/.claude-plugin/plugin.json": [('{ "name": "lint-helper", "version": "~1.2.0" }', '"lint-helper"')]},
+    "wrong-cross-marketplace-no-allowlist": [('  "allowCrossMarketplaceDependenciesOn": ["shared-tools"],\n', "")],
+    "wrong-settings-key-mismatch": {".claude/settings.json": [('"example-org-tools": {', '"example-org-plugins": {')]},
+    "wrong-enable-external-plugin": {".claude/settings.json": [('"standards-kit@example-org-tools": true', '"standards-kit@example-org-tools": true,\n    "lint-helper@example-org-tools": true')]},
+    "wrong-rename-dangling": [('"std-kit": "standards-kit"', '"std-kit": "standards-tools"')],
+    "wrong-personal-path": [('"description": "Plugins for the platform team"', '"description": "Plugins for the platform team, notes in /home/jane/team-notes"')],
 })
 
 PLANTS[f"{X}/40-claude-in-the-software-life-cycle/unit-01/practice-1"] = both(".github/workflows/claude.yml", {

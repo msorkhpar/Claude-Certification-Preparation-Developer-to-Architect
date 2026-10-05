@@ -1,6 +1,6 @@
 # Skills, and how they compare with the other ways to extend Claude Code
 
-**Level:** Developer · **Module 39:** Extending Claude Code · **Page 1 of 3**
+**Level:** Developer · **Module 39:** Extending Claude Code · **Page 1 of 4**
 **Exams:** DV1, DV7; A3.2
 
 **After this page you can** write a skill, say where skill files live and which one wins when two share a name, decide who may start a skill and which tools it pre-approves, choose between a skill, a memory file, a subagent, an MCP server and a hook, and diagnose a skill that does not trigger or triggers too often.

@@ -1,0 +1,136 @@
+{
+  "practice": "27-choosing-an-extension/unit-01/practice-1",
+  "name": "extension_choice",
+  "tests": {
+    "java": "ExtensionChoiceTest",
+    "kotlin": "ExtensionChoiceTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_every_situation_of_the_bank_gets_its_mechanism_and_its_reason",
+      "typescript": "m1 every situation of the bank gets its mechanism and its reason",
+      "java": "m1_everySituationOfTheBankGetsItsMechanismAndItsReason",
+      "kotlin": "m1_everySituationOfTheBankGetsItsMechanismAndItsReason"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_rule_that_must_hold_goes_to_a_hook_whatever_else_is_true",
+      "typescript": "e1 a rule that must hold goes to a hook whatever else is true",
+      "java": "e1_aRuleThatMustHoldGoesToAHookWhateverElseIsTrue",
+      "kotlin": "e1_aRuleThatMustHoldGoesToAHookWhateverElseIsTrue"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_an_outside_system_needs_a_server_and_noisy_work_alone_needs_a_subagent",
+      "typescript": "e2 an outside system needs a server and noisy work alone needs a subagent",
+      "java": "e2_anOutsideSystemNeedsAServerAndNoisyWorkAloneNeedsASubagent",
+      "kotlin": "e2_anOutsideSystemNeedsAServerAndNoisyWorkAloneNeedsASubagent"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_knowledge_goes_to_the_file_or_skill_that_loads_it_at_the_right_time",
+      "typescript": "e3 knowledge goes to the file or skill that loads it at the right time",
+      "java": "e3_knowledgeGoesToTheFileOrSkillThatLoadsItAtTheRightTime",
+      "kotlin": "e3_knowledgeGoesToTheFileOrSkillThatLoadsItAtTheRightTime"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_plugin_carries_a_skill_hook_subagent_or_server_to_a_second_repository_and_nothing_else",
+      "typescript": "e4 a plugin carries a skill hook subagent or server to a second repository and nothing else",
+      "java": "e4_aPluginCarriesASkillHookSubagentOrServerToASecondRepositoryAndNothingElse",
+      "kotlin": "e4_aPluginCarriesASkillHookSubagentOrServerToASecondRepositoryAndNothingElse"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_in_an_application_the_platform_may_supply_the_schema_and_only_a_remote_server_replaces_your_own_tool",
+      "typescript": "e5 in an application the platform may supply the schema and only a remote server replaces your own tool",
+      "java": "e5_inAnApplicationThePlatformMaySupplyTheSchemaAndOnlyARemoteServerReplacesYourOwnTool",
+      "kotlin": "e5_inAnApplicationThePlatformMaySupplyTheSchemaAndOnlyARemoteServerReplacesYourOwnTool"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_an_unknown_value_is_an_error_and_a_missing_key_takes_its_default",
+      "typescript": "e6 an unknown value is an error and a missing key takes its default",
+      "java": "e6_anUnknownValueIsAnErrorAndAMissingKeyTakesItsDefault",
+      "kotlin": "e6_anUnknownValueIsAnErrorAndAMissingKeyTakesItsDefault"
+    }
+  },
+  "plants": {
+    "wrong-guarantee-needs-no-knowledge": {
+      "caught_by": [
+        "e1",
+        "m1"
+      ],
+      "defect": "treats a rule as a hook only when no instruction text goes with it, so a rule with a convention is left to a sentence"
+    },
+    "wrong-server-skipped-when-noisy": {
+      "caught_by": [
+        "e2",
+        "m1"
+      ],
+      "defect": "sends an outside system to a subagent when the work is also noisy"
+    },
+    "wrong-scope-ignored": {
+      "caught_by": [
+        "e3",
+        "e4",
+        "m1"
+      ],
+      "defect": "puts a path-scoped convention in the always-loaded file"
+    },
+    "wrong-one-reason-for-skills": {
+      "caught_by": [
+        "e3",
+        "e4",
+        "m1"
+      ],
+      "defect": "gives a repeatable procedure the reason code of a reference"
+    },
+    "wrong-plugin-at-one-repo": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "m1"
+      ],
+      "defect": "makes a plugin even when only one repository needs the setup"
+    },
+    "wrong-plugin-for-conventions": {
+      "caught_by": [
+        "e4",
+        "m1"
+      ],
+      "defect": "packages an instruction file as a plugin, which cannot carry one"
+    },
+    "wrong-api-provided-schema-ignored": {
+      "caught_by": [
+        "e5",
+        "m1"
+      ],
+      "defect": "writes your own tool in an application even when the platform supplies the schema"
+    },
+    "wrong-api-server-without-remote": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "uses the connector in an application when no remote server exists"
+    },
+    "wrong-no-validation": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "accepts a knowledge kind it does not know"
+    },
+    "wrong-fallthrough-skill": {
+      "caught_by": [
+        "e3",
+        "e4",
+        "e6",
+        "m1"
+      ],
+      "defect": "answers a situation that needs nothing special with a skill"
+    }
+  }
+}

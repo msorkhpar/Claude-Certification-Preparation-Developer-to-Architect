@@ -1,13 +1,13 @@
 # The extension surface and what each piece costs
 
-**Level:** Developer · **Module 27:** Choosing an extension · **Page 1 of 2**
+**Level:** Developer · **Module 27:** Choosing an extension · **Page 1 of 3**
 **Exams:** DV5, DV7
 
 **After this page you can** name the extension points of Claude Code, say what each one is for, say when each one loads into
 context and what it costs there, and pick the feature that a stated trigger calls for.
 
-Checked against the Claude Code documentation (Extend Claude Code) on 2026-10-03. This module is reading and quiz only: no code runs,
-and the page describes the documented behaviour, not a run in the course container.
+Checked against the Claude Code documentation (Extend Claude Code) on 2026-10-03. This page is reading and quiz only: no code runs,
+and the page describes the documented behaviour, not a run in the course container. Page 3 closes the module with a practice.
 
 ## Why it matters
 
