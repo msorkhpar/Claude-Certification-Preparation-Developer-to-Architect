@@ -509,7 +509,7 @@ report (film search down for good): status=partial, covered=3/4, findings=5, err
 ```
 <!-- /example -->
 
-The point of the last two lines is the second one. A report that did not cover film is still a useful report, and the status and the note are what keep it honest: the reader learns that a scope is missing, and which queries were tried. All four languages print the same lines.
+The point of the last two output lines is the second report's status and note. A report that did not cover film is still a useful report, and the status and the note are what keep it honest: the reader learns that a scope is missing, and which queries were tried. All four languages print the same lines.
 
 ## Traps
 
