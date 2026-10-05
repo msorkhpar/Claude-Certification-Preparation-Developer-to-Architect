@@ -1,5 +1,7 @@
 import java.util.Base64
 
+private val log = System.getLogger("tool_lint")
+
 /**
  * Tool interfaces graded on rules, offline: a set that confuses a model, the same job split into tools with one contract each, and a long result paged.
  *
@@ -16,6 +18,7 @@ data class Tool(val name: String, val description: String, val params: Map<Strin
 data class Page(val rows: List<String>, val cursor: String?, val note: String?)
 
 fun lint(tool: Tool): List<String> {
+    log.log(System.Logger.Level.DEBUG, "lint input: {0}", tool)
     val text = tool.description.lowercase()
     val found = mutableListOf<String>()
     if (listOf("do not use", "not for", "instead of").none { it in text }) found += "no-boundary"

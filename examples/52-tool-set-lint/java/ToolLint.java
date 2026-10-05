@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
  * page of the Claude API documentation and the "Writing tools for agents" article.
  */
 public final class ToolLint {
+    private static final System.Logger LOG = System.getLogger(ToolLint.class.getName());
     static final double OVERLAP = 0.6;
 
     /** A tool as the lint sees it: a name, a description and the description of each parameter. */
@@ -27,6 +28,7 @@ public final class ToolLint {
     record Page(List<String> rows, String cursor, String note) {}
 
     static List<String> lint(Tool tool) {
+        LOG.log(System.Logger.Level.DEBUG, "lint input: {0}", tool);
         String text = tool.description().toLowerCase();
         List<String> found = new ArrayList<>();
         if (!(text.contains("do not use") || text.contains("not for") || text.contains("instead of"))) found.add("no-boundary");

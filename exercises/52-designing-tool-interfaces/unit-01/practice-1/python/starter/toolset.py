@@ -1,6 +1,9 @@
 """Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md."""
+import logging
 import base64
 import re
+
+log = logging.getLogger(__name__)
 
 NAME = re.compile(r"[A-Za-z0-9_-]{1,128}")
 VAGUE = {"tool", "helper", "do", "run", "process", "handle", "data", "util", "utils", "query"}
@@ -81,6 +84,7 @@ def _list_and_hint_rules(name, properties, hints):
 
 def lint_tool(tool):
     """The rules one tool breaks, sorted and without repeats."""
+    log.debug("lint_tool input: %r", tool)
     found = set()
     name = str(tool.get("name") or "")
     description = str(tool.get("description") or "")

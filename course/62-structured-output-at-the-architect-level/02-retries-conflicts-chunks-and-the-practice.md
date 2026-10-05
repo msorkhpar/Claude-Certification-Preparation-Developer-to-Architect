@@ -56,7 +56,10 @@ The rules are the exam guide's for tasks 4.3 and 4.4 and the Claude documentatio
 nullable so the model is not pushed to invent a value; a retry helps with format and structure and cannot supply what the source does not hold; a request that forces a tool is rejected by the current models, which use
 `auto` with strict tool use. The "model" below is a script of fixed replies: it shows the pipeline's decisions, not what a real model would answer.
 """
+import logging
 import json
+
+log = logging.getLogger(__name__)
 
 DOC = "Invoice from Acme Tools.\nItems: 100.00 + 20.50\nTotal due: 130.00 EUR"
 NO_FORCING = {"claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"}
@@ -72,6 +75,7 @@ def scripted_value(document, nullable):
 
 def check(record, document):
     """Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document."""
+    log.debug("check input: %r", record)
     problems = []
     if abs(sum(record["items"]) - record["total"]) > 0.005:
         problems.append(f"total: the items add up to {sum(record['items'])}, not {record['total']}")
@@ -139,6 +143,8 @@ claude-haiku-4-5, two extraction tools: {'tool_choice': 'any', 'check_reply': Fa
 claude-sonnet-5-5, two extraction tools: {'tool_choice': 'auto', 'check_reply': True}
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("extraction_checks");
 /**
  * What a schema does not give an extraction pipeline: a field the document may lack, checks of meaning, a retry that carries feedback, and an accuracy figure that does not hide the failures.
  *
@@ -159,6 +165,7 @@ export function scriptedValue(document: string, nullable: boolean): string | nul
 
 /** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
 export function check(record: Answer, document: string): string[] {
+  log.debug("check input", record);
   const problems: string[] = [];
   const sum = record.items.reduce((a, b) => a + b, 0);
   if (Math.abs(sum - record.total) > 0.005) problems.push(`total: the items add up to ${sum}, not ${record.total}`);
@@ -243,6 +250,7 @@ import java.util.stream.Collectors;
  * `auto` with strict tool use. The "model" below is a script of fixed replies: it shows the pipeline's decisions, not what a real model would answer.
  */
 public final class ExtractionChecks {
+    private static final System.Logger LOG = System.getLogger(ExtractionChecks.class.getName());
     static final String DOC = "Invoice from Acme Tools.\nItems: 100.00 + 20.50\nTotal due: 130.00 EUR";
     static final Set<String> NO_FORCING = Set.of("claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1");
 
@@ -274,6 +282,7 @@ public final class ExtractionChecks {
 
     /** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
     static List<String> check(Invoice record, String document) {
+        LOG.log(System.Logger.Level.DEBUG, "check input: {0}", record);
         List<String> problems = new ArrayList<>();
         double sum = 0;
         for (double item : record.items()) sum += item;
@@ -368,6 +377,8 @@ claude-sonnet-5-5, two extraction tools: {'tool_choice': 'auto', 'check_reply': 
 ```kotlin
 import harness.Show.py
 
+private val log = System.getLogger("extraction_checks")
+
 /**
  * What a schema does not give an extraction pipeline: a field the document may lack, checks of meaning, a retry that carries feedback, and an accuracy figure that does not hide the failures.
  *
@@ -396,6 +407,7 @@ fun scriptedValue(document: String, nullable: Boolean): String? {
 
 /** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
 fun check(record: Invoice, document: String): List<String> {
+    log.log(System.Logger.Level.DEBUG, "check input: {0}", record)
     val problems = mutableListOf<String>()
     val sum = record.items.fold(0.0) { a, b -> a + b }
     if (Math.abs(sum - record.total) > 0.005) problems += "total: the items add up to $sum, not ${record.total}"

@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 /** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */
 final class Extraction {
+    private static final System.Logger LOG = System.getLogger(Extraction.class.getName());
     private Extraction() {}
 
     static final List<String> CURRENCIES = List.of("USD", "EUR", "GBP", "other", "unclear");
@@ -62,6 +63,7 @@ final class Extraction {
     }
 
     static List<Map<String, Object>> validate(Map<String, Object> record, String document) {
+        LOG.log(System.Logger.Level.DEBUG, "validate input: {0}", record);
         return validate(record, document, List.of());
     }
 

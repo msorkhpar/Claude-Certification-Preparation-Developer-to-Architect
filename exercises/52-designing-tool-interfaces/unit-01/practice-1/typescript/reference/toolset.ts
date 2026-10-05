@@ -1,4 +1,6 @@
 // Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("toolset");
 
 const NAME = /^[A-Za-z0-9_-]{1,128}$/;
 const VAGUE = new Set(["tool", "helper", "do", "run", "process", "handle", "data", "util", "utils", "query"]);
@@ -61,6 +63,7 @@ function listAndHintRules(name: string, properties: Obj, hints: Obj): Set<string
 
 /** The rules one tool breaks, sorted and without repeats. */
 export function lintTool(tool: Obj): string[] {
+  log.debug("lintTool input", tool);
   const found = new Set<string>();
   const name = String(tool.name ?? "");
   const description = String(tool.description ?? "");

@@ -89,13 +89,17 @@ No model is called. The rules are the course's own and small: a description of t
 neighbouring tool, a description on every parameter, and a pair of descriptions that overlap too much. Checked on 2026-10-03 against the "Define tools"
 page of the Claude API documentation and the "Writing tools for agents" article.
 """
+import logging
 import base64
 import re
+
+log = logging.getLogger(__name__)
 
 OVERLAP = 0.6
 
 
 def lint(tool):
+    log.debug("lint input: %r", tool)
     text = tool["description"].lower()
     found = []
     if not any(p in text for p in ("do not use", "not for", "instead of")):
@@ -193,11 +197,14 @@ a long result, paged four rows at a time
 // No model is called. The rules are the course's own and small: a description of three sentences or more, a when-to-use phrase, a boundary against the
 // neighbouring tool, a description on every parameter, and a pair of descriptions that overlap too much. Checked on 2026-10-03 against the "Define tools"
 // page of the Claude API documentation and the "Writing tools for agents" article.
+import { logger } from "./logger.ts";
+const log = logger("tool_lint");
 const OVERLAP = 0.6;
 
 type Tool = { name: string; description: string; params: Record<string, string> };
 
 export function lint(tool: Tool): string[] {
+  log.debug("lint input", tool);
   const text = tool.description.toLowerCase();
   const found: string[] = [];
   if (!["do not use", "not for", "instead of"].some((p) => text.includes(p))) found.push("no-boundary");
@@ -308,6 +315,7 @@ import java.util.regex.Pattern;
  * page of the Claude API documentation and the "Writing tools for agents" article.
  */
 public final class ToolLint {
+    private static final System.Logger LOG = System.getLogger(ToolLint.class.getName());
     static final double OVERLAP = 0.6;
 
     /** A tool as the lint sees it: a name, a description and the description of each parameter. */
@@ -317,6 +325,7 @@ public final class ToolLint {
     record Page(List<String> rows, String cursor, String note) {}
 
     static List<String> lint(Tool tool) {
+        LOG.log(System.Logger.Level.DEBUG, "lint input: {0}", tool);
         String text = tool.description().toLowerCase();
         List<String> found = new ArrayList<>();
         if (!(text.contains("do not use") || text.contains("not for") || text.contains("instead of"))) found.add("no-boundary");
@@ -432,6 +441,8 @@ a long result, paged four rows at a time
 ```kotlin
 import java.util.Base64
 
+private val log = System.getLogger("tool_lint")
+
 /**
  * Tool interfaces graded on rules, offline: a set that confuses a model, the same job split into tools with one contract each, and a long result paged.
  *
@@ -448,6 +459,7 @@ data class Tool(val name: String, val description: String, val params: Map<Strin
 data class Page(val rows: List<String>, val cursor: String?, val note: String?)
 
 fun lint(tool: Tool): List<String> {
+    log.log(System.Logger.Level.DEBUG, "lint input: {0}", tool)
     val text = tool.description.lowercase()
     val found = mutableListOf<String>()
     if (listOf("do not use", "not for", "instead of").none { it in text }) found += "no-boundary"

@@ -1,5 +1,7 @@
 import harness.Show.py
 
+private val log = System.getLogger("extraction_checks")
+
 /**
  * What a schema does not give an extraction pipeline: a field the document may lack, checks of meaning, a retry that carries feedback, and an accuracy figure that does not hide the failures.
  *
@@ -28,6 +30,7 @@ fun scriptedValue(document: String, nullable: Boolean): String? {
 
 /** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
 fun check(record: Invoice, document: String): List<String> {
+    log.log(System.Logger.Level.DEBUG, "check input: {0}", record)
     val problems = mutableListOf<String>()
     val sum = record.items.fold(0.0) { a, b -> a + b }
     if (Math.abs(sum - record.total) > 0.005) problems += "total: the items add up to $sum, not ${record.total}"

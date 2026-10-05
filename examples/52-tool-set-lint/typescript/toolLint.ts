@@ -3,11 +3,14 @@
 // No model is called. The rules are the course's own and small: a description of three sentences or more, a when-to-use phrase, a boundary against the
 // neighbouring tool, a description on every parameter, and a pair of descriptions that overlap too much. Checked on 2026-10-03 against the "Define tools"
 // page of the Claude API documentation and the "Writing tools for agents" article.
+import { logger } from "./logger.ts";
+const log = logger("tool_lint");
 const OVERLAP = 0.6;
 
 type Tool = { name: string; description: string; params: Record<string, string> };
 
 export function lint(tool: Tool): string[] {
+  log.debug("lint input", tool);
   const text = tool.description.toLowerCase();
   const found: string[] = [];
   if (!["do not use", "not for", "instead of"].some((p) => text.includes(p))) found.push("no-boundary");

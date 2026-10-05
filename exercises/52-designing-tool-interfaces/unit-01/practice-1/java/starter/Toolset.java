@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 /** Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md. Tools are JSON-like maps. */
 final class Toolset {
+    private static final System.Logger LOG = System.getLogger(Toolset.class.getName());
     private Toolset() {}
 
     private static final Pattern NAME = Pattern.compile("[A-Za-z0-9_-]{1,128}");
@@ -91,6 +92,7 @@ final class Toolset {
     }
 
     static List<String> lintTool(Map<String, Object> tool) {
+        LOG.log(System.Logger.Level.DEBUG, "lintTool input: {0}", tool);
         Set<String> found = new TreeSet<>();
         String name = str(tool.get("name"));
         String description = str(tool.get("description"));
