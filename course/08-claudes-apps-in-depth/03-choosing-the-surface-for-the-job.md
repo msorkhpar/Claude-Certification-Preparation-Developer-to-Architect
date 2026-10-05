@@ -109,10 +109,10 @@ quickly, so confirm features and plan limits on the official page the day you de
 
 2. A product team wants one visible place in Slack to chase open checklist entries, where anyone can steer the work.
    One entry is a pay dispute. Which approach fits?
-   - **a**: Put the whole list, dispute included, in the thread so the record stays complete
-   - **b**: Share a Project with the team that holds the whole list in its knowledge
-   - **c**: Take the entries to a direct message, then paste the results back
-   - **d**: Use Claude Tag for ordinary items, and send the HR one to the policy that governs it
+   - **a**: Keep the whole list in the thread, then mark the dispute as sensitive
+   - **b**: Share a Project holding the whole list, then limit who sees the dispute
+   - **c**: Move the whole list to a direct message, then paste the results back
+   - **d**: Handle ordinary items in the channel, then route the HR item to its governing policy
 
 3. An analyst must revise a spreadsheet model, then refresh a deck and a memo that quote it. Which surface fits best?
    - **a**: Claude Tag in a channel, with the three files attached
@@ -126,8 +126,8 @@ quickly, so confirm features and plan limits on the official page the day you de
 1. **a**. A single short draft needs none of the machinery; plain chat plus a check of the facts is enough (task 6). *b* is ruled out because "Cowork or a scheduled task for a one-line draft adds risk and cost", and a weekly schedule is wrong for a single email. *c* is ruled out because "A shared Project, a published artifact and a shared skill show their content to everyone with access", which is a poor home for candidate details. *d* is ruled out because Research is for an open question with many sources, and the table lists "A job one document answers" as what Research must not be given.
 2. **d**. A channel suits shared work that anyone can steer (task 5), while a sensitive personnel matter belongs
    with the people and policy that govern it. *a* is ruled out because a sensitive HR matter belongs "not in a tool
-   whose results the whole channel can read". *b* is ruled out because "A shared Project, a published artifact and a
-   shared skill show their content to everyone with access". *c* is ruled out because the channel is chosen "so the
+   whose results the whole channel can read", and a sensitivity mark does not hide it. *b* is ruled out because "A shared Project, a published artifact and a
+   shared skill show their content to everyone with access", dispute included. *c* is ruled out because the channel is chosen "so the
    thread is visible and anyone can steer it", and pasted results leave nobody able to steer.
 3. **c**. The work lives in open Excel, PowerPoint and Word files and context passes between them (task 3). *b* is ruled out because a Project suits "Recurring work with fixed rules and reference files", and does not edit the open files. *a* is ruled out because "Claude Tag in a channel shows everything to everyone in the channel", which is the wrong audience for a model under revision. *d* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", not the desktop files.
 
@@ -140,10 +140,10 @@ This quiz covers every page of the module.
 1. A finance team's job reconciles bank statements into one summary. The team wants it to run weekly from
    the first week, in Auto approval, and to compare against last year's statements kept elsewhere on the drive.
    Which plan does the module support?
-   - **a**: Keep Auto approval and open the entire drive so the comparison has what it needs
-   - **b**: Move the job to the Excel add-in, which reaches every workbook on the drive
-   - **c**: Confirm each step by hand in a dedicated folder with that older material, then schedule it
-   - **d**: Keep the schedule and switch to Skip all approvals so a missed review cannot stall it
+   - **a**: Keep Auto approval on, open the drive wide to the job, then run it every week
+   - **b**: Move it to the Excel add-in, let it reach workbooks on the drive, then run it weekly
+   - **c**: Approve actions by hand, keep the older files in a dedicated folder, then schedule it
+   - **d**: Switch to Skip all approvals, grant the connectors it might want, then run it every week
 
 2. A consultant opens a spreadsheet from an unknown sender in Excel with the add-in, and asks Claude to update the
    assumptions. The cells hide text telling Claude to send data elsewhere. Which handling fits?
@@ -152,19 +152,19 @@ This quiz covers every page of the module.
    - **c**: Work from a trusted copy, review each change and study every prompt raised
    - **d**: Rely on Auto approval, which blocks anything unsafe in Office files
 
-3. A manager must decide on a disciplinary case about a named employee, and Claude Tag is installed in her team's
+3. A manager must decide on a disciplinary case about a named employee, and Claude Tag is installed in their team's
    busy channel. Which course of action matches the module?
-   - **a**: Handle it with the people and policy that govern such matters, outside the tool
-   - **b**: Ask in the channel, but word the request without the employee's name
-   - **c**: Open a shared Project for her notes, since chats inside are visible to the owner alone
-   - **d**: Ask in the channel, then have Claude Tag delete the thread when the session ends
+   - **a**: Take it to the people and policy that govern such matters, not to the tool
+   - **b**: Ask in the channel, with the employee's name left out of the request
+   - **c**: Put the case notes in a shared Project, then ask Claude from inside it
+   - **d**: Ask in the channel, then have Claude Tag delete the thread afterwards
 
 4. A sales lead needs an editable proposal built from last year's winning documents and a handful of fresh market
    statistics. Which combination fits best?
    - **a**: Cowork scheduled weekly, a connector for the facts, plain chat for the output
    - **b**: A Project of earlier winners, Research for the figures, an artifact for the output
    - **c**: Claude in Chrome for the facts, memory for the past pitches, a skill for the output
-   - **d**: Claude Tag for the facts, a plugin for the past pitches, an inline reply for the output
+   - **d**: A Project of earlier winners, Research for the figures, an inline reply for the output
 
 <details>
 <summary>Answer key</summary>
@@ -180,6 +180,6 @@ This quiz covers every page of the module.
    afterwards does not undo that. *b* is ruled out because "Claude Tag in a channel shows everything to everyone in
    the channel", and removing a name leaves the matter visible. *c* is ruled out because "A shared Project, a
    published artifact and a shared skill show their content to everyone with access", so it is not private.
-4. **b**. A Project holds recurring reference material, Research fetches fresh facts across many sources, and an artifact is the editable deliverable (task 1). *a* is ruled out because "Cowork or a scheduled task for a one-line draft adds risk and cost", and a weekly schedule is not asked for. *c* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", which is an odd way to source market statistics. *d* is ruled out because "Claude Tag in a channel shows everything to everyone in the channel", the wrong place for a draft pitch, and an inline reply is not an editable document.
+4. **b**. A Project holds recurring reference material, Research fetches fresh facts across many sources, and an artifact is the editable deliverable (task 1). *a* is ruled out because "Cowork or a scheduled task for a one-line draft adds risk and cost", and a weekly schedule is not asked for. *c* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", which is an odd way to source market statistics. *d* is ruled out because the page names "A deliverable to hand over" as the job of an artifact, and an inline reply is not an editable document.
 
 </details>

@@ -36,8 +36,9 @@ files or synthesised research. There is no terminal.
 
 The Academy guidance condenses the choice: reach for chat when you have a one-off question or want a thought partner,
 and reach for Cowork when there is a clear deliverable and the work touches your files or tools. The help centre now
-describes chat and Cowork as one Claude: you ask for what you need and Claude decides which tool to use, with the
-rollout starting on Pro and Max plans. The distinction above is still the one to reason with, because the exam asks
+describes a new experience that merges chat and Cowork into one conversation, so you ask for what you need and
+Claude decides which tool to use. It is rolling out gradually, starting with Pro and Max plans, so your account may not
+have it yet. The distinction above is still the one to reason with, because the exam asks
 what kind of work suits which style.
 
 ### Requirements, in the help centre's words
@@ -121,7 +122,7 @@ changed and actions taken by scheduled tasks on your behalf.
 ## Quiz
 
 1. A finance analyst wants Claude to turn a folder of invoices into a reconciled spreadsheet and a summary, handled
-   on its own while she is in meetings. Which choice fits?
+   on its own while they are in meetings. Which choice fits?
    - **a**: Run a Research query on the web, then type the totals into a sheet by hand
    - **b**: Paste each invoice into a chat and steer the reply one turn at a time
    - **c**: Attach the whole company drive so that nothing the task needs is missing
@@ -144,7 +145,7 @@ changed and actions taken by scheduled tasks on your behalf.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. There is a clear deliverable that touches files, so it is a delegation, and a dedicated folder keeps the reach narrow (the worked task). *b* is ruled out because chat is "A conversation you steer turn by turn", which defeats working alone while she is away. *c* is ruled out because the safety habits say to "create a dedicated working folder" and not to grant whole drives. *a* is ruled out because Research suits open questions across many sources, and the table puts "A clear deliverable that touches your files or tools" under Cowork.
+1. **d**. There is a clear deliverable that touches files, so it is a delegation, and a dedicated folder keeps the reach narrow (the worked task). *b* is ruled out because chat is "A conversation you steer turn by turn", which defeats working alone while they are away. *c* is ruled out because the safety habits say to "create a dedicated working folder" and not to grant whole drives. *a* is ruled out because Research suits open questions across many sources, and the table puts "A clear deliverable that touches your files or tools" under Cowork.
 2. **a**. The page says to start scheduled tasks with low-risk work such as summaries and to review the output after each run. *b* is ruled out because Auto mode checks each action "but it still runs on its own", and the habits recommend Manual approval for new tools and hard-to-undo actions. *c* is ruled out because the habits say to "grant access selectively and avoid financial documents, credentials and personal records". *d* is ruled out because an unscheduled task that sends messages immediately has no review step, and the page says "Review the output after each run".
 3. **c**. The isolation "doesn't limit what Claude reads or does" through the connected tools, so the protection covers the network and not the files Claude can already reach. *b* is ruled out because the environment is "created for that session" and "removed when the session ends". *a* is ruled out because the page says injected instructions are risky "when Claude can read untrusted content and also take consequential actions", whether or not the app is open. *d* is ruled out because nothing on the page links the risk to switching approval off, and the page says to "use Manual approval for sensitive files, new tools and hard-to-undo actions".
 
