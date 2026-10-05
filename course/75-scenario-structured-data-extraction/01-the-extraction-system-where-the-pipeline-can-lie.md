@@ -505,20 +505,20 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 1. In the example run, a scanned invoice names its vendor but holds no total anywhere in its text, and the model returns the total as null. What does the pipeline do with that document?
    - **a**: Retry it once with the error attached, since a second look may still find a figure there
    - **b**: Send it to a person after one attempt, as no retry supplies what the page lacks
-   - **c**: Compute the figure from the line items instead and mark the record as valid
+   - **c**: Compute the figure from the line items instead, since the lines imply what the total should be, and mark the record as valid
    - **d**: Fail it at once and discard the vendor that the scan did manage to read
 
 2. The example run reports three valid documents, all correct, out of six that were sent. Which pair of figures does an honest report give?
-   - **a**: Everything delivered was right, so the run scores a full hundred, and nothing more is reported
-   - **b**: Half of everything received and all of the accepted ones, with the difference stated
-   - **c**: Half of everything received, with the accepted-only figure left out as beside the point
-   - **d**: Three quarters, as the mean of the two figures, so that both are treated fairly
+   - **a**: A full hundred percent, with nothing else reported alongside it
+   - **b**: Half of everything received and all of the accepted ones, with the gap stated
+   - **c**: Half of everything received, with the accepted-only figure left out of the report
+   - **d**: Three quarters, the mean of the two figures, reported alone
 
 3. A pipeline on Claude Sonnet 5.5 must make sure that an extraction tool is used on every request, and it forces the tool through `tool_choice`. What happens, and what does the documentation recommend instead?
-   - **a**: The call works, but the cached message blocks are then processed again from the start of the prompt
-   - **b**: The tool is used and the text before it is dropped, which does no harm in a pipeline that only extracts
-   - **c**: The call fails with a 400 error, and `auto` with strict schemas is the published replacement
-   - **d**: The setting is ignored, and the model goes on to choose whichever tool it likes best
+   - **a**: The call works, but cached message blocks are processed again from the start
+   - **b**: The tool is used, and the text before the tool call is dropped
+   - **c**: The call fails with a 400 error, and `auto` with strict schemas replaces it
+   - **d**: The setting is ignored, and the model chooses whichever tool it likes best
 
 <details>
 <summary>Answer key</summary>
