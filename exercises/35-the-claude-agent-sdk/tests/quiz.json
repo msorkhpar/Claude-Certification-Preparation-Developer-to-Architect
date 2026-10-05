@@ -64,10 +64,10 @@
       "scope": "page",
       "stem": "A developer puts Read and Grep in allowed_tools, expecting the agent to be unable to run shell commands. What happens?",
       "options": {
-        "a": "Every other tool is removed, because a list means an exact allowance",
-        "b": "The remaining ones stay available; the listed ones are merely pre-approved",
-        "c": "The run fails at startup, because the list is incomplete",
-        "d": "The shell tool asks nothing, since unlisted tools default to approval"
+        "a": "Every other tool is removed from the agent's context",
+        "b": "Everything else stays reachable, and only the two listed are pre-approved",
+        "c": "The run fails at startup because the list is incomplete",
+        "d": "Unlisted tools are approved automatically, with no prompt at all"
       },
       "key": "b",
       "explanation": {
@@ -83,10 +83,10 @@
       "scope": "page",
       "stem": "A hook returns a denial for a tool call that a matching allow rule would approve. Which result follows?",
       "options": {
-        "a": "It runs, because an allow rule outranks a hook's denial",
-        "b": "It runs only if the permission mode is bypassPermissions",
-        "c": "It goes to the permission callback, which makes the final decision",
-        "d": "It is refused: that check is the first thing evaluated"
+        "a": "It runs, with the allow rule overriding the denial",
+        "b": "It runs only when the permission mode is bypassPermissions",
+        "c": "It goes to the permission callback for the final decision",
+        "d": "It is blocked, with the earliest step deciding the outcome"
       },
       "key": "d",
       "explanation": {
