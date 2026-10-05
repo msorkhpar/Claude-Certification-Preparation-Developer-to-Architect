@@ -55,7 +55,7 @@ Two levers show here. **Caching** more than halves the bill, because the long st
 | Status | What it means | What the design does |
 |---|---|---|
 | **429, rate limit** | A limit was reached; the response says how long to wait | Wait for the time given and retry, with backoff; cut the token rate by caching, queueing or spreading the load |
-| **429, spend cap** | The organisation's spend limit was reached; there is no wait time to honour | Do not retry: raise the limit or stop, and alert a person |
+| **429, spend cap** | The usage tier's monthly spend cap was reached; there is no wait time to honour (a limit you set yourself is refused with a 400 instead) | Do not retry: raise the limit or stop, and alert a person |
 | **529, overloaded** | The service is overloaded, not your limit | Retry with backoff; consider a fallback or a queue |
 
 The SDKs retry twice by default, which absorbs a brief limit and does nothing against a sustained one. A retry loop that ignores the wait time or retries a spend-cap error spends effort on a request that will fail. The reliability patterns of module 81 (the same key on every retry, a breaker) apply here too.

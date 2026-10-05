@@ -33,7 +33,7 @@ The practice of this module is the four decisions of a gateway.
 
 1. **Routing.** A request names a task and may pin a model. The gateway uses the pin only when the policy allows that model, because a pin is a request and not a right. Otherwise it uses the route for the task, and the default for a task the table does not know. When the team is near its budget the model is replaced by a cheaper one that the policy names, and when it has no cheaper entry the model is kept. A blocked team gets no model: the request is refused.
 2. **Admission.** Given what a team has spent, its budget and the estimate for one more request, the gateway returns `allow`, `warn` or `block`. The edges are exact. A budget that is not positive blocks. A request that would bring the spend to more than the budget blocks, and one that brings it exactly to the budget does not. Reaching 80 percent warns, and exactly 80 percent warns. So a team is warned, then degraded, then stopped, in that order, and the first two steps leave its work running.
-3. **Showback.** Each team sees what it spent, computed from usage rows of input, cache-read and output tokens at the price of the row's model. Every token kind has its own price (cache reads are cheap, output is dear), so a bill that ignores either is wrong. The total is divided by a million and rounded **once**, at the end: rounding each row first gains or loses cents, so two rows of 0.4 cent are 1 cent together and 0 apart. The figure shown to a team is a whole number of cents. A row whose model has no price is refused, because a gateway never guesses a price.
+3. **Showback.** Each team sees what it spent, computed from usage rows of input, cache-read and output tokens at the price of the row's model; this example's rows leave out cache writes, which a full bill prices too (page 1). Every token kind has its own price (cache reads are cheap, output is dear), so a bill that ignores either is wrong. The total is divided by a million and rounded **once**, at the end: rounding each row first gains or loses cents, so two rows of 0.4 cent are 1 cent together and 0 apart. The figure shown to a team is a whole number of cents. A row whose model has no price is refused, because a gateway never guesses a price.
 4. **Delivery.** Some callers cannot wait: a legacy system that times out after two seconds, a screen that cannot hold a connection open. The gateway compares the slow case (the 95th-percentile time plus a safety margin) with the caller's timeout. If it fits, the call is synchronous. If it does not, the gateway uses **accept-and-poll**: it takes the request, returns an identifier at once, does the work behind the scenes and lets the caller fetch the result by polling or receive it by callback. The constraint and the workload then coexist without cutting the work short.
 
 ### Why accept-and-poll beats the alternatives
@@ -62,7 +62,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 2. Scenario: Pylon Software's four teams each hold a separate key, and finance cannot say which team spent what. The platform team proposes an internal gateway. What will the gateway achieve by itself?
    - **a**: A lower token bill for the teams, since requests now pass through a central point, and less waste
-   - **b**: One shared point for credentials, routing, budgets and the record of spend, since all traffic passes it
+   - **b**: One shared point for credentials, routing, budgets and usage records, since all traffic passes it
    - **c**: Faster answers for the teams, since the gateway adds capacity to the shared model, and fewer errors
    - **d**: Better quality for the teams, because the gateway improves the prompts it forwards, and fewer refusals
 
@@ -82,7 +82,7 @@ This quiz covers both pages of the module.
    - **a**: Honours the pin, since the team chose that model deliberately
    - **b**: Blocks the team for breaking the policy until it has been reviewed
    - **c**: Uses the pin once and warns the platform team afterwards
-   - **d**: Routes by the table entry for the task, since that choice is merely a wish
+   - **d**: Routes by the table entry for the task, as the pin is only a wish
 
 2. Scenario: Tallow Insurance's gateway sees a team at exactly 80 percent of its budget, and the next request is estimated to stay under 100 percent. What does admission return?
    - **a**: Allow, since the team has not yet passed its budget and nothing is wrong at this point
