@@ -4,6 +4,8 @@
 // cases included, to automate the grading, and to judge several dimensions at once ("an F1 score of at least 0.85", "99.5% of outputs are
 // non-toxic"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a
 // better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
+import { logger } from "./logger.ts";
+const log = logger("eval_run");
 
 type Case = { id: string; input: string; expect: string; tags: string[] };
 type Report = { results: { id: string; passed: boolean; tags: string[] }[]; pass_rate: number; by_tag: Record<string, [number, number]> };

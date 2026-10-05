@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.
  */
 public final class ThreeStyles {
+    private static final System.Logger LOG = System.getLogger(ThreeStyles.class.getName());
     static final String TICKET = "I was charged twice for invoice 1042.";
     static final Map<String, String> INVOICES = Map.of("1042", "paid twice on 2026-09-30");
     private static final ObjectMapper JSON = new ObjectMapper();

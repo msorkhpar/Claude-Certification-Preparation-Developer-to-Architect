@@ -4,6 +4,8 @@
 // Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("loops");
 
 export const MODEL = "claude-sonnet-5-5";
 const TOOLS: Anthropic.Tool[] = [

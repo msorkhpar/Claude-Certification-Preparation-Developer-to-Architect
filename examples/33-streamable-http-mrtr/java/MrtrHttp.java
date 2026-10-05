@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
  * Checked on 2026-10-04 against the "Streamable HTTP" page of the MCP specification.
  */
 public final class MrtrHttp {
+    private static final System.Logger LOG = System.getLogger(MrtrHttp.class.getName());
     static final Map<String, Object> CONFIRM_SCHEMA = Map.of("type", "object", "properties", Map.of("confirm", Map.of("type", "boolean", "title", "Confirm the deployment")), "required", List.of("confirm"));
 
     static McpSchema.CallToolResult text(String text, boolean isError) {

@@ -34,6 +34,7 @@ import java.util.function.Predicate;
  * "Computer use tool" page of the Claude documentation, checked on 2026-10-03.
  */
 public final class ScreenLoop {
+    private static final System.Logger LOG = System.getLogger(ScreenLoop.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String HALT = "Not executed: an earlier computer action in this turn failed.";
 

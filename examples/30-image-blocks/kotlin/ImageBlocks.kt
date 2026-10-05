@@ -17,6 +17,8 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+private val log = System.getLogger("image_blocks")
+
 /**
  * Image and document blocks: three kinds of source, a labelled comparison, the resize rule, the cost and the way back.
  *

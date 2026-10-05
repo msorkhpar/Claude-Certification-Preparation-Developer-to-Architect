@@ -5,6 +5,7 @@ The server is `mcp` 2.2.0 and the client is the same SDK with scripted callbacks
 the client retries with the answers. The log under the program output is what the HTTP hook of the client saw on the wire.
 Checked on 2026-10-03 against the "Multi Round-Trip Requests" page of the MCP specification.
 """
+import logging
 import asyncio
 import json
 import logging
@@ -23,6 +24,8 @@ from mcp.server.mcpserver.resolve import Elicit, Resolve, Sample
 from mcp.shared.exceptions import MCPError
 from mcp_types import CreateMessageResult, ElicitResult, SamplingMessage, TextContent
 from pydantic import BaseModel
+
+log = logging.getLogger(__name__)
 
 
 class Confirm(BaseModel):

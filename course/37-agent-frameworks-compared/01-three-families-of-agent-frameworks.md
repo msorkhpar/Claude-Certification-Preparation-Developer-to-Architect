@@ -53,7 +53,10 @@ The task is a support ticket: decide whether it is about billing, look the invoi
 functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own
 sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.
 """
+import logging
 import json
+
+log = logging.getLogger(__name__)
 
 TICKET = "I was charged twice for invoice 1042."
 INVOICES = {"1042": "paid twice on 2026-09-30"}
@@ -176,6 +179,8 @@ typed, never valid: the reply is not JSON after 2 attempts
 // The task is a support ticket: decide whether it is about billing, look the invoice up when it is, and write a reply. The three
 // functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own
 // sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.
+import { logger } from "./logger.ts";
+const log = logger("three_styles");
 
 export const TICKET = "I was charged twice for invoice 1042.";
 const INVOICES: Record<string, string> = { "1042": "paid twice on 2026-09-30" };
@@ -320,6 +325,7 @@ import java.util.stream.Collectors;
  * sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.
  */
 public final class ThreeStyles {
+    private static final System.Logger LOG = System.getLogger(ThreeStyles.class.getName());
     static final String TICKET = "I was charged twice for invoice 1042.";
     static final Map<String, String> INVOICES = Map.of("1042", "paid twice on 2026-09-30");
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -465,6 +471,8 @@ typed, never valid: the reply is not JSON after 2 attempts
 ```
 ```kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
+
+private val log = System.getLogger("three_styles")
 
 /**
  * One small task, three ways to build it: a graph you draw, a loop the model drives, and a typed result you validate.

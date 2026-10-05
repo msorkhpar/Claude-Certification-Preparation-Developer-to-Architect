@@ -38,6 +38,10 @@ cases included, to automate the grading, and to judge several dimensions at once
 non-toxic"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a
 better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 CASES = [
     {"id": "pos-1", "input": "Love it, works great", "expect": "positive", "tags": ["core"]},
     {"id": "neg-1", "input": "Broke after two days", "expect": "negative", "tags": ["core"]},
@@ -116,6 +120,8 @@ average improved: True - safe to ship: False
 // cases included, to automate the grading, and to judge several dimensions at once ("an F1 score of at least 0.85", "99.5% of outputs are
 // non-toxic"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a
 // better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
+import { logger } from "./logger.ts";
+const log = logger("eval_run");
 
 type Case = { id: string; input: string; expect: string; tags: string[] };
 type Report = { results: { id: string; passed: boolean; tags: string[] }[]; pass_rate: number; by_tag: Record<string, [number, number]> };
@@ -214,6 +220,7 @@ import java.util.stream.Collectors;
  * better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
  */
 public final class EvalRun {
+    private static final System.Logger LOG = System.getLogger(EvalRun.class.getName());
     record Case(String id, String input, String expect, List<String> tags) {}
 
     record Result(String id, boolean passed, List<String> tags) {}
@@ -316,6 +323,8 @@ v2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']
 average improved: True - safe to ship: False
 ```
 ```kotlin
+private val log = System.getLogger("eval_run")
+
 /**
  * An eval run, a success gate and a regression comparison, on a scripted classifier.
  *

@@ -5,7 +5,10 @@ a successful response ("Response contains valid content") while an error is a 4x
 a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names
 the first failure, its origin and the next action. The traces are scripted and carry no live output.
 """
+import logging
 import json
+
+log = logging.getLogger(__name__)
 
 ORIGIN = {"invalid_request_error": "integration", "authentication_error": "account", "rate_limit_error": "service", "api_error": "service",
           "overloaded_error": "service", "timeout_error": "service"}

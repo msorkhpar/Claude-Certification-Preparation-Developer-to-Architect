@@ -16,7 +16,8 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 
-log = logging.getLogger("notes")  # logging writes to stderr; print() would write to stdout and corrupt the protocol
+# logging writes to stderr; print() would write to stdout and corrupt the protocol
+log = logging.getLogger(__name__)
 
 
 def build_server():

@@ -4,6 +4,8 @@
 // a successful response ("Response contains valid content") while an error is a 4xx or 5xx status. It also says that adding text right after
 // a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names
 // the first failure, its origin and the next action. The traces are scripted and carry no live output.
+import { logger } from "./logger.ts";
+const log = logger("read_a_trace");
 
 type Event = Record<string, any>;
 

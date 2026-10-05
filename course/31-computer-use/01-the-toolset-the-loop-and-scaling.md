@@ -62,12 +62,15 @@ There is no desktop and no model: the screen is a few rectangles in memory and t
 Messages API (claude-sonnet-5-5), illustrative and not captures. The tool entry, the batch rule and the halt text are those of the
 "Computer use tool" page of the Claude documentation, checked on 2026-10-03.
 """
+import logging
 import base64
 import json
 import math
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TOOLSET = {"type": "computer_toolset_20260801"}
@@ -183,6 +186,8 @@ second result message: [('toolu_5', 'computer', True), ('toolu_6', 'computer', T
 // "Computer use tool" page of the Claude documentation, checked on 2026-10-03.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("screen_loop");
 
 export const MODEL = "claude-sonnet-5-5";
 export const TOOLSET = { type: "computer_toolset_20260801" };
@@ -336,6 +341,7 @@ import java.util.function.Predicate;
  * "Computer use tool" page of the Claude documentation, checked on 2026-10-03.
  */
 public final class ScreenLoop {
+    private static final System.Logger LOG = System.getLogger(ScreenLoop.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String HALT = "Not executed: an earlier computer action in this turn failed.";
 
@@ -517,6 +523,8 @@ import java.util.Base64
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
+
+private val log = System.getLogger("screen_loop")
 
 /**
  * The loop around the computer use toolset, on a toy screen: scaling both ways, a batch, a halt after a failure and a confirmation.

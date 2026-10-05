@@ -81,6 +81,9 @@ tools run: an Anthropic-managed cloud sandbox or a self-hosted one) and a sessio
 API. The rules below are the ones the documentation states for environments, permission policies and session budgets, read on
 2026-10-03 (beta header managed-agents-2026-04-01); the prices are the list prices recorded in docs/VERSIONS.md on 2026-10-02.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 # --- configuration checks -------------------------------------------------------------------------------------------------
 
@@ -210,6 +213,8 @@ budget '25.00': amount '25.00' is rejected: write whole cents as a string with n
 // tools run: an Anthropic-managed cloud sandbox or a self-hosted one) and a session, then exchange events. Nothing here calls the
 // API. The rules below are the ones the documentation states for environments, permission policies and session budgets, read on
 // 2026-10-03 (beta header managed-agents-2026-04-01); the prices are the list prices recorded in docs/VERSIONS.md on 2026-10-02.
+import { logger } from "./logger.ts";
+const log = logger("managed_agent");
 
 type Json = Record<string, any>;
 
@@ -351,6 +356,7 @@ import java.util.stream.Collectors;
  * The payloads are JSON objects read into maps, as the API would receive them.
  */
 public final class ManagedAgent {
+    private static final System.Logger LOG = System.getLogger(ManagedAgent.class.getName());
     private static final ObjectMapper JSON = new ObjectMapper();
 
     /** A JSON object as a map. */
@@ -533,6 +539,8 @@ budget '25.00': amount '25.00' is rejected: write whole cents as a string with n
 ```
 ```kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
+
+private val log = System.getLogger("managed_agent")
 
 /**
  * Managed Agents, checked offline: lint the configuration you would send, and price a session against its budget.

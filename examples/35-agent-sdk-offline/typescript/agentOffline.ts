@@ -9,6 +9,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createSdkMcpServer, query, tool } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
+import { logger } from "./logger.ts";
+const log = logger("agent_offline");
 
 export const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
 

@@ -69,6 +69,7 @@ The server is `mcp` 2.2.0 and the client is the same SDK with scripted callbacks
 the client retries with the answers. The log under the program output is what the HTTP hook of the client saw on the wire.
 Checked on 2026-10-03 against the "Multi Round-Trip Requests" page of the MCP specification.
 """
+import logging
 import asyncio
 import json
 import logging
@@ -87,6 +88,8 @@ from mcp.server.mcpserver.resolve import Elicit, Resolve, Sample
 from mcp.shared.exceptions import MCPError
 from mcp_types import CreateMessageResult, ElicitResult, SamplingMessage, TextContent
 from pydantic import BaseModel
+
+log = logging.getLogger(__name__)
 
 
 class Confirm(BaseModel):
@@ -217,6 +220,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { CreateMessageRequestSchema, ElicitRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { logger } from "./logger.ts";
+const log = logger("mrtr_http");
 
 const text = (t: string) => ({ content: [{ type: "text" as const, text: t }] });
 
@@ -381,6 +386,7 @@ import reactor.core.publisher.Mono;
  * Checked on 2026-10-04 against the "Streamable HTTP" page of the MCP specification.
  */
 public final class MrtrHttp {
+    private static final System.Logger LOG = System.getLogger(MrtrHttp.class.getName());
     static final Map<String, Object> CONFIRM_SCHEMA = Map.of("type", "object", "properties", Map.of("confirm", Map.of("type", "boolean", "title", "Confirm the deployment")), "required", List.of("confirm"));
 
     static McpSchema.CallToolResult text(String text, boolean isError) {
@@ -639,6 +645,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+
+private val log = System.getLogger("mrtr_http")
 
 /**
  * A tool that asks for a person's confirmation and for a model completion, over Streamable HTTP on the loopback interface.

@@ -70,12 +70,15 @@ standard output and its standard error. Exit code 2 blocks the call and the stan
 with --hook) and a demonstration (run it plain). The event and output shapes are those of the Claude Code hooks reference, read on
 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.
 """
+import logging
 import json
 import re
 import shlex
 import sys
 
 from miniyaml import split_frontmatter
+
+log = logging.getLogger(__name__)
 
 PROTECTED = (".env", "package-lock.json", ".git/")
 
@@ -210,6 +213,8 @@ agent findings: ['tools is omitted: the subagent inherits every tool', 'memory m
 // 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.
 import { readFileSync } from "node:fs";
 import { splitFrontmatter } from "./miniyaml.ts";
+import { logger } from "./logger.ts";
+const log = logger("hook_gate");
 
 const PROTECTED = [".env", "package-lock.json", ".git/"];
 
@@ -396,6 +401,7 @@ import java.util.stream.Collectors;
  * The front matter of the skill and subagent files is YAML, read with Jackson.
  */
 public final class HookGate {
+    private static final System.Logger LOG = System.getLogger(HookGate.class.getName());
     static final List<String> PROTECTED = List.of(".env", "package-lock.json", ".git/");
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
@@ -609,6 +615,8 @@ agent findings: ['tools is omitted: the subagent inherits every tool', 'memory m
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import kotlin.system.exitProcess
+
+private val log = System.getLogger("hook_gate")
 
 /**
  * A PreToolUse hook that blocks destructive commands, and a linter for skill and subagent files.

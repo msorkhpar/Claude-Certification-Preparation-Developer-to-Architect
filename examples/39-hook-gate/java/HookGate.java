@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  * The front matter of the skill and subagent files is YAML, read with Jackson.
  */
 public final class HookGate {
+    private static final System.Logger LOG = System.getLogger(HookGate.class.getName());
     static final List<String> PROTECTED = List.of(".env", "package-lock.json", ".git/");
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());

@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("three_styles")
+
 /**
  * One small task, three ways to build it: a graph you draw, a loop the model drives, and a typed result you validate.
  *

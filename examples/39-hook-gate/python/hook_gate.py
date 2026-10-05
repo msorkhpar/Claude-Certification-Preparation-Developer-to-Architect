@@ -6,12 +6,15 @@ standard output and its standard error. Exit code 2 blocks the call and the stan
 with --hook) and a demonstration (run it plain). The event and output shapes are those of the Claude Code hooks reference, read on
 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.
 """
+import logging
 import json
 import re
 import shlex
 import sys
 
 from miniyaml import split_frontmatter
+
+log = logging.getLogger(__name__)
 
 PROTECTED = (".env", "package-lock.json", ".git/")
 

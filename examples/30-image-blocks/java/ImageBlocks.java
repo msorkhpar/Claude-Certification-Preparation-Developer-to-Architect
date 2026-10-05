@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  * rule is the reference implementation of the "Coordinates and bounding boxes" page of the Claude documentation, checked on 2026-10-03.
  */
 public final class ImageBlocks {
+    private static final System.Logger LOG = System.getLogger(ImageBlocks.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     /** tier to {longest edge in pixels, visual token budget} */
     static final Map<String, int[]> TIERS = Map.of("standard", new int[] {1568, 1568}, "high", new int[] {2576, 4784});

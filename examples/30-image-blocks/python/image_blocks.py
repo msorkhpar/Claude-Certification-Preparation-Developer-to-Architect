@@ -3,11 +3,14 @@
 The model reply is illustrative, a hand-written body in the shape of the Messages API (claude-sonnet-5-5), not a capture. The resize
 rule is the reference implementation of the "Coordinates and bounding boxes" page of the Claude documentation, checked on 2026-10-03.
 """
+import logging
 import json
 import math
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TIERS = {"standard": (1568, 1568), "high": (2576, 4784)}  # tier -> (longest edge in pixels, visual token budget)

@@ -4,12 +4,15 @@ There is no desktop and no model: the screen is a few rectangles in memory and t
 Messages API (claude-sonnet-5-5), illustrative and not captures. The tool entry, the batch rule and the halt text are those of the
 "Computer use tool" page of the Claude documentation, checked on 2026-10-03.
 """
+import logging
 import base64
 import json
 import math
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TOOLSET = {"type": "computer_toolset_20260801"}

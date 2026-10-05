@@ -65,7 +65,8 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 
-log = logging.getLogger("notes")  # logging writes to stderr; print() would write to stdout and corrupt the protocol
+# logging writes to stderr; print() would write to stdout and corrupt the protocol
+log = logging.getLogger(__name__)
 
 
 def build_server():
@@ -202,6 +203,8 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { logger } from "./logger.ts";
+const log = logger("notes_example");
 
 const textOf = (result: any) => (result.content ?? []).map((c: any) => c.text ?? "").join("");
 const fail = (text: string) => ({ isError: true, content: [{ type: "text" as const, text }] });
@@ -353,6 +356,7 @@ import tools.jackson.databind.ObjectMapper;
  * local: the server is a child process and the two sides talk through pipes. `io.modelcontextprotocol.sdk:mcp` 2.0.1, checked on 2026-10-04.
  */
 public final class NotesExample {
+    private static final System.Logger LOG = System.getLogger(NotesExample.class.getName());
     /** The server's state and the four things it offers. The tool schemas are written out: the Java SDK does not derive them from code. */
     static final class Notes {
         final List<String> titles = new ArrayList<>();
@@ -598,6 +602,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+
+private val log = System.getLogger("notes_example")
 
 /**
  * One file, two roles: run with --serve it is an MCP server over stdio; run alone it starts itself as a server and talks to it twice.

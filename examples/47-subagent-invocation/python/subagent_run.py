@@ -4,6 +4,7 @@ The Agent SDK starts the Claude Code binary; here the binary is `harness/fake_cl
 used. The stand-in puts the messages of the subagent after the call that started it, which the real binary may order differently. `claude-agent-sdk`
 0.2.163, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
 """
+import logging
 import asyncio
 import json
 import os
@@ -11,6 +12,8 @@ import tempfile
 from pathlib import Path
 
 from claude_agent_sdk import AgentDefinition, AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, ToolResultBlock, ToolUseBlock, UserMessage, query
+
+log = logging.getLogger(__name__)
 
 FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
 

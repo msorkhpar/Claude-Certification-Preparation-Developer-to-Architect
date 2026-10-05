@@ -67,9 +67,12 @@ the job needs, use the v1 action, cap the work of each run with --max-turns, a t
 comments that mention @claude, and check the repository out before a skill from it can run. Reading the workflow is plain data work:
 nothing here needs a runner, a key or a network.
 """
+import logging
 import re
 
 from miniyaml import parse_yaml
+
+log = logging.getLogger(__name__)
 
 CLAUDE_ACTION = "anthropics/claude-code-action"
 
@@ -193,6 +196,8 @@ good workflow: 0 finding(s)
 // comments that mention @claude, and check the repository out before a skill from it can run. Reading the workflow is plain data work:
 // nothing here needs a runner, a key or a network.
 import { parseYaml } from "./miniyaml.ts";
+import { logger } from "./logger.ts";
+const log = logger("workflow_lint");
 
 const CLAUDE_ACTION = "anthropics/claude-code-action";
 type Finding = [string, string, string];
@@ -315,6 +320,7 @@ import java.util.regex.Pattern;
  * nothing here needs a runner, a key or a network. The workflow is YAML, read with Jackson.
  */
 public final class WorkflowLint {
+    private static final System.Logger LOG = System.getLogger(WorkflowLint.class.getName());
     static final String CLAUDE_ACTION = "anthropics/claude-code-action";
 
     /** A finding: the job (or "-"), a rule id and a message. */
@@ -452,6 +458,8 @@ good workflow: 0 finding(s)
 ```kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+
+private val log = System.getLogger("workflow_lint")
 
 /**
  * Lint a GitHub Actions workflow that runs Claude Code, against what the Claude Code GitHub Actions documentation recommends.

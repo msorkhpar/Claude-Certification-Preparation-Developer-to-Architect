@@ -3,6 +3,8 @@
 // The task is a support ticket: decide whether it is about billing, look the invoice up when it is, and write a reply. The three
 // functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own
 // sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.
+import { logger } from "./logger.ts";
+const log = logger("three_styles");
 
 export const TICKET = "I was charged twice for invoice 1042.";
 const INVOICES: Record<string, string> = { "1042": "paid twice on 2026-09-30" };

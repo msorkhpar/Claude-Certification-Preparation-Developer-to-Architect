@@ -5,6 +5,10 @@ cases included, to automate the grading, and to judge several dimensions at once
 non-toxic"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a
 better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 CASES = [
     {"id": "pos-1", "input": "Love it, works great", "expect": "positive", "tags": ["core"]},
     {"id": "neg-1", "input": "Broke after two days", "expect": "negative", "tags": ["core"]},

@@ -33,6 +33,7 @@ import java.util.Map;
  * Messages are JSON trees (Jackson), the same shape the API takes; the SDK's own types read them for the beta call.
  */
 public final class ContextTrimming {
+    private static final System.Logger LOG = System.getLogger(ContextTrimming.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String POLICY = "The grass is green. The sky is blue. Water is essential for life.";
     private static final ObjectMapper JSON = new ObjectMapper();

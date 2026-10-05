@@ -14,6 +14,8 @@ import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
 
+private val log = System.getLogger("loops")
+
 /**
  * Three loops over the same scripted replies: one ends on stop_reason, one on a word in the text, one after a fixed count.
  *

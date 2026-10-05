@@ -68,7 +68,10 @@ a successful response ("Response contains valid content") while an error is a 4x
 a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names
 the first failure, its origin and the next action. The traces are scripted and carry no live output.
 """
+import logging
 import json
+
+log = logging.getLogger(__name__)
 
 ORIGIN = {"invalid_request_error": "integration", "authentication_error": "account", "rate_limit_error": "service", "api_error": "service",
           "overloaded_error": "service", "timeout_error": "service"}
@@ -144,6 +147,8 @@ C: JSON in a code fence
 // a successful response ("Response contains valid content") while an error is a 4xx or 5xx status. It also says that adding text right after
 // a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names
 // the first failure, its origin and the next action. The traces are scripted and carry no live output.
+import { logger } from "./logger.ts";
+const log = logger("read_a_trace");
 
 type Event = Record<string, any>;
 
@@ -239,6 +244,7 @@ import java.util.Optional;
  * the first failure, its origin and the next action. The traces are scripted and carry no live output.
  */
 public final class ReadATrace {
+    private static final System.Logger LOG = System.getLogger(ReadATrace.class.getName());
     sealed interface Event permits Request, Response, ApiError, Parse {}
 
     /** A request; only the kinds of block in its last user message matter here. */
@@ -342,6 +348,8 @@ C: JSON in a code fence
 ```kotlin
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+
+private val log = System.getLogger("read_a_trace")
 
 /**
  * Reading a trace: where did it fail, in the integration or in the model, and what should happen next?

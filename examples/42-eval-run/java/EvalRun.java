@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.
  */
 public final class EvalRun {
+    private static final System.Logger LOG = System.getLogger(EvalRun.class.getName());
     record Case(String id, String input, String expect, List<String> tags) {}
 
     record Result(String id, boolean passed, List<String> tags) {}

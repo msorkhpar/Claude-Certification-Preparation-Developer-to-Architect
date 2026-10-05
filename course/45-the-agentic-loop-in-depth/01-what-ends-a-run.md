@@ -74,8 +74,11 @@ The example runs three loops over the same scripted replies. In scenario A the f
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.
 """
+import logging
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TOOLS = [
@@ -177,6 +180,8 @@ B: the task needs four lookups, then the model ends its turn
 // Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("loops");
 
 export const MODEL = "claude-sonnet-5-5";
 const TOOLS: Anthropic.Tool[] = [
@@ -311,6 +316,7 @@ import java.util.Map;
  * Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.
  */
 public final class Loops {
+    private static final System.Logger LOG = System.getLogger(Loops.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static Tool tool(String name, String description, String property, String type) {
@@ -457,6 +463,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
+
+private val log = System.getLogger("loops")
 
 /**
  * Three loops over the same scripted replies: one ends on stop_reason, one on a word in the text, one after a fixed count.

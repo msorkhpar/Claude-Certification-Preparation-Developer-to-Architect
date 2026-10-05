@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("settings_layers")
+
 /**
  * Claude Code settings layers, permission rules and memory files, resolved offline.
  *

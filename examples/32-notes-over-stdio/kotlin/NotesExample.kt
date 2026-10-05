@@ -41,6 +41,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+private val log = System.getLogger("notes_example")
+
 /**
  * One file, two roles: run with --serve it is an MCP server over stdio; run alone it starts itself as a server and talks to it twice.
  *

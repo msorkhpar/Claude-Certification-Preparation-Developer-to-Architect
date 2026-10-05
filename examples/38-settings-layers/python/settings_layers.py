@@ -5,7 +5,10 @@ the highest level winning a scalar key and lists combining; permission rules are
 match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a
 teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 LEVELS = ["managed", "command line", "local", "project", "user"]  # highest precedence first
 REPO_LEVELS = ("project", "local")  # files that live in the repository

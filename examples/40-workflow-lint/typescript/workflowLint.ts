@@ -5,6 +5,8 @@
 // comments that mention @claude, and check the repository out before a skill from it can run. Reading the workflow is plain data work:
 // nothing here needs a runner, a key or a network.
 import { parseYaml } from "./miniyaml.ts";
+import { logger } from "./logger.ts";
+const log = logger("workflow_lint");
 
 const CLAUDE_ACTION = "anthropics/claude-code-action";
 type Finding = [string, string, string];

@@ -4,10 +4,13 @@ The model replies are illustrative, hand-written bodies in the shape of the Mess
 by looking at its prompt, so the order in which concurrent requests arrive does not matter. The patterns are those of Anthropic's
 engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
 """
+import logging
 import asyncio
 
 from harness import scripted_async_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 CHEAP, STRONG = "claude-haiku-4-5", "claude-sonnet-5-5"
 ROUTES = {"billing": (STRONG, "You are a billing specialist. Be exact about amounts."), "technical": (STRONG, "You are a support engineer. Ask for logs."),

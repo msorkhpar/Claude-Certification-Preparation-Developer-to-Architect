@@ -1,3 +1,5 @@
+private val log = System.getLogger("eval_run")
+
 /**
  * An eval run, a success gate and a regression comparison, on a scripted classifier.
  *

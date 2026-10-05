@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
  * The payloads are JSON objects read into maps, as the API would receive them.
  */
 public final class ManagedAgent {
+    private static final System.Logger LOG = System.getLogger(ManagedAgent.class.getName());
     private static final ObjectMapper JSON = new ObjectMapper();
 
     /** A JSON object as a map. */

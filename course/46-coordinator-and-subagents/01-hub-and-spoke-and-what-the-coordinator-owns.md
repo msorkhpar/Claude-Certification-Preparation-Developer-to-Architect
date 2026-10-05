@@ -66,10 +66,13 @@ The example is hub and spoke on the Messages API, so that you can see the isolat
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The point is what each
 request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
 """
+import logging
 import json
 
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PLAN_TOOL = {"name": "plan", "description": "Record the plan: one subtask per independent part of the question, each with a scope and a self-contained brief.",
@@ -147,6 +150,8 @@ answer: Chip supply recovered first, car output followed, and rates stayed high.
 // request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("hub");
 
 export const MODEL = "claude-sonnet-5-5";
 const PLAN_TOOL: Anthropic.Tool = {
@@ -256,6 +261,7 @@ import java.util.Map;
  * request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
  */
 public final class Hub {
+    private static final System.Logger LOG = System.getLogger(Hub.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final Tool PLAN_TOOL = Tool.builder().name("plan")
         .description("Record the plan: one subtask per independent part of the question, each with a scope and a self-contained brief.")
@@ -368,6 +374,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
+
+private val log = System.getLogger("hub")
 
 /**
  * Hub and spoke on the Messages API: a coordinator plans by calling a plan tool, each subagent is its own conversation, the coordinator synthesizes.

@@ -4,6 +4,8 @@
 // the highest level winning a scalar key and lists combining; permission rules are checked deny, then ask, then allow, with the first
 // match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a
 // teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.
+import { logger } from "./logger.ts";
+const log = logger("settings_layers");
 
 type Json = Record<string, any>;
 type Kind = "allow" | "ask" | "deny";

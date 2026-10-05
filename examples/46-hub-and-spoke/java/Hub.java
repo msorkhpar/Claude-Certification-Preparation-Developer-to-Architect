@@ -24,6 +24,7 @@ import java.util.Map;
  * request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
  */
 public final class Hub {
+    private static final System.Logger LOG = System.getLogger(Hub.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final Tool PLAN_TOOL = Tool.builder().name("plan")
         .description("Record the plan: one subtask per independent part of the question, each with a scope and a self-contained brief.")

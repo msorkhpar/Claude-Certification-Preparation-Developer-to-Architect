@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
  * nothing here needs a runner, a key or a network. The workflow is YAML, read with Jackson.
  */
 public final class WorkflowLint {
+    private static final System.Logger LOG = System.getLogger(WorkflowLint.class.getName());
     static final String CLAUDE_ACTION = "anthropics/claude-code-action";
 
     /** A finding: the job (or "-"), a rule id and a message. */

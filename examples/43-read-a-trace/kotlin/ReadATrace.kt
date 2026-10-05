@@ -1,6 +1,8 @@
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("read_a_trace")
+
 /**
  * Reading a trace: where did it fail, in the integration or in the model, and what should happen next?
  *
