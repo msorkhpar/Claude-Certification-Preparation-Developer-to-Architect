@@ -72,6 +72,9 @@ a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and
 task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.
 """
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 CUSTOM_ID = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 
@@ -147,6 +150,8 @@ independent=no: carries the reasoning: yes
 independent=yes: carries the reasoning: no
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("batch_and_review");
 /**
  * What a batch asks of its caller, and what an independent review is given.
  *
@@ -242,6 +247,7 @@ import java.util.regex.Pattern;
  * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the methods below make visible. Nothing here calls a model.
  */
 public final class BatchAndReview {
+    private static final System.Logger LOG = System.getLogger(BatchAndReview.class.getName());
     private static final Pattern CUSTOM_ID = Pattern.compile("^[a-zA-Z0-9_-]{1,64}$");
 
     record Matched(String customId, String kind) {}
@@ -326,6 +332,8 @@ independent=no: carries the reasoning: yes
 independent=yes: carries the reasoning: no
 ```
 ```kotlin
+private val log = System.getLogger("batch_and_review")
+
 /**
  * What a batch asks of its caller, and what an independent review is given.
  *

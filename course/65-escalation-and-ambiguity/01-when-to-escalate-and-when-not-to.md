@@ -51,6 +51,10 @@ The exam guide (task 5.2) names the triggers (a customer asks for a person, the 
 unreliable proxies for how hard a case is. It also says that when a lookup returns several customers the agent asks for more identifiers and does not choose by a heuristic. Below, six hand-written cases
 (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 # name, sentiment, asked for a person, policy silent, what a careful person would do
 CASES = [
     ("price match with another shop", "calm", False, True, "escalate"),
@@ -127,6 +131,8 @@ Customer: "Can you match the price on another site?" -> escalate (the policy onl
 Customer: "This is the third time my parcel is late!" -> resolve (a late parcel is within the agent's tools; acknowledge the frustration)
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("escalation_rules");
 /**
  * Why escalation is decided by criteria, and what to ask when a lookup finds several people.
  *
@@ -217,6 +223,7 @@ import java.util.function.Function;
  * (illustrative, not data from a deployment) are routed by a sentiment rule and by the guide's criteria, and a name that matches two accounts is handled both ways. Nothing here calls a model.
  */
 public final class EscalationRules {
+    private static final System.Logger LOG = System.getLogger(EscalationRules.class.getName());
     /** name, sentiment, asked for a person, policy silent, what a careful person would do */
     record Case(String name, String sentiment, boolean asked, boolean policySilent, String truth) {}
 
@@ -309,6 +316,8 @@ Customer: "Can you match the price on another site?" -> escalate (the policy onl
 Customer: "This is the third time my parcel is late!" -> resolve (a late parcel is within the agent's tools; acknowledge the frustration)
 ```
 ```kotlin
+private val log = System.getLogger("escalation_rules")
+
 /**
  * Why escalation is decided by criteria, and what to ask when a lookup finds several people.
  *

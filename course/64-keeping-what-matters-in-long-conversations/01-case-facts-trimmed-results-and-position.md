@@ -58,6 +58,10 @@ tool results pile up in the context out of proportion to their use (40 fields in
 (read 2026-10-04) says to put long documents at the top and the question at the end, which can improve quality in tests by up to 30 percent, and to structure documents with tags. The functions below show the bookkeeping;
 nothing here calls a model, and the numbers come from the sample data, not from a measurement.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 TOOL_FIELDS = {
     "lookup_order": ["order_id", "purchase_date", "items", "return_window", "refund_amount"],
     "lookup_customer": ["customer_id", "tier"],
@@ -124,6 +128,8 @@ refund_amount seen on day 118, today day 125, limit 3 days: read it again before
 refund_amount seen on day 124, today day 125, limit 3 days: still fresh
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("case_facts");
 /**
  * What a long support conversation should keep, and where it should sit.
  *
@@ -210,6 +216,7 @@ import java.util.Map;
  * nothing here calls a model, and the numbers come from the sample data, not from a measurement.
  */
 public final class CaseFacts {
+    private static final System.Logger LOG = System.getLogger(CaseFacts.class.getName());
     static final Map<String, List<String>> TOOL_FIELDS = Map.of(
         "lookup_order", List.of("order_id", "purchase_date", "items", "return_window", "refund_amount"),
         "lookup_customer", List.of("customer_id", "tier"));
@@ -290,6 +297,8 @@ refund_amount seen on day 118, today day 125, limit 3 days: read it again before
 refund_amount seen on day 124, today day 125, limit 3 days: still fresh
 ```
 ```kotlin
+private val log = System.getLogger("case_facts")
+
 /**
  * What a long support conversation should keep, and where it should sit.
  *

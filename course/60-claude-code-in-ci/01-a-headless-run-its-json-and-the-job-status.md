@@ -65,6 +65,9 @@ the shape the SDK documents for its result message; nothing here ran the real bi
 """
 import json
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 SEVERITIES = ["low", "medium", "high"]
 REVIEW_SCHEMA = {
@@ -205,6 +208,8 @@ not JSON: exit 1, 0 comment(s), claude exited with status 1
 wrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("ci_gate");
 /**
  * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.
  *
@@ -363,6 +368,7 @@ import java.util.stream.Collectors;
  * the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network. The JSON is read with Jackson.
  */
 public final class CiGate {
+    private static final System.Logger LOG = System.getLogger(CiGate.class.getName());
     static final List<String> SEVERITIES = List.of("low", "medium", "high");
     private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -610,6 +616,8 @@ wrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import harness.Show.py
+
+private val log = System.getLogger("ci_gate")
 
 /**
  * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.

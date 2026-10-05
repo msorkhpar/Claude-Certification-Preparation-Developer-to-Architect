@@ -48,7 +48,7 @@ PLANTS[f"{X}/69-provenance-and-uncertainty/unit-01/practice-1"] = {
         "wrong-changed-also-contested": [('else if (e.status().equals("changed")) changed.add(e.claim());', 'else if (e.status().equals("changed")) { changed.add(e.claim()); contested.add(e.claim()); }')],
     }),
     "kotlin": ("Ledger.kt", {
-        "wrong-first-wins": [("val values = group.map { it.value!! }.distinct().map { value ->", "val values = group.map { it.value!! }.distinct().take(1).map { value ->")],
+        "wrong-first-wins": [("        }\n    }\n}\n\nfun coverageNote", "        }.let { e -> Entry(e.claim, e.status, e.values.take(1)) }\n    }\n}\n\nfun coverageNote")],
         "wrong-ignores-dates": [('group.any { a -> group.any { b -> a.value != b.value && a.date == b.date } } -> Entry(claim, "conflict", values)', 'true -> Entry(claim, "conflict", values)')],
         "wrong-sources-collapsed": [(".map { Src(it.source!!, it.date!!) }.distinct()", ".map { Src(it.source!!, it.date!!) }.take(1)")],
         "wrong-date-optional": [("REQUIRED.filter { field(finding, it).isBlank() }", 'REQUIRED.filter { it != "date" && field(finding, it).isBlank() }')],

@@ -57,6 +57,10 @@ The exam guide (task 5.4) describes crash recovery as agents that export structu
 restarts. The Claude Code documentation (read 2026-10-04) says that subagents explore in a separate context and report back summaries, and that a context window which fills up degrades Claude's work. Below, a dictionary
 stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 MANIFEST = "state/manifest.txt"
 TRANSCRIPT_CHARS = {"auth": 3200, "billing": 2400, "search": 1600}
 
@@ -141,6 +145,8 @@ injected into the next phase: 5 findings from 2 agents, about 77 tokens
 replaying the three transcripts instead: about 1800 tokens
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("state_manifest");
 /**
  * Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.
  *
@@ -245,6 +251,7 @@ import java.util.Map;
  * stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.
  */
 public final class StateManifest {
+    private static final System.Logger LOG = System.getLogger(StateManifest.class.getName());
     static final String MANIFEST = "state/manifest.txt";
 
     record Entry(String status, String path) {}
@@ -347,6 +354,8 @@ injected into the next phase: 5 findings from 2 agents, about 77 tokens
 replaying the three transcripts instead: about 1800 tokens
 ```
 ```kotlin
+private val log = System.getLogger("state_manifest")
+
 /**
  * Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.
  *

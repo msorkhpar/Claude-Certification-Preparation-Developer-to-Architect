@@ -42,6 +42,10 @@ A request is sometimes incomplete: no branch named, no reviewer. What a run does
 The rules are the exam guide's for tasks 4.1 and 4.2 (explicit categorical criteria instead of "be conservative", two to four targeted examples that include an acceptable pattern, a category with a high false positive rate is switched
 off while its prompt is improved) and the prompting guide's advice on examples (read on 2026-10-03: relevant, diverse and structured, three to five). No model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 VAGUE = ("be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "use your judgment")
 
 
@@ -114,6 +118,8 @@ style: reviewed 8, precision 0.25, switch off: True
 naming: reviewed 3, precision 0.0, switch off: False
 ```
 ```typescript
+import { logger } from "./logger.ts";
+const log = logger("criteria_lint");
 /**
  * Three checks that keep a review prompt precise: lint a criterion for vague wording, check a set of few-shot examples, and measure the precision of each finding category from the verdicts developers gave.
  *
@@ -204,6 +210,7 @@ import java.util.Set;
  * off while its prompt is improved) and the prompting guide's advice on examples (read on 2026-10-03: relevant, diverse and structured, three to five). No model is called.
  */
 public final class CriteriaLint {
+    private static final System.Logger LOG = System.getLogger(CriteriaLint.class.getName());
     static final List<String> VAGUE = List.of("be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "use your judgment");
 
     /** A review criterion: what to report, what to skip, and a concrete example for each severity level. */
@@ -310,6 +317,8 @@ naming: reviewed 3, precision 0.0, switch off: False
 ```
 ```kotlin
 import harness.Show.py
+
+private val log = System.getLogger("criteria_lint")
 
 /**
  * Three checks that keep a review prompt precise: lint a criterion for vague wording, check a set of few-shot examples, and measure the precision of each finding category from the verdicts developers gave.
