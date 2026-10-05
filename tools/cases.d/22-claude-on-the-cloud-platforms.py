@@ -15,9 +15,12 @@ PRACTICES[f"{X}/22-claude-on-the-cloud-platforms/unit-01/practice-1"] = {
     "plants": {
         "wrong-vertex-model-in-body": (["e2"], "leaves the model in the Vertex body"),
         "wrong-vertex-version-header": (["m1", "e2"], "sends the Vertex version as the anthropic-version header instead of a body field"),
-        "wrong-bedrock-direct-id": (["e1"], "sends the direct API model id to Bedrock"),
+        "wrong-bedrock-direct-id": (["e1"], "keeps the date of the direct API model id in the Bedrock id"),
+        "wrong-vertex-haiku-undated": (["e1"], "leaves the Haiku date out of the Vertex model id"),
         "wrong-regional-any": (["e3"], "allows any model on a specific Vertex region"),
         "wrong-batches-everywhere": (["e5"], "treats the Message Batches API as available on both clouds"),
         "wrong-body-mutated": (["e2"], "removes the model from the caller's own body"),
+        "wrong-bedrock-any-model": (["e4"], "lets Bedrock take any model id"),
+        "wrong-region-optional": (["e6"], "builds a Bedrock request without a region"),
     },
 }

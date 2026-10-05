@@ -13,6 +13,23 @@ the content changes on every request, such as the current time), `breakpoint` (t
 here) and `ttl` (`5m`, the default, or `1h`). The function returns a list, one entry per block, as maps
 `{"id": ..., "cache": null | "5m" | "1h"}`; a `cache` value stands for a `cache_control` marker on that block.
 
+## What is already written, and what you write
+
+The starter is a working planner with six gaps cut out of it. Everything that is plumbing is written and correct: the constants, `PlanError`, the walk over the
+blocks with the running token total, the building of the plan entries and the collecting of the breakpoints. Each gap is a small function with its signature, a comment that
+says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python
+names them with a leading underscore; TypeScript, Java and Kotlin use the same names without it, in camel case (`checkTools`, `wantsBreakpoint`). Write them in this order:
+
+1. `_check_tools` unlocks `e5`: a volatile tool definition is refused.
+2. `_ordered` unlocks `m1`, `e1` and `e6`: the prefix order, the volatile blocks last, and a new list.
+3. `_wants_breakpoint` unlocks `e2` and `e5`: the prefix must reach the minimum, and a volatile block never carries a breakpoint.
+4. `_marker` unlocks `m1`: the lifetime a breakpoint carries, `5m` by default.
+5. `_check_count` unlocks `e3`: at most four breakpoints.
+6. `_check_lifetimes` unlocks `e4`: a `1h` breakpoint never follows a `5m` one.
+
+About a dozen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `plan_request` already logs its input at debug level, and a
+run shows the logged lines under the failing case.
+
 ## `plan_request(blocks, min_tokens=1024)` (TypeScript `planRequest`, Java `CachePlan.planRequest`, Kotlin `planRequest`)
 
 1. **Order.** The sections come in the order `tools`, `system`, `messages`; blocks of one section keep the order they

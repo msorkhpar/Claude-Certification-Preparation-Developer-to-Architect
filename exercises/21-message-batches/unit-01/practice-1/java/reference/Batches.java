@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 /** Build, split and read Message Batches. See ../../statement.md for the contract. Requests and results are JSON-like maps. */
 final class Batches {
+    private static final System.Logger LOG = System.getLogger(Batches.class.getName());
     private Batches() {}
 
     private static final Pattern CUSTOM_ID = Pattern.compile("^[a-zA-Z0-9_-]{1,64}$");
@@ -16,23 +17,32 @@ final class Batches {
     static final long MAX_BYTES = 256L * 1024 * 1024;
     private static final List<String> USAGE_KEYS = List.of("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens");
 
+    private static void checkCustomId(Object id, Set<String> seen) {
+        if (!(id instanceof String s) || !CUSTOM_ID.matcher(s).matches()) {
+            throw new BatchError("custom_id", id + " is not 1 to 64 letters, digits, hyphens or underscores");
+        }
+        if (!seen.add(s)) throw new BatchError("custom_id", s + " is used twice");
+    }
+
+    private static void checkParams(Map<String, Object> params) {
+        Object maxTokens = params.get("max_tokens");
+        if (maxTokens == null || ((Number) maxTokens).longValue() < 1) throw new BatchError("params.max_tokens", "must be at least 1 inside a batch");
+        if (Boolean.TRUE.equals(params.get("stream"))) throw new BatchError("params.stream", "batch results are a file, not a stream");
+        if (params.containsKey("speed")) throw new BatchError("params.speed", "fast mode is not available in a batch");
+    }
+
     @SuppressWarnings("unchecked")
     static List<Map<String, Object>> buildRequests(List<Map<String, Object>> items) {
+        LOG.log(System.Logger.Level.DEBUG, "buildRequests input: {0}", items);
         Set<String> seen = new HashSet<>();
         List<Map<String, Object>> requests = new ArrayList<>();
         for (Map<String, Object> item : items) {
             Object id = item.get("id");
             Map<String, Object> params = (Map<String, Object>) item.get("params");
-            if (!(id instanceof String s) || !CUSTOM_ID.matcher(s).matches()) {
-                throw new BatchError("custom_id", id + " is not 1 to 64 letters, digits, hyphens or underscores");
-            }
-            if (!seen.add(s)) throw new BatchError("custom_id", s + " is used twice");
-            Object maxTokens = params.get("max_tokens");
-            if (maxTokens == null || ((Number) maxTokens).longValue() < 1) throw new BatchError("params.max_tokens", "must be at least 1 inside a batch");
-            if (Boolean.TRUE.equals(params.get("stream"))) throw new BatchError("params.stream", "batch results are a file, not a stream");
-            if (params.containsKey("speed")) throw new BatchError("params.speed", "fast mode is not available in a batch");
+            checkCustomId(id, seen);
+            checkParams(params);
             Map<String, Object> request = new LinkedHashMap<>();
-            request.put("custom_id", s);
+            request.put("custom_id", id);
             request.put("params", params);
             requests.add(request);
         }
@@ -43,6 +53,10 @@ final class Batches {
         return Json.stringify(request).getBytes(StandardCharsets.UTF_8).length;
     }
 
+    private static boolean mustStartNew(int count, long used, long bytes, int maxRequests, long maxBytes) {
+        return count > 0 && (count >= maxRequests || used + bytes > maxBytes);
+    }
+
     static List<List<Map<String, Object>>> splitBatches(List<Map<String, Object>> requests, int maxRequests, long maxBytes) {
         List<List<Map<String, Object>>> batches = new ArrayList<>();
         List<Map<String, Object>> current = new ArrayList<>();
@@ -50,7 +64,7 @@ final class Batches {
         for (Map<String, Object> request : requests) {
             long bytes = size(request);
             if (bytes > maxBytes) throw new BatchError("size", request.get("custom_id") + " alone is larger than a batch may be");
-            if (!current.isEmpty() && (current.size() >= maxRequests || used + bytes > maxBytes)) {
+            if (mustStartNew(current.size(), used, bytes, maxRequests, maxBytes)) {
                 batches.add(current);
                 current = new ArrayList<>();
                 used = 0;
@@ -66,6 +80,28 @@ final class Batches {
         return splitBatches(requests, MAX_REQUESTS, MAX_BYTES);
     }
 
+    private static void keepResult(List<String> wanted, Map<String, Map<String, Object>> byId, List<String> unknown, Map<String, Object> record) {
+        String cid = (String) record.get("custom_id");
+        if (!wanted.contains(cid)) unknown.add(cid);
+        else byId.putIfAbsent(cid, castMap(record.get("result")));
+    }
+
+    private static boolean needsFix(String errorType) {
+        return errorType.equals("invalid_request_error");
+    }
+
+    private static void addUsage(Map<String, Object> usage, Map<String, Object> used) {
+        for (String key : USAGE_KEYS) {
+            long add = used.get(key) == null ? 0 : ((Number) used.get(key)).longValue();
+            usage.put(key, ((Number) usage.get(key)).longValue() + add);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> castMap(Object value) {
+        return (Map<String, Object>) value;
+    }
+
     @SuppressWarnings("unchecked")
     static Map<String, Object> collect(List<Map<String, Object>> requests, List<String> resultLines) {
         List<String> wanted = new ArrayList<>();
@@ -74,10 +110,7 @@ final class Batches {
         List<String> unknown = new ArrayList<>();
         for (String line : resultLines) {
             if (line.isBlank()) continue;
-            Map<String, Object> record = (Map<String, Object>) Json.parse(line);
-            String cid = (String) record.get("custom_id");
-            if (!wanted.contains(cid)) unknown.add(cid);
-            else byId.putIfAbsent(cid, (Map<String, Object>) record.get("result"));
+            keepResult(wanted, byId, unknown, (Map<String, Object>) Json.parse(line));
         }
         List<Map<String, Object>> outcomes = new ArrayList<>();
         List<String> retry = new ArrayList<>();
@@ -102,16 +135,13 @@ final class Batches {
                 outcome.put("status", "succeeded");
                 outcome.put("text", text.toString());
                 outcome.put("usage", used);
-                for (String key : USAGE_KEYS) {
-                    long add = used.get(key) == null ? 0 : ((Number) used.get(key)).longValue();
-                    usage.put(key, ((Number) usage.get(key)).longValue() + add);
-                }
+                addUsage(usage, used);
             } else if ("errored".equals(result.get("type"))) {
                 Map<String, Object> outer = (Map<String, Object>) result.get("error");
                 String kind = (String) ((Map<String, Object>) outer.get("error")).get("type");
                 outcome.put("status", "errored");
                 outcome.put("error_type", kind);
-                (kind.equals("invalid_request_error") ? fix : retry).add(cid);
+                (needsFix(kind) ? fix : retry).add(cid);
             } else { // canceled or expired: the request never reached the model
                 outcome.put("status", result.get("type"));
                 retry.add(cid);

@@ -1,3 +1,7 @@
+import java.lang.System.Logger.Level
+
+private val log = System.getLogger("platforms")
+
 /** One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md. */
 
 /** The request cannot be built for this platform. [field] names the offending part. */
@@ -18,7 +22,25 @@ private val MISSING = mapOf(
 private val FEATURES = setOf("batches", "fast_mode", "files_api", "web_search", "web_fetch", "code_execution", "mcp_connector",
     "structured_outputs", "skills", "managed_agents", "prompt_caching", "thinking", "tool_use", "citations")
 
-private fun family(model: String) = if (model.startsWith(HAIKU)) HAIKU else model
+private fun family(model: String): String = if (model.startsWith(HAIKU)) HAIKU else model
+
+private fun checkBedrock(model: String, family: String, config: Map<String, Any?>) {
+    if (family !in BEDROCK_MODELS) throw PlatformError("model", "$model is not served by Claude in Amazon Bedrock")
+    if ((config["region"] as String?).isNullOrEmpty()) throw PlatformError("config", "a Bedrock request needs a region")
+}
+
+private fun bedrockModelId(family: String): String = "anthropic.$family"
+
+private fun vertexModelId(family: String): String = if (family == HAIKU) HAIKU_VERTEX else family
+
+private fun vertexHost(endpoint: String, family: String, model: String): String = when (endpoint) {
+    "global" -> "aiplatform.googleapis.com"
+    "us", "eu" -> "aiplatform.$endpoint.rep.googleapis.com"
+    else -> {
+        if (family !in REGIONAL_VERTEX_MODELS) throw PlatformError("endpoint", "$model is served on the global and multi-region endpoints, not on a specific region")
+        "$endpoint-aiplatform.googleapis.com"
+    }
+}
 
 @Suppress("UNCHECKED_CAST")
 private fun copy(value: Any?): Any? = when (value) {
@@ -30,12 +52,22 @@ private fun copy(value: Any?): Any? = when (value) {
 @Suppress("UNCHECKED_CAST")
 private fun copyBody(body: Map<String, Any?>): LinkedHashMap<String, Any?> = copy(body) as LinkedHashMap<String, Any?>
 
+private fun vertexBody(body: Map<String, Any?>): Map<String, Any?> {
+    val sent = copyBody(body)
+    sent.remove("model")
+    sent["anthropic_version"] = VERTEX_VERSION
+    return sent
+}
+
+private fun lacking(platform: String, features: List<String>): List<String> = features.filter { it in MISSING.getValue(platform) }
+
 private fun versionHeaders(): Map<String, Any?> = linkedMapOf("anthropic-version" to ANTHROPIC_VERSION, "content-type" to "application/json")
 
 private fun request(url: String, headers: Map<String, Any?>, body: Map<String, Any?>): Map<String, Any?> =
     linkedMapOf("method" to "POST", "url" to url, "headers" to headers, "body" to body)
 
 fun buildRequest(platform: String, model: String, body: Map<String, Any?>, config: Map<String, Any?>): Map<String, Any?> {
+    log.log(Level.DEBUG, "buildRequest input: {0} {1} {2} {3}", platform, model, body, config)
     val family = family(model)
     when (platform) {
         "anthropic" -> {
@@ -44,11 +76,10 @@ fun buildRequest(platform: String, model: String, body: Map<String, Any?>, confi
             return request("https://api.anthropic.com/v1/messages", versionHeaders(), sent)
         }
         "bedrock" -> {
-            if (family !in BEDROCK_MODELS) throw PlatformError("model", "$model is not served by Claude in Amazon Bedrock")
+            checkBedrock(model, family, config)
             val region = config["region"] as String?
-            if (region.isNullOrEmpty()) throw PlatformError("config", "a Bedrock request needs a region")
             val sent = copyBody(body)
-            sent["model"] = "anthropic.$family"
+            sent["model"] = bedrockModelId(family)
             return request("https://bedrock-mantle.$region.api.aws/anthropic/v1/messages", versionHeaders(), sent)
         }
         "vertex" -> {
@@ -56,20 +87,9 @@ fun buildRequest(platform: String, model: String, body: Map<String, Any?>, confi
             val project = config["project"] as String?
             if (project.isNullOrEmpty()) throw PlatformError("config", "a Vertex request needs a project")
             val endpoint = (config["endpoint"] as String?) ?: "global"
-            val modelId = if (family == HAIKU) HAIKU_VERTEX else family
-            val path = "/v1/projects/$project/locations/$endpoint/publishers/anthropic/models/$modelId:rawPredict"
-            val host = when (endpoint) {
-                "global" -> "aiplatform.googleapis.com"
-                "us", "eu" -> "aiplatform.$endpoint.rep.googleapis.com"
-                else -> {
-                    if (family !in REGIONAL_VERTEX_MODELS) throw PlatformError("endpoint", "$model is served on the global and multi-region endpoints, not on a specific region")
-                    "$endpoint-aiplatform.googleapis.com"
-                }
-            }
-            val sent = copyBody(body)
-            sent.remove("model")
-            sent["anthropic_version"] = VERTEX_VERSION
-            return request("https://$host$path", linkedMapOf("content-type" to "application/json"), sent)
+            val path = "/v1/projects/$project/locations/$endpoint/publishers/anthropic/models/${vertexModelId(family)}:rawPredict"
+            val host = vertexHost(endpoint, family, model)
+            return request("https://$host$path", linkedMapOf("content-type" to "application/json"), vertexBody(body))
         }
         else -> throw PlatformError("platform", "unknown platform $platform")
     }
@@ -78,5 +98,5 @@ fun buildRequest(platform: String, model: String, body: Map<String, Any?>, confi
 fun unsupportedFeatures(platform: String, features: List<String>): List<String> {
     val missing = MISSING[platform] ?: throw PlatformError("platform", "unknown platform $platform")
     features.firstOrNull { it !in FEATURES }?.let { throw PlatformError("feature", "unknown feature $it") }
-    return features.filter { it in missing }
+    return lacking(platform, features)
 }

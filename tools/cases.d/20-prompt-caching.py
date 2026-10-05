@@ -14,10 +14,13 @@ PRACTICES[f"{X}/20-prompt-caching/unit-01/practice-1"] = {
     ],
     "plants": {
         "wrong-no-reorder": (["m1", "e1"], "keeps the blocks in the order they were given"),
+        "wrong-sections-unsorted": (["e1"], "moves the volatile blocks last but leaves the sections in the order given"),
         "wrong-volatile-first": (["m1"], "puts the volatile blocks ahead of the stable ones"),
         "wrong-per-block-minimum": (["e2"], "tests each block's own size against the minimum instead of the prefix"),
         "wrong-five-breakpoints": (["e3"], "allows five breakpoints"),
         "wrong-ttl-unchecked": (["e4"], "never checks the order of one hour and five minute breakpoints"),
         "wrong-volatile-cached": (["e5"], "puts a breakpoint on a volatile block"),
+        "wrong-volatile-tool-allowed": (["e5"], "accepts a volatile tool definition"),
+        "wrong-input-changed": (["e6"], "leaves a mark on the first input block"),
     },
 }

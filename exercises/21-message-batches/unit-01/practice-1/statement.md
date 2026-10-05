@@ -15,6 +15,23 @@ here touches the network: results are the lines of the `.jsonl` file the API ser
 | result line | one line of JSON: `{"custom_id": ..., "result": {...}}` where `result.type` is `succeeded` (with `message`, whose `content` blocks and `usage` are those of a normal reply), `errored` (with `error.error.type`, such as `invalid_request_error` or `overloaded_error`), `canceled` or `expired` |
 | `BatchError` | the error to raise: `field` names the offending part (`custom_id`, `params.max_tokens`, `params.stream`, `params.speed` or `size`) |
 
+## What is already written, and what you write
+
+The starter is a working batch tool with six gaps cut out of it. Everything that is plumbing is written and correct: the constants, `BatchError`, the loops of the three
+functions, the size measure, the parsing of the result lines, the matching by custom id, the outcome of every kind of result, and the assembling of the answer. Each gap is a small function
+with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails
+the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use camel case without it (`checkCustomId`, `mustStartNew`). Write them in this order:
+
+1. `_check_custom_id` unlocks `e1`: the pattern, and an id used twice.
+2. `_check_params` unlocks `e2`: `max_tokens`, `stream` and `speed`.
+3. `_must_start_new` unlocks `e3`: when the next request opens a new batch, by count or by size.
+4. `_keep_result` unlocks `m1` and `e5`: a result is filed by its custom id, a stranger is reported, the first result wins.
+5. `_needs_fix` unlocks `e4`: which error type is fixed and which is retried.
+6. `_add_usage` unlocks `e6`: the four usage sums.
+
+About fifteen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `build_requests` already logs its input at debug level, and a
+run shows the logged lines under the failing case.
+
 ## `build_requests(items)` (TypeScript `buildRequests`, Java `Batches.buildRequests`, Kotlin `buildRequests`)
 
 Return the requests, one per item, `custom_id` being the item's id, in the same order. Raise `BatchError` when:

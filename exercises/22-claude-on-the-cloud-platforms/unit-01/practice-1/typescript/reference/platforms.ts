@@ -1,4 +1,7 @@
 // One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("platforms");
+
 const ANTHROPIC_VERSION = "2023-06-01";
 const VERTEX_VERSION = "vertex-2023-10-16";
 const HAIKU = "claude-haiku-4-5";
@@ -27,40 +30,63 @@ export class PlatformError extends Error {
   }
 }
 
-const family = (model: string) => (model.startsWith(HAIKU) ? HAIKU : model);
+function family(model: string): string {
+  return model.startsWith(HAIKU) ? HAIKU : model;
+}
+
+function checkBedrock(model: string, fam: string, config: Config): void {
+  if (!BEDROCK_MODELS.has(fam)) throw new PlatformError("model", `${model} is not served by Claude in Amazon Bedrock`);
+  if (!config.region) throw new PlatformError("config", "a Bedrock request needs a region");
+}
+
+function bedrockModelId(fam: string): string {
+  return `anthropic.${fam}`;
+}
+
+function vertexModelId(fam: string): string {
+  return fam === HAIKU ? HAIKU_VERTEX : fam;
+}
+
+function vertexHost(endpoint: string, fam: string, model: string): string {
+  if (endpoint === "global") return "aiplatform.googleapis.com";
+  if (endpoint === "us" || endpoint === "eu") return `aiplatform.${endpoint}.rep.googleapis.com`;
+  if (!REGIONAL_VERTEX_MODELS.has(fam)) throw new PlatformError("endpoint", `${model} is served on the global and multi-region endpoints, not on a specific region`);
+  return `${endpoint}-aiplatform.googleapis.com`;
+}
+
+function vertexBody(body: Record<string, any>): Record<string, any> {
+  const sent = structuredClone(body);
+  delete sent.model;
+  sent.anthropic_version = VERTEX_VERSION;
+  return sent;
+}
+
+function lacking(platform: string, features: string[]): string[] {
+  return features.filter((name) => MISSING[platform].has(name));
+}
 
 export function buildRequest(platform: string, model: string, body: Record<string, any>, config: Config): Built {
+  log.debug("buildRequest input", platform, model, body, config);
   const fam = family(model);
   if (platform === "anthropic") {
     return { method: "POST", url: "https://api.anthropic.com/v1/messages", headers: { "anthropic-version": ANTHROPIC_VERSION, "content-type": "application/json" }, body: { ...structuredClone(body), model } };
   }
   if (platform === "bedrock") {
-    if (!BEDROCK_MODELS.has(fam)) throw new PlatformError("model", `${model} is not served by Claude in Amazon Bedrock`);
-    if (!config.region) throw new PlatformError("config", "a Bedrock request needs a region");
+    checkBedrock(model, fam, config);
     return {
       method: "POST",
       url: `https://bedrock-mantle.${config.region}.api.aws/anthropic/v1/messages`,
       headers: { "anthropic-version": ANTHROPIC_VERSION, "content-type": "application/json" },
-      body: { ...structuredClone(body), model: `anthropic.${fam}` },
+      body: { ...structuredClone(body), model: bedrockModelId(fam) },
     };
   }
   if (platform === "vertex") {
     if (!VERTEX_MODELS.has(fam)) throw new PlatformError("model", `${model} is not served on Google Vertex AI`);
     if (!config.project) throw new PlatformError("config", "a Vertex request needs a project");
     const endpoint = config.endpoint ?? "global";
-    const modelId = fam === HAIKU ? HAIKU_VERTEX : fam;
-    const path = `/v1/projects/${config.project}/locations/${endpoint}/publishers/anthropic/models/${modelId}:rawPredict`;
-    let host: string;
-    if (endpoint === "global") host = "aiplatform.googleapis.com";
-    else if (endpoint === "us" || endpoint === "eu") host = `aiplatform.${endpoint}.rep.googleapis.com`;
-    else {
-      if (!REGIONAL_VERTEX_MODELS.has(fam)) throw new PlatformError("endpoint", `${model} is served on the global and multi-region endpoints, not on a specific region`);
-      host = `${endpoint}-aiplatform.googleapis.com`;
-    }
-    const sent = structuredClone(body);
-    delete sent.model;
-    sent.anthropic_version = VERTEX_VERSION;
-    return { method: "POST", url: `https://${host}${path}`, headers: { "content-type": "application/json" }, body: sent };
+    const path = `/v1/projects/${config.project}/locations/${endpoint}/publishers/anthropic/models/${vertexModelId(fam)}:rawPredict`;
+    const host = vertexHost(endpoint, fam, model);
+    return { method: "POST", url: `https://${host}${path}`, headers: { "content-type": "application/json" }, body: vertexBody(body) };
   }
   throw new PlatformError("platform", `unknown platform ${platform}`);
 }
@@ -69,5 +95,5 @@ export function unsupportedFeatures(platform: string, features: string[]): strin
   const missing = MISSING[platform];
   if (!missing) throw new PlatformError("platform", `unknown platform ${platform}`);
   for (const name of features) if (!FEATURES.has(name)) throw new PlatformError("feature", `unknown feature ${name}`);
-  return features.filter((name) => missing.has(name));
+  return lacking(platform, features);
 }

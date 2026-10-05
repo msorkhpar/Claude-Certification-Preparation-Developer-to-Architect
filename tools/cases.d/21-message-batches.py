@@ -13,11 +13,12 @@ PRACTICES[f"{X}/21-message-batches/unit-01/practice-1"] = {
         ("e6", "edge", "only requests that succeeded count toward usage"),
     ],
     "plants": {
-        "wrong-by-position": (["m1"], "pairs results with requests by their position in the file"),
+        "wrong-by-position": (["m1", "e5"], "reads the results in the order of the file instead of matching each to its request"),
         "wrong-duplicate-ids": (["e1"], "accepts a custom id that is used twice"),
         "wrong-allow-stream": (["e2"], "lets stream and speed into a batch"),
         "wrong-count-only": (["e3"], "cuts by request count and ignores the size limit"),
         "wrong-retry-invalid": (["e4"], "retries an invalid request unchanged instead of fixing it"),
         "wrong-missing-ignored": (["e5"], "drops a request that has no result instead of retrying it"),
+        "wrong-usage-no-cache-reads": (["e6"], "leaves the cache read tokens out of the usage totals"),
     },
 }

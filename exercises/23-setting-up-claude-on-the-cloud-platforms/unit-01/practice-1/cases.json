@@ -66,30 +66,45 @@
   "plants": {
     "wrong-wildcard-action": {
       "caught_by": [
-        "e1",
-        "m1"
+        "e1"
       ],
-      "defect": "grants a wildcard action instead of the invoke action"
+      "defect": "adds a wildcard action beside the invoke action"
+    },
+    "wrong-non-invoke-action": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "adds an action that is not an invoke action"
     },
     "wrong-resource-star": {
       "caught_by": [
-        "e2",
-        "m1"
+        "e2"
       ],
-      "defect": "allows the action on every resource"
+      "defect": "adds a resource that matches every resource"
     },
     "wrong-region-wildcard": {
       "caught_by": [
-        "e2",
-        "m1"
+        "e2"
       ],
-      "defect": "leaves the region of the model ARN as a wildcard"
+      "defect": "adds a model ARN whose region is a wildcard"
+    },
+    "wrong-undocumented-region": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a model ARN with a region Bedrock does not list"
     },
     "wrong-old-policy-version": {
       "caught_by": [
         "e3"
       ],
       "defect": "uses the 2008 policy language version"
+    },
+    "wrong-deny-statement": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "makes the statement a Deny"
     },
     "wrong-predefined-role": {
       "caught_by": [
@@ -117,10 +132,21 @@
     },
     "wrong-bare-model-id": {
       "caught_by": [
-        "e6",
-        "m1"
+        "e6"
       ],
-      "defect": "names the model without the Bedrock provider prefix"
+      "defect": "adds a model ARN without the Bedrock provider prefix"
+    },
+    "wrong-vertex-prefixed-model": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "gives the Vertex model the Bedrock provider prefix"
+    },
+    "wrong-haiku-undated": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "names Haiku 4.5 on Vertex without its date"
     },
     "wrong-quota-over": {
       "caught_by": [

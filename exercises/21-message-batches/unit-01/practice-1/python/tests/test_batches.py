@@ -45,7 +45,7 @@ def test_m1_results_are_matched_to_requests_by_custom_id_not_by_position():
     assert requests[0]["params"]["max_tokens"] == 200
     lines = [line("t-3", message("billing")), line("t-1", message("refund")), line("t-2", message("shipping"))]
     done = collect(requests, lines) or {}
-    assert [(o["custom_id"], o["status"], o["text"]) for o in done.get("outcomes", [])] == [
+    assert [(o["custom_id"], o["status"], o.get("text")) for o in done.get("outcomes", [])] == [
         ("t-1", "succeeded", "refund"), ("t-2", "succeeded", "shipping"), ("t-3", "succeeded", "billing")]
     assert [done.get("retry"), done.get("fix"), done.get("unknown")] == [[], [], []]
 
