@@ -1,0 +1,35 @@
+{
+  "id": "cloud-readthrough-l4",
+  "purpose": "Read-through of Level 4 (Professional, modules 79 to 94): fix wording, accuracy and quiz defects in the lesson pages.",
+  "office": "office-fix",
+  "inputs": {
+    "course": {
+      "path": "claude-certification-preparation",
+      "commit": "74f48c49c95be21692a0ed56e2123a5c33b4b35f"
+    }
+  },
+  "module_range": {
+    "from": 79,
+    "to": 94,
+    "modules_regex": "^(79|8[0-9]|9[0-4])-"
+  },
+  "languages": [
+    "python",
+    "typescript",
+    "java",
+    "kotlin"
+  ],
+  "gates": [
+    "python3 tools/check_quiz.py",
+    "python3 tools/test_check_quiz.py",
+    "python3 tools/check_revision.py",
+    "python3 tools/check_coverage.py",
+    "python3 tools/check_logger.py --modules '.*'",
+    "python3 tools/check_personal_data.py"
+  ],
+  "acceptance": {
+    "check_findings": 0,
+    "files_outside_scope": 0
+  },
+  "frozen_at": "2026-10-05T14:00:00Z"
+}
