@@ -110,6 +110,8 @@ def practices(rx):
 
 def scaffold(practice: Path):
     for lang, name in FILES.items():
+        if not (practice / lang / "starter").is_dir():
+            continue  # a practice that has no starter in this language (Agent SDK ones) has no try-it file either
         target = practice / lang / "tryit" / name
         if target.exists():
             print(f"kept {target.relative_to(ROOT)}")
@@ -120,6 +122,8 @@ def scaffold(practice: Path):
         print(f"wrote {target.relative_to(ROOT)}")
     for lang in ("java", "kotlin"):
         build = practice / lang / "build.gradle.kts"
+        if not build.is_file():
+            continue
         text = build.read_text(encoding="utf-8")
         key = "java" if lang == "java" else "kotlin"
         old = f"main {{ {key}.setSrcDirs(listOf(solution)) }}"
@@ -158,6 +162,8 @@ def check(rx) -> int:
             continue
         seen += 1
         for lang, name in FILES.items():
+            if not (practice / lang / "starter").is_dir():
+                continue
             file = practice / lang / "tryit" / name
             where = file.relative_to(ROOT)
             if not file.is_file():
