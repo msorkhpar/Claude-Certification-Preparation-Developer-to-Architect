@@ -135,10 +135,10 @@ trust and review before sharing.
 
 3. A colleague shares a ZIP file of a "free time-saving skill" from an unknown site and asks you to upload it. What is
    the best response?
-   - **a**: Upload it straight away, since skills only run when the task matches them
-   - **b**: Inspect the archive first, and decline unless someone trusted vouches for it
-   - **c**: Upload it for yourself only, so that no colleague is ever exposed to it
-   - **d**: Upload it to a test chat and judge it by the first reply it gives back to you
+   - **a**: Upload it straight away and watch the first few replies for anything odd
+   - **b**: Decline the archive and ask for a copy from a source you already trust
+   - **c**: Upload it for yourself only and keep every colleague away from it
+   - **d**: Upload it to a test chat and judge it by the first reply it gives
 
 <details>
 <summary>Answer key</summary>
@@ -154,6 +154,6 @@ trust and review before sharing.
    chats sit elsewhere. *b* is ruled out because a plugin is "A role's bundle of procedures and connections", far
    more than one layout. *c* is ruled out because an artifact is "A document, deck, dashboard or small tool to hand
    to someone" and does not make later chats follow a layout.
-3. **b**. Skills carry instructions and scripts that Claude follows, so the page says to install skills only from trusted sources and to review what they bundle. *a* is ruled out because "from an unknown source it is a route for prompt injection", whether or not the task matches. *c* is ruled out because the risks named, "prompt injection and data exfiltration", apply to the person who installs the skill, not only to colleagues. *d* is ruled out because the first reply cannot show hidden scripts or instructions, which is why the page says to review "code dependencies and bundled resources" first.
+3. **b**. Skills carry instructions and scripts that Claude follows, so the page says to install skills only from trusted sources and to review what they bundle. *a* is ruled out because "from an unknown source it is a route for prompt injection", and odd behaviour may never show in a reply. *c* is ruled out because the risks named, "prompt injection and data exfiltration", apply to the person who installs the skill, not only to colleagues. *d* is ruled out because the first reply cannot show hidden scripts or instructions, which is why the page says to review "code dependencies and bundled resources" first.
 
 </details>

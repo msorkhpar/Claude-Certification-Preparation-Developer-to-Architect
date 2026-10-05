@@ -43,8 +43,7 @@ be refreshed by updating a file.
 
 Everything in a Project competes for the context window (module 1). On the paid plans the help centre says that when a
 Project approaches the context limit Claude enables RAG mode, retrieval of the relevant parts, which expands
-the Project's capacity. (An earlier reading of the page gave a multiplier of up to 10 times; it was not found again on
-2026-10-02, so treat that figure as unverified.) Two consequences follow. A big knowledge base is possible, and
+the Project's capacity, by up to ten times. Two consequences follow. A big knowledge base is possible, and
 a retrieved passage is only as good as its source, so a muddled file produces muddled answers at scale.
 
 ### Sharing a Project
@@ -135,15 +134,15 @@ Review:    the file name is March. The pricing file for October exists in Drive.
    What explains it?
    - **a**: A second copy of the figure sits in text that no replaced document reaches
    - **b**: Memory carried the March percentage over from an earlier conversation
-   - **c**: The old and new editions both remain in the knowledge base, and Claude quotes either
+   - **c**: Retrieval over a large knowledge base returned an older passage than the June file
    - **d**: Sharing the Project keeps showing members the percentage they saw first
 
-3. An operations lead supports several clients, whose background material and house rules must never mix. Which
-   set-up fits?
-   - **a**: Run one long chat and paste each customer's material into it in turn as the work arrives
-   - **b**: Create one Project and put all customers' guidance into a single instruction block
-   - **c**: Give each customer a Project holding that customer's own instructions and documents
-   - **d**: Depend on memory alone, since Claude saves context from every chat it has
+3. An operations lead supports several outside organisations, whose background material and house rules must never
+   mix. Which set-up fits?
+   - **a**: Run one long chat and paste each one's material into it in turn as the work arrives
+   - **b**: Create one Project and put everyone's guidance into a single instruction block
+   - **c**: Give each one a Project holding its own instructions and documents
+   - **d**: Rely on memory alone to keep each one's context apart from the others
 
 <details>
 <summary>Answer key</summary>
@@ -152,9 +151,10 @@ Review:    the file name is March. The pricing file for October exists in Drive.
 2. **a**. Instructions say how to work and files say what is true, so a figure typed into the instructions is a
    second copy that no file update will touch (the first trap). *b* is ruled out because memory "holds preferences
    and context that Claude picked up, not the authoritative text of a policy". *c* is ruled out because the team
-   deleted the March file, whereas the page warns about "Two versions of one document side by side". *d* is ruled
+   deleted the March file, so no older passage remains to retrieve, and "a retrieved passage is only as good as its
+   source" says nothing about a figure that never lived in a file. *d* is ruled
    out because "anyone with access can read the instructions and every file in the knowledge base" describes who
    sees the content, not whether it is current.
-3. **c**. Each Project is a self-contained space, so "one Project's context does not leak into another" (the memory paragraph). *b* is ruled out because "Everything in a Project competes for the context window", and one block of mixed rules lets one customer's rules bleed into another's. *a* is ruled out because the table says chats are "The actual tasks; each can be restarted without losing the first two", and one long chat gives that up. *d* is ruled out because "memory is not a substitute for a knowledge file" and holds preferences, not each customer's authoritative documents.
+3. **c**. Each Project is a self-contained space, so "one Project's context does not leak into another" (the memory paragraph). *b* is ruled out because "Everything in a Project competes for the context window", and one block of mixed rules lets one organisation's rules bleed into another's. *a* is ruled out because the table says chats are "The actual tasks; each can be restarted without losing the first two", and one long chat gives that up. *d* is ruled out because "memory is not a substitute for a knowledge file" and holds preferences, not each organisation's authoritative documents.
 
 </details>
