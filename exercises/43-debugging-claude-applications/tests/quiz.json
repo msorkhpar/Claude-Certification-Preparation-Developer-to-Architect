@@ -5,19 +5,19 @@
       "id": "01-failure-types-origins-and-recoveries#q1",
       "page": "01-failure-types-origins-and-recoveries.md",
       "scope": "page",
-      "stem": "A service sends a request with a prefilled assistant message to a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?",
+      "stem": "A service starts Claude's reply with prefilled text on a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?",
       "options": {
         "a": "Retry each call with exponential back-off and jitter",
-        "b": "Hand the problem to the billing owner of the organisation",
-        "c": "Move the traffic to a fallback model and keep the same request",
-        "d": "Drop the pre-written closing block so that the user speaks last"
+        "b": "Extend the timeout so that each call has longer to finish",
+        "c": "Reword the system prompt so that Claude continues the text",
+        "d": "Rebuild the request so that the user speaks last"
       },
       "key": "d",
       "explanation": {
         "d": "The errors page lists the rejected prefill under \"Common validation errors\": \"This model does not support assistant message prefill. The conversation must end with a user message.\" The module adds that a migration error has the recovery \"change the request\".",
         "a": "Ruled out because \"A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure\".",
-        "c": "Ruled out because a fallback model is the recovery for a refusal, where the table says \"Use a fallback model, or reset the context\", and the 400 is a rejected request.",
-        "b": "Ruled out because billing problems are the 402 row, \"Your credential or account (401, 402, 403, a spend cap)\", and this is a 400."
+        "b": "Ruled out because a timeout is the 504 recovery, where the table says \"Change the call: stream, or use a batch\", while every migration row has the same recovery: \"change the request\".",
+        "c": "Ruled out because \"None is cured by a retry, a longer timeout or a different prompt\", and a reworded system prompt is a different prompt."
       }
     },
     {
@@ -45,10 +45,10 @@
       "scope": "page",
       "stem": "An assistant's reply arrives with status 200 and a stop reason of `refusal`. The team's dashboard shows nothing wrong. What does the documentation imply?",
       "options": {
-        "a": "Nothing is wrong, because the dashboard counts only failed calls",
-        "b": "The same request will usually succeed if it is sent again unchanged",
-        "c": "Monitoring built on error rates misses it, so it needs a separate signal",
-        "d": "The model is overloaded and the call should wait for a retry header"
+        "a": "Nothing failed, so the dashboard is right to show no alert",
+        "b": "A resend will usually work, so the team should retry as is",
+        "c": "Error-rate alerts miss it, so a separate signal is needed",
+        "d": "The service is overloaded, so the call should wait for a header"
       },
       "key": "c",
       "explanation": {
@@ -102,16 +102,16 @@
       "scope": "page",
       "stem": "A trace holds a 529, then a retry that returns a good response, then nothing else. What is the finding?",
       "options": {
-        "a": "No failure at all, since the final response was good",
-        "b": "A service failure that the application survived",
-        "c": "A failure of the model, with no recovery afterwards",
-        "d": "An integration failure that needs a fix in code"
+        "a": "A service failure, which ended without recovery",
+        "b": "A service failure, which the application survived",
+        "c": "A model failure, which the application survived",
+        "d": "An integration failure, which needs a fix in code"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"A 529 is retried and succeeds, so the application recovered\", and \"A later good response means the failure was survived\".",
-        "a": "Ruled out because the diagnosis names a failure even when it recovered: \"Read from the top. The diagnosis names the first failing event\".",
-        "c": "Ruled out because the first failing event is a 529, which is not model output, and the page says \"A 529 is retried and succeeds, so the application recovered\".",
+        "a": "Ruled out because \"A later good response means the failure was survived\", so the trace did recover.",
+        "c": "Ruled out because \"Trace B's 529 is the service's\", and a 529 is not model output.",
         "d": "Ruled out because \"a bug in your request fails the same way each time\", while this request succeeded on the retry."
       }
     },
@@ -138,19 +138,19 @@
       "id": "02-reading-a-trace-and-the-practice#m2",
       "page": "02-reading-a-trace-and-the-practice.md",
       "scope": "module",
-      "stem": "After switching the model id, every call returns a 400 whose message says that forcing a call is unsupported. The incident notes list four suspects. Which should the team investigate first?",
+      "stem": "After switching the model id, every call returns a 400 whose message says that a forced invocation is not supported for the model. The incident notes list four suspects. Which should the team investigate first?",
       "options": {
-        "a": "The `tool_choice` setting that the new release rejects",
-        "b": "The provider's capacity in the region where the traffic is sent",
-        "c": "The wording of the system message, which may have drifted",
-        "d": "The key's permissions on the organisation's workspace"
+        "a": "The `tool_choice` field that the new release rejects",
+        "b": "The prefilled turn that the new release rejects",
+        "c": "The thinking mode that the new release rejects",
+        "d": "The capacity that the provider holds in that region"
       },
       "key": "a",
       "explanation": {
-        "a": "The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5 and Sonnet 5.5, with the recovery \"change the request\".",
-        "b": "Ruled out because a 400 is a request status and capacity failures are \"429 with `retry-after`, 529\".",
-        "c": "Ruled out because \"None is cured by a retry, a longer timeout or a different prompt\".",
-        "d": "Ruled out because permissions are the 403 row, \"Your credential or account (401, 402, 403, a spend cap)\", and a 400 names a rejected request."
+        "a": "The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, with the message \"forced tool use is not supported for those models\".",
+        "b": "Ruled out because the rejected prefill has its own message: \"This model does not support assistant message prefill\".",
+        "c": "Ruled out because a rejected thinking mode is a \"400, with a message that points to adaptive thinking and `output_config.effort`\".",
+        "d": "Ruled out because a 400 is a request status and capacity failures are \"429 with `retry-after`, 529\"."
       }
     },
     {
@@ -159,17 +159,17 @@
       "scope": "module",
       "stem": "A reply ends cleanly with stop reason `end_turn`, but the downstream code throws on it, and the logged output is a sentence followed by a fenced block of JSON. Which statement is true?",
       "options": {
-        "a": "The fault is likely the integration's parser, and a test should script this sample",
+        "a": "The fault is the integration's parser, so a test should script this sample",
         "b": "The fault is the service's, so the call should be repeated until it is clean",
-        "c": "The fault is the account's, so the output format needs a higher plan",
-        "d": "The fault is the model's, since it ignored the instruction to return only JSON"
+        "c": "The fault is the model's, so the system prompt should forbid code fences",
+        "d": "The fault is the integration's limit, so `max_tokens` should be raised"
       },
       "key": "a",
       "explanation": {
         "a": "The table says an object between the first `{` and the last `}` makes it \"The integration: the parser was too strict, so extract the object first\", and the page says to prove a fix \"with a test that scripts the trace\".",
-        "d": "Ruled out because the trap warns \"Assuming the model when the output is odd\", and the output does hold the JSON.",
+        "c": "Ruled out because the trap warns \"Assuming the model when the output is odd\", and the output does hold the JSON.",
         "b": "Ruled out because the module's rule is to \"retry only what can change by itself\", and a repeat gives the same shape.",
-        "c": "Ruled out because the account row is \"Your credential or account (401, 402, 403, a spend cap)\", which arrives as an error status, and this call returned text."
+        "d": "Ruled out because a limit shows as a cut-off: \"A reply that stops mid-sentence with status 200 is the integration's configuration\", while this reply ends cleanly with `end_turn`."
       }
     },
     {

@@ -21,7 +21,7 @@ A useful trace is an ordered list of events, each small enough to read at a glan
 - **Responses and errors:** the status, the `type` and `message` of an error, the `stop_reason` of a success, and the content blocks.
 - **Tool calls and results:** the tool name and input, whether the result was flagged as an error, and the exception if your own tool code raised one.
 - **Parse steps:** whether your code could read the model's output, and the text it was given.
-- **The request id** of every call. The errors page says "Every API response includes a unique `request-id` header", and the same value is the `request_id` field of an error body. The Python and TypeScript SDKs expose it as `_request_id` on a response. Log it, and give it to support when a fault is the provider's.
+- **The request id** of every call. The errors page says "Every API response includes a unique `request-id` header", and the same value is the `request_id` field of an error body. The Python and TypeScript SDKs expose it as `_request_id` on a top-level response object. Log it, and give it to support when a fault is the provider's.
 
 The logging rules of module 15 apply: record the shape and the ids, and never a key or a customer's text in the clear.
 
@@ -496,17 +496,17 @@ The practice is the diagnosis function. You write, in the language of your choic
    - **d**: The parser was too strict, so pull out the object first
 
 3. A trace holds a 529, then a retry that returns a good response, then nothing else. What is the finding?
-   - **a**: No failure at all, since the final response was good
-   - **b**: A service failure that the application survived
-   - **c**: A failure of the model, with no recovery afterwards
-   - **d**: An integration failure that needs a fix in code
+   - **a**: A service failure, which ended without recovery
+   - **b**: A service failure, which the application survived
+   - **c**: A model failure, which the application survived
+   - **d**: An integration failure, which needs a fix in code
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The table says that when text follows the tool result the origin is "The integration: send the tool result alone", and the routine's step 4 says "An `end_turn` with no content blocks is an empty reply. Look at the request before it." *a* is ruled out because that is the answer only when no text followed: the table gives "The model: add a new user message that asks it to continue" for "If no". *d* is ruled out because "A dropped connection has none: it is the network, and it belongs to the service side", while here a response arrived with a stop reason. *c* is ruled out because a limit arrives as an error: "An `error` event has one, and the table of page 1 gives its origin and recovery".
 2. **d**. The table says that an object in the text makes it "The integration: the parser was too strict, so extract the object first". *b* is ruled out because "The model: it did not produce JSON, so validate and ask again" applies only when no object is in the text, and here one is. *c* is ruled out because a cut-off arrives as a stop reason: "A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response". *a* is ruled out because an access failure arrives as an error status: "An `error` event has one, and the table of page 1 gives its origin and recovery".
-3. **b**. The page says "A 529 is retried and succeeds, so the application recovered", and "A later good response means the failure was survived". *a* is ruled out because the diagnosis names a failure even when it recovered: "Read from the top. The diagnosis names the first failing event". *c* is ruled out because the first failing event is a 529, which is not model output, and the page says "A 529 is retried and succeeds, so the application recovered". *d* is ruled out because "a bug in your request fails the same way each time", while this request succeeded on the retry.
+3. **b**. The page says "A 529 is retried and succeeds, so the application recovered", and "A later good response means the failure was survived". *a* is ruled out because "A later good response means the failure was survived", so the trace did recover. *c* is ruled out because "Trace B's 529 is the service's", and a 529 is not model output. *d* is ruled out because "a bug in your request fails the same way each time", while this request succeeded on the retry.
 
 </details>
 
@@ -520,17 +520,17 @@ This quiz covers both pages of the module.
    - **c**: Split the work into smaller calls so that each one fits beneath the ceiling
    - **d**: Move the call to a fallback model, since this one is overloaded
 
-2. After switching the model id, every call returns a 400 whose message says that forcing a call is unsupported. The incident notes list four suspects. Which should the team investigate first?
-   - **a**: The `tool_choice` setting that the new release rejects
-   - **b**: The provider's capacity in the region where the traffic is sent
-   - **c**: The wording of the system message, which may have drifted
-   - **d**: The key's permissions on the organisation's workspace
+2. After switching the model id, every call returns a 400 whose message says that a forced invocation is not supported for the model. The incident notes list four suspects. Which should the team investigate first?
+   - **a**: The `tool_choice` field that the new release rejects
+   - **b**: The prefilled turn that the new release rejects
+   - **c**: The thinking mode that the new release rejects
+   - **d**: The capacity that the provider holds in that region
 
 3. A reply ends cleanly with stop reason `end_turn`, but the downstream code throws on it, and the logged output is a sentence followed by a fenced block of JSON. Which statement is true?
-   - **a**: The fault is likely the integration's parser, and a test should script this sample
+   - **a**: The fault is the integration's parser, so a test should script this sample
    - **b**: The fault is the service's, so the call should be repeated until it is clean
-   - **c**: The fault is the account's, so the output format needs a higher plan
-   - **d**: The fault is the model's, since it ignored the instruction to return only JSON
+   - **c**: The fault is the model's, so the system prompt should forbid code fences
+   - **d**: The fault is the integration's limit, so `max_tokens` should be raised
 
 4. A bug in a tool-use loop is fixed in production on a Friday evening. Which follow-up does the module recommend?
    - **a**: Close the incident, since the fix was deployed
@@ -542,8 +542,8 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The table sends "Your credential or account (401, 402, 403, a spend cap)" to a person, because "a spend cap lifts only at the monthly reset or with a higher limit", and "No retry can supply a key or a payment". *a* is ruled out because capacity failures are the ones where you "Wait for the header, or back off with jitter, then retry", and this response has no such header. *c* is ruled out because the module's rule is to "retry only what can change by itself", and smaller calls do not change an organisation's ceiling. *d* is ruled out because a fallback model is the recovery for a refusal, where the table says "Use a fallback model, or reset the context", and this is not an overload.
-2. **a**. The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5 and Sonnet 5.5, with the recovery "change the request". *b* is ruled out because a 400 is a request status and capacity failures are "429 with `retry-after`, 529". *c* is ruled out because "None is cured by a retry, a longer timeout or a different prompt". *d* is ruled out because permissions are the 403 row, "Your credential or account (401, 402, 403, a spend cap)", and a 400 names a rejected request.
-3. **a**. The table says an object between the first `{` and the last `}` makes it "The integration: the parser was too strict, so extract the object first", and the page says to prove a fix "with a test that scripts the trace". *d* is ruled out because the trap warns "Assuming the model when the output is odd", and the output does hold the JSON. *b* is ruled out because the module's rule is to "retry only what can change by itself", and a repeat gives the same shape. *c* is ruled out because the account row is "Your credential or account (401, 402, 403, a spend cap)", which arrives as an error status, and this call returned text.
+2. **a**. The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, with the message "forced tool use is not supported for those models". *b* is ruled out because the rejected prefill has its own message: "This model does not support assistant message prefill". *c* is ruled out because a rejected thinking mode is a "400, with a message that points to adaptive thinking and `output_config.effort`". *d* is ruled out because a 400 is a request status and capacity failures are "429 with `retry-after`, 529".
+3. **a**. The table says an object between the first `{` and the last `}` makes it "The integration: the parser was too strict, so extract the object first", and the page says to prove a fix "with a test that scripts the trace". *c* is ruled out because the trap warns "Assuming the model when the output is odd", and the output does hold the JSON. *b* is ruled out because the module's rule is to "retry only what can change by itself", and a repeat gives the same shape. *d* is ruled out because a limit shows as a cut-off: "A reply that stops mid-sentence with status 200 is the integration's configuration", while this reply ends cleanly with `end_turn`.
 4. **c**. The page says "A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite." *a* is ruled out because "A bug that is fixed without a test or an eval case will return", as the last trap puts it. *b* is ruled out because a runbook note records the bug and does not test for it, and the page says "The bug cannot return unseen" once it is a case. *d* is ruled out because a smaller budget hides failures, while the routine says to "note whether the application recovered".
 
 </details>
