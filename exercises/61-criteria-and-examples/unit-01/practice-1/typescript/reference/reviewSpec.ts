@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+const log = logger("review_spec");
 /** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. */
 
 export const VAGUE = ["be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "when you are sure", "use your judgment"];
@@ -7,6 +9,7 @@ const blank = (value: unknown): boolean => value === undefined || value === null
 const vague = (text: string): string | undefined => VAGUE.find((phrase) => text.toLowerCase().includes(phrase));
 
 export function buildReviewPrompt(spec: any, diff: string): string {
+  log.debug("buildReviewPrompt input", spec);
   const criteria: any[] = spec.criteria ?? [];
   const examples: any[] = spec.examples ?? [];
   if (criteria.length === 0) throw new Error("at least one criterion is required");

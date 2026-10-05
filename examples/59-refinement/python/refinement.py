@@ -4,6 +4,9 @@ The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-
 touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and
 independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def choose_mode(task):

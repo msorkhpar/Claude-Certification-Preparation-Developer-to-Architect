@@ -9,6 +9,7 @@ import java.util.Set;
 
 /** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. Results are JSON-like maps. */
 final class ReviewSpec {
+    private static final System.Logger LOG = System.getLogger(ReviewSpec.class.getName());
     private ReviewSpec() {}
 
     static final List<String> VAGUE = List.of("be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "when you are sure", "use your judgment");
@@ -44,6 +45,7 @@ final class ReviewSpec {
     }
 
     static String buildReviewPrompt(Map<String, Object> spec, String diff) {
+        LOG.log(System.Logger.Level.DEBUG, "buildReviewPrompt input: {0}", spec);
         List<Map<String, Object>> criteria = maps(spec.get("criteria"));
         List<Map<String, Object>> examples = maps(spec.get("examples"));
         if (criteria.isEmpty()) throw new IllegalArgumentException("at least one criterion is required");

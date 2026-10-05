@@ -7,6 +7,7 @@ import java.util.Map;
 
 /** The decision of a review job and the prompt of a review run. See ../../statement.md. */
 public final class ReviewGate {
+    private static final System.Logger LOG = System.getLogger(ReviewGate.class.getName());
     private ReviewGate() {}
 
     static final List<String> SEVERITIES = List.of("low", "medium", "high");
@@ -43,6 +44,7 @@ public final class ReviewGate {
     /** policy: min_severity, disabled_categories and fail_on. Returns exit, comments and problems. */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> gate(String stdout, int exitCode, JsonNode schema, Map<String, Object> policy) {
+        LOG.log(System.Logger.Level.DEBUG, "gate input: {0}", stdout);
         List<String> problems = new ArrayList<>();
         if (exitCode != 0) problems.add("claude exited with status " + exitCode);
         JsonNode envelope;

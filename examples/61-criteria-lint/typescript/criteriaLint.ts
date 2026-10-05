@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("criteria_lint");
 /**
  * Three checks that keep a review prompt precise: lint a criterion for vague wording, check a set of few-shot examples, and measure the precision of each finding category from the verdicts developers gave.
  *

@@ -11,6 +11,22 @@ part, `review_gate.py`, `reviewGate.ts`, `ReviewGate.java` (the class `ReviewGat
 `gate` as methods in Java and Kotlin and a provided `SchemaCheck` that you do not edit. The Java and Kotlin tests read the JSON with Jackson and the workflow
 with its YAML module.
 
+## What is already written, and what you write
+
+The starter is a working review job with nine gaps cut out of it. Everything that is plumbing is written and correct: the prompt's instructions, its already-reported and existing-tests sections and its diff, the parsing of the run's output, the refusal of output that is not a JSON object, the subtype and `structured_output` checks, the schema check helper and the workflow's checkout and trigger. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The new-only sentence (unlocks `e4`): the prompt's instructions ask for findings that are new or still unaddressed, in the sentence `Report only findings that are new or still unaddressed.`.
+2. The exit status (unlocks `e1`): a non-zero exit status of `claude` fails the job and adds the problem `claude exited with status N`.
+3. The schema check (unlocks `e2`): each error of the answer against the schema becomes a problem that starts with `schema ` and the path of the error, such as `schema $.findings[0].line: expected integer`.
+4. The comments (unlocks `m1`): a finding becomes a comment `{file, line, severity, body}` when its severity is at or above `min_severity` and its category is not in `disabled_categories`; the body is the issue, then ` Suggested fix: `, then the fix.
+5. The blocking severity (unlocks `e3`): the job fails when a posted comment has a severity in `fail_on`, and only comments otherwise.
+6. The schema file, in `review-schema.json` (unlocks `e5`): a draft-07 schema in which `category` and `severity` are closed enums (`bug`, `security`, `style`, `other`; `low`, `medium`, `high`), every finding requires `file`, `line`, `category`, `severity`, `issue`, `suggested_fix` and `detected_pattern` (a string), and nothing extra is allowed in a finding; no `minLength`, `maxLength`, `minimum` or `maximum`.
+7. The workflow, in `.github/workflows/claude-review.yml` (unlocks `e6`): a `timeout-minutes`, the permissions `contents: read` and `pull-requests: write`, the key from `${{ secrets.ANTHROPIC_API_KEY }}`, and a `claude` command with `--bare -p`, `--output-format json`, `--json-schema`, `--max-turns` (at most 20) and `--allowedTools` limited to read-only tools.
+8. The criteria, in `CLAUDE.md` (unlocks `e7`): explicit criteria in place of `Be conservative`: severity examples for medium and low next to the one for high, and the testing standards (where tests live, which fixtures they use, what makes a test valuable).
+9. The personal path, in `CLAUDE.md` (unlocks `e8`): the line that names a path in a home folder is removed; no file holds a personal path, an address or a key.
+
+`m1` needs gap 4. About twenty lines in all, spread over the code and the four files (the four language folders hold the same files). The steps below describe the whole job, so you can see how your gaps are used.
+
 ## What to write
 
 - `.github/workflows/claude-review.yml`:

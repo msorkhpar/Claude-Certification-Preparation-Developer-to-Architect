@@ -18,7 +18,7 @@ PRACTICES[f"{X}/58-commands-and-skills/unit-01/practice-1"] = {
         "wrong-no-fork": (["m1"], "runs the review in the conversation instead of a forked context"),
         "wrong-no-agent": (["m1"], "leaves the subagent type out of the forked skill"),
         "wrong-no-hint": (["m1"], "leaves the argument hint out of the review skill"),
-        "wrong-no-placeholder": (["m1", "e3"], "never uses the pull request number in the steps"),
+        "wrong-no-placeholder": (["e3", "m1"], "never uses the pull request number in the steps"),
         "wrong-allowed-restricts": (["e2"], "relies on allowed tools to keep the review from editing"),
         "wrong-disallow-scoped": (["e2"], "writes scoped rules in disallowed tools, which leave Edit and Write in place"),
         "wrong-review-bare-bash": (["e2"], "pre approves the whole Bash tool in the review skill"),

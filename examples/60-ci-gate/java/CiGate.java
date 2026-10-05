@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  * the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network. The JSON is read with Jackson.
  */
 public final class CiGate {
+    private static final System.Logger LOG = System.getLogger(CiGate.class.getName());
     static final List<String> SEVERITIES = List.of("low", "medium", "high");
     private static final ObjectMapper JSON = new ObjectMapper();
 

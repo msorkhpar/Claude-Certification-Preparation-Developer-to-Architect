@@ -1,3 +1,5 @@
+import { logger } from "./logger.ts";
+const log = logger("skill_model");
 /**
  * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.
  *

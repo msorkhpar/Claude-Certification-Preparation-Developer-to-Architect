@@ -1,5 +1,8 @@
 """Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md."""
 import math
+import logging
+
+log = logging.getLogger(__name__)
 
 TRIGGERS = ("interval", "event", "condition", "once", "background")
 CLOUD_MIN_SECONDS = 3600  # a routine never runs more often than hourly
@@ -28,6 +31,7 @@ def _local(seconds):
 
 
 def choose(job):
+    log.debug("choose input: %r", job)
     trigger = job.get("trigger", "interval")
     seconds = job.get("interval_seconds", 0)
     days = job.get("lasts_days", 1)

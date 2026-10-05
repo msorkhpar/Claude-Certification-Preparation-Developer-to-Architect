@@ -8,6 +8,20 @@ the files: they are configuration and notes, not code in a language, and the Jav
 matter with its YAML module. The checks run on the course's own model of the documented loading rules (`examples/57-memory-loading`, with
 `examples/38-settings-layers` for permission rules, in your language). Nothing here starts Claude Code or touches the network.
 
+## What is already written, and what you write
+
+The starter is a working set of memory files with seven gaps cut out of it. Everything that is plumbing is written and correct: the Terraform rule with its paths, the architecture notes the root file imports, the always-rules and the pointers of the root file, and the titles of every file. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:
+
+1. The root file, in `CLAUDE.md` (unlocks `m1`, `e1`): it keeps only the three rules every task needs (and the pointers); the API conventions and the stray testing line are removed from it, because an area's conventions load from its own rule file.
+2. The import, in `CLAUDE.md` (unlocks `e3`): `@docs/standards/architecture.md` is spelled as the file is named, on a line of its own and not inside a code span.
+3. The testing rule, in `.claude/rules/testing.md` (unlocks `m1`, `e2`, `e6`): frontmatter with a `paths` list of `**/*.test.ts` and `**/*.test.tsx`, so the rule follows the file type and not a folder.
+4. The API rule, in `.claude/rules/api.md` (unlocks `m1`, `e6`): `paths` as a list with `src/api/**/*.ts`, and the four API conventions moved here from the root file, none left behind.
+5. The migrations rule, in `.claude/settings.json` (unlocks `e5`): a `deny` list with `Edit(db/migrations/**)` and nothing else, because a rule that must always hold is a permission and not a sentence.
+6. The personal files, in `user-memory.example.md`, `CLAUDE.local.example.md` and `.gitignore` (unlocks `e4`): the short-answers preference in the first, the sandbox note in the second, neither left in the root file, and `CLAUDE.local.md` in the ignore file.
+7. The personal path, in `CLAUDE.md` (unlocks `e7`): the line that names a path in a home folder is removed; no file holds a personal path, an address or a key.
+
+`m1` needs gaps 1, 3 and 4. About thirteen lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used.
+
 ## What to write
 
 - `CLAUDE.md`, the shared root file:

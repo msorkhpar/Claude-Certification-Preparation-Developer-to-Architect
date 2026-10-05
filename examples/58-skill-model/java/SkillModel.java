@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  * the front matter is YAML, read with Jackson.
  */
 public final class SkillModel {
+    private static final System.Logger LOG = System.getLogger(SkillModel.class.getName());
     static final List<String> LEVELS = List.of("enterprise", "personal", "project"); // the order in which a skill name is resolved: the first level wins
     private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
     private static final Pattern FRONTMATTER = Pattern.compile("^---\\n(.*?)\\n---\\n?(.*)$", Pattern.DOTALL);

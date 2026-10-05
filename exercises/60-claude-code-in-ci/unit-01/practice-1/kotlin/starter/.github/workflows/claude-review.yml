@@ -9,8 +9,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Review the pull request
         env:
           ANTHROPIC_API_KEY: sk-ant-api03-EXAMPLEKEY123456
         run: |
-          claude "Review the change on standard input." --allowedTools "Bash,Edit" > review.txt
+          git diff origin/${{ github.base_ref }}...HEAD | claude -p "Review the change on standard input." \
+            --append-system-prompt-file CLAUDE.md \
+            --allowedTools "Bash,Edit" > review.json

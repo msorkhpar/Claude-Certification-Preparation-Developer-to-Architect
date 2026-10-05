@@ -2,6 +2,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import harness.Show.py
 
+private val log = System.getLogger("ci_gate")
+
 /**
  * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.
  *

@@ -1,5 +1,7 @@
 /** Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md. */
 
+private val log = System.getLogger("rhythm_plan")
+
 data class Choice(val mechanism: String, val reason: String, val intervalMinutes: Int)
 
 private val TRIGGERS = listOf("interval", "event", "condition", "once", "background")
@@ -24,6 +26,7 @@ private fun local(seconds: Int): Choice {
 }
 
 fun choose(job: Map<String, Any>): Choice {
+    log.log(System.Logger.Level.DEBUG, "choose input: {0}", job)
     val trigger = job["trigger"]?.toString() ?: "interval"
     val seconds = number(job, "interval_seconds", 0)
     val days = number(job, "lasts_days", 1)

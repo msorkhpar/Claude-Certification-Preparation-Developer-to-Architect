@@ -8,6 +8,9 @@ the shape the SDK documents for its result message; nothing here ran the real bi
 """
 import json
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 SEVERITIES = ["low", "medium", "high"]
 REVIEW_SCHEMA = {

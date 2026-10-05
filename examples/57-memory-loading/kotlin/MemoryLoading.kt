@@ -1,5 +1,7 @@
 import harness.Show.py
 
+private val log = System.getLogger("memory_loading")
+
 /**
  * Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.
  *

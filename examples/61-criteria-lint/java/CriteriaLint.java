@@ -14,6 +14,7 @@ import java.util.Set;
  * off while its prompt is improved) and the prompting guide's advice on examples (read on 2026-10-03: relevant, diverse and structured, three to five). No model is called.
  */
 public final class CriteriaLint {
+    private static final System.Logger LOG = System.getLogger(CriteriaLint.class.getName());
     static final List<String> VAGUE = List.of("be conservative", "high-confidence", "high confidence", "only important", "only significant", "if you are sure", "use your judgment");
 
     /** A review criterion: what to report, what to skip, and a concrete example for each severity level. */

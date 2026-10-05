@@ -10,6 +10,21 @@ Python has `choose(job)` in `rhythm_plan.py`; TypeScript has `choose` in `rhythm
 function `choose` and the data class `Choice`. Python and TypeScript take a plain object, and Java and Kotlin take a map from the key to its value. The keys are the same strings in
 every language, and a missing key has the default shown below. The result has the fields `mechanism`, `reason` and `interval_minutes` (`intervalMinutes` in Java and Kotlin).
 
+## What is already written, and what you write
+
+The starter is a working planner of unattended and scheduled runs with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the reading of a job's fields with their defaults, the rows for a condition, a background command, a closed machine and a closed session, the local desktop task and the fixed and self-paced loops. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):
+
+1. The routine's interval (unlocks `m1`): a cloud routine carries its interval in whole minutes, rounded up from the job's seconds.
+2. The pipeline job (unlocks `e1`): a job that runs in a pipeline is a `headless-run` with the reason `no-person-present`, whatever else is true of it.
+3. The event trigger (unlocks `e2`): an event that is a repository event, or that must run while the machine is off, is a `routine` (`react-to-event-unattended`); any other event is watched with a `monitor` (`push-not-poll`).
+4. The one-off job and the closed session (unlocks `e3`): a one-off job on a machine that stays on, whose session is closed, is a durable `desktop-task` (`durable-and-local`).
+5. The hourly floor (unlocks `e4`): a cloud schedule below one hour (3,600 seconds) is refused with an error; exactly one hour is allowed.
+6. Whole minutes (unlocks `e5`): seconds are rounded up to whole minutes (90 seconds are 2 minutes).
+7. The seven days (unlocks `e6`): a recurring job that lasts more than 7 days cannot stay a loop of a session: it goes to a desktop task when it needs local files and to a cloud routine otherwise (`outlives-seven-days`).
+8. The refusals (unlocks `e7`): an unknown trigger, a negative interval, a duration below 1 day, and a job that needs a closed machine and local files are refused with an error.
+
+`m1` needs gap 1. About twenty lines in all. The steps below describe the whole planner, so you can see how your gaps are used.
+
 ## What to write
 
 | Key | Meaning | Default |
