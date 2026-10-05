@@ -530,7 +530,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
    - **c**: The pick is refused for the session and restored after the next restart
    - **d**: The pick stands only if the project file also names that model
 
-2. Scenario: Amara adds `allowManagedHooksOnly: true` to the shared project file that her team commits, expecting every developer to be limited to the hooks of the organisation. What is the effect?
+2. Scenario: Amara adds `allowManagedHooksOnly: true` to the shared project file that Amara's team commits, expecting every developer to be limited to the hooks of the organisation. What is the effect?
    - **a**: Hooks from the project run, since the team's file is read after the user file
    - **b**: Every hook is switched off in the project until the managed file confirms it
    - **c**: Nothing happens, since only the top tier reads that key

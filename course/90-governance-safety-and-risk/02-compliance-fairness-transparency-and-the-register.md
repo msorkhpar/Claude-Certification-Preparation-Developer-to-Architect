@@ -399,7 +399,7 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
    - **c**: Replace the tokens in that customer's entries with new tokens
    - **d**: Encrypt that customer's entries with a key that is then kept
 
-2. Scenario: Tomas must set how long a support assistant keeps its audit records. His design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?
+2. Scenario: Tomas must set how long a support assistant keeps its audit records. Tomas's design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?
    - **a**: They are deleted at once because the court may inspect any copy
    - **b**: They follow the same schedule and the case uses what is left
    - **c**: They are moved to a table with no limit on their retention
