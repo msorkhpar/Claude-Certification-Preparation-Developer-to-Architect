@@ -21,5 +21,6 @@ PRACTICES[f"{X}/34-workflows-and-agents/unit-01/practice-1"] = {
         "wrong-trust-unreadable-judge": (["e4"], "scores a judge reply it cannot read as a pass"),
         "wrong-punctuation-kept": (["e5"], "does not strip punctuation around the label, so a reply of Billing. misses its route"),
         "wrong-tie-goes-last": (["e6"], "breaks a voting tie in favour of the answer seen last"),
+        "wrong-error-rounds": (["e7"], "counts the round in which the writer failed as completed"),
     },
 }

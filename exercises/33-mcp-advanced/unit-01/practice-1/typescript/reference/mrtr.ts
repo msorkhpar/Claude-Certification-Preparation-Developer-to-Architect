@@ -1,5 +1,8 @@
 // An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { logger } from "../logger.ts";
+
+const log = logger("mrtr");
 
 export const VERSION = "2026-07-28";
 export const META_VERSION = "io.modelcontextprotocol/protocolVersion";
@@ -58,8 +61,12 @@ function metaError(request: any) {
   return null;
 }
 
+function toolListing(): Record<string, unknown> {
+  return { resultType: "complete", tools: [...TOOLS].sort((a, b) => a.name.localeCompare(b.name)), ttlMs: 300000, cacheScope: "public" };
+}
+
 export function listTools(request: any) {
-  return metaError(request) ?? { resultType: "complete", tools: [...TOOLS].sort((a, b) => a.name.localeCompare(b.name)), ttlMs: 300000, cacheScope: "public" };
+  return metaError(request) ?? toolListing();
 }
 
 const complete = (text: string, isError = false) => ({ resultType: "complete", content: [{ type: "text", text }], isError });
@@ -69,47 +76,78 @@ const confirmRequest = (service: string) => ({ confirm: { method: "elicitation/c
 
 const notesRequest = (service: string) => ({ notes: { method: "sampling/createMessage", params: { messages: [{ role: "user", content: { type: "text", text: `Write one sentence of release notes for ${service}.` } }], maxTokens: 100 } } });
 
+function newState(name: string, args: unknown, principal: string, now: number, step: string): Record<string, unknown> {
+  return { v: 1, tool: name, digest: argsDigest(args), sub: principal, exp: now + TTL_SECONDS, step };
+}
+
+function validate(name: unknown, args: Record<string, any>): any {
+  if (name !== "deploy" && name !== "status") return error(-32602, `Unknown tool: ${name}`);
+  if (typeof args.service !== "string" || !args.service.trim()) return error(-32602, "Invalid params: service is required");
+  if (name === "deploy" && args.env !== "staging" && args.env !== "production") return error(-32602, "Invalid params: env must be staging or production");
+  return null;
+}
+
+function canElicit(caps: Record<string, any>): boolean {
+  const elicitation = caps.elicitation;
+  return elicitation !== undefined && elicitation !== null && (Object.keys(elicitation).length === 0 || "form" in elicitation);
+}
+
+function stateError(secret: string, token: unknown, principal: string, name: string, args: unknown, now: number): any {
+  const state = readState(secret, token);
+  if (state === null) return error(-32602, "Invalid requestState");
+  if (now > (state.exp ?? 0)) return error(-32602, "Expired requestState");
+  if (state.sub !== principal || state.tool !== name || state.digest !== argsDigest(args)) return error(-32602, "requestState does not match this request");
+  return null;
+}
+
+function confirmUsable(answer: any): boolean {
+  return answer !== null && typeof answer === "object" && ["accept", "decline", "cancel"].includes(answer.action);
+}
+
+function confirmed(answer: any): boolean {
+  return answer.action === "accept" && (answer.content ?? {}).confirm === true;
+}
+
+function notesText(answers: Record<string, any>): string | null {
+  const content = answers.notes !== null && typeof answers.notes === "object" ? answers.notes.content : undefined;
+  return content !== null && typeof content === "object" && typeof content.text === "string" ? content.text : null;
+}
+
 function ask(requests: unknown, step: string, secret: string, name: string, args: unknown, principal: string, now: number) {
-  const state = { v: 1, tool: name, digest: argsDigest(args), sub: principal, exp: now + TTL_SECONDS, step };
+  const state = newState(name, args, principal, now, step);
   return { resultType: "input_required", inputRequests: requests, requestState: mintState(secret, state) };
 }
 
 export function callTool(request: any, secret: string, principal: string, now: number): any {
+  log.debug("callTool input", request);
   const bad = metaError(request);
   if (bad) return bad;
   const name = request.name;
   const args = request.arguments ?? {};
-  if (name !== "deploy" && name !== "status") return error(-32602, `Unknown tool: ${name}`);
-  const service = args.service;
-  if (typeof service !== "string" || !service.trim()) return error(-32602, "Invalid params: service is required");
+  const invalid = validate(name, args);
+  if (invalid) return invalid;
+  const service: string = args.service;
   if (name === "status") return complete(`${service}: running`);
-  const env = args.env;
-  if (env !== "staging" && env !== "production") return error(-32602, "Invalid params: env must be staging or production");
-  if (env === "staging") return complete(`Deployed ${service} to staging`);
+  if (args.env === "staging") return complete(`Deployed ${service} to staging`);
   const caps = request._meta?.[META_CAPS] ?? {};
-  const elicitation = caps.elicitation;
-  if (elicitation === undefined || elicitation === null || (Object.keys(elicitation).length > 0 && !("form" in elicitation))) {
-    return complete("Deploying to production needs confirmation, and this client cannot be asked.", true);
-  }
+  if (!canElicit(caps)) return complete("Deploying to production needs confirmation, and this client cannot be asked.", true);
   let step = "confirm";
   const token = request.requestState;
   if (token !== undefined && token !== null) {
-    const state = readState(secret, token);
-    if (state === null) return error(-32602, "Invalid requestState");
-    if (now > (state.exp ?? 0)) return error(-32602, "Expired requestState");
-    if (state.sub !== principal || state.tool !== name || state.digest !== argsDigest(args)) return error(-32602, "requestState does not match this request");
-    step = state.step;
+    const problem = stateError(secret, token, principal, name, args, now);
+    if (problem) return problem;
+    step = readState(secret, token)?.step;
   }
   const given = token !== undefined && token !== null ? request.inputResponses : undefined;
   const answers = given !== null && typeof given === "object" && !Array.isArray(given) ? given : {};
   if (step === "confirm") {
     const answer = answers.confirm;
-    if (answer === null || typeof answer !== "object" || !["accept", "decline", "cancel"].includes(answer.action)) return ask(confirmRequest(service), "confirm", secret, name, args, principal, now);
-    if (answer.action !== "accept" || (answer.content ?? {}).confirm !== true) return complete("Deployment cancelled");
+    if (!confirmUsable(answer)) return ask(confirmRequest(service), "confirm", secret, name, args, principal, now);
+    if (!confirmed(answer)) return complete("Deployment cancelled");
     if (!("sampling" in caps)) return complete(`Deployed ${service} to production`);
     return ask(notesRequest(service), "notes", secret, name, args, principal, now);
   }
-  const content = answers.notes !== null && typeof answers.notes === "object" ? answers.notes.content : undefined;
-  if (content === undefined || content === null || typeof content !== "object" || typeof content.text !== "string") return ask(notesRequest(service), "notes", secret, name, args, principal, now);
-  return complete(`Deployed ${service} to production. Release notes: ${content.text}`);
+  const text = notesText(answers);
+  if (text === null) return ask(notesRequest(service), "notes", secret, name, args, principal, now);
+  return complete(`Deployed ${service} to production. Release notes: ${text}`);
 }

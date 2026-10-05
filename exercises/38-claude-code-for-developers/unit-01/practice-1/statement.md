@@ -10,9 +10,25 @@ Claude Code or touches the network.
 
 ## The project
 
-`starter/` holds `docs/architecture.md` (finished), a `CLAUDE.md` that only says `TODO`, an empty `.claude/settings.json`, and a
-`.claude/settings.local.json` that someone filled in with a personal path. The tests merge your files with two fixed layers: an
-organisation policy that denies `Bash(sudo *)`, and a user file that sets the model to `haiku` and allows `Bash(ls *)`.
+`starter/` is the finished project with eight gaps cut out of it: `docs/architecture.md`, the Conventions and Gotchas of `CLAUDE.md`, the
+skill's body and the script's plumbing are written. The tests merge your files with two fixed layers: an organisation policy that denies
+`Bash(sudo *)`, and a user file that sets the model to `haiku` and allows `Bash(ls *)`. Everything is plain files, so a gap is a
+`TODO` comment where a comment is possible (Markdown, the skill, the script) and is named below where it is not (JSON). A run reports
+what each failing case read; to debug a gap, put the file's content or the merged settings in a `print` of the test you are working on.
+These files are not code, so there is no logger line to add (the `log` line of the code practices has no file to live in here).
+
+## What is already written, and what you write
+
+About a dozen lines in all. In this order:
+
+1. `CLAUDE.md`, Commands: the two bullets with `make test` and `make lint` in backticks. Unlocks `m1`.
+2. `CLAUDE.md`, Architecture: the `@docs/architecture.md` import line. Unlocks `m1`.
+3. `.claude/settings.json`: `model` is `opus` and `permissions.defaultMode` is `acceptEdits`. Unlocks `e2` and `e3`.
+4. `.claude/settings.json`, allow: add `make lint` and the three read-only git commands to the one rule given. Unlocks `e1`.
+5. `.claude/settings.json`, deny: add `Read(./.env)`, `Read(./secrets/**)` and `Bash(git push *)` to the `curl` rule given. Unlocks `e1` and `e2`.
+6. `.claude/settings.local.json` and `.gitignore`: replace the personal path by the one `model` key, and ignore the two personal files. Unlocks `e3` and `e6`.
+7. `.claude/skills/fix-issue/SKILL.md`: the `argument-hint`, the line that only lets a person start it, and the `make test` step. Unlocks `e4`.
+8. `scripts/ci-review.sh`: the permission mode, the turn limit, the dollar cap and the read-only `--allowedTools`. Unlocks `e5`.
 
 ## What to write
 

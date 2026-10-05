@@ -24,5 +24,6 @@ PRACTICES[f"{X}/35-the-claude-agent-sdk/unit-01/practice-1"] = {
         "wrong-raises-after-error-result": (["e6"], "lets the error that follows an error result escape, so a run that hit its limit has no summary"),
         "wrong-hides-crash": (["e6"], "swallows every error, so a process that died before any result looks like a run that ended"),
         "wrong-status-unmapped": (["e5"], "reports the raw result subtype instead of the course status for the turn limit"),
+        "wrong-denied-capped": (["e7"], "counts at most one denied call however many the run had"),
     },
 }

@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /** An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md. Requests and results are JSON-like maps. */
 final class Mrtr {
+    private static final System.Logger LOG = System.getLogger(Mrtr.class.getName());
     private Mrtr() {}
 
     static final String VERSION = "2026-07-28";
@@ -111,12 +112,16 @@ final class Mrtr {
         return null;
     }
 
-    static Map<String, Object> listTools(Map<String, Object> request) {
-        Map<String, Object> bad = metaError(request);
-        if (bad != null) return bad;
+    private static Map<String, Object> toolListing() {
         List<Map<String, Object>> sorted = new ArrayList<>(TOOLS);
         sorted.sort(Comparator.comparing(t -> (String) t.get("name")));
         return map("resultType", "complete", "tools", sorted, "ttlMs", 300000, "cacheScope", "public");
+    }
+
+    static Map<String, Object> listTools(Map<String, Object> request) {
+        Map<String, Object> bad = metaError(request);
+        if (bad != null) return bad;
+        return toolListing();
     }
 
     private static Map<String, Object> complete(String text, boolean isError) {
@@ -133,51 +138,83 @@ final class Mrtr {
                 List.of(map("role", "user", "content", map("type", "text", "text", "Write one sentence of release notes for " + service + "."))), "maxTokens", 100)));
     }
 
+    private static Map<String, Object> newState(Object name, Map<String, Object> arguments, String principal, long now, String step) {
+        return map("v", 1, "tool", name, "digest", argsDigest(arguments), "sub", principal, "exp", now + TTL_SECONDS, "step", step);
+    }
+
+    private static Map<String, Object> validate(Object name, Map<String, Object> arguments) {
+        if (!"deploy".equals(name) && !"status".equals(name)) return error(-32602, "Unknown tool: " + name, null);
+        Object service = arguments.get("service");
+        if (!(service instanceof String s) || s.isBlank()) return error(-32602, "Invalid params: service is required", null);
+        Object env = arguments.get("env");
+        if ("deploy".equals(name) && !"staging".equals(env) && !"production".equals(env)) return error(-32602, "Invalid params: env must be staging or production", null);
+        return null;
+    }
+
+    private static boolean canElicit(Map<String, Object> caps) {
+        Object elicitation = caps.get("elicitation");
+        return elicitation instanceof Map<?, ?> m && (m.isEmpty() || m.containsKey("form"));
+    }
+
+    private static Map<String, Object> stateError(String secret, String token, String principal, Object name, Map<String, Object> arguments, long now) {
+        Map<String, Object> state = readState(secret, token);
+        if (state == null) return error(-32602, "Invalid requestState", null);
+        if (now > (state.get("exp") instanceof Number e ? e.longValue() : 0)) return error(-32602, "Expired requestState", null);
+        if (!principal.equals(state.get("sub")) || !name.equals(state.get("tool")) || !argsDigest(arguments).equals(state.get("digest"))) return error(-32602, "requestState does not match this request", null);
+        return null;
+    }
+
+    private static boolean confirmUsable(Object answer) {
+        return answer instanceof Map<?, ?> a && List.of("accept", "decline", "cancel").contains(a.get("action"));
+    }
+
+    private static boolean confirmed(Map<?, ?> answer) {
+        return "accept".equals(answer.get("action")) && answer.get("content") instanceof Map<?, ?> cm && Boolean.TRUE.equals(cm.get("confirm"));
+    }
+
+    private static String notesText(Map<String, Object> answers) {
+        Object content = answers.get("notes") instanceof Map<?, ?> n ? n.get("content") : null;
+        return content instanceof Map<?, ?> cm && cm.get("text") instanceof String text ? text : null;
+    }
+
     private static Map<String, Object> ask(Map<String, Object> requests, String step, String secret, String name, Map<String, Object> arguments, String principal, long now) {
-        Map<String, Object> state = map("v", 1, "tool", name, "digest", argsDigest(arguments), "sub", principal, "exp", now + TTL_SECONDS, "step", step);
+        Map<String, Object> state = newState(name, arguments, principal, now, step);
         return map("resultType", "input_required", "inputRequests", requests, "requestState", mintState(secret, state));
     }
 
     @SuppressWarnings("unchecked")
     static Map<String, Object> callTool(Map<String, Object> request, String secret, String principal, long now) {
+        LOG.log(System.Logger.Level.DEBUG, "callTool input: {0}", request);
         Map<String, Object> bad = metaError(request);
         if (bad != null) return bad;
         Object name = request.get("name");
         Map<String, Object> arguments = request.get("arguments") instanceof Map<?, ?> a ? (Map<String, Object>) a : new LinkedHashMap<>();
-        if (!"deploy".equals(name) && !"status".equals(name)) return error(-32602, "Unknown tool: " + name, null);
-        Object service = arguments.get("service");
-        if (!(service instanceof String s) || s.isBlank()) return error(-32602, "Invalid params: service is required", null);
-        if (name.equals("status")) return complete(service + ": running", false);
-        Object env = arguments.get("env");
-        if (!"staging".equals(env) && !"production".equals(env)) return error(-32602, "Invalid params: env must be staging or production", null);
-        if (env.equals("staging")) return complete("Deployed " + service + " to staging", false);
+        Map<String, Object> invalid = validate(name, arguments);
+        if (invalid != null) return invalid;
+        String s = (String) arguments.get("service");
+        if (name.equals("status")) return complete(s + ": running", false);
+        if (arguments.get("env").equals("staging")) return complete("Deployed " + s + " to staging", false);
         Object capsObject = meta(request).get(META_CAPS);
         Map<String, Object> caps = capsObject instanceof Map<?, ?> c ? (Map<String, Object>) c : new LinkedHashMap<>();
-        Object elicitation = caps.get("elicitation");
-        if (elicitation == null || (!((Map<?, ?>) elicitation).isEmpty() && !((Map<?, ?>) elicitation).containsKey("form")))
-            return complete("Deploying to production needs confirmation, and this client cannot be asked.", true);
+        if (!canElicit(caps)) return complete("Deploying to production needs confirmation, and this client cannot be asked.", true);
         String step = "confirm";
         Object token = request.get("requestState");
         if (token != null) {
+            Map<String, Object> problem = stateError(secret, String.valueOf(token), principal, name, arguments, now);
+            if (problem != null) return problem;
             Map<String, Object> state = readState(secret, String.valueOf(token));
-            if (state == null) return error(-32602, "Invalid requestState", null);
-            if (now > (state.get("exp") instanceof Number e ? e.longValue() : 0)) return error(-32602, "Expired requestState", null);
-            if (!principal.equals(state.get("sub")) || !name.equals(state.get("tool")) || !argsDigest(arguments).equals(state.get("digest"))) return error(-32602, "requestState does not match this request", null);
-            step = String.valueOf(state.get("step"));
+            step = state == null ? "" : String.valueOf(state.get("step"));
         }
         Map<String, Object> answers = token != null && request.get("inputResponses") instanceof Map<?, ?> r ? (Map<String, Object>) r : new LinkedHashMap<>();
         if (step.equals("confirm")) {
             Object answer = answers.get("confirm");
-            if (!(answer instanceof Map<?, ?> a) || !List.of("accept", "decline", "cancel").contains(a.get("action"))) return ask(confirmRequest(s), "confirm", secret, "deploy", arguments, principal, now);
-            Object content = a.get("content");
-            boolean confirmed = content instanceof Map<?, ?> cm && Boolean.TRUE.equals(cm.get("confirm"));
-            if (!"accept".equals(a.get("action")) || !confirmed) return complete("Deployment cancelled", false);
-            if (!caps.containsKey("sampling")) return complete("Deployed " + service + " to production", false);
+            if (!confirmUsable(answer)) return ask(confirmRequest(s), "confirm", secret, "deploy", arguments, principal, now);
+            if (!confirmed((Map<?, ?>) answer)) return complete("Deployment cancelled", false);
+            if (!caps.containsKey("sampling")) return complete("Deployed " + s + " to production", false);
             return ask(notesRequest(s), "notes", secret, "deploy", arguments, principal, now);
         }
-        Object notes = answers.get("notes");
-        Object content = notes instanceof Map<?, ?> n ? n.get("content") : null;
-        if (!(content instanceof Map<?, ?> cm) || !(cm.get("text") instanceof String text)) return ask(notesRequest(s), "notes", secret, "deploy", arguments, principal, now);
-        return complete("Deployed " + service + " to production. Release notes: " + text, false);
+        String text = notesText(answers);
+        if (text == null) return ask(notesRequest(s), "notes", secret, "deploy", arguments, principal, now);
+        return complete("Deployed " + s + " to production. Release notes: " + text, false);
     }
 }

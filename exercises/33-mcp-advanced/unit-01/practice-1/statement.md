@@ -20,6 +20,26 @@ function from the parameters of a request to the result, which is what the SDKs 
 | `read_state(secret, token)` | the payload of a `requestState`, or nothing when it is not one this secret signed (changed, cut short, signed by another secret, or not a state at all) |
 | `args_digest(arguments)` | a fingerprint of the arguments, the same in any key order |
 
+## What is already written, and what you write
+
+The starter is a working handler with eight gaps cut out of it. Everything that is plumbing is written and correct: the state signing
+(`mint_state`, `read_state`, `args_digest`), the error and result builders, the two request messages, the version check, and the order in which
+`call_tool` runs its steps. Each gap is a small function with its signature, a comment that says what it receives and returns with one example,
+and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Debug a gap by logging its input
+with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript
+names are the camel-case forms):
+
+1. `_validate` unlocks `e6`: the protocol error for an unknown tool, a missing service or a bad env.
+2. `_can_elicit` unlocks `e2`: which declared capabilities mean the client can be asked.
+3. `_confirm_usable` unlocks `m1` and `e3`: which answers count as an answer to the question.
+4. `_confirmed` unlocks `e3`: only an accept with `confirm` exactly true goes on.
+5. `_notes_text` unlocks `m1`: the sentence the client wrote for the release notes.
+6. `_state_error` unlocks `e4` and `e5`: the three checks on a returned state, in order.
+7. `_new_state` unlocks `e7`: the payload that carries the whole context.
+8. `_tool_listing` unlocks `e1`: the cacheable tool list.
+
+About twenty lines in all. The sections below describe the whole handler; the parts you do not write are there so you can see how your functions are used.
+
 ## What to write
 
 - `list_tools(request)`: a request whose version is not `VERSION` is a protocol error (below). Otherwise `{"resultType": "complete",

@@ -16,6 +16,28 @@ checked. Nothing here touches the network: the model is a function from a prompt
 | `ask`, `write`, `judge` | the model: a function that takes the prompt text and returns the reply text; it may throw |
 | `routes` | a map from a label to a handler, a function of the text that returns text; its key order is the label order |
 
+## What is already written, and what you write
+
+The starter is a working set of four workflows with nine small gaps cut out of it. The plumbing is written and correct: the two defensive
+readers (`_slice`, `parse_plan`, `read_judgement`), the loops, the counting of calls and the results of `orchestrate`, `refine`, `route` and
+`vote`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it
+unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log`
+line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names
+are the camel-case forms, `cleanSteps` and so on):
+
+1. `_clean_steps` unlocks `e1`: the string subtasks of the plan, stripped, without empty ones or repeats.
+2. `_run_worker` unlocks `m1` and `e2`: one worker call that never raises and reports `ok` or `failed`.
+3. `_combine_prompt` unlocks `m1`: the combine prompt with one line per subtask.
+4. `_score_ok` unlocks `e4`: which judge scores count (a number from 0 to 10, never a boolean).
+5. `_writer_prompt` unlocks `e3`: the first prompt, and the revision prompt with the previous draft and the feedback.
+6. `_is_better` unlocks `e4`: when a draft replaces the best one (strictly higher, so the earliest wins a tie).
+7. `_error_result` unlocks `e7`: the result when the writer raises.
+8. `_normalise_label` unlocks `e5`: the label read from the classifier's reply.
+9. `_pick_winner` unlocks `e6`: the most frequent answer, the first seen on a tie.
+
+About a dozen lines in all. The sections below describe the whole workflows; the parts you do not write are there so you can see how your
+functions are used.
+
 ## What to write
 
 Prompts are part of the contract, so that a test can answer by the start of a prompt. Write them exactly; `\n` is a newline.

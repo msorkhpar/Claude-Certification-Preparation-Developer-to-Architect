@@ -57,46 +57,6 @@
     }
   },
   "plants": {
-    "wrong-bypass-mode": {
-      "caught_by": [
-        "e1",
-        "e2"
-      ],
-      "defect": "sets defaultMode to bypassPermissions in the shared file, where it is ignored"
-    },
-    "wrong-write-deny": {
-      "caught_by": [
-        "e1",
-        "e2"
-      ],
-      "defect": "writes the secret rules for the Write tool, which no check consults, instead of Read"
-    },
-    "wrong-push-ask-only": {
-      "caught_by": [
-        "e1"
-      ],
-      "defect": "asks before a push instead of denying it"
-    },
-    "wrong-bare-bash-allow": {
-      "caught_by": [
-        "e1",
-        "e2"
-      ],
-      "defect": "allows every Bash command with a bare Bash rule"
-    },
-    "wrong-local-not-ignored": {
-      "caught_by": [
-        "e3"
-      ],
-      "defect": "leaves settings.local.json out of .gitignore"
-    },
-    "wrong-local-widens": {
-      "caught_by": [
-        "e1",
-        "e3"
-      ],
-      "defect": "puts a permission rule in the personal file"
-    },
     "wrong-bloated-memory": {
       "caught_by": [
         "m1"
@@ -109,11 +69,65 @@
       ],
       "defect": "names the architecture file without the @ that imports it"
     },
+    "wrong-push-ask-only": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "asks before a push instead of denying it"
+    },
+    "wrong-commit-allowed": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "allows git commit without asking"
+    },
+    "wrong-env-readable": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "leaves the .env file out of the deny rules"
+    },
+    "wrong-write-rule": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a path rule for the Write tool, which no check consults"
+    },
+    "wrong-extra-permission-key": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a permissions key that the shared file may not hold"
+    },
+    "wrong-local-not-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves settings.local.json out of .gitignore"
+    },
+    "wrong-local-md-not-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves CLAUDE.local.md out of .gitignore"
+    },
+    "wrong-local-env": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "puts an env block in the personal file"
+    },
     "wrong-skill-auto": {
       "caught_by": [
         "e4"
       ],
       "defect": "lets Claude start the fix-issue command on its own"
+    },
+    "wrong-skill-no-hint": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the argument hint out of the command"
     },
     "wrong-headless-bypass": {
       "caught_by": [
@@ -127,11 +141,29 @@
       ],
       "defect": "leaves the headless run without a turn limit"
     },
+    "wrong-headless-no-budget": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the headless run without a dollar cap"
+    },
+    "wrong-headless-bash-tool": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "pre-approves the whole Bash tool in the headless run"
+    },
     "wrong-key-in-script": {
       "caught_by": [
         "e6"
       ],
       "defect": "writes an API key into the script"
+    },
+    "wrong-path-in-memory": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes a personal home path into CLAUDE.md"
     }
   }
 }
