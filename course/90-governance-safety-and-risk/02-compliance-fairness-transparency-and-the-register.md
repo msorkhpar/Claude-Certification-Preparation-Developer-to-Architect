@@ -48,6 +48,324 @@ The risk register ties it together, and its test is mechanical. Each row names a
 The example is the router from the first page, and its second half is this page: the **audit record** and the **erasure**. The record for the supported refund holds the request id, the action, the consequence `high`, the outcome `human`, the number of characters and `content_stored=False`. The erasure runs on a vault of three mappings, two of them for one person. It ran offline in every language.
 
 <!-- example: m90-control-chain tabs: python,typescript,java,kotlin -->
+```python
+"""Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.
+
+The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
+"""
+from collections import namedtuple
+
+Action = namedtuple("Action", "name consequence")
+Answer = namedtuple("Answer", "text confidence quote")
+AUTO_CONFIDENCE = 95
+
+
+def route(action, answer, source, screen_up, confidence_min=AUTO_CONFIDENCE):
+    """Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed."""
+    if not screen_up and action.consequence == "high":
+        return "hold: screen down"
+    flag = "" if screen_up else " (unscreened)"
+    if answer.quote not in source:
+        return "hold: unsupported" + flag
+    if action.consequence == "high":
+        return "human" + flag
+    return ("auto" if answer.confidence >= confidence_min else "review") + flag
+
+
+def audit_record(request_id, action, outcome, text):
+    """Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text."""
+    return {"request": request_id, "action": action.name, "consequence": action.consequence, "outcome": outcome, "chars": len(text), "content_stored": False}
+
+
+def erase(vault, subject):
+    """Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone."""
+    kept = {token: person for token, person in vault.items() if person != subject}
+    return kept, len(vault) - len(kept)
+
+
+def main():
+    source = "Water damage is covered up to 5,000 per claim. Flood damage is excluded."
+    reply = Action("draft_reply", "low")
+    refund = Action("issue_refund", "high")
+    good = Answer("Water damage is covered up to 5,000.", 99, "Water damage is covered up to 5,000 per claim.")
+    edge = Answer("Water damage is covered up to 5,000.", 95, "Water damage is covered up to 5,000 per claim.")
+    unsure = Answer("Water damage is covered up to 5,000.", 94, "Water damage is covered up to 5,000 per claim.")
+    wrong = Answer("Water damage is covered up to 8,000.", 99, "Water damage is covered up to 8,000 per claim.")
+    cases = [
+        ("screen up, refund, supported", refund, good, True),
+        ("screen up, reply, confidence 99", reply, good, True),
+        ("screen up, reply, confidence 95", reply, edge, True),
+        ("screen up, reply, confidence 94", reply, unsure, True),
+        ("screen up, reply, confident but unsupported", reply, wrong, True),
+        ("screen down, refund", refund, good, False),
+        ("screen down, reply", reply, good, False),
+    ]
+    for label, action, answer, up in cases:
+        print(f"{label}: {route(action, answer, source, up)}")
+    record = audit_record("r-1001", refund, "human", good.text)
+    print("audit record:", ", ".join(f"{k}={v}" for k, v in record.items()))
+    vault = {"<EMAIL_1>": "person-a", "<EMAIL_2>": "person-b", "<MEMBER_1>": "person-a"}
+    kept, removed = erase(vault, "person-a")
+    print(f"erasure removed {removed} of {len(vault)} mappings; the audit entries stay, with {len(kept)} token still linkable")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+screen up, refund, supported: human
+screen up, reply, confidence 99: auto
+screen up, reply, confidence 95: auto
+screen up, reply, confidence 94: review
+screen up, reply, confident but unsupported: hold: unsupported
+screen down, refund: hold: screen down
+screen down, reply: auto (unscreened)
+audit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False
+erasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable
+```
+```typescript
+/**
+ * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.
+ *
+ * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
+ */
+export type Action = { name: string; consequence: string };
+export type Answer = { text: string; confidence: number; quote: string };
+
+export const AUTO_CONFIDENCE = 95;
+
+/** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
+export function route(action: Action, answer: Answer, source: string, screenUp: boolean, confidenceMin = AUTO_CONFIDENCE): string {
+  if (!screenUp && action.consequence === "high") return "hold: screen down";
+  const flag = screenUp ? "" : " (unscreened)";
+  if (!source.includes(answer.quote)) return "hold: unsupported" + flag;
+  if (action.consequence === "high") return "human" + flag;
+  return (answer.confidence >= confidenceMin ? "auto" : "review") + flag;
+}
+
+/** Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text. */
+export function auditRecord(requestId: string, action: Action, outcome: string, text: string): Record<string, string | number | boolean> {
+  return { request: requestId, action: action.name, consequence: action.consequence, outcome, chars: text.length, content_stored: false };
+}
+
+/** Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone. */
+export function erase(vault: Record<string, string>, subject: string): [Record<string, string>, number] {
+  const kept: Record<string, string> = {};
+  for (const [token, person] of Object.entries(vault)) if (person !== subject) kept[token] = person;
+  return [kept, Object.keys(vault).length - Object.keys(kept).length];
+}
+
+function main(): void {
+  const source = "Water damage is covered up to 5,000 per claim. Flood damage is excluded.";
+  const reply: Action = { name: "draft_reply", consequence: "low" };
+  const refund: Action = { name: "issue_refund", consequence: "high" };
+  const supported = "Water damage is covered up to 5,000 per claim.";
+  const good: Answer = { text: "Water damage is covered up to 5,000.", confidence: 99, quote: supported };
+  const edge: Answer = { text: "Water damage is covered up to 5,000.", confidence: 95, quote: supported };
+  const unsure: Answer = { text: "Water damage is covered up to 5,000.", confidence: 94, quote: supported };
+  const wrong: Answer = { text: "Water damage is covered up to 8,000.", confidence: 99, quote: "Water damage is covered up to 8,000 per claim." };
+  const cases: [string, Action, Answer, boolean][] = [
+    ["screen up, refund, supported", refund, good, true],
+    ["screen up, reply, confidence 99", reply, good, true],
+    ["screen up, reply, confidence 95", reply, edge, true],
+    ["screen up, reply, confidence 94", reply, unsure, true],
+    ["screen up, reply, confident but unsupported", reply, wrong, true],
+    ["screen down, refund", refund, good, false],
+    ["screen down, reply", reply, good, false],
+  ];
+  for (const [label, action, answer, up] of cases) console.log(`${label}: ${route(action, answer, source, up)}`);
+  const record = auditRecord("r-1001", refund, "human", good.text);
+  console.log("audit record:", Object.entries(record).map(([k, v]) => `${k}=${v === true ? "True" : v === false ? "False" : v}`).join(", "));
+  const vault = { "<EMAIL_1>": "person-a", "<EMAIL_2>": "person-b", "<MEMBER_1>": "person-a" };
+  const [kept, removed] = erase(vault, "person-a");
+  console.log(`erasure removed ${removed} of ${Object.keys(vault).length} mappings; the audit entries stay, with ${Object.keys(kept).length} token still linkable`);
+}
+
+if (import.meta.main) main();
+```
+```text
+screen up, refund, supported: human
+screen up, reply, confidence 99: auto
+screen up, reply, confidence 95: auto
+screen up, reply, confidence 94: review
+screen up, reply, confident but unsupported: hold: unsupported
+screen down, refund: hold: screen down
+screen down, reply: auto (unscreened)
+audit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False
+erasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable
+```
+```java
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.
+ *
+ * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
+ */
+public class ControlChain {
+    record Action(String name, String consequence) {}
+
+    record Answer(String text, int confidence, String quote) {}
+
+    record Case(String label, Action action, Answer answer, boolean screenUp) {}
+
+    record Erased(Map<String, String> kept, int removed) {}
+
+    static final int AUTO_CONFIDENCE = 95;
+
+    /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
+    static String route(Action action, Answer answer, String source, boolean screenUp, int confidenceMin) {
+        if (!screenUp && action.consequence().equals("high")) return "hold: screen down";
+        String flag = screenUp ? "" : " (unscreened)";
+        if (!source.contains(answer.quote())) return "hold: unsupported" + flag;
+        if (action.consequence().equals("high")) return "human" + flag;
+        return (answer.confidence() >= confidenceMin ? "auto" : "review") + flag;
+    }
+
+    static String route(Action action, Answer answer, String source, boolean screenUp) {
+        return route(action, answer, source, screenUp, AUTO_CONFIDENCE);
+    }
+
+    /** Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text. */
+    static Map<String, Object> auditRecord(String requestId, Action action, String outcome, String text) {
+        Map<String, Object> record = new LinkedHashMap<>();
+        record.put("request", requestId);
+        record.put("action", action.name());
+        record.put("consequence", action.consequence());
+        record.put("outcome", outcome);
+        record.put("chars", text.length());
+        record.put("content_stored", false);
+        return record;
+    }
+
+    /** Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone. */
+    static Erased erase(Map<String, String> vault, String subject) {
+        Map<String, String> kept = new LinkedHashMap<>();
+        for (Map.Entry<String, String> e : vault.entrySet()) if (!e.getValue().equals(subject)) kept.put(e.getKey(), e.getValue());
+        return new Erased(kept, vault.size() - kept.size());
+    }
+
+    static String flag(Object value) {
+        return value instanceof Boolean b ? (b ? "True" : "False") : String.valueOf(value);
+    }
+
+    public static void main(String[] args) {
+        String source = "Water damage is covered up to 5,000 per claim. Flood damage is excluded.";
+        Action reply = new Action("draft_reply", "low");
+        Action refund = new Action("issue_refund", "high");
+        String supported = "Water damage is covered up to 5,000 per claim.";
+        Answer good = new Answer("Water damage is covered up to 5,000.", 99, supported);
+        Answer edge = new Answer("Water damage is covered up to 5,000.", 95, supported);
+        Answer unsure = new Answer("Water damage is covered up to 5,000.", 94, supported);
+        Answer wrong = new Answer("Water damage is covered up to 8,000.", 99, "Water damage is covered up to 8,000 per claim.");
+        List<Case> cases = List.of(
+            new Case("screen up, refund, supported", refund, good, true),
+            new Case("screen up, reply, confidence 99", reply, good, true),
+            new Case("screen up, reply, confidence 95", reply, edge, true),
+            new Case("screen up, reply, confidence 94", reply, unsure, true),
+            new Case("screen up, reply, confident but unsupported", reply, wrong, true),
+            new Case("screen down, refund", refund, good, false),
+            new Case("screen down, reply", reply, good, false));
+        for (Case c : cases) System.out.println(c.label() + ": " + route(c.action(), c.answer(), source, c.screenUp()));
+        Map<String, Object> record = auditRecord("r-1001", refund, "human", good.text());
+        System.out.println("audit record: " + record.entrySet().stream().map(e -> e.getKey() + "=" + flag(e.getValue())).collect(Collectors.joining(", ")));
+        Map<String, String> vault = new LinkedHashMap<>();
+        vault.put("<EMAIL_1>", "person-a");
+        vault.put("<EMAIL_2>", "person-b");
+        vault.put("<MEMBER_1>", "person-a");
+        Erased erased = erase(vault, "person-a");
+        System.out.println("erasure removed " + erased.removed() + " of " + vault.size() + " mappings; the audit entries stay, with " + erased.kept().size() + " token still linkable");
+    }
+}
+```
+```text
+screen up, refund, supported: human
+screen up, reply, confidence 99: auto
+screen up, reply, confidence 95: auto
+screen up, reply, confidence 94: review
+screen up, reply, confident but unsupported: hold: unsupported
+screen down, refund: hold: screen down
+screen down, reply: auto (unscreened)
+audit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False
+erasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable
+```
+```kotlin
+/**
+ * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.
+ *
+ * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.
+ */
+data class Action(val name: String, val consequence: String)
+
+data class Answer(val text: String, val confidence: Int, val quote: String)
+
+data class Case(val label: String, val action: Action, val answer: Answer, val screenUp: Boolean)
+
+data class Erased(val kept: Map<String, String>, val removed: Int)
+
+const val AUTO_CONFIDENCE = 95
+
+/** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */
+fun route(action: Action, answer: Answer, source: String, screenUp: Boolean, confidenceMin: Int = AUTO_CONFIDENCE): String {
+    if (!screenUp && action.consequence == "high") return "hold: screen down"
+    val flag = if (screenUp) "" else " (unscreened)"
+    if (answer.quote !in source) return "hold: unsupported$flag"
+    if (action.consequence == "high") return "human$flag"
+    return (if (answer.confidence >= confidenceMin) "auto" else "review") + flag
+}
+
+/** Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text. */
+fun auditRecord(requestId: String, action: Action, outcome: String, text: String): Map<String, Any> =
+    linkedMapOf("request" to requestId, "action" to action.name, "consequence" to action.consequence, "outcome" to outcome, "chars" to text.length, "content_stored" to false)
+
+/** Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone. */
+fun erase(vault: Map<String, String>, subject: String): Erased {
+    val kept = vault.filterValues { it != subject }
+    return Erased(kept, vault.size - kept.size)
+}
+
+fun flag(value: Any): String = if (value is Boolean) (if (value) "True" else "False") else value.toString()
+
+fun main() {
+    val source = "Water damage is covered up to 5,000 per claim. Flood damage is excluded."
+    val reply = Action("draft_reply", "low")
+    val refund = Action("issue_refund", "high")
+    val supported = "Water damage is covered up to 5,000 per claim."
+    val good = Answer("Water damage is covered up to 5,000.", 99, supported)
+    val edge = Answer("Water damage is covered up to 5,000.", 95, supported)
+    val unsure = Answer("Water damage is covered up to 5,000.", 94, supported)
+    val wrong = Answer("Water damage is covered up to 8,000.", 99, "Water damage is covered up to 8,000 per claim.")
+    val cases = listOf(
+        Case("screen up, refund, supported", refund, good, true),
+        Case("screen up, reply, confidence 99", reply, good, true),
+        Case("screen up, reply, confidence 95", reply, edge, true),
+        Case("screen up, reply, confidence 94", reply, unsure, true),
+        Case("screen up, reply, confident but unsupported", reply, wrong, true),
+        Case("screen down, refund", refund, good, false),
+        Case("screen down, reply", reply, good, false),
+    )
+    for (c in cases) println("${c.label}: ${route(c.action, c.answer, source, c.screenUp)}")
+    val record = auditRecord("r-1001", refund, "human", good.text)
+    println("audit record: " + record.entries.joinToString(", ") { "${it.key}=${flag(it.value)}" })
+    val vault = linkedMapOf("<EMAIL_1>" to "person-a", "<EMAIL_2>" to "person-b", "<MEMBER_1>" to "person-a")
+    val erased = erase(vault, "person-a")
+    println("erasure removed ${erased.removed} of ${vault.size} mappings; the audit entries stay, with ${erased.kept.size} token still linkable")
+}
+```
+```text
+screen up, refund, supported: human
+screen up, reply, confidence 99: auto
+screen up, reply, confidence 95: auto
+screen up, reply, confidence 94: review
+screen up, reply, confident but unsupported: hold: unsupported
+screen down, refund: hold: screen down
+screen down, reply: auto (unscreened)
+audit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False
+erasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable
+```
 <!-- /example -->
 
 ### The practice: the governance files

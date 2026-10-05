@@ -38,6 +38,449 @@ The practice's `rollout.md` has three parts, each testable: the precedence table
 The example is the resolver of the first page, and the part that belongs here is the model lock and the list merge: the managed list refuses a model outside it, and without the lock a project's rule and a user's rules merge into one list. It ran offline in every language.
 
 <!-- example: m92-policy-resolver tabs: python,typescript,java,kotlin -->
+```python
+"""Which value does a developer's Claude Code actually use when a team, a person and an organisation all set the same key? A small resolver that applies the documented precedence, the keys only an organisation can set, the lists that merge and the locks that stop them merging.
+
+The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
+"""
+LEVELS = ["managed", "command line", "local", "project", "user"]
+MANAGED_ONLY = {"allowManagedPermissionRulesOnly", "allowManagedHooksOnly", "allowManagedMcpServersOnly", "strictKnownMarketplaces", "disableSideloadFlags"}
+EFFORT = ["low", "medium", "high", "xhigh", "max"]
+
+
+def effective(layers):
+    """The settings Claude Code applies, and a note for every entry that was ignored and why."""
+    managed = layers.get("managed", {})
+    lock_rules = managed.get("allowManagedPermissionRulesOnly") is True
+    lock_mcp = managed.get("allowManagedMcpServersOnly") is True
+    out, notes = {}, []
+    for key in sorted({k for level in layers.values() for k in level}):
+        values = [(level, layers[level][key]) for level in LEVELS if level in layers and key in layers[level]]
+        reason = None
+        if key in MANAGED_ONLY:
+            reason = "a managed-only key"
+        elif key in ("permissions.allow", "permissions.deny") and lock_rules:
+            reason = "managed settings are the only source of permission rules"
+        elif key == "allowedMcpServers" and lock_mcp:
+            reason = "managed settings are the only source of the MCP allowlist"
+        elif key == "availableModels" and any(level == "managed" for level, _ in values):
+            reason = "the managed list applies as it is"
+        if reason:
+            notes += [f"ignored {key} from {level}: {reason}" for level, _ in values if level != "managed"]
+            values = [(level, v) for level, v in values if level == "managed"]
+        if not values:
+            continue
+        out[key] = combine(key, [v for _, v in values])
+    return out, notes
+
+
+def combine(key, values):
+    """Lists merge without duplicates, the lowest effort cap wins, a connector ban from any level stands, and any other key takes the highest level's value."""
+    if isinstance(values[0], list):
+        merged = []
+        for value in values:
+            merged += [item for item in value if item not in merged]
+        return merged
+    if key == "maxEffortLevel":
+        return min(values, key=EFFORT.index)
+    if key == "disableClaudeAiConnectors":
+        return any(v is True for v in values)
+    return values[0]
+
+
+def allowed_model(requested, settings):
+    """A managed list of available models refuses any other choice, whoever makes it."""
+    listed = settings.get("availableModels")
+    return "allowed" if listed is None or requested in listed else "refused (not in availableModels)"
+
+
+def show(value):
+    if isinstance(value, list):
+        return ", ".join(value)
+    return "True" if value is True else "False" if value is False else str(value)
+
+
+def main():
+    layers = {
+        "managed": {"allowManagedPermissionRulesOnly": True, "permissions.deny": ["Read(./.env)"], "permissions.allow": ["Read(./docs/**)"],
+                    "maxEffortLevel": "high", "availableModels": ["sonnet", "haiku"], "cleanupPeriodDays": 7, "spinnerTipsEnabled": True},
+        "command line": {"cleanupPeriodDays": 14},
+        "local": {"permissions.allow": ["Bash(npm test)"], "allowManagedHooksOnly": False},
+        "project": {"permissions.allow": ["Bash(git status)"], "permissions.deny": ["Read(./secrets/**)"], "maxEffortLevel": "xhigh",
+                    "availableModels": ["opus"], "disableClaudeAiConnectors": False, "spinnerTipsEnabled": False},
+        "user": {"permissions.allow": ["Edit(./notes/**)"], "disableClaudeAiConnectors": True, "spinnerTipsEnabled": False},
+    }
+    settings, notes = effective(layers)
+    print("effective settings:")
+    for key, value in settings.items():
+        print(f"  {key} = {show(value)}")
+    print("notes:")
+    for note in notes:
+        print(f"  {note}")
+    for model in ("opus", "haiku"):
+        print(f"model {model}: {allowed_model(model, settings)}")
+    open_layers = {"project": {"permissions.allow": ["Bash(git status)"]}, "user": {"permissions.allow": ["Edit(./notes/**)", "Bash(git status)"]}}
+    merged, _ = effective(open_layers)
+    print(f"without a lock the lists merge: {show(merged['permissions.allow'])}")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+effective settings:
+  allowManagedPermissionRulesOnly = True
+  availableModels = sonnet, haiku
+  cleanupPeriodDays = 7
+  disableClaudeAiConnectors = True
+  maxEffortLevel = high
+  permissions.allow = Read(./docs/**)
+  permissions.deny = Read(./.env)
+  spinnerTipsEnabled = True
+notes:
+  ignored allowManagedHooksOnly from local: a managed-only key
+  ignored availableModels from project: the managed list applies as it is
+  ignored permissions.allow from local: managed settings are the only source of permission rules
+  ignored permissions.allow from project: managed settings are the only source of permission rules
+  ignored permissions.allow from user: managed settings are the only source of permission rules
+  ignored permissions.deny from project: managed settings are the only source of permission rules
+model opus: refused (not in availableModels)
+model haiku: allowed
+without a lock the lists merge: Bash(git status), Edit(./notes/**)
+```
+```typescript
+/**
+ * Which value does a developer's Claude Code actually use when a team, a person and an organisation all set the same key? A small resolver that applies the documented precedence, the keys only an organisation can set, the lists that merge and the locks that stop them merging.
+ *
+ * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
+ */
+export type Value = boolean | number | string | string[];
+export type Layers = Record<string, Record<string, Value>>;
+
+export const LEVELS = ["managed", "command line", "local", "project", "user"];
+const MANAGED_ONLY = new Set(["allowManagedPermissionRulesOnly", "allowManagedHooksOnly", "allowManagedMcpServersOnly", "strictKnownMarketplaces", "disableSideloadFlags"]);
+const EFFORT = ["low", "medium", "high", "xhigh", "max"];
+
+/** The settings Claude Code applies, and a note for every entry that was ignored and why. */
+export function effective(layers: Layers): [Record<string, Value>, string[]] {
+  const managed = layers["managed"] ?? {};
+  const lockRules = managed["allowManagedPermissionRulesOnly"] === true;
+  const lockMcp = managed["allowManagedMcpServersOnly"] === true;
+  const out: Record<string, Value> = {};
+  const notes: string[] = [];
+  const keys = [...new Set(Object.values(layers).flatMap((level) => Object.keys(level)))].sort();
+  for (const key of keys) {
+    let values: [string, Value][] = LEVELS.filter((level) => level in layers && key in layers[level]).map((level) => [level, layers[level][key]]);
+    let reason: string | null = null;
+    if (MANAGED_ONLY.has(key)) reason = "a managed-only key";
+    else if ((key === "permissions.allow" || key === "permissions.deny") && lockRules) reason = "managed settings are the only source of permission rules";
+    else if (key === "allowedMcpServers" && lockMcp) reason = "managed settings are the only source of the MCP allowlist";
+    else if (key === "availableModels" && values.some(([level]) => level === "managed")) reason = "the managed list applies as it is";
+    if (reason) {
+      for (const [level] of values) if (level !== "managed") notes.push(`ignored ${key} from ${level}: ${reason}`);
+      values = values.filter(([level]) => level === "managed");
+    }
+    if (values.length === 0) continue;
+    out[key] = combine(key, values.map(([, v]) => v));
+  }
+  return [out, notes];
+}
+
+/** Lists merge without duplicates, the lowest effort cap wins, a connector ban from any level stands, and any other key takes the highest level's value. */
+export function combine(key: string, values: Value[]): Value {
+  if (Array.isArray(values[0])) {
+    const merged: string[] = [];
+    for (const value of values as string[][]) for (const item of value) if (!merged.includes(item)) merged.push(item);
+    return merged;
+  }
+  if (key === "maxEffortLevel") return (values as string[]).reduce((a, b) => (EFFORT.indexOf(b) < EFFORT.indexOf(a) ? b : a));
+  if (key === "disableClaudeAiConnectors") return values.some((v) => v === true);
+  return values[0];
+}
+
+/** A managed list of available models refuses any other choice, whoever makes it. */
+export function allowedModel(requested: string, settings: Record<string, Value>): string {
+  const listed = settings["availableModels"] as string[] | undefined;
+  return listed === undefined || listed.includes(requested) ? "allowed" : "refused (not in availableModels)";
+}
+
+function show(value: Value): string {
+  if (Array.isArray(value)) return value.join(", ");
+  return value === true ? "True" : value === false ? "False" : String(value);
+}
+
+function main(): void {
+  const layers: Layers = {
+    managed: { allowManagedPermissionRulesOnly: true, "permissions.deny": ["Read(./.env)"], "permissions.allow": ["Read(./docs/**)"], maxEffortLevel: "high", availableModels: ["sonnet", "haiku"], cleanupPeriodDays: 7, spinnerTipsEnabled: true },
+    "command line": { cleanupPeriodDays: 14 },
+    local: { "permissions.allow": ["Bash(npm test)"], allowManagedHooksOnly: false },
+    project: { "permissions.allow": ["Bash(git status)"], "permissions.deny": ["Read(./secrets/**)"], maxEffortLevel: "xhigh", availableModels: ["opus"], disableClaudeAiConnectors: false, spinnerTipsEnabled: false },
+    user: { "permissions.allow": ["Edit(./notes/**)"], disableClaudeAiConnectors: true, spinnerTipsEnabled: false },
+  };
+  const [settings, notes] = effective(layers);
+  console.log("effective settings:");
+  for (const [key, value] of Object.entries(settings)) console.log(`  ${key} = ${show(value)}`);
+  console.log("notes:");
+  for (const note of notes) console.log(`  ${note}`);
+  for (const model of ["opus", "haiku"]) console.log(`model ${model}: ${allowedModel(model, settings)}`);
+  const open: Layers = { project: { "permissions.allow": ["Bash(git status)"] }, user: { "permissions.allow": ["Edit(./notes/**)", "Bash(git status)"] } };
+  const [merged] = effective(open);
+  console.log(`without a lock the lists merge: ${show(merged["permissions.allow"])}`);
+}
+
+if (import.meta.main) main();
+```
+```text
+effective settings:
+  allowManagedPermissionRulesOnly = True
+  availableModels = sonnet, haiku
+  cleanupPeriodDays = 7
+  disableClaudeAiConnectors = True
+  maxEffortLevel = high
+  permissions.allow = Read(./docs/**)
+  permissions.deny = Read(./.env)
+  spinnerTipsEnabled = True
+notes:
+  ignored allowManagedHooksOnly from local: a managed-only key
+  ignored availableModels from project: the managed list applies as it is
+  ignored permissions.allow from local: managed settings are the only source of permission rules
+  ignored permissions.allow from project: managed settings are the only source of permission rules
+  ignored permissions.allow from user: managed settings are the only source of permission rules
+  ignored permissions.deny from project: managed settings are the only source of permission rules
+model opus: refused (not in availableModels)
+model haiku: allowed
+without a lock the lists merge: Bash(git status), Edit(./notes/**)
+```
+```java
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Which value does a developer's Claude Code actually use when a team, a person and an organisation all set the same key? A small resolver that applies the documented precedence, the keys only an organisation can set, the lists that merge and the locks that stop them merging.
+ *
+ * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
+ */
+public class PolicyResolver {
+    record Result(Map<String, Object> settings, List<String> notes) {}
+
+    record Entry(String level, Object value) {}
+
+    static final List<String> LEVELS = List.of("managed", "command line", "local", "project", "user");
+    static final Set<String> MANAGED_ONLY = Set.of("allowManagedPermissionRulesOnly", "allowManagedHooksOnly", "allowManagedMcpServersOnly", "strictKnownMarketplaces", "disableSideloadFlags");
+    static final List<String> EFFORT = List.of("low", "medium", "high", "xhigh", "max");
+
+    /** The settings Claude Code applies, and a note for every entry that was ignored and why. */
+    static Result effective(Map<String, Map<String, Object>> layers) {
+        Map<String, Object> managed = layers.getOrDefault("managed", Map.of());
+        boolean lockRules = Boolean.TRUE.equals(managed.get("allowManagedPermissionRulesOnly"));
+        boolean lockMcp = Boolean.TRUE.equals(managed.get("allowManagedMcpServersOnly"));
+        Map<String, Object> out = new LinkedHashMap<>();
+        List<String> notes = new ArrayList<>();
+        TreeSet<String> keys = new TreeSet<>();
+        for (Map<String, Object> level : layers.values()) keys.addAll(level.keySet());
+        for (String key : keys) {
+            List<Entry> values = new ArrayList<>();
+            for (String level : LEVELS) if (layers.containsKey(level) && layers.get(level).containsKey(key)) values.add(new Entry(level, layers.get(level).get(key)));
+            String reason = null;
+            if (MANAGED_ONLY.contains(key)) reason = "a managed-only key";
+            else if ((key.equals("permissions.allow") || key.equals("permissions.deny")) && lockRules) reason = "managed settings are the only source of permission rules";
+            else if (key.equals("allowedMcpServers") && lockMcp) reason = "managed settings are the only source of the MCP allowlist";
+            else if (key.equals("availableModels") && values.stream().anyMatch(e -> e.level().equals("managed"))) reason = "the managed list applies as it is";
+            if (reason != null) {
+                for (Entry e : values) if (!e.level().equals("managed")) notes.add("ignored " + key + " from " + e.level() + ": " + reason);
+                values = new ArrayList<>(values.stream().filter(e -> e.level().equals("managed")).toList());
+            }
+            if (values.isEmpty()) continue;
+            out.put(key, combine(key, values.stream().map(Entry::value).toList()));
+        }
+        return new Result(out, notes);
+    }
+
+    /** Lists merge without duplicates, the lowest effort cap wins, a connector ban from any level stands, and any other key takes the highest level's value. */
+    @SuppressWarnings("unchecked")
+    static Object combine(String key, List<Object> values) {
+        if (values.get(0) instanceof List) {
+            List<String> merged = new ArrayList<>();
+            for (Object value : values) for (String item : (List<String>) value) if (!merged.contains(item)) merged.add(item);
+            return merged;
+        }
+        if (key.equals("maxEffortLevel")) {
+            String lowest = (String) values.get(0);
+            for (Object v : values) if (EFFORT.indexOf((String) v) < EFFORT.indexOf(lowest)) lowest = (String) v;
+            return lowest;
+        }
+        if (key.equals("disableClaudeAiConnectors")) return values.stream().anyMatch(v -> Boolean.TRUE.equals(v));
+        return values.get(0);
+    }
+
+    /** A managed list of available models refuses any other choice, whoever makes it. */
+    @SuppressWarnings("unchecked")
+    static String allowedModel(String requested, Map<String, Object> settings) {
+        List<String> listed = (List<String>) settings.get("availableModels");
+        return listed == null || listed.contains(requested) ? "allowed" : "refused (not in availableModels)";
+    }
+
+    @SuppressWarnings("unchecked")
+    static String show(Object value) {
+        if (value instanceof List) return String.join(", ", (List<String>) value);
+        if (value instanceof Boolean b) return b ? "True" : "False";
+        return String.valueOf(value);
+    }
+
+    public static void main(String[] args) {
+        Map<String, Map<String, Object>> layers = new LinkedHashMap<>();
+        layers.put("managed", new LinkedHashMap<>(Map.of("allowManagedPermissionRulesOnly", true, "permissions.deny", List.of("Read(./.env)"), "permissions.allow", List.of("Read(./docs/**)"),
+            "maxEffortLevel", "high", "availableModels", List.of("sonnet", "haiku"), "cleanupPeriodDays", 7, "spinnerTipsEnabled", true)));
+        layers.put("command line", Map.of("cleanupPeriodDays", 14));
+        layers.put("local", Map.of("permissions.allow", List.of("Bash(npm test)"), "allowManagedHooksOnly", false));
+        layers.put("project", Map.of("permissions.allow", List.of("Bash(git status)"), "permissions.deny", List.of("Read(./secrets/**)"), "maxEffortLevel", "xhigh",
+            "availableModels", List.of("opus"), "disableClaudeAiConnectors", false, "spinnerTipsEnabled", false));
+        layers.put("user", Map.of("permissions.allow", List.of("Edit(./notes/**)"), "disableClaudeAiConnectors", true, "spinnerTipsEnabled", false));
+        Result result = effective(layers);
+        System.out.println("effective settings:");
+        for (Map.Entry<String, Object> e : result.settings().entrySet()) System.out.println("  " + e.getKey() + " = " + show(e.getValue()));
+        System.out.println("notes:");
+        for (String note : result.notes()) System.out.println("  " + note);
+        for (String model : List.of("opus", "haiku")) System.out.println("model " + model + ": " + allowedModel(model, result.settings()));
+        Map<String, Map<String, Object>> open = new LinkedHashMap<>();
+        open.put("project", Map.of("permissions.allow", List.of("Bash(git status)")));
+        open.put("user", Map.of("permissions.allow", List.of("Edit(./notes/**)", "Bash(git status)")));
+        System.out.println("without a lock the lists merge: " + show(effective(open).settings().get("permissions.allow")));
+    }
+}
+```
+```text
+effective settings:
+  allowManagedPermissionRulesOnly = True
+  availableModels = sonnet, haiku
+  cleanupPeriodDays = 7
+  disableClaudeAiConnectors = True
+  maxEffortLevel = high
+  permissions.allow = Read(./docs/**)
+  permissions.deny = Read(./.env)
+  spinnerTipsEnabled = True
+notes:
+  ignored allowManagedHooksOnly from local: a managed-only key
+  ignored availableModels from project: the managed list applies as it is
+  ignored permissions.allow from local: managed settings are the only source of permission rules
+  ignored permissions.allow from project: managed settings are the only source of permission rules
+  ignored permissions.allow from user: managed settings are the only source of permission rules
+  ignored permissions.deny from project: managed settings are the only source of permission rules
+model opus: refused (not in availableModels)
+model haiku: allowed
+without a lock the lists merge: Bash(git status), Edit(./notes/**)
+```
+```kotlin
+/**
+ * Which value does a developer's Claude Code actually use when a team, a person and an organisation all set the same key? A small resolver that applies the documented precedence, the keys only an organisation can set, the lists that merge and the locks that stop them merging.
+ *
+ * The layers are invented and the key list is a subset of the settings documentation read on 2026-10-04 (Claude Code settings and managed-settings pages). Nothing here starts Claude Code or calls a model.
+ */
+data class Result(val settings: Map<String, Any>, val notes: List<String>)
+
+val LEVELS = listOf("managed", "command line", "local", "project", "user")
+val MANAGED_ONLY = setOf("allowManagedPermissionRulesOnly", "allowManagedHooksOnly", "allowManagedMcpServersOnly", "strictKnownMarketplaces", "disableSideloadFlags")
+val EFFORT = listOf("low", "medium", "high", "xhigh", "max")
+
+/** The settings Claude Code applies, and a note for every entry that was ignored and why. */
+fun effective(layers: Map<String, Map<String, Any>>): Result {
+    val managed = layers["managed"] ?: mapOf()
+    val lockRules = managed["allowManagedPermissionRulesOnly"] == true
+    val lockMcp = managed["allowManagedMcpServersOnly"] == true
+    val out = linkedMapOf<String, Any>()
+    val notes = mutableListOf<String>()
+    for (key in layers.values.flatMap { it.keys }.toSortedSet()) {
+        var values = LEVELS.filter { layers[it]?.containsKey(key) == true }.map { it to layers.getValue(it).getValue(key) }
+        val reason = when {
+            key in MANAGED_ONLY -> "a managed-only key"
+            (key == "permissions.allow" || key == "permissions.deny") && lockRules -> "managed settings are the only source of permission rules"
+            key == "allowedMcpServers" && lockMcp -> "managed settings are the only source of the MCP allowlist"
+            key == "availableModels" && values.any { it.first == "managed" } -> "the managed list applies as it is"
+            else -> null
+        }
+        if (reason != null) {
+            for ((level, _) in values) if (level != "managed") notes.add("ignored $key from $level: $reason")
+            values = values.filter { it.first == "managed" }
+        }
+        if (values.isEmpty()) continue
+        out[key] = combine(key, values.map { it.second })
+    }
+    return Result(out, notes)
+}
+
+/** Lists merge without duplicates, the lowest effort cap wins, a connector ban from any level stands, and any other key takes the highest level's value. */
+@Suppress("UNCHECKED_CAST")
+fun combine(key: String, values: List<Any>): Any {
+    if (values[0] is List<*>) {
+        val merged = mutableListOf<String>()
+        for (value in values) for (item in value as List<String>) if (item !in merged) merged.add(item)
+        return merged
+    }
+    if (key == "maxEffortLevel") return (values as List<String>).minByOrNull { EFFORT.indexOf(it) }!!
+    if (key == "disableClaudeAiConnectors") return values.any { it == true }
+    return values[0]
+}
+
+/** A managed list of available models refuses any other choice, whoever makes it. */
+@Suppress("UNCHECKED_CAST")
+fun allowedModel(requested: String, settings: Map<String, Any>): String {
+    val listed = settings["availableModels"] as List<String>?
+    return if (listed == null || requested in listed) "allowed" else "refused (not in availableModels)"
+}
+
+@Suppress("UNCHECKED_CAST")
+fun show(value: Any?): String = when (value) {
+    is List<*> -> (value as List<String>).joinToString(", ")
+    true -> "True"
+    false -> "False"
+    else -> value.toString()
+}
+
+fun main() {
+    val layers = linkedMapOf<String, Map<String, Any>>(
+        "managed" to linkedMapOf("allowManagedPermissionRulesOnly" to true, "permissions.deny" to listOf("Read(./.env)"), "permissions.allow" to listOf("Read(./docs/**)"),
+            "maxEffortLevel" to "high", "availableModels" to listOf("sonnet", "haiku"), "cleanupPeriodDays" to 7, "spinnerTipsEnabled" to true),
+        "command line" to mapOf("cleanupPeriodDays" to 14),
+        "local" to mapOf("permissions.allow" to listOf("Bash(npm test)"), "allowManagedHooksOnly" to false),
+        "project" to mapOf("permissions.allow" to listOf("Bash(git status)"), "permissions.deny" to listOf("Read(./secrets/**)"), "maxEffortLevel" to "xhigh",
+            "availableModels" to listOf("opus"), "disableClaudeAiConnectors" to false, "spinnerTipsEnabled" to false),
+        "user" to mapOf("permissions.allow" to listOf("Edit(./notes/**)"), "disableClaudeAiConnectors" to true, "spinnerTipsEnabled" to false),
+    )
+    val result = effective(layers)
+    println("effective settings:")
+    for ((key, value) in result.settings) println("  $key = ${show(value)}")
+    println("notes:")
+    for (note in result.notes) println("  $note")
+    for (model in listOf("opus", "haiku")) println("model $model: ${allowedModel(model, result.settings)}")
+    val open = linkedMapOf<String, Map<String, Any>>("project" to mapOf("permissions.allow" to listOf("Bash(git status)")), "user" to mapOf("permissions.allow" to listOf("Edit(./notes/**)", "Bash(git status)")))
+    println("without a lock the lists merge: ${show(effective(open).settings["permissions.allow"])}")
+}
+```
+```text
+effective settings:
+  allowManagedPermissionRulesOnly = True
+  availableModels = sonnet, haiku
+  cleanupPeriodDays = 7
+  disableClaudeAiConnectors = True
+  maxEffortLevel = high
+  permissions.allow = Read(./docs/**)
+  permissions.deny = Read(./.env)
+  spinnerTipsEnabled = True
+notes:
+  ignored allowManagedHooksOnly from local: a managed-only key
+  ignored availableModels from project: the managed list applies as it is
+  ignored permissions.allow from local: managed settings are the only source of permission rules
+  ignored permissions.allow from project: managed settings are the only source of permission rules
+  ignored permissions.allow from user: managed settings are the only source of permission rules
+  ignored permissions.deny from project: managed settings are the only source of permission rules
+model opus: refused (not in availableModels)
+model haiku: allowed
+without a lock the lists merge: Bash(git status), Edit(./notes/**)
+```
 <!-- /example -->
 
 ### The practice: the policy files

@@ -54,6 +54,309 @@ The guide lists five phases: discovery, design, handoff, monitoring and iteratio
 The example is the same as on the first page, and its second half is this page: five lines for the service levels (a latency of 1800 ms met, 2000 ms met at the ceiling, 2150 ms missed by 150 ms, an availability of 997 per mille met and 990 missed by 5), the report by segment with the costliest first and the two briefs. It ran offline in every language.
 
 <!-- example: m91-tradeoff-brief tabs: python,typescript,java,kotlin -->
+```python
+"""One decision told to two audiences: the figures an engineer needs, the same figures in the words a sponsor decides with, and an honest check of each service level at its exact edge.
+
+The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
+"""
+from collections import namedtuple
+
+Sla = namedtuple("Sla", "name limit direction unit")
+Segment = namedtuple("Segment", "name right total error_cost")
+
+
+def pct(right, total):
+    """Whole percent, halves rounded up, and 0 for no cases."""
+    return (200 * right + total) // (2 * total) if total else 0
+
+
+def break_even(error_cost, review_cost):
+    """The accuracy, in whole percent, at or above which a check no longer pays: (1 - accuracy) x error cost <= review cost."""
+    return 100 - (-(-100 * review_cost // error_cost))
+
+
+def sla_line(sla, measured):
+    """A service level is met at its limit exactly, and a miss says by how much."""
+    met = measured <= sla.limit if sla.direction == "max" else measured >= sla.limit
+    verdict = "met" if met else f"missed by {abs(measured - sla.limit)} {sla.unit}"
+    word = "limit" if sla.direction == "max" else "floor"
+    return f"{sla.name}: {measured} {sla.unit} against a {word} of {sla.limit} {sla.unit}: {verdict}"
+
+
+def segment_report(segments, review_cost):
+    """The costliest segment first, with its accuracy and whether a person checks it."""
+    lines = []
+    for s in sorted(segments, key=lambda s: (-s.error_cost, s.name)):
+        floor = break_even(s.error_cost, review_cost)
+        handling = "auto" if pct(s.right, s.total) >= floor else "reviewed"
+        lines.append(f"{s.name}: {pct(s.right, s.total)} percent right, error cost {s.error_cost}, {handling} (break-even {floor})")
+    return lines
+
+
+def brief(audience, design, cost, baseline, weakest, ask):
+    """The same facts for a sponsor (money, risk and one decision) or for an engineer (the numbers that produced them)."""
+    if audience == "sponsor":
+        return (f"{design} costs {cost:,} a month against {baseline:,} for people alone, a saving of {baseline - cost:,}. "
+                f"The weakest answers are {weakest.name}: {pct(weakest.right, weakest.total)} in 100 are right and each wrong one costs {weakest.error_cost}, "
+                f"so a person decides them. Decision asked: {ask}.")
+    return f"design={design}; cost={cost}; baseline={baseline}; saving={baseline - cost}; weakest={weakest.name} {pct(weakest.right, weakest.total)}% at {weakest.error_cost} an error"
+
+
+def main():
+    slas = [(Sla("p95 latency", 2000, "max", "ms"), 1800), (Sla("p95 latency", 2000, "max", "ms"), 2000), (Sla("p95 latency", 2000, "max", "ms"), 2150),
+            (Sla("availability", 995, "min", "per mille"), 997), (Sla("availability", 995, "min", "per mille"), 990)]
+    for sla, measured in slas:
+        print(sla_line(sla, measured))
+    segments = [Segment("status", 98, 100, 12), Segment("credit", 63, 100, 250), Segment("complaint", 91, 100, 60)]
+    for line in segment_report(segments, 5):
+        print(line)
+    weakest = min(segments, key=lambda s: pct(s.right, s.total))
+    for audience in ("sponsor", "engineer"):
+        print(f"{audience}: {brief(audience, 'Routing by confidence', 80000, 315000, weakest, 'approve the pilot')}")
+
+
+if __name__ == "__main__":
+    main()
+```
+```text
+p95 latency: 1800 ms against a limit of 2000 ms: met
+p95 latency: 2000 ms against a limit of 2000 ms: met
+p95 latency: 2150 ms against a limit of 2000 ms: missed by 150 ms
+availability: 997 per mille against a floor of 995 per mille: met
+availability: 990 per mille against a floor of 995 per mille: missed by 5 per mille
+credit: 63 percent right, error cost 250, reviewed (break-even 98)
+complaint: 91 percent right, error cost 60, auto (break-even 91)
+status: 98 percent right, error cost 12, auto (break-even 58)
+sponsor: Routing by confidence costs 80,000 a month against 315,000 for people alone, a saving of 235,000. The weakest answers are credit: 63 in 100 are right and each wrong one costs 250, so a person decides them. Decision asked: approve the pilot.
+engineer: design=Routing by confidence; cost=80000; baseline=315000; saving=235000; weakest=credit 63% at 250 an error
+```
+```typescript
+/**
+ * One decision told to two audiences: the figures an engineer needs, the same figures in the words a sponsor decides with, and an honest check of each service level at its exact edge.
+ *
+ * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
+ */
+export type Sla = { name: string; limit: number; direction: string; unit: string };
+export type Segment = { name: string; right: number; total: number; errorCost: number };
+
+const group = (n: number): string => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+/** Whole percent, halves rounded up, and 0 for no cases. */
+export function pct(right: number, total: number): number {
+  return total ? Math.floor((200 * right + total) / (2 * total)) : 0;
+}
+
+/** The accuracy, in whole percent, at or above which a check no longer pays: (1 - accuracy) x error cost <= review cost. */
+export function breakEven(errorCost: number, reviewCost: number): number {
+  return 100 - Math.ceil((100 * reviewCost) / errorCost);
+}
+
+/** A service level is met at its limit exactly, and a miss says by how much. */
+export function slaLine(sla: Sla, measured: number): string {
+  const met = sla.direction === "max" ? measured <= sla.limit : measured >= sla.limit;
+  const verdict = met ? "met" : `missed by ${Math.abs(measured - sla.limit)} ${sla.unit}`;
+  const word = sla.direction === "max" ? "limit" : "floor";
+  return `${sla.name}: ${measured} ${sla.unit} against a ${word} of ${sla.limit} ${sla.unit}: ${verdict}`;
+}
+
+/** The costliest segment first, with its accuracy and whether a person checks it. */
+export function segmentReport(segments: Segment[], reviewCost: number): string[] {
+  const sorted = [...segments].sort((a, b) => b.errorCost - a.errorCost || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return sorted.map((s) => {
+    const floor = breakEven(s.errorCost, reviewCost);
+    const handling = pct(s.right, s.total) >= floor ? "auto" : "reviewed";
+    return `${s.name}: ${pct(s.right, s.total)} percent right, error cost ${s.errorCost}, ${handling} (break-even ${floor})`;
+  });
+}
+
+/** The same facts for a sponsor (money, risk and one decision) or for an engineer (the numbers that produced them). */
+export function brief(audience: string, design: string, cost: number, baseline: number, weakest: Segment, ask: string): string {
+  if (audience === "sponsor") {
+    return `${design} costs ${group(cost)} a month against ${group(baseline)} for people alone, a saving of ${group(baseline - cost)}. ` +
+      `The weakest answers are ${weakest.name}: ${pct(weakest.right, weakest.total)} in 100 are right and each wrong one costs ${weakest.errorCost}, ` +
+      `so a person decides them. Decision asked: ${ask}.`;
+  }
+  return `design=${design}; cost=${cost}; baseline=${baseline}; saving=${baseline - cost}; weakest=${weakest.name} ${pct(weakest.right, weakest.total)}% at ${weakest.errorCost} an error`;
+}
+
+function main(): void {
+  const latency: Sla = { name: "p95 latency", limit: 2000, direction: "max", unit: "ms" };
+  const availability: Sla = { name: "availability", limit: 995, direction: "min", unit: "per mille" };
+  const slas: [Sla, number][] = [[latency, 1800], [latency, 2000], [latency, 2150], [availability, 997], [availability, 990]];
+  for (const [sla, measured] of slas) console.log(slaLine(sla, measured));
+  const segments: Segment[] = [{ name: "status", right: 98, total: 100, errorCost: 12 }, { name: "credit", right: 63, total: 100, errorCost: 250 }, { name: "complaint", right: 91, total: 100, errorCost: 60 }];
+  for (const line of segmentReport(segments, 5)) console.log(line);
+  const weakest = segments.reduce((a, b) => (pct(b.right, b.total) < pct(a.right, a.total) ? b : a));
+  for (const audience of ["sponsor", "engineer"]) console.log(`${audience}: ${brief(audience, "Routing by confidence", 80000, 315000, weakest, "approve the pilot")}`);
+}
+
+if (import.meta.main) main();
+```
+```text
+p95 latency: 1800 ms against a limit of 2000 ms: met
+p95 latency: 2000 ms against a limit of 2000 ms: met
+p95 latency: 2150 ms against a limit of 2000 ms: missed by 150 ms
+availability: 997 per mille against a floor of 995 per mille: met
+availability: 990 per mille against a floor of 995 per mille: missed by 5 per mille
+credit: 63 percent right, error cost 250, reviewed (break-even 98)
+complaint: 91 percent right, error cost 60, auto (break-even 91)
+status: 98 percent right, error cost 12, auto (break-even 58)
+sponsor: Routing by confidence costs 80,000 a month against 315,000 for people alone, a saving of 235,000. The weakest answers are credit: 63 in 100 are right and each wrong one costs 250, so a person decides them. Decision asked: approve the pilot.
+engineer: design=Routing by confidence; cost=80000; baseline=315000; saving=235000; weakest=credit 63% at 250 an error
+```
+```java
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+/**
+ * One decision told to two audiences: the figures an engineer needs, the same figures in the words a sponsor decides with, and an honest check of each service level at its exact edge.
+ *
+ * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
+ */
+public class TradeoffBrief {
+    record Sla(String name, int limit, String direction, String unit) {}
+
+    record Segment(String name, int right, int total, int errorCost) {}
+
+    record Measured(Sla sla, int value) {}
+
+    static String group(long n) {
+        return String.format(java.util.Locale.US, "%,d", n);
+    }
+
+    /** Whole percent, halves rounded up, and 0 for no cases. */
+    static int pct(int right, int total) {
+        return total == 0 ? 0 : (200 * right + total) / (2 * total);
+    }
+
+    /** The accuracy, in whole percent, at or above which a check no longer pays: (1 - accuracy) x error cost <= review cost. */
+    static int breakEven(int errorCost, int reviewCost) {
+        return 100 - (100 * reviewCost + errorCost - 1) / errorCost;
+    }
+
+    /** A service level is met at its limit exactly, and a miss says by how much. */
+    static String slaLine(Sla sla, int measured) {
+        boolean met = sla.direction().equals("max") ? measured <= sla.limit() : measured >= sla.limit();
+        String verdict = met ? "met" : "missed by " + Math.abs(measured - sla.limit()) + " " + sla.unit();
+        String word = sla.direction().equals("max") ? "limit" : "floor";
+        return sla.name() + ": " + measured + " " + sla.unit() + " against a " + word + " of " + sla.limit() + " " + sla.unit() + ": " + verdict;
+    }
+
+    /** The costliest segment first, with its accuracy and whether a person checks it. */
+    static List<String> segmentReport(List<Segment> segments, int reviewCost) {
+        List<Segment> sorted = new ArrayList<>(segments);
+        sorted.sort(Comparator.comparingInt((Segment s) -> -s.errorCost()).thenComparing(Segment::name));
+        List<String> lines = new ArrayList<>();
+        for (Segment s : sorted) {
+            int floor = breakEven(s.errorCost(), reviewCost);
+            String handling = pct(s.right(), s.total()) >= floor ? "auto" : "reviewed";
+            lines.add(s.name() + ": " + pct(s.right(), s.total()) + " percent right, error cost " + s.errorCost() + ", " + handling + " (break-even " + floor + ")");
+        }
+        return lines;
+    }
+
+    /** The same facts for a sponsor (money, risk and one decision) or for an engineer (the numbers that produced them). */
+    static String brief(String audience, String design, int cost, int baseline, Segment weakest, String ask) {
+        if (audience.equals("sponsor")) {
+            return design + " costs " + group(cost) + " a month against " + group(baseline) + " for people alone, a saving of " + group(baseline - cost) + ". "
+                + "The weakest answers are " + weakest.name() + ": " + pct(weakest.right(), weakest.total()) + " in 100 are right and each wrong one costs " + weakest.errorCost() + ", "
+                + "so a person decides them. Decision asked: " + ask + ".";
+        }
+        return "design=" + design + "; cost=" + cost + "; baseline=" + baseline + "; saving=" + (baseline - cost) + "; weakest=" + weakest.name() + " " + pct(weakest.right(), weakest.total()) + "% at " + weakest.errorCost() + " an error";
+    }
+
+    public static void main(String[] args) {
+        Sla latency = new Sla("p95 latency", 2000, "max", "ms");
+        Sla availability = new Sla("availability", 995, "min", "per mille");
+        List<Measured> slas = List.of(new Measured(latency, 1800), new Measured(latency, 2000), new Measured(latency, 2150), new Measured(availability, 997), new Measured(availability, 990));
+        for (Measured m : slas) System.out.println(slaLine(m.sla(), m.value()));
+        List<Segment> segments = List.of(new Segment("status", 98, 100, 12), new Segment("credit", 63, 100, 250), new Segment("complaint", 91, 100, 60));
+        for (String line : segmentReport(segments, 5)) System.out.println(line);
+        Segment weakest = segments.get(0);
+        for (Segment s : segments) if (pct(s.right(), s.total()) < pct(weakest.right(), weakest.total())) weakest = s;
+        for (String audience : List.of("sponsor", "engineer")) System.out.println(audience + ": " + brief(audience, "Routing by confidence", 80000, 315000, weakest, "approve the pilot"));
+    }
+}
+```
+```text
+p95 latency: 1800 ms against a limit of 2000 ms: met
+p95 latency: 2000 ms against a limit of 2000 ms: met
+p95 latency: 2150 ms against a limit of 2000 ms: missed by 150 ms
+availability: 997 per mille against a floor of 995 per mille: met
+availability: 990 per mille against a floor of 995 per mille: missed by 5 per mille
+credit: 63 percent right, error cost 250, reviewed (break-even 98)
+complaint: 91 percent right, error cost 60, auto (break-even 91)
+status: 98 percent right, error cost 12, auto (break-even 58)
+sponsor: Routing by confidence costs 80,000 a month against 315,000 for people alone, a saving of 235,000. The weakest answers are credit: 63 in 100 are right and each wrong one costs 250, so a person decides them. Decision asked: approve the pilot.
+engineer: design=Routing by confidence; cost=80000; baseline=315000; saving=235000; weakest=credit 63% at 250 an error
+```
+```kotlin
+/**
+ * One decision told to two audiences: the figures an engineer needs, the same figures in the words a sponsor decides with, and an honest check of each service level at its exact edge.
+ *
+ * The figures are invented for a utility's billing-dispute assistant; the break-even rule is the one of module 79. Nothing here calls a model.
+ */
+data class Sla(val name: String, val limit: Int, val direction: String, val unit: String)
+
+data class Segment(val name: String, val right: Int, val total: Int, val errorCost: Int)
+
+fun group(n: Long): String = String.format(java.util.Locale.US, "%,d", n)
+
+/** Whole percent, halves rounded up, and 0 for no cases. */
+fun pct(right: Int, total: Int): Int = if (total == 0) 0 else (200 * right + total) / (2 * total)
+
+/** The accuracy, in whole percent, at or above which a check no longer pays: (1 - accuracy) x error cost <= review cost. */
+fun breakEven(errorCost: Int, reviewCost: Int): Int = 100 - (100 * reviewCost + errorCost - 1) / errorCost
+
+/** A service level is met at its limit exactly, and a miss says by how much. */
+fun slaLine(sla: Sla, measured: Int): String {
+    val met = if (sla.direction == "max") measured <= sla.limit else measured >= sla.limit
+    val verdict = if (met) "met" else "missed by ${Math.abs(measured - sla.limit)} ${sla.unit}"
+    val word = if (sla.direction == "max") "limit" else "floor"
+    return "${sla.name}: $measured ${sla.unit} against a $word of ${sla.limit} ${sla.unit}: $verdict"
+}
+
+/** The costliest segment first, with its accuracy and whether a person checks it. */
+fun segmentReport(segments: List<Segment>, reviewCost: Int): List<String> =
+    segments.sortedWith(compareBy<Segment>({ -it.errorCost }, { it.name })).map { s ->
+        val floor = breakEven(s.errorCost, reviewCost)
+        val handling = if (pct(s.right, s.total) >= floor) "auto" else "reviewed"
+        "${s.name}: ${pct(s.right, s.total)} percent right, error cost ${s.errorCost}, $handling (break-even $floor)"
+    }
+
+/** The same facts for a sponsor (money, risk and one decision) or for an engineer (the numbers that produced them). */
+fun brief(audience: String, design: String, cost: Int, baseline: Int, weakest: Segment, ask: String): String {
+    if (audience == "sponsor") {
+        return "$design costs ${group(cost.toLong())} a month against ${group(baseline.toLong())} for people alone, a saving of ${group((baseline - cost).toLong())}. " +
+            "The weakest answers are ${weakest.name}: ${pct(weakest.right, weakest.total)} in 100 are right and each wrong one costs ${weakest.errorCost}, " +
+            "so a person decides them. Decision asked: $ask."
+    }
+    return "design=$design; cost=$cost; baseline=$baseline; saving=${baseline - cost}; weakest=${weakest.name} ${pct(weakest.right, weakest.total)}% at ${weakest.errorCost} an error"
+}
+
+fun main() {
+    val latency = Sla("p95 latency", 2000, "max", "ms")
+    val availability = Sla("availability", 995, "min", "per mille")
+    for ((sla, measured) in listOf(latency to 1800, latency to 2000, latency to 2150, availability to 997, availability to 990)) println(slaLine(sla, measured))
+    val segments = listOf(Segment("status", 98, 100, 12), Segment("credit", 63, 100, 250), Segment("complaint", 91, 100, 60))
+    for (line in segmentReport(segments, 5)) println(line)
+    val weakest = segments.minByOrNull { pct(it.right, it.total) }!!
+    for (audience in listOf("sponsor", "engineer")) println("$audience: ${brief(audience, "Routing by confidence", 80000, 315000, weakest, "approve the pilot")}")
+}
+```
+```text
+p95 latency: 1800 ms against a limit of 2000 ms: met
+p95 latency: 2000 ms against a limit of 2000 ms: met
+p95 latency: 2150 ms against a limit of 2000 ms: missed by 150 ms
+availability: 997 per mille against a floor of 995 per mille: met
+availability: 990 per mille against a floor of 995 per mille: missed by 5 per mille
+credit: 63 percent right, error cost 250, reviewed (break-even 98)
+complaint: 91 percent right, error cost 60, auto (break-even 91)
+status: 98 percent right, error cost 12, auto (break-even 58)
+sponsor: Routing by confidence costs 80,000 a month against 315,000 for people alone, a saving of 235,000. The weakest answers are credit: 63 in 100 are right and each wrong one costs 250, so a person decides them. Decision asked: approve the pilot.
+engineer: design=Routing by confidence; cost=80000; baseline=315000; saving=235000; weakest=credit 63% at 250 an error
+```
 <!-- /example -->
 
 ### The practice: a design record
