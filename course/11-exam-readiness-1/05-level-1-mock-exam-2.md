@@ -268,7 +268,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 37. A team lead tags Claude in a thread to compile a report, then closes Slack for the evening. A colleague adds a correction as a later message. Which two statements describe what happens? (Select two.)
    - **a**: Replies posted afterwards are followed
    - **b**: It ignores the late addition, reading only the tagged post
-   - **c**: Work stops once Slack is closed on her device
+   - **c**: Work stops once Slack is closed on the lead's device
    - **d**: It needs a fresh tag before it reads anything new
    - **e**: The work carries on in the cloud
 
