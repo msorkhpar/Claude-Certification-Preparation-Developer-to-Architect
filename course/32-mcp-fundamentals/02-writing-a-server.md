@@ -796,16 +796,16 @@ The Java and Kotlin tabs build the same server on the JVM SDKs (`io.modelcontext
    - **d**: As an ordinary result flagged as an error, with a readable explanation
 
 3. A tool's annotations say that it only reads data, and a client skips the confirmation prompt because of them. What does the specification say about relying on them?
-   - **a**: Follow them as binding instructions from the server
+   - **a**: Follow them as binding unless the tool is marked destructive
    - **b**: Treat them as untrusted unless the server is trusted
-   - **c**: Follow them after the first call ends without an error
-   - **d**: Let the SDK verify them before the client acts
+   - **c**: Follow them unless the first call ends with an error
+   - **d**: Let the SDK verify them unless the server runs locally
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "The server MUST NOT write anything to its stdout that is not a valid MCP message." *a* is ruled out because the client "SHOULD NOT assume stderr output indicates error conditions". *d* is ruled out because the stream carries one message per line and "The server MUST NOT write anything to its stdout that is not a valid MCP message", with no queue of printed lines. *c* is ruled out because the guide says to use a logger that writes to stderr: "Never write to stdout. Writing to stdout will corrupt the JSON-RPC messages and break your server."
 2. **d**. The page says tool execution errors "contain actionable feedback that language models can use to self-correct and retry with adjusted parameters", and lists "Input validation errors (e.g., date in wrong format, value out of range)" among them. *a* is ruled out because "Clients MAY provide protocol errors to language models, though these are less likely to result in successful recovery." *b* is ruled out because a wrong format is an "Input validation errors (e.g., date in wrong format, value out of range)", which is a tool execution error and not a malformed request. *c* is ruled out because "Clients SHOULD provide tool execution errors to language models to enable self-correction", which needs text that says what to change.
-3. **b**. The page quotes the specification: "clients MUST consider tool annotations to be untrusted unless they come from trusted servers." *a* is ruled out because "there SHOULD always be a human in the loop with the ability to deny tool invocations". *d* is ruled out because annotations are only "Optional properties describing tool behavior", and nothing on the page says the SDK checks them, locally or not. *c* is ruled out because trust depends on where the server comes from, "unless they come from trusted servers", and not on how a first call went.
+3. **b**. The page quotes the specification: "clients MUST consider tool annotations to be untrusted unless they come from trusted servers." *a* is ruled out because annotations help a client "decide whether to ask a person", "not because they enforce anything", so no marking makes them binding. *d* is ruled out because annotations are only "Optional properties describing tool behavior", and nothing on the page says the SDK checks them, locally or not. *c* is ruled out because trust depends on where the server comes from, "unless they come from trusted servers", and not on how a first call went.
 
 </details>

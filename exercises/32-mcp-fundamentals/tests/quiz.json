@@ -102,15 +102,15 @@
       "scope": "page",
       "stem": "A tool's annotations say that it only reads data, and a client skips the confirmation prompt because of them. What does the specification say about relying on them?",
       "options": {
-        "a": "Follow them as binding instructions from the server",
+        "a": "Follow them as binding unless the tool is marked destructive",
         "b": "Treat them as untrusted unless the server is trusted",
-        "c": "Follow them after the first call ends without an error",
-        "d": "Let the SDK verify them before the client acts"
+        "c": "Follow them unless the first call ends with an error",
+        "d": "Let the SDK verify them unless the server runs locally"
       },
       "key": "b",
       "explanation": {
         "b": "The page quotes the specification: \"clients MUST consider tool annotations to be untrusted unless they come from trusted servers.\"",
-        "a": "Ruled out because \"there SHOULD always be a human in the loop with the ability to deny tool invocations\".",
+        "a": "Ruled out because annotations help a client \"decide whether to ask a person\", \"not because they enforce anything\", so no marking makes them binding.",
         "d": "Ruled out because annotations are only \"Optional properties describing tool behavior\", and nothing on the page says the SDK checks them, locally or not.",
         "c": "Ruled out because trust depends on where the server comes from, \"unless they come from trusted servers\", and not on how a first call went."
       }
