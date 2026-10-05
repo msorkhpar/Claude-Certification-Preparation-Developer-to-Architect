@@ -17,6 +17,25 @@ scripted replies in the shape of a Messages API response.
 | `ToolError` | a handler may throw it (or any other error) to say it failed |
 | `RequestError` | what your code throws, before any call, for a request the API would reject with a 400; `field` names the part |
 
+## What is already written, and what you write
+
+The starter is a working tool loop with seven small gaps cut out of it. Everything that is plumbing is written and correct: the types, the request that
+is built for every turn, the assistant message that is appended after every reply, the error results for an unknown tool and for a handler that throws,
+the `pause_turn` continue and the `max_turns` result. Each gap is a small function with its signature, a comment that says what it receives and returns
+with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java
+and Kotlin names are the camel-case forms (`checkChoice`, `missingInputs`, `resultContent`, ...); `_turn_numbers` is `lastTurn` there. Write them in this order:
+
+1. `_check_choice` unlocks `e5`: the `RequestError` for a `tool_choice` the API would reject.
+2. `_missing_inputs` unlocks `e2`: the required keys that a call leaves out.
+3. `_result_content` unlocks `e6`: a string as it is, any other value as JSON text.
+4. `_tool_results` unlocks `m1` and `e1`: one result per `tool_use` block, in order, none for a server tool block.
+5. `_final_status` unlocks `e4`: `done`, `refused` or `truncated` from the stop reason.
+6. `_turn_numbers` unlocks `e3`: the turns the loop may use, so that `max_turns` calls are made and no more.
+7. `_sent_choice` unlocks `e5`: a forced choice on the first request only.
+
+`m1` needs the fourth gap. About fifteen lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines
+under the failing case. `run_agent` already logs the user text it receives.
+
 ## What to write
 
 `run_agent(ask, tools, user_text, model="claude-sonnet-5-5", max_turns=8, tool_choice=None)` returns

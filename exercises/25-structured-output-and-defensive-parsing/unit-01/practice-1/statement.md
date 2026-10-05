@@ -16,6 +16,26 @@ function that you call, and the tests give it scripted replies in the shape of a
 | problem | `{"path", "message"}`; the path is `$` for the whole value, `$.total` for a field, `$.items[1].qty` for an array element |
 | `ParseError` | raised when no JSON object can be read from a reply |
 
+## What is already written, and what you write
+
+The starter is a working extractor with eight small gaps cut out of it. Everything that is plumbing is written and correct: the fence handling and the
+JSON parse in `parse_json`, the type table, the order of the checks in `validate` and its walk over properties and items, the first prompt, the loop of
+`extract` with its re-prompt messages and its result shape. Each gap is a small function with its signature, a comment that says what it receives and
+returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The
+TypeScript, Java and Kotlin names are the camel-case forms (`objectSpan`, `isInteger`, `rangeErrors`, ...). Write them in this order:
+
+1. `_object_span` unlocks `m1`, `e1` and `e3`: the index of the first `{` and of the last `}`.
+2. `_is_integer` unlocks `e6`: a whole number or a float with no fraction, never a boolean.
+3. `_range_errors` unlocks `e2`: the `minimum` and `maximum` problems of a number.
+4. `_required_errors` unlocks `e2`: one problem per missing `required` key.
+5. `_extra_errors` unlocks `e2`: one problem per key the schema does not list.
+6. `_feedback` unlocks `e2`: the text that sends every problem back to the model.
+7. `_grounding_errors` unlocks `e5`: the quotes that the document does not contain.
+8. `_early_status` unlocks `e4`: `refused` or `truncated`, so the reply is not retried.
+
+`m1` needs the first gap; the rest of the cases need the gaps named above. About twenty lines in all. To debug a gap, log its input with the `log` line at the top of
+the file; a run shows the lines under the failing case. `parse_json` already logs what it receives.
+
 ## What to write
 
 - `parse_json(text)` returns the JSON value in a reply. If the text holds a code fence, use the body of the first fence;

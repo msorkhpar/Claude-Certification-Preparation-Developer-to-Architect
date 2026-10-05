@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 /** A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md. */
 final class Retrieval {
+    private static final System.Logger LOG = System.getLogger(Retrieval.class.getName());
     private Retrieval() {}
 
     private static final Pattern WORD = Pattern.compile("[a-z0-9]+");
@@ -51,6 +52,10 @@ final class Retrieval {
     static List<String> chunk(String text, int size, int overlap) {
         if (size < 1 || overlap < 0 || overlap >= size) throw new IllegalArgumentException("size must be at least 1 and overlap must be in 0 .. size - 1");
         String[] words = text.isBlank() ? new String[0] : text.trim().split("\\s+");
+        return windows(words, size, overlap);
+    }
+
+    private static List<String> windows(String[] words, int size, int overlap) {
         List<String> chunks = new ArrayList<>();
         for (int start = 0; start < words.length; start += size - overlap) {
             chunks.add(String.join(" ", java.util.Arrays.copyOfRange(words, start, Math.min(start + size, words.length))));
@@ -83,6 +88,11 @@ final class Retrieval {
         return out;
     }
 
+    private static double termScore(int tf, int df, int n, int length, double average, double k1, double b) {
+        double idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));
+        return idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average));
+    }
+
     static List<String> bm25Rank(List<Chunk> chunks, String query) {
         return bm25Rank(chunks, query, null);
     }
@@ -106,12 +116,17 @@ final class Retrieval {
             for (String term : terms) {
                 int tf = java.util.Collections.frequency(tokens, term);
                 if (tf == 0) continue;
-                double idf = Math.log(1 + (n - df.get(term) + 0.5) / (df.get(term) + 0.5));
-                score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * tokens.size() / average));
+                score += termScore(tf, df.get(term), n, tokens.size(), average, k1, b);
             }
             scores.put(e.getKey(), score);
         }
         return ordered(scores);
+    }
+
+    private static double dot(double[] a, double[] b) {
+        double total = 0;
+        for (int i = 0; i < a.length; i++) total += a[i] * b[i];
+        return total;
     }
 
     static List<String> embeddingRank(List<Chunk> chunks, String query) {
@@ -123,10 +138,7 @@ final class Retrieval {
         double[] q = embed(query);
         Map<String, Double> scores = new LinkedHashMap<>();
         texts(chunks, indexText).forEach((id, text) -> {
-            double[] v = embed(text);
-            double total = 0;
-            for (int i = 0; i < q.length; i++) total += q[i] * v[i];
-            scores.put(id, total);
+            scores.put(id, dot(q, embed(text)));
         });
         return ordered(scores);
     }
@@ -163,6 +175,12 @@ final class Retrieval {
         return (double) hits / wanted.size();
     }
 
+    private static Map<String, String> indexedText(List<Chunk> chunks, Map<String, String> contexts) {
+        Map<String, String> indexText = new LinkedHashMap<>();
+        for (Chunk c : chunks) if (contexts != null && contexts.containsKey(c.id())) indexText.put(c.id(), contexts.get(c.id()) + " " + c.text());
+        return indexText;
+    }
+
     static List<String> retrieve(List<Chunk> chunks, String query, String mode, int k) {
         return retrieve(chunks, query, mode, k, 10, null, null);
     }
@@ -170,8 +188,8 @@ final class Retrieval {
     /** The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). contexts maps chunk ids to a sentence
      *  that is indexed in front of the chunk's text; scorer reranks the first pool ids of the ranking. */
     static List<String> retrieve(List<Chunk> chunks, String query, String mode, int k, int pool, Map<String, String> contexts, BiFunction<String, String, Double> scorer) {
-        Map<String, String> indexText = new LinkedHashMap<>();
-        for (Chunk c : chunks) if (contexts != null && contexts.containsKey(c.id())) indexText.put(c.id(), contexts.get(c.id()) + " " + c.text());
+        LOG.log(System.Logger.Level.DEBUG, "retrieve input: mode={0} k={1} query={2}", mode, k, query);
+        Map<String, String> indexText = indexedText(chunks, contexts);
         List<String> lexical = bm25Rank(chunks, query, indexText);
         List<String> semantic = embeddingRank(chunks, query, indexText);
         List<String> ranked = mode.equals("bm25") ? lexical : mode.equals("embedding") ? semantic : fuse(List.of(lexical, semantic));

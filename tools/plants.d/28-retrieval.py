@@ -4,7 +4,7 @@
 PLANTS[f"{X}/28-retrieval/unit-01/practice-1"] = {
     "python": ("retrieval.py", {
         "wrong-no-overlap": [("        start += size - overlap\n", "        start += size\n")],
-        "wrong-no-idf": [("idf = math.log(1 + (n - df[term] + 0.5) / (df[term] + 0.5))", "idf = 1.0")],
+        "wrong-no-idf": [("idf = math.log(1 + (n - df + 0.5) / (df + 0.5))", "idf = 1.0")],
         "wrong-fuse-by-votes": [("scores.get(cid, 0.0) + 1.0 / (k + rank)", "scores.get(cid, 0.0) + 1.0")],
         "wrong-rerank-ascending": [("key=lambda cid: -scorer(query, texts[cid])", "key=lambda cid: scorer(query, texts[cid])")],
         "wrong-pool-ignored": [("return rerank(query, ranked[:pool], ", "return rerank(query, ranked, ")],
@@ -13,7 +13,7 @@ PLANTS[f"{X}/28-retrieval/unit-01/practice-1"] = {
     }),
     "typescript": ("retrieval.ts", {
         "wrong-no-overlap": [("start += size - overlap)", "start += size)")],
-        "wrong-no-idf": [("const idf = Math.log(1 + (n - df.get(term)! + 0.5) / (df.get(term)! + 0.5));", "const idf = 1;")],
+        "wrong-no-idf": [("const idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));", "const idf = 1;")],
         "wrong-fuse-by-votes": [("(scores.get(id) ?? 0) + 1 / (k + i + 1)", "(scores.get(id) ?? 0) + 1")],
         "wrong-rerank-ascending": [("b.s - a.s || a.i - b.i", "a.s - b.s || a.i - b.i")],
         "wrong-pool-ignored": [("return rerank(query, ranked.slice(0, pool), ", "return rerank(query, ranked, ")],
@@ -22,7 +22,7 @@ PLANTS[f"{X}/28-retrieval/unit-01/practice-1"] = {
     }),
     "java": ("Retrieval.java", {
         "wrong-no-overlap": [("start += size - overlap)", "start += size)")],
-        "wrong-no-idf": [("double idf = Math.log(1 + (n - df.get(term) + 0.5) / (df.get(term) + 0.5));", "double idf = 1.0;")],
+        "wrong-no-idf": [("double idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));", "double idf = 1.0;")],
         "wrong-fuse-by-votes": [("scores.merge(id, 1.0 / (k + rank++), Double::sum);", "scores.merge(id, 1.0, Double::sum);")],
         "wrong-rerank-ascending": [("-scorer.apply(query, texts.get(id))", "scorer.apply(query, texts.get(id))")],
         "wrong-pool-ignored": [("return rerank(query, ranked.subList(0, Math.min(pool, ranked.size())), plain, scorer, k);", "return rerank(query, ranked, plain, scorer, k);")],
@@ -31,7 +31,7 @@ PLANTS[f"{X}/28-retrieval/unit-01/practice-1"] = {
     }),
     "kotlin": ("Retrieval.kt", {
         "wrong-no-overlap": [("        start += size - overlap\n", "        start += size\n")],
-        "wrong-no-idf": [("val idf = ln(1 + (n - df.getValue(term) + 0.5) / (df.getValue(term) + 0.5))", "val idf = 1.0")],
+        "wrong-no-idf": [("val idf = ln(1 + (n - df + 0.5) / (df + 0.5))", "val idf = 1.0")],
         "wrong-fuse-by-votes": [("(scores[id] ?: 0.0) + 1.0 / (k + i + 1)", "(scores[id] ?: 0.0) + 1.0")],
         "wrong-rerank-ascending": [("ids.sortedByDescending { scorer(query, texts.getValue(it)) }", "ids.sortedBy { scorer(query, texts.getValue(it)) }")],
         "wrong-pool-ignored": [("return rerank(query, ranked.take(pool), ", "return rerank(query, ranked, ")],

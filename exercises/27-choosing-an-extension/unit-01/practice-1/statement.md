@@ -9,6 +9,25 @@ Python has `choose(situation)` in `extension_choice.py`; TypeScript has `choose`
 Kotlin has the top-level function `choose` and the data class `Choice`. Python and TypeScript take a plain object, and Java and Kotlin take a map from the key to its value. The keys
 are the same strings in every language, and a missing key has the default shown below. The page lists the twenty-eight situations of the scenario bank in words; the tests hold the same twenty-eight as features.
 
+## What is already written, and what you write
+
+The starter is a working chooser with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the checks of the five
+named values (`surface`, `knowledge`, `timing`, `presence`, `personal`), the reading of the defaults, the rhythm rules for a pipeline, a condition and a background command, and the order in which
+the answers are tried. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap
+returns a neutral value (nothing, so the chooser falls back to `builtin-tool`), so the starter runs and fails the cases on an assertion. The names below are Python's; TypeScript, Java and Kotlin
+have the camel-case forms (`checkCounts`, `apiChoice`, `priorityChoice`, `eventChoice`, `intervalChoice`, `personalChoice`, `knowledgeChoice`, `packageChoice`). Write them in this order:
+
+1. `_check_counts` unlocks `e6`: `repos` or `lasts_days` below 1, and `presence` `away` with `local_files`, are errors.
+2. `_api_choice` unlocks `e5`: the platform's tool, the remote server, or nothing (the caller answers `api-tool`).
+3. `_priority_choice` unlocks `e1` and `e2`: a guarantee, an outside system and noisy work, in that order.
+4. `_event_choice` unlocks `e7`: an event is a routine when nobody is there, a monitor otherwise.
+5. `_interval_choice` unlocks `e8`: a loop, a routine or a desktop task for work that repeats.
+6. `_personal_choice` unlocks `e9`: a voice, a display or a key binding.
+7. `_knowledge_choice` unlocks `e3`: the instruction file, the path rule or the skill that loads the knowledge at the right time.
+8. `_package` unlocks `e4`: a plugin from the second repository onward, for what a plugin can carry.
+
+`m1` needs all eight. About twenty-five lines in all. To see what a gap receives, log its input with the `log` line at the top of the file; a run shows the lines under the failing case.
+
 ## What to write
 
 `choose(situation)` returns `{mechanism, reason}`. A situation has these keys:

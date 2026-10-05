@@ -13,7 +13,7 @@ PRACTICES[f"{X}/26-tool-use/unit-01/practice-1"] = {
         ("e6", "edge", "results that are not text are sent as json text"),
     ],
     "plants": {
-        "wrong-result-per-message": (["e1"], "sends each tool result in a user message of its own"),
+        "wrong-server-block-answered": (["e1"], "answers a server tool block as if it were a tool call of its own"),
         "wrong-swallow-errors": (["e2"], "sends a failing tool's message without the error flag"),
         "wrong-extra-turn": (["e3"], "makes one model call more than the turn limit"),
         "wrong-ignore-stop-reason": (["e4"], "reports a refusal as a cut-off answer"),

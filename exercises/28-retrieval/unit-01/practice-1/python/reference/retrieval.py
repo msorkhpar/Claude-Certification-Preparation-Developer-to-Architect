@@ -1,6 +1,9 @@
 """A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md."""
+import logging
 import math
 import re
+
+log = logging.getLogger(__name__)
 
 
 def tokenize(text):
@@ -35,7 +38,10 @@ def chunk(text, size, overlap):
     """Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word."""
     if size < 1 or overlap < 0 or overlap >= size:
         raise ValueError("size must be at least 1 and overlap must be in 0 .. size - 1")
-    words = text.split()
+    return _windows(text.split(), size, overlap)
+
+
+def _windows(words, size, overlap):
     chunks, start = [], 0
     while start < len(words):
         chunks.append(" ".join(words[start:start + size]))
@@ -59,6 +65,11 @@ def _ordered(scores):
     return [cid for cid, score in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0])) if score > 0]
 
 
+def _term_score(tf, df, n, length, average, k1, b):
+    idf = math.log(1 + (n - df + 0.5) / (df + 0.5))
+    return idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average))
+
+
 def bm25_rank(chunks, query, index_text=None, k1=1.5, b=0.75):
     """Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out."""
     docs = {cid: tokenize(text) for cid, text in _texts(chunks, index_text).items()}
@@ -76,10 +87,16 @@ def bm25_rank(chunks, query, index_text=None, k1=1.5, b=0.75):
             tf = tokens.count(term)
             if tf == 0:
                 continue
-            idf = math.log(1 + (n - df[term] + 0.5) / (df[term] + 0.5))
-            score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * len(tokens) / average))
+            score += _term_score(tf, df[term], n, len(tokens), average, k1, b)
         scores[cid] = score
     return _ordered(scores)
+
+
+def _dot(a, b):
+    total = 0.0
+    for x, y in zip(a, b):
+        total += x * y
+    return total
 
 
 def embedding_rank(chunks, query, index_text=None):
@@ -87,10 +104,7 @@ def embedding_rank(chunks, query, index_text=None):
     q = embed(query)
     scores = {}
     for cid, text in _texts(chunks, index_text).items():
-        total = 0.0
-        for a, b in zip(q, embed(text)):
-            total += a * b
-        scores[cid] = total
+        scores[cid] = _dot(q, embed(text))
     return _ordered(scores)
 
 
@@ -118,10 +132,15 @@ def recall_at_k(ids, doc_of, relevant, k):
     return len(found & set(relevant)) / len(set(relevant))
 
 
+def _indexed_text(chunks, contexts):
+    return {c["id"]: f"{contexts[c['id']]} {c['text']}" for c in chunks if contexts and c["id"] in contexts}
+
+
 def retrieve(chunks, query, mode="hybrid", k=3, pool=10, contexts=None, scorer=None):
     """The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a
     sentence that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking."""
-    index_text = {c["id"]: f"{contexts[c['id']]} {c['text']}" for c in chunks if contexts and c["id"] in contexts}
+    log.debug("retrieve input: mode=%s k=%s query=%r", mode, k, query)
+    index_text = _indexed_text(chunks, contexts)
     lexical = bm25_rank(chunks, query, index_text)
     semantic = embedding_rank(chunks, query, index_text)
     ranked = lexical if mode == "bm25" else semantic if mode == "embedding" else fuse([lexical, semantic])
