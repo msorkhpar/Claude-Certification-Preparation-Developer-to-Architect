@@ -76,7 +76,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 5. One session holds eleven calls to the wrong tool, and the audit reports a count of one for the wrong-tool shape. A manager asks why not eleven. What is the answer?
    - **a**: The audit keeps only the first mistake of each session in the report
    - **b**: Counts are capped at one by default, whatever the session holds
-   - **c**: Repeated mistakes within a session are usually copies of the first mistake
+   - **c**: The other ten calls were retries, which the audit leaves out
    - **d**: The target is a share of conversations, and each fails at most once
 
 6. The audit needs two fields for each session: whether a human was needed, and which tool each step should have used. Which source supplies them?
@@ -89,7 +89,7 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 <summary>Answer key</summary>
 
 4. **b**. A lower escalation rate is a success only if no case that needed a person was settled alone. *a* is ruled out because tokens are not what the change risked: "Both are visible only against labels." *c* is ruled out because the length of a prompt is not the risk: "A rate alone is a bad objective". *d* is ruled out because a number the model reports is unmeasured: "The course treats the number as a claim that has to be measured against labelled outcomes before anything is routed on it".
-5. **d**. The unit of the target is the conversation. *a* is ruled out because the audit does not drop later mistakes for space: "The count of steps is still a useful diagnostic for a single session." *b* is ruled out because nothing in the audit caps a count: "The audit counts each failure shape once per session." *c* is ruled out because the reason is the unit and not a guess about copies: "Counting steps lets one confused session look like eleven problems".
+5. **d**. The unit of the target is the conversation. *a* is ruled out because the audit does not drop later mistakes for space: "The count of steps is still a useful diagnostic for a single session." *b* is ruled out because nothing in the audit caps a count: "The audit counts each failure shape once per session." *c* is ruled out because every call was a pick of the wrong tool and none is set aside: "A conversation in which the model picked the wrong tool eleven times is one failed conversation".
 6. **b**. A judgement about need and about the right tool is made by a person, on a sample. *a* is ruled out because the logs hold the calls and not the judgements: "Two fields are not." *c* is ruled out because the audit exists to check the agent against something other than itself: "a number computed only on what is easy to read is flattering". *d* is ruled out because a survey does not say which tool was right: "Whether a case needed a person is a judgement, and so is which tool a step should have used."
 
 </details>
