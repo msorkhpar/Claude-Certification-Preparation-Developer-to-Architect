@@ -420,7 +420,7 @@ This quiz covers both pages of the module.
 1. Scenario: Ines's claims assistant keeps its record of each request for a year, and a reviewer notices that the screen that checks incoming requests is allowed to let them through when it is down. Which change does the first page support?
    - **a**: Keep the pass-through and add a monitor that alerts on the gap
    - **b**: Keep the pass-through and shorten the retention of the records
-   - **c**: Stop the call whenever that service cannot answer, and log why
+   - **c**: Stop every high-consequence call whenever that service cannot answer, and log why
    - **d**: Move the screening into the system prompt so that it cannot be down
 
 2. Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. What does the second page say about that claim?
@@ -433,7 +433,7 @@ This quiz covers both pages of the module.
    - **a**: Nothing, because a record without the content is not admissible
    - **b**: A record that is too thin, since only the text proves what happened
    - **c**: A record that holds the refund amount and the approver's name
-   - **d**: Proof of the step, with no copy of the customer's text kept
+   - **d**: Evidence of the step, with no copy of the customer's text kept
 
 <details>
 <summary>Answer key</summary>
