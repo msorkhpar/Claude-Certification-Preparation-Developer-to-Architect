@@ -11,7 +11,7 @@ Checked on 2026-10-03 against the Claude Code documentation pages "How Claude re
 
 ## Why it matters
 
-A new engineer joins a team and Claude Code in her checkout ignores the team's rule that every endpoint validates its input. The rule exists: a senior engineer wrote it into his own `~/.claude/CLAUDE.md` months ago and has been getting the right behaviour ever since. Nothing in the repository carries it, so nobody else gets it. This is the exam's scenario S2 in its simplest form, and the question behind it is always the same one: at which level does an instruction live, and who receives it. The remaining failures come from the same ignorance of loading: a file in a subdirectory that has not been read yet, an import with a typo that imports nothing, and an `AGENTS.md` that is never read because a `CLAUDE.md` sits one folder up.
+A new engineer joins a team and Claude Code in their checkout ignores the team's rule that every endpoint validates its input. The rule exists: a senior engineer wrote it into their own `~/.claude/CLAUDE.md` months ago and has been getting the right behaviour ever since. Nothing in the repository carries it, so nobody else gets it. This is the exam's scenario S2 in its simplest form, and the question behind it is always the same one: at which level does an instruction live, and who receives it. The remaining failures come from the same ignorance of loading: a file in a subdirectory that has not been read yet, an import with a typo that imports nothing, and an `AGENTS.md` that is never read because a `CLAUDE.md` sits one folder up.
 
 ## The idea
 
