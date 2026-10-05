@@ -5,7 +5,8 @@ val solution = (findProperty("solution") ?: "starter") as String
 
 repositories { mavenCentral() }
 dependencies {
-    implementation("io.modelcontextprotocol:kotlin-sdk:0.15.0")
+    implementation("io.modelcontextprotocol:kotlin-sdk-server:0.15.0")
+    implementation("io.modelcontextprotocol:kotlin-sdk-client:0.15.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

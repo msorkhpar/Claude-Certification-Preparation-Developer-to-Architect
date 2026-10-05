@@ -145,7 +145,7 @@ final class Context {
     // Receives the messages, their turns, the budget and keepTurns. True when the conversation fits the budget or there are no more
     // turns than keepTurns. Example: a conversation of 40 tokens with budget 50 -> true.
     private static boolean leaveAlone(List<Map<String, Object>> messages, List<List<Map<String, Object>>> turns, int budget, int keepTurns) {
-        return false;
+        return turns.size() <= keepTurns; // the turn-count half is written; add the budget half
     }
 
     // TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.

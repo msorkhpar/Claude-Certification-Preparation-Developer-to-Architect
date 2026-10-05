@@ -54,7 +54,7 @@ PLANTS[f"{X}/31-computer-use/unit-01/practice-1"] = {
     "kotlin": ("Computer.kt", {
         "wrong-scale-no-edge-cap": [("min(1.0, min(1568.0 / max(width, height), sqrt(1_150_000.0 / (width.toDouble() * height))))", "min(1.0, sqrt(1_150_000.0 / (width.toDouble() * height)))")],
         "wrong-no-clamp": [('Pair(min(max(Math.rint(x / scale), 0.0), (num(screen["width"]) - 1).toDouble()).toInt(), min(max(Math.rint(y / scale), 0.0), (num(screen["height"]) - 1).toDouble()).toInt())', "Pair(Math.rint(x / scale).toInt(), Math.rint(y / scale).toInt())")],
-        "wrong-no-confirm": [('if (element == null || (element["risk"] ?: "none") == "none") return null', "if (true) return null")],
+        "wrong-no-confirm": [('if (element == null || (element["risk"] ?: "none") == "none") return null', "if (name.isNotEmpty()) return null")],
         "wrong-continue-after-failure": [("                        failed = true\n", "")],
         "wrong-key-repeat-unbounded": [("num(repeat) >= 1 && num(repeat) <= 100", "num(repeat) >= 1")],
         "wrong-wait-unbounded": [(" || d.toDouble() > 300", "")],

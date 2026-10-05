@@ -3,8 +3,7 @@
 
 PLANTS[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
     "python": ("vision.py", {
-        "wrong-edge-only-resize": [(" and visual_tokens(w, h) <= max_tokens", "")],
-        "wrong-text-first": [('content.append({"type": "text", "text": question})', 'content.insert(0, {"type": "text", "text": question})')],
+        "wrong-tokens-original-size": [("tokens += visual_tokens(*seen)", 'tokens += visual_tokens(it["width"], it["height"])')],
         "wrong-no-labels": [("if image_count > 1:", "if False:")],
         "wrong-padded-coordinates": [("return (x / resized_w * width, y / resized_h * height)", "return (x / resized_w * width, y / (math.ceil(resized_h / 28) * 28) * height)")],
         "wrong-same-limit-all-models": [("if len(images) > _max_count(context):", "if len(images) > 600:")],
@@ -17,8 +16,7 @@ PLANTS[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
         "wrong-no-clamp": [("    x, y = min(max(x, 0), resized_w), min(max(y, 0), resized_h)\n", "")],
     }),
     "typescript": ("vision.ts", {
-        "wrong-edge-only-resize": [(" && visualTokens(w, h) <= maxTokens", "")],
-        "wrong-text-first": [('content.push({ type: "text", text: question });', 'content.unshift({ type: "text", text: question });')],
+        "wrong-tokens-original-size": [("tokens += visualTokens(seen[0], seen[1]);", "tokens += visualTokens(w, h);")],
         "wrong-no-labels": [("if (imageCount > 1) blocks.push", "if (false) blocks.push")],
         "wrong-padded-coordinates": [("return [(cx / resizedW) * width, (cy / resizedH) * height];", "return [(cx / resizedW) * width, (cy / (Math.ceil(resizedH / 28) * 28)) * height];")],
         "wrong-same-limit-all-models": [("if (images.length > limit)", "if (images.length > 600)")],
@@ -31,8 +29,7 @@ PLANTS[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
         "wrong-no-clamp": [("const cx = Math.min(Math.max(x, 0), resizedW);", "const cx = x;"), ("const cy = Math.min(Math.max(y, 0), resizedH);", "const cy = y;")],
     }),
     "java": ("Vision.java", {
-        "wrong-edge-only-resize": [(" && visualTokens(w, h) <= maxTokens", "")],
-        "wrong-text-first": [('content.add(map("type", "text", "text", question));', 'content.add(0, map("type", "text", "text", question));')],
+        "wrong-tokens-original-size": [("tokens += visualTokens(seen[0], seen[1]);", "tokens += visualTokens(w, h);")],
         "wrong-no-labels": [("if (imageCount > 1) blocks.add", "if (imageCount > 1000) blocks.add")],
         "wrong-padded-coordinates": [("return new double[] {cx / r[0] * width, cy / r[1] * height};", "return new double[] {cx / r[0] * width, cy / (Math.ceilDiv(r[1], 28) * 28) * height};")],
         "wrong-same-limit-all-models": [("if (images > limit)", "if (images > 600)")],
@@ -45,8 +42,7 @@ PLANTS[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
         "wrong-no-clamp": [("double cx = Math.min(Math.max(x, 0), r[0]);", "double cx = x;"), ("double cy = Math.min(Math.max(y, 0), r[1]);", "double cy = y;")],
     }),
     "kotlin": ("Vision.kt", {
-        "wrong-edge-only-resize": [(" && visualTokens(w, h) <= maxTokens", "")],
-        "wrong-text-first": [('content.add(mapOf("type" to "text", "text" to question))', 'content.add(0, mapOf("type" to "text", "text" to question))')],
+        "wrong-tokens-original-size": [("tokens += visualTokens(seen.first, seen.second)", "tokens += visualTokens(w, h)")],
         "wrong-no-labels": [("if (imageCount > 1) blocks.add(", "if (imageCount > 1000) blocks.add(")],
         "wrong-padded-coordinates": [("return Pair(cx / rw * width, cy / rh * height)", "return Pair(cx / rw * width, cy / (ceil(rh / 28.0).toInt() * 28) * height)")],
         "wrong-same-limit-all-models": [("if (images > limit)", "if (images > 600)")],

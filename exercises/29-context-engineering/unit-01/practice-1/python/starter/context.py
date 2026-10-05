@@ -98,9 +98,10 @@ def _leave_alone(messages, turns, budget, keep_turns):
     """TODO 4 of 7 (unlocks e3): whether compaction has nothing to do.
 
     Receives the messages, their turns, the budget and keep_turns. True when the conversation fits the budget or there are no more
-    turns than `keep_turns`. Example: a conversation of 40 tokens with budget 50 -> True.
+    turns than `keep_turns`. The turn-count half is written; add the budget half.
+    Example: a conversation of 40 tokens with budget 50 -> True.
     """
-    return False
+    return len(turns) <= keep_turns
 
 
 def _with_summary(kept, summary):

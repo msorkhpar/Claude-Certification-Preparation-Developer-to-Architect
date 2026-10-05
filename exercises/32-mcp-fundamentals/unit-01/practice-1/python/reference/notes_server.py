@@ -61,6 +61,16 @@ def review_text(tone: str) -> str:
     return f"Review these notes in a {tone} tone:\n" + "\n".join(f"- {title}" for title, _ in NOTES)
 
 
+def default_limit() -> int:
+    """How many hits a search returns when the caller gives no limit."""
+    return 5
+
+
+def search_annotations():
+    """The annotations that tell a client search_notes only reads."""
+    return ToolAnnotations(read_only_hint=True)
+
+
 @server.tool(description="Save a note with a title and a text.", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False))
 def add_note(title: str, text: str) -> str:
     log.debug("add_note input: %r %r", title, text)
@@ -70,8 +80,8 @@ def add_note(title: str, text: str) -> str:
     return f"Saved note {len(NOTES)}: {title}"
 
 
-@server.tool(description="Find notes whose title or text contains the query.", annotations=ToolAnnotations(read_only_hint=True))
-def search_notes(query: str, limit: int = 5) -> str:
+@server.tool(description="Find notes whose title or text contains the query.", annotations=search_annotations())
+def search_notes(query: str, limit: int = default_limit()) -> str:
     validate_search(query.strip(), limit)
     return format_hits(find_hits(query.strip()), limit, query.strip())
 

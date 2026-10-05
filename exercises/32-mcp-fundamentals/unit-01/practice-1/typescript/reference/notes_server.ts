@@ -57,6 +57,16 @@ function reviewText(tone: string): string {
   return `Review these notes in a ${tone} tone:\n` + notes.map((n) => `- ${n.title}`).join("\n");
 }
 
+/** How many hits a search returns when the caller gives no limit. */
+function defaultLimit(): number {
+  return 5;
+}
+
+/** The annotations that tell a client search_notes only reads. */
+function searchAnnotations(): { readOnlyHint: boolean } | undefined {
+  return { readOnlyHint: true };
+}
+
 server.registerTool(
   "add_note",
   { description: "Save a note with a title and a text.", inputSchema: { title: z.string(), text: z.string() }, annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false } },
@@ -73,7 +83,7 @@ server.registerTool(
 
 server.registerTool(
   "search_notes",
-  { description: "Find notes whose title or text contains the query.", inputSchema: { query: z.string(), limit: z.number().int().default(5) }, annotations: { readOnlyHint: true } },
+  { description: "Find notes whose title or text contains the query.", inputSchema: { query: z.string(), limit: z.number().int().default(defaultLimit()) }, annotations: searchAnnotations() },
   async ({ query, limit }) => {
     const error = searchError(query.trim(), limit);
     if (error) return fail(error);

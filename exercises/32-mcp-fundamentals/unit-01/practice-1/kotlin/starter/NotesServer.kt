@@ -39,7 +39,7 @@ fun ok(text: String) = CallToolResult(content = listOf(TextContent(text)), isErr
 
 fun fail(message: String) = CallToolResult(content = listOf(TextContent(message)), isError = true)
 
-// GAP 1 of 7 (unlocks e2 and e7): refuse a bad note.
+// GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.
 // Receives the title and the text, both already stripped. Returns the error message, or null when they are fine: "title is required" for an empty
 // title, "text is required" for an empty text and "text is too long (max $MAX_TEXT)" for a text longer than MAX_TEXT, checked in that order.
 // Example: noteError("", "x") -> "title is required"; noteError("T", "x") -> null
@@ -47,7 +47,7 @@ fun noteError(title: String, text: String): String? {
     return null
 }
 
-// GAP 2 of 7 (unlocks e2): refuse a bad search.
+// GAP 2 of 9 (unlocks e2): refuse a bad search.
 // Receives the stripped query and the limit. Returns the error message, or null when they are fine: "query is required" for an empty query and
 // "limit must be between 1 and 20" for a limit outside 1 to 20, in that order.
 // Example: searchError("x", 21) -> "limit must be between 1 and 20"
@@ -55,7 +55,7 @@ fun searchError(query: String, limit: Int): String? {
     return null
 }
 
-// GAP 3 of 7 (unlocks m1 and e3): the notes that match a search.
+// GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.
 // Receives the stripped query. Returns the lines "{id}. {title}" of the notes (ids count from 1) whose title or text contains the query in any
 // letter case, in id order.
 // Example: with notes ("Alpha", "x") and ("beta", "ALPHA again"), findHits("alpha") -> ["1. Alpha", "2. beta"]
@@ -63,7 +63,7 @@ fun findHits(query: String): List<String> {
     return emptyList()
 }
 
-// GAP 4 of 7 (unlocks e3): the answer of a search.
+// GAP 4 of 9 (unlocks e3): the answer of a search.
 // Receives the hit lines, the limit and the stripped query. Returns at most `limit` lines joined by newlines; with no hits the sentence
 // No notes match "<query>".
 // Example: formatHits(["1. A", "2. B"], 1, "a") -> "1. A"; formatHits([], 5, "zeta") -> No notes match "zeta"
@@ -71,14 +71,14 @@ fun formatHits(hits: List<String>, limit: Int, query: String): String {
     return ""
 }
 
-// GAP 5 of 7 (unlocks e5): the text of the count resource.
+// GAP 5 of 9 (unlocks e5): the text of the count resource.
 // Receives the number of notes. Returns "0 notes", "1 note", "2 notes" and so on.
 // Example: countText(1) -> "1 note"
 fun countText(count: Int): String {
     return ""
 }
 
-// GAP 6 of 7 (unlocks m1 and e5): the text of one note.
+// GAP 6 of 9 (unlocks m1 and e5): the text of one note.
 // Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an existing note
 // ("0", "3" of two notes, "abc") throws IllegalArgumentException("No note $id").
 // Example: with one note ("Plan", "ship it"), noteText("1") -> "Plan\n\nship it"
@@ -86,12 +86,26 @@ fun noteText(id: String): String {
     return ""
 }
 
-// GAP 7 of 7 (unlocks e6): the text of the review prompt.
+// GAP 7 of 9 (unlocks e6): the text of the review prompt.
 // With no notes it is "There are no notes to review."; otherwise "Review these notes in a <tone> tone:" and one line "- <title>" per note,
 // each after a newline.
 // Example: with one note titled "Plan", reviewText("brief") -> "Review these notes in a brief tone:\n- Plan"
 fun reviewText(tone: String): String {
     return ""
+}
+
+// GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.
+// Takes nothing; returns that number, which is also the default the tool's input schema advertises.
+// Example: defaultLimit() -> 5
+fun defaultLimit(): Int {
+    return 0
+}
+
+// GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.
+// Takes nothing; returns ToolAnnotations with readOnlyHint = true.
+// Example: searchAnnotations()?.readOnlyHint -> true
+fun searchAnnotations(): ToolAnnotations? {
+    return null
 }
 
 fun addNote(args: JsonObject?): CallToolResult {
@@ -105,7 +119,7 @@ fun addNote(args: JsonObject?): CallToolResult {
 
 fun searchNotes(args: JsonObject?): CallToolResult {
     val query = args?.get("query")?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
-    val limit = args?.get("limit")?.jsonPrimitive?.intOrNull ?: 5
+    val limit = args?.get("limit")?.jsonPrimitive?.intOrNull ?: defaultLimit()
     searchError(query, limit)?.let { return fail(it) }
     return ok(formatHits(findHits(query), limit, query))
 }
@@ -139,11 +153,11 @@ fun main() = runBlocking {
         inputSchema = ToolSchema(
             properties = buildJsonObject {
                 put("query", buildJsonObject { put("type", "string") })
-                put("limit", buildJsonObject { put("type", "integer"); put("default", 5) })
+                put("limit", buildJsonObject { put("type", "integer"); put("default", defaultLimit()) })
             },
             required = listOf("query"),
         ),
-        toolAnnotations = ToolAnnotations(readOnlyHint = true),
+        toolAnnotations = searchAnnotations(),
     ) { request -> searchNotes(request.arguments) }
     server.addResource(uri = "notes://count", name = "count", description = "How many notes there are.", mimeType = "text/plain") { request ->
         ReadResourceResult(listOf(TextResourceContents(text = countText(notes.size), uri = request.uri, mimeType = "text/plain")))

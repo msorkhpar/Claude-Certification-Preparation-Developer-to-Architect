@@ -14,8 +14,7 @@ PRACTICES[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
         ("e7", "edge", "coordinates map back to the original and cost follows the price"),
     ],
     "plants": {
-        "wrong-edge-only-resize": (["e1"], "sizes an image by the edge limit alone and ignores the visual token budget"),
-        "wrong-text-first": (["m1"], "puts the question before the images"),
+        "wrong-tokens-original-size": (["e1"], "counts the tokens of the original size, not of the size the model sees"),
         "wrong-no-labels": (["m1"], "does not label the images when there are several"),
         "wrong-padded-coordinates": (["e7"], "divides a returned coordinate by the padded height instead of the resized height"),
         "wrong-same-limit-all-models": (["e2"], "allows 600 images for every model, including the 200k-context one"),

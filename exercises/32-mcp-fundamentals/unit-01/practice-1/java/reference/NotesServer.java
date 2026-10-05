@@ -81,6 +81,16 @@ public class NotesServer {
         return "Review these notes in a " + tone + " tone:\n" + String.join("\n", NOTES.stream().map(n -> "- " + n.title()).toList());
     }
 
+    /** How many hits a search returns when the caller gives no limit. */
+    static int defaultLimit() {
+        return 5;
+    }
+
+    /** The annotations that tell a client search_notes only reads. */
+    static ToolAnnotations searchAnnotations() {
+        return ToolAnnotations.builder().readOnlyHint(true).build();
+    }
+
     static CallToolResult addNote(Map<String, Object> args) {
         LOG.log(System.Logger.Level.DEBUG, "addNote input: {0}", args);
         String title = String.valueOf(args.getOrDefault("title", "")).strip(), text = String.valueOf(args.getOrDefault("text", "")).strip();
@@ -92,7 +102,7 @@ public class NotesServer {
 
     static CallToolResult searchNotes(Map<String, Object> args) {
         String query = String.valueOf(args.getOrDefault("query", "")).strip();
-        int limit = ((Number) args.getOrDefault("limit", 5)).intValue();
+        int limit = ((Number) args.getOrDefault("limit", defaultLimit())).intValue();
         String error = searchError(query, limit);
         if (error != null) return fail(error);
         return ok(formatHits(findHits(query), limit, query));
@@ -104,8 +114,8 @@ public class NotesServer {
                 .inputSchema(json, "{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"}},\"required\":[\"title\",\"text\"]}")
                 .annotations(ToolAnnotations.builder().readOnlyHint(false).destructiveHint(false).idempotentHint(false).build()).build();
         Tool search = Tool.builder().name("search_notes").description("Find notes whose title or text contains the query.")
-                .inputSchema(json, "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\",\"default\":5}},\"required\":[\"query\"]}")
-                .annotations(ToolAnnotations.builder().readOnlyHint(true).build()).build();
+                .inputSchema(json, "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"limit\":{\"type\":\"integer\",\"default\":" + defaultLimit() + "}},\"required\":[\"query\"]}")
+                .annotations(searchAnnotations()).build();
         McpSchema.Resource count = McpSchema.Resource.builder().uri("notes://count").name("count").description("How many notes there are.").mimeType("text/plain").build();
         McpSchema.ResourceTemplate noteTemplate = McpSchema.ResourceTemplate.builder().uriTemplate("notes://note/{id}").name("note").description("One note by id.").mimeType("text/plain").build();
         McpSchema.Prompt review = new McpSchema.Prompt("review_notes", "Ask for a review of the notes.", List.of(new McpSchema.PromptArgument("tone", null, false)));

@@ -77,6 +77,12 @@ fun noteText(id: String): String {
 fun reviewText(tone: String): String =
     if (notes.isEmpty()) "There are no notes to review." else "Review these notes in a $tone tone:\n" + notes.joinToString("\n") { "- ${it.title}" }
 
+/** How many hits a search returns when the caller gives no limit. */
+fun defaultLimit(): Int = 5
+
+/** The annotations that tell a client search_notes only reads. */
+fun searchAnnotations(): ToolAnnotations? = ToolAnnotations(readOnlyHint = true)
+
 fun addNote(args: JsonObject?): CallToolResult {
     log.log(System.Logger.Level.DEBUG, "addNote input: {0}", args)
     val title = args?.get("title")?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
@@ -88,7 +94,7 @@ fun addNote(args: JsonObject?): CallToolResult {
 
 fun searchNotes(args: JsonObject?): CallToolResult {
     val query = args?.get("query")?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
-    val limit = args?.get("limit")?.jsonPrimitive?.intOrNull ?: 5
+    val limit = args?.get("limit")?.jsonPrimitive?.intOrNull ?: defaultLimit()
     searchError(query, limit)?.let { return fail(it) }
     return ok(formatHits(findHits(query), limit, query))
 }
@@ -122,11 +128,11 @@ fun main() = runBlocking {
         inputSchema = ToolSchema(
             properties = buildJsonObject {
                 put("query", buildJsonObject { put("type", "string") })
-                put("limit", buildJsonObject { put("type", "integer"); put("default", 5) })
+                put("limit", buildJsonObject { put("type", "integer"); put("default", defaultLimit()) })
             },
             required = listOf("query"),
         ),
-        toolAnnotations = ToolAnnotations(readOnlyHint = true),
+        toolAnnotations = searchAnnotations(),
     ) { request -> searchNotes(request.arguments) }
     server.addResource(uri = "notes://count", name = "count", description = "How many notes there are.", mimeType = "text/plain") { request ->
         ReadResourceResult(listOf(TextResourceContents(text = countText(notes.size), uri = request.uri, mimeType = "text/plain")))

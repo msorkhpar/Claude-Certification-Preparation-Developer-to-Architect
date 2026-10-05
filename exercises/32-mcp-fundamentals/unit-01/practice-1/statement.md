@@ -35,7 +35,7 @@ text inside the result.
 
 ## What is already written, and what you write
 
-The starter is a working notes server with seven gaps cut out of it. Everything that is plumbing is written and correct: the server name and
+The starter is a working notes server with nine gaps cut out of it. Everything that is plumbing is written and correct: the server name and
 version, the capabilities, the tool, resource and prompt registrations with their descriptions, schemas and annotations, the stripping of the
 inputs, the saving of a note and the answer to `add_note`. Each gap is a small function with its signature, a comment that says what it
 receives and returns with one example, and the cases it unlocks; it returns a neutral value, so the starter runs and fails the cases on an
@@ -50,8 +50,10 @@ camel case, `validateNote` is `noteError` there and returns the message or `null
 5. `count_text` unlocks `e5`: `0 notes`, `1 note`, `2 notes`.
 6. `note_text` unlocks `m1` and `e5`: the note as text, or the `No note {id}` error.
 7. `review_text` unlocks `e6`: the prompt text, with and without notes.
+8. `default_limit` unlocks `e1`: the limit a search uses when none is given, also advertised in the input schema (`defaultLimit` in the other languages).
+9. `search_annotations` unlocks `e4`: the read-only annotation of `search_notes` (`searchAnnotations` in the other languages).
 
-About fifteen lines in all. The cases `e1` and `e4` check the registration, which is written.
+About fifteen lines in all. The rest of the registration is written.
 
 ## The cases
 
