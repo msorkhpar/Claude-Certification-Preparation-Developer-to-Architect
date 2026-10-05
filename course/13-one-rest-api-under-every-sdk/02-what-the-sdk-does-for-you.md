@@ -332,8 +332,8 @@ Read the output as a list:
   requires beyond what the raw call already had.
 - **The SDK adds identifying headers** (the `x-stainless-*` family in these runs): the platform, the runtime version,
   the package version, the retry count and the timeout. They help debugging and are not part of your contract.
-  The two languages differ in the exact list because the HTTP stacks differ.
-- **A 429 is a status for raw code and a typed exception for the SDK.** Both SDKs raised a `RateLimitError`, and both carry the status and the request id read from the `request-id` header.
+  The exact list differs between languages because the HTTP stacks differ.
+- **A 429 is a status for raw code and a typed exception for the SDK.** The Python and TypeScript SDKs raised a `RateLimitError`, and both carry the status and the request id read from the `request-id` header.
   Java and Kotlin: the Java SDK page maps a 429 to `RateLimitException` and offers `withRawResponse()` for the
   headers and `requestId()`.
 

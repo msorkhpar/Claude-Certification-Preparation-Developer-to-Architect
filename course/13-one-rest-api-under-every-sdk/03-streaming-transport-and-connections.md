@@ -92,8 +92,7 @@ for an idle-connection timeout. So:
    large `max_tokens` value without using the streaming Messages API or Message Batches API".
 2. **Or use batches** when no one is waiting, because the Message Batches API "can help you manage the risk of
    network issues by allowing you to poll for results rather than requiring an uninterrupted network connection".
-3. **Set a TCP keep-alive** if you write a direct integration. The SDKs already do: they validate that a non-streaming
-   request is not expected to exceed a 10-minute timeout, and set the socket option for TCP keep-alive.
+3. **Set a TCP keep-alive** if you write a direct integration. The SDKs already set the socket option for TCP keep-alive.
 4. **Reuse connections.** The Java SDK's page tells you not to create more than one client in an application, because
    each has a connection pool and thread pools that are better shared. In Python, close a client you create, or use it
    as a context manager.
