@@ -45,7 +45,7 @@
       "scope": "page",
       "stem": "Scenario: Elm Biotech's plan has five tasks: a, b, c, d and e. Task b breaks for good, d needs b, and c and e need neither. What should the runner report?",
       "options": {
-        "a": "c and e done, b failed, d skipped because of b, with each reason stated",
+        "a": "a, c and e done, b failed, d skipped because of b, with each reason stated",
         "b": "The whole run counts as failed, since one broken part makes the rest untrustworthy for the reader",
         "c": "Task a done, with the later tasks left unreported until someone has repaired the broken one",
         "d": "Five tasks done, with d computed from a plausible guess at what b would have returned"
@@ -83,7 +83,7 @@
       "scope": "module",
       "stem": "Scenario: Dovetail Labs sets a breaker threshold of three consecutive failures for each agent. Agent X fails, succeeds, fails, succeeds, and fails again. Agent Y fails three times running. Which breakers are open afterwards?",
       "options": {
-        "a": "Only Y's, since X's successes keep resetting its count",
+        "a": "Only Y's, since X's tally returns to zero whenever a call works",
         "b": "Both, since each agent has failed at least three times in all across the run",
         "c": "Only X's, since it has made the larger number of calls overall in the run",
         "d": "Neither, because a breaker opens only after a cooldown has already passed"
@@ -121,10 +121,10 @@
       "scope": "module",
       "stem": "Scenario: Hazel Analytics' plan has tasks a, b, c and d, where d needs b. In the first run b used up its retries, and a and c finished and were saved. What does a second run call?",
       "options": {
-        "a": "All four, since a run starts from the beginning each time it is launched",
-        "b": "Only b, because d is skipped for good once it has been skipped one time",
-        "c": "Only b and then d if b succeeds, with a and c taken from the checkpoint",
-        "d": "Only d, since b is already known to have failed in the earlier run"
+        "a": "All four, since a run restarts the whole plan",
+        "b": "Only b, since a skipped task is not retried later",
+        "c": "b, then d once b succeeds, since a and c come from the checkpoint",
+        "d": "Just d, since b is known to have failed in the earlier run"
       },
       "key": "c",
       "explanation": {

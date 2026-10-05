@@ -350,7 +350,7 @@ without the policy: breakpoint None because 21 tokens is under 512
 ```
 <!-- /example -->
 
-Read the output from the top. The order is role, policy, customer, question. The static prefix is 587 of 603 tokens, so most of the request is cacheable. The next request from another customer has an identical prefix, and an edit to the policy does not. The last line is the failure that goes unseen without a count: with the policy removed, the breakpoint is `None` because 21 tokens is under 512.
+Read the output from the top. The order is role, policy, customer, question. The static prefix is 587 of 603 tokens, so most of the request is cacheable. The next request from another customer has an identical prefix, and after an edit to the policy it is not identical. The last line is the failure that goes unseen without a count: with the policy removed, the breakpoint is `None` because 21 tokens is under 512.
 
 ## Traps
 
@@ -362,7 +362,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 ## Quiz
 
-1. Scenario: Egret Support's request holds fixed rules, a conversation history ranked 5 and marketing blurbs ranked 1. It exceeds its token budget by a small margin. What does the assembler do?
+1. Scenario: Egret Support's request holds fixed rules, a conversation history at priority 5 and marketing blurbs at priority 1. It exceeds its token budget by a small margin. What does the assembler do?
    - **a**: Truncates the end of the rules until the whole request fits within the budget
    - **b**: Drops the conversation history first, because it is the largest block of the three
    - **c**: Refuses the request at once, since it is over budget by any amount at all
@@ -372,12 +372,12 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **a**: A reminder in the team wiki that the policy text ought to come first in the prompt
    - **b**: A longer cache lifetime, so that the different strings are all kept for longer
    - **c**: A standard header that every team adds to the start of its own prompt
-   - **d**: A single assembler that orders named modules, with callers passing only values
+   - **d**: A single assembler that arranges named modules, with callers passing only values
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The lowest-ranked dynamic block goes first, and the assembler climbs only while the request is still over. *a* is ruled out because "The static modules are never dropped". *b* is ruled out because "the assembler drops the lowest first", by rank and not by size. *c* is ruled out because refusal is for when "only static modules remain and they still exceed the budget, the assembler refuses the request".
+1. **d**. The lowest-priority dynamic block goes first, and the assembler climbs only while the request is still over. *a* is ruled out because "The static modules are never dropped". *b* is ruled out because "the assembler drops the lowest first", by priority and not by size. *c* is ruled out because refusal is for when "only static modules remain and they still exceed the budget, the assembler refuses the request".
 2. **d**. One assembler fixes the order, so every team's prefix matches. *a* is ruled out because a reminder leaves the order to each caller, where "the assembler decides the order and callers cannot". *b* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", and a longer lifetime does not make the strings identical. *c* is ruled out because a header does not fix the order that follows it: "The order is the same every time" only when one assembler decides it.
 
 </details>

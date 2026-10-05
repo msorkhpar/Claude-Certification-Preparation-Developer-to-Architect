@@ -623,12 +623,12 @@ This quiz covers both pages of the module.
    - **a**: Move the metrics to a much larger store and carry on with the labels that the teams have added
    - **b**: Remove the id from the whole system, since single conversations are rarely worth reading
    - **c**: Store a random tenth of the metric points, so that the number of series that must be kept falls
-   - **d**: Take the identifier off the series, and keep it in traces and events, which hold single occurrences
+   - **d**: Keep the value out of the series, and put it in traces and events, which hold single occurrences
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Claude Code ignores the exporter variables in a repository's settings. *a* is ruled out because "a repository can't use them to turn telemetry on". *b* is ruled out because the sentence continues "choose where it goes, or capture content". *d* is ruled out because "each is opened by a separate variable", so redaction can be changed, just not from a repository.
+1. **c**. Claude Code ignores the exporter variables in a repository's settings. *a* is ruled out because "a repository can't use them to turn telemetry on". *b* is ruled out because "a repository cannot turn any of it on", whether or not a developer enables tracing. *d* is ruled out because "each is opened by a separate variable", so redaction can be changed, just not from a repository.
 2. **b**. A shared identifier, taken at the edge and written everywhere, joins the records. *a* is ruled out because "Time alone cannot join records: two requests at the same millisecond look the same". *c* is ruled out because "keeping records longer keeps the same unjoinable records longer". *d* is ruled out because "A central store collects the records and still does not say which belong together".
 3. **d**. The id is high-cardinality, so it belongs on the traces and events, which are meant for single occurrences. *a* is ruled out because "Moving to a larger store pays for the series and leaves their count growing". *c* is ruled out because "a random sample of metric points gives a wrong rate: metrics are counts, and a missing count is a wrong count". *b* is ruled out because "Dropping the id from everything gives up the ability to look at one conversation, which the traces exist for".
 

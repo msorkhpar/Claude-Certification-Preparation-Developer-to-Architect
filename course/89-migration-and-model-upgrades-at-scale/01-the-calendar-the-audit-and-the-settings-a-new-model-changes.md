@@ -706,7 +706,7 @@ roll-out at 100% with 50000 requests and 10 errors: complete
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The table can say "not sooner than" for a model that is still active, which marks a date that may move later. *b* is ruled out because "is never a date to wait for". *c* is ruled out because "marks a date that may move later". *d* is ruled out because "Sixty days is the shortest warning, and a migration of forty applications can take longer than that".
+1. **a**. The table can say "not sooner than" for a model that is still active, which marks a date that may move later. *b* is ruled out because "is never a date to wait for". *c* is ruled out because "marks a date that may move later". *d* is ruled out because "Deprecated models are likely to be less reliable than active models", so nothing is safe until the retired state.
 2. **c**. Legacy means "The model will no longer receive updates and may be deprecated in the future." *a* is ruled out because deprecated is the state where Anthropic "provides a recommended replacement and assigns a retirement date". *b* is ruled out because active is the state where "The model is fully supported and recommended for use". *d* is ruled out because "Requests to retired models will fail" describes the retired state, not legacy.
 
 </details>

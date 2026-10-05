@@ -633,7 +633,7 @@ This quiz covers both pages of the module.
    - **a**: Two blocking items, so the pipeline is rejected twice over
    - **b**: Two items that ask for revision and nothing that blocks
    - **c**: One minor item that is only recorded and one that blocks
-   - **d**: One blocking item and one that asks for revision, both in the same domain
+   - **d**: One blocking item and one that asks for revision, and nothing minor
 
 <details>
 <summary>Answer key</summary>

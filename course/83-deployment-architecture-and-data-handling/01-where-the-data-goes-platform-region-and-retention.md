@@ -80,7 +80,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The `us` pin is a United States geography, and the API has no European one. *a* is ruled out because the audit log is separate from where inference runs: "A requirement that cannot be met on a platform is reported". *c* is ruled out because "The workspace geography is set per workspace" and the page says it is `us` only. *d* is ruled out because the agreement concerns health data and does not move the processing: "there is no European pin".
+1. **b**. The `us` pin is a United States geography, and the API has no European one. *a* is ruled out because the audit log is separate from where inference runs, and "the request carries an inference geography" that the log store does not change. *c* is ruled out because "The workspace geography is set per workspace" and the page says it is `us` only. *d* is ruled out because the agreement concerns health data and does not move the processing: "there is no European pin".
 2. **c**. Zero data retention is an arrangement with Anthropic, and on Bedrock the cloud provider is the processor. *a* is ruled out because "Their retention, compliance and region rules are the provider's", so no arrangement is shared. *b* is ruled out because the page gives no such approval, and says the provider's rules are "the provider's own documentation". *d* is ruled out because the model is a separate rule ("A model that requires 30-day retention cannot satisfy a zero-retention requirement") and does not change who the processor is.
 
 </details>

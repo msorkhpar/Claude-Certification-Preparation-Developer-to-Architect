@@ -62,7 +62,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 2. Scenario: Pylon Software's four teams each hold a separate key, and finance cannot say which team spent what. The platform team proposes an internal gateway. What will the gateway achieve by itself?
    - **a**: A lower token bill for the teams, since requests now pass through a central point, and less waste
-   - **b**: One shared point for credentials, routing, budgets and the record of spend
+   - **b**: One shared point for credentials, routing, budgets and the record of spend, since all traffic passes it
    - **c**: Faster answers for the teams, since the gateway adds capacity to the shared model, and fewer errors
    - **d**: Better quality for the teams, because the gateway improves the prompts it forwards, and fewer refusals
 
@@ -82,7 +82,7 @@ This quiz covers both pages of the module.
    - **a**: Honours the pin, since the team chose that model deliberately
    - **b**: Blocks the team for breaking the policy until it has been reviewed
    - **c**: Uses the pin once and warns the platform team afterwards
-   - **d**: Ignores the pin and routes by the table entry, since a pin is merely a wish
+   - **d**: Routes by the table entry for the task, since that choice is merely a wish
 
 2. Scenario: Tallow Insurance's gateway sees a team at exactly 80 percent of its budget, and the next request is estimated to stay under 100 percent. What does admission return?
    - **a**: Allow, since the team has not yet passed its budget and nothing is wrong at this point

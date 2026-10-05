@@ -34,7 +34,7 @@ A change of embedding model has the same shape on a larger scale. Vectors made b
 
 An index is stale when a chunk no longer matches its source. The check is cheap and exact: compare each chunk's version with the current version of its document, and list the chunks that differ or whose document is gone. The practice's `stale` does this. Run it after every re-index and alert on any result, because the symptom, a confident wrong answer, arrives long after the cause. When a wrong answer is reported, the trace should hold the ids and versions of the chunks that were retrieved (module 87), so that the question "was it stale?" has an answer in one lookup.
 
-Recall by chunk id does not see staleness: an old chunk with the right id still counts as a hit. A retrieval metric that passes while users see old answers is the sign that the metric counts the wrong thing.
+Recall by chunk id, or by document as in module 28, does not see staleness: an old chunk with the right id still counts as a hit. A retrieval metric that passes while users see old answers is the sign that the metric counts the wrong thing.
 
 ### Judge retrieval and generation separately
 
@@ -808,9 +808,9 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 
 ## Quiz
 
-1. A team reports 90 percent retrieval recall. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
+1. A team reports a retrieval recall of nine in ten. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
    - **a**: 90 percent, since only questions that returned something can be judged
-   - **b**: 27 of 40, about two thirds, because a blank query still belongs in the denominator
+   - **b**: 68 percent, since a blank query still belongs in the denominator
    - **c**: 100 percent, since every result that was returned held the relevant chunk
    - **d**: 75 percent, since 30 of the 40 labelled questions were answered
 
@@ -823,8 +823,8 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "the denominator is every labelled question". *a* is ruled out because "A question with no results counts as a miss in recall over the labelled set". *c* is ruled out because "the denominator is every labelled question", not the questions that returned results. *d* is ruled out because "and so does a question that was never answered": answered questions are not the denominator.
-2. **d**. The outcomes are 4 ok, 1 generation, 2 retrieval and 1 unsupported, so two questions had no evidence and a wrong answer. *b* is ruled out because the wrong answer that had its evidence is one where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because the right answer without evidence is one where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure by definition. *a* is ruled out because five is the number of questions for which "the evidence was retrieved for 5 and 5 answers were right" is said of, the opposite count.
+1. **b**. The page says "the denominator is every labelled question", so 27 of 40 is about 68 percent. *a* is ruled out because "A question with no results counts as a miss in recall over the labelled set". *c* is ruled out because only 27 of the 30 returned results held the relevant chunk, and "the denominator is every labelled question" in any case. *d* is ruled out because "and so does a question that was never answered": answered questions are not the denominator.
+2. **d**. The outcomes are 4 ok, 1 generation, 2 retrieval and 1 unsupported, so two questions had no evidence and a wrong answer. *b* is ruled out because the wrong answer that had its evidence is one where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because the right answer without evidence is one where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure by definition. *a* is ruled out because five is the number of questions whose evidence was retrieved ("the evidence was retrieved for 5"), the opposite count.
 
 </details>
 
