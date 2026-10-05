@@ -28,7 +28,7 @@ The layers answer different attackers and different mistakes. An input control c
 
 ### What a control does when it fails
 
-Every control has a failure mode of its own, and the design must say it. The two choices are to **hold** (stop the request or the action until the control works) and to **proceed, flagged** (let it go on and record that the check did not run). The rule of the example is by consequence and by layer: a control on the input or the action layer, and any control of the high tier, holds. Only an output or monitor control of the ordinary tier may proceed with a flag. The example's router applies it to the screen by consequence: a high-consequence action holds, and a low-consequence reply goes on, flagged.
+Every control has a failure mode of its own, and the design must say it. The two choices are to **hold** (stop the request or the action until the control works) and to **proceed, flagged** (let it go on and record that the check did not run). The rule of the example is by consequence: a control holds whenever the action it guards is high-consequence, and every control on the action layer holds. A control that guards a low-consequence reply may proceed with a flag. The example's router applies it to the screen: with the screen down, a high-consequence action holds, and a low-consequence reply goes on, flagged.
 
 The reason is the cost of a wrong guess. A screen that is down and lets a request through is the opening an attacker waits for. A drift alert that is down and lets the answers go on flagged costs a delay in noticing, and the answers themselves are still checked by other controls. The example shows both: with the screen down, a refund is held (`hold: screen down`), and a low-consequence reply goes on with a mark (`auto (unscreened)`) so that the gap shows in the record. "Fail open to keep the service up" is a business decision for the second kind of control and never for the first.
 
@@ -399,7 +399,7 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 
 ## Traps
 
-1. **"If the screen is down, let the request through so customers are not blocked."** It is tempting because availability is measured and a blocked request is visible. The exam rejects it because a failed input or action control that proceeds is the gap an attacker waits for; hold, and say so in the response. Only a control on the output or monitor layer of the ordinary tier may proceed with a flag.
+1. **"If the screen is down, let the request through so customers are not blocked."** It is tempting because availability is measured and a blocked request is visible. The exam rejects it because a failed input or action control that proceeds on a high-consequence request is the gap an attacker waits for; hold, and say so in the response. Only a control that guards a low-consequence reply may proceed with a flag.
 2. **"The system prompt says to ask a person before refunds, so a person is in the loop."** It is tempting because the instruction is written and the model usually follows it. The exam rejects it because a line in a prompt is a request, and a control is a step the model cannot skip; build the approval into the action layer as a step that holds.
 3. **"A confidence of 99 means the answer can go out without a check."** It is tempting because the score is high and the threshold is 95. The exam rejects it because confidence is not evidence: an answer whose quote is not in the source is held at any confidence, and a high-consequence action goes to a person at any confidence.
 
@@ -421,6 +421,6 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 <summary>Answer key</summary>
 
 1. **a**. A refund is a high-consequence action and the screen is an input control, so the design holds. *b* is ruled out because "A screen that is down and lets a request through is the opening an attacker waits for". *c* is ruled out because the layers "answer different attackers and different mistakes", and the model's own training is not the missing screen. *d* is ruled out because "an output control cannot stop a tool call that already happened", and a later step does not repair a gap on an earlier layer.
-2. **c**. A line in a prompt is a request and a control is a step the model cannot skip. *a* is ruled out because the page does not argue about length: "a line in a prompt is a request, and a control is a step the model cannot skip". *b* is ruled out because the sentence stays "a request to the model and not a control" wherever it sits. *d* is ruled out because "Every control has a failure mode of its own, and the design must say it", and no platform rule is assumed to hold it.
+2. **c**. A line in a prompt is a request and a control is a step the model cannot skip. *a* is ruled out because the page grants that "the model usually follows it", so reliability of following is not the weakness. *b* is ruled out because the sentence stays "a request to the model and not a control" wherever it sits. *d* is ruled out because "Every control has a failure mode of its own, and the design must say it", and no platform rule is assumed to hold it.
 
 </details>

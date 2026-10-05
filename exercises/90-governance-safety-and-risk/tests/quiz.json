@@ -34,7 +34,7 @@
       "key": "c",
       "explanation": {
         "c": "A line in a prompt is a request and a control is a step the model cannot skip.",
-        "a": "Ruled out because the page does not argue about length: \"a line in a prompt is a request, and a control is a step the model cannot skip\".",
+        "a": "Ruled out because the page grants that \"the model usually follows it\", so reliability of following is not the weakness.",
         "b": "Ruled out because the sentence stays \"a request to the model and not a control\" wherever it sits.",
         "d": "Ruled out because \"Every control has a failure mode of its own, and the design must say it\", and no platform rule is assumed to hold it."
       }
@@ -85,12 +85,12 @@
       "options": {
         "a": "Keep the pass-through and add a monitor that alerts on the gap",
         "b": "Keep the pass-through and shorten the retention of the records",
-        "c": "Stop every high-consequence call whenever that service cannot answer, and log why",
+        "c": "Hold each high-consequence call until that service replies",
         "d": "Move the screening into the system prompt so that it cannot be down"
       },
       "key": "c",
       "explanation": {
-        "c": "An input control holds when it fails, and the reason goes in the record.",
+        "c": "An input control holds a high-consequence call when it fails.",
         "b": "Ruled out because retention does not close the gap: \"A screen that is down and lets a request through is the opening an attacker waits for\".",
         "a": "Ruled out because the first page puts the monitor in the layers that watch \"afterwards\", so \"an output control cannot stop a tool call that already happened\".",
         "d": "Ruled out because \"a line in a prompt is a request, and a control is a step the model cannot skip\"."
@@ -103,7 +103,7 @@
       "stem": "Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. What does the second page say about that claim?",
       "options": {
         "a": "A small group cannot be measured, so the average is the only usable figure",
-        "b": "Fairness is a gap between segments, and a headline figure masks a failing one",
+        "b": "A headline figure masks a failing segment",
         "c": "The group's score should be dropped when it is below the volume needed",
         "d": "The system passes because the model was tested on a broad set before launch"
       },
