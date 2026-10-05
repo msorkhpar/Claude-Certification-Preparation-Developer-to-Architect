@@ -102,14 +102,14 @@ earlier turns without the earlier reasoning, and should test for it.
    - **a**: The newest release, since a later model has the lowest price
    - **b**: The most capable tier, because ticket text can always hide a hard case
    - **c**: The middle tier, since it balances the tests against the price list
-   - **d**: The smallest model, since the extra capability above it buys nothing here
+   - **d**: The smallest model, since the extra capability above it buys nothing
 
 2. A job feeds 300,000 tokens to a model and expects a short answer. One model is cheapest by price per million. What rules it
    out first?
    - **a**: Its context window is smaller than what is sent
-   - **b**: Its latency is the highest in the table
-   - **c**: Its tokenizer is older than the others
-   - **d**: Its output costs more than its input
+   - **b**: Its latency is the highest of all the models in the table
+   - **c**: Its tokenizer is older than the tokenizers of the others
+   - **d**: Its output price is higher than its own input price
 
 3. A model lists a price 20% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the
    same text. What does the page's reasoning give for the cost of one task?
