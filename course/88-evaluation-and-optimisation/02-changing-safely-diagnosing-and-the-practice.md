@@ -17,7 +17,7 @@ A team has a new prompt that raised the score on its offline set. It is tried on
 
 ### A/B tests: telling a gain from chance
 
-An A/B test sends live traffic to two versions at random and compares an outcome. Its first enemy is chance: with few cases, two equal versions will differ, and a gap that large is a coin's work. The example's test is the plain two-proportion comparison, done at 95 percent: the gap must be large enough that equal versions would show it less than about one time in twenty. Four rules make it honest.
+An A/B test sends live traffic to two versions at random and compares an outcome. Its first enemy is chance: with few cases, two equal versions will differ, and a gap of that size can be chance alone. The example's test is the plain two-proportion comparison, done at 95 percent: the gap must be large enough that equal versions would show it less than about one time in twenty. Four rules make it honest.
 
 - **Decide the metric and the sample before you look.** One primary metric, set in advance, and a minimum number of cases per arm. The example's minimum is 200; below it the verdict is `too few cases`, whatever the gap.
 - **The larger number is not the better version.** With 80 cases in an arm, a gap of five points is within chance. The same gap on 500 cases each can be clear. In the example, 410 right of 500 against 438 is a clear gain, and 410 against 431 is not.
@@ -706,8 +706,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The evidence was never retrieved, so the index and chunking are the cheapest place to look. *b* is ruled out because "A larger model does not know a document it was never shown". *a* is ruled out because "Sampling settings change how an answer is worded and not what evidence it was given". *d* is ruled out because "Examples teach a format; they do not supply a missing fact".
-2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the rule is "Check that the result is right, then check that the process was reasonable". *a* is ruled out because "an eval that checks for a prescribed sequence of steps fails correct runs". *c* is ruled out because tool efficiency is one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)". *d* is ruled out because the rule is to "check that the process was reasonable" after the result.
+1. **c**. The evidence was never retrieved, so the index and the splitting of documents are the cheapest place to look. *b* is ruled out because "A larger model does not know a document it was never shown". *a* is ruled out because "Sampling settings change how an answer is worded and not what evidence it was given". *d* is ruled out because "Examples teach a format; they do not supply a missing fact".
+2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the rule is "Check that the result is right, then check that the process was reasonable". *a* is ruled out because "an eval that checks for a prescribed sequence of steps fails correct runs". *c* is ruled out because tool efficiency is only one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)". *d* is ruled out because the rule is to "check that the process was reasonable" after the result.
 3. **d**. Early changes are large, so a small set shows them. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because "every week without an eval is a week of judging by feel". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
 
 </details>
