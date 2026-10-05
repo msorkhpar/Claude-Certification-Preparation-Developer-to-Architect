@@ -40,7 +40,7 @@ final class Retry {
         // TODO 4 of 7 (finish this to pass e1, e4 and e6): the request id of a reply.
         // Receives the Response. Returns its request-id header (header names are lower case), or null when there is none.
         // Example: headers {request-id=req_1} -> "req_1"; {} -> null
-        return null;
+        return "";
     }
 
     private static CallFailed failure(Response response, int attempts) {

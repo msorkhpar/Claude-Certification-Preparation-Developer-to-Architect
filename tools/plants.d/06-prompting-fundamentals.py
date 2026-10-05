@@ -3,7 +3,7 @@
 
 PLANTS[f"{X}/06-prompting-fundamentals/unit-01/practice-1"] = {
     "python": ("prompt_builder.py", {
-        "wrong-task-first": [('    parts.append(_block("task", _fill(task, variables)))\n', ""),
+        "wrong-task-first": [('    parts.append(_block("task", _fill(task or "", variables)))\n', ""),
                               ("    parts = []\n", '    parts = [_block("task", _fill(task, variables))]\n')],
         "wrong-empty-sections": [('    if _present(spec.get("role")):', '    if "role" in spec:')],
         "wrong-missing-variable-silent": [('raise ValueError(f"missing variable: {name}")', 'return "{{" + name + "}}"')],

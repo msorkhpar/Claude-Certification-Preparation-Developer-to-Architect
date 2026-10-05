@@ -80,5 +80,5 @@ def build_prompt(spec, variables=None):
         parts.append(_block("constraints", _constraint_lines(constraints, variables)))
     if _present(spec.get("output_format")):
         parts.append(_block("output_format", _fill(spec["output_format"], variables)))
-    parts.append(_block("task", _fill(task, variables)))
+    parts.append(_block("task", _fill(task or "", variables)))
     return _join(parts)
