@@ -94,7 +94,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Branch on the status and type through the SDK's typed classes, most specific first
 
 8. A team streams five-minute reports and sets a read timeout of 30 seconds, worried that long generations will always trip it. What should the review say?
-   - **a**: It will trip, the limit covering the whole generation from its very first byte
+   - **a**: It will trip once the whole generation runs past 30 seconds from the first byte
    - **b**: The clock restarts at every event, so steady output survives and only a stall fails
    - **c**: It will fail unless the timeout is raised to the ten-minute default
    - **d**: The timeout applies only before the first byte, so it never matters afterwards
@@ -152,7 +152,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 17. Two Claude sessions edit two different features in the same checkout, and each keeps overwriting the other's files. Which setup fits best?
    - **a**: Let the sessions take turns, committing to main after each change
    - **b**: Ask each session to avoid files that the other is likely to touch
-   - **c**: Switch both sessions to plan mode, neither writing until approved
+   - **c**: Switch both sessions to plan mode so neither writes until approved
    - **d**: Give every run a separate worktree, each one placed on a branch of its own
 
 18. A reply begins with a confident wrong figure, and the rest of the answer then builds on it without any correction. What explains this?
@@ -221,7 +221,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: Run the last step anyway, but tell it to mention that some work failed
    - **b**: Retry each worker in a loop until at least one of them returns a result
    - **c**: Skip that stage and flag the whole job as failed, with nothing produced for the user
-   - **d**: Return the plan text as the answer, it already describing the work
+   - **d**: Return the plan text as the answer, which already describes the work
 
 29. A service stops reading an agent run's messages the moment the closing summary message arrives, and a few late items never reach its logs. Which change fits best?
    - **a**: Raise max_turns so that the run produces its late items before the closing message
@@ -281,7 +281,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 38. A hard document keeps failing validation, and the extraction loop keeps re-prompting for hours, with the bill growing each time. Which change fits best?
    - **a**: Raise the temperature setting to make a later attempt differ from earlier ones
-   - **b**: Re-prompt with only the original prompt, the error list distracting the model
+   - **b**: Re-prompt with only the original prompt and drop the distracting error list
    - **c**: Cap the attempts, then report the outcome with its last problems for a person
    - **d**: Remove the validation step for that document to accept the first reply
 

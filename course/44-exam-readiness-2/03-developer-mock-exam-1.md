@@ -198,7 +198,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: The smaller model drops earlier reasoning blocks
 
 25. A drafting feature scores 62 percent on the team's fixed test set against a 90 percent target and costs more than planned. Someone proposes switching tiers immediately. What does the module advise?
-   - **a**: Switch tiers now, a lower price making later quality work affordable
+   - **a**: Switch tiers now and spend the saving on quality work later
    - **b**: Judge the lower tier on the ten easiest items, then roll it out
    - **c**: Rewrite several parts of the prompt together to gain accuracy quickly
    - **d**: Hit the quality bar before looking for any saving that holds it
@@ -206,7 +206,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 26. A team migrates a reasoning-heavy workload to a newer model and copies its old effort values unchanged. Quality drifts. Which step does the guidance give?
    - **a**: Reapply the old thinking budgets, which carry over between generations
    - **b**: Run a sweep across levels on its own test set
-   - **c**: Raise every level by one notch, newer models thinking less per level
+   - **c**: Raise every level by one notch to offset the newer model
    - **d**: Pin the old model id until the next generation arrives
 
 27. A pipeline starts two model calls at once: one drafts a reply and one checks the reply's tone, but the checker keeps failing because the draft does not exist yet. How should the team restructure it?
@@ -259,10 +259,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Pick the family by the brand that has published the most releases
 
 35. An application pastes a user's forwarded email between fixed tags in its prompt. A tester shows that an email containing the closing tag followed by new orders is treated as part of the instructions. Which measure from the page on pasted content fits best?
-   - **a**: Move the email above the instructions, its position marking it as data
+   - **a**: Move the email above the instructions, where its position marks it as data
    - **b**: Place the email in the system prompt, where it carries the most weight with the model
    - **c**: Fence it with a random identifier and warn the model it could hold directives
-   - **d**: Rely on tags alone, the model treating text inside tags as inert data
+   - **d**: Rely on tags alone, so the model treats text inside them as inert data
 
 36. A JSON schema for a classifier includes a property named "thinking_steps" that demands the model's reasoning, and some requests now come back refused. Which change fits?
    - **a**: Raise max_tokens to keep the long reasoning from being cut off
@@ -297,7 +297,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 41. A service forces a named tool on Claude Haiku 4.5 and every reply is a bare tool call with no sentence before it, but product wants a brief explanation first. What fits?
    - **a**: Switch to the any setting, which adds an explanation before the call
-   - **b**: Disable parallel use, one action per reply letting text appear first
+   - **b**: Disable parallel use, so each reply holds one action and text comes first
    - **c**: Set the choice to none, with commentary written before anything else
    - **d**: Use the automatic setting and say in a user message to run that function
 
@@ -359,7 +359,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 51. A CI job runs the headless mode with the flag that skips local configuration and now reports no credentials, although the developer is signed in with a subscription on the same machine. What is needed?
    - **a**: Mount the developer's keychain into the runner so it can be read
-   - **b**: Drop the flag, the other mode seeing the same local setup on every machine
+   - **b**: Drop the flag, so the other mode reads the same local setup on every machine
    - **c**: Run it interactively in a terminal, where the login prompt can appear
    - **d**: Provide an API key through an environment variable at launch
 
