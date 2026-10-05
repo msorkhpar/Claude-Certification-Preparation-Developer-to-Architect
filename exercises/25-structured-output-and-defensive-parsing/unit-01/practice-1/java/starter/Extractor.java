@@ -197,7 +197,7 @@ final class Extractor {
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             Map<String, Object> reply = ask.apply(List.copyOf(messages));
             String early = earlyStatus(reply);
-            if (early != null) return result(early, null, attempt, new ArrayList<>());
+            if (early != null) return result(early, Map.of(), attempt, new ArrayList<>());
             String text = textOf(reply);
             Object value = null;
             try {
