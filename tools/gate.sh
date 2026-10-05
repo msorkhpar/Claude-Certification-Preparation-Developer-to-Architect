@@ -84,6 +84,7 @@ if [ "$MODE" = full ]; then
   step revision python3 tools/check_revision.py
   step coverage python3 tools/check_coverage.py
   [ -f tools/check_logger.py ] && step logger python3 tools/check_logger.py --modules "$MODULES"
+  [ -f tools/make_tryit.py ] && step tryit python3 tools/make_tryit.py check --modules "$MODULES"
   step personal-data python3 tools/check_personal_data.py --modules "$MODULES" --examples "$EXAMPLES"
 else
   step personal-data python3 tools/check_personal_data.py --modules "$MODULES" --examples "$EXAMPLES"

@@ -8,6 +8,10 @@ let current = "";
 // `node file.ts` run would print an empty test summary, which would change what a program prints.
 if (process.env.NODE_TEST_CONTEXT) { const { beforeEach } = await import("node:test"); beforeEach((t) => { current = t.name; }); }
 
+// A plain `node try-it.ts` run (the practice's Run button) writes nothing until the file calls logTo("try-it"); the lines then
+// appear as `[log:try-it] LEVEL name: message`, the same form the test report uses.
+export function logTo(label: string) { current = label; }
+
 export function logger(name: string) {
   const write = (level: string) => (...parts: unknown[]) => {
     if (current === "") return;   // outside a test (node file.ts) nothing is written, so a program's printed output is unchanged
