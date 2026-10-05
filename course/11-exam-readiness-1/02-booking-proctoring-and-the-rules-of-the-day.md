@@ -9,7 +9,7 @@ right order, plan around retakes, and keep a credential current through renewal.
 Checked against the Associate, Developer, Architect Foundations and Architect Professional exam guides (version 1.0,
 effective July 2026; the registration, policy and renewal sections are the same in all four), the Anthropic Certification
 Terms and Conditions, the Anthropic Certification Exam Policy (last updated 25 June 2026), the Pearson VUE pages for
-Anthropic exams and for online proctoring, and the Anthropic announcement of the programme, all read on 2026-10-02.
+Anthropic exams and for online proctoring, and the Anthropic announcement of the programme, all read on 2026-10-02, and the facts on this page re-checked against the official pages on 2026-10-05.
 **Fees, rules and deadlines change; read the current guide, the Terms, the Exam Policy and your booking confirmation
 before you rely on anything here.**
 
@@ -23,18 +23,18 @@ written down. Reading them once costs less than one forfeited fee.
 
 ### The booking path
 
-1. **Check eligibility and pick the exam** (page 1). Exam access is through the Claude Partner Network and the Anthropic
-   Partner Academy.
+1. **Check eligibility and pick the exam** (page 1): at least 18, a valid government ID, and employment at a Claude
+   Partner Network organisation with a recognised company e-mail domain. Some countries and regions have restrictions,
+   so check the exam policy.
 2. **Read the three documents before you pay**: the exam guide, the Certification Terms and Conditions and the
    Certification Exam Policy. The guide tells you to read them before registering.
 3. **Register and pay.** The fee shown at checkout reflects any discount for your partner tier. Fees on 2026-10-02:
    Associate 99, Developer and Architect Foundations 125, Architect Professional 175 (USD).
 4. **Create your Pearson VUE account** from the confirmation instructions and sign in to schedule.
 5. **Choose a date and a delivery mode:** online proctoring or a Pearson test centre.
-6. **Cancel or reschedule on time.** The exam guides say you may cancel or reschedule up to 24 hours before the
-   appointment, and that changes within 24 hours forfeit the fee. Pearson's page for Anthropic exams gives 48 hours for
-   test-centre appointments. The two figures differ, so the safe habit is to **use the longer notice and read your
-   confirmation email**, which governs your booking.
+6. **Cancel or reschedule on time.** Cancel or reschedule at least **48 hours** before the appointment, for online and
+   test-centre bookings alike. Inside 48 hours the fee is forfeited. Read your confirmation email, which governs your
+   booking.
 7. **Do not no-show, and do not arrive late.** A candidate who does not appear, or who arrives after the permitted
    late-arrival window, forfeits the fee and must register again.
 
@@ -113,7 +113,7 @@ mock exams and review bank in this module are for that.
 
 1. **Scheduling first, asking for an accommodation later.** The approval must come before the booking, and it cannot be
    arranged on the day.
-2. **Trusting one notice period.** The guide and the test-centre page give different cancellation notices; use the longer and
-   check your confirmation.
+2. **Changing a booking late.** Cancel or reschedule at least 48 hours ahead, whichever mode you chose; inside 48 hours
+   the fee is forfeited.
 3. **Treating an expired credential as renewable.** Renewal is before expiry and by the free assessment; after a lapse the
    full exam is needed.

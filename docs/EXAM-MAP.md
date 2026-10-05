@@ -22,16 +22,17 @@ with 720 to pass, reported as pass or fail with a percent-correct figure per dom
 months from the date awarded; renewal on time by a free non-proctored assessment, a lapsed
 credential needs the full exam again; retakes after 14, 30 and 90 days following the first,
 second and third failed attempt, at most four attempts in a rolling 12 months, each attempt at the
-full fee. Cancellation or rescheduling is allowed up to 24 hours before the appointment, and a change inside 24
-hours forfeits the fee (confirmed in the guides; Pearson's page for Anthropic exams gives 48 hours, so use
-the longer notice). The guides tell candidates to review the Certification Terms and the Exam Policy before
+full fee. Cancellation or rescheduling needs at least 48 hours' notice, and a change inside 48
+hours forfeits the fee (confirmed on the official pages on 2026-10-05, online and test-centre alike). The guides tell candidates to review the Certification Terms and the Exam Policy before
 registering; the Policy and Terms (updated 2026-06-25) say a certification is valid for its stated term, must be
 renewed before it ends, and cannot be renewed once expired (confirmed). Partner tiers get fee discounts at
-checkout (confirmed in the guides). **Reported, not found on any official guide, Terms or Policy read on
-2026-10-02:** that candidates must work at an organisation in Anthropic's Claude Partner Network, must register
-with a partner e-mail address, must be at least 18, and that the sitting takes about 135 minutes in all with
-check-in and survey. The course pages say only what the guides state and tell the reader to check the
-registration page. The Associate, Developer and Professional guides state that no course is mandatory and the
+checkout (confirmed in the guides). **Eligibility (confirmed 2026-10-05):** at least 18, a valid government ID, employment at an
+organisation in Anthropic's Claude Partner Network with a recognised company e-mail domain; some countries and
+regions have restrictions, which the course pages state only generally. The sitting takes about 135 minutes in all
+(120 of exam time plus about 15 for check-in and survey). **Not confirmed on an official page on 2026-10-05:** the
+item counts 60 (Associate, Architect Foundations) and 63 (Professional), the Architect Foundations
+four-scenarios-from-six structure, and the Associate domain weights below; the course pages word these as what the
+published guides list. The Developer count of 53 and its domain weights are confirmed. The Associate, Developer and Professional guides state that no course is mandatory and the
 experience they describe is recommended (about six months with Claude for the Developer and
 Professional exams, three or more years in architecture for the Professional); the Architect
 Foundations guide describes a typical candidate with six months or more of hands-on experience. **Exam-day rules (confirmed):** valid
@@ -41,9 +42,9 @@ exam content is confidential. Fees, eligibility and policy change, so module 11 
 
 ## Associate, Foundations (confirmed domains)
 
-The Associate guide's seven domains, with the course's own codes. All domains and weights are
-confirmed from the official Claude Certified Associate – Foundations Exam Guide (v1.0, effective
-July 2026).
+The Associate guide's seven domains, with the course's own codes. The domains and weights are the
+published Claude Certified Associate – Foundations Exam Guide's figures (v1.0, effective July 2026); the weights were
+not confirmed on an official page on 2026-10-05.
 
 | Domain | Weight | Topics (own words) | Modules |
 |---|---|---|---|

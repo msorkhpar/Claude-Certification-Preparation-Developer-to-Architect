@@ -9,7 +9,7 @@ how every exam is built: item types, time, scoring, validity and who may sit it.
 Checked against the four official exam guides (Associate CCAO-F, Developer CCDV-F, Architect Foundations CCAR-F and
 Architect Professional CCAR-P, each version 1.0 effective July 2026), the Certification Terms and Conditions and the
 Certification Exam Policy (updated 25 June 2026), the Pearson VUE page for Anthropic exams, and the Anthropic
-announcement of the certification programme, all read on 2026-10-02. Fees, eligibility and policies change; **the
+announcement of the certification programme, all read on 2026-10-02, and the exam facts on this page re-checked against the official pages on 2026-10-05. Fees, eligibility and policies change; **the
 official pages decide, and you should read them before you register.** This course is not official and does not
 promise a pass.
 
@@ -24,7 +24,7 @@ for everything else in the course.
 
 ### The four exams
 
-| Exam | Code | For | Items | Fee (USD) | Course levels |
+| Exam | Code | For | Items (as published) | Fee (USD) | Course levels |
 |---|---|---|---|---|---|
 | Claude Certified Associate, Foundations | CCAO-F | Professionals who use Claude as a productivity tool: operations, marketing, project management, education, communications | 60 | 99 | Level 1 |
 | Claude Certified Developer, Foundations | CCDV-F | Engineers who build with the API, Claude Code and MCP | 53 | 125 | Levels 1 and 2 |
@@ -35,6 +35,10 @@ The exams are **separate**: the Associate guide says limits apply per exam, so n
 registering for another. No guide makes a course or an earlier certificate a prerequisite. The Associate guide says plainly
 that no software-development or API experience is needed, and that the experience it describes is recommended, not
 required.
+
+The Developer count of 53 is confirmed on the official pages. **The counts of 60 (Associate and Architect
+Foundations) and 63 (Professional) are what the published guides list; they were not confirmed on an official page on
+2026-10-05, so check the current guide before you plan your pacing.**
 
 ### Choosing the exam
 
@@ -57,11 +61,11 @@ the base of all the others.
 
 These facts are common to the guides:
 
-- **Format.** Multiple-choice and multiple-response items. **Each item states how many responses to select**, so you
+- **Format.** Multiple-choice and scenario-based multiple-response items. **Each item states how many responses to select**, so you
   never have to guess. The guides do not say whether a partly right multiple-response answer earns partial credit, so
   treat every response you give as one that must be right.
-- **Time.** 120 minutes of exam time. With 60 items that is two minutes an item; with 53 items about two and a quarter
-  minutes; with 63 about 1.9.
+- **Time.** 120 minutes of exam time, plus about 15 minutes for check-in and a survey. With 53 items that is about two and a
+  quarter minutes an item; if the guides' 60 items hold, two minutes; with 63, about 1.9.
 - **Delivery.** Proctored, by Pearson VUE: online, or at a Pearson test centre (page 2).
 - **Scoring.** A scaled score from 100 to 1,000, with **720 to pass**. The exam is criterion-referenced: you are
   measured against a fixed standard set by a study of what a minimally qualified candidate can do, not against other
@@ -74,14 +78,15 @@ These facts are common to the guides:
 - **Content is confidential.** Exam questions, options and scenarios are Anthropic's confidential property, and you
   accept a non-disclosure agreement before the exam begins. This is why a course writes its own questions.
 
-**The Architect Foundations exam is built from scenarios.** Its guide says four scenarios are drawn at random from a bank of
-six, and each scenario frames a set of questions: a customer support resolution agent, code generation with Claude
-Code, a multi-agent research system, developer productivity, Claude Code in continuous integration, and structured
-data extraction. The other guides use scenario-style items too, but only this one states the four-from-six structure.
+**The Architect Foundations exam is built from scenarios.** The published guide lists six scenarios (a customer support
+resolution agent, code generation with Claude Code, a multi-agent research system, developer productivity, Claude Code
+in continuous integration, and structured data extraction) and describes a sitting that draws four of them; the
+four-from-six structure was not confirmed on an official page on 2026-10-05, so check the current guide before
+relying on it. The other guides use scenario-style items too.
 
 ### The Associate blueprint
 
-Level 1 is aimed at the Associate exam, so here are its seven domains and weights, with the course modules that serve each:
+Level 1 is aimed at the Associate exam, so here are its seven domains and weights, with the course modules that serve each. The weights are the published guide's figures; they were not confirmed on an official page on 2026-10-05, so check the current guide and treat them as a study guide only:
 
 | Domain | Weight | In short | Modules |
 |---|---|---|---|
@@ -98,14 +103,15 @@ which is why modules 1, 4 and 5 teach it three ways.
 
 ### Who may sit an exam
 
-The Anthropic announcement says the certifications are open to members of the Claude Partner Network, which is free
-to join for organisations bringing Claude to market, and that preparation courses are available through the Anthropic
-Partner Academy. Registration for each exam goes through that academy and Pearson VUE. Other conditions can apply to
-individuals (for example about the e-mail address you register with or a minimum age), and they were not found in
-the documents read on 2026-10-02, so **read the eligibility terms on the registration page before you pay**. The Terms
-also say that if you take part through a partner, Anthropic may tell the partner whether you passed or failed and whether
-your certification is active, expired, suspended or revoked, which matters if you prefer your employer not to know
-about a failed attempt.
+Four conditions apply to every candidate. You must be **at least 18**, hold a **valid government-issued ID**, and be
+**employed by an organisation in the Claude Partner Network** (free to join for organisations bringing Claude to
+market), and you register with a recognised company e-mail domain. Some countries and regions have restrictions, for
+example a requirement to sit at a test centre or no access at all; **check the exam policy for your place of residence
+before you book.** Preparation courses are available through the Anthropic Partner Academy, and registration for each
+exam goes through that academy and Pearson VUE. The Terms also say that if you take part through a partner, Anthropic
+may tell the partner whether you passed or failed and whether your certification is active, expired, suspended or
+revoked, which matters if you prefer your employer not to know about a failed attempt. Eligibility rules change, so
+**read the current terms on the registration page before you pay**.
 
 ## Traps
 

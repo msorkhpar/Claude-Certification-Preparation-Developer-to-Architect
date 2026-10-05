@@ -26,7 +26,7 @@ scale from 100 to 1,000**, so treat the mock as a guide to where you stand in ea
 
 ## What it covers
 
-The mock has **60 questions**, the number of items on the real exam. They are spread by the Associate blueprint's weights (each domain's weight times 60, rounded so that the total stays 60) and grouped by domain here for easy scoring; the real exam mixes them. The share column is the count divided by 60, set beside the official weight so that you can see the split matches. The modules column shows which pages to revisit for a miss.
+The mock has **60 questions**, the number of items the published guide lists (check the current guide before booking). They are spread by the Associate blueprint's weights (each domain's weight times 60, rounded so that the total stays 60) and grouped by domain here for easy scoring; the real exam mixes them. The share column is the count divided by 60, set beside the official weight so that you can see the split matches. The modules column shows which pages to revisit for a miss.
 
 | Questions | Associate domain | Weight | Count | Share of this mock | Drawn from modules |
 |---|---|---|---|---|---|
