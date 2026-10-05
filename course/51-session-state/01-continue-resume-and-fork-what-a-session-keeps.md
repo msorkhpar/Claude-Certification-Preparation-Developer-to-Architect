@@ -294,15 +294,15 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: A new run whose first prompt only names the Monday thread
 
 2. A multi-user app keeps one conversation per customer. After a restart it must return each customer to the right earlier conversation, not just the latest one. What does the code store for each customer?
-   - **a**: `continue` enabled for the customer's directory
-   - **b**: A display name passed to `resume` in the SDK
+   - **a**: A `continue` flag, with one working directory for each customer
+   - **b**: A display name for each customer, passed to `resume` in the SDK
    - **c**: The session id from the last result message
-   - **d**: A fork of the first session per customer
+   - **d**: A fork of the first session, created for each customer
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Fork is an option set together with a resume id, so it branches a copy and leaves the original usable. *b* is ruled out because "**Continue** finds the most recent session in the current directory", so it adds to that session and branches nothing. *c* is ruled out because "Continue and resume both pick up an existing session and add to it", which puts both approaches into one history. *d* is ruled out because a name carries none of the analysis, and the guide says to "Capture the results you need (analysis output, decisions, file diffs) as application state and pass them into a fresh session's prompt."
-2. **c**. Resume needs a specific id, and the result carries it on every result. *b* is ruled out because "Resume takes a specific session ID", not a display name; the guide's `--resume <session-name>` is a command-line form, and the SDK guide passes an id. *a* is ruled out because continue "Works well when your app runs one conversation at a time", and this app runs one per customer. *d* is ruled out because "Fork is different: it creates a new session that starts with a copy of the original's history", which is a second conversation and not a return to the first.
+2. **c**. Resume needs a specific id, and the result carries it on every result. *b* is ruled out because "Resume takes a specific session ID", not a display name; the guide's `--resume <session-name>` is a command-line form, and the SDK guide passes an id. *a* is ruled out because "**Continue** finds the most recent session in the current directory", so a customer would get the latest conversation only and never an earlier one. *d* is ruled out because "Fork is different: it creates a new session that starts with a copy of the original's history", which is a second conversation and not a return to the first.
 
 </details>
