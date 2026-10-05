@@ -19,7 +19,7 @@ A research system has four subagents: one searches the web, one reads documents,
 
 A tool list is part of the prompt, and the model chooses from it every turn by reading the names and descriptions. Two things go wrong as it grows. The choice becomes harder, because there are more neighbours to confuse: the documentation puts the point where accuracy declines at "more than 30-50 tools loaded at once", and the guide's example of 18 against 4 or 5 makes the same point from the other side. And the list costs context on every turn, since the definitions are sent each time. A smaller list is both cheaper and easier to choose from.
 
-The tool list is the first place to cut, because it is the only one that works before the model has decided anything. A prompt line that says "do not search the web" is a request; a tool that the agent holds is a tool that it can use. The sentence to remember is the one the exam builds on: an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use.
+The tool list is the first place to cut, because it is the only one that works before the model has decided anything. The sentence to remember is the one the exam builds on: an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use.
 
 ### Give each role the tools of its role
 
