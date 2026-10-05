@@ -78,14 +78,14 @@ When Claude does not use a skill, work down the list the documentation gives: ch
 
 ## Quiz
 
-1. A description reads only "Release helper", and Claude never loads that package when users ask for a changelog. What is the first fix?
+1. A description reads only "Release helper", and Claude never loads that skill when users ask for a changelog. What is the first fix?
    - **a**: Raise the tool grant so that the skill may run any shell command
    - **b**: Move the folder into the enterprise location so it takes priority
    - **c**: Add the value true on the model-invocation field in the frontmatter
    - **d**: State what it does and when to use it, in everyday words
 
 2. A team requires that no agent ever pushes to the main branch. Which extension fits best?
-   - **a**: A hook or a deny rule, because it always runs and cannot be skipped
+   - **a**: A hook that blocks the command, because it always runs and cannot be skipped
    - **b**: A line in the project memory file that forbids pushing to that branch
    - **c**: A skill whose instructions tell Claude never to push to the main branch
    - **d**: A subagent that reviews each command before Claude is allowed to run it
@@ -100,7 +100,7 @@ When Claude does not use a skill, work down the list the documentation gives: ch
 <summary>Answer key</summary>
 
 1. **d**. The page says the description is "What the skill does and when to use it. Claude uses this to decide when to apply the skill." *b* is ruled out because location decides which skill wins when "two skills share a name", and has no bearing on whether Claude matches a request. *c* is ruled out because the table says `true` "stops Claude from starting it by itself", which is the opposite of what the team wants. *a* is ruled out because a tool grant is for "Tools Claude may use without asking while the skill runs", and a skill that is never loaded never runs.
-2. **a**. The page says "A rule that must never be broken belongs in a hook or a deny rule", and a hook is "a program that always runs". *c* is ruled out because "a skill is instructions Claude may follow". *b* is ruled out because a memory file is guidance of the same kind, and the page says "Persistent context loaded every conversation" is for conventions and "always do X" rules. *d* is ruled out because a subagent is "An isolated context that returns summarised results" for side tasks, and not a gate that every command must pass.
+2. **a**. The page says "A rule that must never be broken belongs in a hook or a deny rule", and a hook, unlike guidance, is "a program that always runs". *c* is ruled out because "a skill is instructions Claude may follow". *b* is ruled out because a memory file is guidance of the same kind, and the page says "Persistent context loaded every conversation" is for conventions and "always do X" rules. *d* is ruled out because a subagent is "An isolated context that returns summarised results" for side tasks, and not a gate that every command must pass.
 3. **c**. The page says a task skill with side effects should set `disable-model-invocation: true`, and that `allowed-tools: Bash(git tag *) Bash(gh release create *)` "approves two command families". *a* is ruled out because the page says bare `Bash` "approves every shell command for that turn". *b* is ruled out because "a person should start it" when a skill has side effects. *d* is ruled out because it keeps the person in control but the page says bare `Bash` "turns a narrow skill into an open one".
 
 </details>

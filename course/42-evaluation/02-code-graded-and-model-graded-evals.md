@@ -120,7 +120,7 @@ An eval grades a set of cases once. The same checks can run on every live reply:
    - **d**: As a failure with the reason that the reply was ungradable
 
 3. A check expects the field `count` to equal the number 3, and the application's output holds the string "3". The grader compares both sides as text and passes it. What is wrong?
-   - **a**: Nothing is wrong, because the digits are the same in both forms of it
+   - **a**: Nothing is wrong, because the digits are the same in both forms of the value
    - **b**: The type differs, and a program reading the value would reject it
    - **c**: The check should have used a model grader to judge the number
    - **d**: The expected value should have been written as a string instead

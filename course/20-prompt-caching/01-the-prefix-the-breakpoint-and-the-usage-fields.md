@@ -88,7 +88,7 @@ returned." You find out only by the two zeros in the usage fields. If the prompt
 Put it on the last block that is identical across the requests you want to share a cache. The page names the common mistake: a
 large static system prompt followed by one block that carries a timestamp and the user's message. With the breakpoint on that last
 block, the hash includes the timestamp, so request 2 never matches request 1: "You pay for a fresh cache write on every request
-and never get a read." The fix is to move the breakpoint to the last stable block. The lookback does not rescue you, because it
+and never get a read." The fix is to move the breakpoint to the last stable block. The lookback, the backward search described on the next page, does not rescue you, because it
 "only finds entries that earlier requests wrote at their own breakpoints".
 
 ### The example
@@ -659,6 +659,6 @@ two usage patterns are the whole diagnosis: writes without reads mean the prefix
 
 1. **d**. The page gives "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens", so 8,000 + 0 + 40. *b* is ruled out because the page sum adds a third term, and "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens" includes the 40. *c* is ruled out because that field holds only "tokens after the last breakpoint, which are not cached". *a* is ruled out because the sum "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens" has no subtraction.
 2. **a**. The page says "Any requests to cache fewer than this number of tokens will be processed without caching" and gives 4,096 for Claude Haiku 4.5. *b* is ruled out because 1,500 is below the minimum, and "the prompt was not cached" is what two zeros mean. *c* is ruled out because the page's hierarchy runs "up to and including the block designated with" the marker, and a system block can be that block. *d* is ruled out because "Row 1 writes the 600 tokens" on a first request, so there is no earlier entry to lapse.
-3. **c**. The page says "The cache key is a hash of everything from the start of the request up to the marked block", so a changing block before it gives a new key. *b* is ruled out because that same sentence says the key is "a hash of everything from the start of the request", not of one block. *a* is ruled out because "Cache breakpoints themselves don't add any cost." and only a block carrying `cache_control` is a breakpoint. *d* is ruled out because "Row 2, a minute later, reads them and pays for only the new question".
+3. **c**. The page says "The cache key is a hash of everything from the start of the request up to the marked block", so a changing block before it gives a new key. *b* is ruled out because that same sentence says the key is "a hash of everything from the start of the request", not of one block. *a* is ruled out because "Explicit breakpoints put `cache_control` on individual blocks", and the clock block carries none, so it is no second marker. *d* is ruled out because "Row 2, a minute later, reads them and pays for only the new question".
 
 </details>

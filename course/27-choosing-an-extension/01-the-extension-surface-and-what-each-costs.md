@@ -86,7 +86,7 @@ The documentation advises "You don't need to configure everything up front." Eac
 | You want something to happen every time without asking | a hook |
 | A second repository needs the same setup | a plugin |
 
-The last paragraph of that section is a design rule: "A repeated mistake or a recurring review comment is a CLAUDE.md edit, not a
+The paragraph after that table is a design rule: "A repeated mistake or a recurring review comment is a CLAUDE.md edit, not a
 one-off correction in chat."
 
 ### Where features are defined

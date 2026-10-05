@@ -10,7 +10,7 @@
         "a": "The `bypassPermissions` mode, which shows each step before running it",
         "b": "The `acceptEdits` mode, which proposes and then writes each edit",
         "c": "The `dontAsk` mode, which reads the files and asks for approval",
-        "d": "The mode named plan, chosen with the permission-mode flag"
+        "d": "The `plan` mode, which reads the project and drafts steps first"
       },
       "key": "d",
       "explanation": {
@@ -73,7 +73,7 @@
       "explanation": {
         "b": "The page says \"Claude treats them as context, not enforced configuration\", and \"To block an action regardless of what Claude decides, use a PreToolUse hook instead\", and a deny rule is checked before anything runs.",
         "a": "Ruled out because memory files are \"context, not enforced configuration\".",
-        "c": "Ruled out because a read of a memory file only asks, while deny rules are \"evaluated in order: deny, then ask, then allow\".",
+        "c": "Ruled out because a memory file is loaded at the start but only asks, while deny rules are \"evaluated in order: deny, then ask, then allow\".",
         "d": "Ruled out because \"A key set at a higher level overrides the same key set lower down\" is about the same key, and since \"they combine across layers\", a project deny still applies."
       }
     },
@@ -219,7 +219,7 @@
         "a": "`bypassPermissions`, with the runner as the only boundary",
         "b": "`auto`, with the classifier left to judge every single call",
         "c": "`acceptEdits`, with edits approved for the whole checkout",
-        "d": "`dontAsk` with `Read` and read-only git patterns listed"
+        "d": "`dontAsk`, with `Read` and read-only git patterns listed"
       },
       "key": "d",
       "explanation": {

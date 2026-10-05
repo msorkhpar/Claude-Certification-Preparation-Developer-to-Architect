@@ -47,7 +47,7 @@ the type:
 | `tool_choice` type | With `disable_parallel_tool_use: true` |
 |---|---|
 | `auto` | "Claude calls at most one tool per response", and may still answer in text |
-| `any` or `tool` | "Claude calls exactly one tool", and the three newest model families reject these types |
+| `any` or `tool` | "Claude calls exactly one tool", and the models named on page 1 reject these types |
 
 Prose in a prompt cannot switch parallel calls off; the field is part of the request body. The loop example on the previous page sends `{"type": "auto", "disable_parallel_tool_use": false}` on its first request. Use `true` when
 a tool has side effects that must not overlap, or when a program cannot handle two calls.

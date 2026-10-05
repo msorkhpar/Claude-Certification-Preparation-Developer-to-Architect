@@ -421,7 +421,7 @@ after the last attempt, spending time to learn nothing.
 
 1. **Retrying with no jitter.** Synchronised clients retry in waves and keep an overloaded service down.
 2. **Letting the default retries stand in for a policy.** The SDK retries a spend-cap 429 twice and a user-facing call
-   can wait for ten seconds of retries nobody budgeted.
+   can wait through retries nobody budgeted.
 3. **Retrying a side effect.** A retried tool call that charges a card is a double charge. Retry the call, give the
    action its own idempotency key.
 
@@ -439,7 +439,7 @@ after the last attempt, spending time to learn nothing.
    - **a**: Wait longer between the attempts so that the first one can finish
    - **b**: Lower the retry count of the call to zero for all tools
    - **c**: Ask the model in the prompt not to call the tool a second time
-   - **d**: Give each filing its own key and check it before the action runs
+   - **d**: Give each action its own key and check it before it runs
 
 <details>
 <summary>Answer key</summary>

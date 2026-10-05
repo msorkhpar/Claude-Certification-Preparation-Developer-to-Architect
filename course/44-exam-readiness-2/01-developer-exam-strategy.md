@@ -95,7 +95,7 @@ Source: Claude Certified Developer, Foundations Exam Guide, version 1.0 (Anthrop
 
 The guide's answer for each is B. The reasoning, in the course's words and with the page that teaches it:
 
-- **Sample 1** pairs a cost constraint with no deadline inside the day. That cue points to a batch (module 21, page 1). Option A raises the price and speed together, which the scenario did not ask for. Options C and D trade quality for a saving that a batch gives without the trade.
+- **Sample 1** pairs a cost constraint with no deadline inside the day. That cue points to a batch (module 21, page 1). Option A buys speed with money, and the scenario wants the opposite. Options C and D trade quality for a saving that a batch gives without the trade.
 - **Sample 2** is indirect injection. The page text is third-party data that the user never typed, so the defence is structural: keep it apart from instructions and limit what an injected instruction can do (module 41, pages 1 and 2). Temperature and a polite request are not controls, and a larger model is not a defence.
 - **Sample 3** asks for a capability that several applications share and one team maintains. That is the case for an MCP server (module 32, page 1; module 27, page 2 for the comparison with other extensions). Prompts and pasted data are neither reusable nor live, and a built-in tool does not reach an arbitrary internal API.
 

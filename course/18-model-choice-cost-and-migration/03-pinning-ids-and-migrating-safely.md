@@ -96,7 +96,7 @@ carrying settings over from an earlier model".
    - **c**: Add retries, since a 400 on a fresh deployment is often transient
    - **d**: Keep the old id and pin the new one on a second key
 
-2. A deprecated one is still called by a nightly job that nobody remembers. How does the page say to find it?
+2. A deprecated id is still called by a nightly job that nobody remembers. How does the page say to find it?
    - **a**: Export the Console usage as a CSV and read it by key and model
    - **b**: Wait for the retirement email, which names each calling application
    - **c**: Ask the model for its own version in a test prompt
@@ -125,7 +125,7 @@ This quiz covers the three pages of the module.
 1. A support product sends one payload to several targets, and the same payload suddenly fails on the newest with a 400 about
    `temperature`. Which design stops the failure at its root?
    - **a**: Catch the 400 and resend the body with the field removed after each failure
-   - **b**: Build the request per model, and leave sampling parameters out for models that reject them
+   - **b**: Build each request per model, omitting what that model rejects
    - **c**: Fix the parameter at its default value for every model in the catalog
    - **d**: Pin the older target for good, so that the payload keeps working there
 
@@ -133,7 +133,7 @@ This quiz covers the three pages of the module.
    does the module support?
    - **a**: Tokens counted before sending, summed at the end of each month
    - **b**: Price per million tokens from the list, taken from the pricing page
-   - **c**: Cost per request priced from usage, with cache and batch multipliers applied
+   - **c**: Cost per request, priced from usage with the multipliers applied
    - **d**: Output tokens only, since they carry the highest unit price
 
 3. A router moves a long conversation to a different target halfway through, and answer quality drops. Which

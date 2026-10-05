@@ -24,7 +24,7 @@ scenario, and the current models change some answers: prefilling, for one, now f
 ### Few-shot examples
 
 The documentation's case for examples is short: "A few well-crafted examples (known as few-shot or multishot prompting) improve accuracy
-and consistency." It asks for three properties and a wrapper.
+and consistency." It asks for relevant and diverse examples, a wrapper and a count.
 
 - "Relevant: Mirror your actual use case closely."
 - "Diverse: Cover edge cases and vary enough that Claude doesn't pick up unintended patterns."
@@ -553,7 +553,7 @@ step 2 output: Yes: at 450 dollars it is above the 400 dollar limit, so it needs
 <!-- /example -->
 
 Read the output. Step 1's prompt is 692 characters and step 2's is 261, because the second step never resends the documents. Both requests end
-on a user turn, so neither can trip the prefill error. The fourth line from the bottom shows the template rule: a missing variable stops the
+on a user turn, so neither can trip the prefill error. The third line from the bottom shows the template rule: a missing variable stops the
 program before any request is made.
 
 The Java and Kotlin tabs run the same chain against the same scripted replies and print the same lines. The logic needs only string

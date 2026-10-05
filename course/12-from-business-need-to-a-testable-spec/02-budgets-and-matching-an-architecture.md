@@ -111,7 +111,7 @@ Start from the simplest design and move up only when a requirement forces it.
 | The path depends on what is found and cannot be listed in advance | **An agent loop** | A fixed chain cannot branch on discoveries |
 | Large volume, nobody waiting, cost matters | **A batch** | An interactive call pays for latency you do not need |
 
-Each row is taught later (tools in module 22, retrieval in module 24, agents from module 34). The skill tested here
+Each row is taught later (tools in module 26, retrieval in module 28, agents from module 34). The skill tested here
 is the reading of the requirement: the words "live", "your own documents", "nobody is waiting" and "cannot be listed
 in advance" each point at one row.
 

@@ -80,7 +80,7 @@ Most of the failures above are knowable before the call, which is what the pract
 <summary>Answer key</summary>
 
 1. **b**. The page says that dense PDFs with small-font pages or heavy graphics "can fill the context window before reaching the page limit". *a* is ruled out because "Standard API pricing applies with no additional PDF fees." *c* is ruled out because the limit is "600, and 100 when the request's context window is under 1M tokens", and no header is involved. *d* is ruled out because the 1,000-token figure belongs to a mode that "uses roughly 1,000 tokens for a 3-page PDF" on Bedrock Converse and is not a cap on documents.
-2. **d**. The page says that "a multi-tenant application creates a workspace for each tenant" because files are visible to the whole workspace. *a* is ruled out because uploaded files are "accessible to the whole workspace, not scoped to an end user, a conversation or a session", whatever the id looks like. *c* is ruled out because "a file cannot be edited or renamed after upload" and a workspace boundary is not created by re-uploading. *b* is ruled out because an expiry is something you set "at upload and not changed afterwards", and it does not separate tenants.
+2. **d**. The page says that "a multi-tenant application creates a workspace for each tenant" because files are visible to the whole workspace. *a* is ruled out because "A `file_id` is a capability: whoever can name it in a request in that workspace can read the file", whatever the stored id looks like. *c* is ruled out because a file uploaded anew is still "accessible to the whole workspace, not scoped to an end user, a conversation or a session", so re-uploading creates no boundary. *b* is ruled out because an expiry is something you set "at upload and not changed afterwards", and it does not separate tenants.
 3. **b**. The page says to upload `.txt`, `.csv` or `.md` "to the Files API with the MIME type `text/plain`", and that binary formats such as `.xlsx` and `.docx` "are not supported in document blocks". *a* is ruled out because "Binary formats such as `.xlsx` and `.docx` are not supported in document blocks". *c* is ruled out because "A plain text file can go into a document block too", so a PDF is not the only type. *d* is ruled out because the page tells you to "convert them to text or PDF first" and offers no route that pastes raw bytes into a text block.
 
 </details>
@@ -96,7 +96,7 @@ This quiz covers both pages of the module.
    - **d**: The tier can charge for padding rows as separate tokens at a higher price
 
 2. An agent returns a bounding box for a table on a scanned page, and the box sits slightly off when drawn on the original. The team divided the coordinates by the extent of the padded picture. What is the correct divisor?
-   - **a**: The dimensions of the image that the model actually received
+   - **a**: The dimensions of the resized image, which is the one Claude saw
    - **b**: The next multiple of 28 above the resized width and height
    - **c**: The width and height of the original scan, taken before any resizing
    - **d**: The token limit of the tier, which is the same on both axes

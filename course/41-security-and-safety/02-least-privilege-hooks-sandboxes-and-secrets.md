@@ -74,22 +74,22 @@ Personal data (PII) is a leak path of its own. Three habits cover most of it. Co
    - **d**: Ask the model to explain why it wants to send a message at all
 
 2. A deny entry blocks `Bash(git push *)`, and the agent runs `git -C . push origin main`. What happens?
-   - **a**: The call is approved, because rules never apply to compound commands
+   - **a**: The call is approved, because rules never apply to a command that has options
    - **b**: The rule matches, because git ignores the options before the subcommand
    - **c**: The sandbox blocks it, because the network is closed to shell commands
-   - **d**: The rule does not match the text as written, so a hook must parse it
+   - **d**: The rule misses it, since the typed text differs from the pattern
 
-3. A team turns on the Bash isolation boundary with an empty domain list and assumes fetching pages is blocked too. Why is that wrong?
-   - **a**: The sandbox covers network calls, while shell commands run unrestricted by it
-   - **b**: The sandbox covers shell commands, while web tools follow permission rules
-   - **c**: The sandbox covers all tools alike, so the fetch is blocked
-   - **d**: The sandbox covers hooks, while commands follow permission rules
+3. A team turns on the Bash isolation boundary with an empty domain list and assumes the WebFetch tool is blocked too. Why is that wrong?
+   - **a**: It governs network calls only, while shell commands run outside it
+   - **b**: It governs shell commands only, while built-in web access follows permission rules
+   - **c**: It governs every tool alike, so the fetch is blocked by the empty list
+   - **d**: It governs hooks only, while shell commands follow permission rules
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The table gives the narrow answer for actions: mail goes "only to listed domains", so a hostile instruction gets at most those recipients. *a* is ruled out because "Whatever the injected text asks for, the agent can do only what its grants allow", and a sentence in a prompt is not a grant. *c* is ruled out because the grants stay the same after a screen, and the page says to "run tools in sandboxed environments, and scope permissions as narrowly as possible". *d* is ruled out because an explanation from the model changes no grant, and the page says "don't give Claude access to secrets it doesn't need".
-2. **d**. The page says a deny rule "matches the text as written", so `git -C . push` is a different string, and "A hook can parse the command into its parts". *b* is ruled out because the match is on text as written, so "A hook can parse the command into its parts" is the page's remedy and git's own option handling is not what the rule sees. *c* is ruled out because "Permission rules decide whether an action may run. A sandbox decides what a running action can reach", and the sandbox does not replace the rule. *a* is ruled out because the page says "a push behind `&&` or inside `sh -c` is a different string", so a rule written for one spelling does not cover the other, and compound commands are not exempt.
-3. **b**. The page says "The sandbox covers shell commands only", and that the built-in file and web tools "follow permission rules instead". *a* is ruled out because the sandbox is "a boundary that the operating system enforces around the shell commands", so shell commands are restricted and not free. *c* is ruled out because "The sandbox covers shell commands only", and the web tools are not among them. *d* is ruled out because "Claude's file tools, MCP servers, and hooks run outside it".
+2. **d**. The page says a deny rule "matches the text as written", so `git -C . push` is a different string and the rule misses it, and "A hook can parse the command into its parts". *b* is ruled out because the match is on text as written, so "A hook can parse the command into its parts" is the page's remedy and git's own option handling is not what the rule sees. *c* is ruled out because "Permission rules decide whether an action may run. A sandbox decides what a running action can reach", and the sandbox does not replace the rule. *a* is ruled out because the page says "a push behind `&&` or inside `sh -c` is a different string", so a rule written for one spelling does not cover the other, and a rule is not exempt for a command with options.
+3. **b**. The page says "The sandbox covers shell commands only", and that the built-in file and web tools "follow permission rules instead", so `allowedDomains` "doesn't limit WebFetch". *a* is ruled out because the sandbox is "a boundary that the operating system enforces around the shell commands", so shell commands are restricted and not free. *c* is ruled out because "The sandbox covers shell commands only", and the web tools are not among them. *d* is ruled out because "Claude's file tools, MCP servers, and hooks run outside it".
 
 </details>

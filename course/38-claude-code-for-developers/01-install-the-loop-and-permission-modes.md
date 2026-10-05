@@ -24,7 +24,7 @@ Claude Code works on a whole project and not on a single file. When you ask it t
 1. **Explore.** Ask Claude to read and explain before it changes anything. It reads files in the session's context window, so you can ask where a behaviour lives.
 2. **Plan.** For a change you want to review before it touches disk, switch to plan mode: "Claude reads files and proposes a plan but makes no edits until you approve." Press `Shift+Tab` until the status bar shows `⏸ plan mode on`, or start with `claude --permission-mode plan`.
 3. **Code.** Approve the plan, let Claude edit, and have it run the tests. A test run is the evidence that the change works, so name the command in the project's memory file (page 2).
-4. **Commit.** Ask for the commit when the change is reviewed. The tool will not commit on its own initiative, because you asked for it only "if you ask".
+4. **Commit.** Ask for the commit when the change is reviewed. Claude commits the changes only "if you ask".
 
 Two limits shape the loop. The context window fills up. "Claude compacts automatically, but instructions from early in the conversation can get lost", so "Put persistent rules in CLAUDE.md", and use `/context` to see what fills the window and `/compact` to summarise it. And file edits are reversible: "Before Claude edits a file, it snapshots the current contents. If something goes wrong, press `Esc` twice to rewind to a previous state, or ask Claude to undo." The command `/rewind` rolls code and conversation back to a checkpoint. Checkpoints "only cover file changes", and "Actions that affect remote systems (databases, APIs, deployments) can't be checkpointed", so a pushed commit or a changed database is not undone by a rewind.
 
@@ -61,7 +61,7 @@ Which mode a session starts in follows an order: the `--permission-mode` flag fi
    - **a**: The `bypassPermissions` mode, which shows each step before running it
    - **b**: The `acceptEdits` mode, which proposes and then writes each edit
    - **c**: The `dontAsk` mode, which reads the files and asks for approval
-   - **d**: The mode named plan, chosen with the permission-mode flag
+   - **d**: The `plan` mode, which reads the project and drafts steps first
 
 2. A repository's shared settings file sets the starting permission mode to `bypassPermissions`. What happens when a teammate opens it?
    - **a**: The value is ignored, and each edit and command asks first

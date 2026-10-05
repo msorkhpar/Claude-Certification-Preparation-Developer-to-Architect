@@ -50,10 +50,10 @@ Write the requirement as a sentence with a number in it: "resume within a minute
 ## Quiz
 
 1. A team's feature is one model call that summarises a document, with retrieved passages added to the prompt. What does the engineering advice suggest?
-   - **a**: A graph framework, so that the single call is saved as a checkpoint file
+   - **a**: A graph framework that saves the single call as a checkpoint file
    - **b**: Improving the lone request with in-context examples and a search step
-   - **c**: A managed agent, so that no code has to run inside the service itself
-   - **d**: A multi-agent system, so that one agent reviews the finished work of another agent
+   - **c**: A managed agent that runs outside the service, with no code inside it
+   - **d**: A multi-agent system in which one agent reviews another agent's work
 
 2. A developer reports that a framework agent gives odd answers and that nobody can see the text sent to the model. Which cost of frameworks is this?
    - **a**: A licence fee that rises with every request the agent makes to a model

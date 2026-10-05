@@ -54,7 +54,7 @@
       "explanation": {
         "c": "The page says \"The cache key is a hash of everything from the start of the request up to the marked block\", so a changing block before it gives a new key.",
         "b": "Ruled out because that same sentence says the key is \"a hash of everything from the start of the request\", not of one block.",
-        "a": "Ruled out because \"Cache breakpoints themselves don't add any cost.\" and only a block carrying `cache_control` is a breakpoint.",
+        "a": "Ruled out because \"Explicit breakpoints put `cache_control` on individual blocks\", and the clock block carries none, so it is no second marker.",
         "d": "Ruled out because \"Row 2, a minute later, reads them and pays for only the new question\"."
       }
     },
@@ -103,7 +103,7 @@
       "stem": "A team adds an image to the fifth message of a long conversation. Which parts of the cache are invalidated?",
       "options": {
         "a": "Only the tool list, while the instructions and the dialogue stay intact",
-        "b": "Only the dialogue blocks; the tool list and instructions stay intact",
+        "b": "Only the dialogue blocks, while the tool list and instructions stay intact",
         "c": "The instructions and the dialogue, while the tool list stays intact",
         "d": "Nothing, since pictures sit outside the cached text"
       },
@@ -122,7 +122,7 @@
       "stem": "A service fires ten calls together, all sharing a 30,000-token prefix, against a cold cache. What does the module predict?",
       "options": {
         "a": "One writes and nine read, since all ten share the same hash and the same prefix",
-        "b": "Each one writes, as the entry appears only once a first reply starts",
+        "b": "Each one writes, since the entry appears only once a first reply starts",
         "c": "All read, since the entry is created the moment a request arrives",
         "d": "One writes and nine fail, since an entry allows a single writer"
       },

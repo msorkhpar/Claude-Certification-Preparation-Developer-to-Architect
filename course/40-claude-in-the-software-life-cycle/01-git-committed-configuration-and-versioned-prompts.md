@@ -73,28 +73,28 @@ When Claude refactors such code, work in small steps on a branch. State the beha
 
 ## Quiz
 
-1. A developer prefers a cheaper model on their own machine. Where is that choice kept?
-   - **a**: `.mcp.json`, which lists the servers used by one project in the repository
-   - **b**: `.claude/settings.json`, which is committed for the whole team of developers
+1. A developer wants private notes about how they like to work in this repository, visible to nobody else. Which place holds them?
+   - **a**: `.mcp.json`, which lists the servers the whole team uses
+   - **b**: `.claude/settings.json`, which carries the team's rules to every clone
    - **c**: `CLAUDE.md`, which every session loads before the first prompt is typed
-   - **d**: `.claude/settings.local.json`, which is listed in the ignore file
+   - **d**: `CLAUDE.local.md`, which stays out of version control
 
 2. A workflow sends a long instruction string that someone edits whenever results look wrong. What step makes those edits safe?
-   - **a**: Move it to its own file with a version, a changelog entry and a review
-   - **b**: Shorten it so that fewer words are open to change in each separate edit
-   - **c**: Store it in an environment variable so the repository never holds the text
-   - **d**: Let Claude rewrite it every night from the previous day's results alone
+   - **a**: Give it a file of its own, with a version, a changelog entry and a review
+   - **b**: Shorten it to a few lines, so that each edit touches fewer words of it
+   - **c**: Store it in an environment variable, so the repository never holds its text
+   - **d**: Let Claude rewrite it every night from the previous day's results, unchecked
 
 3. A pull request adds one entry to the shared settings that allows a new shell command. How should it be reviewed?
    - **a**: Not at all, because a project permission rule has no effect on others
-   - **b**: Lightly, because settings files hold preferences and not behaviour
-   - **c**: Like a build script, because it changes what runs on every machine
+   - **b**: Lightly, because a settings entry is configuration and the diff is one line
+   - **c**: With the care given to build tooling, since each teammate's machine inherits it
    - **d**: By Claude alone, because the model wrote the line in the first place
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The table puts "One developer's overrides" in `.claude/settings.local.json`, which is "No, in `.gitignore`". *b* is ruled out because the file is committed and holds "Team permission rules, default model, hooks, plugins", so the choice would reach the whole team. *c* is ruled out because `CLAUDE.md` holds "Commands, conventions, the git workflow", and is not a place for a model setting. *a* is ruled out because `.mcp.json` holds "The MCP servers a project uses".
+1. **d**. The table puts "One developer's notes for this project" in `CLAUDE.local.md`, which is "No, in `.gitignore`". *b* is ruled out because the file is committed and holds "Team permission rules, default model, hooks, plugins", so the notes would reach the whole team. *c* is ruled out because `CLAUDE.md` is committed and holds "Commands, conventions, the git workflow", which every teammate loads. *a* is ruled out because `.mcp.json` holds "The MCP servers a project uses", which is configuration and not notes.
 2. **a**. The page says to keep "One file per prompt, in the repository", with "A version in the file", "A changelog entry for every change" and "A review of the change". *b* is ruled out because the page says "A reworded prompt is a behaviour change", and a shorter prompt is still unversioned and unreviewed. *c* is ruled out because "keys and tokens are read from the environment or from GitHub Secrets", and a prompt needs history, which an environment variable lacks. *d* is ruled out because a rewrite nobody reviews is the problem: "A review of the change, ideally with a sample of inputs".
 3. **c**. The page says "a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine", so such pull requests "deserve the same care as a change to a build script". *b* is ruled out because such a line "changes what runs on every teammate's machine", which is behaviour and not preference. *a* is ruled out because the file is committed and shared, so the rule "changes what runs on every teammate's machine". *d* is ruled out because "Pull requests that touch these files deserve the same care as a change to a build script", with a person deciding.
 

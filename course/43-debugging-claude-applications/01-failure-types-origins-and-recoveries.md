@@ -31,7 +31,7 @@ Module 15 sorted HTTP errors into origins by status. This module widens the view
 
 ### Failures that carry a status
 
-The status table of module 15 holds: 400 `invalid_request_error`, 401 `authentication_error`, 402 `billing_error`, 403 `permission_error`, 404 `not_found_error`, 409 `conflict_error`, 413 `request_too_large`, 429 `rate_limit_error`, 500 `api_error`, 504 `timeout_error` and 529 `overloaded_error`. The errors page says the API "always returns errors as JSON, with a top-level `error` object that always includes a `type` and `message` value", and that the body carries a `request_id`. Three rules from the page sit above the table.
+The status table of module 15 holds: 400 `invalid_request_error`, 401 `authentication_error`, 402 `billing_error`, 403 `permission_error`, 404 `not_found_error`, 409 `conflict_error`, 413 `request_too_large`, 429 `rate_limit_error`, 500 `api_error`, 504 `timeout_error` and 529 `overloaded_error`. The errors page says the API "always returns errors as JSON, with a top-level `error` object that always includes a `type` and `message` value", and that the body carries a `request_id`. Three rules from the page apply to every row.
 
 - Read the **`type`** and the **`message`**, not the status alone, because a status can mean more than one thing (a 400 can be a spend limit you set, and a 429 can be a spend cap that no retry will lift).
 - **Catch the SDK's typed classes**, in the page's words, "rather than string-matching error messages, handling the most specific classes first".
@@ -116,7 +116,7 @@ Module 15 builds the retry machinery, with attempts and time budgets, `retry-aft
 3. An assistant's reply arrives with status 200 and a stop reason of `refusal`. The team's dashboard shows nothing wrong. What does the documentation imply?
    - **a**: Nothing is wrong, because the dashboard counts only failed calls
    - **b**: The same request will usually succeed if it is sent again unchanged
-   - **c**: A refusal is invisible to an error rate, so it needs its own signal
+   - **c**: Monitoring built on error rates misses it, so it needs a separate signal
    - **d**: The model is overloaded and the call should wait for a retry header
 
 <details>

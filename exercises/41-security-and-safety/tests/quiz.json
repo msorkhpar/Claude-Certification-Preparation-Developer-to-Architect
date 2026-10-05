@@ -10,11 +10,11 @@
         "a": "A data breach, where stored records are copied from the server",
         "b": "An indirect injection, where a third party's content is the carrier",
         "c": "A prompt leak, where the model reveals what it was told to keep",
-        "d": "A jailbreak or direct injection, where the user is the adversary"
+        "d": "A jailbreak, where the person typing is the one attacking"
       },
       "key": "d",
       "explanation": {
-        "d": "The table gives jailbreaks and direct injection \"The user of your application\" as the adversary, who \"crafts inputs intended to bypass your guardrails\".",
+        "d": "The table gives jailbreaks and direct injection \"The user of your application\" as the adversary, so the person typing is the attacker, who \"crafts inputs intended to bypass your guardrails\".",
         "b": "Ruled out because indirect injection has \"A third party whose content Claude reads\" as the adversary, and the user is trusted.",
         "c": "Ruled out because the page defines the attack as \"attempts to make Claude ignore its guidelines or your instructions\", and a leak exposes what was meant to stay hidden, which this user is not after.",
         "a": "Ruled out because nothing in the scenario copies stored records, and the page defines the attack as an attempt \"to make Claude ignore its guidelines or your instructions\"."
@@ -45,17 +45,17 @@
       "scope": "page",
       "stem": "A team adds a list of known attack phrases and considers the agent protected. What is wrong?",
       "options": {
-        "a": "The list works only when it runs after the model has replied",
-        "b": "Pattern lists are forbidden, because they block harmless text",
+        "a": "It runs at the wrong time, because such a list works only after the reply",
+        "b": "It is not allowed, because pattern lists block harmless text",
         "c": "A rewording passes it, so it cannot stand as the only layer",
-        "d": "Nothing, because a list of phrases removes the risk entirely"
+        "d": "It is too weak to matter, so it should be dropped from the design"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\", and the example's last line shows one passing.",
         "b": "Ruled out because the page does not forbid pattern lists: \"Input validation filters known injection patterns before they reach Claude\" is one of its defences.",
         "a": "Ruled out because the page says to \"screen tool outputs with a small model\" before Claude acts, and not after the reply.",
-        "d": "Ruled out because \"Treat every screen as one layer that reduces risk\", and none removes it entirely."
+        "d": "Ruled out because \"Treat every screen as one layer that reduces risk\", and the page keeps it as a layer beside structure and privilege, \"not in place of them\", so it is neither a cure nor worthless."
       }
     },
     {
@@ -83,33 +83,33 @@
       "scope": "page",
       "stem": "A deny entry blocks `Bash(git push *)`, and the agent runs `git -C . push origin main`. What happens?",
       "options": {
-        "a": "The call is approved, because rules never apply to compound commands",
+        "a": "The call is approved, because rules never apply to a command that has options",
         "b": "The rule matches, because git ignores the options before the subcommand",
         "c": "The sandbox blocks it, because the network is closed to shell commands",
-        "d": "The rule does not match the text as written, so a hook must parse it"
+        "d": "The rule misses it, since the typed text differs from the pattern"
       },
       "key": "d",
       "explanation": {
-        "d": "The page says a deny rule \"matches the text as written\", so `git -C . push` is a different string, and \"A hook can parse the command into its parts\".",
+        "d": "The page says a deny rule \"matches the text as written\", so `git -C . push` is a different string and the rule misses it, and \"A hook can parse the command into its parts\".",
         "b": "Ruled out because the match is on text as written, so \"A hook can parse the command into its parts\" is the page's remedy and git's own option handling is not what the rule sees.",
         "c": "Ruled out because \"Permission rules decide whether an action may run. A sandbox decides what a running action can reach\", and the sandbox does not replace the rule.",
-        "a": "Ruled out because the page says \"a push behind `&&` or inside `sh -c` is a different string\", so a rule written for one spelling does not cover the other, and compound commands are not exempt."
+        "a": "Ruled out because the page says \"a push behind `&&` or inside `sh -c` is a different string\", so a rule written for one spelling does not cover the other, and a rule is not exempt for a command with options."
       }
     },
     {
       "id": "02-least-privilege-hooks-sandboxes-and-secrets#q3",
       "page": "02-least-privilege-hooks-sandboxes-and-secrets.md",
       "scope": "page",
-      "stem": "A team turns on the Bash isolation boundary with an empty domain list and assumes fetching pages is blocked too. Why is that wrong?",
+      "stem": "A team turns on the Bash isolation boundary with an empty domain list and assumes the WebFetch tool is blocked too. Why is that wrong?",
       "options": {
-        "a": "The sandbox covers network calls, while shell commands run unrestricted by it",
-        "b": "The sandbox covers shell commands, while web tools follow permission rules",
-        "c": "The sandbox covers all tools alike, so the fetch is blocked",
-        "d": "The sandbox covers hooks, while commands follow permission rules"
+        "a": "It governs network calls only, while shell commands run outside it",
+        "b": "It governs shell commands only, while built-in web access follows permission rules",
+        "c": "It governs every tool alike, so the fetch is blocked by the empty list",
+        "d": "It governs hooks only, while shell commands follow permission rules"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says \"The sandbox covers shell commands only\", and that the built-in file and web tools \"follow permission rules instead\".",
+        "b": "The page says \"The sandbox covers shell commands only\", and that the built-in file and web tools \"follow permission rules instead\", so `allowedDomains` \"doesn't limit WebFetch\".",
         "a": "Ruled out because the sandbox is \"a boundary that the operating system enforces around the shell commands\", so shell commands are restricted and not free.",
         "c": "Ruled out because \"The sandbox covers shell commands only\", and the web tools are not among them.",
         "d": "Ruled out because \"Claude's file tools, MCP servers, and hooks run outside it\"."
@@ -121,10 +121,10 @@
       "scope": "page",
       "stem": "A team wants to notice a user who keeps trying to defeat the rules of its application. What does the documentation suggest?",
       "options": {
-        "a": "Adjust responses and consider throttling or banning repeat offenders",
-        "b": "Make the system prompt longer, so that it refuses harder next time",
-        "c": "Delete the logs after each session so no attack leaves a record",
-        "d": "Give the user a higher limit, so the rules are tested less often"
+        "a": "Adjust its responses to the offender, and consider throttling or a ban",
+        "b": "Tighten the system prompt, so that it refuses harder next time",
+        "c": "Keep no logs of refused requests, so that no attack leaves a record",
+        "d": "Raise the request limit of that person, so the rules are tested less often"
       },
       "key": "a",
       "explanation": {
@@ -140,7 +140,7 @@
       "scope": "page",
       "stem": "A team wants to cut the risk of a prompt leak without hurting the work. Which step adds no complexity?",
       "options": {
-        "a": "Leave out proprietary details that Claude does not need for the task",
+        "a": "Remove proprietary details that are not needed for the job",
         "b": "Add many rules that forbid repeating text from the instructions",
         "c": "Rewrite the prompt so that instructions are stated twice over",
         "d": "Stop monitoring altogether, because screening slows down replies"
@@ -160,8 +160,8 @@
       "stem": "A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it do?",
       "options": {
         "a": "Skip the audit entirely for calls that carry a secret of any kind",
-        "b": "Store the raw arguments, because the audit needs each detail of the call",
-        "c": "Redact secrets from the arguments before the record is saved",
+        "b": "Store the raw arguments, because the audit needs every detail of the call",
+        "c": "Replace the secret with a fixed marker before the record is saved",
         "d": "Encrypt the record and keep the key in the same file as the record"
       },
       "key": "c",
@@ -178,10 +178,10 @@
       "scope": "module",
       "stem": "A mail assistant reads inbound messages. Which combination gives the best protection against a hostile message?",
       "options": {
-        "a": "A longer system prompt and a firm tone in every instruction given",
-        "b": "JSON-encoded results, narrow tools and a gate that tightens afterward",
-        "c": "A pattern list alone, run before the model reads each inbound message",
-        "d": "A larger context window, so the model can weigh the message better"
+        "a": "A longer system prompt, with a firm tone in every instruction given",
+        "b": "Encoded results, narrow tools and a gate that tightens once outside text is present",
+        "c": "A pattern list on its own, run before the model reads each inbound message",
+        "d": "A larger context window, so that the model can weigh each message better"
       },
       "key": "b",
       "explanation": {
@@ -219,7 +219,7 @@
         "a": "Block every shell command, whatever its purpose or its origin",
         "b": "Match the text `rm -rf` and allow whatever it cannot parse at all",
         "c": "Match the text `rm -rf` and rely on the model's own caution alone",
-        "d": "Parse the command, look through wrappers and fail closed on errors"
+        "d": "Parse the command into parts, see through wrappers and block what it cannot read"
       },
       "key": "d",
       "explanation": {

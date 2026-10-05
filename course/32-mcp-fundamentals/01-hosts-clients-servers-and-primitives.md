@@ -69,16 +69,16 @@ The SDKs the course pins differ here, and the course checked it by running them.
 ## Quiz
 
 1. An AI application connects to a ticketing system and a document store, both exposed through MCP. How is the connecting side organized?
-   - **a**: A single client multiplexes both servers over one shared connection
+   - **a**: One client multiplexes both servers over a single shared connection
    - **b**: The host talks to each server directly, with no client component
    - **c**: Each server creates a client inside itself to call the application back
-   - **d**: The host creates one client for each server, each with a dedicated link
+   - **d**: The host creates one client per server, each holding its own link
 
-2. A developer offers three things: a function the model may call to book flights, a read-only data document that the application attaches as context, and a ready-made instruction that a user selects from a menu. Which primitives fit, in that order?
-   - **a**: A tool, a resource, a prompt
+2. A developer offers three things: a ready-made instruction that a user selects from a menu, a function the model may call to book flights, and a read-only data document that the application attaches as context. Which primitives fit, in that order?
+   - **a**: A prompt, a tool, a resource
    - **b**: A resource, a prompt, a tool
    - **c**: A tool, a prompt, a resource
-   - **d**: A prompt, a tool, a resource
+   - **d**: A tool, a resource, a prompt
 
 3. How does a client written for the 2026-07-28 revision tell a server which protocol version it speaks?
    - **a**: An initialize exchange that opens a session and fixes it for later calls
@@ -90,7 +90,7 @@ The SDKs the course pins differ here, and the course checked it by running them.
 <summary>Answer key</summary>
 
 1. **d**. The page says "The MCP host accomplishes this by creating one MCP client for each MCP server", and that each client "maintains a dedicated connection with its corresponding MCP server". *a* is ruled out because each client "maintains a dedicated connection with its corresponding MCP server", so none is shared. *b* is ruled out because the client is "A component that maintains a connection to an MCP server and obtains context from an MCP server for the MCP host to use". *c* is ruled out because it is the host that does the creating: "The MCP host accomplishes this by creating one MCP client for each MCP server".
-2. **a**. A function the model calls is a tool, because tools "are model-controlled, meaning AI models can discover and invoke them automatically". Read-only data that the application attaches is a resource, which the application "can access this information directly and decide how to use it". A template that a person picks is a prompt. *d* is ruled out because a resource is the one the application "can access this information directly and decide how to use it", so it cannot stand for the function the model calls. *b* is ruled out because tools "are model-controlled, meaning AI models can discover and invoke them automatically", so the first item is a tool. *c* is ruled out because the data document is a resource, which gives "read-only access to information", and the menu item is a prompt.
+2. **a**. The menu entry is a prompt, because "Prompts are picked by a person, for example from a menu". A function the model calls is a tool, because tools "are model-controlled, meaning AI models can discover and invoke them automatically". Read-only data that the application attaches is a resource, which the application "can access this information directly and decide how to use it". *d* is ruled out because it puts a tool first, and the first item is the one that "Prompts are picked by a person, for example from a menu" describes. *b* is ruled out because it puts a resource first, and a resource is the one the application "can access this information directly and decide how to use it", not a person at a menu. *c* is ruled out because it puts the tool first as well, and it makes the data document a prompt, though a resource gives "read-only access to information".
 3. **c**. The page says "Every request declares the protocol version it is using" in its metadata field, and that the server "accepts or rejects each request independently". *a* is ruled out because the legacy versions "establish a session with an initialize handshake", and the modern ones have none. *b* is ruled out because the server "accepts or rejects each request independently", so nothing is remembered from a first call. *d* is ruled out because a client "is free to invoke any RPC inline", so discovery is optional.
 
 </details>

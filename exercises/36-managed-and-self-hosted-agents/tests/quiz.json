@@ -10,11 +10,11 @@
         "a": "The Client SDK's tool runner, which hosts the sandbox for the loop",
         "b": "The Messages API alone, which stores the conversation for each request",
         "c": "The Claude Code CLI, started again by hand each morning",
-        "d": "The hosted harness, which keeps the session and its history on Anthropic's side"
+        "d": "The hosted harness, which stores sessions on Anthropic's side"
       },
       "key": "d",
       "explanation": {
-        "d": "The overview says the product is best for \"Long-running execution\", and that sessions \"resume cleanly after pauses\" with history and outputs stored server-side, so your service holds only an ID.",
+        "d": "The overview table gives \"Long-running tasks and asynchronous work\" as the best fit, and says sessions \"resume cleanly after pauses\" with history and outputs stored server-side, so your service holds only an ID.",
         "b": "Ruled out because the Messages API is \"Direct model prompting access\", for \"Custom agent loops and fine-grained control\", and you keep the history yourself.",
         "c": "Ruled out because the CLI is something you drive yourself: \"You use the CLI by hand.\"",
         "a": "Ruled out because the page says the tool runner \"drives the same kind of loop inside your process and hosts nothing\", while the sandbox belongs to the hosted product."
@@ -90,7 +90,7 @@
       },
       "key": "d",
       "explanation": {
-        "d": "The page advises \"to set the `bash` tool's permission policy to `always_ask` or `auto`\", and to prefer `limited` networking with an explicit host list.",
+        "d": "The page advises to \"set the `bash` tool's policy to `always_ask` or `auto`\", and its first trap says to set `networking` and list the hosts.",
         "a": "Ruled out because \"Access is granted by host and not by action\", so a smaller context window changes neither.",
         "c": "Ruled out because the page's advice is to \"set the `bash` tool's policy to `always_ask` or `auto`\", and a prompt is not a policy.",
         "b": "Ruled out because \"Custom tools are executed by your application and controlled by you\", so they would move the risk into your code and not remove it."
@@ -129,9 +129,9 @@
       "key": "b",
       "explanation": {
         "b": "The page says self-hosting moves execution into your infrastructure while \"keep the orchestration on Anthropic's side\", and that \"Without egress restrictions, a compromised tool execution can reach arbitrary external hosts\", so the group owns image and egress.",
-        "a": "Ruled out because \"The sandbox can send any request to an allowed host\", and `unrestricted` reaches any host, which is the opposite of keeping files inside.",
+        "a": "Ruled out because \"The sandbox can send any request to an allowed host\", and `unrestricted` means \"Full outbound network access, except for a general safety blocklist\", which is the opposite of keeping files inside.",
         "c": "Ruled out because the Messages API is the choice for \"Custom agent loops and fine-grained control\", and pasting files sends them to Anthropic on every call.",
-        "d": "Ruled out because a cloud sandbox runs in Anthropic's infrastructure, where the files would be stored, and the first page lists \"Self-hosted execution for compliance\" as its own reason to choose another option."
+        "d": "Ruled out because a cloud sandbox runs in Anthropic's infrastructure, where the files would be stored, and the first page lists \"self-hosted execution for compliance or data residency\" as its own reason to choose another option."
       }
     },
     {
@@ -185,7 +185,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The page prices \"Model tokens, at each served model's list price\", web searches at $10 per 1,000 and \"Session running time, at $0.08 per hour\".",
+        "c": "The page lists \"model tokens at each model's list price, web searches at $10 per 1,000\" and \"Session running time, at $0.08 per hour\".",
         "b": "Ruled out because running time is priced: \"Session running time, at $0.08 per hour\".",
         "a": "Ruled out because the page prices \"model tokens at each model's list price\", web searches and running time, and no storage.",
         "d": "Ruled out because the page names no charge for packages, and prices \"what the session consumes\" only."

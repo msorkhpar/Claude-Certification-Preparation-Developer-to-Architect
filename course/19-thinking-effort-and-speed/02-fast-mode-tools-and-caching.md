@@ -35,7 +35,7 @@ It is the same model on a faster inference configuration: "There is no change to
 - **Only some models have it.** Opus 5.5, Opus 5 and Opus 4.8 do. Opus 4.7 rejects the flag with an error, and Opus 4.6 runs the
   request at standard speed and bills it at standard rates.
 - **It is API-only.** The Pricing page says it "is available on the Claude API (first-party) only; it is not available on Claude
-  Platform on AWS or partner-operated cloud platforms". Bedrock and Vertex do not have it (module 22).
+  Platform on AWS or partner-operated cloud platforms". Bedrock and Google Cloud do not have it (module 22).
 - **It is not for batches.** "Fast mode is not available with the Batch API." A batch is not waiting on anyone's screen, so there is
   nothing for it to speed up.
 
@@ -124,7 +124,7 @@ effort. Each setting is valid alone, and the pair returns a 400.
 1. A chat feature on Opus 5.5 streams long answers to people watching the text appear, and the team wants it to arrive sooner without a change of tier or effort.
    Which option does the page support?
    - **a**: Fast mode, at the standard price and on every cloud platform
-   - **b**: Fast mode, at twice the standard price and on the first-party API only
+   - **b**: Fast mode, at twice the standard price, on the first-party API
    - **c**: A lower effort level, with a reduced price and shorter replies
    - **d**: A batch, at half the price and with the replies delivered sooner
 
@@ -133,7 +133,7 @@ effort. Each setting is valid alone, and the pair returns a 400.
    - **a**: The API treats each call as its own turn and accepts the new setting
    - **b**: The API returns a 400 for the first changed request and stops the loop
    - **c**: The API keeps the first setting for the whole turn and ignores the rest
-   - **d**: The API silently disables thinking for each altered step and raises no error
+   - **d**: The API silently disables thinking on the altered steps, without error
 
 3. A team lowers the effort for later turns of a long conversation that relies on a cached document. What follows?
    - **a**: The stored tools and system are invalidated, but the messages stay valid
@@ -157,13 +157,13 @@ This quiz covers both pages of the module.
 1. An agent on Sonnet 5.5 runs at `xhigh` effort, and a developer adds `between_tools` to stop up-front thinking. The request
    fails. Which statement matches the module?
    - **a**: The option is valid on Sonnet 5.5 at any effort level
-   - **b**: Each option is valid alone, yet the combination is refused by the API
+   - **b**: Each option is valid alone, but the pair is refused
    - **c**: The option exists only on Opus models, so any use fails
    - **d**: The option works only if a manual budget is also sent
 
 2. A helpdesk bot prints replies live for agents and also runs overnight bulk jobs. Management wants the speed option on all of
    it. What does the module say?
-   - **a**: It suits only the watched output, as the batch route excludes it
+   - **a**: It suits only the watched output, since batches exclude it
    - **b**: It suits neither, since it only lowers time to first token
    - **c**: It suits neither, because only the cloud platforms offer it
    - **d**: It suits both, at the standard price for the bulk jobs

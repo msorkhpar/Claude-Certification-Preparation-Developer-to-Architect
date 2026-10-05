@@ -38,7 +38,7 @@ Setting `disable-model-invocation: true` tells it to "prevent Claude from automa
 
 ### Headless runs
 
-`claude -p` runs one prompt without a session: "Run Claude non-interactively for CI, pre-commit hooks, or batch processing." Four groups of flags make a run safe.
+`claude -p` runs one prompt non-interactively: "Run Claude non-interactively for CI, pre-commit hooks, or batch processing." Four groups of flags make a run safe.
 
 - **Context.** `--bare` skips "auto-discovery of hooks, skills, custom commands, subagents, installed plugins, MCP servers, auto memory, and CLAUDE.md", and the page says it is "useful for CI and scripts where you need the same result on every machine." Bare mode "never reads OAuth credentials or the system keychain", so the key must be in `ANTHROPIC_API_KEY` in the environment. Without it, a `-p` session loads whatever the working directory configures, hooks and MCP servers included, and it shows no trust dialog.
 - **Output.** `--output-format` is `text`, `json` or `stream-json`. Use `json` when a script parses the result.
@@ -53,7 +53,7 @@ Auto mode replaces the prompt with a reviewer. "In auto mode, a second model, th
 
 ### The practice
 
-The practice sets up a small repository, the invoice API, for Claude Code. You write the project's memory file, its shared settings, a personal settings file, a custom command and a headless review script. Tests then read your files and ask the questions this module raised: does the memory file stay short and import the architecture notes, do sixteen sample calls get the right answer from the merged rules, does the shared file avoid modes it cannot set, does the personal file stay local, can only a person start the command, and does the script have limits and no key. The files are language-neutral, so the module has the same test suites in Python, TypeScript, Java and Kotlin: the Java and Kotlin ones read the JSON with Jackson and the YAML front matter with its YAML module. The statement lists each cases id, and the starter fails every test.
+The practice sets up a small repository, the invoice API, for Claude Code. You write the project's memory file, its shared settings, a personal settings file, a custom command and a headless review script. Tests then read your files and ask the questions this module raised: does the memory file stay short and import the architecture notes, do sixteen sample calls get the right answer from the merged rules, does the shared file avoid modes it cannot set, does the personal file stay local, can only a person start the command, and does the script have limits and no key. The files are language-neutral, so the module has the same test suites in Python, TypeScript, Java and Kotlin: the Java and Kotlin ones read the JSON with Jackson and the YAML front matter with its YAML module. The statement lists the id of each case, and the starter fails every test.
 
 ## Traps
 
@@ -111,7 +111,7 @@ This quiz covers all three pages of the module.
    - **a**: `bypassPermissions`, with the runner as the only boundary
    - **b**: `auto`, with the classifier left to judge every single call
    - **c**: `acceptEdits`, with edits approved for the whole checkout
-   - **d**: `dontAsk` with `Read` and read-only git patterns listed
+   - **d**: `dontAsk`, with `Read` and read-only git patterns listed
 
 4. A session started in Manual mode has been running for hours. The developer wants code changes to apply without a prompt while shell work still asks. Which mode fits?
    - **a**: `plan`, which runs changes after one approval has been given once

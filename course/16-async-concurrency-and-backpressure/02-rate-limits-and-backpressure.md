@@ -143,7 +143,7 @@ fails this one, and in production it is the version that runs out of memory on t
 
 This quiz covers both pages of the module.
 
-1. Twelve tickets are sent together, and the provider refuses one with a 429. The team wants fewer refusals first. What comes first?
+1. Twelve tickets are sent together, and the provider refuses one with a 429. The team wants fewer refusals. What comes first?
    - **a**: Cap the parallel work with a semaphore, then pace what remains
    - **b**: Raise the retry count so that each refusal is repeated sooner than before
    - **c**: Send the work through more clients so that each one carries fewer calls

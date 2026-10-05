@@ -33,7 +33,7 @@
       },
       "key": "a",
       "explanation": {
-        "a": "The page works the example: 1075 by 1520 costs 2145 tokens, so Claude \"resizes it to 924 by 1307\" and the point is in that picture.",
+        "a": "The page works the example: 1075 by 1520 costs 2145 tokens, so on the standard tier it \"is resized to 924 by 1307\" and the point is in that picture.",
         "b": "Ruled out because \"Claude does not work well when you ask for normalized coordinates\", and it returns pixel positions.",
         "c": "Ruled out because the padding sits \"on the bottom and right\", so the origin does not move.",
         "d": "Ruled out because \"The token limit can resize an image whose sides are both under the edge limit.\""
@@ -91,8 +91,8 @@
       "key": "d",
       "explanation": {
         "d": "The page says that \"a multi-tenant application creates a workspace for each tenant\" because files are visible to the whole workspace.",
-        "a": "Ruled out because uploaded files are \"accessible to the whole workspace, not scoped to an end user, a conversation or a session\", whatever the id looks like.",
-        "c": "Ruled out because \"a file cannot be edited or renamed after upload\" and a workspace boundary is not created by re-uploading.",
+        "a": "Ruled out because \"A `file_id` is a capability: whoever can name it in a request in that workspace can read the file\", whatever the stored id looks like.",
+        "c": "Ruled out because a file uploaded anew is still \"accessible to the whole workspace, not scoped to an end user, a conversation or a session\", so re-uploading creates no boundary.",
         "b": "Ruled out because an expiry is something you set \"at upload and not changed afterwards\", and it does not separate tenants."
       }
     },
@@ -140,7 +140,7 @@
       "scope": "module",
       "stem": "An agent returns a bounding box for a table on a scanned page, and the box sits slightly off when drawn on the original. The team divided the coordinates by the extent of the padded picture. What is the correct divisor?",
       "options": {
-        "a": "The dimensions of the image that the model actually received",
+        "a": "The dimensions of the resized image, which is the one Claude saw",
         "b": "The next multiple of 28 above the resized width and height",
         "c": "The width and height of the original scan, taken before any resizing",
         "d": "The token limit of the tier, which is the same on both axes"

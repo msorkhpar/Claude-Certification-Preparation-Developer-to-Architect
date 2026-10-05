@@ -77,7 +77,7 @@ name that the model has hardly seen can land far from a query that contains it.
 adds that you "should assess a variety of embeddings vendors to find the best fit for your specific use case". Three practical points
 from that page:
 
-- Choose by dataset and domain fit, "Inference performance" and "Customization", the three factors it lists.
+- Choose by the three factors it lists: dataset and domain fit, "Inference performance" and "Customization".
 - For retrieval, use the `input_type` parameter to say whether the text is a query or a document, and "Do not omit `input_type` or set
   `input_type=None`." The provider then prepends a different prompt to each, which can lead to better retrieval quality.
 - Separate models are offered for code, law and finance, and a family of rerankers (`rerank-2.5`) takes a query and a list of documents

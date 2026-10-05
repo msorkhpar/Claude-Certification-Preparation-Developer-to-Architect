@@ -7,10 +7,10 @@
       "scope": "page",
       "stem": "An AI application connects to a ticketing system and a document store, both exposed through MCP. How is the connecting side organized?",
       "options": {
-        "a": "A single client multiplexes both servers over one shared connection",
+        "a": "One client multiplexes both servers over a single shared connection",
         "b": "The host talks to each server directly, with no client component",
         "c": "Each server creates a client inside itself to call the application back",
-        "d": "The host creates one client for each server, each with a dedicated link"
+        "d": "The host creates one client per server, each holding its own link"
       },
       "key": "d",
       "explanation": {
@@ -24,19 +24,19 @@
       "id": "01-hosts-clients-servers-and-primitives#q2",
       "page": "01-hosts-clients-servers-and-primitives.md",
       "scope": "page",
-      "stem": "A developer offers three things: a function the model may call to book flights, a read-only data document that the application attaches as context, and a ready-made instruction that a user selects from a menu. Which primitives fit, in that order?",
+      "stem": "A developer offers three things: a ready-made instruction that a user selects from a menu, a function the model may call to book flights, and a read-only data document that the application attaches as context. Which primitives fit, in that order?",
       "options": {
-        "a": "A tool, a resource, a prompt",
+        "a": "A prompt, a tool, a resource",
         "b": "A resource, a prompt, a tool",
         "c": "A tool, a prompt, a resource",
-        "d": "A prompt, a tool, a resource"
+        "d": "A tool, a resource, a prompt"
       },
       "key": "a",
       "explanation": {
-        "a": "A function the model calls is a tool, because tools \"are model-controlled, meaning AI models can discover and invoke them automatically\". Read-only data that the application attaches is a resource, which the application \"can access this information directly and decide how to use it\". A template that a person picks is a prompt.",
-        "d": "Ruled out because a resource is the one the application \"can access this information directly and decide how to use it\", so it cannot stand for the function the model calls.",
-        "b": "Ruled out because tools \"are model-controlled, meaning AI models can discover and invoke them automatically\", so the first item is a tool.",
-        "c": "Ruled out because the data document is a resource, which gives \"read-only access to information\", and the menu item is a prompt."
+        "a": "The menu entry is a prompt, because \"Prompts are picked by a person, for example from a menu\". A function the model calls is a tool, because tools \"are model-controlled, meaning AI models can discover and invoke them automatically\". Read-only data that the application attaches is a resource, which the application \"can access this information directly and decide how to use it\".",
+        "d": "Ruled out because it puts a tool first, and the first item is the one that \"Prompts are picked by a person, for example from a menu\" describes.",
+        "b": "Ruled out because it puts a resource first, and a resource is the one the application \"can access this information directly and decide how to use it\", not a person at a menu.",
+        "c": "Ruled out because it puts the tool first as well, and it makes the data document a prompt, though a resource gives \"read-only access to information\"."
       }
     },
     {
@@ -102,16 +102,16 @@
       "scope": "page",
       "stem": "A tool declares that it only reads data, and a client skips the confirmation prompt for it because of that declaration. What does the specification say about trusting the declaration?",
       "options": {
-        "a": "Hints are binding, so a read-only tool never needs confirmation",
+        "a": "Hints are binding, unless a person has demanded confirmation",
         "b": "Hints are unverified claims, unless the origin is vetted",
-        "c": "Hints are trusted once the first call has succeeded without an error",
-        "d": "Hints are checked by the SDK, which blocks any tool that writes"
+        "c": "Hints are trusted, unless the first call has ended in an error",
+        "d": "Hints are checked by the SDK, unless the server runs locally"
       },
       "key": "b",
       "explanation": {
         "b": "The page quotes the specification: \"clients MUST consider tool annotations to be untrusted unless they come from trusted servers.\"",
         "a": "Ruled out because \"there SHOULD always be a human in the loop with the ability to deny tool invocations\".",
-        "d": "Ruled out because annotations are only \"Optional properties describing tool behavior\" and nothing in the SDK enforces them.",
+        "d": "Ruled out because annotations are only \"Optional properties describing tool behavior\", and nothing on the page says the SDK checks them, locally or not.",
         "c": "Ruled out because trust depends on where the server comes from, \"unless they come from trusted servers\", and not on how a first call went."
       }
     },
@@ -140,10 +140,10 @@
       "scope": "page",
       "stem": "A stdio server started by a host cannot find credentials that work in the developer's shell. Which documented behavior explains it?",
       "options": {
-        "a": "Only a limited subset is inherited, so extra variables go in the config",
-        "b": "Credentials are read from the shell only when the transport used is HTTP",
-        "c": "The server receives its variables only after the first tool call has arrived",
-        "d": "The host wipes the whole environment on purpose, to keep secrets away from servers"
+        "a": "Only some variables are inherited, so the rest go in an env key of the configuration",
+        "b": "Credentials are read from the shell only over HTTP, so stdio servers never receive them",
+        "c": "Variables arrive only after the first tool call, so startup always sees none",
+        "d": "The whole environment is wiped, so no server can read any variable"
       },
       "key": "a",
       "explanation": {
@@ -159,17 +159,17 @@
       "scope": "page",
       "stem": "A CI job must exercise a server without a browser and print machine-readable results. Which Inspector client fits?",
       "options": {
-        "a": "The web one, run headless with the default settings",
-        "b": "The terminal-UI one, since it prints results as JSON",
-        "c": "The scriptable command-line mode, built for pipelines",
-        "d": "None, because the Inspector can only run interactively"
+        "a": "The web one, because it is the default and the richest surface",
+        "b": "The terminal one, because it needs no browser and prints JSON",
+        "c": "The CLI one, because it is built for shell pipelines",
+        "d": "Any of the three, because they all connect the same way"
       },
       "key": "c",
       "explanation": {
         "c": "The page's table says the CLI is \"A scriptable, machine-readable client for CI, shell pipelines, and coding agents.\"",
         "a": "Ruled out because the web one is \"A full graphical inspector in the browser. The default, and the richest surface.\"",
         "b": "Ruled out because the terminal one is \"An interactive terminal UI, for when a browser isn't available or wanted.\"",
-        "d": "Ruled out because the CLI is \"A scriptable, machine-readable client for CI, shell pipelines, and coding agents.\""
+        "d": "Ruled out because only the CLI is \"A scriptable, machine-readable client for CI, shell pipelines, and coding agents.\", while the other two are graphical or interactive, even though every client behind the Inspector \"connects the same way\"."
       }
     },
     {
@@ -219,7 +219,7 @@
         "a": "All four, since they share one specification and release together",
         "b": "Only the Kotlin library, because it is the newest of the four",
         "c": "Only the Java library, which the documentation ranks in its top tier overall",
-        "d": "Only the Python library; the other three stop at an earlier revision"
+        "d": "Only the Python library, because the other three stop at an earlier revision"
       },
       "key": "d",
       "explanation": {

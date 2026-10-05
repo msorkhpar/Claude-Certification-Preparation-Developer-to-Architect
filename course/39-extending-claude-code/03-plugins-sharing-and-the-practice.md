@@ -67,22 +67,22 @@ The practice builds a plugin called `release-kit` and the team settings that ena
    - **d**: Neither, because ranges are resolved only for plugins that carry no version
 
 2. A team wants every contributor to receive a tool bundle without a manual install. Where does the configuration go?
-   - **a**: The repository's own `.claude/settings.json`, naming a marketplace and an enabled entry
-   - **b**: Each person's home settings file, copied by hand from a wiki page of the team
-   - **c**: The manifest, which lists the people who should install the bundle on their machines
-   - **d**: The memory file, which names the bundle in a sentence for Claude to read each time
+   - **a**: The repository's own `.claude/settings.json`, naming a marketplace and an enabled plugin
+   - **b**: Each person's home settings file, copied by hand from a wiki page the team keeps
+   - **c**: The plugin manifest, which lists the people who should install the bundle on their machines
+   - **d**: The project memory file, which names the bundle in a sentence for Claude to read each time
 
 3. An agent file shipped inside a plugin sets `permissionMode: bypassPermissions` to run quietly. What happens?
    - **a**: The plugin fails to load, because the loader rejects the whole file
    - **b**: The agent skips every prompt, exactly as the value says it should
    - **c**: The value is dropped at load time, because the loader skips such fields
-   - **d**: The agent asks once, then remembers the answer for the whole session
+   - **d**: The agent runs quietly, but only in a folder that the person has trusted
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says with `~2.1.0` "users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`." *b* is ruled out because a pinned range does not follow the newest release: "Without a version constraint, a dependency moves to each new release its marketplace publishes". *c* is ruled out because the dependency "installs at the highest git tag that satisfies this range", which is 2.1.4 and not the first match. *d* is ruled out because "resolution is by git tag" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained.
 2. **a**. The page says to set two keys in the repository's `.claude/settings.json`, so that the marketplace and the enabled plugin reach every contributor. *b* is ruled out because hand copying is what the shared file replaces, and the page gives the repository's file as the way "to give a repository's contributors a plugin without each of them installing it". *c* is ruled out because the manifest is "a `plugin.json` file, called the manifest, that names the plugin", and it lists dependencies and not people. *d* is ruled out because the page says to "set two keys in the repository's `.claude/settings.json`", which is configuration and not a sentence in a memory file.
-3. **c**. The page says "These fields are ignored when loading agents from a plugin." *b* is ruled out because the fields are "ignored when loading agents from a plugin", so the agent keeps its normal prompts. *a* is ruled out because "These fields are ignored when loading agents from a plugin", so the file still loads. *d* is ruled out because no remembered approval is described, and the page names the fix: "Ship the guard in `hooks/hooks.json`."
+3. **c**. The page says "These fields are ignored when loading agents from a plugin." *b* is ruled out because the fields are "ignored when loading agents from a plugin", so the agent keeps its normal prompts. *a* is ruled out because "These fields are ignored when loading agents from a plugin", so the file still loads. *d* is ruled out because the fields are "ignored" whatever the folder, and trust only decides whether `extraKnownMarketplaces` applies. The page names the fix: "Ship the guard in `hooks/hooks.json`."
 
 </details>

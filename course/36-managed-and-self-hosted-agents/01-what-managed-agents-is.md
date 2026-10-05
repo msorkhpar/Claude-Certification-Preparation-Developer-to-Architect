@@ -73,7 +73,7 @@ The migration page says what changes. From a hand-written Messages API loop, you
    - **a**: The Client SDK's tool runner, which hosts the sandbox for the loop
    - **b**: The Messages API alone, which stores the conversation for each request
    - **c**: The Claude Code CLI, started again by hand each morning
-   - **d**: The hosted harness, which keeps the session and its history on Anthropic's side
+   - **d**: The hosted harness, which stores sessions on Anthropic's side
 
 2. A session is created with an override that lists one tool. The agent itself defines five. How many tools does the session have?
    - **a**: One, because it takes the place of the whole set
@@ -90,7 +90,7 @@ The migration page says what changes. From a hand-written Messages API loop, you
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The overview says the product is best for "Long-running execution", and that sessions "resume cleanly after pauses" with history and outputs stored server-side, so your service holds only an ID. *b* is ruled out because the Messages API is "Direct model prompting access", for "Custom agent loops and fine-grained control", and you keep the history yourself. *c* is ruled out because the CLI is something you drive yourself: "You use the CLI by hand." *a* is ruled out because the page says the tool runner "drives the same kind of loop inside your process and hosts nothing", while the sandbox belongs to the hosted product.
+1. **d**. The overview table gives "Long-running tasks and asynchronous work" as the best fit, and says sessions "resume cleanly after pauses" with history and outputs stored server-side, so your service holds only an ID. *b* is ruled out because the Messages API is "Direct model prompting access", for "Custom agent loops and fine-grained control", and you keep the history yourself. *c* is ruled out because the CLI is something you drive yourself: "You use the CLI by hand." *a* is ruled out because the page says the tool runner "drives the same kind of loop inside your process and hosts nothing", while the sandbox belongs to the hosted product.
 2. **a**. The page says "Overrides never merge with the agent's configuration, so a `tools` override must list every tool the session should have." *c* is ruled out because "Overrides never merge with the agent's configuration", so nothing is added to the agent's five tools. *b* is ruled out because "so a tools override must list every tool the session should have", and the agent's own list is not kept. *d* is ruled out because "They apply to that one session", and nothing waits for a new agent version.
 3. **c**. The overview says "Managed Agents is not currently eligible for Zero Data Retention or HIPAA Business Associate Agreement (BAA) coverage", because sessions are stateful and stored server-side. *a* is ruled out because self-hosting moves only the tools: "keep the orchestration on Anthropic's side", so the session data still sits with Anthropic. *b* is ruled out because the overview says the product is "not currently eligible for Zero Data Retention", not that it is covered. *d* is ruled out because deleting sessions is a control you hold afterward, and "the data exists on Anthropic's side first", so the product is still not covered.
 

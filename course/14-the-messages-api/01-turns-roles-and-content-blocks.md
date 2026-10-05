@@ -65,9 +65,9 @@ first turn, and the mid-conversation message for instructions that only become r
 |---|---|---|
 | `text` | requests and replies | Text |
 | `image` | requests | An image, from `base64`, a `url` or an uploaded `file`; the documented media types are `image/jpeg`, `image/png`, `image/gif` and `image/webp` |
-| `tool_use` | replies | The model asks your code to run a tool: an `id`, a `name`, an `input` object (module 22) |
-| `tool_result` | requests | Your answer to a `tool_use`, matched by `tool_use_id` (module 22) |
-| `thinking`, `redacted_thinking` | replies | The model's reasoning, when thinking is on (module 18) |
+| `tool_use` | replies | The model asks your code to run a tool: an `id`, a `name`, an `input` object (module 26) |
+| `tool_result` | requests | Your answer to a `tool_use`, matched by `tool_use_id` (module 26) |
+| `thinking`, `redacted_thinking` | replies | The model's reasoning, when thinking is on (module 19) |
 
 A reply's `content` is always a list, because it can hold several blocks: text, then a `tool_use`, for instance. The
 reply you store and send back next time is that list, **as received**.

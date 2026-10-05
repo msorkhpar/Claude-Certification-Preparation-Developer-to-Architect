@@ -95,7 +95,7 @@ You write `build_request(platform, model, body, config)` and `unsupported_featur
 `config`, `endpoint` or `feature`. The rules are the ones above: on Vertex the model goes in the URL and the version in the body field
 `anthropic_version`; on Bedrock the model gets its `anthropic.` prefix and a region is required. Dated direct ids map to the platform forms:
 `claude-haiku-4-5-20251001` becomes `anthropic.claude-haiku-4-5` on Bedrock and `claude-haiku-4-5@20251001` on Vertex. An unsupported model and
-endpoint pair is a `PlatformError`, as when a specific region is asked to serve any model but a `claude-sonnet-4-6`: the practice says a specific region serves `claude-sonnet-4-6` only. The statement is in `exercises/22-claude-on-the-cloud-platforms/unit-01/practice-1/statement.md`. Each language
+endpoint pair is a `PlatformError`: the practice says a specific region serves `claude-sonnet-4-6` only. The statement is in `exercises/22-claude-on-the-cloud-platforms/unit-01/practice-1/statement.md`. Each language
 folder has a `starter`, the tests and a build file, and the starter fails every test. Nothing is signed and nothing leaves the container.
 
 | Id | What it checks |

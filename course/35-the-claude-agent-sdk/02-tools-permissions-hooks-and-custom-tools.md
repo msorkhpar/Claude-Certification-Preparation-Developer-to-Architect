@@ -18,7 +18,7 @@ An agent that can run shell commands and edit files is only as safe as the polic
 Two settings sound alike and do different things.
 
 - **Which tools exist.** `tools` sets the built-in tools that are available. A bare name in `disallowed_tools` (such as `Bash`) removes the tool from Claude's context altogether, so Claude cannot even attempt it.
-- **Which calls are pre-approved.** `allowed_tools` auto-approves the tools you list, and the documentation is explicit that "This does not restrict Claude to only these tools." Other unlisted tools fall through to `permission_mode` and `can_use_tool`. In the loop page's words, "Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool."
+- **Which calls are pre-approved.** `allowed_tools` auto-approves the tools you list, and the documentation is explicit that "This does not restrict Claude to only these tools." Other unlisted tools fall through to `permission_mode` and `can_use_tool`. The documentation's agent loop page says: "Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool."
 
 A scoped deny rule is different again. `disallowed_tools=["Bash(rm *)"]` leaves `Bash` available and denies matching calls in every permission mode, `bypassPermissions` included. The match is on the command as written, so another spelling of the same command falls through to the mode. A deny rule is a guard against the obvious, not a sandbox.
 
@@ -48,7 +48,7 @@ When several hooks match they run in parallel, and the most restrictive result a
 
 A custom tool is a function that Claude can call, defined with the SDK's in-process MCP server: the `@tool` decorator in Python (the `tool()` helper in TypeScript), wrapped by `create_sdk_mcp_server` (TypeScript: `createSdkMcpServer`). The server "runs in-process inside your application, not as a separate process". You pass it in `mcp_servers`, and the key you choose becomes the server name in each tool's full name: `mcp__{server_name}__{tool_name}`, so `add` on a server `calc` is `mcp__calc__add`. A pattern such as `mcp__calc__*` names every tool of the server in an allow rule.
 
-Two details of tools matter in production. First, annotations. Setting `readOnlyHint` lets the tool run in parallel with other read-only tools, and the documentation adds that "Annotations are metadata, not enforcement." A tool marked read-only can still write if its handler does. Second, errors. "A handler error doesn't stop the agent loop." The in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on. If the handler catches the error and returns `is_error` (TypeScript: `isError`), Claude sees the message you compose, which can say which request failed and what to try instead. So how you report an error decides what Claude reads, and not whether the query fails. In Python the decorator forwards only `content` and `is_error` from your return value.
+Two details of tools matter in production. First, annotations. Setting `readOnlyHint` lets the tool run in parallel with other read-only tools, and the documentation adds that "Annotations are metadata, not enforcement." A tool marked read-only can still write if its handler does. Second, errors. "A handler error doesn't stop the agent loop." The in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on. (This is the Agent SDK's in-process server; a Python server built with the MCP SDK in module 32 reports an escaped exception without its message.) If the handler catches the error and returns `is_error` (TypeScript: `isError`), Claude sees the message you compose, which can say which request failed and what to try instead. So how you report an error decides what Claude reads, and not whether the query fails. In Python the decorator forwards only `content` and `is_error` from your return value.
 
 ## Traps
 
@@ -61,16 +61,16 @@ Two details of tools matter in production. First, annotations. Setting `readOnly
 ## Quiz
 
 1. A developer puts Read and Grep in allowed_tools, expecting the agent to be unable to run shell commands. What happens?
-   - **a**: Every other tool is removed, because a list means an exact allowance
-   - **b**: The remaining ones stay available; the listed ones are merely pre-approved
-   - **c**: The run fails at startup, because the list is incomplete
-   - **d**: The shell tool asks nothing, since unlisted tools default to approval
+   - **a**: Every other tool is removed from the agent's context
+   - **b**: Others stay reachable, and only those two are pre-approved
+   - **c**: The run fails at startup because the list is incomplete
+   - **d**: Unlisted tools are approved automatically, with no prompt at all
 
 2. A hook returns a denial for a tool call that a matching allow rule would approve. Which result follows?
-   - **a**: It runs, because an allow rule outranks a hook's denial
-   - **b**: It runs only if the permission mode is bypassPermissions
-   - **c**: It goes to the permission callback, which makes the final decision
-   - **d**: It is refused: that check is the first thing evaluated
+   - **a**: It runs, with the allow rule overriding the denial
+   - **b**: It runs only when the permission mode is bypassPermissions
+   - **c**: It goes to the permission callback for the final decision
+   - **d**: It is blocked, with the earliest step deciding the outcome
 
 3. A custom in-process tool divides by zero and the handler throws without catching. What does Claude see?
    - **a**: Nothing, because the query aborts before any result is produced

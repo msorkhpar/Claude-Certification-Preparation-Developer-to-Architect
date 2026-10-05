@@ -51,7 +51,7 @@ Read it after every call. The documentation gives seven values:
 | `end_turn` | The model finished naturally | Use the reply |
 | `max_tokens` | The reply reached `max_tokens` | Raise the limit and ask again, or treat the reply as cut; a cut `tool_use` block must be retried with a higher limit |
 | `stop_sequence` | The model wrote one of your stop sequences | Read `stop_sequence` to see which one |
-| `tool_use` | The model wants a tool run | Run the tools and send back `tool_result` blocks (module 22) |
+| `tool_use` | The model wants a tool run | Run the tools and send back `tool_result` blocks (module 26) |
 | `pause_turn` | A server-side tool loop reached its iteration limit (10 by default) | Send the reply back as an assistant turn and call again so the model can finish |
 | `refusal` | The model declined to answer | Read `stop_details`, which names the policy category; plan a fallback |
 | `model_context_window_exceeded` | The context window filled before `max_tokens` (documented in the beta namespace) | Treat the reply as truncated: valid but limited |
@@ -140,7 +140,7 @@ a deletion, not a change of value.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "stop_reason indicates normal completion; HTTP errors indicate failures", so a cut reply arrives as a normal 200 and only `stop_reason` shows it. *a* is ruled out because "a larger ceiling does not slow short answers" and variability is not what truncates a reply. *c* is ruled out because a stop sequence ends a reply early at a chosen string and does not stop it being cut: "the model usually stops by itself, well before the ceiling". *d* is ruled out because a `max_tokens` cut carries a 200 status: "a `max_tokens` or a `refusal` arrives with status 200".
+1. **b**. The page says "stop_reason indicates normal completion; HTTP errors indicate failures", so a cut reply arrives as a normal 200 and only `stop_reason` shows it. *a* is ruled out because on current models "a non-default value of any of them is rejected with a 400 error", and variability is not what truncates a reply. *c* is ruled out because a stop sequence is "a cheap way to end a reply at a delimiter you chose", which does not stop the reply being cut at the ceiling. *d* is ruled out because a `max_tokens` cut carries a 200 status: "a `max_tokens` or a `refusal` arrives with status 200".
 2. **d**. The page says a non-default value of any of the three settings "is rejected with a 400 error" on the current models. *b* is ruled out because "the upgrade is a deletion, not a change of value", and the page does not name 1.0 or any value as safe. *c* is ruled out because "a non-default value of any of them is rejected with a 400 error", and the three are named together. *a* is ruled out because "temperature, top_p and top_k used to be the knobs of randomness", and the page rejects all three, so `top_k` is no way out.
 
 </details>

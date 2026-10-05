@@ -5,7 +5,7 @@
       "id": "01-skills-and-how-they-compare#q1",
       "page": "01-skills-and-how-they-compare.md",
       "scope": "page",
-      "stem": "A description reads only \"Release helper\", and Claude never loads that package when users ask for a changelog. What is the first fix?",
+      "stem": "A description reads only \"Release helper\", and Claude never loads that skill when users ask for a changelog. What is the first fix?",
       "options": {
         "a": "Raise the tool grant so that the skill may run any shell command",
         "b": "Move the folder into the enterprise location so it takes priority",
@@ -26,14 +26,14 @@
       "scope": "page",
       "stem": "A team requires that no agent ever pushes to the main branch. Which extension fits best?",
       "options": {
-        "a": "A hook or a deny rule, because it always runs and cannot be skipped",
+        "a": "A hook that blocks the command, because it always runs and cannot be skipped",
         "b": "A line in the project memory file that forbids pushing to that branch",
         "c": "A skill whose instructions tell Claude never to push to the main branch",
         "d": "A subagent that reviews each command before Claude is allowed to run it"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"A rule that must never be broken belongs in a hook or a deny rule\", and a hook is \"a program that always runs\".",
+        "a": "The page says \"A rule that must never be broken belongs in a hook or a deny rule\", and a hook, unlike guidance, is \"a program that always runs\".",
         "c": "Ruled out because \"a skill is instructions Claude may follow\".",
         "b": "Ruled out because a memory file is guidance of the same kind, and the page says \"Persistent context loaded every conversation\" is for conventions and \"always do X\" rules.",
         "d": "Ruled out because a subagent is \"An isolated context that returns summarised results\" for side tasks, and not a gate that every command must pass."
@@ -103,13 +103,13 @@
       "stem": "A team wants the learnings of a subagent to travel with the repository. Which memory choice fits?",
       "options": {
         "a": "The user scope, which lives in the home directory of each single person",
-        "b": "The project scope, whose directory is shareable via version control",
-        "c": "The local scope, which is kept out of version control on purpose here",
+        "b": "The project scope, whose directory is committed alongside the code",
+        "c": "The local scope, whose directory is deliberately kept out of commits",
         "d": "No scope applies, because memory is always private to a single machine"
       },
       "key": "b",
       "explanation": {
-        "b": "The table says the `project` scope is for knowledge that is \"project-specific and shareable via version control\".",
+        "b": "The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is \"project-specific and shareable via version control\", so it can be committed alongside the code.",
         "a": "Ruled out because the `user` scope is `~/.claude/agent-memory/<name>/`, for an agent that \"should remember across all projects\", in each person's home directory.",
         "c": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\".",
         "d": "Ruled out because the project scope's directory \"shareable via version control\" is the page's own counterexample, so not every memory is private."
@@ -140,10 +140,10 @@
       "scope": "page",
       "stem": "A team wants every contributor to receive a tool bundle without a manual install. Where does the configuration go?",
       "options": {
-        "a": "The repository's own `.claude/settings.json`, naming a marketplace and an enabled entry",
-        "b": "Each person's home settings file, copied by hand from a wiki page of the team",
-        "c": "The manifest, which lists the people who should install the bundle on their machines",
-        "d": "The memory file, which names the bundle in a sentence for Claude to read each time"
+        "a": "The repository's own `.claude/settings.json`, naming a marketplace and an enabled plugin",
+        "b": "Each person's home settings file, copied by hand from a wiki page the team keeps",
+        "c": "The plugin manifest, which lists the people who should install the bundle on their machines",
+        "d": "The project memory file, which names the bundle in a sentence for Claude to read each time"
       },
       "key": "a",
       "explanation": {
@@ -162,14 +162,14 @@
         "a": "The plugin fails to load, because the loader rejects the whole file",
         "b": "The agent skips every prompt, exactly as the value says it should",
         "c": "The value is dropped at load time, because the loader skips such fields",
-        "d": "The agent asks once, then remembers the answer for the whole session"
+        "d": "The agent runs quietly, but only in a folder that the person has trusted"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"These fields are ignored when loading agents from a plugin.\"",
         "b": "Ruled out because the fields are \"ignored when loading agents from a plugin\", so the agent keeps its normal prompts.",
         "a": "Ruled out because \"These fields are ignored when loading agents from a plugin\", so the file still loads.",
-        "d": "Ruled out because no remembered approval is described, and the page names the fix: \"Ship the guard in `hooks/hooks.json`.\""
+        "d": "Ruled out because the fields are \"ignored\" whatever the folder, and trust only decides whether `extraKnownMarketplaces` applies. The page names the fix: \"Ship the guard in `hooks/hooks.json`.\""
       }
     },
     {
