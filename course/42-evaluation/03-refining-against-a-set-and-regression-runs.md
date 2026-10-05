@@ -496,7 +496,7 @@ The Java and Kotlin folders give you a small `Json` helper, because those two ha
    - **c**: An edit that fixes one case and breaks another
    - **d**: A label that was copied wrongly from a spreadsheet into the set
 
-3. A team re-grades 800 items with a model every night, and nobody waits for the result. Which option cuts the price of that job the most?
+3. A team re-grades 800 items with a model every night, and nobody waits for the result. Which option cuts the price of that job the most while every item is still graded each night?
    - **a**: Grade a random tenth of the items each night
    - **b**: Rerun the work on every commit instead of nightly
    - **c**: Submit the work through the Message Batches API

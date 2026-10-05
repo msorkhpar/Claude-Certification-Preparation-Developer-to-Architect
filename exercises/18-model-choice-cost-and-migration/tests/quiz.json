@@ -180,14 +180,14 @@
       "options": {
         "a": "Catch the 400 and resend the body with the field removed after each failure",
         "b": "Build each request per model, omitting what that model rejects",
-        "c": "Fix the parameter at its default value for every model in the catalog",
+        "c": "Fix the parameter at one custom value for every model in the catalog",
         "d": "Pin the older target for good, so that the payload keeps working there"
       },
       "key": "b",
       "explanation": {
         "b": "The page says to \"Change the request builder together with the id\" and that Haiku 4.5 \"still accepts sampling parameters\", so one body does not fit every model.",
         "a": "Ruled out because a rejected setting fails every time and a 400 is \"the signal of a rejected parameter\", not something to patch after each failure.",
-        "c": "Ruled out because the rule is \"Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected\" and only a request builder knows each model's rule.",
+        "c": "Ruled out because the rule is \"Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected\", so one custom value fails on the newest model.",
         "d": "Ruled out because a pinned older model still reaches retirement, after which \"Requests to retired models will fail\", so pinning for good only postpones the break"
       }
     },

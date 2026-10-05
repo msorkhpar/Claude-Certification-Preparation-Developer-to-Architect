@@ -375,7 +375,7 @@
       "key": "d",
       "explanation": {
         "d": "The overview points to Claude Fable 5.1 \"when evals at higher effort still fall short\" (module 3, page 1).",
-        "a": "Ruled out because the course advises \"adding complexity only when it demonstrably improves outcomes\", and a vote adds complexity with no evidence of gain.",
+        "a": "Ruled out because the course advises \"adding complexity only when it demonstrably improves outcomes\" (module 34, page 2), and a vote adds complexity with no evidence of gain.",
         "b": "Ruled out because the capability-first path is to \"get the quality, then work down to cheaper options\", and the quality is not yet reached.",
         "c": "Ruled out because a cheap start is the efficiency-first path, and this agent fits the other one, which is \"Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work\"."
       }
@@ -559,7 +559,7 @@
       "explanation": {
         "b": "\"If the verdict cannot be parsed, the draft is unchecked\", so it is graded zero with a reason (module 34, page 2).",
         "a": "Ruled out because \"treating an unreadable reply as a pass would accept an unchecked draft\", whatever the log says.",
-        "c": "Ruled out because such a parse \"turns a broken grader into a plausible number\".",
+        "c": "Ruled out because such a parse \"turns a broken grader into a plausible number\" (module 42, page 2).",
         "d": "Ruled out because \"A refinement loop can get worse\", so the page keeps the best draft and not the last."
       }
     },
@@ -601,8 +601,8 @@
       "explanation": {
         "a": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2).",
         "e": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2).",
-        "b": "Ruled out because clients treat annotations as \"untrusted unless they come from trusted servers\", wherever the tool is served.",
-        "c": "Ruled out because annotations exist \"not because they enforce anything\", so the SDK does not police writes on their basis.",
+        "b": "Ruled out because clients treat annotations as \"untrusted unless they come from trusted servers\" (module 32, page 2), wherever the tool is served.",
+        "c": "Ruled out because annotations exist \"not because they enforce anything\" (module 32, page 2), so the SDK does not police writes on their basis.",
         "d": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\"."
       },
       "select": 2
@@ -893,7 +893,7 @@
       "options": {
         "a": "Return a protocol error that asks the client to resend the request",
         "b": "Print the reason to standard output for the client to relay",
-        "c": "Use the SDK's ToolError for a problem of this expected kind",
+        "c": "Switch to ToolError for a problem of this expected kind",
         "d": "Catch the exception and return an empty success result"
       },
       "key": "c",
@@ -901,7 +901,7 @@
         "c": "\"In the Python SDK, raise ToolError for an expected failure\" (module 32, page 2).",
         "a": "Ruled out because protocol errors are for \"issues with the request structure itself that models are less likely to be able to fix\".",
         "b": "Ruled out because \"The server MUST NOT write anything to its stdout that is not a valid MCP message\".",
-        "d": "Ruled out because a swallowed failure \"tells the model the call worked\". The answer is specific to this SDK: the Agent SDK's in-process server of module 35 returns the raw exception message as an error result, but a server built with the MCP Python SDK reports an exception that is not a ToolError \"without its message\"."
+        "d": "Ruled out because a swallowed failure \"tells the model the call worked\" (module 26, page 2). The answer is specific to this SDK: the Agent SDK's in-process server of module 35 returns the raw exception message as an error result, but a server built with the MCP Python SDK reports an exception that is not a ToolError \"without its message\"."
       }
     },
     {
@@ -1278,7 +1278,7 @@
       "options": {
         "a": "Write an event handler of your own that assembles each content block as it arrives",
         "b": "Lower max_tokens until the request passes the size check and goes out",
-        "c": "Call the SDK's final-message helper and read the one finished message",
+        "c": "Call the final-message helper and read the one finished message",
         "d": "Move the request into a batch of one and wait for its result file"
       },
       "key": "c",
@@ -1441,7 +1441,7 @@
       "explanation": {
         "a": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1), and \"accuracy and recall degrade as the window fills\".",
         "e": "\"A bigger window is capacity, not a reason to send everything\" (module 4, page 1), and \"accuracy and recall degrade as the window fills\".",
-        "b": "Ruled out because \"A request that fits can still answer badly\" (module 4, page 1), so a larger window is no promise of quality.",
+        "b": "Ruled out because \"A request that fits can still answer badly\" (module 1, page 1), so a larger window is no promise of quality.",
         "c": "Ruled out because effort affects \"all tokens in the response\" (module 19, page 1), which is output and not the input that the archive supplies.",
         "d": "Ruled out because the layout rule is to \"put long documents first and the question last\" (module 4, page 1)."
       },
@@ -1492,7 +1492,7 @@
       "stem": "A support prompt is one long paragraph, and reviewers cannot tell which piece of it causes made-up verdicts when the policy is silent. Which change fits best?",
       "options": {
         "a": "Give the assistant a flattering role and ask it to be careful",
-        "b": "Rebuild it as labelled parts, one stating what to answer when the rules do not decide",
+        "b": "Rebuild it as labelled parts, one covering cases the rules leave open",
         "c": "Ask for a longer reply and let the model explain its reasoning at length",
         "d": "Move the documents below the task and put the policy last in the prompt"
       },

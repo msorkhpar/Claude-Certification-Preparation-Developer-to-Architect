@@ -666,7 +666,7 @@ The limitations list is short and testable. Claude "cannot be used to name peopl
    - **a**: Send the pages through Amazon Bedrock, which has no per-image limit at all
    - **b**: Raise the output limit so that the reply has room to describe all thirty of them
    - **c**: Convert each page to GIF so that the stricter size limit stops counting it
-   - **d**: Downscale every file until neither side exceeds 2000 px
+   - **d**: Downscale every file until neither side is longer than 2000 px, keeping all of them together
 
 2. A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands above and to the left of the line on the original. What explains the miss?
    - **a**: The picture it viewed was 924 by 1307, so every returned value needs rescaling by that size
@@ -683,7 +683,7 @@ The limitations list is short and testable. Claude "cannot be used to name peopl
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says to resize each image "so that neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks." *b* is ruled out because the stricter limit is "a stricter per-image dimension limit", which concerns the size of each file and not the reply. *c* is ruled out because "Animations are unsupported, and only the first frame is used", which changes nothing about the dimension limit. *a* is ruled out because on Amazon Bedrock "only base64-encoded sources are currently available", and the limit still applies to every image.
+1. **d**. The page says to resize each image "so that neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks." *b* is ruled out because the stricter limit is "a stricter per-image dimension limit", which concerns the size of each file and not the reply. *c* is ruled out because "Every `image` block counts" toward the stricter limit, whatever its format. *a* is ruled out because the limits table gives Amazon Bedrock its own cap, "Size of one image, Amazon Bedrock and Google Cloud (base64)", so a per-image limit exists there too.
 2. **a**. The page works the example: 1075 by 1520 costs 2145 tokens, so on the standard tier it "is resized to 924 by 1307" and the point is in that picture. *b* is ruled out because "Claude does not work well when you ask for normalized coordinates", and it returns pixel positions. *c* is ruled out because the padding sits "on the bottom and right", so the origin does not move. *d* is ruled out because "The token limit can resize an image whose sides are both under the edge limit."
 3. **c**. The page says that an uploaded file keeps the payload small "regardless of how many images accumulate in the conversation history." *a* is ruled out because "Lossy compression can add artifacts that hurt text". *b* is ruled out because the problem is that "each request resends the full conversation history", whatever the window size. *d* is ruled out because the placement advice is only that Claude "works best when images come before text".
 
