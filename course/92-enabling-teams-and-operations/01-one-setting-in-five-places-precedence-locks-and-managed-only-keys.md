@@ -539,7 +539,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A managed `model` is a default, and the lock is the list. *b* is ruled out because "A managed `model` is a **default**: a developer can still pick another model". *c* is ruled out because the rule is "The **lock** is `availableModels`, a list", because "a default is overridden at once", so no refusal appears that a restart could lift. *d* is ruled out because "a managed list applies as it is: a project file's list cannot widen it", and nothing here makes a project file's model decide.
+1. **a**. A managed `model` is a default, and the lock is the list. *b* is ruled out because "A managed `model` is a **default**: a developer can still pick another model". *c* is ruled out because "a default is overridden at once", so no refusal appears that a restart could lift. *d* is ruled out because "a managed list applies as it is: a project file's list cannot widen it", and nothing here makes a project file's model decide.
 2. **c**. A lower file that sets a managed-only key has no effect. *a* is ruled out because "A lower file that sets one of these has **no effect**". *b* is ruled out because the page describes "a lock written in the shared project file looks like policy and does nothing", not a switch that waits for confirmation. *d* is ruled out because "Some keys are read only from managed settings, because their purpose is to be out of a developer's reach".
 
 </details>
