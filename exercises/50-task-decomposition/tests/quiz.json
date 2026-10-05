@@ -26,17 +26,17 @@
       "scope": "page",
       "stem": "A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?",
       "options": {
-        "a": "Fix one subtask per directory in advance and run them in order",
-        "b": "Ask the model to plan every test in advance, then run that plan to the end",
-        "c": "Map the structure, rank the areas by impact, then re-plan as dependencies appear",
-        "d": "Pick the largest files first and write tests for them until time runs out"
+        "a": "Fix one subtask per directory in advance, then run them in order",
+        "b": "Ask the model to plan every test in advance, then run the plan to its end",
+        "c": "Map the structure and rank by impact, then re-plan as dependencies appear",
+        "d": "Pick the largest files first, then write tests for them until time runs out"
       },
       "key": "c",
       "explanation": {
         "c": "An open-ended task is mapped first and planned from what is found.",
         "a": "Ruled out because a fixed order cannot follow the findings: \"a pipeline that marches through steps that no longer make sense\".",
         "b": "Ruled out because a plan made before any ground truth is a guess: \"the plan is made before any ground truth exists\".",
-        "d": "Ruled out because size is not impact: \"mapped, ranked and then planned again as dependencies appear\"."
+        "d": "Ruled out because size is not impact: the task is \"mapped first, then the high-impact areas are found\"."
       }
     },
     {
@@ -73,7 +73,7 @@
       "explanation": {
         "d": "Summaries are the interface between the passes.",
         "a": "Ruled out because the text would bring the overload back: \"the one overloaded request that the split removed\".",
-        "b": "Ruled out because findings alone say nothing about what the files offer: \"what the file offers (the functions and types others use, with their parameters)\".",
+        "b": "Ruled out because the diff is the text that this pass is not given, and findings alone say nothing about what the files offer: \"what the file offers (the functions and types others use, with their parameters)\".",
         "c": "Ruled out because the final pass needs each file's conclusions: \"The cross pass needs what each file pass concluded about what the file offers\"."
       }
     },
@@ -102,17 +102,17 @@
       "scope": "module",
       "stem": "A team's adaptive investigation asks the planner for each next step, but shows it only its own earlier plan text and not what the earlier work produced. After a few steps the plan drifts away from the true state of the code. What fixes it?",
       "options": {
-        "a": "Ask it to restate the goal more carefully before each next step",
+        "a": "Ask it to restate the goal more carefully before each step",
         "b": "Plan every step up front, so that no drift is possible",
-        "c": "Hand it the output of each action so far, such as a test run or a file listing",
-        "d": "Switch to a fixed chain, since a chain cannot drift from the code"
+        "c": "Give it the result of each action, such as a test run",
+        "d": "Switch to a fixed chain, which cannot drift from the code"
       },
       "key": "c",
       "explanation": {
         "c": "The planner needs ground truth from each step, not its own earlier guesses.",
         "a": "Ruled out because the source of the drift is what it is shown: \"a plan that is made from the model's own previous guesses drifts\".",
         "b": "Ruled out because an up-front plan has no results to use: \"the plan is made before any ground truth exists\".",
-        "d": "Ruled out because a chain does not adapt: \"If step two finds that step three is pointless, the chain runs step three.\""
+        "d": "Ruled out because an open-ended job in a fixed chain gives \"a pipeline that marches through steps that no longer make sense\", and ground truth, not a chain, cures the drift."
       }
     },
     {
