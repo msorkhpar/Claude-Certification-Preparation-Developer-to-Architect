@@ -128,10 +128,11 @@ def check_quotes(qid, explanation, key, prose):
 
 
 def check_key_quotes(qid, para, explanation):
-    """The folded key on the page quotes the same phrases, in the same order, as the quiz.json explanations."""
-    on_page = [norm(q) for q in QUOTE.findall(para.replace("“", '"').replace("”", '"'))]
-    in_json = [norm(q) for letter in sorted(explanation) for q in QUOTE.findall(explanation[letter])]
-    if sorted(on_page) != sorted(in_json):
+    """The folded key on the page quotes the same phrases as the quiz.json explanations (a multiple-response item
+    repeats the key's explanation under each keyed letter, so the phrases are compared as sets)."""
+    on_page = {norm(q) for q in QUOTE.findall(para.replace("“", '"').replace("”", '"'))}
+    in_json = {norm(q) for text in explanation.values() for q in QUOTE.findall(text)}
+    if on_page != in_json:
         return [f"{qid}: the folded key on the page and quiz.json quote different phrases"]
     return []
 

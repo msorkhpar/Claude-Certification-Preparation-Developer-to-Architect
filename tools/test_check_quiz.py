@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_quiz import (check_multi, keys_longest, parse_page_quizzes, select_count, check_duplicate, check_named_page, check_page_has_quiz, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
+from check_quiz import (check_multi, keys_longest, parse_page_quizzes, select_count, check_duplicate, check_named_page, check_page_has_quiz, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes, check_key_quotes,  # noqa: E402
                         key_is_longest, check_mock_item, check_mock_extremes)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
@@ -66,6 +66,21 @@ expect("clean quotations", check_quotes("t#q1", EXP, "a", PAGE), False)
 expect("plant: option without a quotation", check_quotes("t#q1", dict(EXP, b="Ruled out because it adds nothing."), "a", PAGE), True)
 expect("plant: quotation not on the page", check_quotes("t#q1", dict(EXP, c='Ruled out because "a cap on output is a cap on window".'), "a", PAGE), True)
 expect("plant: quotation under 4 words", check_quotes("t#q1", dict(EXP, d='Ruled out because "remembers nothing".'), "a", PAGE), True)
+
+# (e2) every quoted phrase of 4 or more words in a rule-out is verbatim, not just one of them; the page's folded key and
+# quiz.json quote the same phrases (the same check runs for page quizzes, module quizzes and mock or pool items)
+TWO = dict(EXP, b='Ruled out because "the API remembers nothing" and "your code resends the whole history on every request".')
+expect("clean: two real quotations", check_quotes("t#q1", TWO, "a", PAGE), False)
+expect("plant: one quotation altered", check_quotes("t#q1", dict(EXP, b='Ruled out because "your code resends the full history on every request".'), "a", PAGE), True)
+expect("plant: a real quotation beside an invented one",
+       check_quotes("t#x1", dict(EXP, b='Ruled out because "the API remembers nothing" and "your code keeps the history for you".'), "a", PAGE), True)
+expect("clean: a short quotation beside a real one is not checked",
+       check_quotes("t#m1", dict(EXP, b='Ruled out because "remembers" and "the API remembers nothing".'), "a", PAGE), False)
+PARA = '**a**. The answer. *b* is ruled out because "the API remembers nothing". *c* is ruled out because "a cap on output is not a cap on context". *d* is ruled out because "your code resends the whole history on every request".'
+JSON = {"a": "The answer.", "b": 'Ruled out because "the API remembers nothing".', "c": 'Ruled out because "a cap on output is not a cap on context".',
+        "d": 'Ruled out because "your code resends the whole history on every request".'}
+expect("clean: page key and quiz.json quote the same phrases", check_key_quotes("t#q1", PARA, JSON), False)
+expect("plant: quiz.json quotes a phrase the page key does not", check_key_quotes("t#q1", PARA, dict(JSON, c='Ruled out because "a cap on output is a cap on context".')), True)
 
 # (f) a module question must not restate a page question of the same module
 PAGES = {"p1#q1": "A support chat sends only the latest question and the assistant asks for the order number again."}
