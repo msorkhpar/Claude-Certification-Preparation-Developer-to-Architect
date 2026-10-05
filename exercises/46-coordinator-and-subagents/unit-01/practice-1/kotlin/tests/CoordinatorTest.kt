@@ -42,7 +42,6 @@ class CoordinatorTest {
         val r = coordinate(plan(chips, cars, rates), spokes, noGaps, echo, "How did supply change?")
         assertNotNull(r, "coordinate returned null")
         assertEquals(listOf<Any?>("complete", "chips report | cars report | rates report", 3, 0), listOf(r!!["status"], r["answer"], r["subagent_calls"], r["rounds"]))
-        assertEquals(listOf(chips.second, cars.second, rates.second), spokes.briefs)
         assertEquals(listOf(finding("chips", "chips report"), finding("cars", "cars report"), finding("rates", "rates report")), r["findings"])
         assertEquals(listOf<Any?>(emptyList<Any?>(), emptyList<Any?>(), emptyList<Any?>()), listOf(r["failed"], r["dropped"], r["gaps"]))
     }

@@ -5,6 +5,7 @@ binary's control requests (hooks, permission questions, calls to your in-process
 which speaks the same stream-json protocol and replays a script, so no model is called and no network is used. `claude-agent-sdk`
 0.2.163, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
 """
+import logging
 import asyncio
 import json
 import os
@@ -14,6 +15,8 @@ from pathlib import Path
 
 from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher, PermissionResultAllow, PermissionResultDeny, ResultMessage, SystemMessage,
                               TextBlock, ToolResultBlock, ToolUseBlock, UserMessage, create_sdk_mcp_server, query, tool)
+
+log = logging.getLogger(__name__)
 
 FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
 

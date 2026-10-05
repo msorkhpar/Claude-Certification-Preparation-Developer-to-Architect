@@ -12,6 +12,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.function.Function
 
+private val log = System.getLogger("routing_and_voting")
+
 /**
  * Three workflow patterns around a model, with the code path fixed by the program: routing, sectioning and voting.
  *

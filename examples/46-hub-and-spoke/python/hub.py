@@ -3,10 +3,13 @@
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The point is what each
 request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
 """
+import logging
 import json
 
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PLAN_TOOL = {"name": "plan", "description": "Record the plan: one subtask per independent part of the question, each with a scope and a self-contained brief.",

@@ -3,10 +3,13 @@
 The replies are illustrative, hand-written bodies in the shapes of the context editing and citations pages (claude-sonnet-5-5),
 not captures; the numbers in the context editing response are the documentation's own example.
 """
+import logging
 import copy
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 POLICY = "The grass is green. The sky is blue. Water is essential for life."

@@ -3,8 +3,11 @@
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.
 """
+import logging
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TOOLS = [

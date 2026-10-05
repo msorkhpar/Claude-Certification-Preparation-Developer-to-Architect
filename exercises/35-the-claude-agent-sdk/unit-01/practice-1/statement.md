@@ -19,6 +19,26 @@ so the SDK code you call is the real one.
 | `mode` | `readonly` (the default) or `edit` |
 | `cli_path` | the executable that the SDK starts; the tests pass the stand-in |
 
+## What is already written, and what you write
+
+The starter is the working code with nine small gaps cut out. The path helpers, the options plumbing, `decide`, the hook, `summarize` and
+`run_agent` are written and correct; each gap is a small function with its signature, a comment that says what it receives and returns with
+one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a
+gap, log its input with the `log` line at the top of the file (`log.debug(...)` in Python, `log.debug(...)` on the `logger` in TypeScript);
+a run shows the lines under the failing case. The names are in Python style; TypeScript uses camelCase (`isSecretName`, `makeCanUseTool`).
+
+1. `_is_secret_name` unlocks `e2`: which file names hold secrets.
+2. `_dangerous` unlocks `e3`: `sudo` and `rm -rf`.
+3. `_chained` unlocks `e3`: chaining, pipes, redirection and substitution.
+4. `_command_allowed` unlocks `e3`: the first word against `SAFE_COMMANDS`.
+5. `make_can_use_tool` unlocks `m1` and `e7`: the callback that turns `decide()` into the SDK's allow or deny result.
+6. `_is_push` unlocks `e4`: the whole-word `git push` test.
+7. `build_options` unlocks `e1`: the options that reach the CLI as flags.
+8. `_denied` unlocks `e5` and `e7`: counting the tool results marked as errors.
+9. `_status` unlocks `e5`: the course status of a result subtype.
+
+The sections below describe the whole program; the parts you do not write are there so you can see how your functions are used.
+
 ## What to write
 
 - `decide(tool_name, tool_input, project_dir, mode)` is the permission policy as plain data: `{"behavior": "allow"}` or `{"behavior": "deny",

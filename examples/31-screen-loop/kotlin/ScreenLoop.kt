@@ -18,6 +18,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
+private val log = System.getLogger("screen_loop")
+
 /**
  * The loop around the computer use toolset, on a toy screen: scaling both ways, a batch, a halt after a failure and a confirmation.
  *

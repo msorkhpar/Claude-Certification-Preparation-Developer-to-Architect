@@ -3,10 +3,10 @@
 
 PLANTS[f"{X}/39-extending-claude-code/unit-01/practice-1"] = both("scripts/guard.py", {
     "wrong-push-prefix": [('if program == "git" and git_subcommand(args) == "push":', 'if program == "git" and args[:1] == ["push"]:')],
-    "wrong-rm-literal": [('if program == "rm" and ("r" in short or "R" in short or "--recursive" in args) and ("f" in short or "--force" in args):', 'if program == "rm" and "-rf" in args:')],
-    "wrong-pipe-shell-allowed": [('if program in ("sh", "bash", "zsh") and position > 0 and "-c" not in args:', "if False:")],
-    "wrong-edit-exit-one": [('is protected ({pattern})")\n                return 2', 'is protected ({pattern})")\n                return 1')],
-    "wrong-no-reason": [('                sys.stderr.write(f"Blocked: {path} is protected ({pattern})")\n', "")],
+    "wrong-rm-literal": [('    return program == "rm" and ("r" in short or "R" in short or "--recursive" in args) and ("f" in short or "--force" in args)', '    return program == "rm" and "-rf" in args')],
+    "wrong-pipe-shell-allowed": [('    if program not in SHELLS or position == 0 or "-c" in args:\n        return False\n', "    return False\n")],
+    "wrong-edit-exit-one": [('is protected ({pattern})")\n            return 2', 'is protected ({pattern})")\n            return 1')],
+    "wrong-no-reason": [('            sys.stderr.write(f"Blocked: {path} is protected ({pattern})")\n', "")],
     "wrong-bad-json-allowed": [('        sys.stderr.write("Blocked: the hook event could not be read")\n        return 2\n', "        return 0\n")],
     "wrong-matcher-bash-only": {"hooks/hooks.json": [('"Bash|Edit|Write"', '"Bash"')]},
     "wrong-relative-path": {"hooks/hooks.json": [('python3 \\"${CLAUDE_PLUGIN_ROOT}/scripts/guard.py\\"', "python3 scripts/guard.py")]},
@@ -20,6 +20,7 @@ PLANTS[f"{X}/39-extending-claude-code/unit-01/practice-1"] = both("scripts/guard
 
 PLANTS[f"{X}/39-extending-claude-code/unit-02/practice-1"] = both(".claude-plugin/marketplace.json", {
     "wrong-entry-name-mismatch": [('"name": "standards-kit",\n      "source": "./plugins/standards-kit"', '"name": "standards-toolkit",\n      "source": "./plugins/standards-kit"')],
+    "wrong-official-plugin-name": [('    }\n  ],\n  "renames": {', '    },\n    {\n      "name": "official-claude-tools",\n      "source": { "source": "github", "repo": "example-org/claude-helper", "ref": "v1.0.0", "sha": "1111111111111111111111111111111111111111" },\n      "description": "Looks like an official plugin"\n    }\n  ],\n  "renames": {')],
     "wrong-dotdot-source": [('"source": "./plugins/standards-kit"', '"source": "./plugins/../plugins/standards-kit"')],
     "wrong-reserved-marketplace-name": [('"name": "example-org-tools",\n  "description"', '"name": "claude-plugins-official",\n  "description"')],
     "wrong-hooks-without-wrapper": {"plugins/standards-kit/hooks/hooks.json": [('  "hooks": {\n    "PreToolUse"', '  "handlers": {\n    "PreToolUse"')]},

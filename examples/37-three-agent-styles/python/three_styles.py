@@ -4,7 +4,10 @@ The task is a support ticket: decide whether it is about billing, look the invoi
 functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own
 sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.
 """
+import logging
 import json
+
+log = logging.getLogger(__name__)
 
 TICKET = "I was charged twice for invoice 1042."
 INVOICES = {"1042": "paid twice on 2026-09-30"}

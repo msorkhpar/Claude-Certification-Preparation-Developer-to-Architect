@@ -14,12 +14,16 @@ PRACTICES[f"{X}/30-vision-and-documents/unit-01/practice-1"] = {
         ("e7", "edge", "coordinates map back to the original and cost follows the price"),
     ],
     "plants": {
-        "wrong-edge-only-resize": (["e1"], "sizes an image by the edge limit alone and ignores the visual token budget"),
-        "wrong-text-first": (["m1"], "puts the question before the images"),
+        "wrong-tokens-original-size": (["e1"], "counts the tokens of the original size, not of the size the model sees"),
         "wrong-no-labels": (["m1"], "does not label the images when there are several"),
         "wrong-padded-coordinates": (["e7"], "divides a returned coordinate by the padded height instead of the resized height"),
         "wrong-same-limit-all-models": (["e2"], "allows 600 images for every model, including the 200k-context one"),
         "wrong-many-image-rule": (["e3"], "ignores the 2000 pixel limit that applies above 20 images"),
         "wrong-exact-silent": (["e4"], "lets an oversized image through even when its exact size matters"),
+        "wrong-pdf-pages-ignored": (["e5"], "does not limit a request by the number of PDF pages"),
+        "wrong-pdfs-after-images": (["e5"], "puts every PDF after the images instead of keeping the order of the items"),
+        "wrong-cloud-url-allowed": (["e6"], "accepts url and file sources on bedrock and vertex"),
+        "wrong-cloud-image-size": (["e6"], "allows a 10 MiB image on bedrock and vertex, where the limit is 5 MiB"),
+        "wrong-no-clamp": (["e7"], "does not clamp a returned point into the resized image"),
     },
 }

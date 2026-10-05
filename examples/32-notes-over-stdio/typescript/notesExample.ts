@@ -9,6 +9,8 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { logger } from "./logger.ts";
+const log = logger("notes_example");
 
 const textOf = (result: any) => (result.content ?? []).map((c: any) => c.text ?? "").join("");
 const fail = (text: string) => ({ isError: true, content: [{ type: "text" as const, text }] });

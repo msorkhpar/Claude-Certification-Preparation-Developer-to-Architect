@@ -28,11 +28,14 @@ Base64 has a cost that grows with the conversation: "each request resends the fu
 The model reply is illustrative, a hand-written body in the shape of the Messages API (claude-sonnet-5-5), not a capture. The resize
 rule is the reference implementation of the "Coordinates and bounding boxes" page of the Claude documentation, checked on 2026-10-03.
 """
+import logging
 import json
 import math
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TIERS = {"standard": (1568, 1568), "high": (2576, 4784)}  # tier -> (longest edge in pixels, visual token budget)
@@ -152,6 +155,8 @@ dividing by the padded size instead gives (537.5, 755.4), 5.2 pixels off
 // rule is the reference implementation of the "Coordinates and bounding boxes" page of the Claude documentation, checked on 2026-10-03.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("image_blocks");
 
 export const MODEL = "claude-sonnet-5-5";
 const TIERS: Record<string, [number, number]> = { standard: [1568, 1568], high: [2576, 4784] }; // tier -> [longest edge in pixels, visual token budget]
@@ -292,6 +297,7 @@ import java.util.stream.Collectors;
  * rule is the reference implementation of the "Coordinates and bounding boxes" page of the Claude documentation, checked on 2026-10-03.
  */
 public final class ImageBlocks {
+    private static final System.Logger LOG = System.getLogger(ImageBlocks.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     /** tier to {longest edge in pixels, visual token budget} */
     static final Map<String, int[]> TIERS = Map.of("standard", new int[] {1568, 1568}, "high", new int[] {2576, 4784});
@@ -466,6 +472,8 @@ import harness.Scripted.text
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
+
+private val log = System.getLogger("image_blocks")
 
 /**
  * Image and document blocks: three kinds of source, a labelled comparison, the resize rule, the cost and the way back.

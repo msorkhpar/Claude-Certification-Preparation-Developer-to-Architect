@@ -7,6 +7,8 @@
 // 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.
 import { readFileSync } from "node:fs";
 import { splitFrontmatter } from "./miniyaml.ts";
+import { logger } from "./logger.ts";
+const log = logger("hook_gate");
 
 const PROTECTED = [".env", "package-lock.json", ".git/"];
 

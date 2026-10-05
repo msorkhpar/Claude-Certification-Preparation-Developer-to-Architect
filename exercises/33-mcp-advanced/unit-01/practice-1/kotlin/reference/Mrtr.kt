@@ -3,6 +3,8 @@ import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
+private val log = System.getLogger("mrtr")
+
 /** An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md. Requests and results are JSON-like maps. */
 
 const val VERSION = "2026-07-28"
@@ -61,8 +63,10 @@ private fun meta(request: Map<String, Any?>): Map<String, Any?> = (request["_met
 private fun metaError(request: Map<String, Any?>): Map<String, Any?>? =
     if (meta(request)[META_VERSION] != VERSION) error(-32022, "Unsupported protocol version", mapOf("supported" to listOf(VERSION))) else null
 
-fun listTools(request: Map<String, Any?>): Map<String, Any?> =
-    metaError(request) ?: mapOf("resultType" to "complete", "tools" to TOOLS.sortedBy { it["name"] as String }, "ttlMs" to 300000, "cacheScope" to "public")
+private fun toolListing(): Map<String, Any?> =
+    mapOf("resultType" to "complete", "tools" to TOOLS.sortedBy { it["name"] as String }, "ttlMs" to 300000, "cacheScope" to "public")
+
+fun listTools(request: Map<String, Any?>): Map<String, Any?> = metaError(request) ?: toolListing()
 
 private fun complete(text: String, isError: Boolean = false): Map<String, Any?> =
     mapOf("resultType" to "complete", "content" to listOf(mapOf("type" to "text", "text" to text)), "isError" to isError)
@@ -73,44 +77,71 @@ private fun confirmRequest(service: String): Map<String, Any?> = mapOf("confirm"
 private fun notesRequest(service: String): Map<String, Any?> = mapOf("notes" to mapOf("method" to "sampling/createMessage", "params" to mapOf(
     "messages" to listOf(mapOf("role" to "user", "content" to mapOf("type" to "text", "text" to "Write one sentence of release notes for $service."))), "maxTokens" to 100)))
 
+private fun newState(name: Any?, arguments: Map<String, Any?>, principal: String, now: Long, step: String): Map<String, Any?> =
+    mapOf("v" to 1, "tool" to name, "digest" to argsDigest(arguments), "sub" to principal, "exp" to now + TTL_SECONDS, "step" to step)
+
+private fun validate(name: Any?, arguments: Map<String, Any?>): Map<String, Any?>? {
+    if (name != "deploy" && name != "status") return error(-32602, "Unknown tool: $name")
+    val service = arguments["service"]
+    if (service !is String || service.isBlank()) return error(-32602, "Invalid params: service is required")
+    if (name == "deploy" && arguments["env"] != "staging" && arguments["env"] != "production") return error(-32602, "Invalid params: env must be staging or production")
+    return null
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun canElicit(caps: Map<String, Any?>): Boolean {
+    val elicitation = caps["elicitation"] as? Map<String, Any?>
+    return elicitation != null && (elicitation.isEmpty() || elicitation.containsKey("form"))
+}
+
+private fun stateError(secret: String, token: String, principal: String, name: Any?, arguments: Map<String, Any?>, now: Long): Map<String, Any?>? {
+    val state = readState(secret, token) ?: return error(-32602, "Invalid requestState")
+    if (now > ((state["exp"] as? Number)?.toLong() ?: 0L)) return error(-32602, "Expired requestState")
+    if (state["sub"] != principal || state["tool"] != name || state["digest"] != argsDigest(arguments)) return error(-32602, "requestState does not match this request")
+    return null
+}
+
+private fun confirmUsable(answer: Any?): Boolean = answer is Map<*, *> && answer["action"] in listOf("accept", "decline", "cancel")
+
+private fun confirmed(answer: Map<String, Any?>): Boolean =
+    answer["action"] == "accept" && ((answer["content"] as? Map<*, *>)?.get("confirm")) == true
+
+private fun notesText(answers: Map<String, Any?>): String? {
+    val content = (answers["notes"] as? Map<*, *>)?.get("content") as? Map<*, *>
+    return content?.get("text") as? String
+}
+
 private fun ask(requests: Map<String, Any?>, step: String, secret: String, name: String, arguments: Map<String, Any?>, principal: String, now: Long): Map<String, Any?> {
-    val state = mapOf("v" to 1, "tool" to name, "digest" to argsDigest(arguments), "sub" to principal, "exp" to now + TTL_SECONDS, "step" to step)
+    val state = newState(name, arguments, principal, now, step)
     return mapOf("resultType" to "input_required", "inputRequests" to requests, "requestState" to mintState(secret, state))
 }
 
 @Suppress("UNCHECKED_CAST")
 fun callTool(request: Map<String, Any?>, secret: String, principal: String, now: Long): Map<String, Any?> {
+    log.log(System.Logger.Level.DEBUG, "callTool input: {0}", request)
     metaError(request)?.let { return it }
     val name = request["name"]
     val arguments = (request["arguments"] as? Map<String, Any?>) ?: emptyMap()
-    if (name != "deploy" && name != "status") return error(-32602, "Unknown tool: $name")
-    val service = arguments["service"]
-    if (service !is String || service.isBlank()) return error(-32602, "Invalid params: service is required")
+    validate(name, arguments)?.let { return it }
+    val service = arguments["service"] as String
     if (name == "status") return complete("$service: running")
-    val env = arguments["env"]
-    if (env != "staging" && env != "production") return error(-32602, "Invalid params: env must be staging or production")
-    if (env == "staging") return complete("Deployed $service to staging")
+    if (arguments["env"] == "staging") return complete("Deployed $service to staging")
     val caps = (meta(request)[META_CAPS] as? Map<String, Any?>) ?: emptyMap()
-    val elicitation = caps["elicitation"] as? Map<String, Any?>
-    if (elicitation == null || (elicitation.isNotEmpty() && !elicitation.containsKey("form"))) return complete("Deploying to production needs confirmation, and this client cannot be asked.", true)
+    if (!canElicit(caps)) return complete("Deploying to production needs confirmation, and this client cannot be asked.", true)
     var step = "confirm"
     val token = request["requestState"]
     if (token != null) {
-        val state = readState(secret, token.toString()) ?: return error(-32602, "Invalid requestState")
-        if (now > ((state["exp"] as? Number)?.toLong() ?: 0L)) return error(-32602, "Expired requestState")
-        if (state["sub"] != principal || state["tool"] != name || state["digest"] != argsDigest(arguments)) return error(-32602, "requestState does not match this request")
-        step = state["step"].toString()
+        stateError(secret, token.toString(), principal, name, arguments, now)?.let { return it }
+        step = readState(secret, token.toString())?.get("step").toString()
     }
     val answers = if (token != null) (request["inputResponses"] as? Map<String, Any?>) ?: emptyMap() else emptyMap()
     if (step == "confirm") {
-        val answer = answers["confirm"] as? Map<String, Any?>
-        if (answer == null || answer["action"] !in listOf("accept", "decline", "cancel")) return ask(confirmRequest(service), "confirm", secret, "deploy", arguments, principal, now)
-        val confirmed = ((answer["content"] as? Map<String, Any?>)?.get("confirm")) == true
-        if (answer["action"] != "accept" || !confirmed) return complete("Deployment cancelled")
+        val answer = answers["confirm"]
+        if (!confirmUsable(answer)) return ask(confirmRequest(service), "confirm", secret, "deploy", arguments, principal, now)
+        if (!confirmed(answer as Map<String, Any?>)) return complete("Deployment cancelled")
         if (!caps.containsKey("sampling")) return complete("Deployed $service to production")
         return ask(notesRequest(service), "notes", secret, "deploy", arguments, principal, now)
     }
-    val content = (answers["notes"] as? Map<String, Any?>)?.get("content") as? Map<String, Any?>
-    val text = content?.get("text") as? String ?: return ask(notesRequest(service), "notes", secret, "deploy", arguments, principal, now)
+    val text = notesText(answers) ?: return ask(notesRequest(service), "notes", secret, "deploy", arguments, principal, now)
     return complete("Deployed $service to production. Release notes: $text")
 }

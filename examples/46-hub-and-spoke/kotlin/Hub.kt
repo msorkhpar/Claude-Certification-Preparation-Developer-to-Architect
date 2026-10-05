@@ -12,6 +12,8 @@ import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
 
+private val log = System.getLogger("hub")
+
 /**
  * Hub and spoke on the Messages API: a coordinator plans by calling a plan tool, each subagent is its own conversation, the coordinator synthesizes.
  *

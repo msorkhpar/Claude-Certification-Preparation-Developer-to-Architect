@@ -107,10 +107,13 @@ checks a cited answer, then tampers with one `cited_text` to show the check fail
 The replies are illustrative, hand-written bodies in the shapes of the context editing and citations pages (claude-sonnet-5-5),
 not captures; the numbers in the context editing response are the documentation's own example.
 """
+import logging
 import copy
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 POLICY = "The grass is green. The sky is blue. Water is essential for life."
@@ -235,6 +238,8 @@ Sources:
 // not captures; the numbers in the context editing response are the documentation's own example.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("context_trimming");
 
 export const MODEL = "claude-sonnet-5-5";
 export const POLICY = "The grass is green. The sky is blue. Water is essential for life.";
@@ -400,6 +405,7 @@ import java.util.Map;
  * Messages are JSON trees (Jackson), the same shape the API takes; the SDK's own types read them for the beta call.
  */
 public final class ContextTrimming {
+    private static final System.Logger LOG = System.getLogger(ContextTrimming.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String POLICY = "The grass is green. The sky is blue. Water is essential for life.";
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -573,6 +579,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
+
+private val log = System.getLogger("context_trimming")
 
 /**
  * Clearing old tool results, asking the API to clear them, and checking the citations in an answer.

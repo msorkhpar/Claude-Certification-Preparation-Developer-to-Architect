@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
  * The settings files are JSON, read with Jackson into maps.
  */
 public final class SettingsLayers {
+    private static final System.Logger LOG = System.getLogger(SettingsLayers.class.getName());
     static final List<String> LEVELS = List.of("managed", "command line", "local", "project", "user"); // highest precedence first
     static final List<String> REPO_LEVELS = List.of("project", "local"); // files that live in the repository
     private static final ObjectMapper JSON = new ObjectMapper();

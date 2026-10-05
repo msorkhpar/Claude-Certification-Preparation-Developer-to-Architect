@@ -128,6 +128,7 @@ class ProjectSetupTest {
     @Test
     void e4_theCustomCommandIsASkillThatOnlyAPersonCanStart() throws IOException {
         String text = read(".claude/skills/fix-issue/SKILL.md");
+        assertTrue(text.startsWith("---") && text.indexOf("\n---", 3) >= 0, "the skill needs front matter between two --- lines");
         Map<String, Object> fm = HookGate.frontmatter(text);
         String body = text.substring(text.indexOf("\n---", 3) + 4);
         assertTrue("fix-issue".equals(fm.get("name")) && fm.get("description") != null && !String.valueOf(fm.get("description")).isBlank(), "name and description are required");

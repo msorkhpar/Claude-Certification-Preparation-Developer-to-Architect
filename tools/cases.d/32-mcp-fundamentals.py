@@ -14,12 +14,14 @@ PRACTICES[f"{X}/32-mcp-fundamentals/unit-01/practice-1"] = {
         ("e7", "edge", "ids are sequential and a failed call does not use one"),
     ],
     "plants": {
-        "wrong-error-not-flagged": (["e2"], "reports bad input as an ordinary result instead of a tool error"),
+        "wrong-limit-default": (["e1"], "states 10 as the default limit in the search tool's input schema"),
+        "wrong-long-not-flagged": (["e2"], "saves a text longer than 500 characters instead of refusing it with a tool error"),
+        "wrong-limit-bound": (["e2"], "accepts a limit of 21"),
         "wrong-case-sensitive": (["e3"], "matches the query only with the same letter case"),
         "wrong-no-limit": (["e3"], "returns every hit and ignores the limit argument"),
         "wrong-read-only-unmarked": (["e4"], "does not mark the search tool as read-only"),
         "wrong-plural": (["e5"], "says 1 notes instead of 1 note"),
         "wrong-default-tone": (["e6"], "uses another default tone when the client gives none"),
-        "wrong-no-trim": (["e7"], "keeps the spaces around a title and a text, so a blank one passes as given"),
+        "wrong-saves-untrimmed": (["e7"], "saves the title and text with the spaces around them and answers with the untrimmed title"),
     },
 }

@@ -18,6 +18,25 @@ is a function that the tests pass in.
 | citation | `{"type": "char_location", "cited_text", "document_index", "start_char_index", "end_char_index"}`; the span is `text[start:end]` of that document, end excluded |
 | document | `{"title", "text"}` |
 
+## What is already written, and what you write
+
+The starter is the working module with seven gaps cut out of it. Everything else is written and correct: the token count, the turn test,
+the cloning, the citation walk and the footnote text. Each gap is a small function with its signature, a comment that says what it
+receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on
+an assertion. To debug a gap, log its input with the `log` line at the top of the file (`split_turns` already logs its input at debug
+level); a run shows the logged lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):
+
+1. `split_turns` unlocks `m1`, `e2` and `e3`: group the messages into turns.
+2. `_clear_oldest` unlocks `e1`: replace the content of every result but the newest `keep`.
+3. `_trim` unlocks `e2`: drop the oldest turns while the conversation is over budget, never the last.
+4. `_leave_alone` unlocks `e3`: when compaction has nothing to do.
+5. `_with_summary` unlocks `m1` and `e4`: put the summary block first in the first kept message.
+6. `_span_problem` unlocks `e5`: `bad_range` or `text_mismatch` for a citation whose document exists.
+7. `_number_for` unlocks `e6`: give a new span the next number.
+
+About twenty lines in all. The sections below describe the whole module; the parts you do not write are there so you can see how your
+functions are used.
+
 ## What to write
 
 - `split_turns(messages)`: the messages as a list of turns. A turn starts at a user message that is not made only of tool result

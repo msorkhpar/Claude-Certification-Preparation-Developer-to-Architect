@@ -32,6 +32,7 @@ import tools.jackson.databind.ObjectMapper;
  * local: the server is a child process and the two sides talk through pipes. `io.modelcontextprotocol.sdk:mcp` 2.0.1, checked on 2026-10-04.
  */
 public final class NotesExample {
+    private static final System.Logger LOG = System.getLogger(NotesExample.class.getName());
     /** The server's state and the four things it offers. The tool schemas are written out: the Java SDK does not derive them from code. */
     static final class Notes {
         final List<String> titles = new ArrayList<>();

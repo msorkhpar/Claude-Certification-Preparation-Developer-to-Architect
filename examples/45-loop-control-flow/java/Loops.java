@@ -26,6 +26,7 @@ import java.util.Map;
  * Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.
  */
 public final class Loops {
+    private static final System.Logger LOG = System.getLogger(Loops.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static Tool tool(String name, String description, String property, String type) {

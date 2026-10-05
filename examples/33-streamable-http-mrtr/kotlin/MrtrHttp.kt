@@ -55,6 +55,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+private val log = System.getLogger("mrtr_http")
+
 /**
  * A tool that asks for a person's confirmation and for a model completion, over Streamable HTTP on the loopback interface.
  *

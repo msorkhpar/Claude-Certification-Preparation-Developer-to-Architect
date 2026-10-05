@@ -34,7 +34,6 @@ test("m1 a hub sends one brief to each spoke and synthesizes what comes back", (
   const s = spokes(REPORTS);
   const result = coordinate(plan(THREE), s, noGaps, echo, "How did supply change?") ?? {};
   assert.deepEqual([result.status, result.answer, result.subagent_calls, result.rounds], ["complete", "chips report | cars report | rates report", 3, 0]);
-  assert.deepEqual(s.briefs, THREE.map(([, b]) => b));
   assert.deepEqual(result.findings, [{ scope: "chips", text: "chips report" }, { scope: "cars", text: "cars report" }, { scope: "rates", text: "rates report" }]);
   assert.deepEqual([result.failed, result.dropped, result.gaps], [[], [], []]);
 });

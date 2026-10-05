@@ -49,17 +49,17 @@
     }
   },
   "plants": {
-    "wrong-inherits-all-tools": {
-      "caught_by": [
-        "e1"
-      ],
-      "defect": "leaves the tools out of a definition that lists none, so the subagent inherits every tool"
-    },
     "wrong-allows-nesting": {
       "caught_by": [
         "e1"
       ],
       "defect": "keeps the Agent tool in a subagent's own tool list"
+    },
+    "wrong-empty-list-widened": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "treats an explicitly empty tool list as no list and hands out the read only tools"
     },
     "wrong-name-unchecked": {
       "caught_by": [
@@ -67,17 +67,23 @@
       ],
       "defect": "accepts any agent name"
     },
+    "wrong-blank-description-accepted": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts a description that is only spaces"
+    },
     "wrong-no-depth-limit": {
       "caught_by": [
         "e3"
       ],
       "defect": "does not limit how deep subagents may nest"
     },
-    "wrong-budget-dropped": {
+    "wrong-concurrency-fixed": {
       "caught_by": [
         "e3"
       ],
-      "defect": "forgets to pass the budget limit to the options"
+      "defect": "ignores the requested number of subagents at once"
     },
     "wrong-only-new-name": {
       "caught_by": [
@@ -85,17 +91,23 @@
       ],
       "defect": "recognises a spawn only under the current tool name"
     },
-    "wrong-counts-everything": {
+    "wrong-tools-repeated": {
       "caught_by": [
         "e5"
       ],
-      "defect": "credits the coordinator's own messages to the first subagent"
+      "defect": "lists a tool once for every time it was used inside the subagent"
     },
     "wrong-brief-drops-facts": {
       "caught_by": [
         "e6"
       ],
       "defect": "leaves the known facts out of the brief"
+    },
+    "wrong-blank-items-kept": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps blank items as empty list lines in the brief"
     },
     "wrong-first-source-only": {
       "caught_by": [
@@ -108,6 +120,12 @@
         "e7"
       ],
       "defect": "writes the source into the claim text"
+    },
+    "wrong-run-keeps-nothing": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "collects no message of the run"
     }
   }
 }

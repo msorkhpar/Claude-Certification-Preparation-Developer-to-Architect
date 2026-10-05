@@ -5,9 +5,12 @@ the job needs, use the v1 action, cap the work of each run with --max-turns, a t
 comments that mention @claude, and check the repository out before a skill from it can run. Reading the workflow is plain data work:
 nothing here needs a runner, a key or a network.
 """
+import logging
 import re
 
 from miniyaml import parse_yaml
+
+log = logging.getLogger(__name__)
 
 CLAUDE_ACTION = "anthropics/claude-code-action"
 

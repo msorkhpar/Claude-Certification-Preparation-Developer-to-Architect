@@ -16,9 +16,9 @@ PRACTICES[f"{X}/45-the-agentic-loop-in-depth/unit-01/practice-1"] = {
         "wrong-text-marker": (["e1"], "ends the run when the text says done, even if the reply also calls a tool"),
         "wrong-cap-reports-done": (["e4"], "reports a run that hit the turn limit as done"),
         "wrong-cap-off-by-one": (["e4"], "allows one model call more than the turn limit"),
-        "wrong-results-split": (["e2"], "answers each tool call of a turn in its own user message"),
+        "wrong-assistant-trimmed": (["e2"], "keeps only the tool calls of an assistant turn and drops its text"),
         "wrong-error-without-flag": (["e3"], "sends a failing tool's message back as an ordinary result"),
         "wrong-truncated-is-done": (["e5"], "treats a reply cut off by max_tokens as a finished one"),
-        "wrong-malformed-continues": (["e6"], "sends an empty user message and calls the model again after a tool use reply with no call"),
+        "wrong-malformed-continues": (["e6"], "reports a tool use reply without a tool call as an unexpected stop reason"),
     },
 }

@@ -8,6 +8,26 @@ their sources. Write those parts. The practice is in Python and TypeScript only,
 runs the Claude Code command line as a subprocess, or builds the team on the Messages API as the examples of module 46 do. Pick your language folder (`python` or `typescript`), open `starter/` and edit the file there. The tests never call a model: the last case starts the
 SDK against the course's stand-in for the Claude Code binary, so the SDK code that you call is the real one.
 
+## What is already written, and what you write
+
+The starter is the working module with nine small gaps cut out. The `build_options`, `spawned`, `by_subagent`, `make_brief`, `package_finding`,
+`merge_findings` and `run_team` functions are written and call the gaps. Each gap is a small function with its signature, a comment that says what it
+receives and returns with one example, and the cases it unlocks; it returns a neutral value, so the starter runs and fails the cases on an
+assertion. To debug a gap, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing
+case. Names are Python's; the TypeScript names are in camel case. Write them in this order:
+
+1. `_valid_name` unlocks `e2`: which names are legal.
+2. `_complete` unlocks `e2`: a description and a prompt that are not blank.
+3. `_agent_tools` unlocks `e1`: the read-only default, no `Agent`, an empty list stays empty.
+4. `_limit_env` unlocks `e3`: the depth and concurrency variables.
+5. `_is_spawn` unlocks `e4` (and `e8`): the two tool names that start a subagent.
+6. `_note_tools` unlocks `e5` (and `e8`): each inner tool once, in order.
+7. `_section` unlocks `e6`: one section of the brief.
+8. `_source` unlocks `e7`: only the parts of a source that were given.
+9. `_add_source` unlocks `e7`: every different source of a merged claim.
+
+About ten lines in all. The sections below describe the whole module; the parts you do not write are there so you can see how your functions are used.
+
 ## What to write
 
 Names are Python's; the TypeScript names are in camel case (`buildOptions`, `bySubagent`, `makeBrief`, `packageFinding`, `mergeFindings`,

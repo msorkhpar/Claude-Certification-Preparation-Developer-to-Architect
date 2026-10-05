@@ -5,6 +5,8 @@
 // "Computer use tool" page of the Claude documentation, checked on 2026-10-03.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("screen_loop");
 
 export const MODEL = "claude-sonnet-5-5";
 export const TOOLSET = { type: "computer_toolset_20260801" };

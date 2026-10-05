@@ -3,6 +3,8 @@
 // not captures; the numbers in the context editing response are the documentation's own example.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("context_trimming");
 
 export const MODEL = "claude-sonnet-5-5";
 export const POLICY = "The grass is green. The sky is blue. Water is essential for life.";

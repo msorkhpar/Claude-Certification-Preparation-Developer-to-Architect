@@ -95,6 +95,7 @@ class ProjectSetupTest {
     @Test
     fun e4_theCustomCommandIsASkillThatOnlyAPersonCanStart() {
         val text = read(".claude/skills/fix-issue/SKILL.md")
+        assertTrue(text.startsWith("---") && text.indexOf("\n---", 3) >= 0, "the skill needs front matter between two --- lines")
         val fm = frontmatter(text)
         val body = text.substring(text.indexOf("\n---", 3) + 4)
         assertTrue(fm["name"] == "fix-issue" && !fm["description"]?.toString().isNullOrBlank(), "name and description are required")

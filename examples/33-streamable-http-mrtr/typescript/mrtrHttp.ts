@@ -12,6 +12,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { CreateMessageRequestSchema, ElicitRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { logger } from "./logger.ts";
+const log = logger("mrtr_http");
 
 const text = (t: string) => ({ content: [{ type: "text" as const, text: t }] });
 

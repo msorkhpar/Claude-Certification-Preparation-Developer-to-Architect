@@ -13,6 +13,22 @@ keeps the conversation in a state the API accepts. Pick your language folder (`p
 | `tools` | a map from a tool name to a handler: a function from the input map to a string; it may throw |
 | `task` | the first user message, a string |
 
+## What is already written, and what you write
+
+The starter is a working loop with six small gaps cut out. The loop itself, the tool runner and the outcome are written and correct; each gap is a
+small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a
+neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the
+file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):
+
+1. `_text` unlocks `m1` and `e5`: the text blocks of a reply joined together.
+2. `_calls` unlocks `e2` and `e6`: the `tool_use` blocks of a reply, in order.
+3. `_tool_result` unlocks `m1`, `e2` and `e3`: one result block, with `is_error` only when flagged.
+4. `_status_for` unlocks `m1`, `e5` and `e6`: the status for each stop reason that ends the run, including `malformed` for `tool_use` with no call.
+5. `_at_limit` unlocks `e4`: whether the turn limit has been reached before the next model call.
+6. `_snapshot` unlocks `m1`: the copy of the messages the model is handed.
+
+About ten lines in all. The sections below describe the whole loop.
+
 ## What to write
 
 `run_agent(model, tools, task, max_turns=8)` (`runAgent` in TypeScript, Java and Kotlin) returns

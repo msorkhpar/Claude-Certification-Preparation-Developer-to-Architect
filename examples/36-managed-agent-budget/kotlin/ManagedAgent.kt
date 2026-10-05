@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 
+private val log = System.getLogger("managed_agent")
+
 /**
  * Managed Agents, checked offline: lint the configuration you would send, and price a session against its budget.
  *

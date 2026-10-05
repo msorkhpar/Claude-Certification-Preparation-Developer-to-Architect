@@ -58,7 +58,10 @@ the highest level winning a scalar key and lists combining; permission rules are
 match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a
 teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 LEVELS = ["managed", "command line", "local", "project", "user"]  # highest precedence first
 REPO_LEVELS = ("project", "local")  # files that live in the repository
@@ -237,6 +240,8 @@ memory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CL
 // the highest level winning a scalar key and lists combining; permission rules are checked deny, then ask, then allow, with the first
 // match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a
 // teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.
+import { logger } from "./logger.ts";
+const log = logger("settings_layers");
 
 type Json = Record<string, any>;
 type Kind = "allow" | "ask" | "deny";
@@ -412,6 +417,7 @@ import java.util.stream.Collectors;
  * The settings files are JSON, read with Jackson into maps.
  */
 public final class SettingsLayers {
+    private static final System.Logger LOG = System.getLogger(SettingsLayers.class.getName());
     static final List<String> LEVELS = List.of("managed", "command line", "local", "project", "user"); // highest precedence first
     static final List<String> REPO_LEVELS = List.of("project", "local"); // files that live in the repository
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -647,6 +653,8 @@ memory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CL
 ```
 ```kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
+
+private val log = System.getLogger("settings_layers")
 
 /**
  * Claude Code settings layers, permission rules and memory files, resolved offline.

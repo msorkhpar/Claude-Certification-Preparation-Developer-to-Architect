@@ -2,6 +2,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import kotlin.system.exitProcess
 
+private val log = System.getLogger("hook_gate")
+
 /**
  * A PreToolUse hook that blocks destructive commands, and a linter for skill and subagent files.
  *

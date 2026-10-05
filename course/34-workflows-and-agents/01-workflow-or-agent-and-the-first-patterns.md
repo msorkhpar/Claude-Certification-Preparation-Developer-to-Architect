@@ -61,10 +61,13 @@ The model replies are illustrative, hand-written bodies in the shape of the Mess
 by looking at its prompt, so the order in which concurrent requests arrive does not matter. The patterns are those of Anthropic's
 engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
 """
+import logging
 import asyncio
 
 from harness import scripted_async_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 CHEAP, STRONG = "claude-haiku-4-5", "claude-sonnet-5-5"
 ROUTES = {"billing": (STRONG, "You are a billing specialist. Be exact about amounts."), "technical": (STRONG, "You are a support engineer. Ask for logs."),
@@ -157,6 +160,8 @@ voting: votes {'SAFE': 1, 'VULNERABLE': 2}, threshold 3 -> not flagged, requests
 // engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("routing_and_voting");
 
 export const CHEAP = "claude-haiku-4-5", STRONG = "claude-sonnet-5-5";
 const ROUTES: Record<string, [string, string]> = {
@@ -268,6 +273,7 @@ import java.util.function.Function;
  * engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
  */
 public final class RoutingAndVoting {
+    private static final System.Logger LOG = System.getLogger(RoutingAndVoting.class.getName());
     static final String CHEAP = "claude-haiku-4-5", STRONG = "claude-sonnet-5-5";
 
     /** A route: the model and the system prompt a label maps to. */
@@ -407,6 +413,8 @@ import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.function.Function
+
+private val log = System.getLogger("routing_and_voting")
 
 /**
  * Three workflow patterns around a model, with the code path fixed by the program: routing, sectioning and voting.

@@ -15,6 +15,26 @@ A platform team ships one plugin from its own repository and lists two more that
 
 The starter holds the files unfinished. All JSON files are strict JSON: a comment or a trailing comma is an error.
 
+## What is already written, and what you write
+
+The starter is the marketplace with nine gaps cut out. The catalog's name, owner and descriptions, the `standards-kit` entry, the `db-tools`
+source, the manifest's name, author, licence and keywords, the shape of the hook file and the MCP file, and the guard script and server
+stand-in are written. JSON cannot carry a comment, so the gaps are listed here; each is an empty value (`{}`, `[]`, `""` or an empty
+front matter field) in the file named. A gap is neutral, so the starter loads and fails the cases on an assertion. Write them in this order:
+
+1. `.claude-plugin/marketplace.json`, the third entry: its `name`, `lint-helper`, unlocks `e1`, and its `source` unlocks `m1` and `e4`: a `github` source, `owner/name`, pinned by `ref` and `sha`.
+2. The same file, the `dependencies` of `db-tools` unlocks `e5`: `audit-logger` from the marketplace `shared-tools`.
+3. The same file, `allowCrossMarketplaceDependenciesOn` unlocks `e5`: the root marketplace names `shared-tools`.
+4. The same file, `renames` unlocks `e7`: `std-kit` to `standards-kit` and `old-linter` to `null`.
+5. `plugins/standards-kit/.claude-plugin/plugin.json` unlocks `e3` and `e5`: the semantic `version` and the dependency with its range.
+6. `plugins/standards-kit/hooks/hooks.json` unlocks `e2`: the `matcher` and the `command` through `${CLAUDE_PLUGIN_ROOT}`.
+7. `plugins/standards-kit/.mcp.json` unlocks `e2`: the `args` that reach the server code through `${CLAUDE_PLUGIN_ROOT}`.
+8. `plugins/standards-kit/skills/changelog/SKILL.md` unlocks `e2` and `e8`: `description`, `allowed-tools` and the instructions.
+9. `.claude/settings.json` unlocks `e6`: the `source` of the registered marketplace and the enabled plugin.
+
+About fourteen lines in all. If a case fails, read the assertion message under it: it names the file and the rule. These files have no code to log
+from; the tests read them, and a failing case shows what it expected and what it found.
+
 ## What to write
 
 1. **The marketplace file.** A `name` of `example-org-tools`, a `description`, an `owner` with a `name` (an e-mail, if you give one, ends in `@example.com`) and a `plugins` array of three entries,

@@ -4,6 +4,8 @@
 // request contains: a subagent's request holds its brief and nothing else, and only the synthesis request holds the findings.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("hub");
 
 export const MODEL = "claude-sonnet-5-5";
 const PLAN_TOOL: Anthropic.Tool = {

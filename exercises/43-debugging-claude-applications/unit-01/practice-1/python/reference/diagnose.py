@@ -1,5 +1,8 @@
 """Diagnose a failure from a trace. See ../../statement.md."""
 import json
+import logging
+
+log = logging.getLogger(__name__)
 
 HTTP = {
     400: ("invalid_request", "integration", "fix_request"),
@@ -21,19 +24,27 @@ STOP = {
 }
 
 
-def _http(event):
-    status = event.get("status", 0)
-    if status == 429:
-        if "retry-after" in event.get("headers", {}):
-            return ("rate_limit", "service", "wait_retry_after")
-        if event.get("error_code") == "enforced_spend_limit_reached":
-            return ("spend_cap", "account", "wait_for_reset")
-        return ("rate_limit", "service", "retry_backoff")
-    if status == 400 and "spend limit" in event.get("message", "").lower():
-        return ("spend_limit", "account", "raise_limit")
+def _rate_limit(event):
+    if "retry-after" in event.get("headers", {}):
+        return ("rate_limit", "service", "wait_retry_after")
+    if event.get("error_code") == "enforced_spend_limit_reached":
+        return ("spend_cap", "account", "wait_for_reset")
+    return ("rate_limit", "service", "retry_backoff")
+
+
+def _by_status(status):
     if status in HTTP:
         return HTTP[status]
     return HTTP[500] if status >= 500 else HTTP[400]
+
+
+def _http(event):
+    status = event.get("status", 0)
+    if status == 429:
+        return _rate_limit(event)
+    if status == 400 and "spend limit" in event.get("message", "").lower():
+        return ("spend_limit", "account", "raise_limit")
+    return _by_status(status)
 
 
 def _has_json_object(text):
@@ -46,6 +57,30 @@ def _has_json_object(text):
         return False
 
 
+def _empty_origin(last_blocks):
+    if "tool_result" in last_blocks and "text" in last_blocks[last_blocks.index("tool_result"):]:
+        return ("empty_response", "integration", "remove_text_after_tool_result")
+    return ("empty_response", "model", "add_continue_prompt")
+
+
+def _tool_failure(event, tools):
+    kind = event.get("kind")
+    if kind == "tool_call" and tools is not None and event.get("name") not in tools:
+        return ("unknown_tool", "model", "return_error_result")
+    if kind == "tool_result" and event.get("exception"):
+        return ("tool_exception", "integration", "fix_tool_code")
+    return None
+
+
+def _recovered(trace, i):
+    return any(e.get("kind") == "response" and e.get("status") == 200 and e.get("stop_reason") == "end_turn" and e.get("content")
+               for e in trace[i + 1:])
+
+def _stop_failure(reason):
+    """The triple for a successful response that still failed by its stop reason, or None."""
+    return STOP.get(reason)
+
+
 def _classify(trace, i, tools, last_blocks):
     """The (type, origin, recovery) of one event, or None when the event is not a failure."""
     event = trace[i]
@@ -56,16 +91,14 @@ def _classify(trace, i, tools, last_blocks):
         return ("network", "service", "retry_backoff")
     if kind == "response" and event.get("status") == 200:
         reason = event.get("stop_reason")
-        if reason in STOP:
-            return STOP[reason]
+        stopped = _stop_failure(reason)
+        if stopped:
+            return stopped
         if reason == "end_turn" and not event.get("content"):
-            if "tool_result" in last_blocks and "text" in last_blocks[last_blocks.index("tool_result"):]:
-                return ("empty_response", "integration", "remove_text_after_tool_result")
-            return ("empty_response", "model", "add_continue_prompt")
-    if kind == "tool_call" and tools is not None and event.get("name") not in tools:
-        return ("unknown_tool", "model", "return_error_result")
-    if kind == "tool_result" and event.get("exception"):
-        return ("tool_exception", "integration", "fix_tool_code")
+            return _empty_origin(last_blocks)
+    found = _tool_failure(event, tools)
+    if found:
+        return found
     if kind == "parse" and event.get("ok") is False:
         if _has_json_object(event.get("text", "")):
             return ("parse_failure", "integration", "extract_json")
@@ -75,6 +108,7 @@ def _classify(trace, i, tools, last_blocks):
 
 def diagnose(trace):
     """The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered."""
+    log.debug("diagnose input: %r", trace)
     tools, last_blocks = None, []
     for i, event in enumerate(trace):
         if event.get("kind") == "request":
@@ -82,7 +116,6 @@ def diagnose(trace):
             continue
         found = _classify(trace, i, tools, last_blocks)
         if found:
-            recovered = any(e.get("kind") == "response" and e.get("status") == 200 and e.get("stop_reason") == "end_turn" and e.get("content")
-                            for e in trace[i + 1:])
+            recovered = _recovered(trace, i)
             return {"index": i, "type": found[0], "origin": found[1], "recovery": found[2], "recovered": recovered}
     return {"index": -1, "type": "ok", "origin": "none", "recovery": "none", "recovered": False}

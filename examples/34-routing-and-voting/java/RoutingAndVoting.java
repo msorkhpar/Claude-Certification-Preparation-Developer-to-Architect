@@ -24,6 +24,7 @@ import java.util.function.Function;
  * engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
  */
 public final class RoutingAndVoting {
+    private static final System.Logger LOG = System.getLogger(RoutingAndVoting.class.getName());
     static final String CHEAP = "claude-haiku-4-5", STRONG = "claude-sonnet-5-5";
 
     /** A route: the model and the system prompt a label maps to. */

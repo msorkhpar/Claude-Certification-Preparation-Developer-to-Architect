@@ -3,6 +3,8 @@
 // rule is the reference implementation of the "Coordinates and bounding boxes" page of the Claude documentation, checked on 2026-10-03.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("image_blocks");
 
 export const MODEL = "claude-sonnet-5-5";
 const TIERS: Record<string, [number, number]> = { standard: [1568, 1568], high: [2576, 4784] }; // tier -> [longest edge in pixels, visual token budget]

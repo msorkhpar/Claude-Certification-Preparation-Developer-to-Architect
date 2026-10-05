@@ -64,11 +64,11 @@
     }
   },
   "plants": {
-    "wrong-retry-400": {
+    "wrong-retry-404": {
       "caught_by": [
         "m1"
       ],
-      "defect": "retries a malformed request with back-off instead of fixing it"
+      "defect": "retries a missing resource with back-off instead of fixing the request"
     },
     "wrong-413-service": {
       "caught_by": [
@@ -140,13 +140,13 @@
       "caught_by": [
         "e6"
       ],
-      "defect": "reports the last failure in the trace instead of the first"
+      "defect": "keeps scanning and reports the last failure in the trace instead of the first"
     },
-    "wrong-recovered-ignored": {
+    "wrong-recovered-next-only": {
       "caught_by": [
         "e6"
       ],
-      "defect": "never reports a recovery"
+      "defect": "looks only at the next response when deciding whether the run recovered"
     },
     "wrong-recovered-empty": {
       "caught_by": [

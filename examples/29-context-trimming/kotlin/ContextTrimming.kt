@@ -18,6 +18,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
 
+private val log = System.getLogger("context_trimming")
+
 /**
  * Clearing old tool results, asking the API to clear them, and checking the citations in an answer.
  *

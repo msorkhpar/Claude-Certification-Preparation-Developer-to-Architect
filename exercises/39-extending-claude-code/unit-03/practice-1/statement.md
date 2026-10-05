@@ -19,6 +19,24 @@ The folder has two parts. `home/` stands for the user's `~` and `project/` for a
 
 The starter holds the files unfinished. The settings files are strict JSON: a comment or a trailing comma is an error.
 
+## What is already written, and what you write
+
+The starter is the setup with seven gaps cut out. The shape of every file is written: the keybindings file with its schema and its `Chat` block, the
+user settings with the `statusLine` object, the style file with its name and description, the status line script with its shebang and its first
+field, and the two project settings files. JSON cannot carry a comment, so the JSON gaps are listed here; each is an empty value (`""`, `0`, `{}` or
+`[]`) in the file named, and a gap in a script, a style file or the ignore file is a comment that says what to write. The starter loads and fails the
+cases on an assertion. Write them in this order:
+
+1. `home/.claude/settings.json` unlocks `m1` and `e2`: the style name, the script path in `~/.claude/` and the `padding` and `refreshInterval` numbers.
+2. `home/.claude/output-styles/terse-review.md` unlocks `e1`: `keep-coding-instructions: true` and the instructions, at least three lines.
+3. `home/.claude/statusline.sh` unlocks `e2` and `e6`: the context percentage and the branch, read from documented fields only.
+4. `home/.claude/keybindings.json` unlocks `e3`: one key rebound to an action and one freed with `null`, in the `Chat` block.
+5. `project/.claude/settings.json` unlocks `e4`: the team's `permissions.allow` rules, and nothing personal.
+6. `project/.claude/settings.local.json` unlocks `e4`: the exact style name for this project.
+7. `project/.gitignore` unlocks `e5`: the line that keeps the local settings file out of git.
+
+About nine lines in all. These files have no code to log from; a failing case shows the assertion message, which names the file and the rule.
+
 ## What to write
 
 1. **The user's settings.** `outputStyle` names the style, exactly as its file or its built-in name spells it. `statusLine` is an object with `type` `"command"`, a `command` that points at

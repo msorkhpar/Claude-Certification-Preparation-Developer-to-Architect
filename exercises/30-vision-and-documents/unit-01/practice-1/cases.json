@@ -64,17 +64,11 @@
     }
   },
   "plants": {
-    "wrong-edge-only-resize": {
+    "wrong-tokens-original-size": {
       "caught_by": [
         "e1"
       ],
-      "defect": "sizes an image by the edge limit alone and ignores the visual token budget"
-    },
-    "wrong-text-first": {
-      "caught_by": [
-        "m1"
-      ],
-      "defect": "puts the question before the images"
+      "defect": "counts the tokens of the original size, not of the size the model sees"
     },
     "wrong-no-labels": {
       "caught_by": [
@@ -105,6 +99,36 @@
         "e4"
       ],
       "defect": "lets an oversized image through even when its exact size matters"
+    },
+    "wrong-pdf-pages-ignored": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not limit a request by the number of PDF pages"
+    },
+    "wrong-pdfs-after-images": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "puts every PDF after the images instead of keeping the order of the items"
+    },
+    "wrong-cloud-url-allowed": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "accepts url and file sources on bedrock and vertex"
+    },
+    "wrong-cloud-image-size": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "allows a 10 MiB image on bedrock and vertex, where the limit is 5 MiB"
+    },
+    "wrong-no-clamp": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "does not clamp a returned point into the resized image"
     }
   }
 }

@@ -1,9 +1,12 @@
 """Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md."""
+import logging
 import os
 import re
 
 from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher, PermissionResultAllow, PermissionResultDeny, ResultMessage,
                               TextBlock, ToolResultBlock, ToolUseBlock, UserMessage, query)
+
+log = logging.getLogger(__name__)
 
 READ_TOOLS = ["Read", "Grep", "Glob"]
 EDIT_TOOLS = ["Edit", "Write"]
@@ -20,8 +23,26 @@ def _inside(project_dir, path):
     return full == root or full.startswith(root + os.sep)
 
 
+def _is_secret_name(base):
+    return base.startswith(".env") and base != ".env.example"
+
+
+def _dangerous(command):
+    return bool(re.search(r"\bsudo\b", command)) or "rm -rf" in command
+
+
+def _chained(command):
+    return bool(re.search(r"[;&|<>`]|\$\(", command))
+
+
+def _command_allowed(command):
+    words = command.split()
+    return bool(words) and words[0] in SAFE_COMMANDS
+
+
 def decide(tool_name, tool_input, project_dir, mode="readonly"):
     """The permission policy as plain data: {"behavior": "allow"} or {"behavior": "deny", "message", "interrupt"}."""
+    log.debug("decide input: %r %r", tool_name, tool_input)
     def deny(message, interrupt=False):
         return {"behavior": "deny", "message": message, "interrupt": interrupt}
 
@@ -33,18 +54,18 @@ def decide(tool_name, tool_input, project_dir, mode="readonly"):
             if not _inside(project_dir, path):
                 return deny(f"{path} is outside the project")
             base = os.path.basename(_resolve(project_dir, path))
-            if base.startswith(".env") and base != ".env.example":
+            if _is_secret_name(base):
                 return deny(f"{base} holds secrets and is never read")
             if tool_name in EDIT_TOOLS and ".git" in _resolve(project_dir, path).split(os.sep):
                 return deny(f"{path} is inside .git")
         return {"behavior": "allow"}
     if tool_name == "Bash":
         command = tool_input.get("command", "")
-        if re.search(r"\bsudo\b", command) or "rm -rf" in command:
+        if _dangerous(command):
             return deny("Dangerous command", True)
-        if re.search(r"[;&|<>`]|\$\(", command):
+        if _chained(command):
             return deny("Command not allowed: no chaining or redirection")
-        if command.split()[:1] and command.split()[0] in SAFE_COMMANDS:
+        if _command_allowed(command):
             return {"behavior": "allow"}
         return deny("Command not allowed: only ls, cat and pytest")
     return deny(f"{tool_name} is not allowed")
@@ -59,9 +80,13 @@ def make_can_use_tool(project_dir, mode="readonly"):
     return can_use_tool
 
 
+def _is_push(command):
+    return bool(re.search(r"\bgit\s+push\b", command))
+
+
 async def bash_guard(input_data, tool_use_id, context):
     """A PreToolUse hook: nothing is pushed from an agent."""
-    if re.search(r"\bgit\s+push\b", (input_data.get("tool_input") or {}).get("command", "")):
+    if _is_push((input_data.get("tool_input") or {}).get("command", "")):
         return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "Nothing is pushed from an agent"}}
     return {}
 
@@ -71,6 +96,14 @@ def build_options(project_dir, cli_path, mode="readonly"):
         cli_path=cli_path, cwd=project_dir, tools=READ_TOOLS + ["Bash"] + (EDIT_TOOLS if mode == "edit" else []), allowed_tools=[],
         disallowed_tools=["Bash(rm *)"], max_turns=6, max_budget_usd=0.5, permission_mode="default", setting_sources=[],
         can_use_tool=make_can_use_tool(project_dir, mode), hooks={"PreToolUse": [HookMatcher(matcher="Bash", hooks=[bash_guard])]})
+
+
+def _denied(content):
+    return sum(1 for b in content if isinstance(b, ToolResultBlock) and b.is_error)
+
+
+def _status(subtype):
+    return STATUS.get(subtype, subtype)
 
 
 def summarize(messages):
@@ -83,12 +116,12 @@ def summarize(messages):
                 elif isinstance(block, ToolUseBlock):
                     tools.append(block.name)
         elif isinstance(message, UserMessage) and isinstance(message.content, list):
-            denied += sum(1 for b in message.content if isinstance(b, ToolResultBlock) and b.is_error)
+            denied += _denied(message.content)
         elif isinstance(message, ResultMessage):
             result = message
     if result is None:
         return {"status": "incomplete", "text": text, "tools": tools, "turns": 0, "cost": 0.0, "denied": denied}
-    return {"status": STATUS.get(result.subtype, result.subtype), "text": result.result or text, "tools": tools, "turns": result.num_turns,
+    return {"status": _status(result.subtype), "text": result.result or text, "tools": tools, "turns": result.num_turns,
             "cost": result.total_cost_usd or 0.0, "denied": denied}
 
 

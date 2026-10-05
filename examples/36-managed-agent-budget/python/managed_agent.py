@@ -5,6 +5,9 @@ tools run: an Anthropic-managed cloud sandbox or a self-hosted one) and a sessio
 API. The rules below are the ones the documentation states for environments, permission policies and session budgets, read on
 2026-10-03 (beta header managed-agents-2026-04-01); the prices are the list prices recorded in docs/VERSIONS.md on 2026-10-02.
 """
+import logging
+
+log = logging.getLogger(__name__)
 
 # --- configuration checks -------------------------------------------------------------------------------------------------
 

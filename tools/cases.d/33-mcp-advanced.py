@@ -21,5 +21,8 @@ PRACTICES[f"{X}/33-mcp-advanced/unit-01/practice-1"] = {
         "wrong-elicit-without-capability": (["e2"], "sends an elicitation request to a client that did not declare the capability"),
         "wrong-decline-continues": (["e3"], "carries on with the deployment after the user declined"),
         "wrong-error-on-missing-input": (["e3"], "answers a retry that lacks the requested input with a protocol error instead of asking again"),
+        "wrong-list-uncacheable": (["e1"], "lists the tools with a cache lifetime of zero"),
+        "wrong-version-ignored": (["e6"], "serves a request whose protocol version is not the one it supports"),
+        "wrong-answer-alone-skips": (["e7"], "takes an answer that arrives with no requestState as if the question had been asked"),
     },
 }

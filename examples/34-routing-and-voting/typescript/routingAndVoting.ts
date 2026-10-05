@@ -5,6 +5,8 @@
 // engineering article "Building effective agents" (published 2024-12-19, read on 2026-10-03).
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("routing_and_voting");
 
 export const CHEAP = "claude-haiku-4-5", STRONG = "claude-sonnet-5-5";
 const ROUTES: Record<string, [string, string]> = {

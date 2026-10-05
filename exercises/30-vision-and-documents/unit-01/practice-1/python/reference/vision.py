@@ -1,5 +1,8 @@
 """Planning a request that carries images and PDFs. See ../../statement.md."""
+import logging
 import math
+
+log = logging.getLogger(__name__)
 
 MIB = 1024 * 1024
 IMAGE_TYPES = ("image/jpeg", "image/png", "image/gif", "image/webp")
@@ -65,7 +68,30 @@ def _source(item):
     return {"type": "url", "url": value} if kind == "url" else {"type": "file", "file_id": value}
 
 
+def _max_count(context):
+    return 100 if context < 1_000_000 else 600
+
+
+def _max_image_size(cloud):
+    return (5 if cloud else 10) * MIB
+
+
+def _many(images, pdfs, cloud):
+    return images + (pdfs if cloud else 0) > 20
+
+
+def _image_blocks(item, n, image_count, exact):
+    blocks = []
+    if image_count > 1:
+        blocks.append({"type": "text", "text": f"Image {n}:"})
+    block = {"type": "image", "source": _source(item)}
+    if exact:
+        block["transformations"] = {"oversized_image": "error"}
+    return blocks + [block]
+
+
 def plan_request(model, items, question, exact=False, platform="api"):
+    log.debug("plan_request input: %r", items)
     if model not in MODELS:
         raise RequestError("model", f"unknown model {model}")
     tier, context, _ = MODELS[model]
@@ -74,13 +100,13 @@ def plan_request(model, items, question, exact=False, platform="api"):
     cloud = platform in ("bedrock", "vertex")
     images = [(i, it) for i, it in enumerate(items) if it["kind"] == "image"]
     pdfs = [(i, it) for i, it in enumerate(items) if it["kind"] == "pdf"]
-    if len(images) > (100 if context < 1_000_000 else 600):
+    if len(images) > _max_count(context):
         raise RequestError("items", f"too many images for {model}")
-    if sum(it["pages"] for _, it in pdfs) > (100 if context < 1_000_000 else 600):
+    if sum(it["pages"] for _, it in pdfs) > _max_count(context):
         raise RequestError("items", f"too many PDF pages for {model}")
     if sum(it["size"] for it in items) > 32 * MIB:
         raise RequestError("items", "the request would be larger than 32 MiB")
-    many = len(images) + (len(pdfs) if cloud else 0) > 20
+    many = _many(len(images), len(pdfs), cloud)
     max_edge = TIERS[tier][0]
     tokens, resized = 0, []
     for i, it in enumerate(items):
@@ -94,7 +120,7 @@ def plan_request(model, items, question, exact=False, platform="api"):
             raise RequestError(f"items[{i}].media_type", f"{it['media_type']} is not a supported image format")
         if it["width"] > 8000 or it["height"] > 8000:
             raise RequestError(f"items[{i}].dimensions", "an image may not exceed 8000 x 8000 pixels")
-        if it["size"] > (5 if cloud else 10) * MIB:
+        if it["size"] > _max_image_size(cloud):
             raise RequestError(f"items[{i}].size", "the image is too large")
         if many and max(it["width"], it["height"]) > 2000:
             raise RequestError(f"items[{i}].dimensions", "with more than 20 images, no side may exceed 2000 pixels")
@@ -108,12 +134,7 @@ def plan_request(model, items, question, exact=False, platform="api"):
     for _, it in sorted(images + pdfs, key=lambda p: p[0]):
         if it["kind"] == "image":
             n += 1
-            if len(images) > 1:
-                content.append({"type": "text", "text": f"Image {n}:"})
-            block = {"type": "image", "source": _source(it)}
-            if exact:
-                block["transformations"] = {"oversized_image": "error"}
-            content.append(block)
+            content.extend(_image_blocks(it, n, len(images), exact))
         else:
             content.append({"type": "document", "source": _source(it)})
     content.append({"type": "text", "text": question})

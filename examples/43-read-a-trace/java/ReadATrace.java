@@ -14,6 +14,7 @@ import java.util.Optional;
  * the first failure, its origin and the next action. The traces are scripted and carry no live output.
  */
 public final class ReadATrace {
+    private static final System.Logger LOG = System.getLogger(ReadATrace.class.getName());
     sealed interface Event permits Request, Response, ApiError, Parse {}
 
     /** A request; only the kinds of block in its last user message matter here. */
