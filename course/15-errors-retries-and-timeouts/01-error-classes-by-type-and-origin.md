@@ -117,7 +117,7 @@ during SSE streaming after a successful initial HTTP response", the case above.
 
 The debugging routine that the exam rewards is short:
 
-1. **Is there a status?** If not, it is the network, or a timeout: module 15's third page.
+1. **Is there a status?** If not, it is the network, or a timeout: page 3 of this module.
 2. **Which origin does the status say?** Your request, your account, capacity or the provider.
 3. **Read `type` and `message`**, and for a 429 the `error_code` and `retry-after`.
 4. **Was the 200 really a success?** Check `stop_reason` (module 14).
