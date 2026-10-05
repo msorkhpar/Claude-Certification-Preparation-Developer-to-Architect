@@ -49,11 +49,15 @@ class BoundedTest {
         return out;
     }
 
+    private static List<Object> sortedValues(List<Outcome<Integer>> outcomes) {
+        return outcomes.stream().map(Outcome::value).sorted().map(v -> (Object) v).toList();
+    }
+
     @Test
     void m1_resultsComeBackForEveryItemAndNeverMoreThanLimitRunAtOnce() {
         Probe probe = new Probe();
         List<Outcome<Integer>> outcomes = Bounded.mapBounded(range(10), probe, 3);
-        assertEquals(IntStream.range(0, 10).mapToObj(n -> (Object) (n * 2)).toList(), values(outcomes));
+        assertEquals(IntStream.range(0, 10).mapToObj(n -> (Object) (n * 2)).toList(), sortedValues(outcomes)); // the order is the point of e1 alone
         assertTrue(outcomes.stream().allMatch(Outcome::ok));
         assertEquals(3, probe.peak.get());
         assertEquals(10, probe.started.get());
@@ -82,17 +86,19 @@ class BoundedTest {
         } catch (RuntimeException e) {
             outcomes = fail("the run threw " + e);
         }
-        assertEquals(List.of(true, true, false, true, true), outcomes.stream().map(Outcome::ok).toList());
-        assertInstanceOf(IllegalStateException.class, outcomes.get(2).error());
-        assertEquals("boom", outcomes.get(2).error().getMessage());
-        assertEquals(List.of(0, 1, 3, 4), outcomes.stream().filter(Outcome::ok).map(Outcome::value).toList());
+        List<Outcome<Integer>> failed = outcomes.stream().filter(o -> !o.ok()).toList();
+        assertEquals(5, outcomes.size());
+        assertEquals(1, failed.size());
+        assertInstanceOf(IllegalStateException.class, failed.get(0).error());
+        assertEquals("boom", failed.get(0).error().getMessage());
+        assertEquals(List.of(0, 1, 3, 4), outcomes.stream().filter(Outcome::ok).map(Outcome::value).sorted().toList());
     }
 
     @Test
     void e3_aLimitAboveTheItemCountAndAnEmptyInputBothWork() {
         Probe probe = new Probe();
         List<Outcome<Integer>> outcomes = Bounded.mapBounded(List.of(1, 2, 3).iterator(), probe, 50);
-        assertEquals(List.of(2, 4, 6), values(outcomes));
+        assertEquals(List.of(2, 4, 6), sortedValues(outcomes));
         assertEquals(3, probe.peak.get());
         assertEquals(0, Bounded.mapBounded(range(0), new Probe(), 4).size());
     }
@@ -134,6 +140,6 @@ class BoundedTest {
         gate.countDown();
         List<Outcome<Integer>> outcomes = run.get(10, TimeUnit.SECONDS);
         assertEquals(2, held, held + " items were pulled while 2 workers were blocked");
-        assertEquals(IntStream.range(0, 20).mapToObj(n -> (Object) n).toList(), values(outcomes));
+        assertEquals(IntStream.range(0, 20).mapToObj(n -> (Object) n).toList(), sortedValues(outcomes));
     }
 }

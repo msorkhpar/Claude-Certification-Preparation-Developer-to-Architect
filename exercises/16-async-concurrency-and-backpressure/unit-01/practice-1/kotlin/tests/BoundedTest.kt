@@ -41,7 +41,7 @@ class BoundedTest {
     fun m1_resultsComeBackForEveryItemAndNeverMoreThanLimitRunAtOnce() {
         val probe = Probe()
         val outcomes = mapBounded(range(10), probe, 3)
-        assertEquals((0 until 10).map { it * 2 }, values(outcomes))
+        assertEquals((0 until 10).map { it * 2 }, values(outcomes).sortedBy { it }) // the order is the point of e1 alone
         assertTrue(outcomes.all { it.ok })
         assertEquals(3, probe.peak.get())
         assertEquals(10, probe.started.get())
@@ -65,17 +65,19 @@ class BoundedTest {
         } catch (e: RuntimeException) {
             fail("the run threw $e")
         }
-        assertEquals(listOf(true, true, false, true, true), outcomes.map { it.ok })
-        assertTrue(outcomes[2].error is IllegalStateException, "got ${outcomes[2].error}")
-        assertEquals("boom", outcomes[2].error!!.message)
-        assertEquals(listOf(0, 1, 3, 4), outcomes.filter { it.ok }.map { it.value })
+        val failed = outcomes.filter { !it.ok }
+        assertEquals(5, outcomes.size)
+        assertEquals(1, failed.size)
+        assertTrue(failed[0].error is IllegalStateException, "got ${failed[0].error}")
+        assertEquals("boom", failed[0].error!!.message)
+        assertEquals(listOf(0, 1, 3, 4), outcomes.filter { it.ok }.map { it.value }.sortedBy { it })
     }
 
     @Test
     fun e3_aLimitAboveTheItemCountAndAnEmptyInputBothWork() {
         val probe = Probe()
         val outcomes = mapBounded(listOf(1, 2, 3).iterator(), probe, 50)
-        assertEquals(listOf(2, 4, 6), values(outcomes))
+        assertEquals(listOf(2, 4, 6), values(outcomes).sortedBy { it })
         assertEquals(3, probe.peak.get())
         assertEquals(0, mapBounded(range(0), Probe(), 4).size)
     }
@@ -106,6 +108,6 @@ class BoundedTest {
         gate.countDown()
         val outcomes = run.get(10, TimeUnit.SECONDS)
         assertEquals(2, held, "$held items were pulled while 2 workers were blocked")
-        assertEquals((0 until 20).toList(), values(outcomes))
+        assertEquals((0 until 20).toList(), values(outcomes).sortedBy { it })
     }
 }
