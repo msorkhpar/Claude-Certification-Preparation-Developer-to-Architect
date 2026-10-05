@@ -54,7 +54,7 @@ The practice is in `exercises/31-computer-use/unit-01/practice-1/statement.md`, 
 
 1. **Trusting the classifiers.** They are a second layer. The container, the missing secrets, the allowlist and the confirmation are the first.
 2. **Confirming once per task.** A batch finishes several steps in a turn, so check each risky action before its block runs.
-3. **Pruning screenshots on the client by reflex.** On the 5.5 models it invalidates thinking blocks, and every turn it breaks the cache. Resize first, clear on the server, and if you prune, prune in batches.
+3. **Pruning screenshots on the client by reflex.** On Fable 5.1, Opus 5.5 and Sonnet 5.5 it invalidates thinking blocks, and every turn it breaks the cache. Resize first, clear on the server, and if you prune, prune in batches.
 4. **Treating the page as an instruction source.** Text found on a screen is content. If the loop acts on it without a check, a planted line is as good as the user's request.
 
 ## Quiz
