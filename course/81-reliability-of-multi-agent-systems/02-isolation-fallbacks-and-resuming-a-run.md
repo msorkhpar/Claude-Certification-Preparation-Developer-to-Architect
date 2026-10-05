@@ -94,7 +94,7 @@ This quiz covers both pages of the module.
 3. Scenario: Hazel Analytics' plan has tasks a, b, c and d, where d needs b. In the first run b used up its retries, and a and c finished and were saved. What does a second run call?
    - **a**: All four, since a run restarts the whole plan
    - **b**: Only b, since a skipped task is not retried later
-   - **c**: b, then d once b succeeds, since a and c come from the checkpoint
+   - **c**: b, then d, since a and c come from the checkpoint
    - **d**: Just d, since b is known to have failed in the earlier run
 
 <details>
