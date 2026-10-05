@@ -141,9 +141,7 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 <summary>Answer key</summary>
 
 1. **b**. The risk "exists when Claude can read untrusted content and take consequential actions", and a person on
-   the consequential step removes the second condition while the first stays. *a* is ruled out because the condition
-   for harm is unchanged by a request, and the page calls the position "safer than before, not safe enough to stop
-   paying attention". *d* is ruled out because the page's summary is "safer than before, not safe enough to stop paying attention", and a stronger model leaves reading and acting in place. *c*
+   the consequential step removes the second condition while the first stays. *a* is ruled out because harm needs reading and acting together, "Take either away and the danger drops", and a standing instruction takes neither away. *d* is ruled out because the page's summary is "safer than before, not safe enough to stop paying attention", and a stronger model leaves reading and acting in place. *c*
    is ruled out because a screen only filters, and the page's habit is to "Keep a person on consequential steps".
 2. **c**. Claude Tag acts through its own accounts, so its actions are traceable and its access can be cut off
    separately (the controls table). *a* is ruled out because the agent's "access can be cut off without touching
@@ -167,14 +165,14 @@ This quiz covers both pages of the module.
 
 2. A clinic's analyst wants Claude's help with a sheet of patient names and diagnoses, and the clinic is under a
    strict data contract. Which opening step fits?
-   - **a**: Strip the identifiers first and use only features its agreements allow
+   - **a**: Strip identifiers first and use only features its agreements allow
    - **b**: Upload it to a consumer account where chats are not used for training
    - **c**: Replace names with codes, keep the key in the sheet, and upload it
    - **d**: Ask an owner to enable every feature, then upload to the strongest one
 
 3. An analyst discovers that a shared document contains a hidden line aimed at AI tools, telling them to send a summary to
    an outside address. What should they do?
-   - **a**: Report it to the security contact and keep the file from assistants
+   - **a**: Report it to security and keep the file from assistants
    - **b**: Delete the line from the file and carry on working as before
    - **c**: Test the line in a spare chat to see whether it really works
    - **d**: Ask the author if the line is theirs, and wait for a reply
