@@ -88,10 +88,10 @@ This quiz covers both pages of the module.
 1. A team's runs often end with the status `max_turns` because one tool keeps failing, and raising the cap from ten to forty only made each failed run cost four times as much. What should they do?
    - **a**: Turn the cap off entirely and let the model decide when a failure is final
    - **b**: Raise the cap again and again until the failures stop ending in the cap itself
-   - **c**: Read the saved conversation, then repair that helper's description or its error message
+   - **c**: Read the saved conversation, then repair that helper's description
    - **d**: Mark such runs as done, since a retry limit is a normal way to finish
 
-2. A hand-written loop receives a reply whose stop reason asks for a tool, but its content holds only a sentence of text. What should the loop do?
+2. A loop that follows this module's practice receives a reply whose stop reason asks for a tool, but its content holds only a sentence of text. What should it do?
    - **a**: Send an empty user message and call the model once more to see what it does
    - **b**: Finish with a malformed status, because nothing is there to answer
    - **c**: Return the sentence to the user as the finished answer

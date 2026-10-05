@@ -78,7 +78,7 @@ These are the answers that sound sensible and fail in a conversational assistant
 <summary>Answer key</summary>
 
 1. **b**. A missed signal holds the release. *a* is ruled out because the average is not the test: "A safety miss is not averaged: one missed signal holds the release however good the rest is." *c* is ruled out because the safety count has no noise allowance: "the review has one number that is never averaged and several that are". *d* is ruled out because one case is enough: "A safety miss is not averaged: one missed signal holds the release however good the rest is."
-2. **b**. The assistant acknowledges and hands over. *a* is ruled out because the assistant does not keep chatting: "it does not diagnose, advise or keep chatting about the order". *c* is ruled out because it does not diagnose: "it does not diagnose, advise or keep chatting about the order". *d* is ruled out because the order question waits: "the assistant acknowledges the message and says that a person will take over".
+2. **b**. The assistant acknowledges and hands over. *a* is ruled out because the assistant does not keep chatting: "it does not diagnose, advise or keep chatting about the order". *c* is ruled out because it does not diagnose: "it does not diagnose, advise or keep chatting about the order". *d* is ruled out because the order question does not come first: "it does not diagnose, advise or keep chatting about the order".
 3. **c**. Two of twenty is exactly ten percent. *a* is ruled out because the policy allows some: "A limit is met at the limit, so exactly ten percent repeated questions pass and twenty do not." *b* is ruled out for the same reason: "A limit is met at the limit, so exactly ten percent repeated questions pass and twenty do not." *d* is ruled out because the source of the repeats plays no part: "The share of conversations in which the assistant asked the same question twice."
 
 </details>
@@ -95,9 +95,9 @@ This quiz covers both pages of the module.
 
 2. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A returning shopper is greeted with an address saved 200 days ago, and the policy limit is thirty days. What should the assistant do first?
    - **a**: Use it as it stands, since a saved address is the best evidence there is
-   - **b**: Use it and ask the person about it at the end of the call
+   - **b**: Use it and ask the account holder about it at the end of the call
    - **c**: Delete every stored fact older than the limit without telling anyone
-   - **d**: Have the person confirm it before relying on it
+   - **d**: Have the account holder confirm it before relying on it
 
 3. Scenario: a conversational assistant for a book shop that remembers customers and hands over to people. A segment of three conversations has none resolved by the assistant, the floor is 80 percent and the minimum is three. What does the review say about it?
    - **a**: It is weak, since the count is enough to judge and the result is short of the bar
@@ -115,7 +115,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **b**. The route is code. *a* is ruled out because a prompt is a request: "Put every rule in the system prompt, in capitals." *c* is ruled out because a confidence threshold is the model's own judgement: "It fails because it makes a probabilistic judgement the only barrier on the one decision that must not be missed". *d* is ruled out for the same reason: "What the design must not do is make the model the only layer."
-2. **d**. An old fact is checked with the person before it is relied on: "an old fact is verified before it is used". *a* is ruled out because an old fact is not trusted: "a fact that has not been touched for months is more likely to be wrong than one from last week". *b* is ruled out because an old fact is verified before use: "so that the assistant asks the customer before it relies on an address from last year". *c* is ruled out because an old fact is verified and not discarded: "A recalled fact is a claim with a date".
+2. **d**. An old fact is checked with the account holder before it is relied on: "an old fact is verified before it is used". *a* is ruled out because an old fact is not trusted: "a fact that has not been touched for months is more likely to be wrong than one from last week". *b* is ruled out because an old fact is verified before use: "so that the assistant asks the customer before it relies on an address from last year". *c* is ruled out because an old fact is verified and not discarded: "A recalled fact is a claim with a date".
 3. **a**. A segment at the minimum and below the floor is weak. *b* is ruled out because the minimum is met: "two unresolved conversations prove nothing and three begin to". *c* is ruled out because the minimum is a floor and not a margin: "only when it has at least a minimum number of conversations". *d* is ruled out because a settlement by a person is not the assistant's: "A conversation that a person settled is a good outcome and is not the assistant's."
 4. **c**. A hand-over takes the conversation out of the measure. *a* is ruled out because the length alone is not the test: "A conversation with more turns than the limit and no hand-off." *b* is ruled out because the stall is a hand-off: "A conversation that was handed over is not overlong, because somebody took over." *d* is ruled out because the hand-off is counted elsewhere: "A hand-off nobody needed and that had no safety signal behind it is over-escalation".
 

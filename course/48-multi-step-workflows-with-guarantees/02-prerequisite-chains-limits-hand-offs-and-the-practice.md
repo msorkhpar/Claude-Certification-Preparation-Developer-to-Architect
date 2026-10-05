@@ -98,12 +98,12 @@ These are the wrong answers that the exam's options for this task statement offe
    - **a**: Keep the transcript, but have the model highlight its key lines
    - **b**: Attach a model-written summary of the conversation beside the full transcript
    - **c**: Add the customer's complete order history to the escalation
-   - **d**: Provide a record from the gate's own state, with the agent's reason as a field
+   - **d**: Send a gate-built record, with the agent's reason as one field
 
 <details>
 <summary>Answer key</summary>
 
-3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because the lock is not the fault: "a successful check resets the count, so ordinary typing mistakes do not lock anyone out". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because the hand-off should come from the gate, not from the model's own account: "A summary written by the model can leave out what went wrong."
+3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because the lock is not the fault: "a successful check resets the count, so ordinary typing mistakes do not lock anyone out". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because the model has no route to a person while escalation sits behind the prerequisite: "if every tool is behind the prerequisite, a blocked agent can only loop."
 4. **d**. The gate holds the facts, and a record answers the reviewer's questions in a fixed place. *b* is ruled out because "A summary written by the model can leave out what went wrong." *c* is ruled out because a record carries only what is needed: "identifiers and amounts, not the whole order contents". *a* is ruled out because the model is again choosing what the reviewer sees: "The gate's state is the source for what was verified, looked up and refunded; the model's account of them is not."
 
 </details>
@@ -120,7 +120,7 @@ This quiz covers both pages of the module.
 
 2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes "damaged" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?
    - **a**: Keep extending the keyword list until the valid claims finally pass through it
-   - **b**: Let the model judge condition, and keep steps, amounts and limits as rules
+   - **b**: Let the model weigh the evidence, and keep steps, amounts and limits as rules
    - **c**: Move the refund limit into the prompt as well, so that the gate has fewer rules
    - **d**: Drop the ownership check altogether, so that more claims reach the model
 

@@ -28,7 +28,7 @@ Everything else is accepted automatically, and is still sampled by stratum (page
 
 When reviewers can read fewer items than are flagged, the order decides what is looked at. The practice's rule puts conflicts first (their score says nothing), then the lowest confidence first, and breaks ties by identifier so the result is the same every time. The first `capacity` items are the day's review. The rest are a backlog: a queue that is kept and shown, not dropped. A backlog that grows is information: it says the threshold or the reviewer capacity is wrong, and the answer is to change one of them on purpose.
 
-Raising the threshold to shrink the queue throws away the calibration that made the threshold mean something. Lowering the capacity of the review to match a low count of staff does the same from the other side. Keep the threshold where the labelled data put it, queue what falls below it, and report the backlog.
+Raising the threshold to shrink the queue throws away the calibration that made the threshold mean something. Reviewing only what the staff can read and accepting the rest unseen does the same from the other side. Keep the threshold where the labelled data put it, queue what falls below it, and report the backlog.
 
 ### A checkpoint for what cannot be undone
 

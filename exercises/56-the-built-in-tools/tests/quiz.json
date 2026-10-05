@@ -8,7 +8,7 @@
       "stem": "An agent must list every component's spec file in a repository, such as `Button.test.tsx`, wherever it sits. Which tool fits?",
       "options": {
         "a": "A content search for the string `describe(` or `it(`",
-        "b": "A name pattern search, for example `**/*.test.tsx`",
+        "b": "A name pattern search across every folder",
         "c": "A full read of each folder in turn",
         "d": "A shell loop that opens each file in turn"
       },
@@ -16,7 +16,7 @@
       "explanation": {
         "b": "The job is matching names, which is what a name pattern search is for.",
         "a": "Ruled out because a content search finds lines inside files: \"Grep finds lines inside files\" and not the names that match a pattern.",
-        "c": "Ruled out because a folder cannot be read: \"Read only reads files, not directories\".",
+        "c": "Ruled out because a folder cannot be read: the table's \"Reads files, not directories\".",
         "d": "Ruled out because opening every file spends the context on files that do not matter: \"it spends the context on files that do not matter\"."
       }
     },
@@ -45,7 +45,7 @@
       "scope": "page",
       "stem": "A repository's settings deny `Read(./.env)`. The agent, trying to fix a bug, calls Edit on `.env`. What happens?",
       "options": {
-        "a": "It is refused, since a read denial also blocks changes there",
+        "a": "It is refused, as the rule reaches the tools that write there",
         "b": "It proceeds, since only reading calls are matched by that rule",
         "c": "A person is asked, since no edit rule names that path",
         "d": "It proceeds, since the working directory counts as trusted"
@@ -131,7 +131,7 @@
         "c": "The cause is the context filling with files that do not matter, and the remedy is to scope the reading.",
         "a": "Ruled out because reading everything is the failure itself: \"The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context.\"",
         "b": "Ruled out because more turns make the run longer and not better: \"Claude's context window fills up fast, and performance degrades as it fills.\"",
-        "d": "Ruled out because a name search returns a capped list and opening each file repeats the first failure: \"If the cap is hit, Claude sees a truncation flag in the result and can narrow the pattern\"."
+        "d": "Ruled out because a name search returns a capped list and opening each file repeats the first failure: \"Claude sees a truncation flag in the result and can narrow the pattern\"."
       }
     }
   ]

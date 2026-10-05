@@ -23,7 +23,7 @@ Few-shot examples are not a sample of typical cases; typical cases are already h
 2. **Both verdicts.** At least one example is reported and at least one is skipped. A set whose every example is a finding teaches the reviewer to report everything; the acceptable pattern is the example that cuts false positives while still letting the reviewer generalise to new code.
 3. **With a reason.** Each example says why the verdict was chosen over the plausible alternative. The reason is what transfers to a case that matches no example.
 
-They should also mirror the real output: show the format the answer must have, since examples are the surest way to steer format as well as judgement. And they should be diverse enough that the reviewer does not learn an accident: five examples that all end with the same label teach the label (module 44's mock shows the failure).
+They should also mirror the real output: show the format the answer must have, since examples are the surest way to steer format as well as judgement. And they should be diverse enough that the reviewer does not learn an accident: five examples that all end with the same label teach the label (module 24 shows the same failure).
 
 ### Where examples go
 
@@ -437,8 +437,8 @@ The practice is in [`exercises/61-criteria-and-examples`](../../exercises/61-cri
 This quiz covers both pages of the module.
 
 1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. The labels for how bad a finding is are free text, and the gate cannot compare them with its floor. Which change fixes it?
-   - **a**: Ask the reviewer to use stronger adjectives for urgent findings
-   - **b**: Let the gate guess the level from words in the issue text
+   - **a**: Ask the reviewer for stronger adjectives on urgent findings, and keep the labels open
+   - **b**: Let the gate guess each level from words in the issue, and keep the labels open
    - **c**: Give each level a worked sample and close the field to a fixed list
    - **d**: Drop the floor so that every label is accepted as it is
 

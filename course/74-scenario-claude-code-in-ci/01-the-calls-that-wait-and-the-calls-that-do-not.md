@@ -21,7 +21,7 @@ A team runs three Claude jobs. A review of each pull request that has to finish 
 
 | The requirement | The design | Why the tempting choice fails |
 |---|---|---|
-| The step must run with nobody at the keyboard | `claude -p "..."` | There is no headless environment variable and no `--batch` flag on the command line; `-p` is the documented way to run without a person. Redirecting standard input from an empty file is a Unix workaround that does not change how Claude Code runs |
+| The step must run with nobody at the keyboard | `claude -p "..."` | A headless variable, a `--batch` flag and an empty standard input are the routes the exam offers instead; the next section says why none works |
 | Lower the cost of the overnight report | The Message Batches API, from a script | Nothing is wrong with it: nobody waits for the report |
 | Lower the cost of the check that blocks the merge | Keep it in real time | A batch has no latency guarantee, and a developer is waiting |
 | The run must end whatever the model does | A turn limit and a list of tools in the command | A prompt that asks the run to be quick is a request, not a limit |

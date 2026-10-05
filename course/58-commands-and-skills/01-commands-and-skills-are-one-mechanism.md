@@ -33,7 +33,7 @@ Both create `/<name>`. A skill's slash command is its `name` field, or its folde
 | `.claude/skills/<name>/` | Whoever works in the repository, through version control |
 | A plugin | Where the plugin is enabled, with the name prefixed by the plugin's name |
 
-The guide's pair, project and personal, is the middle of this table, with the same logic as memory on module 57: what is committed is shared, and what is in your home folder is yours. Project skills are also found from the directory where you start and from every parent up to the repository root, and a skill in a folder below the start directory loads "the first time Claude reads or edits a file in that subdirectory", and the skills "stay available for the rest of the session".
+The guide's pair, project and personal, is the middle of this table, with the same logic as memory in module 57: what is committed is shared, and what is in your home folder is yours. Project skills are also found from the directory where you start and from every parent up to the repository root, and a skill in a folder below the start directory loads "the first time Claude reads or edits a file in that subdirectory", and the skills "stay available for the rest of the session".
 
 ### The name decides which one runs
 
@@ -49,7 +49,7 @@ Two frontmatter fields control it, and they do opposite things:
 | `disable-model-invocation: true` | Yes | No | No: the full skill loads only when you invoke it |
 | `user-invocable: false` | No | Yes | Yes |
 
-A release, a deploy or a message to a channel has side effects, so `disable-model-invocation: true` keeps the model from deciding by itself that the time has come. Background knowledge that is no action, such as an explanation of a legacy system, is `user-invocable: false`. Note the second note in the documentation: `user-invocable: false` hides the skill from you but not from Claude, and it is `disable-model-invocation` that stops Claude.
+A release, a deploy or a message to a channel has side effects, so `disable-model-invocation: true` keeps the model from deciding by itself that the time has come. Background knowledge that is no action, such as an explanation of a legacy system, is `user-invocable: false`. Note the documentation's caveat: `user-invocable: false` hides the skill from you but not from Claude, and it is `disable-model-invocation` that stops Claude.
 
 ### The description is how a skill is found
 

@@ -90,14 +90,14 @@ This quiz covers both pages of the module.
 
 2. Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A team proposes to run generated tools in a container and to drop the gate, because the container limits the damage. Which gap remains?
    - **a**: Nothing, since a container makes every tool safe to run
-   - **b**: Nothing compares the claim with the code, and nothing waits for a person
+   - **b**: Nothing checks what the code does against what was declared
    - **c**: The container's speed, which is lower than that of a direct run
    - **d**: The agent's description of the tool, which a container cannot read
 
 3. Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. Which record satisfies the audit part of the design?
    - **a**: A file that the agent keeps and updates for itself after every one of its runs
    - **b**: A summary that the agent writes by itself at the end of each working day
-   - **c**: The agent's own account of which of its tools it considers to be the risky ones
+   - **c**: One line per run, kept in the folder where the agent saves its tools
    - **d**: One line per decision and per run, kept where its subject has no access
 
 4. Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A proposed name is 64 characters of lower-case letters, digits and underscores, starting with a letter. What does the gate do with the name?
@@ -110,8 +110,8 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **a**. An undeclared effect is refused. *c* is ruled out because the gate approves only what was declared: "Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page." *b* is ruled out because a refusal is not a revision: "The first group is about trust: the proposal contradicts itself or the rules." *d* is ruled out because the gap is the finding: "A proposal with a refusal is refused, whatever else is true of it."
-2. **b**. The container holds the run, and the gate decides what is proposed. *a* is ruled out because a container is only one of the five jobs: "Containment is the environment's job." *c* is ruled out because speed is not the gap: "the example is about the decisions around a run". *d* is ruled out because the gate reads the description: "a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema".
-3. **d**. The audit is kept out of the agent's reach. *a* is ruled out because an editable file is not an audit: "A log that the agent can edit is not an audit." *b* is ruled out because a summary by the agent is its own account: "The record has to be written by the gate and the runner and kept where the agent has no write access". *c* is ruled out because the agent's view of risk is a claim: "the declaration is the claim to be checked".
+2. **b**. The container holds the run, and only the gate compares the code with its declaration. *a* is ruled out because a container is only one of the five jobs: "Containment is the environment's job." *c* is ruled out because speed is not the gap: "the example is about the decisions around a run". *d* is ruled out because the gate reads the description: "a gate can require a minimum of words, a name in a fixed form and an example that is valid for the schema".
+3. **d**. The audit is kept out of the agent's reach. *a* is ruled out because an editable file is not an audit: "A log that the agent can edit is not an audit." *b* is ruled out because a summary by the agent is its own account: "The record has to be written by the gate and the runner and kept where the agent has no write access". *c* is ruled out because the agent can write where the log is kept: "kept where the agent has no write access".
 4. **c**. A name may be 64 characters. *a* is ruled out because the length is allowed: "A name may be 64 characters long, and 65 is too long." *b* is ruled out because the gate checks the form and not the model's taste: "Four things only send it back: a name that is not in the fixed form". *d* is ruled out because the description has its own minimum: "The description needs at least the minimum number of words, and exactly the minimum is enough."
 
 </details>

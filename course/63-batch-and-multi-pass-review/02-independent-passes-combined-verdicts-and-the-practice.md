@@ -62,7 +62,7 @@ The practice is in [`exercises/63-batch-and-multi-pass-review`](../../exercises/
 
 1. Scenario S2, code generation with Claude Code. A team reviews each change in a separate run, yet nearly every verdict is still approval, because the run is also handed the author's rationale for each change. Which step removes the remaining cause?
    - **a**: Keep the notes and add a second review turn in the same conversation
-   - **b**: Give the new instance the diff and the criteria without the notes
+   - **b**: Drop the notes and give the new instance the diff and the criteria
    - **c**: Keep the notes and raise the thinking budget until verdicts stop approving
    - **d**: Keep the notes and ask the instance to write a stricter checklist first
 

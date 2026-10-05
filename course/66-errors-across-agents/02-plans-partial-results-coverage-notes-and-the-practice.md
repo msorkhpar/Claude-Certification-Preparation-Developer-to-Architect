@@ -27,7 +27,7 @@ The practice's `coordinator_plan` maps each topic's outcome to an action:
 | Failed, no partial results, alternatives exist | `try_alternative` | A cached source, another provider, a narrower query |
 | Failed, nothing to try | `flag_gap` | Say what is missing, and do not guess |
 
-The two outcomes that are easiest to swap are the empty result and the failure. Treat the empty result as a failure, and the system retries a search that already worked. A search that runs and finds nothing has succeeded, and a failure reported as empty is the worse mistake, since nobody looks again.
+The two outcomes that are easiest to swap are the empty result and the failure. Treat the empty result as a failure, and the system retries a search that already worked. A search that runs and finds nothing has succeeded. A failure reported as empty is the worse mistake, since nobody looks again.
 
 The plan is a list with an entry for every topic. There is no entry that ends the run. An alternative is tried once, within the bounded rounds of module 46, and a second failure becomes a gap.
 

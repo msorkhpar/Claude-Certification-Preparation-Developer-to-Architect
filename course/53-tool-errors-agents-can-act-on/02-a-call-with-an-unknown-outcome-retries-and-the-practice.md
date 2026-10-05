@@ -118,7 +118,7 @@ This quiz covers both pages of the module.
    - **a**: Retry nothing at all, so that every failure goes to a person for review
    - **b**: Retry five times instead of twice, so that fewer timeouts reach the customer
    - **c**: Retry after a longer fixed pause, so that a late answer arrives before the next call
-   - **d**: Repeat only what is known to be harmless, and report a lost write as unsettled
+   - **d**: Repeat only calls known to be harmless, so that no payment is ever sent again
 
 <details>
 <summary>Answer key</summary>

@@ -33,7 +33,7 @@ Every question of the scenario starts from something a team would see in product
 | Two customers share a name and the agent acts on the first | An ambiguous match treated as a unique one | Return the matches and ask the customer for something that tells them apart | Module 65 (Escalation and ambiguity) |
 | Late in a long chat the order number is forgotten, or facts of an earlier customer show up | Case facts that live only in the transcript, and a state shared between cases | Keep the facts outside the transcript, and one state per case | Module 64 (Keeping what matters in long conversations) |
 
-The sixth and seventh rows are where this module goes beyond what the earlier pages built, and the example runs both. The last column is the answer to "where did we learn this", and the rest of this page is about the order in which the fixes are made.
+The sixth and seventh rows are where this module goes beyond what the earlier pages built: the example runs the sixth as an incident and answers the shared state of the seventh with one desk per case. The last column is the answer to "where did we learn this", and the rest of this page is about the order in which the fixes are made.
 
 ### Money before rate, and the proportionate fix before the large one
 

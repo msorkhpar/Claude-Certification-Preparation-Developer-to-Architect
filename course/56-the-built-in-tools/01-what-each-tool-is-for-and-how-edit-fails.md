@@ -28,7 +28,7 @@ The exam's scenario S4 is an agent that explores unfamiliar codebases, understan
 | `Grep` | Searches file contents | Built on ripgrep, so its regex syntax is not POSIX grep; skips gitignored files |
 | `Glob` | Finds files by name pattern | Supports `**`; sorted by modification time and capped at 100 files; does not respect `.gitignore` by default |
 
-The split to remember is the guide's: content or names? Grep finds lines inside files, and Glob finds the files themselves. Use Grep to find all callers of a function or every place an error message is produced; use Glob for every `**/*.test.tsx` or every `src/**/handlers/*.py`. Glob's cap is a signal: "If the cap is hit, Claude sees a truncation flag in the result and can narrow the pattern", so a pattern that returns exactly a hundred files should be narrowed and not trusted as complete.
+The split to remember is the guide's: content or names? Grep finds lines inside files, and Glob finds the files themselves. Use Grep to find all callers of a function or every place an error message is produced; use Glob for every `**/*.test.tsx` or every `src/**/handlers/*.py`.
 
 A Glob result is a window, not a census. The documentation says that results are sorted by modification time and capped at 100 files, and that when the cap is hit "Claude sees a truncation flag in the result and can narrow the pattern." A list that ends at exactly 100 is therefore a prompt to narrow the pattern to the folder the question concerns, and never a statement that no other file matches.
 
@@ -39,8 +39,6 @@ Grep has three output modes, and the choice is about cost: `files_with_matches` 
 Before the exam's answer, check the platform. On macOS, Linux and WSL, Claude Code leaves Glob and Grep out of the default tool set and Claude searches with `find` and `grep` through Bash, where "those two commands run embedded versions of `bfs` and `ugrep`, and the searches reach your hooks and permission rules as `Bash` calls". On Windows both are part of the default set. A rule that matches `Grep` calls therefore sees nothing in a default Linux session, and a hook with the matcher `Grep` never fires, because the searches arrive as `Bash`. You get the tools back in three ways: name `Glob` or `Grep` in `--tools` or `--allowedTools` (or the SDK's `tools` and `allowedTools`), where "with `--tools` you get the ones you list, and naming either tool in `--allowedTools` restores both"; remove `Bash` from the session; or give a subagent a `tools` list that names them and leaves out `Bash`. An allow rule in a settings file does not have this effect.
 
 For an Architect, the consequence is concrete. An S4 agent built with the SDK that is meant to use Grep and Glob must name them. An agent that is told to use Grep on a Linux machine, with the default tool set, will run `grep` through Bash instead, which a permission rule on Grep does not cover.
-
-Read only reads files, not directories, so listing a folder is a job for Bash.
 
 ### Edit needs one exact match
 
@@ -549,7 +547,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 1. An agent must list every component's spec file in a repository, such as `Button.test.tsx`, wherever it sits. Which tool fits?
    - **a**: A content search for the string `describe(` or `it(`
-   - **b**: A name pattern search, for example `**/*.test.tsx`
+   - **b**: A name pattern search across every folder
    - **c**: A full read of each folder in turn
    - **d**: A shell loop that opens each file in turn
 
@@ -562,7 +560,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The job is matching names, which is what a name pattern search is for. *a* is ruled out because a content search finds lines inside files: "Grep finds lines inside files" and not the names that match a pattern. *c* is ruled out because a folder cannot be read: "Read only reads files, not directories". *d* is ruled out because opening every file spends the context on files that do not matter: "it spends the context on files that do not matter".
+1. **b**. The job is matching names, which is what a name pattern search is for. *a* is ruled out because a content search finds lines inside files: "Grep finds lines inside files" and not the names that match a pattern. *c* is ruled out because a folder cannot be read: the table's "Reads files, not directories". *d* is ruled out because opening every file spends the context on files that do not matter: "it spends the context on files that do not matter".
 2. **a**. The guide keys Read plus Write as the fallback for a non-unique Edit, and here no unique anchor exists. The product's documented remedies are a longer unique string or `replace_all`; Read plus Write is the guide's route when neither applies, and it is where this case lands. *b* is ruled out because "`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change." *c* is ruled out because the page names this very case as the one for the fallback: "for example when a file is made of repeated blocks that differ only by position". *d* is ruled out because "Grep finds lines inside files" and does not change them, so the retried edit would be refused again.
 
 </details>

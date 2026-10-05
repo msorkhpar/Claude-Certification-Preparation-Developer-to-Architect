@@ -47,7 +47,7 @@ Three controls look alike and do different things.
 | `tools` (and omitting a tool from it) | Decides which tools exist |
 | `disallowedTools` / `disallowed_tools` with a bare name | Removes the tool from Claude's context; a scoped rule such as `Bash(rm *)` leaves the tool and denies matching calls |
 
-The documentation spells out the first: "Other tools not listed here still exist, and calls to them that need approval fall through to the permission mode and `canUseTool`", and for `bypassPermissions`: "Setting `allowed_tools=["Read"]` alongside `permission_mode="bypassPermissions"` still approves every tool, including `Bash`, `Write`, and `Edit`." The reason is the order: "Other unlisted tools are not matched by any allow rule and fall through to the permission mode, where `bypassPermissions` approves them." For a locked-down agent pair the list with a mode that never prompts, or take the tools away. A subagent's own `tools` list is the same idea for the agents of module 47: it lists what the subagent has, and a subagent that lists `Glob` or `Grep` and leaves out `Bash` has them back even on macOS and Linux.
+The documentation spells out the first: "Other tools not listed here still exist, and calls to them that need approval fall through to the permission mode and `canUseTool`", and for `bypassPermissions`: "Setting `allowed_tools=["Read"]` alongside `permission_mode="bypassPermissions"` still approves every tool, including `Bash`, `Write`, and `Edit`." The reason is the order: "Other unlisted tools are not matched by any allow rule and fall through to the permission mode, where `bypassPermissions` approves them." For a locked-down agent, pair the list with `dontAsk`, which denies what would prompt (module 38), not with `bypassPermissions`, or take the tools away. A subagent's own `tools` list is the same idea for the agents of module 47: it lists what the subagent has, and a subagent that lists `Glob` or `Grep` and leaves out `Bash` has them back even on macOS and Linux.
 
 A skill's `allowed-tools` is a pre-approval in the same sense, which the guide's wording hides (see the box above). Skills are the subject of modules 57 and 58; the point here is that no list of allowed tools is a wall.
 
@@ -57,13 +57,13 @@ The Architect guide asks for incremental understanding: start with Grep to find 
 
 A workable order for an explorer, which the practice checks:
 
-A community guide gives the rule for the opposite mistake: "Do not use filename search to find code references inside files." A name pattern finds the files called `discount`, and the callers of `applyDiscount` are lines inside files with other names.
-
 1. Find entry points with Grep (`def main`, route decorators, command handlers), asking for file paths first.
 2. Find files by name with Glob when the question is about a kind of file.
 3. Read the entry files and follow imports one hop at a time.
 4. Before tracing a function through wrapper modules, list the exported names and search for each.
 5. Write what you learned, with the file and line of every claim, to a notes file. The agent that writes notes needs `Edit` on that folder and nothing else.
+
+A community guide gives the rule for the opposite mistake: "Do not use filename search to find code references inside files." A name pattern finds the files called `discount`, and the callers of `applyDiscount` are lines inside files with other names.
 
 When an Edit does not apply, the order of remedies is page 1's: a longer unique string, `replace_all`, and Read plus Write last.
 
@@ -84,7 +84,7 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. A repository's settings deny `Read(./.env)`. The agent, trying to fix a bug, calls Edit on `.env`. What happens?
-   - **a**: It is refused, since a read denial also blocks changes there
+   - **a**: It is refused, as the rule reaches the tools that write there
    - **b**: It proceeds, since only reading calls are matched by that rule
    - **c**: A person is asked, since no edit rule names that path
    - **d**: It proceeds, since the working directory counts as trusted
@@ -130,7 +130,7 @@ This quiz covers both pages of the module.
 
 1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "a `Write(path)` rule is never matched by the file permission checks". *c* is ruled out because a scoped Bash rule matches calls "as written", and other spellings "fall through to the permission mode", so it stops neither the search tools nor a different spelling.
 2. **a**. A capped result is a window, and a narrower request brings the rest into view. *b* is ruled out because "Results are sorted by modification time and capped at 100 files", so the same request returns the same window. *c* is ruled out because "Claude sees a truncation flag in the result and can narrow the pattern", which says the set is incomplete. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
-3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because reading everything is the failure itself: "The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context." *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because a name search returns a capped list and opening each file repeats the first failure: "If the cap is hit, Claude sees a truncation flag in the result and can narrow the pattern".
+3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because reading everything is the failure itself: "The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context." *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because a name search returns a capped list and opening each file repeats the first failure: "Claude sees a truncation flag in the result and can narrow the pattern".
 
 </details>
 

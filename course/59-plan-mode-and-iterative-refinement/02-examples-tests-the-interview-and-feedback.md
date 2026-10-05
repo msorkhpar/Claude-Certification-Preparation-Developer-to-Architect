@@ -17,7 +17,7 @@ A developer asks for "a function that cleans up phone numbers". Claude writes on
 
 ### Show the transformation
 
-When a description is interpreted in different ways, give "concrete input and output examples". "Normalise phone numbers" can mean ten things; `"(555) 010-2030"` becomes `"+15550102030"`, `"555.010.2030"` becomes `"+15550102030"` and `"12"` is refused is one thing. Two or three examples, including one that is an edge case, are enough. Examples are the first step because they cost a few lines and settle the question; they are what module 61 does for the prompt of a reviewer, and the same logic.
+When a description is interpreted in different ways, give "concrete input and output examples". "Normalise phone numbers" can mean ten things; `"(555) 010-2030"` becomes `"+15550102030"`, `"555.010.2030"` becomes `"+15550102030"` and `"12"` is refused is one thing. Two or three examples, including one that is an edge case, are enough. Examples are the first step because they cost a few lines and settle the question; module 61 applies the same idea to the prompt of a reviewer.
 
 ### Let the tests lead
 
@@ -424,7 +424,7 @@ This quiz covers both pages of the module.
 
 1. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A scheduled job starts Claude Code with `-p` and `--permission-mode plan`. What happens when Claude tries to edit a source file?
    - **a**: It goes ahead, because a headless run skips permission modes
-   - **b**: It is refused, since plan restrictions hold without a terminal too
+   - **b**: It is refused, since the mode's restrictions hold without a terminal too
    - **c**: It goes ahead, because a scheduled run counts as pre-approved
    - **d**: It prompts the job's owner by email for approval
 

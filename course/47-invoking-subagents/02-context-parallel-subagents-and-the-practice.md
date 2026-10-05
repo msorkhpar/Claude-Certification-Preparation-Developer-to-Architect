@@ -95,7 +95,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: The concurrency limit refused the spawn without telling the coordinator anything
 
 
-4. A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact in different words. Which change fits best?
+4. A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact. Which change fits best?
    - **a**: Keep only the first source of every repeated fact, so that answers stay short
    - **b**: Ask the synthesizer to cite sources by recalling where each figure appeared
    - **c**: Write the source into each claim sentence, in brackets right after the text
