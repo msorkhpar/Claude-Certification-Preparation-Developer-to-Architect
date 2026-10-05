@@ -98,6 +98,19 @@ def analyse(lang, text, cases, junit=None):
     return failed, problems, rc
 
 
+def judge(variant, failed, problems, rc, cases):
+    """(ok, wanted outcome text) for one variant's run: reference passes, starter fails every case on assertions, a plant fails exactly its caught_by."""
+    allids = list(cases["cases"])
+    if variant == "reference":
+        return not failed and not problems and rc == 0, "all pass with rc=0"
+    if variant == "starter":
+        return failed == set(allids) and not problems and rc not in (0, None), "all fail on assertions"
+    caught = set(cases["plants"][variant]["caught_by"])
+    unlisted = failed - caught   # a plant must fail exactly the cases its caught_by lists: a plant that also fails the main ask cannot serve an edge
+    ok = caught <= failed and not unlisted and not problems and rc not in (0, None)
+    return ok, f"fails {sorted(caught)} on an assertion" + (f" and no other case, but it also fails {sorted(unlisted)} that caught_by does not list" if unlisted else "")
+
+
 def main():
     findings = 0
     summary = {}
@@ -111,17 +124,7 @@ def main():
                     findings += 1
                     continue
                 failed, problems, rc = analyse(lang, p.read_text(), cases, junit_results(practice, lang, variant) if lang in ("java", "kotlin") else None)
-                if variant == "reference":
-                    ok = not failed and not problems and rc == 0
-                    want = "all pass with rc=0"
-                elif variant == "starter":
-                    ok = failed == set(allids) and not problems and rc not in (0, None)
-                    want = "all fail on assertions"
-                else:
-                    caught = set(cases["plants"][variant]["caught_by"])
-                    unlisted = failed - caught   # a plant must fail exactly the cases its caught_by lists: a plant that also fails the main ask cannot serve an edge
-                    ok = caught <= failed and not unlisted and not problems and rc not in (0, None)
-                    want = f"fails {sorted(caught)} on an assertion" + (f" and no other case, but it also fails {sorted(unlisted)} that caught_by does not list" if unlisted else "")
+                ok, want = judge(variant, failed, problems, rc, cases)
                 summary.setdefault((practice, lang), []).append((variant, len(allids) - len(failed), len(failed), ok))
                 print(f"{practice.split('/')[0]:42} {lang:10} {variant:28} failed={sorted(failed)} rc={rc} {'ok' if ok else 'FINDING: want ' + want + ' ' + str(problems)}")
                 findings += 0 if ok else 1
