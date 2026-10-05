@@ -11,8 +11,10 @@ Rules (CLAUDE.md quiz rules that a script can check):
   - the folded key gives every option its own explanation sentence (no merged "a, b, c are ..." sentence);
   - the folded key on the page names the same letter as quiz.json, in the same order;
   - quiz.json explains every option;
-  - every non-key option's explanation quotes, in double quotes, a phrase of at least 4 words that appears verbatim
-    on the page the quiz closes (for a module quiz: on any page of the module, quiz sections excluded);
+  - every non-key option's explanation quotes, in double quotes, a phrase of at least 4 words, and every quoted
+    phrase of 4 words or more in it appears verbatim on the page the quiz closes (for a module quiz: on any page of
+    the module; for a mock or pool item: on any page in its level scope; quiz sections excluded);
+  - the folded key on the page quotes the same phrases as quiz.json;
   - no doubled adjacent word in a stem, option or explanation; no stem or option ends on a preposition, article or
     conjunction (cut-off text);
   - a module question's stem shares at most half of its content stems with any page question of the same module;
@@ -119,9 +121,19 @@ def check_quotes(qid, explanation, key, prose):
         quotes = [q for q in QUOTE.findall(explanation[letter]) if len(q.split()) >= MIN_QUOTE_WORDS]
         if not quotes:
             problems.append(f"{qid}: option {letter} has no quoted phrase of {MIN_QUOTE_WORDS} words or more in its explanation")
-        elif not any(norm(q) in page for q in quotes):
-            problems.append(f"{qid}: option {letter} quotes {quotes[0]!r}, which is not verbatim on the page")
+        else:
+            problems += [f"{qid}: option {letter} quotes {q!r}, which is not verbatim on the page"
+                         for q in quotes if norm(q) not in page]
     return problems
+
+
+def check_key_quotes(qid, para, explanation):
+    """The folded key on the page quotes the same phrases, in the same order, as the quiz.json explanations."""
+    on_page = [norm(q) for q in QUOTE.findall(para.replace("“", '"').replace("”", '"'))]
+    in_json = [norm(q) for letter in sorted(explanation) for q in QUOTE.findall(explanation[letter])]
+    if sorted(on_page) != sorted(in_json):
+        return [f"{qid}: the folded key on the page and quiz.json quote different phrases"]
+    return []
 
 
 def check_named_page(qid, text):
@@ -513,6 +525,7 @@ def check_module(folder):
                 idx = [k for k, _, _ in parse_page_quizzes(md)].index(kind)
                 if n - 1 < len(paras[idx]):
                     problems += check_key_paragraph(qid, paras[idx][n - 1], q["key"], want_letters)
+                    problems += check_key_quotes(qid, paras[idx][n - 1], q.get("explanation", {}))
                 grp = longest.setdefault("mock exam" if kind == "Mock exam" else "module", [0, 0])
                 grp[0] += keys_longest(opts, q["key"])
                 grp[1] += 1
