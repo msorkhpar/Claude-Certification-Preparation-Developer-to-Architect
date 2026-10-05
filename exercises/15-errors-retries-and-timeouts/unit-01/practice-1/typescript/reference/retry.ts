@@ -1,4 +1,7 @@
 // A retry policy for API calls. See ../../statement.md for the contract.
+import { logger } from "../logger.ts";
+const log = logger("retry");
+
 export type Response = { status: number; headers: Record<string, string>; body: any }; // header names in lower case; body is parsed JSON or {}
 
 /** The connection failed or timed out: no reply was received. */
@@ -21,15 +24,32 @@ export class CallFailed extends Error {
 
 export type Options = { maxAttempts?: number; baseDelay?: number; cap?: number; jitter?: (delay: number) => number };
 
+function statusRetryable(status: number): boolean {
+  return status === 408 || status === 409 || status === 429 || status >= 500;
+}
+
+function spendCap(response: Response): boolean {
+  return response.body?.error?.details?.error_code === "enforced_spend_limit_reached";
+}
+
 function retryable(response: Response): boolean {
-  if (response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500) {
-    return response.body?.error?.details?.error_code !== "enforced_spend_limit_reached";
-  }
-  return false;
+  return statusRetryable(response.status) && !spendCap(response);
+}
+
+function errorType(response: Response): string {
+  return response.body?.error?.type ?? "unknown";
+}
+
+function requestId(response: Response): string | null {
+  return response.headers["request-id"] ?? null;
 }
 
 function failure(response: Response, attempts: number): CallFailed {
-  return new CallFailed(response.status, response.body?.error?.type ?? "unknown", attempts, response.headers["request-id"] ?? null);
+  return new CallFailed(response.status, errorType(response), attempts, requestId(response));
+}
+
+function connectionFailure(attempts: number): CallFailed {
+  return new CallFailed(0, "connection_error", attempts);
 }
 
 function retryAfter(response: Response): number {
@@ -37,7 +57,12 @@ function retryAfter(response: Response): number {
   return Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
 }
 
+function delayFor(attempt: number, baseDelay: number, cap: number, jitter: (delay: number) => number): number {
+  return jitter(Math.min(cap, baseDelay * 2 ** (attempt - 1)));
+}
+
 export function callWithRetry(send: () => Response, sleep: (seconds: number) => void, options: Options = {}): Response {
+  log.debug("callWithRetry input", options);
   const { maxAttempts = 4, baseDelay = 0.5, cap = 8, jitter = (delay: number) => delay } = options;
   for (let attempt = 1; ; attempt++) {
     let wait = 0;
@@ -48,8 +73,8 @@ export function callWithRetry(send: () => Response, sleep: (seconds: number) => 
       wait = retryAfter(response);
     } catch (err) {
       if (!(err instanceof TransportError)) throw err;
-      if (attempt >= maxAttempts) throw new CallFailed(0, "connection_error", attempt);
+      if (attempt >= maxAttempts) throw connectionFailure(attempt);
     }
-    sleep(Math.max(jitter(Math.min(cap, baseDelay * 2 ** (attempt - 1))), wait));
+    sleep(Math.max(delayFor(attempt, baseDelay, cap, jitter), wait));
   }
 }

@@ -57,11 +57,17 @@
     }
   },
   "plants": {
-    "wrong-send-last-only": {
+    "wrong-assistant-text-only": {
       "caught_by": [
         "m1"
       ],
-      "defect": "sends only the newest user turn, as if the API remembered the rest"
+      "defect": "stores the assistant turn as plain text instead of the content blocks as received"
+    },
+    "wrong-usage-input-overwritten": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "replaces the input token total with the last turn instead of adding to it"
     },
     "wrong-no-rollback": {
       "caught_by": [
@@ -69,11 +75,29 @@
       ],
       "defect": "keeps the user turn when the call fails, so the next request has two user turns in a row"
     },
-    "wrong-shared-list": {
+    "wrong-truncated-on-any-stop": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "marks every reply truncated unless it ended with end_turn"
+    },
+    "wrong-stop-sequences-dropped": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "does not pass the stop sequences on"
+    },
+    "wrong-history-not-copied": {
       "caught_by": [
         "e5"
       ],
-      "defect": "hands its own history list to send, so later turns rewrite earlier requests"
+      "defect": "hands out its own history list instead of a copy"
+    },
+    "wrong-blank-turn-accepted": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "sends a turn that is empty or only whitespace"
     }
   }
 }

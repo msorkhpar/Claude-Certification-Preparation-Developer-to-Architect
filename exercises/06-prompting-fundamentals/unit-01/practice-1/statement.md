@@ -5,6 +5,26 @@ Write `build_prompt` (Python), `buildPrompt` (TypeScript), `PromptBuilder.build`
 edit the file there. The tests check the structure of the string, exactly, so the format below is the
 contract.
 
+## What is already written, and what you write
+
+The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the
+sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it
+receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an
+assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the
+failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms,
+`renderDocument` for `_render_document`, and so on):
+
+1. `_join` unlocks every case: the sections separated by one blank line.
+2. `_present` unlocks `e1`: an absent, empty or whitespace-only text is not there.
+3. `_lookup` unlocks `e2`: a placeholder's value, or an error that names the variable.
+4. `_escape` unlocks `e4`: `&`, `<` and `>` made harmless.
+5. `_render_document` unlocks `e4`, `e5` and `e6`: one document, escaped and never filled.
+6. `_render_example` unlocks `m1` and `e6`: one example with its input and output blocks.
+7. `_constraint_lines` unlocks `m1`: one `- ` line per constraint.
+8. `_check_task` unlocks `e3`: a blank task is refused.
+
+`m1` needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all.
+
 ## The spec
 
 | Field | Type | Meaning |

@@ -13,8 +13,12 @@ PRACTICES[f"{X}/14-the-messages-api/unit-01/practice-1"] = {
         ("e6", "edge", "a blank turn is refused before anything is sent"),
     ],
     "plants": {
-        "wrong-send-last-only": (["m1"], "sends only the newest user turn, as if the API remembered the rest"),
+        "wrong-assistant-text-only": (["m1"], "stores the assistant turn as plain text instead of the content blocks as received"),
+        "wrong-usage-input-overwritten": (["e1"], "replaces the input token total with the last turn instead of adding to it"),
         "wrong-no-rollback": (["e2"], "keeps the user turn when the call fails, so the next request has two user turns in a row"),
-        "wrong-shared-list": (["e5"], "hands its own history list to send, so later turns rewrite earlier requests"),
+        "wrong-truncated-on-any-stop": (["e3"], "marks every reply truncated unless it ended with end_turn"),
+        "wrong-stop-sequences-dropped": (["e4"], "does not pass the stop sequences on"),
+        "wrong-history-not-copied": (["e5"], "hands out its own history list instead of a copy"),
+        "wrong-blank-turn-accepted": (["e6"], "sends a turn that is empty or only whitespace"),
     },
 }

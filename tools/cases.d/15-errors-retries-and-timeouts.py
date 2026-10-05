@@ -16,6 +16,8 @@ PRACTICES[f"{X}/15-errors-retries-and-timeouts/unit-01/practice-1"] = {
         "wrong-retry-everything": (["e1"], "retries every failing status, including 400, 401 and 404"),
         "wrong-ignore-retry-after": (["e2"], "waits by its own schedule and never reads retry-after"),
         "wrong-no-cap": (["e3"], "lets the delay double without limit"),
+        "wrong-spend-cap-retried": (["e4"], "retries a 429 that says the spend limit is reached"),
+        "wrong-connection-not-retried": (["e5"], "gives up at the first lost connection"),
         "wrong-sleep-after-last": (["e6"], "waits once more after the final failed attempt"),
     },
 }

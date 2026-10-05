@@ -5,6 +5,7 @@ import java.util.Map;
 
 /** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */
 final class Conversation {
+    private static final System.Logger LOG = System.getLogger(Conversation.class.getName());
     private final Send send;
     private final String model;
     private final int maxTokens;
@@ -27,39 +28,68 @@ final class Conversation {
         return (List<Map<String, Object>>) Json.parse(Json.stringify(turns));
     }
 
-    Reply say(String text) {
+    private void checkText(String text) {
         if (text == null || text.isBlank()) throw new IllegalArgumentException("a turn needs text");
-        Map<String, Object> user = new LinkedHashMap<>();
-        user.put("role", "user");
-        user.put("content", text);
-        history.add(user);
+    }
+
+    private Map<String, Object> requestBody() {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", model);
         body.put("max_tokens", (long) maxTokens);
         body.put("messages", copy(history));
+        return body;
+    }
+
+    private void optionalFields(Map<String, Object> body) {
         if (system != null && !system.isBlank()) body.put("system", system);
         if (stopSequences != null && !stopSequences.isEmpty()) body.put("stop_sequences", new ArrayList<>(stopSequences));
-        Map<String, Object> response;
+    }
+
+    private Map<String, Object> sendOrRollBack(Map<String, Object> body) {
         try {
-            response = send.send(body);
+            return send.send(body);
         } catch (RuntimeException e) {
             history.remove(history.size() - 1);
             throw e;
         }
+    }
+
+    private Map<String, Object> assistantTurn(Map<String, Object> response) {
         Map<String, Object> assistant = new LinkedHashMap<>();
         assistant.put("role", "assistant");
         assistant.put("content", response.get("content"));
-        history.add(assistant);
-        if (response.get("usage") instanceof Map<?, ?> usage) {
+        return assistant;
+    }
+
+    private void addUsage(Object usageValue) {
+        if (usageValue instanceof Map<?, ?> usage) {
             if (usage.get("input_tokens") instanceof Number n) inputTokens += n.longValue();
             if (usage.get("output_tokens") instanceof Number n) outputTokens += n.longValue();
         }
+    }
+
+    private Reply makeReply(Map<String, Object> response) {
         StringBuilder replyText = new StringBuilder();
         for (Object b : (List<?>) response.get("content")) {
             if (b instanceof Map<?, ?> block && "text".equals(block.get("type"))) replyText.append(block.get("text"));
         }
         String stop = (String) response.get("stop_reason");
         return new Reply(replyText.toString(), stop, "max_tokens".equals(stop));
+    }
+
+    Reply say(String text) {
+        LOG.log(System.Logger.Level.DEBUG, "say input: {0}", text);
+        checkText(text);
+        Map<String, Object> user = new LinkedHashMap<>();
+        user.put("role", "user");
+        user.put("content", text);
+        history.add(user);
+        Map<String, Object> body = requestBody();
+        optionalFields(body);
+        Map<String, Object> response = sendOrRollBack(body);
+        history.add(assistantTurn(response));
+        addUsage(response.get("usage"));
+        return makeReply(response);
     }
 
     List<Map<String, Object>> history() {

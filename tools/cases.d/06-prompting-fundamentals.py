@@ -19,5 +19,6 @@ PRACTICES[f"{X}/06-prompting-fundamentals/unit-01/practice-1"] = {
         "wrong-blank-task-accepted": (["e3"], "accepts a whitespace-only task"),
         "wrong-no-escape": (["e4"], "does not escape document text"),
         "wrong-fill-documents": (["e5"], "fills placeholders inside document text"),
+        "wrong-documents-sorted": (["e6"], "renders documents sorted by name instead of in the order given"),
     },
 }

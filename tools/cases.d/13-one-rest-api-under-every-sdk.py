@@ -14,7 +14,11 @@ PRACTICES[f"{X}/13-one-rest-api-under-every-sdk/unit-01/practice-1"] = {
     ],
     "plants": {
         "wrong-no-version-header": (["m1"], "leaves out the anthropic-version header"),
+        "wrong-blank-system-kept": (["e1"], "puts a blank system text into the body"),
+        "wrong-zero-max-tokens-ok": (["e2"], "accepts max_tokens of zero"),
+        "wrong-text-joined-with-space": (["e3"], "joins the text blocks with a space"),
         "wrong-body-id-first": (["e4"], "prefers the request id in the body over the request-id header"),
+        "wrong-unknown-type-renamed": (["e5"], "names the error type of a reply that is not JSON error instead of unknown"),
         "wrong-no-redaction": (["e6"], "puts the server's message into the error without removing the API key"),
     },
 }
