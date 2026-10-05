@@ -32,7 +32,7 @@ endpoints: Dynamic routing within a geographic area (for example, the United Sta
 "Regional endpoints: Guaranteed data routing through specific geographic regions". Regional and multi-region endpoints "include a 10% pricing premium over global
 endpoints". For an EU residency rule, the choices are the `eu` multi-region endpoint or a `europe-` region.
 
-The catch, from module 22, is the model: a specific region serves `claude-sonnet-4-6` only. A project that must stay in the EU and use Sonnet 5.5 therefore
+The catch, from module 22, is the model: the docs say specific regions serve older models, and the practice accepts `claude-sonnet-4-6` alone. A project that must stay in the EU and use Sonnet 5.5 therefore
 uses the `eu` multi-region endpoint, at the premium. The Vertex model id is the plain name, `claude-sonnet-5-5`, with no `anthropic.` prefix.
 
 On Bedrock the equivalent choice is the endpoint type: a global endpoint, or a regional one that "resolves to the single AWS region you specify, for data-residency
@@ -84,7 +84,7 @@ The ARN rule is a shape check only. The `foundation-model` form is the one AWS d
 
 ## Traps
 
-1. **Choosing a specific EU region for a new model.** A specific region serves `claude-sonnet-4-6` only, so a project that needs Sonnet 5.5 in the EU uses the `eu`
+1. **Choosing a specific EU region for a new model.** Specific regions serve older models (in the practice, `claude-sonnet-4-6` only), so a project that needs Sonnet 5.5 in the EU uses the `eu`
    multi-region endpoint instead.
 2. **Asking for more than the self-service ceiling without approval.** Past 5 million input and 500,000 output tokens per minute, Anthropic has to approve.
 3. **Granting the broad role to get started.** A predefined role holds more than the predict permission, and the practice's tests fail it.
@@ -122,7 +122,7 @@ The ARN rule is a shape check only. The `foundation-model` form is the one AWS d
 
 This quiz covers both pages of the module.
 
-1. A reviewer finds a single star in the policy field that points at a specific resource. Which practice rule does it break?
+1. A reviewer finds a single star in the resource field of a policy statement. Which practice rule does it break?
    - **a**: The document must carry the current version string at the top
    - **b**: Each entry must be a model ARN in a documented region, without wildcards
    - **c**: Every action must be one of the three invoke actions allowed
