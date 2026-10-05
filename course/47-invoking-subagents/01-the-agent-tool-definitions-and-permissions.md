@@ -252,7 +252,7 @@ flag --max-turns 10
 ```
 <!-- /example -->
 
-Read it from the top. The spawn line shows the tool name `Agent`, the subagent type and the size of the brief (six lines: task, files, known facts and the return format, the layout of page 2). The report line is the subagent's final message arriving as a tool result for the coordinator. The two lines marked `inside t1` are messages that ran inside the reviewer, tagged with the id of the spawn. The `agent sent to the binary` lines are the definitions as the SDK sent them in its handshake: the reviewer with two tools and a model, the finder with three tools and no model set. The flags show the auto-approved tools, the budget and the turn limit that reached the binary. The stand-in puts the inner messages after the report, which the real binary may not, so the example shows how to read the tags and not the timing. Both languages print the same lines.
+Read it from the top. The spawn line shows the tool name `Agent`, the subagent type and the size of the brief (six lines: task, files, known facts and the return format, the layout that page 2 gives). The report line is the subagent's final message arriving as a tool result for the coordinator. The two lines marked `inside t1` are messages that ran inside the reviewer, tagged with the id of the spawn. The `agent sent to the binary` lines are the definitions as the SDK sent them in its handshake: the reviewer with two tools and a model, the finder with three tools and no model set. The flags show the auto-approved tools, the budget and the turn limit that reached the binary. The stand-in puts the inner messages after the report, which the real binary may not, so the example shows how to read the tags and not the timing. Both languages print the same lines.
 
 ## Traps
 
@@ -274,7 +274,7 @@ These are the wrong answers that the exam's options for this task statement offe
 2. A dashboard counts delegations by looking for calls to the Agent tool in the message stream. Replayed logs from earlier runs show subagent reports, yet the dashboard reports zero delegations. What fixes it?
    - **a**: Read the tools list of the init message, where the tool is always named Agent
    - **b**: Look for the subagent's name in the assistant's text blocks
-   - **c**: Match the former name Task in the call blocks too, besides the current one
+   - **c**: Also match the former name Task in each spawn's blocks
    - **d**: Add Agent to the allowed tools so that its calls show up in the stream
 
 <details>
