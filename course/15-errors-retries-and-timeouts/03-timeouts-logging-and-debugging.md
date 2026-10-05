@@ -35,7 +35,8 @@ or per request. All three set the default for every call on the client or overri
 
 The default is **ten minutes**. The SDK pages add two precise rules:
 
-1. For a non-streaming request that the SDK expects to take longer than about ten minutes, it raises an error before
+1. For a non-streaming request that the SDK expects to take longer than about ten minutes (the Python, TypeScript, Java
+   and Go pages say so), it raises an error before
    sending: Python raises a `ValueError`, which "passing `stream=True` or overriding the `timeout` option" disables.
    That is a hint to stream.
 2. When the timeout fires, the SDK raises a timeout error (`APITimeoutError` in Python, `APIConnectionTimeoutError` in

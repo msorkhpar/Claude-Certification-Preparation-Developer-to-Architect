@@ -45,10 +45,10 @@
       "scope": "page",
       "stem": "A service retries every 5xx and 429 at once, three times in a row. During a provider overload its own traffic triples and the errors last longer. What is the best change?",
       "options": {
-        "a": "Retry five times in a row instead of three, so that one attempt lands after the overload",
+        "a": "Retry five times in a row instead of three, with no pause between the attempts",
         "b": "Wait with a doubling, capped pause plus jitter, and honour any retry-after value",
-        "c": "Retry only the 429 responses and treat every 5xx response as final, since those are the provider's fault",
-        "d": "Add a fixed one-second pause between the attempts, so that every client waits the same short time"
+        "c": "Retry only the 429 responses and treat every 5xx response as final, not retryable",
+        "d": "Add a fixed one-second pause between the attempts and keep the count at three"
       },
       "key": "b",
       "explanation": {
