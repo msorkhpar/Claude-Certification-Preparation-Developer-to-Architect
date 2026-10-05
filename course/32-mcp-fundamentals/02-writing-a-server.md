@@ -795,11 +795,11 @@ The Java and Kotlin tabs build the same server on the JVM SDKs (`io.modelcontext
    - **c**: By returning empty text, which signals the model to ask the user
    - **d**: As an ordinary result flagged as an error, with a readable explanation
 
-3. A tool declares that it only reads data, and a client skips the confirmation prompt for it because of that declaration. What does the specification say about trusting the declaration?
-   - **a**: Hints are binding, unless a person has demanded confirmation
-   - **b**: Hints are unverified claims, unless the origin is vetted
-   - **c**: Hints are trusted, unless the first call has ended in an error
-   - **d**: Hints are checked by the SDK, unless the server runs locally
+3. A tool's annotations say that it only reads data, and a client skips the confirmation prompt because of them. What does the specification say about relying on them?
+   - **a**: Follow them as binding instructions from the server
+   - **b**: Treat them as untrusted unless the server is trusted
+   - **c**: Follow them after the first call ends without an error
+   - **d**: Let the SDK verify them before the client acts
 
 <details>
 <summary>Answer key</summary>

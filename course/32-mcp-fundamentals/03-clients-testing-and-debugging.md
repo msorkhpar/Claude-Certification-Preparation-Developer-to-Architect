@@ -66,22 +66,22 @@ The practice is in `exercises/32-mcp-fundamentals/unit-01/practice-1/statement.m
    - **d**: Reinstall the host application, since a corrupt cache hides tools
 
 2. A stdio server started by a host cannot find credentials that work in the developer's shell. Which documented behavior explains it?
-   - **a**: Only some variables are inherited, so the rest go in an env key of the configuration
-   - **b**: Credentials are read from the shell only over HTTP, so stdio servers never receive them
-   - **c**: Variables arrive only after the first tool call, so startup always sees none
-   - **d**: The whole environment is wiped, so no server can read any variable
+   - **a**: Only a limited subset of variables is inherited
+   - **b**: Credentials reach a server only through its HTTP transport
+   - **c**: Variables arrive after the first tool call has completed
+   - **d**: The host clears the whole environment before each launch
 
 3. A CI job must exercise a server without a browser and print machine-readable results. Which Inspector client fits?
-   - **a**: The web one, because it is the default and the richest surface
-   - **b**: The terminal one, because it needs no browser and prints JSON
-   - **c**: The CLI one, because it is built for shell pipelines
-   - **d**: Any of the three, because they all connect the same way
+   - **a**: The web one, the graphical default
+   - **b**: The terminal one, an interactive interface
+   - **c**: The CLI one, built for scripted use
+   - **d**: Any of the three alike
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The page says the guide's connection checks include "Test standalone with Inspector", and the guide calls the Inspector the "first stop" for debugging. *d* is ruled out because the documented checks look at the server and the logs, such as "Verify server process is running", and none of them is to reinstall the host. *b* is ruled out because the steps go through logs, the process and "Test standalone with Inspector" before anything is rewritten. *c* is ruled out because "Local MCP servers should not log messages to stdout (standard out), as this will interfere with protocol operation."
-2. **a**. The page quotes the guide: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically (the exact set is platform-dependent)." *d* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them, not none. *b* is ruled out because the fix is to "set an env key in the host's configuration", whatever the transport. *c* is ruled out because the variables are fixed when the process is launched: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically".
+2. **a**. The page quotes the guide: "MCP servers launched over stdio inherit only a limited subset of environment variables automatically (the exact set is platform-dependent)." *d* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them, not none. *b* is ruled out because the fix is to "set an env key in the host's configuration", whatever the transport. *c* is ruled out because a start-up failure can be "a missing environment variable", so the variables matter from launch and not after a first tool call.
 3. **c**. The page's table says the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents." *a* is ruled out because the web one is "A full graphical inspector in the browser. The default, and the richest surface." *b* is ruled out because the terminal one is "An interactive terminal UI, for when a browser isn't available or wanted." *d* is ruled out because only the CLI is "A scriptable, machine-readable client for CI, shell pipelines, and coding agents.", while the other two are graphical or interactive, even though every client behind the Inspector "connects the same way".
 
 </details>
@@ -103,10 +103,10 @@ This quiz covers all three pages of the module.
    - **d**: A tool result flagged as an error, saying the user cannot be reached
 
 3. A team must build an MCP server that speaks the newest protocol version. Which of the four SDKs used in the course reached that version when it was checked?
-   - **a**: All four, since they share one specification and release together
-   - **b**: Only the Kotlin library, because it is the newest of the four
-   - **c**: Only the Java library, which the documentation ranks in its top tier overall
-   - **d**: Only the Python library, because the other three stop at an earlier revision
+   - **a**: All four libraries alike
+   - **b**: Only the Kotlin library
+   - **c**: The TypeScript and Java libraries
+   - **d**: Only the Python library
 
 4. A query matches no stored entries. How does the course's notes server answer?
    - **a**: With a tool error that tells the model to ask the user for a new query
@@ -119,7 +119,7 @@ This quiz covers all three pages of the module.
 
 1. **b**. The third page quotes the guide: the directory of a launched server "may be undefined (like / on macOS) since the client could be started from anywhere", so use absolute paths. *a* is ruled out because the guide says "the same principles apply to any stdio-based MCP client", and no registration with the Inspector exists. *d* is ruled out because "testing from the command line uses the directory where you run the command", which is the contrast, and the transport is not part of it. *c* is ruled out because servers "inherit only a limited subset of environment variables automatically", which is some of them and not none.
 2. **c**. The third page says that if the server needs a capability that the request's client capabilities did not declare, "it returns a MissingRequiredClientCapabilityError (code -32021) naming the missing capabilities". *a* is ruled out because an unsupported-version error is one that "lists the server's supported versions in its data field", and the version was fine here. *b* is ruled out because "A request missing either required field is rejected with error -32602", and the required fields were sent. *d* is ruled out because the error is "returned as an error with its own code", so a client can tell it from a failed tool.
-3. **d**. The first page says the Python SDK speaks both eras, and that the other three "contain no support for 2026-07-28, and their latest revision is 2025-11-25". *a* is ruled out because three of them "contain no support for 2026-07-28". *b* is ruled out because the Kotlin SDK is one of the three whose "latest revision is 2025-11-25". *c* is ruled out because "Java is Tier 2 and Kotlin is Tier 3", and the Java SDK stops at the earlier revision as well.
+3. **d**. The first page says the Python SDK speaks both eras, and that the other three "contain no support for 2026-07-28, and their latest revision is 2025-11-25". *a* is ruled out because "only the Python one reached 2026-07-28 when it was checked". *b* is ruled out because the Kotlin SDK is one of those that "contain no support for 2026-07-28". *c* is ruled out because the TypeScript and Java SDKs have "their latest revision is 2025-11-25" as well.
 4. **b**. The third page says that with no match the search answers `No notes match "{query}"`, in the practice statement's words "which is not an error". *a* is ruled out because the answer is "which is not an error", so there is no tool error to read. *d* is ruled out because protocol errors "indicate issues with the request structure itself that models are less likely to be able to fix", and the request here is valid. *c* is ruled out because the protocol error that says `No note {id}` is "for reading a note that does not exist", and "a search that finds nothing is a normal answer".
 
 </details>
