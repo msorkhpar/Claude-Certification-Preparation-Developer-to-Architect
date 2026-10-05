@@ -19,7 +19,7 @@ The exam has 63 items and lasts 120 minutes, which is about 1.9 minutes an item,
 
 ### The blueprint as a study plan
 
-The guide lists seven domains. The course uses its own codes P1 to P7, in the guide's order. The last column shows how many of 63 items a domain weight gives, and the mock exam of this module uses that split.
+The guide lists seven domains. The course uses its own codes P1 to P7, in the guide's order. The "Items in 63" column shows how many of 63 items a domain weight gives, and the mock exam of this module uses that split.
 
 | Course code | The guide's domain | Weight | Items in 63 | Level 4 modules that teach it |
 |---|---|---|---|---|
@@ -31,7 +31,7 @@ The guide lists seven domains. The course uses its own codes P1 to P7, in the gu
 | P6 | Stakeholder Communication and Lifecycle Management | 14% | about 8.8 | 79, 89, 91 |
 | P7 | Developer Productivity and Operational Enablement | 7% | about 4.4 | 92 |
 
-Three readings of the table matter. First, **integration is the largest single domain**, at about one item in five, and it is the one in which a wrong answer is most often a plausible mechanism for the wrong situation, so its modules (85 to 87) repay a second reading. Second, **the two stakeholder-and-lifecycle domains reward judgement more than recall**: P6 is 14 percent, and its items ask what to say, to whom and in what order, which a candidate who studied only the technical modules misses. Third, **P7 is small but narrow**: four items, almost all from one module (92), on settings that have a documented answer. A candidate who has read that module twice can take them. Module 93 is the capstone: it draws on all seven domains at once and is a good place to test which domain a scenario belongs to before you answer it.
+Three readings of the table matter. First, **integration is the largest single domain**, at about one item in five, and it is the one in which a wrong answer is most often a plausible mechanism for the wrong situation, so its modules (85 to 87) repay a second reading. Second, **the stakeholder-and-lifecycle domain rewards judgement more than recall**: P6 is 14 percent, and its items ask what to say, to whom and in what order, which a candidate who studied only the technical modules misses. Third, **P7 is small but narrow**: four items, almost all from one module (92), on settings that have a documented answer. A candidate who has read that module twice can take them. Module 93 is the capstone: it draws on all seven domains at once and is a good place to test which domain a scenario belongs to before you answer it.
 
 A plan by weight is a plan by expected marks. If your practice results are even across domains, spend your time in proportion to the weights. If they are not, spend it where the product of the weight and the miss rate is largest: a domain at 19 percent where you score 60 percent loses more than a domain at 7 percent where you score 40 percent.
 
