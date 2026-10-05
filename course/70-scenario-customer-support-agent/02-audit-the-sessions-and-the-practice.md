@@ -74,14 +74,14 @@ These are the wrong answers that the exam's options for this scenario offer, eac
    - **d**: That the confidence scores of the model moved up together with the rate
 
 5. One session holds eleven calls to the wrong tool, and the audit reports a count of one for the wrong-tool shape. A manager asks why not eleven. What is the answer?
-   - **a**: The audit keeps only the first mistake of each session to save space in the report
-   - **b**: Counts are capped at one by default so that no single case can dominate
+   - **a**: The audit keeps only the first mistake of each session in the report
+   - **b**: Counts are capped at one by default, whatever the session holds
    - **c**: Repeated mistakes within a session are usually copies of the first mistake
-   - **d**: The target is a share of conversations, and a conversation fails once however often it errs
+   - **d**: The target is a share of conversations, and each fails at most once
 
 6. The audit needs two fields for each session: whether a human was needed, and which tool each step should have used. Which source supplies them?
-   - **a**: The tool logs, since every call is recorded with its arguments and its result
-   - **b**: Reviewers who label a sample, because they are judgements that logs do not hold
+   - **a**: The tool logs, which record every call with its arguments and its result
+   - **b**: Reviewers who label a sample of the sessions by hand
    - **c**: The model, which can be asked after each conversation to mark its own errors
    - **d**: The customer, through a short survey sent at the end of each conversation
 
@@ -99,16 +99,16 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 This quiz covers both pages of the module.
 
 1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A worker process keeps one state object for every conversation it serves, and a customer is shown a note that belongs to someone else's order. Which change addresses the cause?
-   - **a**: Clear the shared object once an hour, which limits how long a note can stay
-   - **b**: Create a new instance for each ticket, so that nothing outlives it
+   - **a**: Clear the shared object once an hour, limiting how long a note stays
+   - **b**: Create a new instance for each ticket, with nothing kept after it
    - **c**: Instruct the model never to repeat what another person has written
-   - **d**: Encrypt the stored notes so that only their owner can read them later
+   - **d**: Encrypt the stored notes, with only their owner able to read them later
 
 2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A refund above the limit is refused, and the model asks for the same refund again, and again. What does the dispatcher need so that the run ends in a useful way?
-   - **a**: A check for identical consecutive calls that stops the loop and transfers to staff
+   - **a**: A guard on identical calls that halts the loop and transfers to staff
    - **b**: A line in the prompt telling the model to stop once a refund is refused
    - **c**: A silent retry of the refund until the backend finally accepts it
-   - **d**: A larger turn limit, since the model needs room to find another approach
+   - **d**: A larger turn limit that gives the model room to find another approach
 
 3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. An audit finds no skipped identity step and no refund over the limit, wrong tools in 14 sessions, and escalation errors in 9. Which fix comes first?
    - **a**: Reword the descriptions of the confusable pair, giving formats and examples

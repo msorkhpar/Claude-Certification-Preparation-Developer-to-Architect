@@ -9,7 +9,7 @@ Checked on 2026-10-04 against Anthropic's engineering article on building effect
 
 ## Why it matters
 
-The Architect exam draws four of its six scenarios for each sitting, so a given scenario turns up in about two sittings out of three. The support agent is the one that touches every domain: the loop and its prerequisites, the tool descriptions and errors, and the judgement of when to hand a case to a person. Its questions have one shape. A log line is shown, a team member proposes a fix, and the options are four fixes of very different weight. The skill is not knowing that a gate exists. It is naming the failure behind the line and picking the proportionate fix first, and knowing which of the four candidate fixes cannot work at all.
+The Architect exam draws four of its six scenarios for each sitting, so a given scenario has a two-in-three chance of being among them, if the draw is even. The support agent is the one that touches every domain: the loop and its prerequisites, the tool descriptions and errors, and the judgement of when to hand a case to a person. Its questions have one shape. A log line is shown, a team member proposes a fix, and the options are four fixes of very different weight. The skill is not knowing that a gate exists. It is naming the failure behind the line and picking the proportionate fix first, and knowing which of the four candidate fixes cannot work at all.
 
 ## The idea
 
@@ -662,15 +662,15 @@ These are the wrong answers that the exam's options for this scenario offer, eac
 
 2. A customer asks about a purchase that belongs to someone else. How does the support example's dispatcher refuse the call?
    - **a**: As `order_not_owned`, and the message does not name the owner
-   - **b**: As `order_not_owned`, and the message names the owner so the customer can be asked
+   - **b**: As `order_not_owned`, and the message names the owner of the order
    - **c**: As `not_found`, and the message says that the order does not exist
    - **d**: As `needs_human`, and the message tells the model to escalate
 
 3. Two customers share a name, the lookup tool returns both, and the agent proceeds with the first. What should the dispatcher have done?
-   - **a**: Choose the customer with the most recent order, as that is the likelier one
-   - **b**: Verify both customers, so that either can be served once the agent knows more
-   - **c**: Set nobody as verified, and tell the model to ask for something that tells them apart
-   - **d**: Raise the retry count of the lookup, since a second try may return one match
+   - **a**: Choose the customer whose order is the most recent one on file
+   - **b**: Verify both customers, and let either be served as the case unfolds
+   - **c**: Set nobody as verified, and have the model ask what tells them apart
+   - **d**: Raise the retry count of the lookup until it returns one match
 
 <details>
 <summary>Answer key</summary>
