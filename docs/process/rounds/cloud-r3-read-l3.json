@@ -1,0 +1,35 @@
+{
+  "id": "cloud-r3-read-l3",
+  "purpose": "Level 3 independent quiz reader: judge every page, module and mock quiz item reworked in round 2 against the quiz rules of CLAUDE.md, and fix only the items judged failing.",
+  "office": "office-fix",
+  "inputs": {
+    "course": {
+      "path": "claude-certification-preparation",
+      "commit": "e5f403aaabf5a794d3f719d0650e4584c8c775ea"
+    }
+  },
+  "module_range": {
+    "from": 45,
+    "to": 78,
+    "modules_regex": "^(4[5-9]|[56][0-9]|7[0-8])-"
+  },
+  "languages": [
+    "python",
+    "typescript",
+    "java",
+    "kotlin"
+  ],
+  "gates": [
+    "python3 tools/check_quiz.py",
+    "python3 tools/test_check_quiz.py",
+    "python3 tools/check_revision.py",
+    "python3 tools/check_coverage.py",
+    "python3 tools/check_personal_data.py --modules '.*'"
+  ],
+  "acceptance": {
+    "check_findings": 0,
+    "files_outside_scope": 0,
+    "cost_cap_usd": 15
+  },
+  "frozen_at": "2026-10-06T08:00:00Z"
+}

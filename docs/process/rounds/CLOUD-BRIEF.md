@@ -98,3 +98,65 @@ Scope: every `course/<module>/*.md` of your level **including** that level's moc
 Keep keys, domains, counts per domain and the "Select two" form of mock items unchanged.
 Out of scope: `exercises/`, `examples/` and `tools/` (list any practice or example mismatch under
 `open`).
+
+## Round 3 tasks
+
+Round 3 inputs are the merged state of round 2 (the commit in each spec). Each spec carries
+`acceptance.cost_cap_usd`, a ceiling for the session: stop at it, hand back what is done and list the
+rest under `open`. Branch names follow the rule above (`cloud/<id>`).
+
+### cloud-r3-fixes
+
+Scope: this round may edit exactly these files, beyond the rule that `tools/`, `exercises/` and
+`docs/` are closed to cloud rounds.
+
+1. Module 86 practice statement (`exercises/86-*/unit-01/practice-1/statement.md`): make it match page
+   `course/86-*/01` and the example. The gateway checks credential, model and rate (not tool), and the
+   Java class is the example's `CapabilityAudit`, not `Capability`. Read the page, the example and the
+   reference solutions first; change only statement wording. If a reference solution or test disagrees
+   with the page, do not change it: list it under `open` (the register runs the practice gate on the
+   host).
+2. `exercises/44-exam-readiness-2/review-bank.json` item `rb-003`: the explanation must say what the
+   revised sentence of `course/12-*/03` says (a rise in 400s usually points at your requests or at a
+   self-set spend limit), not that it is a bug in your requests. Keep key, options and domain.
+3. `docs/EXAM-MAP.md`: the course spells it "optimisation" (British, as Level 4 pages do). Make line 72
+   and every other occurrence consistent; do not touch quoted exam names that appear in code blocks or
+   links.
+4. `tools/check_quiz.py` and `tools/test_check_quiz.py`: today a rule-out passes when any one quoted
+   phrase of 4 words is verbatim on the page, so an altered quote next to a real one passes. Make the
+   check require every quoted phrase of 4 or more words in a wrong option's explanation to be verbatim
+   in the page prose (module quizzes: any page of the module), for page quizzes, module quizzes and
+   mock/pool items alike, and that the key paragraph on the page quotes the same phrases as
+   `quiz.json`. Add tests (a passing case, an altered-quote case, a mixed real-and-invented case).
+   Then fix every item the tightened check flags by correcting the quote to the page's exact words
+   (never by changing the page), rebuild with `python3 tools/build_quiz_json.py`, and keep
+   `check_quiz.py` at zero findings.
+5. Other source-only open items of the round 2 hand-backs: Level 2 `course/28-retrieval/02` m4 (check
+   the quoted sentence against the page; fix the quote if it is not verbatim) and Level 1 `course/04-*/02`
+   ("current Opus, Sonnet, Fable models keep them" lacks an "and"): fix the sentence and the Developer
+   mock 1 x24 quote (module 44) in the same commit. List anything needing documentation or a host
+   run under `open`; do not guess.
+
+### cloud-r3-read-l1, -l2, -l3, -l4 (independent reader, one level each)
+
+You are a reader, not the author. Scope: the quiz items (page quizzes, module quizzes, mock and pool
+items) whose `quiz.json` entry or page quiz section differs between commit
+`6409c86398347d5a341118d272d0367e2fcc898d` and the input commit, for your level's modules
+(`git diff --name-only 6409c86 <input> -- course`), plus the items named in `fixed` of
+`cloud-r2-l<N>.handback.json`. Judge each against `CLAUDE.md`'s quiz rules, reading the page the quiz
+closes:
+
+- one best answer; three plausible distractors parallel in form to the key;
+- the key repeats no word of the stem and is not the longest or the only hedged option;
+- every wrong option is ruled out by a quoted passage that is on the page and does rule it out;
+- the folded explanation says why the key is best and why each other option is not, and matches
+  `quiz.json`;
+- the item is answerable from the page (a mock item: from the pages it names).
+
+Write the verdict of every item in the hand-back under a `verdicts` key: `{"<module>/<page> <item>":
+"pass" | "fixed: <one line>" | "open: <reason>"}`. Fix only an item judged failing, by editing the
+quiz section (and the page passage when a rule-out lacks one, inside 10% of the page length), then
+rebuild with `python3 tools/build_quiz_json.py`. Do not touch keys, domains, counts per domain or the
+"Select two" form. Do not re-judge items outside the scope list; do not edit anything but the course
+pages' quiz sections, `quiz.json` files and the hand-back. Work in module order and stop at the cost
+cap.
