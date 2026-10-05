@@ -59,7 +59,9 @@
   "plants": {
     "wrong-flat-cache-read": {
       "caught_by": [
-        "e1"
+        "e1",
+        "e2",
+        "e6"
       ],
       "defect": "prices every cache read at a tenth of the input price, whatever the model"
     },
@@ -71,13 +73,15 @@
     },
     "wrong-first-eligible": {
       "caught_by": [
-        "e3"
+        "e3",
+        "e6"
       ],
       "defect": "returns the first eligible model of the catalog instead of the cheapest"
     },
     "wrong-ignore-context": {
       "caught_by": [
-        "e4"
+        "e4",
+        "e5"
       ],
       "defect": "never checks the context window or the output limit"
     },
@@ -86,6 +90,36 @@
         "e6"
       ],
       "defect": "breaks a cost tie towards the higher tier"
+    },
+    "wrong-unsplit-write-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "prices a cache write that has no 5-minute and 1-hour split at zero"
+    },
+    "wrong-batch-picks-priciest": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "takes the most expensive model instead of the cheapest when the task is a batch"
+    },
+    "wrong-ignore-output-limit": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "never checks the output limit of a model, only its context window"
+    },
+    "wrong-deprecated-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "treats a deprecated model as eligible"
+    },
+    "wrong-empty-choice-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "returns an empty answer instead of raising when no model can take the task"
     }
   }
 }

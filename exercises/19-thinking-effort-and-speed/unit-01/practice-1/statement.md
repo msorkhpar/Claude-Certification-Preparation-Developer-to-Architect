@@ -34,6 +34,23 @@ Return a map with `model`, `max_tokens` and only the keys the options asked for,
    `betas: ["fast-mode-2026-02-01"]` to the result. A `speed` of `standard` adds nothing.
 6. Never change the `options` you were given.
 
+## What is already written, and what you write
+
+The starter is a working request builder with seven gaps cut out of it. The model lookup, the `max_tokens` check, the order of the checks, the assembly of the result and the unknown-type
+refusal are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns
+a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines
+under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`checkEffort`, `checkMode`, `checkBudget`, `checkBetweenTools`, `thinkingObject`, `samplingAllowed`, `fastParams`).
+
+1. `_check_effort` unlocks `e3`: Haiku has no effort and the level must be a real one.
+2. `_check_mode` unlocks `e1`: the thinking modes a model does not have.
+3. `_check_budget` unlocks `e6`: a manual budget of at least 1,024 and below `max_tokens`.
+4. `_check_between_tools` unlocks `e2`: Sonnet only, and not at `xhigh` or `max` effort.
+5. `_thinking_object` unlocks `m1` and `e7`: the `thinking` value, with no effort in it.
+6. `_sampling_allowed` unlocks `e4`: Haiku keeps sampling parameters, the others only a temperature of 1.0.
+7. `_fast_params` unlocks `e5`: Opus only, never in a batch, with the beta header.
+
+About twenty lines in all.
+
 ## The cases
 
 | Id | What it checks |

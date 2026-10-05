@@ -24,6 +24,22 @@ Kotlin spell them `errorType` and `detail`). Java and Kotlin also get the `Json`
 `content` lists the blocks in **index order**. A stream that ends **without `message_stop`** raises `StreamError`
 with error type `incomplete_stream`.
 
+## What is already written, and what you write
+
+The starter is a working assembler with six gaps cut out of it. The event loop, the block start, the stop flag, the index order of `content` and the `StreamError` type are written and
+correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral
+value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows
+the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`startMessage`, `applyDelta`, `finishBlock`, `applyMessageDelta`, `raiseError`, `checkComplete`).
+
+1. `_start_message` unlocks `m1` and `e5`: the message a `message_start` begins, with an empty `content` and a copy of its usage.
+2. `_apply_delta` unlocks `m1` and `e6`: fold one delta (text, thinking, signature or a JSON fragment) into its block.
+3. `_finish_block` unlocks `e1`: join and parse a tool block's fragments, `{}` when there are none.
+4. `_apply_message_delta` unlocks `m1` and `e5`: the stop reason and sequence, and the cumulative usage keys.
+5. `_raise_error` unlocks `e3`: an `error` event raises `StreamError`.
+6. `_check_complete` unlocks `e4`: a stream that never reached `message_stop` raises `StreamError`.
+
+`e2` needs the loop to leave `ping` and unknown events alone, and it is written, so it passes once the others do. About twenty lines in all.
+
 ## The cases
 
 | Id | What it checks |

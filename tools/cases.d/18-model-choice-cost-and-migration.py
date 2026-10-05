@@ -13,10 +13,15 @@ PRACTICES[f"{X}/18-model-choice-cost-and-migration/unit-01/practice-1"] = {
         ("e6", "edge", "a tie goes to the lower tier"),
     ],
     "plants": {
-        "wrong-flat-cache-read": (["e1"], "prices every cache read at a tenth of the input price, whatever the model"),
+        "wrong-flat-cache-read": (["e1", "e2", "e6"], "prices every cache read at a tenth of the input price, whatever the model"),
         "wrong-batch-output-only": (["e2"], "applies the batch discount to the output tokens only"),
-        "wrong-first-eligible": (["e3"], "returns the first eligible model of the catalog instead of the cheapest"),
-        "wrong-ignore-context": (["e4"], "never checks the context window or the output limit"),
+        "wrong-first-eligible": (["e3", "e6"], "returns the first eligible model of the catalog instead of the cheapest"),
+        "wrong-ignore-context": (["e4", "e5"], "never checks the context window or the output limit"),
         "wrong-tie-high-tier": (["e6"], "breaks a cost tie towards the higher tier"),
+        "wrong-unsplit-write-ignored": (["e1"], "prices a cache write that has no 5-minute and 1-hour split at zero"),
+        "wrong-batch-picks-priciest": (["e3"], "takes the most expensive model instead of the cheapest when the task is a batch"),
+        "wrong-ignore-output-limit": (["e4"], "never checks the output limit of a model, only its context window"),
+        "wrong-deprecated-allowed": (["e5"], "treats a deprecated model as eligible"),
+        "wrong-empty-choice-allowed": (["e5"], "returns an empty answer instead of raising when no model can take the task"),
     },
 }

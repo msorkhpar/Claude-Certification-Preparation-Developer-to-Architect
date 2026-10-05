@@ -20,6 +20,7 @@ PRACTICES[f"{X}/19-thinking-effort-and-speed/unit-01/practice-1"] = {
         "wrong-sampling-pass-through": (["e4"], "passes temperature, top_p and top_k through to every model"),
         "wrong-fast-in-batch": (["e5"], "allows fast mode inside a batch"),
         "wrong-budget-floor": (["e6"], "accepts a budget below the 1,024 minimum"),
-        "wrong-effort-in-thinking": (["e7"], "puts the effort level inside the thinking object"),
+        "wrong-effort-in-thinking": (["m1", "e7"], "puts the effort level inside the thinking object"),
+        "wrong-default-effort-omitted": (["e7"], "leaves output_config out when the effort equals the model's default"),
     },
 }

@@ -17,5 +17,8 @@ PRACTICES[f"{X}/17-streaming/unit-01/practice-1"] = {
         "wrong-sum-usage": (["e5"], "adds the output tokens of message_delta to the output tokens of message_start"),
         "wrong-ignore-error": (["e3"], "skips an error event and returns what it has"),
         "wrong-accept-incomplete": (["e4"], "returns the partial message when message_stop never arrives"),
+        "wrong-empty-input-null": (["e1"], "gives a tool block with no fragments a null input instead of an empty object"),
+        "wrong-unknown-event-kept": (["e2"], "adds a block for a ping or an event type it does not know"),
+        "wrong-signature-dropped": (["e6"], "drops the signature of a thinking block"),
     },
 }

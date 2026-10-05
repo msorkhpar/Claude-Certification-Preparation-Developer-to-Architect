@@ -16,5 +16,7 @@ PRACTICES[f"{X}/16-async-concurrency-and-backpressure/unit-01/practice-1"] = {
         "wrong-fail-fast": (["e2"], "lets the first failure abort the whole run"),
         "wrong-completion-order": (["e1"], "returns outcomes in the order the items finished"),
         "wrong-eager-input": (["e5"], "reads the whole input into memory before starting any work"),
+        "wrong-large-limit-sequential": (["e3"], "runs one item at a time when the limit is above ten"),
+        "wrong-zero-limit-accepted": (["e4"], "accepts a limit of zero instead of refusing it"),
     },
 }
