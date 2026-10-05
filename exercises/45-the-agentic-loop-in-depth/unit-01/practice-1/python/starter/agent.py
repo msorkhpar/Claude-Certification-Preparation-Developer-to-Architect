@@ -32,12 +32,12 @@ def _tool_result(block, content, is_error=False):
     return {}
 
 
-def _status_for(reason):
-    """TODO 4 of 6 (unlocks m1 and e5): the status a stop reason other than tool_use ends the run with.
+def _status_for(reason, calls):
+    """TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).
 
-    Receives the stop reason. Returns "done" for end_turn and stop_sequence, "truncated" for max_tokens, "refused" for refusal and
-    "unexpected" for anything else.
-    Example: _status_for("max_tokens") -> "truncated", _status_for("brand_new") -> "unexpected"
+    Receives the stop reason and the tool calls of the reply. Returns "malformed" for tool_use with no calls, "done" for end_turn and
+    stop_sequence, "truncated" for max_tokens, "refused" for refusal and "unexpected" for anything else.
+    Example: _status_for("max_tokens", []) -> "truncated", _status_for("tool_use", []) -> "malformed", _status_for("brand_new", []) -> "unexpected"
     """
     return ""
 
@@ -82,10 +82,8 @@ def run_agent(model, tools, task, max_turns=8):
         last_text = _text(content)
         messages.append({"role": "assistant", "content": content})
         reason = reply["stop_reason"]
-        if reason == "tool_use":
-            calls = _calls(content)
-            if not calls:
-                return {"status": "malformed", "text": last_text, "turns": turns, "messages": messages}
+        calls = _calls(content)
+        if reason == "tool_use" and calls:
             messages.append({"role": "user", "content": [_run_tool(block, tools) for block in calls]})
         else:
-            return {"status": _status_for(reason), "text": last_text, "turns": turns, "messages": messages}
+            return {"status": _status_for(reason, calls), "text": last_text, "turns": turns, "messages": messages}

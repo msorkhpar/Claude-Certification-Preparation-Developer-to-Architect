@@ -33,7 +33,8 @@ final class AgentLoop {
         return result;
     }
 
-    private static String statusFor(String reason) {
+    private static String statusFor(String reason, List<Map<String, Object>> calls) {
+        if (reason.equals("tool_use") && calls.isEmpty()) return "malformed";
         return switch (reason) {
             case "end_turn", "stop_sequence" -> "done";
             case "max_tokens" -> "truncated";
@@ -86,15 +87,11 @@ final class AgentLoop {
             lastText = textOf(content);
             messages.add(map("role", "assistant", "content", content));
             String reason = (String) reply.get("stop_reason");
-            switch (reason) {
-                case "tool_use" -> {
-                    List<Map<String, Object>> results = new ArrayList<>();
-                    for (Map<String, Object> block : callsOf(content)) results.add(runTool(block, tools));
-                    if (results.isEmpty()) return outcome("malformed", lastText, turns, messages);
-                    messages.add(map("role", "user", "content", results));
-                }
-                default -> { return outcome(statusFor(reason), lastText, turns, messages); }
-            }
+            List<Map<String, Object>> calls = callsOf(content);
+            if (!"tool_use".equals(reason) || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages);
+            List<Map<String, Object>> results = new ArrayList<>();
+            for (Map<String, Object> block : calls) results.add(runTool(block, tools));
+            messages.add(map("role", "user", "content", results));
         }
     }
 }

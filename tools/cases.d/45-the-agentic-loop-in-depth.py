@@ -19,6 +19,6 @@ PRACTICES[f"{X}/45-the-agentic-loop-in-depth/unit-01/practice-1"] = {
         "wrong-assistant-trimmed": (["e2"], "keeps only the tool calls of an assistant turn and drops its text"),
         "wrong-error-without-flag": (["e3"], "sends a failing tool's message back as an ordinary result"),
         "wrong-truncated-is-done": (["e5"], "treats a reply cut off by max_tokens as a finished one"),
-        "wrong-malformed-continues": (["e6"], "sends an empty user message and calls the model again after a tool use reply with no call"),
+        "wrong-malformed-continues": (["e6"], "reports a tool use reply without a tool call as an unexpected stop reason"),
     },
 }

@@ -17,7 +17,8 @@ function toolResult(block: Block, content: string, isError = false): Block {
   return isError ? { type: "tool_result", tool_use_id: block.id, content, is_error: true } : { type: "tool_result", tool_use_id: block.id, content };
 }
 
-function statusFor(reason: string): string {
+function statusFor(reason: string, calls: Block[]): string {
+  if (reason === "tool_use" && calls.length === 0) return "malformed";
   if (reason === "end_turn" || reason === "stop_sequence") return "done";
   if (reason === "max_tokens") return "truncated";
   if (reason === "refusal") return "refused";
@@ -55,12 +56,11 @@ export function runAgent(model: Model, tools: Tools, task: string, maxTurns = 8)
     lastText = textOf(content);
     messages.push({ role: "assistant", content });
     const reason = reply.stop_reason;
-    if (reason === "tool_use") {
-      const calls = callsOf(content);
-      if (calls.length === 0) return { status: "malformed", text: lastText, turns, messages };
+    const calls = callsOf(content);
+    if (reason === "tool_use" && calls.length > 0) {
       messages.push({ role: "user", content: calls.map((b) => runTool(b, tools)) });
     } else {
-      return { status: statusFor(reason), text: lastText, turns, messages };
+      return { status: statusFor(reason, calls), text: lastText, turns, messages };
     }
   }
 }

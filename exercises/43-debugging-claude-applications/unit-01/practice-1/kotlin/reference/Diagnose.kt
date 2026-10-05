@@ -55,13 +55,16 @@ object Diagnose {
         it["kind"] == "response" && (it["status"] as? Number)?.toInt() == 200 && it["stop_reason"] == "end_turn" && !(it["content"] as? List<*>).isNullOrEmpty()
     }
 
+    /** The triple for a successful response that still failed by its stop reason, or null. */
+    private fun stopFailure(reason: Any?): List<String>? = STOP[reason]
+
     private fun classify(event: Map<String, Any?>, tools: List<*>?, lastBlocks: List<*>): List<String>? {
         when (event["kind"]) {
             "error" -> return http(event)
             "network_error" -> return listOf("network", "service", "retry_backoff")
             "response" -> if ((event["status"] as? Number)?.toInt() == 200) {
                 val reason = event["stop_reason"]
-                STOP[reason]?.let { return it }
+                stopFailure(reason)?.let { return it }
                 if (reason == "end_turn" && (event["content"] as? List<*>).isNullOrEmpty()) return emptyOrigin(lastBlocks)
             }
             "tool_call", "tool_result" -> toolFailure(event, tools)?.let { return it }

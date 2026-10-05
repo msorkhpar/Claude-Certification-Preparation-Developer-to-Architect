@@ -44,11 +44,12 @@ final class AgentLoop {
     }
 
     /**
-     * TODO 4 of 6 (unlocks m1 and e5): the status a stop reason other than tool_use ends the run with.
-     * Receives the stop reason. Returns "done" for end_turn and stop_sequence, "truncated" for max_tokens, "refused" for refusal and
-     * "unexpected" for anything else. Example: "max_tokens" -> "truncated", "brand_new" -> "unexpected"
+     * TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).
+     * Receives the stop reason and the tool calls of the reply. Returns "malformed" for tool_use with no calls, "done" for end_turn and
+     * stop_sequence, "truncated" for max_tokens, "refused" for refusal and "unexpected" for anything else.
+     * Example: ("max_tokens", no calls) -> "truncated", ("tool_use", no calls) -> "malformed", ("brand_new", no calls) -> "unexpected"
      */
-    private static String statusFor(String reason) {
+    private static String statusFor(String reason, List<Map<String, Object>> calls) {
         return "";
     }
 
@@ -105,15 +106,11 @@ final class AgentLoop {
             lastText = textOf(content);
             messages.add(map("role", "assistant", "content", content));
             String reason = (String) reply.get("stop_reason");
-            switch (reason) {
-                case "tool_use" -> {
-                    List<Map<String, Object>> results = new ArrayList<>();
-                    for (Map<String, Object> block : callsOf(content)) results.add(runTool(block, tools));
-                    if (results.isEmpty()) return outcome("malformed", lastText, turns, messages);
-                    messages.add(map("role", "user", "content", results));
-                }
-                default -> { return outcome(statusFor(reason), lastText, turns, messages); }
-            }
+            List<Map<String, Object>> calls = callsOf(content);
+            if (!"tool_use".equals(reason) || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages);
+            List<Map<String, Object>> results = new ArrayList<>();
+            for (Map<String, Object> block : calls) results.add(runTool(block, tools));
+            messages.add(map("role", "user", "content", results));
         }
     }
 }

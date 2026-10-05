@@ -19,7 +19,9 @@ def _tool_result(block, content, is_error=False):
     return result
 
 
-def _status_for(reason):
+def _status_for(reason, calls):
+    if reason == "tool_use" and not calls:
+        return "malformed"
     if reason in ("end_turn", "stop_sequence"):
         return "done"
     if reason == "max_tokens":
@@ -60,10 +62,8 @@ def run_agent(model, tools, task, max_turns=8):
         last_text = _text(content)
         messages.append({"role": "assistant", "content": content})
         reason = reply["stop_reason"]
-        if reason == "tool_use":
-            calls = _calls(content)
-            if not calls:
-                return {"status": "malformed", "text": last_text, "turns": turns, "messages": messages}
+        calls = _calls(content)
+        if reason == "tool_use" and calls:
             messages.append({"role": "user", "content": [_run_tool(block, tools) for block in calls]})
         else:
-            return {"status": _status_for(reason), "text": last_text, "turns": turns, "messages": messages}
+            return {"status": _status_for(reason, calls), "text": last_text, "turns": turns, "messages": messages}

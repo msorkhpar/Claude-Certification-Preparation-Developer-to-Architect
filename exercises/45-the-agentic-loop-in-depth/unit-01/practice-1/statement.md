@@ -23,7 +23,7 @@ file; a run shows the lines under the failing case. Write them in this order (th
 1. `_text` unlocks `m1` and `e5`: the text blocks of a reply joined together.
 2. `_calls` unlocks `e2` and `e6`: the `tool_use` blocks of a reply, in order.
 3. `_tool_result` unlocks `m1`, `e2` and `e3`: one result block, with `is_error` only when flagged.
-4. `_status_for` unlocks `m1` and `e5`: the status for each stop reason other than `tool_use`.
+4. `_status_for` unlocks `m1`, `e5` and `e6`: the status for each stop reason that ends the run, including `malformed` for `tool_use` with no call.
 5. `_at_limit` unlocks `e4`: whether the turn limit has been reached before the next model call.
 6. `_snapshot` unlocks `m1`: the copy of the messages the model is handed.
 

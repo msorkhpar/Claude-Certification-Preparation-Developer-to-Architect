@@ -29,7 +29,7 @@ Every event has a `kind`. Fields not listed for a kind are ignored, and a listed
 
 ## What is already written, and what you write
 
-The starter is a working diagnosis with six gaps cut out of it. Everything that is plumbing is written and correct: the HTTP and stop reason
+The starter is a working diagnosis with seven gaps cut out of it. Everything that is plumbing is written and correct: the HTTP and stop reason
 tables, the request tracking, the classification of each event kind, the loop that finds the first failure and the final answer. Each gap is a
 small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a
 neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the
@@ -41,8 +41,9 @@ file; a run shows the lines under the failing case. Write them in this order (th
 4. `_empty_origin` unlocks `e3`: integration or model for an empty end turn, from the block order.
 5. `_tool_failure` unlocks `e5`: the unknown tool and the tool that raised.
 6. `_recovered` unlocks `e6` and `e7`: whether a later good response recovered the run.
+7. `_stop_failure` unlocks `e2`: the table row for a response that succeeded but stopped for a bad reason, and nothing for the fine ones.
 
-About twenty lines in all. `e2` needs no gap: the stop reason table is given, so it already passes. The sections below describe the whole
+About twenty lines in all. The sections below describe the whole
 function; the parts you do not write are there so you can see how your functions are used.
 
 ## What to write

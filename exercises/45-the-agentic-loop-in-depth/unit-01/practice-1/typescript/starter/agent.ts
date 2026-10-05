@@ -27,10 +27,11 @@ function toolResult(block: Block, content: string, isError = false): Block {
   return {};
 }
 
-// TODO 4 of 6 (unlocks m1 and e5): the status a stop reason other than tool_use ends the run with.
-// Receives the stop reason. Returns "done" for end_turn and stop_sequence, "truncated" for max_tokens, "refused" for refusal and "unexpected" for anything else.
-// Example: statusFor("max_tokens") -> "truncated", statusFor("brand_new") -> "unexpected"
-function statusFor(reason: string): string {
+// TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).
+// Receives the stop reason and the tool calls of the reply. Returns "malformed" for tool_use with no calls, "done" for end_turn and stop_sequence,
+// "truncated" for max_tokens, "refused" for refusal and "unexpected" for anything else.
+// Example: statusFor("max_tokens", []) -> "truncated", statusFor("tool_use", []) -> "malformed", statusFor("brand_new", []) -> "unexpected"
+function statusFor(reason: string, calls: Block[]): string {
   return "";
 }
 
@@ -70,12 +71,11 @@ export function runAgent(model: Model, tools: Tools, task: string, maxTurns = 8)
     lastText = textOf(content);
     messages.push({ role: "assistant", content });
     const reason = reply.stop_reason;
-    if (reason === "tool_use") {
-      const calls = callsOf(content);
-      if (calls.length === 0) return { status: "malformed", text: lastText, turns, messages };
+    const calls = callsOf(content);
+    if (reason === "tool_use" && calls.length > 0) {
       messages.push({ role: "user", content: calls.map((b) => runTool(b, tools)) });
     } else {
-      return { status: statusFor(reason), text: lastText, turns, messages };
+      return { status: statusFor(reason, calls), text: lastText, turns, messages };
     }
   }
 }

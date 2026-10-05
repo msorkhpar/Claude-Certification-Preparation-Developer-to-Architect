@@ -71,13 +71,19 @@ function recoveredAfter(trace: Event[], i: number): boolean {
   return trace.slice(i + 1).some((e) => e.kind === "response" && e.status === 200 && e.stop_reason === "end_turn" && e.content && e.content.length > 0);
 }
 
+/** The triple for a successful response that still failed by its stop reason, or null. */
+function stopFailure(reason: string): Triple | null {
+  return STOP[reason] ?? null;
+}
+
 function classify(event: Event, tools: string[] | null, lastBlocks: string[]): Triple | null {
   const kind = event.kind;
   if (kind === "error") return http(event);
   if (kind === "network_error") return ["network", "service", "retry_backoff"];
   if (kind === "response" && event.status === 200) {
     const reason: string = event.stop_reason;
-    if (reason in STOP) return STOP[reason];
+    const stopped = stopFailure(reason);
+    if (stopped) return stopped;
     if (reason === "end_turn" && !(event.content && event.content.length)) return emptyOrigin(lastBlocks);
   }
   const failed = toolFailure(event, tools);

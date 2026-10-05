@@ -28,11 +28,12 @@ private fun callsOf(content: List<Map<String, Any?>>): List<Map<String, Any?>> =
 private fun toolResult(block: Map<String, Any?>, content: String, isError: Boolean = false): Map<String, Any?> = linkedMapOf()
 
 /**
- * TODO 4 of 6 (unlocks m1 and e5): the status a stop reason other than tool_use ends the run with.
- * Receives the stop reason. Returns "done" for end_turn and stop_sequence, "truncated" for max_tokens, "refused" for refusal and
- * "unexpected" for anything else. Example: "max_tokens" -> "truncated", "brand_new" -> "unexpected"
+ * TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).
+ * Receives the stop reason and the tool calls of the reply. Returns "malformed" for tool_use with no calls, "done" for end_turn and
+ * stop_sequence, "truncated" for max_tokens, "refused" for refusal and "unexpected" for anything else.
+ * Example: ("max_tokens", no calls) -> "truncated", ("tool_use", no calls) -> "malformed", ("brand_new", no calls) -> "unexpected"
  */
-private fun statusFor(reason: Any?): String = ""
+private fun statusFor(reason: Any?, calls: List<Map<String, Any?>>): String = ""
 
 /**
  * TODO 5 of 6 (unlocks e4): has the turn limit been reached before the next model call?
@@ -75,13 +76,9 @@ fun runAgent(model: Model, tools: Tools, task: String, maxTurns: Int = 8): Map<S
         val content = reply["content"] as List<Map<String, Any?>>
         lastText = textOf(content)
         messages.add(linkedMapOf("role" to "assistant", "content" to content))
-        when (reply["stop_reason"]) {
-            "tool_use" -> {
-                val calls = callsOf(content)
-                if (calls.isEmpty()) return outcome("malformed", lastText, turns, messages)
-                messages.add(linkedMapOf("role" to "user", "content" to calls.map { runTool(it, tools) }))
-            }
-            else -> return outcome(statusFor(reply["stop_reason"]), lastText, turns, messages)
-        }
+        val reason = reply["stop_reason"]
+        val calls = callsOf(content)
+        if (reason != "tool_use" || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages)
+        messages.add(linkedMapOf("role" to "user", "content" to calls.map { runTool(it, tools) }))
     }
 }

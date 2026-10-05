@@ -15,10 +15,11 @@ private fun toolResult(block: Map<String, Any?>, content: String, isError: Boole
     return result
 }
 
-private fun statusFor(reason: Any?): String = when (reason) {
-    "end_turn", "stop_sequence" -> "done"
-    "max_tokens" -> "truncated"
-    "refusal" -> "refused"
+private fun statusFor(reason: Any?, calls: List<Map<String, Any?>>): String = when {
+    reason == "tool_use" && calls.isEmpty() -> "malformed"
+    reason == "end_turn" || reason == "stop_sequence" -> "done"
+    reason == "max_tokens" -> "truncated"
+    reason == "refusal" -> "refused"
     else -> "unexpected"
 }
 
@@ -54,13 +55,9 @@ fun runAgent(model: Model, tools: Tools, task: String, maxTurns: Int = 8): Map<S
         val content = reply["content"] as List<Map<String, Any?>>
         lastText = textOf(content)
         messages.add(linkedMapOf("role" to "assistant", "content" to content))
-        when (reply["stop_reason"]) {
-            "tool_use" -> {
-                val calls = callsOf(content)
-                if (calls.isEmpty()) return outcome("malformed", lastText, turns, messages)
-                messages.add(linkedMapOf("role" to "user", "content" to calls.map { runTool(it, tools) }))
-            }
-            else -> return outcome(statusFor(reply["stop_reason"]), lastText, turns, messages)
-        }
+        val reason = reply["stop_reason"]
+        val calls = callsOf(content)
+        if (reason != "tool_use" || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages)
+        messages.add(linkedMapOf("role" to "user", "content" to calls.map { runTool(it, tools) }))
     }
 }

@@ -76,6 +76,11 @@ def _recovered(trace, i):
     return any(e.get("kind") == "response" and e.get("status") == 200 and e.get("stop_reason") == "end_turn" and e.get("content")
                for e in trace[i + 1:])
 
+def _stop_failure(reason):
+    """The triple for a successful response that still failed by its stop reason, or None."""
+    return STOP.get(reason)
+
+
 def _classify(trace, i, tools, last_blocks):
     """The (type, origin, recovery) of one event, or None when the event is not a failure."""
     event = trace[i]
@@ -86,8 +91,9 @@ def _classify(trace, i, tools, last_blocks):
         return ("network", "service", "retry_backoff")
     if kind == "response" and event.get("status") == 200:
         reason = event.get("stop_reason")
-        if reason in STOP:
-            return STOP[reason]
+        stopped = _stop_failure(reason)
+        if stopped:
+            return stopped
         if reason == "end_turn" and not event.get("content"):
             return _empty_origin(last_blocks)
     found = _tool_failure(event, tools)

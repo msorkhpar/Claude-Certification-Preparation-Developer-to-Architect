@@ -25,7 +25,7 @@ STOP = {
 
 
 def _rate_limit(event):
-    """TODO 1 of 6 (unlocks e1): the diagnosis of a 429.
+    """TODO 1 of 7 (unlocks e1): the diagnosis of a 429.
 
     Receives the error event. Returns ("rate_limit", "service", "wait_retry_after") when its `headers` have a `retry-after` key (this wins),
     else ("spend_cap", "account", "wait_for_reset") when `error_code` is "enforced_spend_limit_reached", else ("rate_limit", "service",
@@ -35,7 +35,7 @@ def _rate_limit(event):
 
 
 def _by_status(status):
-    """TODO 6 of 6 (unlocks e1 and m1): the triple for a status.
+    """TODO 6 of 7 (unlocks e1 and m1): the triple for a status.
 
     Receives the status number. Returns `HTTP[status]` for a documented status; any other status falls back by class: 500 and above
     use the 500 row, everything else the 400 row. Example: _by_status(502) -> HTTP[500], _by_status(418) -> HTTP[400]
@@ -53,7 +53,7 @@ def _http(event):
 
 
 def _has_json_object(text):
-    """TODO 2 of 6 (unlocks e4): does the text hold a JSON object?
+    """TODO 2 of 7 (unlocks e4): does the text hold a JSON object?
 
     Receives a text. Returns True when the span from the first `{` to the last `}` parses as JSON and is an object (a dict, not a list
     or a number); False for no braces, a broken span or another JSON type. Example: _has_json_object('ok {"a": 1} done') -> True,
@@ -63,7 +63,7 @@ def _has_json_object(text):
 
 
 def _empty_origin(last_blocks):
-    """TODO 3 of 6 (unlocks e3): who is to blame for an empty end turn?
+    """TODO 3 of 7 (unlocks e3): who is to blame for an empty end turn?
 
     Receives the block types of the last user message, in order. Returns the triple ("empty_response", "integration",
     "remove_text_after_tool_result") when a `text` block comes after a `tool_result` block, else ("empty_response", "model",
@@ -73,7 +73,7 @@ def _empty_origin(last_blocks):
 
 
 def _tool_failure(event, tools):
-    """TODO 4 of 6 (unlocks e5): is this tool event a failure, and whose?
+    """TODO 4 of 7 (unlocks e5): is this tool event a failure, and whose?
 
     Receives an event and the tool names of the last request (None when unknown). Returns ("unknown_tool", "model", "return_error_result")
     for a `tool_call` whose name is not in `tools`, ("tool_exception", "integration", "fix_tool_code") for a `tool_result` that has an
@@ -84,12 +84,21 @@ def _tool_failure(event, tools):
 
 
 def _recovered(trace, i):
-    """TODO 5 of 6 (unlocks e6): did a later response recover from the failure at index i?
+    """TODO 5 of 7 (unlocks e6): did a later response recover from the failure at index i?
 
     Receives the trace and the index of the failure. Returns True when a later event is a response with status 200, stop_reason
     `end_turn` and a non-empty `content`; False otherwise. Example: a failure at 1 and a good end_turn at 5 -> True
     """
     return False
+
+def _stop_failure(reason):
+    """TODO 7 of 7 (unlocks e2): the triple for a response that succeeded but stopped for a bad reason.
+
+    Receives the stop_reason. Returns `STOP[reason]` when the reason is in the STOP table, else None (end_turn, stop_sequence and tool_use are fine).
+    Example: _stop_failure("refusal") -> ("refusal", "model", "fallback_model"), _stop_failure("end_turn") -> None
+    """
+    return None
+
 
 def _classify(trace, i, tools, last_blocks):
     """The (type, origin, recovery) of one event, or None when the event is not a failure."""
@@ -101,8 +110,9 @@ def _classify(trace, i, tools, last_blocks):
         return ("network", "service", "retry_backoff")
     if kind == "response" and event.get("status") == 200:
         reason = event.get("stop_reason")
-        if reason in STOP:
-            return STOP[reason]
+        stopped = _stop_failure(reason)
+        if stopped:
+            return stopped
         if reason == "end_turn" and not event.get("content"):
             return _empty_origin(last_blocks)
     found = _tool_failure(event, tools)

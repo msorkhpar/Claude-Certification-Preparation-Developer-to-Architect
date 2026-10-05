@@ -76,6 +76,11 @@ final class Diagnose {
         return false;
     }
 
+    /** The triple for a successful response that still failed by its stop reason, or null. */
+    private static String[] stopFailure(String reason) {
+        return reason == null ? null : STOP.get(reason);
+    }
+
     @SuppressWarnings("unchecked")
     private static String[] classify(Map<String, Object> event, List<String> tools, List<String> lastBlocks) {
         String kind = (String) event.get("kind");
@@ -88,7 +93,8 @@ final class Diagnose {
             case "response":
                 if (event.get("status") instanceof Number n && n.intValue() == 200) {
                     String reason = (String) event.get("stop_reason");
-                    if (reason != null && STOP.containsKey(reason)) return STOP.get(reason);
+                    String[] stopped = stopFailure(reason);
+                    if (stopped != null) return stopped;
                     if ("end_turn".equals(reason) && !(event.get("content") instanceof List<?> c && !c.isEmpty())) return emptyOrigin(lastBlocks);
                 }
                 return null;
