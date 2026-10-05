@@ -1,4 +1,7 @@
 // A toy next-token sampler. It is not Claude: it only shows what temperature does.
+import { logger } from "./logger.ts";
+const log = logger("sampler");
+
 export const TOKENS = ["blue", " clear", " falling", "green"];
 export const LOGITS = [4.0, 2.5, 1.0, -1.0];
 

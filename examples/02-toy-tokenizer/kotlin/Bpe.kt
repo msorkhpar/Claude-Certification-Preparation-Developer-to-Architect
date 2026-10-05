@@ -1,3 +1,5 @@
+private val log = System.getLogger("bpe")
+
 /** A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words. */
 data class Rule(val left: String, val right: String)
 

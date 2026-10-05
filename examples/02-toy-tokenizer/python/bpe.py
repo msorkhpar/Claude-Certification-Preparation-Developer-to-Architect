@@ -1,5 +1,8 @@
 """A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words."""
+import logging
 from collections import Counter
+
+log = logging.getLogger(__name__)
 
 
 def train(corpus, merges):

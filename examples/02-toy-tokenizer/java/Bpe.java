@@ -5,6 +5,7 @@ import java.util.Map;
 
 /** A toy byte-pair tokenizer. It is not Claude's tokenizer: it shows why tokens are not words. */
 public final class Bpe {
+    private static final System.Logger LOG = System.getLogger(Bpe.class.getName());
     record Rule(String left, String right) {}
 
     /** Learn merge rules: repeatedly join the most frequent adjacent pair (ties: first seen). */
