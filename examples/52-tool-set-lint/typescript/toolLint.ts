@@ -10,6 +10,7 @@ const OVERLAP = 0.6;
 type Tool = { name: string; description: string; params: Record<string, string> };
 
 export function lint(tool: Tool): string[] {
+  log.debug("lint input", tool);
   const text = tool.description.toLowerCase();
   const found: string[] = [];
   if (!["do not use", "not for", "instead of"].some((p) => text.includes(p))) found.push("no-boundary");

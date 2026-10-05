@@ -20,6 +20,7 @@ export function scriptedValue(document: string, nullable: boolean): string | nul
 
 /** Checks a schema cannot make: the items add up to the total, and the quoted evidence is in the document. */
 export function check(record: Answer, document: string): string[] {
+  log.debug("check input", record);
   const problems: string[] = [];
   const sum = record.items.reduce((a, b) => a + b, 0);
   if (Math.abs(sum - record.total) > 0.005) problems.push(`total: the items add up to ${sum}, not ${record.total}`);

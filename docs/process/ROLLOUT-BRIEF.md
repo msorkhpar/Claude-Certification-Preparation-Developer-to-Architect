@@ -16,8 +16,7 @@ and their `make_plants.py` sections first. Read `tools/harness/README.md` for ho
    as the first line in the class; Kotlin `private val log = System.getLogger("<name>")` at file top; TypeScript `const log = logger("<name>")` with
    `import { logger } from "../logger.ts";` in practices and `import { logger } from "./logger.ts";` in lesson examples (the helper is generated, see below).
    Add **one `log.debug` of the input** as the first statement of one function the learner calls, identical in starter and reference (Java/Kotlin
-   `LOG.log(System.Logger.Level.DEBUG, "<fn> input: {0}", x)`; TypeScript `log.debug("<fn> input", x)`). In Python, Java and Kotlin it never prints at default levels. The TypeScript helper writes to stdout
-   whenever it is called, so **a TypeScript lesson example declares the logger but carries no `log.debug`** (its printed output is shown on the page); check that every
+   `LOG.log(System.Logger.Level.DEBUG, "<fn> input: {0}", x)`; TypeScript `log.debug("<fn> input", x)`). It never prints at default levels in any language (the TypeScript helper is silent outside a test), so a lesson example's printed output is unchanged; check that every
    lesson example's output is unchanged.
 3. **Statement.** In `statement.md` add one sentence that points to the logger: debug a gap by logging its input with the `log` line at the top of the file;
    a run shows the lines under the failing case. List the gaps in "What is already written" with the cases each unlocks.

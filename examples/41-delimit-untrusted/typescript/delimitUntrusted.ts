@@ -38,6 +38,7 @@ export function toolResult(toolUseId: string, source: string, body: string) {
 
 /** Screen first: a flagged body is withheld and the attempt is named, instead of reaching the model. */
 export function quarantine(toolUseId: string, source: string, body: string) {
+  log.debug("quarantine input", body);
   const signals = screen(body);
   if (signals.length) return { type: "tool_result", tool_use_id: toolUseId, is_error: true, content: `Content from ${source} withheld: possible prompt injection (${signals.join(", ")})` } as ReturnType<typeof toolResult>;
   return toolResult(toolUseId, source, body);
