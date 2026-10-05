@@ -24,19 +24,19 @@
       "id": "01-what-managed-agents-is#q2",
       "page": "01-what-managed-agents-is.md",
       "scope": "page",
-      "stem": "A session is created with an override that lists one tool. The agent itself defines five. How many tools does the session have?",
+      "stem": "A session is created with a tools override that names one tool, while the saved agent lists eight. What does the session have?",
       "options": {
-        "a": "One, because it takes the place of the whole set",
-        "b": "Five, because an override cannot remove a tool of the agent",
-        "c": "Six, because the override is added to the agent's tools",
-        "d": "Zero, until the agent is updated to a new version"
+        "a": "Only that lone entry, with nothing else carried over",
+        "b": "The entry together with the agent's eight, merged into one list",
+        "c": "The agent's eight, which an override cannot remove",
+        "d": "None, until the agent is updated to a new version"
       },
       "key": "a",
       "explanation": {
         "a": "The page says \"Overrides never merge with the agent's configuration, so a `tools` override must list every tool the session should have.\"",
-        "c": "Ruled out because \"Overrides never merge with the agent's configuration\", so nothing is added to the agent's five tools.",
-        "b": "Ruled out because \"so a tools override must list every tool the session should have\", and the agent's own list is not kept.",
-        "d": "Ruled out because \"They apply to that one session\", and nothing waits for a new agent version."
+        "b": "Ruled out because \"Overrides never merge with the agent's configuration\", so nothing is added to the entry.",
+        "c": "Ruled out because \"overrides replace and never merge\", so the agent's own list is not kept beside the entry.",
+        "d": "Ruled out because \"They apply to that one session, and the agent resource and its version are untouched.\", so nothing waits for a new agent version."
       }
     },
     {
@@ -45,17 +45,17 @@
       "scope": "page",
       "stem": "A compliance team requires Zero Data Retention for every Claude workload. What follows for Managed Agents?",
       "options": {
-        "a": "It qualifies once the sandbox is self-hosted on the team's network",
-        "b": "It qualifies, because ZDR applies to every endpoint of the API",
-        "c": "It does not qualify, because sessions store history server-side",
-        "d": "It qualifies after the sessions are deleted from the console"
+        "a": "It qualifies once the sandbox runs on the team's own network",
+        "b": "It qualifies, since ZDR covers every endpoint of the API",
+        "c": "It is ineligible today, since sessions store history server-side",
+        "d": "It qualifies once the sessions have been deleted afterwards"
       },
       "key": "c",
       "explanation": {
-        "c": "The overview says \"Managed Agents is not currently eligible for Zero Data Retention or HIPAA Business Associate Agreement (BAA) coverage\", because sessions are stateful and stored server-side.",
-        "a": "Ruled out because self-hosting moves only the tools: \"keep the orchestration on Anthropic's side\", so the session data still sits with Anthropic.",
-        "b": "Ruled out because the overview says the product is \"not currently eligible for Zero Data Retention\", not that it is covered.",
-        "d": "Ruled out because deleting sessions is a control you hold afterward, and \"the data exists on Anthropic's side first\", so the product is still not covered."
+        "c": "The overview says sessions \"store conversation history, sandbox state, and outputs server-side\", so they are held on Anthropic's side.",
+        "a": "Ruled out because \"Self-hosted sandboxes keep the orchestration on Anthropic's side but move tool execution into infrastructure you control\", so the session data still sits with Anthropic.",
+        "b": "Ruled out because the overview says \"Managed Agents is not currently eligible for Zero Data Retention or HIPAA Business Associate Agreement (BAA) coverage\", not that it is covered.",
+        "d": "Ruled out because \"You can delete sessions and files through the API, but the data exists on Anthropic's side first\", so deletion does not make it qualify."
       }
     },
     {
@@ -81,57 +81,57 @@
       "id": "02-environments-policies-budgets-and-self-hosting#q2",
       "page": "02-environments-policies-budgets-and-self-hosting.md",
       "scope": "page",
-      "stem": "An agent keeps the default toolset policy and the sandbox has unrestricted networking. What should the team change first?",
+      "stem": "A cloud agent reads untrusted pages, keeps the default toolset policy and has `limited` networking with a few allowed hosts. Which change limits what a prompt injection can send out through those hosts?",
       "options": {
-        "a": "Move the agent to a model with a smaller context window",
+        "a": "Replace the allowed hosts with wildcard patterns",
         "b": "Switch the toolset to custom tools so that no policy applies",
-        "c": "Add a longer system prompt that forbids any outbound request",
-        "d": "Set bash to `always_ask` and name the allowed hosts"
+        "c": "Restrict the web tools with an allowed domains list",
+        "d": "Make bash wait for approval before each command"
       },
       "key": "d",
       "explanation": {
-        "d": "The page advises to \"set the `bash` tool's policy to `always_ask` or `auto`\", and its first trap says to set `networking` and list the hosts.",
-        "a": "Ruled out because \"Access is granted by host and not by action\", so a smaller context window changes neither.",
-        "c": "Ruled out because the page's advice is to \"set the `bash` tool's policy to `always_ask` or `auto`\", and a prompt is not a policy.",
-        "b": "Ruled out because \"Custom tools are executed by your application and controlled by you\", so they would move the risk into your code and not remove it."
+        "d": "The page advises to \"set the `bash` tool's policy to `always_ask` or `auto`\".",
+        "a": "Ruled out because \"The sandbox can send any request to an allowed host\", so wider host patterns open more places to send to.",
+        "b": "Ruled out because \"Custom tools are executed by your application and controlled by you\", so they would move the risk into your code and not remove it.",
+        "c": "Ruled out because the `web_search` and `web_fetch` tools \"run on Anthropic's servers, so `networking` does not govern them\", and a domain list on them leaves the sandbox's own route open."
       }
     },
     {
       "id": "02-environments-policies-budgets-and-self-hosting#q3",
       "page": "02-environments-policies-budgets-and-self-hosting.md",
       "scope": "page",
-      "stem": "A team sets a session budget of `\"500\"`. The session pauses with a list cost of 503 cents. What does this show?",
+      "stem": "A session created with a budget of `\"500\"` goes idle with a list cost of 503 cents. How should the team read this?",
       "options": {
-        "a": "A billing error, because the platform must stop exactly at the cap",
-        "b": "Expected behaviour, because the request in flight finishes",
-        "c": "A failed enforcement, because the cap is checked mid-request",
-        "d": "A crash, because a session cannot outlive its budget"
+        "a": "As intended, with the running request allowed to finish",
+        "b": "As a billing error that the platform should refund",
+        "c": "As a failed check that ran in the middle of a request",
+        "d": "As a crash that ended the session for good"
       },
-      "key": "b",
+      "key": "a",
       "explanation": {
-        "b": "The page says \"The request in flight when the cap is crossed still finishes\", so a paused session can read a fraction past the cap.",
-        "a": "Ruled out because \"it bounds new work and not the exact total\", so the platform is not required to stop at the cap.",
-        "d": "Ruled out because \"A session at its cap does not die\", and its history and sandbox are kept.",
-        "c": "Ruled out because \"The cap is checked between requests, so it bounds new work\", which is the designed behaviour and not a failure."
+        "a": "The page says \"The request in flight when the cap is crossed still finishes\", so a paused session can read a fraction past the cap.",
+        "b": "Ruled out because \"it bounds new work and not the exact total\", so a figure past the cap is not an error.",
+        "c": "Ruled out because \"The cap is checked between requests, so it bounds new work\", and not in the middle of a request.",
+        "d": "Ruled out because \"A session at its cap does not die.\" Its history and sandbox are kept."
       }
     },
     {
       "id": "02-environments-policies-budgets-and-self-hosting#m1",
       "page": "02-environments-policies-budgets-and-self-hosting.md",
       "scope": "module",
-      "stem": "A hospital group must keep patient files inside its own network but wants Anthropic to run the agent loop. Which choice fits, and what must the group still do?",
+      "stem": "A hospital group must keep patient files inside its own network but wants Anthropic to run the agent loop. Which setup fits?",
       "options": {
-        "a": "A cloud environment with `unrestricted` networking and a strict system prompt",
-        "b": "A self-hosted sandbox, securing the image and the egress rules itself",
-        "c": "The Messages API with the files pasted into the system prompt of each call",
-        "d": "A cloud environment, since Anthropic hardens it and nothing else is needed"
+        "a": "A cloud sandbox with `limited` networking and a few allowed hosts",
+        "b": "A self-hosted sandbox whose tools execute on local machines",
+        "c": "The Messages API with the files pasted into each prompt",
+        "d": "The Agent SDK running in the group's own process"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says self-hosting moves execution into your infrastructure while \"keep the orchestration on Anthropic's side\", and that \"Without egress restrictions, a compromised tool execution can reach arbitrary external hosts\", so the group owns image and egress.",
-        "a": "Ruled out because \"The sandbox can send any request to an allowed host\", and `unrestricted` means \"Full outbound network access, except for a general safety blocklist\", which is the opposite of keeping files inside.",
-        "c": "Ruled out because the Messages API is the choice for \"Custom agent loops and fine-grained control\", and pasting files sends them to Anthropic on every call.",
-        "d": "Ruled out because a cloud sandbox runs in Anthropic's infrastructure, where the files would be stored, and the first page lists \"self-hosted execution for compliance or data residency\" as its own reason to choose another option."
+        "b": "The page says \"Self-hosted sandboxes keep the orchestration on Anthropic's side but move tool execution into infrastructure you control\", and the group still owns the image and the egress rules.",
+        "a": "Ruled out because \"By default tools run in Anthropic's sandboxes.\", so the files would be processed on Anthropic's side.",
+        "c": "Ruled out because \"You write the loop on the Messages API.\", and the group wants Anthropic to run the loop.",
+        "d": "Ruled out because \"You embed Claude Code's loop with the Agent SDK, in a process you operate.\", so the group, not Anthropic, would run it."
       }
     },
     {
@@ -176,19 +176,19 @@
       "id": "02-environments-policies-budgets-and-self-hosting#m4",
       "page": "02-environments-policies-budgets-and-self-hosting.md",
       "scope": "module",
-      "stem": "A finance team asks for the cost of one long session before approving a budget. Which items does the list cost include?",
+      "stem": "A finance team wants to know what one long session's reported cost contains. Which items make up that total?",
       "options": {
-        "a": "Model tokens and the storage of the event history afterward",
-        "b": "Model tokens only, since the sandbox is free to run",
-        "c": "Model tokens, web searches and the running time",
-        "d": "Model tokens and every package the environment installs"
+        "a": "Model tokens, event-history storage and disk space",
+        "b": "Model tokens alone, with sandbox time left free",
+        "c": "Model tokens, web searches and running time",
+        "d": "Model tokens and web searches, with running time billed apart"
       },
       "key": "c",
       "explanation": {
-        "c": "The page lists \"model tokens at each model's list price, web searches at $10 per 1,000\" and \"Session running time, at $0.08 per hour\".",
+        "c": "The page says the total is \"model tokens at each model's list price, web searches at $10 per 1,000, and \"Session running time, at $0.08 per hour\"\".",
+        "a": "Ruled out because \"The documentation lists these three items and no other.\", and storage and disk are not among them.",
         "b": "Ruled out because running time is priced: \"Session running time, at $0.08 per hour\".",
-        "a": "Ruled out because the page prices \"model tokens at each model's list price\", web searches and running time, and no storage.",
-        "d": "Ruled out because the page names no charge for packages, and prices \"what the session consumes\" only."
+        "d": "Ruled out because running time is one of the three items of \"the total is its list cost\", not a separate bill."
       }
     }
   ]
