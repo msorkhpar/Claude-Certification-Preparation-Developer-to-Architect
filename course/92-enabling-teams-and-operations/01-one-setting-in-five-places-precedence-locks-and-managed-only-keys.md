@@ -37,13 +37,13 @@ Some keys are read only from managed settings, because their purpose is to be ou
 
 ### Locks you build from lists, and security exceptions
 
-Two choices look alike and are not. A managed `model` is a **default**: a developer can still pick another model. The **lock** is `availableModels`, a list, and a managed list applies as it is: a project file's list cannot widen it. The example shows the two results: with a managed list of `sonnet` and `haiku`, a request for `haiku` is allowed and one for `opus` is refused (`not in availableModels`), whoever makes it.
+Two choices look alike and are not. A managed `model` is a **default**: a developer can still pick another model. The **lock** is `availableModels`, a list, and a managed list applies as it is: a project file's list cannot widen it. The example shows the two results: with a managed list of `sonnet` and `haiku`, a request for `haiku` is allowed and one for `opus` is refused (`not in availableModels`), whoever makes it. Neither choice is temporary: a default is overridden at once, and a list refuses in every session.
 
 Two keys go the other way, because a stricter value is always welcome. `disableClaudeAiConnectors` set to `true` from any level stands. `maxEffortLevel` caps the effort level, and when several levels set a cap, the lowest applies, so a developer may lower the organisation's cap and nobody can raise it. The example's managed cap is `high`, the project file asks for `xhigh` and the result is `high`; a cap of `xhigh` or `max` in the managed file would be no cap at all for the levels it was meant to hold back.
 
 ### Server-managed settings and their limits
 
-When the company has no device management, the same policy can be set in the admin console and fetched by Claude Code at startup and refreshed hourly during a session. Four facts bound it. It is for Teams and Enterprise organisations and is edited by an Owner or Primary Owner, not by any administrator. It applies to everyone in the organisation, and per-group policy is not yet supported there, so a different policy for one group means a different file or profile deployed to that group. If the fetch fails, Claude Code continues without the remote policy and warns, unless `forceRemoteSettingsRefresh` is set, which makes startup fail closed. And a policy fetched hourly is not an instant switch: plan for the interval.
+When the company has no device management, the same policy can be set in the admin console and fetched by Claude Code at startup and refreshed hourly during a session. Four facts bound it. It is for Teams and Enterprise organisations and is edited by an Owner or Primary Owner, not by any administrator. It applies to everyone in the organisation, and per-group policy is not yet supported there, so a different policy for one group means a different file or profile deployed to that group. If the fetch fails, Claude Code continues on the last policy it cached, or on none, and warns, unless `forceRemoteSettingsRefresh` is set, which makes startup fail closed. And a policy fetched hourly is not an instant switch: plan for the interval.
 
 ### Finding out what a machine is running
 
@@ -525,7 +525,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 ## Quiz
 
 1. Scenario: Dmitri's company wants developers limited to two approved models. The platform team sets `model` to the first of them in the managed file and tells the developers to use only those two. What happens when a developer picks another model?
-   - **a**: It is allowed, since a default gets overridden and only a list restricts
+   - **a**: It is allowed, since only a list restricts a choice
    - **b**: The choice is refused, because the managed file outranks the developer's own picks
    - **c**: The pick is refused for the session and restored after the next restart
    - **d**: The pick stands only if the project file also names that model
@@ -539,7 +539,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A managed `model` is a default, and the lock is the list. *b* is ruled out because "A managed `model` is a **default**: a developer can still pick another model". *c* is ruled out because the rule is "The **lock** is `availableModels`, a list", with no session restore described. *d* is ruled out because "a managed list applies as it is: a project file's list cannot widen it", and nothing here makes a project file's model decide.
+1. **a**. A managed `model` is a default, and the lock is the list. *b* is ruled out because "A managed `model` is a **default**: a developer can still pick another model". *c* is ruled out because the rule is "The **lock** is `availableModels`, a list", because "a default is overridden at once", so no refusal appears that a restart could lift. *d* is ruled out because "a managed list applies as it is: a project file's list cannot widen it", and nothing here makes a project file's model decide.
 2. **c**. A lower file that sets a managed-only key has no effect. *a* is ruled out because "A lower file that sets one of these has **no effect**". *b* is ruled out because the page describes "a lock written in the shared project file looks like policy and does nothing", not a switch that waits for confirmation. *d* is ruled out because "Some keys are read only from managed settings, because their purpose is to be out of a developer's reach".
 
 </details>
