@@ -54,7 +54,7 @@ A command hook is a process. "When an event fires, Claude Code passes event-spec
 - **Exit 2**: "Claude Code blocks the action. Write a reason to stderr." For `PreToolUse` the reason goes to Claude as feedback, so it can adjust.
 - **Any other exit code**: with empty or plain-text output, "the action proceeds as a non-blocking error". Treat it as a bug in the hook, because it does not stop the call.
 
-Exit 0 with a JSON object on standard output is the structured answer. For `PreToolUse`, put `hookSpecificOutput` with `hookEventName: "PreToolUse"`, `permissionDecision` as `allow`, `deny` or `ask`, and `permissionDecisionReason`. Both forms block. The JSON form lets you say `ask` and carries a reason that is shown to the person.
+Exit 0 with a JSON object on standard output is the structured answer. For `PreToolUse`, put `hookSpecificOutput` with `hookEventName: "PreToolUse"`, `permissionDecision` as `allow`, `deny` or `ask`, and `permissionDecisionReason`. Both forms can block. The JSON form lets you say `ask` and carries a reason that is shown to the person.
 
 Several hooks can match one call, and they run in parallel. "For `PreToolUse` permission decisions, the most restrictive answer applies, in the order `deny`, `defer`, `ask`, `allow`." A logging hook that exits 0 does not weaken a guard hook that denies.
 
@@ -818,7 +818,7 @@ agent findings: ['tools is omitted: the subagent inherits every tool', 'memory m
 ```
 <!-- /example -->
 
-The program is a hook and a linter. Plain, it runs seven events through the gate. A `git push`, `git -C . push` and `bash -c 'rm -rf build'` are denied through the JSON answer with exit 0 and a reason. A compound `ls && git status` and a plain `rm build/old.txt` get no opinion. An edit of `.env` blocks with exit 2 and a reason on standard error, and an edit of `main.py` gets no opinion. With `--hook` the same code reads one event from standard input and exits with the code, which is how Claude Code would start it. The linter then reads two files. The skill `deploy` has side effects and a bare `Bash` grant, so it gets two findings. The agent has no `tools` line and a `memory` value that is not `user`, `project` or `local`, so it gets two findings as well. Both languages print the same lines.
+The program is a hook and a linter. Plain, it runs seven events through the gate. A `git push`, `git -C . push` and `bash -c 'rm -rf build'` are denied through the JSON answer with exit 0 and a reason. A compound `ls && git status` and a plain `rm build/old.txt` get no opinion. An edit of `.env` blocks with exit 2 and a reason on standard error, and an edit of `main.py` gets no opinion. With `--hook` the same code reads one event from standard input and exits with the code, which is how Claude Code would start it. The linter then reads two files. The skill `deploy` has side effects and a bare `Bash` grant, so it gets two findings. The agent has no `tools` line and a `memory` value that is not `user`, `project` or `local`, so it gets two findings as well. All four languages print the same lines.
 
 ## Traps
 
@@ -843,8 +843,8 @@ The program is a hook and a linter. Plain, it runs seven events through the gate
 
 3. A team wants the learnings of a subagent to travel with the repository. Which memory choice fits?
    - **a**: The user scope, which lives in the home directory of each single person
-   - **b**: The project scope, whose directory is shareable via version control
-   - **c**: The local scope, which is kept out of version control on purpose here
+   - **b**: The project scope, whose directory is committed alongside the code
+   - **c**: The local scope, whose directory is deliberately kept out of commits
    - **d**: No scope applies, because memory is always private to a single machine
 
 <details>
@@ -852,6 +852,6 @@ The program is a hook and a linter. Plain, it runs seven events through the gate
 
 1. **b**. The page says "Omit it and the subagent inherits every tool", and "a reviewer with no `tools` line can edit files and run commands". *a* is ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: "Bound a subagent by listing its tools." *c* is ruled out because the table says "Omit it and the subagent inherits every tool", which is the opposite of none. *d* is ruled out because a subagent has "specific tool access, and independent permissions", and an omitted list does not narrow it to the main conversation's pre-approvals.
 2. **d**. The page says "Exit 2: Claude Code blocks the action. Write a reason to stderr." *a* is ruled out because with an exit code of 1 and plain-text output "the action proceeds as a non-blocking error", and a warning does not stop the call. *b* is ruled out because "Exit 0: no objection", and a logging hook "does not weaken a guard hook" and does not block either. *c* is ruled out because exit code 3 is an "other exit code", and the page says to "Treat it as a bug in the hook, because it does not stop the call."
-3. **b**. The table says the `project` scope is for knowledge that is "project-specific and shareable via version control". *a* is ruled out because the `user` scope is `~/.claude/agent-memory/<name>/`, for an agent that "should remember across all projects", in each person's home directory. *c* is ruled out because the `local` scope is for knowledge that "should not be checked in". *d* is ruled out because the project scope's directory "shareable via version control" is the page's own counterexample, so not every memory is private.
+3. **b**. The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is "project-specific and shareable via version control", so it can be committed alongside the code. *a* is ruled out because the `user` scope is `~/.claude/agent-memory/<name>/`, for an agent that "should remember across all projects", in each person's home directory. *c* is ruled out because the `local` scope is for knowledge that "should not be checked in". *d* is ruled out because the project scope's directory "shareable via version control" is the page's own counterexample, so not every memory is private.
 
 </details>
