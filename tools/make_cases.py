@@ -43,7 +43,7 @@ PRACTICES[f"{X}/27-choosing-an-extension/unit-01/practice-1"] = {
         "wrong-scope-ignored": (["e3", "e4", "m1"], "puts a path-scoped convention in the always-loaded file"),
         "wrong-one-reason-for-skills": (["e3", "e4", "m1"], "gives a repeatable procedure the reason code of a reference"),
         "wrong-plugin-at-one-repo": (["e1", "e2", "e3", "e4", "m1"], "makes a plugin even when only one repository needs the setup"),
-        "wrong-plugin-for-conventions": (["e4", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
+        "wrong-plugin-for-conventions": (["e4", "e9", "m1"], "packages an instruction file as a plugin, which cannot carry one"),
         "wrong-api-provided-schema-ignored": (["e5", "m1"], "writes your own tool in an application even when the platform supplies the schema"),
         "wrong-api-server-without-remote": (["e5"], "uses the connector in an application when no remote server exists"),
         "wrong-no-validation": (["e6"], "accepts a knowledge kind it does not know"),
