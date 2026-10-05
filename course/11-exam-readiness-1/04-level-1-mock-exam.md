@@ -114,7 +114,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 12. A test asserts that a Claude reply matches a stored string exactly. It passes today and fails tomorrow for the same input. What is the best interpretation?
    - **a**: The vendor swapped the model silently, so the id must be pinned and re-recorded
-   - **b**: Replies vary even at fixed settings, so judge quality across many cases
+   - **b**: Replies do vary even at fixed settings, so quality must be judged across many cases
    - **c**: The prompt is faulty, and a line such as be consistent will stabilise it
    - **d**: The machine's clock changed the output, so the time must be frozen
 
@@ -126,7 +126,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 14. A knowledge-base assistant answers every question, even when the manuals say nothing, and sometimes invents a procedure. The manuals are already included with each request. Which prompt addition best tackles this?
    - **a**: Permission to admit that the text does not cover the case
-   - **b**: A lower temperature, so that it stops guessing at missing steps
+   - **b**: A lower temperature setting aimed at the guessing over missing steps
    - **c**: A confidence percentage placed beside each answer it gives
    - **d**: A second copy of the manuals at the end of each request
 
@@ -134,7 +134,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Give each reviewer a longer checklist of style rules
    - **b**: Ask Claude to mark the sentences it is least sure of and review only those
    - **c**: Match effort to the cost of an error
-   - **d**: Check nothing in routine papers, since the author reads each draft once
+   - **d**: Check nothing in routine papers once the author has read each draft
    - **e**: Check figures and quotations first
 
 16. An analyst asks Claude for the reasons a new policy will succeed, and the reply gives only supporters' views. The memo goes to a review committee. What is the best next step?
@@ -145,9 +145,9 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 17. A finance team plans to use Claude for Excel to produce the reconciliation that its auditors will rely on, and to send the result with no further checks. What does the add-in page say about this plan?
    - **a**: It is fine provided the workbook includes its macros for the whole reconciliation
-   - **b**: It advises against using it for critical sign-off figures unless verified
+   - **b**: It is not advised for critical sign-off figures unless they are verified
    - **c**: It is fine when Claude is told to double-check its own totals before sending
-   - **d**: It is approved for such work, since cell-level citations make each result reliable
+   - **d**: It is approved for such work thanks to the cell-level citations on each result
 
 18. Before sending a report to a client, an analyst asks Claude "How confident are you in these figures?" and gets "Very confident". Which view of that reply is right?
    - **a**: It lets the numbers skip review and go straight to the client
@@ -158,25 +158,25 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 19. An analyst needs Claude's output to load into a database through a script, and also to show executives a short takeaway. Which pair of formats fits?
    - **a**: A published artifact with shared storage that serves both audiences at once
    - **b**: An artifact for the ingest step, and a table in a slide deck for leadership
-   - **c**: Inline replies for both audiences, since artifacts only suit code
+   - **c**: Inline replies for both audiences, with artifacts kept for code alone
    - **d**: Machine-readable results for the ingest step, a brief inline note for leadership
 
 20. A communications assistant has Claude draft a press note that goes out under the organisation's name within the hour. It holds a remark attributed to the chief executive and three figures. What should be checked first?
-   - **a**: Spelling and tone, since colleagues will proofread those anyway
+   - **a**: Spelling and tone, which colleagues will proofread anyway
    - **b**: The quote and the statistics, against their originals
    - **c**: Whether Claude says it is confident about each claim
    - **d**: Whether a second Claude draft repeats the same claims
 
 21. A team runs Claude Haiku 4.5 on questions about product launches from mid-2025, and the answers are thin. Which fact from the models overview best accounts for this?
    - **a**: Its window is smaller than the others', so the later material no longer fits
-   - **b**: Its reliable knowledge ends in February 2025, before those events took place
+   - **b**: Its reliable knowledge is limited to February 2025, before those events took place
    - **c**: Its training data cutoff is later than its reliable one, so it knows every event fully
    - **d**: All tiers share the same dates, so switching tier could not change the result
 
 22. A retailer will draft about 5,000 short order-status replies an hour, and a few each hour need delicate judgment. Speed and cost matter most. What is the best opening move? 
    - **a**: Use the middle tier until the invoices arrive, then decide
    - **b**: Use the most capable tier for every reply to protect quality
-   - **c**: Begin on the fast, cheap tier and send hard cases higher
+   - **c**: Use the fast, cheap tier first and send hard cases higher
    - **d**: Use the cheapest tier for every reply, hard cases included
 
 23. A team uses Claude Code in the terminal, and a colleague asks whether the repository's CLAUDE.md file and MCP servers also apply in the IDE extension and the desktop app. What does the surfaces page say?
@@ -186,7 +186,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: They apply only after being exported once into each of the other tools
 
 24. An analyst switches on Research mode to look up the notice period stated in a single contract that she has open. What does the course say about this choice?
-   - **a**: It wastes allowance and adds sources to check, since one text answers it
+   - **a**: It is wasteful and adds sources to check, since one text answers it
    - **b**: It is the right choice, since contracts always need many linked searches
    - **c**: It is the right choice, since citations make each answer easier to trust
    - **d**: It is blocked, since Research cannot read a document that is already open
@@ -194,17 +194,17 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 25. A long conversation in the app starts contradicting decisions made hours earlier, though no error appears. The lead wants the project to continue with every decision kept. Which action fits?
    - **a**: Ask Claude to restate every decision in the same conversation and continue
    - **b**: Switch to a model with a larger window and continue in the same conversation
-   - **c**: Begin a new chat with a short summary of what was agreed
+   - **c**: Begin a new chat with a short summary of the agreed points
    - **d**: Paste the whole earlier transcript into a new chat
 
 26. A strategist must compare twelve vendors using public sources and wants cited findings by tomorrow, with several rounds of investigation expected. Which feature fits best?
    - **a**: Research mode, with the web lookup setting enabled
    - **b**: A Project holding the vendors' brochures and no web access
-   - **c**: A plain chat reply, since citations arrive with every answer
+   - **c**: A plain chat reply, whose citations arrive with every answer
    - **d**: An artifact that renders the comparison as a dashboard first
 
 27. A team lists what to weigh before picking a model for a new feature. Which set matches the start of the "Choosing the right model" page?
-   - **a**: What the task needs, how fast it must answer, the cost, and the effort setting
+   - **a**: What the task needs, the answer speed required, the cost, and the effort setting
    - **b**: Brand, window size, release date and the number of supported languages
    - **c**: Capabilities, speed, price and the cloud platform that hosts the model
    - **d**: Latency, accuracy, safety and the vendor's retirement dates in the tables
@@ -229,23 +229,23 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Keep one skill and put the connectors into the Project's instructions
 
 31. A small charity asks Claude for a first draft of a grant application and receives polished text in a corporate voice that misses the funder's priorities. Which two statements fit the course's guidance for this audience? (Select two.)
-   - **a**: Only a word limit and a deadline, since sponsors judge on form
+   - **a**: Only a word limit and a deadline, judged on form alone
    - **b**: The request should list the donor's criteria
    - **c**: It should also give the mission, tone and reader
    - **d**: A list of warm, moving and professional adjectives for the whole text
    - **e**: A request to sound like a larger charity with a longer record
 
 32. An online shop wants every order with a postcode outside its delivery zones flagged automatically, and 12,000 orders arrive daily. Which design is best?
-   - **a**: A short program applies the geographic rule; Claude drafts customer notes
+   - **a**: Claude drafts customer notes while a short program applies the geographic rule
    - **b**: Claude reads each order and decides whether the postcode lies out of zone
    - **c**: Claude checks a sample of orders and the rest are assumed to be fine
    - **d**: Claude flags suspicious postcodes by feel, then code confirms them
 
 33. When choosing between Claude surfaces, a team ranks options by power. The course gives a different principle behind its table of what each surface must not be given. What is it?
-   - **a**: Most action, since an approval step only slows the task down
+   - **a**: Most action, with an approval step that only slows the task
    - **b**: Least reach, least action, and most visibility for the right people
-   - **c**: Maximum reach, so that the work never needs a second surface
-   - **d**: Least visibility, so that results stay private to the person asking
+   - **c**: Maximum reach, with no second surface ever needed for the work
+   - **d**: Least visibility, with results kept private to the person asking
 
 34. A COO asks which of four chores suit Claude with review and no extra tools: (1) drafting vendor-email variants, (2) making the final call on which supplier to drop, (3) summarising call transcripts, (4) calculating invoice totals to the cent in the chat. Which pair is right?
    - **a**: The second and fourth
@@ -263,13 +263,13 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Add more adjectives about the style and mood of the page
    - **b**: Name what must stay as it is
    - **c**: Say who will use it and what is already built
-   - **d**: Give only the task, since a strong model infers the rest
+   - **d**: Give only the task and let a strong model infer the rest
    - **e**: Ask for three finished designs in one go for comparison
 
 37. A lecturer designs a take-home essay brief and wonders whether students could simply paste it into an AI. Which check does the course list for educators?
-   - **a**: Whether the brief is long enough to need several drafts from each student
-   - **b**: Whether students are told which model the lecturer used to prepare it
-   - **c**: Whether the rubric is written by Claude and then checked once by hand
+   - **a**: If the brief is long enough to need several drafts from each student
+   - **b**: If students are told which model the lecturer used to prepare it
+   - **c**: If the rubric is written by Claude and then checked once by hand
    - **d**: If a chatbot could finish the task unaided, and if that matters
 
 38. A shop's support inbox gets about 300 routine order questions a day, plus occasional warranty and refund disputes, and nobody reviews the answers sent today. Which workflow change fits?
@@ -288,11 +288,11 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Ask Claude to merge both files into a third file and use that one
    - **b**: Keep both and add an instruction to prefer the newer document when they conflict
    - **c**: Take the outdated file out of the workspace and archive it in your own storage
-   - **d**: Switch on memory so that Claude learns which policy is current
+   - **d**: Switch on memory, which lets Claude learn which policy is current
 
 41. A team wants every Claude Tag reply in one Slack channel to be brief and to link its source. Which two statements describe the setup? (Select two.)
    - **a**: Ask each member to retype the rule in every thread
-   - **b**: Set it in a Project, because Slack reads Project instructions first
+   - **b**: Set it in a Project, whose instructions Slack reads first
    - **c**: Lower the temperature in the model's settings
    - **d**: Admins can review and delete what is stored
    - **e**: Say it to the assistant where the replies appear
@@ -301,7 +301,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Share one Project widely and tell its instructions to withhold the salary bands
    - **b**: Share one Project widely with view-only access, which keeps viewers out of the knowledge
    - **c**: Share one Project widely now, and delete the salary bands later if anyone objects
-   - **d**: Move the confidential figures to a separate area restricted to HR, and share the other widely
+   - **d**: Share the other material widely after moving the confidential figures to an HR-only area
 
 43. A team syncs a Google document that holds a pasted chart image with the key figures into a private Project. Answers ignore those figures. Which limit explains it?
    - **a**: The Project reached its context limit, so retrieval skipped the chart
@@ -318,13 +318,13 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 45. A coordinator builds a small published artifact where parents of pupils enter their children's dietary needs, and it keeps data. What should she check before inviting people?
    - **a**: Whether its storage is personal or visible to every user
    - **b**: Whether the artifact runs past fifteen lines, which decides its storage
-   - **c**: Whether each visitor has the creator's plan, as usage bills to it
+   - **c**: Whether each visitor has the creator's plan, with usage billed to it
    - **d**: Whether visitors have connected the creator's own apps
 
 46. A researcher replaces patient names with codes and keeps the table of codes in a locked folder. The data also lists a rare job title, a small town and an exact visit date. Is it now anonymous?
    - **a**: No, but only because the exact date is present, so drop that single field
    - **b**: Yes, because the table that reverses the codes is stored apart and locked
-   - **c**: No, since the mix still singles out a person, so generalise it further
+   - **c**: No, since the mix is still identifying, so generalise it further
    - **d**: Yes, since coding is the strongest technique on the list of methods in use
 
 47. A member of a Team plan finds that memory and a particular connector are missing from her settings, while a friend at another company has both. Which two statements explain it? (Select two.)
@@ -338,7 +338,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: They are used unless an owner opts out, and they are then kept for up to five years
    - **b**: They are never used, and they are always deleted the moment a chat comes to an end
    - **c**: They are used only if each member allows it in their own privacy settings
-   - **d**: Not by default, and deleted within 30 days unless custom or zero retention applies
+   - **d**: They are not used by default, and are deleted within 30 days unless custom or zero retention applies
 
 49. A manager connects a client folder to Cowork and is concerned that a task might remove files. What does the safety page say about permanent deletion?
    - **a**: Claude cannot delete anything from the connected folder
@@ -347,7 +347,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Backups are unnecessary once permission has been given for the removal
 
 50. A researcher must report survey findings by area and age group, and policy restricts personal data. The responses include names and a free-text column. Which preparation is best?
-   - **a**: Delete only the names column and upload the rest, since open text rarely identifies anyone
+   - **a**: Delete only the names column and upload the rest, trusting open text to be anonymous
    - **b**: Coarsen places and ages into bands, strip identities, and read the open answers
    - **c**: Replace each name with a code and keep the key list in the same file
    - **d**: Upload everything and ask for a summary that leaves out personal details
@@ -362,12 +362,12 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 52. A professional asks Claude in Chrome to shortlist conference venues while her banking site is open in another tab, and she has ten minutes before a call. Which habit best limits harm?
    - **a**: Rely on the classifiers, which screen each action
    - **b**: Leave the bank tab open but ask Claude to skip it
-   - **c**: Switch on Skip all approvals so that no prompt interrupts the task
+   - **c**: Switch on Skip all approvals, with no prompt interrupting the task
    - **d**: Use a clean profile, and approve each action manually
 
 53. A company approved a remote tool for Claude a year ago, and its provider has since changed hands. Nobody has looked at its connector list since. Which governance step was skipped?
    - **a**: A switch to a custom connector, which Anthropic has verified
-   - **b**: A periodic review of what is linked, because trust given at install ages
+   - **b**: A periodic review of what is linked, with trust given at install treated as aging
    - **c**: A one-time classification of the tool's data, valid while it stays in use
    - **d**: A stronger approval prompt for each single call to the tool
 
@@ -379,7 +379,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 55. A team's bill jumps after it starts sending full-size phone photos with each request, though the text prompts are unchanged. Which two facts about images explain the jump? (Select two.)
    - **a**: Photos are turned into text first, which multiplies the words sent
-   - **b**: Large pictures use many, up to a model's cap
+   - **b**: Large pictures use many tokens, up to a model's cap
    - **c**: Images count toward the window but are never billed as input
    - **d**: Each 28 by 28 pixel patch is a token
    - **e**: Images are priced as a flat fee that ignores their size
@@ -392,8 +392,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 57. A nightly job summarises 3,000 documents. The output is good, but the bill is above budget and the run finishes after the morning deadline. Which plan fits the course's method?
    - **a**: Rewrite the instructions, add examples and change tier together, then compare
-   - **b**: Move every document to the lower tier and skip testing, since the instructions are unchanged
-   - **c**: Raise effort to the maximum so that fewer retries are needed
+   - **b**: Move every document to the lower tier and skip testing, the instructions being unchanged
+   - **c**: Raise effort to the maximum, with fewer retries expected as a result
    - **d**: Name the cause, try one lower-cost faster tier on the same test set, and compare
 
 58. A nightly job re-scores 200,000 archived documents, and the results are due the next morning. Which cost lever fits best?
@@ -405,7 +405,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 59. A support bot resends the same 40,000-token manual with every turn, and the bill is far higher than expected. Which lever does Level 1 name for reusing context instead of resending it?
    - **a**: Prompt caching in the API, or a Project's stored material in the apps
    - **b**: A higher output limit, which spreads the cost across more tokens
-   - **c**: A larger context window, since more room makes each request cheaper
+   - **c**: A larger context window, on the idea that more room makes each request cheaper
    - **d**: A lower temperature, which shortens the manual that is sent
 
 60. A model gives correct, well-formatted labels but is too slow for a live widget, and the labels must stay as accurate as today. The instructions and context are good. Which step fits?
@@ -540,7 +540,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    checks its actions".
 53. **b**. Remote tools can change after you approve them, so the connector list is reviewed on a schedule (module 7, page 3). *a* is ruled out because "a custom connector has not been verified by Anthropic". *c* is ruled out because "Remote tools can change after you approve them". *d* is ruled out because the checklist says "re-check the ones whose provider changed".
 54. **b**. The Usage Policy lists plagiarising or submitting AI-assisted work without proper permission or attribution under fraudulent, abusive or predatory practices (module 10, page 1). *a* is ruled out because the policy singles out "uses where output directly affects individuals or consumers". *c* is ruled out because that category covers "sharing personal information without consent". *d* is ruled out because that category is "creating or spreading misinformation, including false medical or scientific information and impersonation".
-55. **b and d**. Each 28 by 28 pixel patch is one visual token, so an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap" (module 4, page 1). *a* is ruled out because "A 1000 by 1000 image is 1,296 tokens on the page's table". *c* is ruled out because "each 28 by 28 pixel patch is one visual token". *e* is ruled out because an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap".
+55. **b and d**. Each 28 by 28 pixel patch is one visual token, so an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap" (module 4, page 1). *a* is ruled out because "Claude reads images and PDFs" directly, so photos are not turned into text first. *c* is ruled out because "Images also cost tokens", and tokens are what is billed as input. *e* is ruled out because an image costs "about ceil(width/28) x ceil(height/28) tokens up to a per-model cap".
 56. **c**. The page lists macros and VBA, and data tables, as unsupported (module 8, page 2). *a* is ruled out because the add-ins are "installed from Microsoft AppSource, for the paid plans". *b* is ruled out because "Macros and VBA, and data tables, are unsupported". *d* is ruled out because cross-app work concerns files and uses "Let Claude work across files".
 57. **d**. The method is to diagnose first, change one thing and compare on the same inputs, and a faster lower-cost
    tier answers both the bill and the deadline. *a* is ruled out because the habit is to "Change one thing at a time

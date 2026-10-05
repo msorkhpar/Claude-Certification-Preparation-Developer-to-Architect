@@ -46,14 +46,14 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 1. A prompt template wraps pasted material in tags, but each author uses different tag names for the same sort of text, and the instructions refer to them loosely. Which rule from the page fits?
    - **a**: Give each kind of input one meaningful label, used identically everywhere
-   - **b**: Vary the names so that no two sections can be mistaken for each other
+   - **b**: Vary the names, keeping any two sections from being mistaken for each other
    - **c**: Drop the tags and rely on the order of the sections to mark the data
    - **d**: Use numbered tags such as part1 and part2
 
 2. A prompt places a 30-page policy in the middle, with the instruction to list exceptions buried in a paragraph above it. The replies often summarise instead. Which edit helps most?
-   - **a**: Add several paragraphs of background so that the exceptions stand out more
+   - **a**: Add several paragraphs of background to make the exceptions stand out more
    - **b**: Write the instruction in capital letters but keep it inside the same paragraph
-   - **c**: Move the policy below the instruction so that it is read most recently
+   - **c**: Move the policy below the instruction, to be read most recently
    - **d**: Give the task its own line, and restate it after the long material
 
 3. A marketing lead gets a social post in the wrong tone, regenerates the same request four times, and keeps getting similar misses. What is the better method?
@@ -69,11 +69,11 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Ask for working and result mixed in one paragraph
 
 5. A classifier prompt lists four allowed labels, but when a ticket fits none the model invents a fifth one. Which two changes address it? (Select two.)
-   - **a**: Lower the temperature setting so that the answers vary less
+   - **a**: Lower the temperature setting to make the answers vary less
    - **b**: Spell out the closed set in the output format
    - **c**: Ask the model to be more careful and precise in its choice
    - **d**: Name a fallback value for when it is unsure
-   - **e**: Remove the list so that the model can pick the closest option freely
+   - **e**: Remove the list and let the model pick the closest option freely
 
 6. A team lead asks Claude to assess whether a pilot met its targets from a set of results tables, and the replies state conclusions with no support. Which emphasis does the course give for an analysis task?
    - **a**: Breadth first, many options and judgment kept for a later pass
@@ -97,13 +97,13 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Whether the wording suits the people it speaks about
    - **b**: Whether the appeal overstates what the programme has achieved so far
    - **c**: Whether the figures cited match the programme's own records
-   - **d**: Whether the appeal names each family so that the donor can follow up
+   - **d**: Whether the appeal names each family for the donor to follow up
 
 10. A project manager asks Cowork for a one-page status pack and wants the reviewer to spot weak points quickly. Which line in the outcome description supports that?
-   - **a**: Ask it to leave out anything uncertain so that the page stays clean
+   - **a**: Ask it to leave out anything uncertain, keeping the page clean
    - **b**: Ask it to list any figure it could not verify and any item with no owner
    - **c**: Ask it to schedule the pack weekly before anyone has reviewed the first one
-   - **d**: Ask it to write with extra confidence so that the pack reads as decisive
+   - **d**: Ask it to write with extra confidence, making the pack read as decisive
 
 11. A student notices that after a few exchanges with Claude, her thesis has shifted toward the conclusion that Claude kept suggesting. Which check from the student's list was she missing?
    - **a**: Whether the explanation Claude gave was actually correct in each detail
@@ -112,20 +112,20 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **d**: Whether each fact and citation in the essay has been confirmed independently
 
 12. A clerk sends Claude a rotated, low-resolution photo of a handwritten delivery note and enters the quantities it reports without a second look. Which concern applies?
-   - **a**: No concern arises, as models read handwriting reliably
+   - **a**: No concern arises, models reading handwriting reliably
    - **b**: Such images invite mistakes or invention, so the entries need verifying
    - **c**: The entries are safe if Claude is asked to say how sure it is of each one
    - **d**: The entries are safe when the quantities are small whole numbers
 
 13. Reviewers of a research assistant's answers want each claim to be traceable and any weak claim removed before reading. Which prompt addition fits?
-   - **a**: A second run of each question so that the two answers can be compared
+   - **a**: A second run of each question to compare the two answers
    - **b**: A score out of ten that the assistant gives to each answer it writes
    - **c**: A supporting quote per statement, and withdrawal of anything unbacked
    - **d**: Permission to say it does not know whenever the material is thin
 
 14. A strategist uses Research mode for a vendor comparison and receives a report with a citation after each claim. Which step is still needed before it goes to the board?
    - **a**: Run the same research again with web search off and compare the totals
-   - **b**: None, as each claim already carries its citation
+   - **b**: None, each claim already carrying its citation
    - **c**: Check the statements that would hurt if wrong against the sources cited
    - **d**: Repeat the research several times and keep the statements that every run shares
 
@@ -163,20 +163,20 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 20. A student uses Claude to find sources for an essay and pastes three citations into the bibliography, one of which does not exist. Which two habits would have prevented it? (Select two.)
    - **a**: Verify every fact that enters graded work
    - **b**: Use the largest model available, which never invents references
-   - **c**: Tell Claude that the essay is graded so that it takes more care
+   - **c**: Tell Claude that the essay is graded, to make it take more care
    - **d**: Confirm each reference in a library or database
    - **e**: Ask Claude whether each reference is real before using it
 
 21. A freelance writer uses Claude to draft a short story opening and wants to be sure it is safe to publish under her own name. Which check does the course name for creative work?
    - **a**: Whether a disclosure line can be skipped for short pieces
-   - **b**: Whether it echoes an existing piece, and whether it still sounds like her
+   - **b**: Whether it is too close to an existing piece, and sounds like her
    - **c**: Whether the plot can be handed to Claude to finish
-   - **d**: Whether Claude agrees that the opening is original, as stated in its reply
+   - **d**: Whether Claude's reply says that the opening is original
 
 22. A team has no benchmark yet and must pick a first model for a mixed set of tasks. What does the models overview advise as the default starting point for most workloads?
-   - **a**: Start with Claude Haiku 4.5 and move up if it fails
-   - **b**: Start with Claude Sonnet 5.5 and never test the other tiers against it
-   - **c**: Start with Claude Fable 5.1 and move down for cost
+   - **a**: Begin with Claude Haiku 4.5 and move up if it fails
+   - **b**: Begin with Claude Sonnet 5.5 and never test the other tiers against it later
+   - **c**: Begin with Claude Fable 5.1 and move down for cost
    - **d**: Begin with Opus 5.5, moving to Fable 5.1 if high-effort tests fall short
 
 23. A designer uses Firefox and a phone, and asks whether Claude in Chrome can be installed there. Which two statements does the course support? (Select two.)
@@ -206,9 +206,9 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 27. A free-plan user wants to hand Cowork a folder on her computer. What does the help centre say it needs?
    - **a**: A terminal with the command-line tool installed
-   - **b**: A Team plan only, as no other plan has it at all
+   - **b**: A Team plan only, no other plan having it at all
    - **c**: A paid subscription and the desktop app, open and connected
-   - **d**: Nothing beyond a browser with the web app open
+   - **d**: Nothing beyond a browser with the web app open and a login
 
 28. A manager asks Claude for a two-sentence reply to a colleague and then for a reusable 40-line status dashboard for her team. Which pair of outputs does the help centre's rule produce?
    - **a**: The short reply as an artifact and the dashboard inline
@@ -230,7 +230,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 31. A manager sets a recurring Cowork task for the early morning and wants it to run while her laptop is shut and the desktop app is closed. Which two statements does the page support? (Select two.)
    - **a**: No awake machine is needed
-   - **b**: It is not possible, because Cowork cannot schedule anything
+   - **b**: It is not possible, Cowork being unable to schedule anything
    - **c**: It runs only while the desktop app stays open and connected
    - **d**: It runs on the laptop and waits until the machine is next powered up
    - **e**: Anthropic's servers do the job
@@ -250,31 +250,31 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 34. A buyer compares three suppliers' public price pages and fills a quote form, wanting to watch each step. Which tool and approval choice fit?
    - **a**: Claude in Chrome on trusted sites, each action confirmed, clean profile
    - **b**: Claude in Chrome with Skip all approvals switched on for speed
-   - **c**: Cowork on the whole drive with Auto approval, so that no single step has to wait
+   - **c**: Cowork on the whole drive with Auto approval, letting no single step wait
    - **d**: Research mode with web search left open on all sites
 
 35. Six months ago a manager used plain chat for a one-off competitor summary. The work now repeats every week with the same rules and files. What does the course suggest?
-   - **a**: Switch to Claude in Chrome so that the web pages are reread each week
-   - **b**: Keep plain chat
-   - **c**: Revisit the choice
-   - **d**: Move to Cowork
+   - **a**: Switch to Claude in Chrome to have the web pages reread each week
+   - **b**: Keep using plain chat for the weekly job as before
+   - **c**: Revisit the choice of tool, moving the routine into a Project or skill
+   - **d**: Move to Cowork and let it run the weekly job on its own
 
 36. A lecturer asks Claude to draft a marking rubric and then to grade the pupils' essays against it, and records the grades. What stays with the lecturer under the course's guidance?
-   - **a**: Little, as Claude can mark and record the essays
+   - **a**: Little, Claude being able to mark and record the essays
    - **b**: The final signature, once Claude has produced each mark for the class
    - **c**: The first draft of the rubric, with the grading handed over
    - **d**: Evaluating the work and any decision that affects the learners
 
 37. A team lead tags Claude in a thread to compile a report, then closes Slack for the evening. A colleague adds a correction as a later message. Which two statements describe what happens? (Select two.)
    - **a**: Replies posted afterwards are followed
-   - **b**: It ignores the late addition, since it only reads the tagged post
-   - **c**: Work stops when Slack closes, because the task runs inside the browser tab
+   - **b**: It ignores the late addition, reading only the tagged post
+   - **c**: Work stops when Slack closes, the task running inside the browser tab
    - **d**: It needs a fresh tag before it reads anything new
    - **e**: The work carries on in the cloud
 
 38. A new team member wants Claude to produce the entire quarterly customer review, from data pull to final slides, in one go on day one. What does the delegation guidance suggest?
    - **a**: Hand over the entire job in one go on day one
-   - **b**: Start with a small, clear step whose result shows, then widen
+   - **b**: Hand over a small, clear step whose result shows, then widen it
    - **c**: Hand over only the final slides, with the data pulled
    - **d**: Hand over everything but ask for a confidence note at the end
 
@@ -288,7 +288,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Judge the material first, preferring approved primary text
    - **b**: Remove superseded versions from the knowledge base
    - **c**: Name an owner and a review date for each file
-   - **d**: Cite the source in each answer given to a reader
+   - **d**: Cite the source in each answer given to a reader of the Project
 
 41. A team wants Claude to use a connector that reads a local application on one employee's machine, not a service on the internet. Which shape fits?
    - **a**: A skill that bundles the application's instructions for Claude to load
@@ -325,7 +325,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Only for her incognito chats, which feed improvements to the models
    - **b**: Only if she opts in through privacy settings, or a conversation is flagged
    - **c**: Never, whatever settings she has chosen or plan she holds
-   - **d**: Always, whatever settings she has chosen or plan she holds
+   - **d**: Always, with no setting available to stop the use in any plan
 
 47. A user sets Claude in Chrome to its least restrictive approval mode to save clicks while she browses her bank. Which two statements does the page support? (Select two.)
    - **a**: Claude still reviews each action for safety and blocks anything unsafe
@@ -337,7 +337,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 48. A manager wants to paste an unreleased financial forecast, marked confidential, into a chat tool that the company has sanctioned. Which rule fits?
    - **a**: Ask Claude to forget the forecast afterwards, which satisfies the rule
    - **b**: Treat it as internal, so any tool that is approved is fine for everyone
-   - **c**: Treat it as regulated, so that no tool may ever receive it at all
+   - **c**: Treat it as regulated, with no tool ever allowed to receive it
    - **d**: Permitted there for those who need it, often with identifiers removed
 
 49. A security lead wants Claude in chat and Cowork to stop reaching the open web for everyone, without disabling the apps. Which control do the pages describe?
@@ -348,8 +348,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 50. An assistant asks a user to confirm "Send this email to everyone on the list?" while she works through a long task, and she presses Allow without a glance. Which two statements does the course support? (Select two.)
    - **a**: It matters only if the email carries an attachment or a link
-   - **b**: It is a formality, since the permission was set at the start of the task
-   - **c**: It is harmless, since classifiers already screen every action taken
+   - **b**: It is a formality, the permission having been set at the start of the task
+   - **c**: It is harmless, classifiers already screening every action taken
    - **d**: Approving unread hands approval to whatever was injected
    - **e**: The prompt is the control
 
@@ -363,7 +363,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: Compromising privacy or identity of private persons
    - **b**: Criminal-justice, censorship and surveillance uses
    - **c**: Undermining democratic processes, such as deceptive content
-   - **d**: Fraudulent, abusive or predatory practices
+   - **d**: Fraudulent, abusive or predatory practices aimed at customers
 
 53. A consultant sends a client a market summary drafted with Claude, and the client's own policy asks suppliers to say when AI helped. She says nothing. Which responsibility did she skip?
    - **a**: Data care, such as keeping client files out of the chat
@@ -436,7 +436,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 17. **b**. Reasoning that decides something important needs a check from outside the same reasoning (module 4, page 1). *a* is ruled out because "Self-reported confidence is not a measure of accuracy". *c* is ruled out because turning thinking up is "billed as output and slows the answer", and it does not supply a separate check. *d* is ruled out because "A confident chain of steps can contain a wrong step that makes everything after it wrong".
 18. **c**. The vision page lists spatial reasoning as approximate: coordinates and localisation outputs are approximate (module 4, page 1). *a* is ruled out because all current models "support text and image input". *b* is ruled out because the page warns about "low-quality, rotated, or very small images under 200 pixels", not about all tags. *d* is ruled out because "Claude works best when images come before text".
 19. **d**. Restricting knowledge tells the model to use only the provided documents, not its general knowledge (module 1, page 2). *a* is ruled out because "Comparing detects the variation; it does not remove it". *b* is ruled out because "A role is a request, not a credential". *c* is ruled out because "Self-reported confidence is not a measure of accuracy".
-20. **a and d**. A student checks every fact and citation that goes into graded work, because a hallucination includes "an invented citation, a function that does not exist" (module 9, page 1). *b* is ruled out because a hallucination includes "an invented citation, a function that does not exist". *c* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true". *e* is ruled out because "Self-reported confidence is not a measure of accuracy".
+20. **a and d**. A student checks every fact and citation that goes into graded work, because a hallucination includes "an invented citation, a function that does not exist" (module 9, page 1). *b* is ruled out because even the documented techniques "don't eliminate them entirely", so no model never invents references. *c* is ruled out because "a plausible-looking fact is a likely continuation whether or not it is true". *e* is ruled out because "Self-reported confidence is not a measure of accuracy".
 21. **b**. For creative work the checks are originality, accuracy, tone and whether the piece still sounds like the maker (module 9, page 2). *a* is ruled out because "Disclosure matters more here than in many fields". *c* is ruled out because a maker keeps "the idea, the voice, the final choices and the signature". *d* is ruled out because "Self-reported confidence is not a measure of accuracy".
 22. **d**. The overview's default advice is to start with Claude Opus 5.5 for most workloads and use Claude Fable 5.1 when evals at higher effort still fall short (module 3, page 1). *a* is ruled out because "The overview's default advice is to start with Claude Opus 5.5 for most workloads". *b* is ruled out because "Having a good evaluation set is the most important step". *c* is ruled out because "the top tier for everything wastes the budget".
 23. **a and e**. Claude in Chrome is an extension in the Chrome side panel on the paid plans, and "It is not supported on other Chromium browsers or on mobile" (module 8, page 2). *b* is ruled out because the extension is offered "on the paid plans (Pro, Max, Team, Enterprise)". *c* is ruled out because "It is not supported on other Chromium browsers or on mobile". *d* is ruled out because "Desktop extensions are for the desktop app only".
@@ -450,7 +450,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 31. **a and e**. A recurring task set with /schedule "runs in the cloud, so it does not need your computer awake or the desktop app open" (module 8, page 1). *b* is ruled out because "A recurring task, set with a /schedule command". *c* is ruled out because a recurring task "runs in the cloud, so it does not need your computer awake or the desktop app open". *d* is ruled out because "Tasks run in the cloud on Anthropic's servers; sessions can continue when your computer is offline".
 32. **d**. The course recommends a deliberate starting point of no AI, adding it only where analysis says it earns its place (module 9, page 2). *a* is ruled out because the course "recommends a deliberate starting point of no AI". *b* is ruled out because "audiences, commissioners and platforms may have rules or expectations about AI involvement". *c* is ruled out because a maker keeps "the idea, the voice, the final choices and the signature".
 33. **b**. Diligence is the official name for taking responsibility: will I stand behind this, tell people honestly what Claude did and have I protected the data (module 9, page 1). *a* is ruled out because that question belongs to the habit of describing: "Have I said what I want, so the job can be done and judged?" *c* is ruled out because the table gives that question as "Is what came back accurate, complete, fair and fit for its reader?" for the habit of judging. *d* is ruled out because that question belongs to deciding what to hand over: "Which parts of this job go to Claude, and which stay with me?"
-34. **a**. A step-by-step task on trusted live pages suits Claude in Chrome with manual approval and a clean profile (module 8, page 3). *b* is ruled out because in that setting "Claude does not pause and nothing checks its actions". *c* is ruled out because "A dedicated folder limits what an injected instruction or a mistake can reach". *d* is ruled out because Chrome is "a browser extension on the paid plans that acts on web pages for you".
+34. **a**. A step-by-step task on trusted live pages suits Claude in Chrome with manual approval and a clean profile (module 8, page 3). *b* is ruled out because in that setting "Claude does not pause and nothing checks its actions". *c* is ruled out because "A dedicated folder limits what an injected instruction or a mistake can reach". *d* is ruled out because Research suits "A job one document answers", and not a step-by-step task that the buyer wants to watch.
 35. **c**. A task that began as a one-off and became weekly deserves a Project or a skill (module 8, page 3). *a* is ruled out because Chrome is for "A step-by-step task on a website you trust". *b* is ruled out because the page says to "revisit it when the work changes". *d* is ruled out because "Picking the most powerful surface" is named as a trap.
 36. **d**. Judging student work and consequential decisions stays with the educator (module 9, page 1). *a* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades". *b* is ruled out because "Judging student work and decisions with consequences for a student stay with the educator". *c* is ruled out because the usage policy treats "academic testing and admissions as a high-risk use needing human review".
 37. **a and e**. Tasks run in the cloud, "Claude keeps working after you close Slack", and once in a thread it follows every reply (module 8, page 2). *b* is ruled out because "once it is in a thread it follows every reply". *c* is ruled out because "Claude keeps working after you close Slack". *d* is ruled out because a thread it has joined needs no new tag, because "once it is in a thread it follows every reply".

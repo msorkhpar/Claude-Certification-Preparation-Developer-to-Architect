@@ -26,9 +26,9 @@
       "scope": "level",
       "stem": "Scenario S1. A customer writes in one message that a refund is wanted on one order, an address has changed, and a charge appears twice. Nothing has been looked up yet, and the three concerns relate to an order, an address record and a card statement. Which two steps does the page give before any tool runs? (Select two.)",
       "options": {
-        "a": "Pass the whole text to a person, since several concerns need human judgement",
+        "a": "Pass the whole text to a person, several concerns needing human judgement",
         "b": "Work on them in parallel with the shared context they need",
-        "c": "Run the three matters one after another in a single chain, so that each sees the previous conclusion",
+        "c": "Run the three matters one after another in a single chain, each seeing the previous conclusion",
         "d": "List the matters separately, each with its own question and result",
         "e": "Handle only the first matter and ask the customer to send the others separately"
       },
@@ -54,7 +54,7 @@
         "a": "Read the identity fields in its input present only for nested workers",
         "b": "Use a matcher that names the coordinator in its pattern",
         "c": "Register the hook only in the coordinator's options file",
-        "d": "Wait for a subagent stop event and undo the call afterwards"
+        "d": "Wait for a subagent stop event and undo the call afterwards by hand and log it"
       },
       "key": "a",
       "explanation": {
@@ -131,7 +131,7 @@
         "b": "A constant pause of one second keeps the pressure even",
         "c": "The computed schedule is kept even when a wait is named",
         "d": "The delay that the service names replaces the computed value for that attempt",
-        "e": "The hint is ignored and the retry is made at once, since the failure may be a fluke"
+        "e": "The hint is ignored and the retry is made at once, the failure possibly being a fluke"
       },
       "key": [
         "a",
@@ -152,10 +152,10 @@
       "scope": "level",
       "stem": "Scenario S1. A refund tool keeps getting amounts in the wrong format, and the model apologises after a few corrections. What does the page advise during development?",
       "options": {
-        "a": "Raise the retry bound so that the model corrects itself more often than it does now in each session",
+        "a": "Raise the retry bound to let the model correct itself more often than it does now in each session",
         "b": "Ask the model in the prompt to stop apologising and keep trying until it succeeds",
         "c": "Write more detailed descriptions, and let the error name the field with an example value",
-        "d": "Switch the field to free text so that no value can ever be rejected by the tool"
+        "d": "Switch the field to free text to leave no value for the tool to reject"
       },
       "key": "c",
       "explanation": {
@@ -173,7 +173,7 @@
       "options": {
         "a": "Treat it as one unit and carry on with the cap check",
         "b": "Refuse it as malformed, with a result that says what is needed",
-        "c": "Pass it through to the backend unchanged, as it accepts it",
+        "c": "Pass it through to the backend unchanged, the backend accepting it",
         "d": "Round it to the nearest allowed value and move to the next step"
       },
       "key": "b",
@@ -248,7 +248,7 @@
       "stem": "Scenario S1. Which escalation triggers can the application itself check in code, without relying on the model's recollection?",
       "options": {
         "a": "The customer's mood, measured by a count of exclamation marks in the message",
-        "b": "The model's own confidence in its answer, as it reports the number itself",
+        "b": "The model's own confidence in its answer, the model reporting the number itself",
         "c": "Whether the issue sounds complicated to a reader of the transcript",
         "d": "Those that are plain facts, such as a spoken request for a person"
       },
@@ -293,8 +293,8 @@
       "key": "a",
       "explanation": {
         "a": "The page states it (module 64, page 2): \"The unit to drop is the exchange, not the message: a tool call and its result stay together or go together\".",
-        "b": "Ruled out because a lone result is invalid: \"a result with no call (or a call with no result) is an invalid\"",
-        "c": "Ruled out because two rules keep a window valid: \"Two rules keep it valid.\"",
+        "b": "Ruled out because a half exchange breaks the record: \"a result with no call\" is invalid.",
+        "c": "Ruled out because a call left alone is just as invalid: \"or a call with no result\".",
         "d": "Ruled out because the oldest goes first: \"keep the newest turns that fit the budget and drop the oldest\""
       }
     },
@@ -304,9 +304,9 @@
       "scope": "level",
       "stem": "Scenario S3. A team plans to answer short factual look-ups from free-tier users with a coordinator and several helpers, because the published design does this. Each look-up is worth very little to the business. What is the sound objection?",
       "options": {
-        "a": "Helpers cannot answer factual questions, since they work in isolated context",
+        "a": "Helpers cannot answer factual questions, working in isolated context",
         "b": "A coordinator can only delegate to helpers whose descriptions are written in code",
-        "c": "Such arrangements cost many times the tokens of a chat, so they suit only tasks whose value pays for them",
+        "c": "Such arrangements cost many times the tokens of a chat, so they suit only valuable tasks",
         "d": "Several helpers on one question always produce conflicting answers that need a human referee"
       },
       "key": "c",
@@ -325,7 +325,7 @@
       "options": {
         "a": "The run is paused until the next billing period and then resumed",
         "b": "Starting another helper fails with a budget error",
-        "c": "The running subagents finish, since only the coordinator's own calls count toward the cap",
+        "c": "The running subagents finish, only the coordinator's own calls counting toward the cap",
         "d": "Background helpers stop and the query ends with a budget subtype",
         "e": "The cap is lowered for later subagents and the run continues on the remaining funds"
       },
@@ -348,10 +348,10 @@
       "scope": "level",
       "stem": "Scenario S3. A research system must use only its own restricted subagents, but the coordinator sometimes starts the general-purpose one that comes with the SDK. The team defined three narrow specialists with limited abilities and wants no fallback to anything broader. Which setting prevents it?",
       "options": {
-        "a": "A longer description on each custom definition, so that the model always prefers it to the built-in one",
+        "a": "A longer description on each custom definition, to make the model always prefer it to the built-in one",
         "b": "An allow rule for the Agent tool, which limits it to custom definitions",
         "c": "The environment variable that removes the bundled helper, after which such a call fails",
-        "d": "A lower turn limit for the coordinator, so that it cannot reach the built-in one"
+        "d": "A lower turn limit for the coordinator, to stop it reaching the built-in one"
       },
       "key": "c",
       "explanation": {
@@ -367,10 +367,10 @@
       "scope": "level",
       "stem": "Scenario S3. A coordinator must run a style review, a security scan and a coverage check on one change, and then write a summary that uses all three results. How should it invoke the subagents?",
       "options": {
-        "a": "Start them one at a time across separate turns, so that nothing conflicts",
+        "a": "Start them one at a time across separate turns, with nothing conflicting",
         "b": "Start all four together, with the summary agent reading the others' files as they appear on disk",
-        "c": "Start the summary agent first, so that it can ask the others for what it needs",
-        "d": "Launch the three together in one response, then compose the closing brief from their reports"
+        "c": "Start the summary agent first, letting it ask the others for what it needs",
+        "d": "Start the three together in one response, then compose the closing brief from their reports"
       },
       "key": "d",
       "explanation": {
@@ -424,7 +424,7 @@
       "scope": "level",
       "stem": "Scenario S3. A research system connects many servers, and the SDK's automatic mode counts the tokens of deferrable definitions against the window. When does tool search become active?",
       "options": {
-        "a": "At half of the window, so that a lot of room stays for the conversation with the user",
+        "a": "At half of the window, leaving a lot of room for the conversation with the user",
         "b": "At ten percent of the context size, below which everything loads up front",
         "c": "As soon as a second server connects, whatever the token count",
         "d": "Only when a person turns it on in the settings file"
@@ -443,9 +443,9 @@
       "scope": "level",
       "stem": "Scenario S3. A research team needs a standard integration with a widely used service. Which does the guide prefer, and which kind of work still justifies a build of the team's own?",
       "options": {
-        "a": "A custom server, since only an own build can be trusted with the credentials of the company",
-        "b": "A custom server, so that its descriptions can be tuned to the model that uses it",
-        "c": "Several overlapping servers, so that the agent can always choose the best one for the task",
+        "a": "A custom server, only a self-built one is trusted with company credentials",
+        "b": "A custom server, with its descriptions tuned to the model that uses it",
+        "c": "Several overlapping servers, letting the agent always choose the best one for the task",
         "d": "A reviewed existing connector, with fresh development kept for unique processes"
       },
       "key": "d",
@@ -463,7 +463,7 @@
       "stem": "Scenario S3. A team sets allowed_tools to Read and Grep for a writer subagent and expects that nothing else is available. What is true?",
       "options": {
         "a": "The rest is removed, since a list of allowed names is a whitelist that excludes whatever is omitted",
-        "b": "The rest still exists, since the list only approves, and unlisted calls follow the permission mode",
+        "b": "The rest still exists, since the list only approves and unlisted calls are governed by the permission mode",
         "c": "The rest is denied, since unlisted calls need a person to approve each one individually",
         "d": "The rest is hidden from the model, but can still run if the model insists on it"
       },
@@ -481,9 +481,9 @@
       "scope": "level",
       "stem": "Scenario S3. A skill with the setting context: fork is started from a research coordinator that has built up a long conversation. What does the forked subagent see?",
       "options": {
-        "a": "A copy of the parent conversation, since a fork copies the history",
+        "a": "A copy of the parent conversation, a fork copying the history",
         "b": "The parent's tool results but not its messages",
-        "c": "Its own instructions, which must therefore stand on their own",
+        "c": "Its own instructions, so these need to stand on their own",
         "d": "The summary that compaction produced for the parent"
       },
       "key": "c",
@@ -533,7 +533,7 @@
       "key": "b",
       "explanation": {
         "b": "The page states it (module 62, page 2): \"recompute the total in code, not by asking a model to add\".",
-        "a": "Ruled out because a model is not asked whether it is right: \"it does not ask the model whether it is right\"",
+        "a": "Ruled out because the rule is to recompute the total in code, \"not by asking a model to add\".",
         "c": "Ruled out because the first value is kept for fields and not for totals: \"keep the first value that is neither null nor unclear, with the quote it came with\"",
         "d": "Ruled out because a different total is a conflict: \"when a later chunk gives a different vendor or total, do not pick silently\""
       }
@@ -544,11 +544,11 @@
       "scope": "level",
       "stem": "Scenario S3. Five topics were scheduled for research, and four were covered. The report leaves out the fifth. Which two statements describe what the coverage note does? (Select two.)",
       "options": {
-        "a": "The topic is listed under no findings, since nothing was found for it",
+        "a": "The topic is listed under no findings, nothing having been found for it",
         "b": "That section sets the plan against what happened",
-        "c": "The topic is omitted, since the note covers only what was searched",
+        "c": "The topic is omitted, the note covering only what was searched",
         "d": "Something never looked into is recorded as a gap",
-        "e": "The topic is listed as partial, since part of the plan was carried out"
+        "e": "The topic is listed as partial, part of the plan having been carried out"
       },
       "key": [
         "b",
@@ -628,7 +628,7 @@
       "options": {
         "a": "A hook on the stop event that runs the suite and keeps the run open until it passes",
         "b": "A stronger sentence at the end of the prompt asking for passing results",
-        "c": "A larger turn limit so that the model has time to fix the failures",
+        "c": "A larger turn limit to give the model time to fix the failures",
         "d": "A second model call that confirms whether the output looks done"
       },
       "key": "a",
@@ -665,9 +665,9 @@
       "stem": "Scenario S5. Each item from a review becomes an inline comment with its file, line, severity and fix. Which extra field lets the team tune its criteria?",
       "options": {
         "a": "A free-text apology field that softens the tone of every comment",
-        "b": "A hash of the whole diff so that duplicate comments can be removed later",
-        "c": "A label naming the detected pattern per entry, so dismissals can be analysed",
-        "d": "The reviewer's temperature setting, so that separate runs can be compared with one another"
+        "b": "A hash of the whole diff to let duplicate comments be removed later",
+        "c": "A label naming the detected pattern per entry, making dismissals analysable",
+        "d": "The reviewer's temperature setting, to let separate runs be compared with one another"
       },
       "key": "c",
       "explanation": {
@@ -711,7 +711,7 @@
         "a": "Repeat the single pass three times and keep what two runs agree upon",
         "b": "More room does not restore attention, so split the work per item and add a cross stage",
         "c": "Keep one pass but ask the reviewer to take equal care with every file",
-        "d": "Lower the number of findings requested so that each file gets a longer note"
+        "d": "Lower the number of findings requested, giving each file a longer note"
       },
       "key": "b",
       "explanation": {
@@ -728,9 +728,9 @@
       "stem": "Scenario S5. An unattended pipeline gives its code-checking job a shell because it sometimes runs git. Why is that a finding?",
       "options": {
         "a": "Reading and searching suffice, so nothing able to change files should be listed",
-        "b": "A shell is slower than the file tools and delays the job",
-        "c": "A shell cannot be restricted by allowed-tools patterns in a pipeline",
-        "d": "A shell is needed for the job to read the diff, so it must stay"
+        "b": "It is slower than the file tools and delays the whole checking job",
+        "c": "Allowed-tools patterns cannot restrict it in an unattended pipeline run",
+        "d": "It is needed for the job to read the diff, so it must stay"
       },
       "key": "a",
       "explanation": {
@@ -746,9 +746,9 @@
       "scope": "level",
       "stem": "Scenario S5. A headless review step runs in a workflow with no interactive login. Which two statements describe how it should be set up? (Select two.)",
       "options": {
-        "a": "The key is written into the workflow file as a literal so that every runner has it",
+        "a": "The key is written into the workflow file as a literal, so every runner has it",
         "b": "The key is read from the developer's subscription login in the runner's keychain",
-        "c": "The key is passed in the prompt so that the model can attach it to its requests",
+        "c": "The key is passed in the prompt, letting the model attach it to its requests",
         "d": "The tool list is complete and minimal, with read tools and no bare shell",
         "e": "The API key comes from a repository secret exposed as an environment variable"
       },
@@ -793,7 +793,7 @@
         "a": "Twenty-five lines, which the documentation sets for projects of a small size",
         "b": "Roughly two hundred, whereas the stricter cap is a testing choice",
         "c": "Five hundred lines, the ceiling the documentation names",
-        "d": "No target at all, as it leaves the length to each team"
+        "d": "No target at all, the length being left to each team"
       },
       "key": "b",
       "explanation": {
@@ -830,9 +830,9 @@
       "options": {
         "a": "An entry may come back as a call to run something",
         "b": "A multi-round procedure runs live, or each round becomes its own entry later",
-        "c": "The entry is refused at submission, since batches take no tools",
+        "c": "The entry is refused at submission, batches taking no tools",
         "d": "The entry streams partial answers that the client reassembles",
-        "e": "An entry returns a finished answer, since a batch runs the tools itself"
+        "e": "An entry returns a finished answer, a batch running the tools itself"
       },
       "key": [
         "a",
@@ -855,7 +855,7 @@
       "options": {
         "a": "Ask about every missing detail before doing anything",
         "b": "Stop with a plain failure that lists the missing fields",
-        "c": "Proceed silently on guesses, so that the developer is not interrupted",
+        "c": "Proceed silently on guesses, leaving the developer uninterrupted",
         "d": "Ask only what cannot be assumed, and state the assumptions"
       },
       "key": "d",
@@ -873,7 +873,7 @@
       "stem": "Scenario S5. A CI extraction step fails the sum check and is retried. What must the second request hold besides the original document?",
       "options": {
         "a": "The faulty record and the specific errors with their fields",
-        "b": "Nothing more, since the same request gets a new sample each time it is sent again",
+        "b": "Nothing more, the same request getting a new sample each time it is sent again",
         "c": "Only the error message, to keep the request short",
         "d": "A note asking the model to try harder"
       },
@@ -929,8 +929,8 @@
       "scope": "level",
       "stem": "Scenario S6. An extraction pass is limited to 200 lines per call, and a document has exactly 200 lines. Which two statements follow the page? (Select two.)",
       "options": {
-        "a": "The document is cut into two parts, since the final line needs its own",
-        "b": "The document is refused, since one at the limit counts as too long",
+        "a": "The document is cut into two parts, the final line needing its own",
+        "b": "The document is refused, one at the limit counting as too long",
         "c": "Only a file too long for one run is cut",
         "d": "The document is cut into two parts that overlap by one line",
         "e": "A file as long as the maximum is one part, not two"
@@ -973,10 +973,10 @@
       "scope": "level",
       "stem": "Scenario S6. An extraction tool rejects a date given as next Friday. Which two statements describe the reply that lets the model repair its input? (Select two.)",
       "options": {
-        "a": "It is a success with an empty field, so that the next stage asks again",
-        "b": "It is a transient error with retry set, since the user may type again",
+        "a": "It is a success with an empty field, leaving the next stage to ask again",
+        "b": "It is a transient error with retry set, the user possibly typing again",
         "c": "The message names the format to use",
-        "d": "It is a protocol error with a generic code, since the form was malformed",
+        "d": "It is a protocol error with a generic code, the form having been malformed",
         "e": "It is a flagged execution error in the validation category"
       },
       "key": [
@@ -1038,7 +1038,7 @@
       "options": {
         "a": "The Explore one, which is limited to read-only search",
         "b": "A new subagent that inherits the parent's conversation",
-        "c": "None, as a forked skill needs a named agent first",
+        "c": "None, a forked skill needing a named agent first",
         "d": "The general-purpose one, which is the default"
       },
       "key": "d",
@@ -1075,7 +1075,7 @@
       "stem": "Scenario S6. A document gives a currency that the closed enum does not list, and another document leaves the currency unstated. Which enum design handles both honestly?",
       "options": {
         "a": "Widen the enum with each new currency as it appears in a document",
-        "b": "Turn the enum into free text so that nothing can ever be refused",
+        "b": "Turn the enum into free text, leaving nothing to be refused",
         "c": "Map values that are not covered to the nearest covered value",
         "d": "Add unclear for the silent case, and other with a detail field for new values"
       },
@@ -1095,7 +1095,7 @@
       "options": {
         "a": "Only the accepted records that reached the next system",
         "b": "All inputs that arrived, each one lost on the way scored as wrong",
-        "c": "A mean taken over the kinds of input, so that rare kinds count equally",
+        "c": "A mean taken over the kinds of input, giving rare kinds equal count",
         "d": "Only the records that a person reviewed by hand"
       },
       "key": "b",
@@ -1131,8 +1131,8 @@
       "scope": "level",
       "stem": "Scenario S6. A team makes every field of an invoice schema nullable, to be safe. Reviewers say that a fully optional schema feels safer because nothing can be rejected. What is the cost?",
       "options": {
-        "a": "Nothing, as every field still arrives in the result",
-        "b": "Required entries check more, so null fits only absent values",
+        "a": "Nothing, every field still arriving in the result",
+        "b": "Checking is weaker, null passing where a real value belongs",
         "c": "Parsing fails whenever one of the fields is left empty or missing",
         "d": "The model stops filling any entry with real data at all"
       },
@@ -1151,7 +1151,7 @@
       "stem": "Scenario S6. Two chunks of one document give the vendor as null in the first and as a name with a quote in the second. How does the merge treat that field?",
       "options": {
         "a": "It keeps the earliest usable entry, with its passage",
-        "b": "It keeps null, as the first chunk came first in the document",
+        "b": "It keeps null, the first chunk having come first in the document",
         "c": "It marks a conflict and asks a person to resolve it by hand",
         "d": "It joins both into one string separated by a comma and a space"
       },
@@ -1197,7 +1197,7 @@
       "explanation": {
         "c": "The page states it (module 68, page 1): \"For a candidate threshold, take every item at or above it, and measure how many are right. This is the precision of automation at that threshold.\"",
         "a": "Ruled out because the first step groups by confidence: \"Group the labelled items by the confidence they were given.\"",
-        "b": "Ruled out because the choice comes after the measurement: \"Pick the lowest threshold whose precision reaches the target.\"",
+        "b": "Ruled out because precision is measured on the other side of the cut-off: \"take every item at or above it\".",
         "d": "Ruled out because stratified sampling is a different job: \"The sample must be random within each stratum\""
       }
     },
@@ -1283,7 +1283,7 @@
       "scope": "level",
       "stem": "Scenario S2. A team rule seems ignored in a session. Which command shows what instruction files actually loaded?",
       "options": {
-        "a": "/context, since an entry missing from its list cannot be seen by the model",
+        "a": "/context, an entry missing from its list being invisible to the model",
         "b": "/memory, which lists the files that loaded and the ones that were skipped, with the reason for each",
         "c": "/clear, which reloads every file from disk",
         "d": "/compact, which prints the instructions that survive summarising"
@@ -1384,7 +1384,7 @@
       "scope": "level",
       "stem": "Scenario S2. A developer wants short answers in every project on their machine, and the team does not. Where does that preference go?",
       "options": {
-        "a": "In the project's root memory file, committed so that the whole team receives it",
+        "a": "In the project's root memory file, committed for the whole team to receive",
         "b": "In a local note beside the root file, ignored by version control on every machine",
         "c": "In the user-level memory document or the user rules folder in the home directory",
         "d": "In the managed policy file that the organisation distributes to its machines"
@@ -1447,8 +1447,8 @@
       "scope": "level",
       "stem": "Scenario S2. A batch finishes with some entries succeeded, some expired, and one rejected as an invalid request. What is the sound reaction?",
       "options": {
-        "a": "Resubmit the whole batch so that the results stay consistent with one another",
-        "b": "Resubmit all the failures unchanged, since errors of this kind are transient",
+        "a": "Resubmit the whole batch to keep the results consistent with one another",
+        "b": "Resubmit all the failures unchanged, errors of this kind being transient and cleared by a retry",
         "c": "Keep the completed ones, resend the timed-out ones as they were, repair the faulty one",
         "d": "Discard the batch and run all of the work synchronously instead"
       },
@@ -1468,7 +1468,7 @@
       "options": {
         "a": "Results stream back entry by entry as they finish, within the window of the batch",
         "b": "The flag is ignored and results arrive after the window has closed",
-        "c": "It is refused with a validation error, since results come back as one file",
+        "c": "It is refused with a validation error, results coming back as one file",
         "d": "The batch is accepted but billed at the full price of the live API"
       },
       "key": "c",
@@ -1505,7 +1505,7 @@
       "stem": "Scenario S4. On Wednesday an engineer wants to carry on Monday's exploration of the payments module as a single line of work, although two other sessions have run in that directory since. Which control fits?",
       "options": {
         "a": "Resume that session by its id, which adds to the original and keeps one thread",
-        "b": "Fork the session, since a fork keeps the whole history and carries on the work",
+        "b": "Fork the session, a fork keeping the whole history and carrying on the work",
         "c": "Continue the most recent session, which takes the newest one whatever it is",
         "d": "Start fresh with a prompt that asks the model to recall Monday from memory"
       },
@@ -1527,7 +1527,7 @@
         "b": "Each fork gets a private copy of the whole directory, so the attempts are isolated",
         "c": "Branching copies the conversation and not the disk",
         "d": "Their edits are merged automatically when the sessions end",
-        "e": "The second fork is rejected at once, since a directory admits one branch"
+        "e": "The second fork is rejected at once, a directory admitting one branch"
       },
       "key": [
         "a",
@@ -1569,7 +1569,7 @@
       "options": {
         "a": "The operation flagged as interrupted before its outcome was stored, to verify",
         "b": "The call is finished again silently when the session resumes, without any notice",
-        "c": "The call is shown as succeeded, since the process had already started it",
+        "c": "The call is shown as succeeded, the process having already started it",
         "d": "The history is cut at the last completed message and the session carries on as normal"
       },
       "key": "a",
@@ -1649,7 +1649,7 @@
       "scope": "level",
       "stem": "Scenario S4. A documentation tool's description is long, with its key rule in the last paragraph. What does Claude Code do with the text?",
       "options": {
-        "a": "It reads all of it, since only the first sentence is shown to the user in the list, as a rule of the product",
+        "a": "It reads all of it, only the first sentence being shown to the user in the list by a rule of the product",
         "b": "It summarises the description with a model call when the text is very long indeed",
         "c": "It truncates at 2,048 characters, so critical details should sit near the beginning",
         "d": "It rejects the server at launch with an error message naming the limit in force"
@@ -1669,8 +1669,8 @@
       "stem": "Scenario S4. A skill from an installed plugin has the same folder name as a project skill. How can both be used?",
       "options": {
         "a": "The extension's is prefixed with its package label, so two commands exist",
-        "b": "The project's overrides the plugin's one of the same name",
-        "c": "The plugin's overrides the project's one of the same name",
+        "b": "Only the project's skill stays, the plugin's one being dropped at install",
+        "c": "Only the plugin's skill stays, the project's one being ignored while it is installed",
         "d": "Neither runs until one of them is renamed to remove the clash"
       },
       "key": "a",
@@ -1678,7 +1678,7 @@
         "a": "The page lists the location (module 58, page 1): \"with the name prefixed by the plugin's name\".",
         "b": "Ruled out because the order of precedence is for skills that share a name: \"Of skills that share a name\"",
         "c": "Ruled out because a plugin skill is available where it is enabled: \"Where the plugin is enabled\"",
-        "d": "Ruled out because a name clash has a winner: \"`/deploy` runs the personal one\""
+        "d": "Ruled out because the plugin name prefix keeps the two apart, so nothing has to be renamed: \"with the name prefixed by the plugin's name\"."
       }
     },
     {
@@ -1687,11 +1687,11 @@
       "scope": "level",
       "stem": "Scenario S4. A user-level file and a repository-level file give conflicting style advice. Which two statements follow the page? (Select two.)",
       "options": {
-        "a": "The user-level file loads last, since personal preferences are applied at the end",
+        "a": "The user-level file loads last, personal preferences being applied at the end",
         "b": "Loading runs from the broadest scope to the most specific",
         "c": "Memory is guidance with good delivery, not an override",
-        "d": "Neither file loads, since conflicting advice is dropped",
-        "e": "The more recently edited file loads last, since the loader sorts by time"
+        "d": "Neither file loads, conflicting advice being dropped",
+        "e": "The more recently edited file loads last, the loader sorting by time"
       },
       "key": [
         "b",
@@ -1751,8 +1751,8 @@
       "stem": "Scenario S4. A large exploration moves from mapping modules to tracing flows. How should the findings of the first phase reach the second?",
       "options": {
         "a": "A digest from the notes goes into the opening prompts of the later workers",
-        "b": "Pass the full transcript of the first phase to each second-phase worker so that nothing is lost",
-        "c": "Let the second phase rediscover them, since fresh eyes avoid bias",
+        "b": "Pass the full transcript of the first phase to each second-phase worker to lose nothing",
+        "c": "Let the second phase rediscover them, fresh eyes avoiding bias",
         "d": "Keep the first phase's workers running and reuse their windows"
       },
       "key": "a",
@@ -1795,8 +1795,8 @@
       "stem": "Scenario S4. A coordinator runs five sources in order, and the second fails with a timeout. The run stops there. What does that waste?",
       "options": {
         "a": "Everything scheduled after the broken one, whose work was never done",
-        "b": "Only the failed source's partial results, which were small anyway and a little context",
-        "c": "Nothing, since later sources depend on the second one",
+        "b": "Only the failed source's partial results, which were small anyway",
+        "c": "Nothing, later sources depending on the second one",
         "d": "The retry budget, which is reset by stopping"
       },
       "key": "a",
@@ -1833,7 +1833,7 @@
       "stem": "Scenario S6. A team registers a hook with the matcher Write|Edit. How is that value read?",
       "options": {
         "a": "As a regular expression that also matches names containing either word in the middle",
-        "b": "As a list of two exact tool names, because it holds only letters and a pipe",
+        "b": "As a list of two exact tool names, it holding only letters and a pipe",
         "c": "As a path filter for the locations that those tools write to disk",
         "d": "As a request to match both names only when they occur in the same turn"
       },
@@ -1851,10 +1851,10 @@
       "scope": "level",
       "stem": "Scenario S6. A fan-out runs one extraction pass per document, then a cross-check pass over their summaries. One of twelve passes fails. What should the run do?",
       "options": {
-        "a": "Abort the whole run, since one failure makes the rest unreliable",
+        "a": "Abort the whole run, one failure making the rest unreliable",
         "b": "Log it with its message, carry on with the rest, and exclude it from the last step",
         "c": "Retry that one forever until it succeeds, then continue",
-        "d": "Give the last step an empty summary for it, so that the count stays complete in the report"
+        "d": "Give the last step an empty summary for it, keeping the count complete in the report"
       },
       "key": "b",
       "explanation": {
@@ -1871,8 +1871,8 @@
       "stem": "Scenario S6. Logs of an extraction agent show many redundant tool calls and few errors. What does the article suggest?",
       "options": {
         "a": "Rewrite the descriptions with clearer examples",
-        "b": "Remove half of the tools so that fewer calls are possible",
-        "c": "Raise the output ceiling so that each call returns more",
+        "b": "Remove half of the tools to make fewer calls possible",
+        "c": "Raise the output ceiling to let each call return more",
         "d": "Rightsize the pagination or token limit parameters"
       },
       "key": "d",
@@ -1927,10 +1927,10 @@
       "scope": "level",
       "stem": "Scenario S6. A schema gives a missing vendor name the default unknown. Why does that hurt downstream?",
       "options": {
-        "a": "It breaks the parser of the report that reads each record",
-        "b": "It lowers accuracy in the final report that the team reads",
-        "c": "It forces the model to guess the vendor on every record",
-        "d": "Code cannot tell it from a real value, so a placeholder passes as real"
+        "a": "It breaks the parser of the report that reads each record downstream",
+        "b": "It lowers accuracy in the final report that the team reads each week",
+        "c": "It forces the model to guess the vendor on every record it reads",
+        "d": "It cannot be told from a real value by code, so a placeholder passes as real"
       },
       "key": "d",
       "explanation": {
@@ -1971,7 +1971,7 @@
       "scope": "level",
       "stem": "Scenario S6. A pipeline's overall accuracy clears its target, and the team proposes dropping manual review for everything. What does the page say decides this?",
       "options": {
-        "a": "The overall average, since a figure above target covers every kind",
+        "a": "The overall average, a figure above target covering every kind",
         "b": "Evidence for each kind of input, never the average",
         "c": "The workload that reviewers face in a normal week",
         "d": "The model's own confidence on each record it returns"
@@ -2050,7 +2050,7 @@
         "a": "Use the cut-off with the highest precision and automate everything above it",
         "b": "Lower the target until some cut-off qualifies for automation",
         "c": "Ask the model to restate its confidence on a hundred-point scale",
-        "d": "Every item needs review until the pipeline improves, since no honest boundary exists"
+        "d": "Every item needs review until the pipeline improves, no honest boundary existing"
       },
       "key": "d",
       "explanation": {
@@ -2066,8 +2066,8 @@
       "scope": "level",
       "stem": "Scenario S6. A subagent cannot name a source for a statement that the schema demands one for. What should it do?",
       "options": {
-        "a": "Invent a plausible citation so that the schema validates the finding",
-        "b": "Cite the search engine as the source of each unsourced claim",
+        "a": "Invent a plausible citation to make the schema validate the finding at once",
+        "b": "Cite the search engine as the source of each unsourced claim in the answer",
         "c": "Return it as a finding with an empty reference field and a warning",
         "d": "Report it apart as lacking an origin, or omit it, rather than return it as a finding"
       },
@@ -2085,7 +2085,7 @@
       "scope": "level",
       "stem": "Scenario S6. Six extraction workers may be lost to a restart. When should each write its state file?",
       "options": {
-        "a": "As it learns, so that a crash half-way still leaves something",
+        "a": "As it learns, leaving something behind after a crash half-way",
         "b": "At the end only, when its findings are complete and checked",
         "c": "Once an hour on a timer, whatever it has learned in that time",
         "d": "Only when a person asks for a checkpoint of its work"
@@ -2186,10 +2186,10 @@
       "scope": "level",
       "stem": "Scenario S1. A hook script stops a refund by signalling failure to the harness and also prints a machine-readable decision. Which two statements does the guide support? (Select two.)",
       "options": {
-        "a": "Prefer the status and discard the structured output, because the status is read first",
+        "a": "Prefer the status and discard the structured output, the status being read first",
         "b": "A single approach is the rule for each component",
         "c": "Print the structured output first and signal failure afterwards, so both are recorded",
-        "d": "Always print the structured output too, since the status alone is ignored",
+        "d": "Always print the structured output too, the status alone being ignored",
         "e": "Status 2 blocks with a stderr message, while status 0 with structured output gives finer control"
       },
       "key": [
@@ -2211,9 +2211,9 @@
       "scope": "level",
       "stem": "Scenario S1. An agent's loop answers two tool calls that came in one reply. In what shape must the results go back?",
       "options": {
-        "a": "Together in one user message, with those blocks placed before any added text",
+        "a": "In one user message, together, with those blocks placed before any added text",
         "b": "In separate user messages, one per call, in the order the calls were made by the model itself",
-        "c": "In one assistant message, since the model asked for the work",
+        "c": "In one assistant message, the model having asked for the work",
         "d": "In one user message, with explanatory text first and the blocks after it"
       },
       "key": "a",
@@ -2230,7 +2230,7 @@
       "scope": "level",
       "stem": "Scenario S1. A loop receives a reply whose stop reason is stop_sequence. The setup lists two custom endings for a generation. What should it do?",
       "options": {
-        "a": "Continue with the next request, since only an end of turn means that the work is finished",
+        "a": "Continue with the next request, only an end of turn meaning that the work is finished",
         "b": "Raise the output ceiling and ask again with the same messages",
         "c": "Treat it as finished, and check which of the configured strings fired if that matters",
         "d": "Report an unexpected value that needs an alert and a person to look at it"
@@ -2249,8 +2249,8 @@
       "scope": "level",
       "stem": "Scenario S1. A lookup finds no orders for a customer. The customer exists, but no purchase was made in the period that was searched. Which reply is right?",
       "options": {
-        "a": "An error result flagged as not found, so that the agent tries another route through the other service",
-        "b": "An empty string, so that the agent decides what it means",
+        "a": "An error result flagged as not found, leaving the agent to try another route through the other service",
+        "b": "An empty string, leaving the agent to decide what it means",
         "c": "A successful response saying that nothing matched the identifier and the date range",
         "d": "A transient error with retry set, in case the index is catching up"
       },
@@ -2269,9 +2269,9 @@
       "stem": "Scenario S1. The wrapper has no information yet about the state of the remote system. Which two of these calls may be sent again after a timeout without first checking state? (Select two.)",
       "options": {
         "a": "A refund that carries an idempotency key which the service honours",
-        "b": "An email send, because the outbox accepted it before the timeout occurred",
-        "c": "A ticket creation, because duplicates can be merged later",
-        "d": "A refund with no key, because the amount is validated",
+        "b": "An email send, the outbox having accepted it before the timeout occurred",
+        "c": "A ticket creation, duplicates being mergeable later",
+        "d": "A refund with no key, the amount being validated",
         "e": "A lookup that only reads a record"
       },
       "key": [
@@ -2293,8 +2293,8 @@
       "scope": "level",
       "stem": "Scenario S1. A refund call fails with a permission error, and the loop retries it three times. The error text says that the caller lacks the right to issue refunds. What went wrong?",
       "options": {
-        "a": "Only a person with authority settles it, so repeating puts a human question to a machine",
-        "b": "Three is too many, and a single retry after a short pause would have succeeded",
+        "a": "Only a person with authority is able to settle it, so repeating puts a human question to a machine",
+        "b": "Three is too many, and a single retry after a short pause would have succeeded in the end",
         "c": "The error should have been marked as a validation failure by the tool author",
         "d": "The loop should have retried with a different amount each time it failed"
       },
@@ -2352,7 +2352,7 @@
       "options": {
         "a": "It carries no weight unless a page of rules follows it",
         "b": "It overrides each instruction that appears later in the conversation",
-        "c": "A brief line is enough to make a difference to focus and tone",
+        "c": "It makes a difference to focus and tone even as a brief line",
         "d": "It applies to the first reply of a session and then lapses"
       },
       "key": "c",
@@ -2388,16 +2388,16 @@
       "scope": "level",
       "stem": "Scenario S1. A long input holds twenty order summaries and a question. Where should the question and the key facts go?",
       "options": {
-        "a": "The question at the start, so that the model reads it before the summaries",
+        "a": "The question at the start, to have the model read it before the summaries",
         "b": "The ask at the end, with a short digest of the essentials at the start",
         "c": "Both in the middle, where the attention of the model is strongest",
-        "d": "The question repeated after every summary so that it is never forgotten"
+        "d": "The question repeated after every summary, to keep it from being forgotten"
       },
       "key": "b",
       "explanation": {
         "b": "The page states it (module 64, page 1): \"Put the long material first and the question last.\"",
-        "a": "Ruled out because the middle is where findings go missing: \"a long input's middle is where findings go missing\"",
-        "c": "Ruled out because detail goes under headers: \"Organise the detail under explicit headers\"",
+        "a": "Ruled out because the page says \"Put the long material first and the question last\".",
+        "c": "Ruled out because \"a long input's middle is where findings go missing\".",
         "d": "Ruled out because quoting before answering is another tool: \"Asking the model to quote the relevant passages before answering is a fourth tool for long documents.\""
       }
     },
@@ -2409,7 +2409,7 @@
       "options": {
         "a": "The file loads only for sessions started by its owner, since it is a personal setting",
         "b": "The file loads at launch but is pushed out first when context fills, since it has the lowest rank",
-        "c": "It loads on demand, since files in subdirectories load only when read",
+        "c": "The file loads on demand, since files in subdirectories load only when read",
         "d": "The file loads only when a slash command names it, since commands choose memory"
       },
       "key": "c",
@@ -2505,7 +2505,7 @@
         "a": "Two or three worked pairs with expected answers, one at a boundary",
         "b": "A request to plan before coding, with no worked pairs shown beside it",
         "c": "A longer paragraph on how careful and exact the code must be",
-        "d": "A larger model, so that it infers the awkward inputs"
+        "d": "A larger model, to infer the awkward inputs"
       },
       "key": "a",
       "explanation": {
@@ -2523,14 +2523,14 @@
       "options": {
         "a": "Keep the whole-file write if the file is under a hundred lines",
         "b": "Use the edit tool, since replacing everything lets damage slip through unseen",
-        "c": "Use the shell with a stream editor, since it avoids both tools",
+        "c": "Use the shell with a stream editor, since it avoids both of the other file tools",
         "d": "Keep the whole-file write, since it never fails to match"
       },
       "key": "b",
       "explanation": {
         "b": "Write overwrites with the full content, so an accidental change elsewhere goes unseen, and for partial changes to an existing file the page says to use Edit (module 56, page 1). The page puts it as \"Write overwrites with the full content, so an accidental change elsewhere goes unseen\".",
-        "a": "Ruled out because the page names no size rule; the reason is that \"it never fails to match\" is not a reason to overwrite.",
-        "c": "Ruled out because \"For partial changes to an existing file, use Edit.\"",
+        "a": "Ruled out because the page gives no size exception: \"For partial changes to an existing file, use Edit.\"",
+        "c": "Ruled out because the shell is a poor edit path: \"Each command is a separate process\".",
         "d": "Ruled out because \"Write overwrites with the full content, so an accidental change elsewhere goes unseen.\""
       }
     },
@@ -2540,7 +2540,7 @@
       "scope": "level",
       "stem": "Scenario S2. A team writes one skill for each kind of code, expecting each skill to apply by itself whenever a file of its kind is opened. What happens?",
       "options": {
-        "a": "Each skill applies when its folder is opened, since folders are the unit",
+        "a": "Each skill applies when its folder is opened, since folders are the unit of loading",
         "b": "Each skill applies by itself, since skills watch the open files",
         "c": "Only the newest skill applies, since later skills outrank earlier ones",
         "d": "Matching a path never launches one, since scoped rules are what load by location"
@@ -2635,9 +2635,9 @@
       "scope": "level",
       "stem": "Scenario S3. A search subagent hits a rate limit twice and succeeds on the third try, and the team's design passes every failure up to the coordinator for a decision. What does the page recommend?",
       "options": {
-        "a": "Keep passing everything up, since the coordinator sees the whole picture",
-        "b": "Report \"search unavailable\" so that the report stays short",
-        "c": "Stop the run and tell the user it failed",
+        "a": "Keep passing everything up, the coordinator seeing the whole picture of the run",
+        "b": "Report \"search unavailable\", keeping the report short",
+        "c": "Stop the run and tell the user that it failed outright",
         "d": "Handle passing faults locally, and send up only what stays unresolved"
       },
       "key": "d",
@@ -2654,8 +2654,8 @@
       "scope": "level",
       "stem": "Scenario S3. To spare the coordinator's context, a developer lets the search and analysis subagents pass findings directly to each other. What does the page say?",
       "options": {
-        "a": "Allow it, since a shorter path saves tokens for the coordinator",
-        "b": "Route it through the hub, since that gives one place to observe",
+        "a": "Allow it, since a shorter path saves tokens for the coordinator's own window",
+        "b": "Allow only a route through the hub, since that gives one place to observe",
         "c": "Allow it if each pair logs its exchanges to a shared file",
         "d": "Allow it for the analysis agent only, since it reads documents"
       },
@@ -2673,10 +2673,10 @@
       "scope": "level",
       "stem": "Scenario S3. To keep the writer's input short, the coordinator has the synthesis step compress all findings into prose and tells the writer to add sources afterwards. What does the page say?",
       "options": {
-        "a": "It is sound for numbers only, since prose carries words well",
-        "b": "It is sound, since short input is easier to draft from the start",
-        "c": "Claim-origin pairs must travel on, since sentences cannot restore them",
-        "d": "It is sound if the writer searches again for each claim"
+        "a": "It is sound for numbers only, since prose carries words well but not figures",
+        "b": "It is sound, since short input is easier for the writer to draft",
+        "c": "It is unsound, since claim-origin pairs must travel and sentences cannot restore them",
+        "d": "It is sound if the writer searches again for each claim it makes"
       },
       "key": "c",
       "explanation": {
@@ -2730,7 +2730,7 @@
       "scope": "level",
       "stem": "Scenario S4. A team commits a .mcp.json whose ticket server's location is written with a fallback, and whose token is written with no fallback. A reviewer objects to the first. What is the verdict?",
       "options": {
-        "a": "Sound for that field, since a non-secret entry suits a placeholder",
+        "a": "Wrong, since a non-secret entry is suited to a placeholder",
         "b": "Wrong, since expansion does not work in the url field",
         "c": "Right, but the token should have a default as well, for a working clone",
         "d": "Wrong, since a fallback in any field is a credential in the file"
@@ -2749,7 +2749,7 @@
       "scope": "level",
       "stem": "Scenario S4. An engineer investigated a payments module on Monday. Overnight a colleague rewrote half of it, and on Tuesday the engineer wants to carry on. Which session choice does the page key?",
       "options": {
-        "a": "Run two fresh sessions and repeat the analysis in each",
+        "a": "Run two fresh sessions and repeat the whole analysis in each, then merge the two",
         "b": "Begin anew with a short summary, since old results describe files as they were",
         "c": "Resume Monday's session, since the model remembers the analysis",
         "d": "Fork Monday's session, since a branch keeps the analysis and the history"
@@ -2770,7 +2770,7 @@
       "options": {
         "a": "It is reviewed by the platform team alone, since developers cannot judge servers",
         "b": "It needs no review, since a configuration file cannot run code",
-        "c": "Scrutiny like code, since entries load unprompted in unattended runs",
+        "c": "It needs scrutiny like code, since entries load unprompted in unattended runs",
         "d": "It needs a review only if the server is remote, since local ones are trusted"
       },
       "key": "c",
@@ -2844,7 +2844,7 @@
       "scope": "level",
       "stem": "Scenario S4. A team wants an exploring helper that cannot change anything and can also query the company's knowledge server, and an engineer says the built-in read-only explorer already does that. What is missing?",
       "options": {
-        "a": "Nothing, since the built-in one reaches every connected server",
+        "a": "Nothing, the built-in one reaching every connected server",
         "b": "A longer root memory file that names the server",
         "c": "A custom project agent whose tools include the lookup",
         "d": "A prompt line telling the main agent to avoid writing"
@@ -2901,10 +2901,10 @@
       "scope": "level",
       "stem": "Scenario S5. The pipeline's review step continues the very session that wrote the change, so that the context is already loaded. A reviewer asks why that is a finding. What is the reason?",
       "options": {
-        "a": "Authors favour their own output, since a clean slate sharpens the check",
-        "b": "A shared session cannot run in a pipeline, since sessions are interactive",
-        "c": "A shared session loses the findings of earlier runs, since they are discarded",
-        "d": "A shared session costs more tokens, since the history is billed again"
+        "a": "It lets authors favour their own output, since a clean slate is the sharper check",
+        "b": "It cannot run in a pipeline, since sessions are interactive by design",
+        "c": "It loses the findings of earlier runs, since they are discarded",
+        "d": "It costs more tokens, since the whole history is billed again"
       },
       "key": "a",
       "explanation": {
@@ -2920,8 +2920,8 @@
       "scope": "level",
       "stem": "Scenario S5. A team runs a large review three times and keeps only the issues that two of the three runs report. Why does the page reject this?",
       "options": {
-        "a": "It needs a larger window to hold three results at once",
-        "b": "Real bugs found only occasionally would be hidden by the filter",
+        "a": "It needs a larger window to hold three results at once during the final merge",
+        "b": "It would hide real bugs found only occasionally, through the filter",
         "c": "It triples the cost without any change in what is found",
         "d": "It lets authors skip the review when two runs disagree"
       },
@@ -2958,7 +2958,7 @@
       "scope": "level",
       "stem": "Scenario S5. To keep a multi-file review consistent, each file's pass is shown the findings of the previous files. What does the page say about it?",
       "options": {
-        "a": "Passes stop being independent, since earlier mistakes become premises",
+        "a": "It makes passes stop being independent, since earlier mistakes become premises",
         "b": "It is wrong only for the last file, since its pass needs all of them",
         "c": "It is sound, since consistency needs shared memory",
         "d": "It is sound if the findings are summarised first, since summaries are neutral"
@@ -2980,7 +2980,7 @@
         "a": "Merge the failed file into the next pass",
         "b": "Retry the failed pass until it succeeds, however long",
         "c": "Report the breakage by name and let the other results stand",
-        "d": "Discard and restart, since a partial review cannot be trusted"
+        "d": "Discard and restart, a partial review being untrusted"
       },
       "key": "c",
       "explanation": {
@@ -2996,7 +2996,7 @@
       "scope": "level",
       "stem": "Scenario S5. An audit of a pipeline flags its test-generation job for holding the edit tool, citing the rule that review jobs must only read. Is the finding right?",
       "options": {
-        "a": "Yes, since writing test files is a way to change things in production",
+        "a": "Yes, since writing test files is a way to change things in a production system",
         "b": "Yes, since every job in the pipeline must be read-only",
         "c": "No, but only because a shell tool would be worse than the edit tool",
         "d": "No, since that limit binds inspections alone and this task writes by design"

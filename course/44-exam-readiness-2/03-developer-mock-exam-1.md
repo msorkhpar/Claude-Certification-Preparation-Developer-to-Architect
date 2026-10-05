@@ -58,7 +58,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: Pin the request to an earlier documented version so replies keep their old shape
    - **b**: Pick out just the values the code uses and skip whatever else arrives
    - **c**: Validate every reply against a strict schema and reject anything that has an extra entry
-   - **d**: Report the provider to support, because adding output values breaks the contract
+   - **d**: Report the provider to support over the added output values breaking the contract
 
 3. A support bot caches a long prefix. After turn four the team wants a new tone rule applied to later turns on Claude Sonnet 5.5, without discarding the cached earlier part. Which two statements describe the approach that fits? (Select two.)
    - **a**: Rewrite the top-level system field with the new rule on the next request
@@ -75,7 +75,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 5. Every call returns a 400 whose message begins with "You have reached your specified API usage limits". The team reformats the request body three times with no change. What should they do next?
    - **a**: Back off and retry after the interval that the response supplies
-   - **b**: Rotate the API key, since the credential has probably expired or been revoked
+   - **b**: Rotate the API key, the credential having probably expired or been revoked
    - **c**: Raise the ceiling that an administrator configured below the plan's cap
    - **d**: Shrink the payload toward the 32 MB size limit and send it again
 
@@ -108,7 +108,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: The date moves into the body and is renamed to a platform-specific field name
    - **b**: The platform infers it from the model identifier, so no value is sent
    - **c**: It stays, with the value 2023-06-01, exactly as on Anthropic's own endpoint
-   - **d**: AWS signing replaces it, since SigV4 authenticates the whole call
+   - **d**: AWS signing replaces it, SigV4 authenticating the whole call
 
 11. A document-review service on Google Cloud attaches dozens of page images to each request and is refused although the token count is well under the window. Which limit did it most likely hit?
    - **a**: The 600-image ceiling that applies to models with larger windows
@@ -126,7 +126,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: Switch the choice to any, which lets the model pick among the tools
    - **b**: A fixed-shape reply through the output format setting with a JSON schema
    - **c**: Ask for JSON in the prompt and parse whatever text comes back
-   - **d**: Add an assistant message that opens a brace so that the reply begins as JSON
+   - **d**: Add an assistant message that opens a brace to start the reply as JSON
 
 14. A team reads PDFs through Amazon Bedrock's Converse API and finds that answers ignore every chart, although the same files work well on the Claude API. Which two statements explain it and the fix? (Select two.)
    - **a**: Switching to base64 sources hides the links that blocked the images
@@ -156,27 +156,27 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 18. Nightly bulk jobs share a 30,000-token instruction block, yet cache hit rates stay low because each entry lapses before many requests have arrived. Which adjustment does the page suggest?
    - **a**: Submit that block as a separate batch beforehand to warm the entry
    - **b**: Ask for the one-hour lifetime on the common material
-   - **c**: Remove the cache markers, because hits are impossible inside a batch
-   - **d**: Vary the instruction block slightly per call so that entries differ
+   - **c**: Remove the cache markers, hits being impossible inside a batch
+   - **d**: Vary the instruction block slightly per call to make entries differ
 
 19. A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?
    - **a**: Abandon the design of the long-running agent and start over with a new one
-   - **b**: Add a second agent on the same tier so that answers receive a majority vote
+   - **b**: Add a second agent on the same tier for a majority vote on answers
    - **c**: Drop to Claude Sonnet 5.5 to lower the cost of each task run
    - **d**: Switch to Claude Fable 5.1, which the page reserves for demanding reasoning
 
 20. A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which two statements explain it and the fix? (Select two.)
    - **a**: That mode works at the three lowest levels
-   - **b**: Pass adaptive as the effort value so that the model chooses its own
-   - **c**: Raise max_tokens, because the 400 reports a truncated reply
-   - **d**: Add temperature 0 so that the behaviour becomes deterministic
+   - **b**: Pass adaptive as the effort value, leaving the model to choose its own
+   - **c**: Raise max_tokens, the 400 reporting a truncated reply
+   - **d**: Add temperature 0 to make the behaviour deterministic
    - **e**: At the two highest levels it is rejected
 
 21. After a deploy, a service immediately fires ten simultaneous requests that share a 30,000-token prefix with a marker on it. Usage shows ten writes and no reads. What is the fix?
    - **a**: Raise the lifetime to one hour so later entries reach the earlier one
    - **b**: Alternate the effort setting on every call to spread out the writes
    - **c**: Send one, wait until its response begins, then release the other nine
-   - **d**: Shrink the prefix below the minimum so that nothing has to be written
+   - **d**: Shrink the prefix below the minimum, leaving nothing to be written
 
 22. A team has no evaluation data yet and no sense of how hard its new feature is. Which starting plan matches the documentation's method?
    - **a**: Pick the cheapest tier at once and keep it for the feature
@@ -185,8 +185,8 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Choose by reputation, then adjust after the first production complaint
 
 23. A request to Claude Haiku 4.5, whose limit is 200K, carries about 150,000 input tokens and sets max_tokens to 64,000, which together go beyond that limit. What happens?
-   - **a**: The call is accepted, and a lengthy reply may end early with a dedicated stop reason
-   - **b**: The call is rejected with a 400, because input plus output may not exceed the limit
+   - **a**: The call is accepted, and a lengthy reply ends early with a dedicated stop reason
+   - **b**: The call is rejected with a 400, input plus output being barred from exceeding the limit
    - **c**: The excess is trimmed from the start of the input history before any processing begins
    - **d**: The output allowance is silently lowered to fit, so the reply always completes
 
@@ -198,7 +198,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: The smaller model drops earlier reasoning blocks
 
 25. A drafting feature scores 62 percent on the team's fixed test set against a 90 percent target and costs more than planned. Someone proposes switching tiers immediately. What does the module advise?
-   - **a**: Switch tiers now, since a lower price makes later quality work affordable
+   - **a**: Switch tiers now, a lower price making later quality work affordable
    - **b**: Judge the lower tier on the ten easiest items, then roll it out
    - **c**: Rewrite several parts of the prompt together to gain accuracy quickly
    - **d**: Hit the quality bar before looking for any saving that holds it
@@ -206,7 +206,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 26. A team migrates a reasoning-heavy workload to a newer model and copies its old effort values unchanged. Quality drifts. Which step does the guidance give?
    - **a**: Reapply the old thinking budgets, which carry over between generations
    - **b**: Run a sweep across levels on its own test set
-   - **c**: Raise every level by one notch, since newer models think less per level
+   - **c**: Raise every level by one notch, newer models thinking less per level
    - **d**: Pin the old model id until the next generation arrives
 
 27. A pipeline starts two model calls at once: one drafts a reply and one checks the reply's tone, but the checker keeps failing because the draft does not exist yet. How should the team restructure it?
@@ -259,19 +259,19 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Pick the family by the brand that has published the most releases
 
 35. An application pastes a user's forwarded email between fixed tags in its prompt. A tester shows that an email containing the closing tag followed by new orders is treated as part of the instructions. Which measure from the page on pasted content fits best?
-   - **a**: Move the email above the instructions so that its position marks it as data
+   - **a**: Move the email above the instructions, its position marking it as data
    - **b**: Place the email in the system prompt, where it carries the most weight with the model
    - **c**: Fence it with a random identifier and warn the model it could hold directives
-   - **d**: Rely on tags alone, because the model treats text inside tags as inert data
+   - **d**: Rely on tags alone, the model treating text inside tags as inert data
 
 36. A JSON schema for a classifier includes a property named "thinking_steps" that demands the model's reasoning, and some requests now come back refused. Which change fits?
-   - **a**: Raise max_tokens so that the long reasoning is not cut off
+   - **a**: Raise max_tokens to keep the long reasoning from being cut off
    - **b**: Retry the same call until the model stops refusing
    - **c**: Lower the effort so the model reasons less before filling the field
-   - **d**: Ask for a brief explanation in its place
+   - **d**: Ask for a brief explanation as the field's content in its place
 
 37. An extraction loop repairs failed replies by sending the original prompt again with the note "try again". The same mistakes keep recurring. Which two changes fit? (Select two.)
-   - **a**: Retry without a limit, since eventual success is likely on a hard document
+   - **a**: Retry without a limit, eventual success being likely on a hard document
    - **b**: Return the model's own answer with the request
    - **c**: List every problem with its path and message
    - **d**: Add a prefilled assistant turn that opens the JSON object
@@ -293,16 +293,16 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: A longer list of excluded tools so fewer results qualify
    - **b**: A higher keep value so more recent pairs stay
    - **c**: A lower bound on the savings each pass must achieve
-   - **d**: A lower trigger so that clearing begins at a smaller context size
+   - **d**: A lower trigger, with clearing beginning at a smaller context size
 
 41. A service forces a named tool on Claude Haiku 4.5 and every reply is a bare tool call with no sentence before it, but product wants a brief explanation first. What fits?
    - **a**: Switch to the any setting, which adds an explanation before the call
-   - **b**: Disable parallel use, since one action per reply lets text appear first
-   - **c**: Set the choice to none so that commentary is written before anything else
+   - **b**: Disable parallel use, one action per reply letting text appear first
+   - **c**: Set the choice to none, with commentary written before anything else
    - **d**: Use the automatic setting and say in a user message to run that function
 
 42. After a refactor, a model that used to call three independent tools in one reply now calls them one at a time. The code sends each output back in its own message. What is the likely cause?
-   - **a**: Parallel use is limited to operations that merely read data, so that setting changed
+   - **a**: Parallel use is limited to operations that merely read data, a setting having changed
    - **b**: The default for the choice field was switched to disable parallel use between releases
    - **c**: Separate returns teach Claude to avoid issuing several requests together
    - **d**: Parallel calls vanish whenever a conversation passes a certain length of history
@@ -315,14 +315,14 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: Each schema loads in full at session start, so the cost stays fixed per server
 
 44. An application defines its own function called screenshot alongside Anthropic's screen-control entry. Incoming blocks with that word are sometimes meant for one and sometimes for the other. How should dispatch work?
-   - **a**: Reject the custom function, because member names are reserved
+   - **a**: Reject the custom function, member names being reserved
    - **b**: Use the order in which the blocks arrive to decide which handler applies
    - **c**: Check whether the block carries display dimensions, which only screen actions have
    - **d**: Branch on the member together with the extra field that identifies the toolset
 
 45. A Python MCP server rejects a blank title by raising an ordinary ValueError inside the handler, and the model never sees why the call failed. Which change fits?
-   - **a**: Return a protocol error, since the model can retry after a malformed request
-   - **b**: Print the reason to standard output so that the client can relay it
+   - **a**: Return a protocol error, the model being able to retry after a malformed request
+   - **b**: Print the reason to standard output for the client to relay
    - **c**: Signal it with the SDK's dedicated exception type for expected problems
    - **d**: Catch the exception and return an empty success result
 
@@ -359,9 +359,9 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 51. A CI job runs the headless mode with the flag that skips local configuration and now reports no credentials, although the developer is signed in with a subscription on the same machine. What is needed?
    - **a**: Mount the developer's keychain into the runner so it can be read
-   - **b**: Drop the flag, since the other mode sees the same local setup on every machine
+   - **b**: Drop the flag, the other mode seeing the same local setup on every machine
    - **c**: Run it interactively in a terminal, where the login prompt can appear
-   - **d**: Provide an API key through the environment
+   - **d**: Provide an API key through an environment variable at launch
 
 52. Two hooks match the same shell call: a logging hook that exits cleanly and a guard hook that answers with a denial. A teammate fears the logger's success will let the call through. What happens?
    - **a**: It proceeds, because the hook that exits with zero is consulted first
@@ -408,7 +408,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 28. **b**. "If the verdict cannot be parsed, the draft is unchecked", so it is graded zero with a reason (module 34, page 2). *a* is ruled out because "a reply that is not a bare score counts as ungradable", and an ungradable case fails. *c* is ruled out because such a parse "turns a broken grader into a plausible number". *d* is ruled out because "A refinement loop can get worse", so the page keeps the best draft and not the last.
 29. **d**. The page states that "the budget covers subagents too" (module 35, page 1). *a* is ruled out because the option is described as "Maximum cost before stopping". *b* is ruled out because only the turn limit "counts tool-use turns only", while the budget measures cost. *c* is ruled out because "When a limit is reached the run ends with a result whose subtype names it".
 30. **a and e**. "Annotations are metadata, not enforcement", and "A tool marked read-only can still write if its handler does" (module 35, page 2). *b* is ruled out because clients treat annotations as "untrusted unless they come from trusted servers", wherever the tool is served. *c* is ruled out because "Annotations are metadata, not enforcement". *d* is ruled out because the hint "lets the tool run in parallel with other read-only tools".
-31. **c**. The page says "a session can instead pin a version" so a prompt can be promoted or rolled back without a deploy (module 36, page 1). *a* is ruled out because "overrides replace and never merge". *b* is ruled out because a session made with just an agent ID "creates the session with the latest agent version". *d* is ruled out because "Environments are not versioned".
+31. **c**. The page says "a session can instead pin a version" so a prompt can be promoted or rolled back without a deploy (module 36, page 1). *a* is ruled out because "overrides replace and never merge". *b* is ruled out because a session made with just an agent ID "creates the session with the latest agent version". *d* is ruled out because an agent's version "starts at 1 and increments each time an update changes the agent", so editing in place would change what production runs.
 32. **a**. "Tool inputs and outputs still flow to Anthropic's control plane" (module 36, page 2). *b* is ruled out because "Anthropic does not inspect or verify your sandbox image", and the image is the customer's. *c* is ruled out because the page says "files, processes and network traffic stay in your environment". *d* is ruled out because the key belongs in "a secrets manager, never an image".
 33. **b**. "Validation proves the shape", and nothing more (module 37, page 1). *a* is ruled out because "A refund of 4999 cents passes the schema whether or not it is right". *c* is ruled out because only "a reply that does not validate against the output type is refused", and this one validated. *d* is ruled out because "A checkpoint is a copy of the state at a point in the graph", not a check.
 34. **a**. The page says to "check whether the simplest option meets it" (module 37, page 2). *b* is ruled out because the advice is to "start with direct calls and add layers when a need appears". *c* is ruled out because "A framework that offers persistence helps only when the product must resume". *d* is ruled out because "The question is who should own the route, not which library is popular".

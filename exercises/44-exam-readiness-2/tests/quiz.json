@@ -29,7 +29,7 @@
         "a": "Pin the request to an earlier documented version so replies keep their old shape",
         "b": "Pick out just the values the code uses and skip whatever else arrives",
         "c": "Validate every reply against a strict schema and reject anything that has an extra entry",
-        "d": "Report the provider to support, because adding output values breaks the contract"
+        "d": "Report the provider to support over the added output values breaking the contract"
       },
       "key": "b",
       "explanation": {
@@ -90,7 +90,7 @@
       "stem": "Every call returns a 400 whose message begins with \"You have reached your specified API usage limits\". The team reformats the request body three times with no change. What should they do next?",
       "options": {
         "a": "Back off and retry after the interval that the response supplies",
-        "b": "Rotate the API key, since the credential has probably expired or been revoked",
+        "b": "Rotate the API key, the credential having probably expired or been revoked",
         "c": "Raise the ceiling that an administrator configured below the plan's cap",
         "d": "Shrink the payload toward the 32 MB size limit and send it again"
       },
@@ -193,7 +193,7 @@
         "a": "The date moves into the body and is renamed to a platform-specific field name",
         "b": "The platform infers it from the model identifier, so no value is sent",
         "c": "It stays, with the value 2023-06-01, exactly as on Anthropic's own endpoint",
-        "d": "AWS signing replaces it, since SigV4 authenticates the whole call"
+        "d": "AWS signing replaces it, SigV4 authenticating the whole call"
       },
       "key": "c",
       "explanation": {
@@ -250,7 +250,7 @@
         "a": "Switch the choice to any, which lets the model pick among the tools",
         "b": "A fixed-shape reply through the output format setting with a JSON schema",
         "c": "Ask for JSON in the prompt and parse whatever text comes back",
-        "d": "Add an assistant message that opens a brace so that the reply begins as JSON"
+        "d": "Add an assistant message that opens a brace to start the reply as JSON"
       },
       "key": "b",
       "explanation": {
@@ -350,8 +350,8 @@
       "options": {
         "a": "Submit that block as a separate batch beforehand to warm the entry",
         "b": "Ask for the one-hour lifetime on the common material",
-        "c": "Remove the cache markers, because hits are impossible inside a batch",
-        "d": "Vary the instruction block slightly per call so that entries differ"
+        "c": "Remove the cache markers, hits being impossible inside a batch",
+        "d": "Vary the instruction block slightly per call to make entries differ"
       },
       "key": "b",
       "explanation": {
@@ -368,7 +368,7 @@
       "stem": "A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?",
       "options": {
         "a": "Abandon the design of the long-running agent and start over with a new one",
-        "b": "Add a second agent on the same tier so that answers receive a majority vote",
+        "b": "Add a second agent on the same tier for a majority vote on answers",
         "c": "Drop to Claude Sonnet 5.5 to lower the cost of each task run",
         "d": "Switch to Claude Fable 5.1, which the page reserves for demanding reasoning"
       },
@@ -387,9 +387,9 @@
       "stem": "A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which two statements explain it and the fix? (Select two.)",
       "options": {
         "a": "That mode works at the three lowest levels",
-        "b": "Pass adaptive as the effort value so that the model chooses its own",
-        "c": "Raise max_tokens, because the 400 reports a truncated reply",
-        "d": "Add temperature 0 so that the behaviour becomes deterministic",
+        "b": "Pass adaptive as the effort value, leaving the model to choose its own",
+        "c": "Raise max_tokens, the 400 reporting a truncated reply",
+        "d": "Add temperature 0 to make the behaviour deterministic",
         "e": "At the two highest levels it is rejected"
       },
       "key": [
@@ -414,7 +414,7 @@
         "a": "Raise the lifetime to one hour so later entries reach the earlier one",
         "b": "Alternate the effort setting on every call to spread out the writes",
         "c": "Send one, wait until its response begins, then release the other nine",
-        "d": "Shrink the prefix below the minimum so that nothing has to be written"
+        "d": "Shrink the prefix below the minimum, leaving nothing to be written"
       },
       "key": "c",
       "explanation": {
@@ -449,8 +449,8 @@
       "scope": "level",
       "stem": "A request to Claude Haiku 4.5, whose limit is 200K, carries about 150,000 input tokens and sets max_tokens to 64,000, which together go beyond that limit. What happens?",
       "options": {
-        "a": "The call is accepted, and a lengthy reply may end early with a dedicated stop reason",
-        "b": "The call is rejected with a 400, because input plus output may not exceed the limit",
+        "a": "The call is accepted, and a lengthy reply ends early with a dedicated stop reason",
+        "b": "The call is rejected with a 400, input plus output being barred from exceeding the limit",
         "c": "The excess is trimmed from the start of the input history before any processing begins",
         "d": "The output allowance is silently lowered to fit, so the reply always completes"
       },
@@ -493,7 +493,7 @@
       "scope": "level",
       "stem": "A drafting feature scores 62 percent on the team's fixed test set against a 90 percent target and costs more than planned. Someone proposes switching tiers immediately. What does the module advise?",
       "options": {
-        "a": "Switch tiers now, since a lower price makes later quality work affordable",
+        "a": "Switch tiers now, a lower price making later quality work affordable",
         "b": "Judge the lower tier on the ten easiest items, then roll it out",
         "c": "Rewrite several parts of the prompt together to gain accuracy quickly",
         "d": "Hit the quality bar before looking for any saving that holds it"
@@ -514,7 +514,7 @@
       "options": {
         "a": "Reapply the old thinking budgets, which carry over between generations",
         "b": "Run a sweep across levels on its own test set",
-        "c": "Raise every level by one notch, since newer models think less per level",
+        "c": "Raise every level by one notch, newer models thinking less per level",
         "d": "Pin the old model id until the next generation arrives"
       },
       "key": "b",
@@ -623,7 +623,7 @@
         "c": "The page says \"a session can instead pin a version\" so a prompt can be promoted or rolled back without a deploy (module 36, page 1).",
         "a": "Ruled out because \"overrides replace and never merge\".",
         "b": "Ruled out because a session made with just an agent ID \"creates the session with the latest agent version\".",
-        "d": "Ruled out because \"Environments are not versioned\"."
+        "d": "Ruled out because an agent's version \"starts at 1 and increments each time an update changes the agent\", so editing in place would change what production runs."
       }
     },
     {
@@ -689,10 +689,10 @@
       "scope": "level",
       "stem": "An application pastes a user's forwarded email between fixed tags in its prompt. A tester shows that an email containing the closing tag followed by new orders is treated as part of the instructions. Which measure from the page on pasted content fits best?",
       "options": {
-        "a": "Move the email above the instructions so that its position marks it as data",
+        "a": "Move the email above the instructions, its position marking it as data",
         "b": "Place the email in the system prompt, where it carries the most weight with the model",
         "c": "Fence it with a random identifier and warn the model it could hold directives",
-        "d": "Rely on tags alone, because the model treats text inside tags as inert data"
+        "d": "Rely on tags alone, the model treating text inside tags as inert data"
       },
       "key": "c",
       "explanation": {
@@ -708,10 +708,10 @@
       "scope": "level",
       "stem": "A JSON schema for a classifier includes a property named \"thinking_steps\" that demands the model's reasoning, and some requests now come back refused. Which change fits?",
       "options": {
-        "a": "Raise max_tokens so that the long reasoning is not cut off",
+        "a": "Raise max_tokens to keep the long reasoning from being cut off",
         "b": "Retry the same call until the model stops refusing",
         "c": "Lower the effort so the model reasons less before filling the field",
-        "d": "Ask for a brief explanation in its place"
+        "d": "Ask for a brief explanation as the field's content in its place"
       },
       "key": "d",
       "explanation": {
@@ -727,7 +727,7 @@
       "scope": "level",
       "stem": "An extraction loop repairs failed replies by sending the original prompt again with the note \"try again\". The same mistakes keep recurring. Which two changes fit? (Select two.)",
       "options": {
-        "a": "Retry without a limit, since eventual success is likely on a hard document",
+        "a": "Retry without a limit, eventual success being likely on a hard document",
         "b": "Return the model's own answer with the request",
         "c": "List every problem with its path and message",
         "d": "Add a prefilled assistant turn that opens the JSON object",
@@ -793,7 +793,7 @@
         "a": "A longer list of excluded tools so fewer results qualify",
         "b": "A higher keep value so more recent pairs stay",
         "c": "A lower bound on the savings each pass must achieve",
-        "d": "A lower trigger so that clearing begins at a smaller context size"
+        "d": "A lower trigger, with clearing beginning at a smaller context size"
       },
       "key": "c",
       "explanation": {
@@ -810,8 +810,8 @@
       "stem": "A service forces a named tool on Claude Haiku 4.5 and every reply is a bare tool call with no sentence before it, but product wants a brief explanation first. What fits?",
       "options": {
         "a": "Switch to the any setting, which adds an explanation before the call",
-        "b": "Disable parallel use, since one action per reply lets text appear first",
-        "c": "Set the choice to none so that commentary is written before anything else",
+        "b": "Disable parallel use, one action per reply letting text appear first",
+        "c": "Set the choice to none, with commentary written before anything else",
         "d": "Use the automatic setting and say in a user message to run that function"
       },
       "key": "d",
@@ -828,7 +828,7 @@
       "scope": "level",
       "stem": "After a refactor, a model that used to call three independent tools in one reply now calls them one at a time. The code sends each output back in its own message. What is the likely cause?",
       "options": {
-        "a": "Parallel use is limited to operations that merely read data, so that setting changed",
+        "a": "Parallel use is limited to operations that merely read data, a setting having changed",
         "b": "The default for the choice field was switched to disable parallel use between releases",
         "c": "Separate returns teach Claude to avoid issuing several requests together",
         "d": "Parallel calls vanish whenever a conversation passes a certain length of history"
@@ -872,7 +872,7 @@
       "scope": "level",
       "stem": "An application defines its own function called screenshot alongside Anthropic's screen-control entry. Incoming blocks with that word are sometimes meant for one and sometimes for the other. How should dispatch work?",
       "options": {
-        "a": "Reject the custom function, because member names are reserved",
+        "a": "Reject the custom function, member names being reserved",
         "b": "Use the order in which the blocks arrive to decide which handler applies",
         "c": "Check whether the block carries display dimensions, which only screen actions have",
         "d": "Branch on the member together with the extra field that identifies the toolset"
@@ -891,8 +891,8 @@
       "scope": "level",
       "stem": "A Python MCP server rejects a blank title by raising an ordinary ValueError inside the handler, and the model never sees why the call failed. Which change fits?",
       "options": {
-        "a": "Return a protocol error, since the model can retry after a malformed request",
-        "b": "Print the reason to standard output so that the client can relay it",
+        "a": "Return a protocol error, the model being able to retry after a malformed request",
+        "b": "Print the reason to standard output for the client to relay",
         "c": "Signal it with the SDK's dedicated exception type for expected problems",
         "d": "Catch the exception and return an empty success result"
       },
@@ -1012,9 +1012,9 @@
       "stem": "A CI job runs the headless mode with the flag that skips local configuration and now reports no credentials, although the developer is signed in with a subscription on the same machine. What is needed?",
       "options": {
         "a": "Mount the developer's keychain into the runner so it can be read",
-        "b": "Drop the flag, since the other mode sees the same local setup on every machine",
+        "b": "Drop the flag, the other mode seeing the same local setup on every machine",
         "c": "Run it interactively in a terminal, where the login prompt can appear",
-        "d": "Provide an API key through the environment"
+        "d": "Provide an API key through an environment variable at launch"
       },
       "key": "d",
       "explanation": {
@@ -1150,7 +1150,7 @@
       "scope": "level",
       "stem": "After a tool loop, Claude Sonnet 5.5 sometimes ends its turn with no content at all. The client packs each tool's findings into the message together with a sentence announcing that data is attached. Which change fits best?",
       "options": {
-        "a": "Raise max_tokens so that the model has room to produce a full answer",
+        "a": "Raise max_tokens to give the model room to produce a full answer",
         "b": "Retry the identical request until a non-empty reply finally arrives",
         "c": "Send the result blocks alone, with no text placed beside them",
         "d": "Switch the request to streaming so the empty turn is delivered in pieces"
@@ -1171,7 +1171,7 @@
       "options": {
         "a": "Refuse the blank turn in the client, before anything is sent",
         "b": "Send it anyway and discard the reply when it comes back from the service",
-        "c": "Insert a default question in place of the blank so that the call is useful",
+        "c": "Insert a default question in place of the blank to make the call useful",
         "d": "Add a line to the system prompt telling Claude to ignore empty messages"
       },
       "key": "a",
@@ -1190,7 +1190,7 @@
       "options": {
         "a": "Add the provider's new wording to the search and keep matching on the message text",
         "b": "Retry every error for ten minutes whatever its status",
-        "c": "Catch only the SDK's base class, so that every failure takes one path",
+        "c": "Catch only the SDK's base class, sending every failure down one path",
         "d": "Branch on the status and type through the SDK's typed classes, most specific first"
       },
       "key": "d",
@@ -1207,7 +1207,7 @@
       "scope": "level",
       "stem": "A team streams five-minute reports and sets a read timeout of 30 seconds, worried that long generations will always trip it. What should the review say?",
       "options": {
-        "a": "It will trip, because the limit covers the whole generation from its very first byte",
+        "a": "It will trip, the limit covering the whole generation from its very first byte",
         "b": "The clock restarts at every event, so steady output survives and only a stall fails",
         "c": "It will fail unless the timeout is raised to the ten-minute default",
         "d": "The timeout applies only before the first byte, so it never matters afterwards"
@@ -1253,7 +1253,7 @@
       "options": {
         "a": "That attribute must travel back unmodified",
         "b": "Regenerate the value locally from a hash of the thinking text",
-        "c": "Ignore them, since only the text deltas matter for the final message",
+        "c": "Ignore them, only the text deltas mattering for the final message",
         "d": "Their payload becomes an attribute of the block",
         "e": "Append their text to the end of the thinking text"
       },
@@ -1295,7 +1295,7 @@
       "scope": "level",
       "stem": "A team's list holds 1,000 request ids and the result file has 998 lines, yet its program reports every request as handled. What should it do?",
       "options": {
-        "a": "Treat the missing two as succeeded, as the rest all came back",
+        "a": "Treat the missing two as succeeded, the rest having all come back",
         "b": "Diff the sent identifiers against the returned ones and resend the missing",
         "c": "Resubmit the whole batch of 1,000 requests from the very start",
         "d": "Match the two files by position, line against line, in order"
@@ -1355,7 +1355,7 @@
         "a": "Pad every picture to a multiple of 28 pixels before sending it",
         "b": "Divide each returned point by the padded size to obtain the fractions",
         "c": "Request pixel coordinates, then convert them to ratios in the program",
-        "d": "Upload the image through the Files API so that its coordinates are kept"
+        "d": "Upload the image through the Files API to keep its coordinates"
       },
       "key": "c",
       "explanation": {
@@ -1392,7 +1392,7 @@
       "options": {
         "a": "Let the sessions take turns, committing to main after each change",
         "b": "Ask each session to avoid files that the other is likely to touch",
-        "c": "Switch both sessions to plan mode so that neither writes until approved",
+        "c": "Switch both sessions to plan mode, neither writing until approved",
         "d": "Give every run a separate worktree, each one placed on a branch of its own"
       },
       "key": "d",
@@ -1411,7 +1411,7 @@
       "options": {
         "a": "The model consults a stored draft of the whole answer and then defends that draft",
         "b": "Each later piece is chosen with the earlier text in view, so the slip becomes context",
-        "c": "The window dropped the opening lines, so the model lost track of what it had said",
+        "c": "The window dropped the opening lines, so the model lost track of what it had said earlier",
         "d": "A hidden checker reviews each sentence and approves it before the sentence is shown"
       },
       "key": "b",
@@ -1429,7 +1429,7 @@
       "stem": "A team sends an entire 800,000-token archive with every request because the window allows it, and answers worsen while bills climb. Which two statements describe the problem? (Select two.)",
       "options": {
         "a": "Recall degrades as the space fills",
-        "b": "A larger window restores accuracy, since more room means better recall",
+        "b": "A larger window restores accuracy, more room meaning better recall",
         "c": "Lowering the effort speeds up processing of the extra tokens",
         "d": "Repeating the key instruction inside the archive fixes the drift",
         "e": "Trimming to what the task needs helps"
@@ -1491,10 +1491,10 @@
       "scope": "level",
       "stem": "A support prompt is one long paragraph, and reviewers cannot tell which piece of it causes made-up verdicts when the policy is silent. Which change fits best?",
       "options": {
-        "a": "Give the assistant a flattering role so that it feels bound to be careful",
+        "a": "Give the assistant a flattering role to make it feel bound to be careful",
         "b": "Separate the parts, then add a fallback value and a test for it",
         "c": "Ask for a longer reply in which the model explains its reasoning at length",
-        "d": "Move the documents below the task so that the policy is read last"
+        "d": "Move the documents below the task, the policy being read last"
       },
       "key": "b",
       "explanation": {
@@ -1614,7 +1614,7 @@
         "a": "Run the last step anyway, but tell it to mention that some work failed",
         "b": "Retry each worker in a loop until at least one of them returns a result",
         "c": "Skip that stage and flag the whole job as failed, with nothing produced for the user",
-        "d": "Return the plan text as the answer, since it already describes the work"
+        "d": "Return the plan text as the answer, it already describing the work"
       },
       "key": "c",
       "explanation": {
@@ -1676,8 +1676,8 @@
       "options": {
         "a": "Start the stand-in binary and read the mode back from the flags it received",
         "b": "Add more unit checks of the policy function, covering unusual tool names",
-        "c": "Call the live model once per release and watch which mode each run shows",
-        "d": "Rely on the SDK default, since it always matches the intended level"
+        "c": "Call the live model once per release and watch which mode each separate run shows",
+        "d": "Rely on the SDK default, which always matches the intended level"
       },
       "key": "a",
       "explanation": {
@@ -1694,16 +1694,16 @@
       "stem": "A hosted agent's shell command prints about 400,000 characters. What does the model receive for that output?",
       "options": {
         "a": "The full text, sent in several consecutive events until it is complete",
-        "b": "Nothing at all, as the output was too large to keep",
+        "b": "Nothing at all, the output being too large to keep",
         "c": "A truncated preview, with the path of a sandbox file that holds the rest",
         "d": "An error result that tells it the output was too long"
       },
       "key": "c",
       "explanation": {
         "c": "\"the model gets a truncated preview with the path\" (module 36, page 1).",
-        "a": "Ruled out because an output past the limit \"is automatically written to a file in the sandbox\".",
-        "b": "Ruled out because \"Event history is persisted server-side and can be fetched in full\".",
-        "d": "Ruled out because such an output \"is automatically written to a file in the sandbox\" instead of being rejected."
+        "a": "Ruled out because an output that \"exceeds 100,000 characters (about 25,000 tokens)\" is not sent whole.",
+        "b": "Ruled out because the output is \"automatically written to a file in the sandbox\", so the model keeps the path to it.",
+        "d": "Ruled out because the page gives a preview and not an error: \"the model gets a truncated preview with the path\"."
       }
     },
     {
@@ -1750,7 +1750,7 @@
       "scope": "level",
       "stem": "A template builder leaves a blank where the document variable was not supplied, and the model answers confidently about nothing. Which behaviour fits best?",
       "options": {
-        "a": "Fill the blank with a default document so that the model always has material",
+        "a": "Fill the blank with a default document, giving the model material always",
         "b": "Send the request anyway and ask the model to say when material is missing",
         "c": "Retry the call and let the model recall the missing document from memory",
         "d": "Stop with a clear error before any request is made, saying what is absent"
@@ -1794,7 +1794,7 @@
       "scope": "level",
       "stem": "A service inserts a fresh random property into the shape of its JSON output format on every request, and every call shows added latency on first use. Which change fits best?",
       "options": {
-        "a": "Keep the schema fixed, because compiled grammars are cached for 24 hours",
+        "a": "Keep the schema fixed, compiled grammars being cached for 24 hours",
         "b": "Rename the schema's fields on every request so the cache sees a fresh entry",
         "c": "Switch to strict tool use, which skips grammar compilation entirely",
         "d": "Send each schema once an hour from a scheduled job so the cache stays warm"
@@ -1813,10 +1813,10 @@
       "scope": "level",
       "stem": "A hard document keeps failing validation, and the extraction loop keeps re-prompting for hours, with the bill growing each time. Which change fits best?",
       "options": {
-        "a": "Raise the temperature setting so that a later attempt differs from earlier ones",
-        "b": "Re-prompt with only the original prompt, since the error list distracts the model",
+        "a": "Raise the temperature setting to make a later attempt differ from earlier ones",
+        "b": "Re-prompt with only the original prompt, the error list distracting the model",
         "c": "Cap the attempts, then report the outcome with its last problems for a person",
-        "d": "Remove the validation step for that document so that the first reply is accepted"
+        "d": "Remove the validation step for that document to accept the first reply"
       },
       "key": "c",
       "explanation": {
@@ -1841,7 +1841,7 @@
       "explanation": {
         "d": "The write-up says to \"make contextualization affordable with prompt caching\" (module 28, page 2).",
         "a": "Ruled out because \"The model is asked to write that sentence for each chunk, with the whole document in view\".",
-        "b": "Ruled out because \"A chunk lifted out of its document can lose its meaning\".",
+        "b": "Ruled out because the page states a cost for it: \"$1.02 per million document tokens\".",
         "c": "Ruled out because the fix is to prepend \"chunk-specific explanatory context to each chunk before embedding\"."
       }
     },
@@ -1852,7 +1852,7 @@
       "stem": "A team asks Claude in the prompt to quote its sources for each claim, and the replies get expensive. Which feature addresses this?",
       "options": {
         "a": "The Files API, which stores the quoted material outside the request",
-        "b": "Citations, whose cited text is not counted toward output tokens",
+        "b": "Citations, whose cited text stays outside the output tokens",
         "c": "Structured outputs, which compress each quote into a fixed shape",
         "d": "A prompt rule asking for shorter quotes of ten words at most"
       },
@@ -1915,7 +1915,7 @@
       "stem": "A new server design wants to borrow the host application's language model for a completion, so that the server needs no key of its own. What does the 2026-07-28 revision advise?",
       "options": {
         "a": "Use sampling, which is the preferred way to reuse the host's model",
-        "b": "Integrate with a provider's API directly, since sampling is deprecated",
+        "b": "Use a provider's API directly, sampling being deprecated",
         "c": "Use roots, which let the server borrow the model through the client's paths",
         "d": "Use elicitation, which asks the host's model for a completion on the user's behalf"
       },
@@ -1933,9 +1933,9 @@
       "scope": "level",
       "stem": "A server test checks a refused call by demanding that the client's reply equal the handler's own sentence, and it fails because the client adds extra words at the start. Which change fits best?",
       "options": {
-        "a": "Wait for an exception from the client, since errors are raised and not returned to it",
+        "a": "Wait for an exception from the client, errors being raised and not returned to it",
         "b": "Call the handler directly in the test, which returns the exact text it produced",
-        "c": "Change the handler so that it adds the same extra words to its own sentence",
+        "c": "Change the handler to add the same extra words to its own sentence",
         "d": "Assert that the error contains the expected phrase rather than matching it whole"
       },
       "key": "d",
@@ -1953,7 +1953,7 @@
       "stem": "A remote server advertises every permission it has in its metadata, and clients request all of them, so a stolen token would reach widely. Which design change fits best?",
       "options": {
         "a": "Start with a small set of low-risk read scopes and escalate by targeted challenge",
-        "b": "Issue longer-lived tokens so that clients are asked for consent less often by the server",
+        "b": "Issue longer-lived tokens to make the server ask clients for consent less often than before",
         "c": "Keep every scope but require the token in the URL query string to track use",
         "d": "Drop authorization on HTTP and trust the Origin header alone"
       },
@@ -2009,9 +2009,9 @@
       "scope": "level",
       "stem": "A production agent calls a partner service with an access secret that the team set as an environment variable inside the agent's sandbox. Which change fits best?",
       "options": {
-        "a": "Rotate the secret weekly so that a leaked copy expires quickly afterwards",
+        "a": "Rotate the secret weekly to let a leaked copy expire quickly afterwards",
         "b": "Keep an opaque stand-in there and let the platform swap in the real value at send time",
-        "c": "Encrypt the variable inside the image so that just the agent process can read it",
+        "c": "Encrypt the variable inside the image to let just the agent process read it",
         "d": "Tell the agent in its instructions to keep the secret out of its output"
       },
       "key": "b",
@@ -2112,7 +2112,7 @@
       "options": {
         "a": "Treat it as truncated, then trim history before the next call",
         "b": "Retry the identical request on the same model after a short wait",
-        "c": "Raise max_tokens so that the reply has room to finish its text",
+        "c": "Raise max_tokens to give the reply room to finish its text",
         "d": "Switch to a fallback model with a larger window"
       },
       "key": "a",

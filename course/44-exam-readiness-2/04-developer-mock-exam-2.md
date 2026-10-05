@@ -76,7 +76,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: The old closing marker no longer exists
 
 5. After a tool loop, Claude Sonnet 5.5 sometimes ends its turn with no content at all. The client packs each tool's findings into the message together with a sentence announcing that data is attached. Which change fits best?
-   - **a**: Raise max_tokens so that the model has room to produce a full answer
+   - **a**: Raise max_tokens to give the model room to produce a full answer
    - **b**: Retry the identical request until a non-empty reply finally arrives
    - **c**: Send the result blocks alone, with no text placed beside them
    - **d**: Switch the request to streaming so the empty turn is delivered in pieces
@@ -84,17 +84,17 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 6. A chat form lets a person submit an empty message, and each one still triggers a paid call whose reply wanders. Which handling fits best?
    - **a**: Refuse the blank turn in the client, before anything is sent
    - **b**: Send it anyway and discard the reply when it comes back from the service
-   - **c**: Insert a default question in place of the blank so that the call is useful
+   - **c**: Insert a default question in place of the blank to make the call useful
    - **d**: Add a line to the system prompt telling Claude to ignore empty messages
 
 7. A service decides whether to retry by searching the error message for the word overloaded. After the provider rewords the message, retries stop. Which change fits best?
    - **a**: Add the provider's new wording to the search and keep matching on the message text
    - **b**: Retry every error for ten minutes whatever its status
-   - **c**: Catch only the SDK's base class, so that every failure takes one path
+   - **c**: Catch only the SDK's base class, sending every failure down one path
    - **d**: Branch on the status and type through the SDK's typed classes, most specific first
 
 8. A team streams five-minute reports and sets a read timeout of 30 seconds, worried that long generations will always trip it. What should the review say?
-   - **a**: It will trip, because the limit covers the whole generation from its very first byte
+   - **a**: It will trip, the limit covering the whole generation from its very first byte
    - **b**: The clock restarts at every event, so steady output survives and only a stall fails
    - **c**: It will fail unless the timeout is raised to the ten-minute default
    - **d**: The timeout applies only before the first byte, so it never matters afterwards
@@ -109,7 +109,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 10. An assembler for streamed replies joins `thinking_delta` fragments into the thinking text but discards the `signature_delta` events as noise. Which two statements describe what it should do? (Select two.)
    - **a**: That attribute must travel back unmodified
    - **b**: Regenerate the value locally from a hash of the thinking text
-   - **c**: Ignore them, since only the text deltas matter for the final message
+   - **c**: Ignore them, only the text deltas mattering for the final message
    - **d**: Their payload becomes an attribute of the block
    - **e**: Append their text to the end of the thinking text
 
@@ -120,7 +120,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Move the request into a batch, whose results arrive together as one file
 
 12. A team's list holds 1,000 request ids and the result file has 998 lines, yet its program reports every request as handled. What should it do?
-   - **a**: Treat the missing two as succeeded, as the rest all came back
+   - **a**: Treat the missing two as succeeded, the rest having all come back
    - **b**: Diff the sent identifiers against the returned ones and resend the missing
    - **c**: Resubmit the whole batch of 1,000 requests from the very start
    - **d**: Match the two files by position, line against line, in order
@@ -141,7 +141,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: Pad every picture to a multiple of 28 pixels before sending it
    - **b**: Divide each returned point by the padded size to obtain the fractions
    - **c**: Request pixel coordinates, then convert them to ratios in the program
-   - **d**: Upload the image through the Files API so that its coordinates are kept
+   - **d**: Upload the image through the Files API to keep its coordinates
 
 16. A team member keeps a skill called deploy in the user-level skills location, and the repository commits a skill with the same name. Which one runs in a session there?
    - **a**: The repository's copy, because committed files take precedence
@@ -152,18 +152,18 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 17. Two Claude sessions edit two different features in the same checkout, and each keeps overwriting the other's files. Which setup fits best?
    - **a**: Let the sessions take turns, committing to main after each change
    - **b**: Ask each session to avoid files that the other is likely to touch
-   - **c**: Switch both sessions to plan mode so that neither writes until approved
+   - **c**: Switch both sessions to plan mode, neither writing until approved
    - **d**: Give every run a separate worktree, each one placed on a branch of its own
 
 18. A reply begins with a confident wrong figure, and the rest of the answer then builds on it without any correction. What explains this?
    - **a**: The model consults a stored draft of the whole answer and then defends that draft
    - **b**: Each later piece is chosen with the earlier text in view, so the slip becomes context
-   - **c**: The window dropped the opening lines, so the model lost track of what it had said
+   - **c**: The window dropped the opening lines, so the model lost track of what it had said earlier
    - **d**: A hidden checker reviews each sentence and approves it before the sentence is shown
 
 19. A team sends an entire 800,000-token archive with every request because the window allows it, and answers worsen while bills climb. Which two statements describe the problem? (Select two.)
    - **a**: Recall degrades as the space fills
-   - **b**: A larger window restores accuracy, since more room means better recall
+   - **b**: A larger window restores accuracy, more room meaning better recall
    - **c**: Lowering the effort speeds up processing of the extra tokens
    - **d**: Repeating the key instruction inside the archive fixes the drift
    - **e**: Trimming to what the task needs helps
@@ -181,10 +181,10 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Wrap every sample in extra tags so that the model separates them better
 
 22. A support prompt is one long paragraph, and reviewers cannot tell which piece of it causes made-up verdicts when the policy is silent. Which change fits best?
-   - **a**: Give the assistant a flattering role so that it feels bound to be careful
+   - **a**: Give the assistant a flattering role to make it feel bound to be careful
    - **b**: Separate the parts, then add a fallback value and a test for it
    - **c**: Ask for a longer reply in which the model explains its reasoning at length
-   - **d**: Move the documents below the task so that the policy is read last
+   - **d**: Move the documents below the task, the policy being read last
 
 23. A team plans to use the token-counting tool before each message request and worries that those calls will use up the allowance for its message calls. What should the review say?
    - **a**: Counting needs a paid tier of its own before it can be used at all in a live service
@@ -221,7 +221,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **a**: Run the last step anyway, but tell it to mention that some work failed
    - **b**: Retry each worker in a loop until at least one of them returns a result
    - **c**: Skip that stage and flag the whole job as failed, with nothing produced for the user
-   - **d**: Return the plan text as the answer, since it already describes the work
+   - **d**: Return the plan text as the answer, it already describing the work
 
 29. A service stops reading an agent run's messages the moment the closing summary message arrives, and a few late items never reach its logs. Which change fits best?
    - **a**: Raise max_turns so that the run produces its late items before the closing message
@@ -239,12 +239,12 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 31. An agent's safety relies on beginning with a particular permission setting, and a refactor drops the line that sets it. The unit checks of the policy function still pass. Which kind of run would catch the change?
    - **a**: Start the stand-in binary and read the mode back from the flags it received
    - **b**: Add more unit checks of the policy function, covering unusual tool names
-   - **c**: Call the live model once per release and watch which mode each run shows
-   - **d**: Rely on the SDK default, since it always matches the intended level
+   - **c**: Call the live model once per release and watch which mode each separate run shows
+   - **d**: Rely on the SDK default, which always matches the intended level
 
 32. A hosted agent's shell command prints about 400,000 characters. What does the model receive for that output?
    - **a**: The full text, sent in several consecutive events until it is complete
-   - **b**: Nothing at all, as the output was too large to keep
+   - **b**: Nothing at all, the output being too large to keep
    - **c**: A truncated preview, with the path of a sandbox file that holds the rest
    - **d**: An error result that tells it the output was too long
 
@@ -261,7 +261,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: It repairs the record by guessing the missing fields from the earlier replies it saw
 
 35. A template builder leaves a blank where the document variable was not supplied, and the model answers confidently about nothing. Which behaviour fits best?
-   - **a**: Fill the blank with a default document so that the model always has material
+   - **a**: Fill the blank with a default document, giving the model material always
    - **b**: Send the request anyway and ask the model to say when material is missing
    - **c**: Retry the call and let the model recall the missing document from memory
    - **d**: Stop with a clear error before any request is made, saying what is absent
@@ -274,16 +274,16 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **e**: Merge the three steps into one prompt so the contract goes once
 
 37. A service inserts a fresh random property into the shape of its JSON output format on every request, and every call shows added latency on first use. Which change fits best?
-   - **a**: Keep the schema fixed, because compiled grammars are cached for 24 hours
+   - **a**: Keep the schema fixed, compiled grammars being cached for 24 hours
    - **b**: Rename the schema's fields on every request so the cache sees a fresh entry
    - **c**: Switch to strict tool use, which skips grammar compilation entirely
    - **d**: Send each schema once an hour from a scheduled job so the cache stays warm
 
 38. A hard document keeps failing validation, and the extraction loop keeps re-prompting for hours, with the bill growing each time. Which change fits best?
-   - **a**: Raise the temperature setting so that a later attempt differs from earlier ones
-   - **b**: Re-prompt with only the original prompt, since the error list distracts the model
+   - **a**: Raise the temperature setting to make a later attempt differ from earlier ones
+   - **b**: Re-prompt with only the original prompt, the error list distracting the model
    - **c**: Cap the attempts, then report the outcome with its last problems for a person
-   - **d**: Remove the validation step for that document so that the first reply is accepted
+   - **d**: Remove the validation step for that document to accept the first reply
 
 39. A team wants to prepend a short context sentence to each of its 50,000 chunks before indexing, but fears the model calls would be too costly. Which fact answers the worry?
    - **a**: The sentences are generated once per chunk for free by the platform
@@ -293,7 +293,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 40. A team asks Claude in the prompt to quote its sources for each claim, and the replies get expensive. Which feature addresses this?
    - **a**: The Files API, which stores the quoted material outside the request
-   - **b**: Citations, whose cited text is not counted toward output tokens
+   - **b**: Citations, whose cited text stays outside the output tokens
    - **c**: Structured outputs, which compress each quote into a fixed shape
    - **d**: A prompt rule asking for shorter quotes of ten words at most
 
@@ -312,19 +312,19 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 
 43. A new server design wants to borrow the host application's language model for a completion, so that the server needs no key of its own. What does the 2026-07-28 revision advise?
    - **a**: Use sampling, which is the preferred way to reuse the host's model
-   - **b**: Integrate with a provider's API directly, since sampling is deprecated
+   - **b**: Use a provider's API directly, sampling being deprecated
    - **c**: Use roots, which let the server borrow the model through the client's paths
    - **d**: Use elicitation, which asks the host's model for a completion on the user's behalf
 
 44. A server test checks a refused call by demanding that the client's reply equal the handler's own sentence, and it fails because the client adds extra words at the start. Which change fits best?
-   - **a**: Wait for an exception from the client, since errors are raised and not returned to it
+   - **a**: Wait for an exception from the client, errors being raised and not returned to it
    - **b**: Call the handler directly in the test, which returns the exact text it produced
-   - **c**: Change the handler so that it adds the same extra words to its own sentence
+   - **c**: Change the handler to add the same extra words to its own sentence
    - **d**: Assert that the error contains the expected phrase rather than matching it whole
 
 45. A remote server advertises every permission it has in its metadata, and clients request all of them, so a stolen token would reach widely. Which design change fits best?
    - **a**: Start with a small set of low-risk read scopes and escalate by targeted challenge
-   - **b**: Issue longer-lived tokens so that clients are asked for consent less often by the server
+   - **b**: Issue longer-lived tokens to make the server ask clients for consent less often than before
    - **c**: Keep every scope but require the token in the URL query string to track use
    - **d**: Drop authorization on HTTP and trust the Origin header alone
 
@@ -341,9 +341,9 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **d**: Verify each product separately, since these extensions fall outside that record
 
 48. A production agent calls a partner service with an access secret that the team set as an environment variable inside the agent's sandbox. Which change fits best?
-   - **a**: Rotate the secret weekly so that a leaked copy expires quickly afterwards
+   - **a**: Rotate the secret weekly to let a leaked copy expire quickly afterwards
    - **b**: Keep an opaque stand-in there and let the platform swap in the real value at send time
-   - **c**: Encrypt the variable inside the image so that just the agent process can read it
+   - **c**: Encrypt the variable inside the image to let just the agent process read it
    - **d**: Tell the agent in its instructions to keep the secret out of its output
 
 49. A screen-driving loop acts on just the first step of each assistant turn and sends back a single outcome. After a turn that planned click, type and click, the next call fails with a 400. Which two statements fit? (Select two.)
@@ -374,7 +374,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 53. A response arrives whose stop reason is `model_context_window_exceeded`. How should the client handle it?
    - **a**: Treat it as truncated, then trim history before the next call
    - **b**: Retry the identical request on the same model after a short wait
-   - **c**: Raise max_tokens so that the reply has room to finish its text
+   - **c**: Raise max_tokens to give the reply room to finish its text
    - **d**: Switch to a fallback model with a larger window
 
 <details>
@@ -411,14 +411,14 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 29. **d**. The page says to "iterate the stream to the end instead of breaking at the result" (module 35, page 1). *a* is ruled out because the limit counts tool-use turns only, "so the final text-only answer is not counted". *b* is ruled out because partial messages only add "the stream event (only when partial messages are enabled)". *c* is ruled out because the identifier "lets you resume a conversation later with the earlier context restored", and does not replay events.
 30. **b and c**. "Auto-approved tools never reach canUseTool", and "To gate every call, use a `PreToolUse` hook" (module 35, page 2). *a* is ruled out because "the callback sees only what nothing earlier decided". *d* is ruled out because a call that "bypassPermissions approved skips the callback". *e* is ruled out because "An allow rule approves a call before the callback is consulted".
 31. **a**. "Set the permission mode in the options and read it back from the flags in a test" (module 35, page 3). *b* is ruled out because "decide can be right while build_options leaves an allow list in". *c* is ruled out because "The tests never call a model", which keeps them repeatable. *d* is ruled out because "If you omit it, the session can start in auto mode".
-32. **c**. "the model gets a truncated preview with the path" (module 36, page 1). *a* is ruled out because an output past the limit "is automatically written to a file in the sandbox". *b* is ruled out because "Event history is persisted server-side and can be fetched in full". *d* is ruled out because such an output "is automatically written to a file in the sandbox" instead of being rejected.
+32. **c**. "the model gets a truncated preview with the path" (module 36, page 1). *a* is ruled out because an output that "exceeds 100,000 characters (about 25,000 tokens)" is not sent whole. *b* is ruled out because the output is "automatically written to a file in the sandbox", so the model keeps the path to it. *d* is ruled out because the page gives a preview and not an error: "the model gets a truncated preview with the path".
 33. **d**. "a create request that omits it gets `unrestricted`" (module 36, page 2). *a* is ruled out because limited mode must be chosen, and it "Restricts sandbox network access to the hosts in `allowed_hosts`". *b* is ruled out because "an omitted field is not neutral", but it is accepted and read as unrestricted. *c* is ruled out because "each session gets its own isolated sandbox (a fresh Linux container)".
 34. **b**. "the failure goes back to the model as a retry message and the run continues" (module 37, page 1). *a* is ruled out because "a reply that does not validate against the output type is refused". *c* is ruled out because the design "turns a malformed reply into a recoverable event". *d* is ruled out because "a reply that does not validate against the output type is refused", and nothing is guessed.
 35. **d**. The builder "raises an error for an unfilled variable" (module 24, page 1). *a* is ruled out because "A blank where a document should be gives a confident answer about nothing", and a default only hides the gap. *b* is ruled out because "A missing variable is an error". *c* is ruled out because private material "is unknown to it unless you supply it in the context or give it a tool that fetches it".
 36. **c and d**. "Pass forward only what the next step needs" (module 24, page 2), which shrinks what later stages carry, and chaining lets you inspect intermediate outputs. *a* is ruled out because the method is to "ask Claude to quote relevant parts of the documents first", not to delete by guesswork. *b* is ruled out because "Each step costs the full input again" wherever the text sits. *e* is ruled out because chaining is kept to "inspect intermediate outputs or enforce a specific pipeline structure".
 37. **a**. "A schema that changes on every request therefore never benefits from it" (module 25, page 1). *b* is ruled out because "Changing only `name` or `description` fields does not invalidate the cache", so renaming gains nothing. *c* is ruled out because "The cache is invalidated when the schema's structure changes or the set of tools changes". *d* is ruled out because "Compiled grammars are cached for 24 hours from last use", and the changing shape defeats any warm-up.
 38. **c**. "An unbounded retry on a hard document is a cost leak" (module 25, page 2). *a* is ruled out because current models "do not support setting temperature". *b* is ruled out because "the model has no way to know what was wrong" without it. *d* is ruled out because a parse that succeeds "says nothing about the content".
-39. **d**. The write-up says to "make contextualization affordable with prompt caching" (module 28, page 2). *a* is ruled out because "The model is asked to write that sentence for each chunk, with the whole document in view". *b* is ruled out because "A chunk lifted out of its document can lose its meaning". *c* is ruled out because the fix is to prepend "chunk-specific explanatory context to each chunk before embedding".
+39. **d**. The write-up says to "make contextualization affordable with prompt caching" (module 28, page 2). *a* is ruled out because "The model is asked to write that sentence for each chunk, with the whole document in view". *b* is ruled out because the page states a cost for it: "$1.02 per million document tokens". *c* is ruled out because the fix is to prepend "chunk-specific explanatory context to each chunk before embedding".
 40. **b**. "`cited_text` does not count toward your output tokens" (module 29, page 3). *a* is ruled out because "File content used in Messages requests is priced as input tokens". *c* is ruled out because "Citations and structured outputs are incompatible". *d* is ruled out because "citations are guaranteed to contain valid pointers to the provided documents", which a prompt rule is not.
 41. **c and d**. "The loop needs its own limit of model calls, and a status for reaching it" (module 26, page 2). *a* is ruled out because "A result that quietly returns an empty string for a failure teaches the model that the tool worked". *b* is ruled out because "A model that keeps calling a tool that keeps failing never decides". *e* is ruled out because the runner loops "until it reaches `max_iterations`".
 42. **c**. "In a workflow, the script decides" (module 27, page 2). *a* is ruled out because a subagent is for "a quick, focused worker". *b* is ruled out because a skill "adds to your main window". *d* is ruled out because "Claude follows both as instructions, so neither is enforced".

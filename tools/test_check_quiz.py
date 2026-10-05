@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_quiz import (check_multi, keys_longest, parse_page_quizzes, select_count, check_duplicate, check_named_page, check_page_has_quiz, check_near_duplicates, longest_verdict, check_key_paragraph, check_question, check_quotes,  # noqa: E402
-                        key_is_longest)
+                        key_is_longest, check_mock_item, check_mock_extremes)
 
 STEM = "A nightly job rejects the largest reports after the vendor changes the tokenizer settings."
 CLEAN = {"a": "Measure the input again for the target model", "b": "Split every document into chapters by hand",
@@ -160,5 +160,22 @@ expect("clean: a page parses a pair key and five options", [] if _keys == [["a",
 expect("clean folded key for a pair", check_key_paragraph("t#x1", "**a and c**. Because. *b* is ruled out because x. *d* is ruled out because y. *e* is ruled out because z.", ["a", "c"], "abcde"), False)
 expect("plant: folded key for a pair misses an option", check_key_paragraph("t#x1", "**a and c**. Because. *b* is ruled out because x. *d* is ruled out because y.", ["a", "c"], "abcde"), True)
 expect("plant: folded key for a pair merges two options", check_key_paragraph("t#x1", "**a and c**. Because. *b*, *d* and *e* are ruled out because they do nothing.", ["a", "c"], "abcde"), True)
+
+# mock-page tells: reason-clause asymmetry, extreme key length, duplicate options, odd form
+M_CLEAN = {"a": "Measure the input again for the target model", "b": "Split every document into chapters by hand",
+           "c": "Raise the output cap on the request body", "d": "Switch the job to a cheaper model tier"}
+expect("clean mock item", check_mock_item("t#x1", M_CLEAN, "a"), False)
+expect("plant: reason clause only on distractors", check_mock_item("t#x1", dict(M_CLEAN, b="Split every document by hand, since chapters are small"), "a"), True)
+expect("plant: reason clause only on the key", check_mock_item("t#x1", dict(M_CLEAN, a="Measure the input again, because the tokenizer changed"), "a"), True)
+expect("clean: reason clause on key and distractor", check_mock_item("t#x1", dict(M_CLEAN, a="Measure the input again, since the tokenizer changed", b="Split every document by hand, since chapters are small"), "a"), False)
+expect("plant: select-two key set lacks the clause the rest carry", check_mock_item("t#x1", {"a": "Measure the input again", "b": "Split by hand, so that chapters stay small", "c": "Check the new limit", "d": "Raise the cap, as it is cheap", "e": "Switch tiers"}, ["a", "c"]), True)
+expect("plant: duplicate options", check_mock_item("t#x1", dict(M_CLEAN, c="split every document into chapters by hand."), "a"), True)
+expect("plant: key is an odd phrase among clauses", check_mock_item("t#x1", {"a": "Remeasuring the input", "b": "Raising fails when the cap is low", "c": "The window is too small", "d": "Tokens are counted twice"}, "a"), True)
+expect("plant: every other option opens with the same word", check_mock_item("t#x1", {"a": "Remeasure the input", "b": "Cut the input by hand", "c": "Cut the cap on the body", "d": "Cut the tier of the job"}, "a"), True)
+ROWS_LONG = [({"a": "x" * 30, "b": "y" * 10, "c": "z" * 11, "d": "w" * 12}, "a")] * 4 + [({"a": "x" * 5, "b": "y" * 20, "c": "z" * 11, "d": "w" * 25}, "a")] * 4
+expect("plant: key is the longest in a third of the items", check_mock_extremes("t", ROWS_LONG[:2] + ROWS_LONG[4:]), True)
+expect("plant: key is the longest in more than a quarter", check_mock_extremes("t", ROWS_LONG[:3] + ROWS_LONG[4:6]), True)
+expect("plant: key is the shortest in more than a quarter", check_mock_extremes("t", ROWS_LONG[4:]), True)
+expect("clean: key length is spread", check_mock_extremes("t", [({"a": "x" * 15, "b": "y" * 10, "c": "z" * 20, "d": "w" * 25}, "a")] * 4), False)
 
 sys.exit(1 if failures else 0)

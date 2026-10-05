@@ -68,7 +68,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: The home-folder one, because that location outranks the committed one for a shared name
 
 5. Scenario S2. A team rule seems ignored in a session. Which command shows what instruction files actually loaded?
-   - **a**: /context, since an entry missing from its list cannot be seen by the model
+   - **a**: /context, an entry missing from its list being invisible to the model
    - **b**: /memory, which lists the files that loaded and the ones that were skipped, with the reason for each
    - **c**: /clear, which reloads every file from disk
    - **d**: /compact, which prints the instructions that survive summarising
@@ -99,7 +99,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: In the settings file as a hook that runs at session start
 
 10. Scenario S2. A developer wants short answers in every project on their machine, and the team does not. Where does that preference go?
-   - **a**: In the project's root memory file, committed so that the whole team receives it
+   - **a**: In the project's root memory file, committed for the whole team to receive
    - **b**: In a local note beside the root file, ignored by version control on every machine
    - **c**: In the user-level memory document or the user rules folder in the home directory
    - **d**: In the managed policy file that the organisation distributes to its machines
@@ -118,15 +118,15 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **e**: The input to judge sits last
 
 13. Scenario S2. A batch finishes with some entries succeeded, some expired, and one rejected as an invalid request. What is the sound reaction?
-   - **a**: Resubmit the whole batch so that the results stay consistent with one another
-   - **b**: Resubmit all the failures unchanged, since errors of this kind are transient
+   - **a**: Resubmit the whole batch to keep the results consistent with one another
+   - **b**: Resubmit all the failures unchanged, errors of this kind being transient and cleared by a retry
    - **c**: Keep the completed ones, resend the timed-out ones as they were, repair the faulty one
    - **d**: Discard the batch and run all of the work synchronously instead
 
 14. Scenario S2. A bulk job submits batch entries that set stream to true. What happens?
    - **a**: Results stream back entry by entry as they finish, within the window of the batch
    - **b**: The flag is ignored and results arrive after the window has closed
-   - **c**: It is refused with a validation error, since results come back as one file
+   - **c**: It is refused with a validation error, results coming back as one file
    - **d**: The batch is accepted but billed at the full price of the live API
 
 15. Scenario S2. A team proposes to log every tool result into the notes file during an exploration. Why is that wrong?
@@ -137,7 +137,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 16. Scenario S4. On Wednesday an engineer wants to carry on Monday's exploration of the payments module as a single line of work, although two other sessions have run in that directory since. Which control fits?
    - **a**: Resume that session by its id, which adds to the original and keeps one thread
-   - **b**: Fork the session, since a fork keeps the whole history and carries on the work
+   - **b**: Fork the session, a fork keeping the whole history and carrying on the work
    - **c**: Continue the most recent session, which takes the newest one whatever it is
    - **d**: Start fresh with a prompt that asks the model to recall Monday from memory
 
@@ -146,7 +146,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **b**: Each fork gets a private copy of the whole directory, so the attempts are isolated
    - **c**: Branching copies the conversation and not the disk
    - **d**: Their edits are merged automatically when the sessions end
-   - **e**: The second fork is rejected at once, since a directory admits one branch
+   - **e**: The second fork is rejected at once, a directory admitting one branch
 
 18. Scenario S4. A service runs an exploration on one machine, and an engineer wants to continue it on a CI worker. What limits this?
    - **a**: Sessions can be resumed only by the account that created them, whatever host is used
@@ -157,7 +157,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 19. Scenario S4. A process died while a tool call was running, and the session is resumed. What does the model see?
    - **a**: The operation flagged as interrupted before its outcome was stored, to verify
    - **b**: The call is finished again silently when the session resumes, without any notice
-   - **c**: The call is shown as succeeded, since the process had already started it
+   - **c**: The call is shown as succeeded, the process having already started it
    - **d**: The history is cut at the last completed message and the session carries on as normal
 
 20. Scenario S4. A team denies Write(secrets/**) to keep the agent from changing a folder. Why does that protect nothing?
@@ -180,23 +180,23 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: It is approved outright and fixed at a later review of the tool
 
 23. Scenario S4. A documentation tool's description is long, with its key rule in the last paragraph. What does Claude Code do with the text?
-   - **a**: It reads all of it, since only the first sentence is shown to the user in the list, as a rule of the product
+   - **a**: It reads all of it, only the first sentence being shown to the user in the list by a rule of the product
    - **b**: It summarises the description with a model call when the text is very long indeed
    - **c**: It truncates at 2,048 characters, so critical details should sit near the beginning
    - **d**: It rejects the server at launch with an error message naming the limit in force
 
 24. Scenario S4. A skill from an installed plugin has the same folder name as a project skill. How can both be used?
    - **a**: The extension's is prefixed with its package label, so two commands exist
-   - **b**: The project's overrides the plugin's one of the same name
-   - **c**: The plugin's overrides the project's one of the same name
+   - **b**: Only the project's skill stays, the plugin's one being dropped at install
+   - **c**: Only the plugin's skill stays, the project's one being ignored while it is installed
    - **d**: Neither runs until one of them is renamed to remove the clash
 
 25. Scenario S4. A user-level file and a repository-level file give conflicting style advice. Which two statements follow the page? (Select two.)
-   - **a**: The user-level file loads last, since personal preferences are applied at the end
+   - **a**: The user-level file loads last, personal preferences being applied at the end
    - **b**: Loading runs from the broadest scope to the most specific
    - **c**: Memory is guidance with good delivery, not an override
-   - **d**: Neither file loads, since conflicting advice is dropped
-   - **e**: The more recently edited file loads last, since the loader sorts by time
+   - **d**: Neither file loads, conflicting advice being dropped
+   - **e**: The more recently edited file loads last, the loader sorting by time
 
 26. Scenario S4. A skill lists disallowed-tools: Bash(rm *). What does that do while the skill is active?
    - **a**: It denies matching commands and keeps the shell available, since only a bare name removes it
@@ -212,8 +212,8 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 28. Scenario S4. A large exploration moves from mapping modules to tracing flows. How should the findings of the first phase reach the second?
    - **a**: A digest from the notes goes into the opening prompts of the later workers
-   - **b**: Pass the full transcript of the first phase to each second-phase worker so that nothing is lost
-   - **c**: Let the second phase rediscover them, since fresh eyes avoid bias
+   - **b**: Pass the full transcript of the first phase to each second-phase worker to lose nothing
+   - **c**: Let the second phase rediscover them, fresh eyes avoiding bias
    - **d**: Keep the first phase's workers running and reuse their windows
 
 29. Scenario S4. A manager tells a helper to explore the whole repository and gets back a long account. Which two statements describe what delegation needs? (Select two.)
@@ -225,8 +225,8 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 30. Scenario S4. A coordinator runs five sources in order, and the second fails with a timeout. The run stops there. What does that waste?
    - **a**: Everything scheduled after the broken one, whose work was never done
-   - **b**: Only the failed source's partial results, which were small anyway and a little context
-   - **c**: Nothing, since later sources depend on the second one
+   - **b**: Only the failed source's partial results, which were small anyway
+   - **c**: Nothing, later sources depending on the second one
    - **d**: The retry budget, which is reset by stopping
 
 31. Scenario S6. A normalising hook runs twice on the same result, for instance when a result is replayed. Which property should it have?
@@ -237,20 +237,20 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 32. Scenario S6. A team registers a hook with the matcher Write|Edit. How is that value read?
    - **a**: As a regular expression that also matches names containing either word in the middle
-   - **b**: As a list of two exact tool names, because it holds only letters and a pipe
+   - **b**: As a list of two exact tool names, it holding only letters and a pipe
    - **c**: As a path filter for the locations that those tools write to disk
    - **d**: As a request to match both names only when they occur in the same turn
 
 33. Scenario S6. A fan-out runs one extraction pass per document, then a cross-check pass over their summaries. One of twelve passes fails. What should the run do?
-   - **a**: Abort the whole run, since one failure makes the rest unreliable
+   - **a**: Abort the whole run, one failure making the rest unreliable
    - **b**: Log it with its message, carry on with the rest, and exclude it from the last step
    - **c**: Retry that one forever until it succeeds, then continue
-   - **d**: Give the last step an empty summary for it, so that the count stays complete in the report
+   - **d**: Give the last step an empty summary for it, keeping the count complete in the report
 
 34. Scenario S6. Logs of an extraction agent show many redundant tool calls and few errors. What does the article suggest?
    - **a**: Rewrite the descriptions with clearer examples
-   - **b**: Remove half of the tools so that fewer calls are possible
-   - **c**: Raise the output ceiling so that each call returns more
+   - **b**: Remove half of the tools to make fewer calls possible
+   - **c**: Raise the output ceiling to let each call return more
    - **d**: Rightsize the pagination or token limit parameters
 
 35. Scenario S6. An extraction tool looks up a vendor record by its number, and the call times out. Which handling does the page give?
@@ -266,10 +266,10 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: That the value is grounded in the text, not that it is correct
 
 37. Scenario S6. A schema gives a missing vendor name the default unknown. Why does that hurt downstream?
-   - **a**: It breaks the parser of the report that reads each record
-   - **b**: It lowers accuracy in the final report that the team reads
-   - **c**: It forces the model to guess the vendor on every record
-   - **d**: Code cannot tell it from a real value, so a placeholder passes as real
+   - **a**: It breaks the parser of the report that reads each record downstream
+   - **b**: It lowers accuracy in the final report that the team reads each week
+   - **c**: It forces the model to guess the vendor on every record it reads
+   - **d**: It cannot be told from a real value by code, so a placeholder passes as real
 
 38. Scenario S6. A team plans a weekly extraction over thousands of stored documents and wants the lowest cost. Which two statements describe the right approach and its entries? (Select two.)
    - **a**: The synchronous interface in parallel threads fits, since discounts need a contract
@@ -279,7 +279,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **e**: Each entry carries a unique identifier, as results return in any order
 
 39. Scenario S6. A pipeline's overall accuracy clears its target, and the team proposes dropping manual review for everything. What does the page say decides this?
-   - **a**: The overall average, since a figure above target covers every kind
+   - **a**: The overall average, a figure above target covering every kind
    - **b**: Evidence for each kind of input, never the average
    - **c**: The workload that reviewers face in a normal week
    - **d**: The model's own confidence on each record it returns
@@ -306,16 +306,16 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **a**: Use the cut-off with the highest precision and automate everything above it
    - **b**: Lower the target until some cut-off qualifies for automation
    - **c**: Ask the model to restate its confidence on a hundred-point scale
-   - **d**: Every item needs review until the pipeline improves, since no honest boundary exists
+   - **d**: Every item needs review until the pipeline improves, no honest boundary existing
 
 44. Scenario S6. A subagent cannot name a source for a statement that the schema demands one for. What should it do?
-   - **a**: Invent a plausible citation so that the schema validates the finding
-   - **b**: Cite the search engine as the source of each unsourced claim
+   - **a**: Invent a plausible citation to make the schema validate the finding at once
+   - **b**: Cite the search engine as the source of each unsourced claim in the answer
    - **c**: Return it as a finding with an empty reference field and a warning
    - **d**: Report it apart as lacking an origin, or omit it, rather than return it as a finding
 
 45. Scenario S6. Six extraction workers may be lost to a restart. When should each write its state file?
-   - **a**: As it learns, so that a crash half-way still leaves something
+   - **a**: As it learns, leaving something behind after a crash half-way
    - **b**: At the end only, when its findings are complete and checked
    - **c**: Once an hour on a timer, whatever it has learned in that time
    - **d**: Only when a person asks for a checkpoint of its work
@@ -346,40 +346,40 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Pass it through unchanged with an empty answer, since rewriting it would hide the failure
 
 50. Scenario S1. A hook script stops a refund by signalling failure to the harness and also prints a machine-readable decision. Which two statements does the guide support? (Select two.)
-   - **a**: Prefer the status and discard the structured output, because the status is read first
+   - **a**: Prefer the status and discard the structured output, the status being read first
    - **b**: A single approach is the rule for each component
    - **c**: Print the structured output first and signal failure afterwards, so both are recorded
-   - **d**: Always print the structured output too, since the status alone is ignored
+   - **d**: Always print the structured output too, the status alone being ignored
    - **e**: Status 2 blocks with a stderr message, while status 0 with structured output gives finer control
 
 51. Scenario S1. An agent's loop answers two tool calls that came in one reply. In what shape must the results go back?
-   - **a**: Together in one user message, with those blocks placed before any added text
+   - **a**: In one user message, together, with those blocks placed before any added text
    - **b**: In separate user messages, one per call, in the order the calls were made by the model itself
-   - **c**: In one assistant message, since the model asked for the work
+   - **c**: In one assistant message, the model having asked for the work
    - **d**: In one user message, with explanatory text first and the blocks after it
 
 52. Scenario S1. A loop receives a reply whose stop reason is stop_sequence. The setup lists two custom endings for a generation. What should it do?
-   - **a**: Continue with the next request, since only an end of turn means that the work is finished
+   - **a**: Continue with the next request, only an end of turn meaning that the work is finished
    - **b**: Raise the output ceiling and ask again with the same messages
    - **c**: Treat it as finished, and check which of the configured strings fired if that matters
    - **d**: Report an unexpected value that needs an alert and a person to look at it
 
 53. Scenario S1. A lookup finds no orders for a customer. The customer exists, but no purchase was made in the period that was searched. Which reply is right?
-   - **a**: An error result flagged as not found, so that the agent tries another route through the other service
-   - **b**: An empty string, so that the agent decides what it means
+   - **a**: An error result flagged as not found, leaving the agent to try another route through the other service
+   - **b**: An empty string, leaving the agent to decide what it means
    - **c**: A successful response saying that nothing matched the identifier and the date range
    - **d**: A transient error with retry set, in case the index is catching up
 
 54. Scenario S1. The wrapper has no information yet about the state of the remote system. Which two of these calls may be sent again after a timeout without first checking state? (Select two.)
    - **a**: A refund that carries an idempotency key which the service honours
-   - **b**: An email send, because the outbox accepted it before the timeout occurred
-   - **c**: A ticket creation, because duplicates can be merged later
-   - **d**: A refund with no key, because the amount is validated
+   - **b**: An email send, the outbox having accepted it before the timeout occurred
+   - **c**: A ticket creation, duplicates being mergeable later
+   - **d**: A refund with no key, the amount being validated
    - **e**: A lookup that only reads a record
 
 55. Scenario S1. A refund call fails with a permission error, and the loop retries it three times. The error text says that the caller lacks the right to issue refunds. What went wrong?
-   - **a**: Only a person with authority settles it, so repeating puts a human question to a machine
-   - **b**: Three is too many, and a single retry after a short pause would have succeeded
+   - **a**: Only a person with authority is able to settle it, so repeating puts a human question to a machine
+   - **b**: Three is too many, and a single retry after a short pause would have succeeded in the end
    - **c**: The error should have been marked as a validation failure by the tool author
    - **d**: The loop should have retried with a different amount each time it failed
 
@@ -398,7 +398,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 58. Scenario S1. A support assistant's role is set in one sentence of the system prompt. What does the documentation say about such a sentence?
    - **a**: It carries no weight unless a page of rules follows it
    - **b**: It overrides each instruction that appears later in the conversation
-   - **c**: A brief line is enough to make a difference to focus and tone
+   - **c**: It makes a difference to focus and tone even as a brief line
    - **d**: It applies to the first reply of a session and then lapses
 
 59. Scenario S1. A support team wants a reviewer that shares none of the refund assistant's reasoning. What gives the product that building block?
@@ -408,10 +408,10 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: A copy of the conversation passed to a new instance with the notes attached for its own reading
 
 60. Scenario S1. A long input holds twenty order summaries and a question. Where should the question and the key facts go?
-   - **a**: The question at the start, so that the model reads it before the summaries
+   - **a**: The question at the start, to have the model read it before the summaries
    - **b**: The ask at the end, with a short digest of the essentials at the start
    - **c**: Both in the middle, where the attention of the model is strongest
-   - **d**: The question repeated after every summary so that it is never forgotten
+   - **d**: The question repeated after every summary, to keep it from being forgotten
 
 <details>
 <summary>Answer key</summary>
@@ -439,7 +439,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 21. **a and e**. "A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it", yet "it refuses the obvious, it compares what the code does with what the proposal declares" (module 77, page 1). *b* is ruled out because "and it costs nothing". *c* is ruled out because "it compares what the code does with what the proposal declares". *d* is ruled out because "The gate in this module does read the code".
 22. **b**. The page states it (module 77, page 2): "A revision comes before a gate, because a person should be asked to approve a proposal that is worth reading". *a* is ruled out because revision comes first: "A revision comes before a gate" *c* is ruled out because a format error only sends it back: "Four things only send it back: a name that is not in the fixed form" *d* is ruled out because only a clean proposal passes outright: "Only a proposal with none of these is approved outright."
 23. **c**. The page states the limit (module 55, page 2): "Claude Code truncates each tool description and each server's instructions at 2,048 characters by default". *a* is ruled out because the cut is a fact: "Descriptions and server instructions are truncated at 2,048 characters by default." *b* is ruled out because the advice follows from it: "Keep them concise, and put critical details near the start." *d* is ruled out because the page names the effect: "The exam rejects the length: Claude Code truncates at 2,048 characters, so what you put last may be cut."
-24. **a**. The page lists the location (module 58, page 1): "with the name prefixed by the plugin's name". *b* is ruled out because the order of precedence is for skills that share a name: "Of skills that share a name" *c* is ruled out because a plugin skill is available where it is enabled: "Where the plugin is enabled" *d* is ruled out because a name clash has a winner: "`/deploy` runs the personal one"
+24. **a**. The page lists the location (module 58, page 1): "with the name prefixed by the plugin's name". *b* is ruled out because the order of precedence is for skills that share a name: "Of skills that share a name" *c* is ruled out because a plugin skill is available where it is enabled: "Where the plugin is enabled" *d* is ruled out because the plugin name prefix keeps the two apart, so nothing has to be renamed: "with the name prefixed by the plugin's name".
 25. **b and c**. The documentation lists the files "in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction" (module 57, page 1). *a* is ruled out because the load order runs "from broadest scope to most specific", so the project file comes after the user file. *d* is ruled out because "All discovered files are concatenated into context". *e* is ruled out because the order is by scope, "from broadest scope to most specific", and not by edit time.
 26. **a**. The page states it (module 58, page 2): "A bare tool name like `Bash` removes the tool from Claude's context entirely". *b* is ruled out because only a bare name removes a tool: "only a bare name removes a tool" *c* is ruled out because a scoped entry has an effect: "a scoped entry such as `Edit(src/**)` is a narrower rule that leaves the tool in place" *d* is ruled out because patterns are exact: "The patterns in `allowed-tools` are as exact as the rules in module 38"
 27. **a**. The page states it (module 67, page 1): "The caller can ask for a thoroughness (quick, medium or very thorough)." *b* is ruled out because it is read-only: "with Write and Edit denied" *c* is ruled out because the cost of reading is the window: "Exploration is the most context-hungry thing an agent does." *d* is ruled out because the question has to be specific: "The question must be specific"
@@ -475,6 +475,6 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 57. **c**. The page separates them (module 57, page 1): "blocking a tool, a command or a path is done with managed settings". *a* is ruled out because memory is context and not enforcement: "Claude treats them as context, not enforced configuration" *b* is ruled out because a managed memory file is for behaviour: "A managed CLAUDE.md is for behaviour" *d* is ruled out because a user-level file is personal: "You, in every project"
 58. **c**. The page quotes the documentation (module 76, page 1): "Setting a role in the system prompt focuses Claude's behavior and tone for your use case. Even a single sentence makes a difference." *a* is ruled out because a persona needs little: "A persona needs a name, a manner and its limits, not a page of rules" *b* is ruled out because rules that must hold belong elsewhere: "the rules that must hold belong in the second row" *d* is ruled out because a role focuses behaviour for the use case: "focuses Claude's behavior and tone for your use case"
 59. **c**. The page states it (module 63, page 1): "In Claude Code a subagent starts with a fresh context window that does not include the conversation history, the skills already invoked or the files the main agent has read, and returns only a summary." *a* is ruled out because a stricter instruction leaves the reasoning in place: "a stricter instruction in the same conversation, since the reasoning is still there" *b* is ruled out because more room is the same starting point: "a larger thinking budget, which gives the model more room to reason from the same starting point" *d* is ruled out because the reviewer gets the code and not the reasoning: "the code, and not the reasoning"
-60. **b**. The page states it (module 64, page 1): "Put the long material first and the question last." *a* is ruled out because the middle is where findings go missing: "a long input's middle is where findings go missing" *c* is ruled out because detail goes under headers: "Organise the detail under explicit headers" *d* is ruled out because quoting before answering is another tool: "Asking the model to quote the relevant passages before answering is a fourth tool for long documents."
+60. **b**. The page states it (module 64, page 1): "Put the long material first and the question last." *a* is ruled out because the page says "Put the long material first and the question last". *c* is ruled out because "a long input's middle is where findings go missing". *d* is ruled out because quoting before answering is another tool: "Asking the model to quote the relevant passages before answering is a fourth tool for long documents."
 
 </details>

@@ -44,15 +44,15 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 2. Scenario: Marden Health's pilot ran with ten volunteers who sent clean cases, and the sponsor wants the roll-out to two thousand users to begin next week. Which test does the roll-out plan need for the pilot's assumption about what the volunteers sent?
    - **a**: Buy licences for all two thousand users and read the first week's tickets
-   - **b**: Raise the model tier before the roll-out, so that odd inputs are handled better
+   - **b**: Raise the model tier before the roll-out, to handle odd inputs better
    - **c**: Sample real production traffic and evaluate it by slice
    - **d**: Count escalations per hundred tasks and staff the help desk for that rate
 
-3. **Mark each answer** and read the explanations only after you finish.
-   - **a**: No finding, as the three stages present are the strong ones
+3. Scenario: A design at Tamsin Rail passes each customer message straight to a model with no check on its length, its content or its source, and it has a good processing stage, an output check and a feedback loop. What does the four-stage review record?
+   - **a**: No finding, the three stages present being the strong ones
    - **b**: A medium finding for the missing input side, which asks for revision
-   - **c**: A low finding, as an input stage can be added after launch
-   - **d**: A high finding for the missing input side, which rejects the design
+   - **c**: A low finding, an input stage being addable after launch
+   - **d**: A high finding for the missing input side, which rejects it
 
 4. Scenario: A refund screen at Ashby Mutual shows the handler a model's ruling and a green button. Handlers approve over 99 percent of what appears. What does the design lack?
    - **a**: A disclosure line on the screen, so that the handler knows AI helped
@@ -67,9 +67,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: A high finding for a missing stage, since an agent has no fixed processing step
 
 6. Scenario: An automated workflow at Torrance Mutual approves payments under a daily spending limit. The team measured 99.8 percent accuracy in testing and proposes to enforce the limit in the system prompt. Where should the limit live?
-   - **a**: In the model's tool description, so that the model reads it at every call
+   - **a**: In the model's tool description, to have the model read it at every call
    - **b**: In the prompt, with a check in the next test run
-   - **c**: In a reviewer's checklist, so that a person catches every breach by hand
+   - **c**: In a reviewer's checklist, to have a person catch every breach by hand
    - **d**: In code outside the model
 
 7. Scenario: A sponsor at Pellam Retail funds a chat design for its agreed targets, the 95th percentile latency and availability. Which value claim is that, and what does it influence in the design?
@@ -92,23 +92,23 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: The count of hours saved for each person each week, summed across the whole team
 
 10. Scenario: A research run at Pike Biotech crashes after a payment tool acts but before the run writes its result to the store. The next run starts from the store. Which two statements does the page support? (Select two.)
-   - **a**: A fresh identifier is minted, since a new run is a new intention
+   - **a**: A fresh identifier is minted, a new run being a new intention
    - **b**: The unsaved task is retried under the identifier already recorded for it
    - **c**: Results are written at the end of the run, so a crash is never half done
    - **d**: The vendor's endpoint returns the first receipt and does not pay again
-   - **e**: The task is skipped, since its effect already happened
+   - **e**: The task is skipped, its effect having already happened
 
 11. Scenario: A lead agent at Rowan Research dispatches three subagents with the one-line task "look into the market", and the subagents return overlapping findings with a gap in the middle. What should the lead write instead?
    - **a**: A brief naming the objective, format, tools and boundaries
    - **b**: A longer one-line task with more adjectives about thoroughness
-   - **c**: The full conversation so far, so that no subagent lacks context
+   - **c**: The full conversation so far, leaving no subagent without context
    - **d**: The same one-line task with the market named more precisely
 
 12. Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. Which two statements describe the right behaviour? (Select two.)
    - **a**: The end of the policy is trimmed until the request fits
    - **b**: The request is sent anyway and the model discards the surplus
    - **c**: Building stops rather than a truncated policy being sent
-   - **d**: The lowest-priority static block is dropped, since every block has a rank
+   - **d**: The lowest-priority static block is dropped, every block having a rank
    - **e**: Rule-bearing blocks are never dropped, whatever the ceiling
 
 13. Scenario: A voice product at Hallow Studio peaks at 500 calls a minute, each carrying 800 fresh input tokens and producing 1,500 tokens of reply. The plan allows 30 percent spare capacity and checks Start (1,000 requests, 2 million input, 400,000 output tokens a minute) and Build (5,000, 5 million, 1 million). Which plan does it pick?
@@ -130,13 +130,13 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: An error was raised and missed in the logs, so the logging level must be raised
 
 16. Scenario: Perrin Cloud's assembler holds two dynamic modules of equal priority, a long customer history and a long list of offers, and the request is over budget by a little. Which module does it drop first?
-   - **a**: Neither module, as they hold equal priority
+   - **a**: Neither module, both holding equal priority
    - **b**: The one that sits later in the final sequence
    - **c**: The one that the caller names first in the request
    - **d**: The one that holds more tokens in its current form
 
 17. Scenario: Orlan Support picks the model for a classification workload by reading its name in the lineup, and a new release replaces the old one without a new check. Which practice does the page require for the capability the task needs?
-   - **a**: Evaluate the candidates, and repeat it whenever one is swapped
+   - **a**: Evaluate the candidates, and repeat it on each swap
    - **b**: Copy the tier from the previous model into the new one
    - **c**: Read the capability from the model's price and its position in the lineup
    - **d**: Take the highest rung of the lineup for every workload
@@ -156,14 +156,14 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 20. Scenario: A team at Selby Finance enables the variable that emits raw request and response bodies, intending only to see tool inputs. What does the page say about that setting?
    - **a**: It redacts prompts by default and so changes nothing
    - **b**: It reveals tool inputs alone, and nothing else in the payload at all
-   - **c**: It exposes all other content too, as payloads hold the conversation
+   - **c**: It exposes all other content too, payloads holding the conversation
    - **d**: It stays off in a project file unless the repository sets it
 
 21. Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the free-text procedure that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)
-   - **a**: A keyword index with a larger k is the fit, since more results reach more links
-   - **b**: A cached prompt that holds the whole rulebook is the fit, since nothing can then be missed
+   - **a**: A keyword index with a larger k is the fit, more results reaching more links
+   - **b**: A cached prompt that holds the whole rulebook is the fit, nothing then being missed
    - **c**: An agent that searches issues one query after another
-   - **d**: A structured query run by a tool is the fit, since each lookup is a record
+   - **d**: A structured query run by a tool is the fit, each lookup being a record
    - **e**: A single top-k list cannot follow a chain
 
 22. Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licences. Which cost does the page name?
@@ -185,11 +185,11 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: It is wrong, since a metric is a count and a missing count is wrong
 
 25. Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. Which two changes does the page call for? (Select two.)
-   - **a**: Lower the number of results returned, so that the old leaflet falls out of the top
+   - **a**: Lower the number of results returned, to push the old leaflet out of the top
    - **b**: Drop a revised source's earlier copy before loading its replacement
    - **c**: Delete the records of retired sources
-   - **d**: Run the same job twice a night, since a second pass will catch the leaflet
-   - **e**: Re-embed every chunk with the same model, since vectors can drift
+   - **d**: Run the same job twice a night, a second pass catching the leaflet
+   - **e**: Re-embed every chunk with the same model, vectors being able to drift
 
 26. Scenario: A small internal agent at Yarrow Print has six tools, every one of which is used in nearly every request, and each definition is short. An engineer proposes the tool search tool to modernise it. What does the page say?
    - **a**: Defer all six, since the cache keeps the prefix untouched
@@ -207,32 +207,32 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Because a correct answer with normal latency is the rarest kind to find
    - **b**: Because retries of a tool are always logged as errors in the span
    - **c**: Because every successful trace is stored when it follows a failure
-   - **d**: Three or more calls of a single tool mark a loop that eventually worked
+   - **d**: Because three or more calls of a single tool mark a loop that is worth keeping
 
 29. Scenario: Ordway Telecom indexes eight years of call transcripts in fixed windows of 200 words, and answers quote half a line from one participant and half from the other. Where should the cut be made?
-   - **a**: At a larger window of 800 words, so that every exchange arrives whole
+   - **a**: At a larger window of 800 words, to bring every exchange in whole
    - **b**: At the same size, with a stronger embedding model to rank the pieces
-   - **c**: At a smaller window of 50 words, so that fewer sentences share a chunk
+   - **c**: At a smaller window of 50 words, to put fewer sentences in a chunk
    - **d**: At each change of speaker, with long turns split at sentence ends
 
 30. Scenario: A review at Lowden Care compares a support agent's tools with its role and plans to delete everything the role does not use, and nothing else. The role also needs a tool the agent was never given. What does the page say about the review?
    - **a**: It is complete
    - **b**: It must add logging for every tool left
    - **c**: It must also report the shortfall
-   - **d**: It must remove the missing tool from the role description, so that the two agree
+   - **d**: It must remove the missing tool from the role description, to make the two agree
 
 31. Scenario: Hendry Stores' agent is offered 120 tools through a search tool, and every request starts with a search because all tools are deferred. Latency is poor. Which configuration does the guidance advise?
    - **a**: Replace the search tool with shorter tool descriptions for all 120
    - **b**: Load the three to five most used definitions and defer the rest
-   - **c**: Defer nothing, so that every definition loads up front
+   - **c**: Defer nothing, loading every definition up front
    - **d**: Defer the most used ones too, along with the rest
 
 32. Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. Which two statements does the page support? (Select two.)
-   - **a**: Release to half of users, since a large exposure gives the clearest data
-   - **b**: An A/B test on all users comes first, since it alone predicts reaction
+   - **a**: Release to half of users, a large exposure giving the clearest data
+   - **b**: An A/B test on all users comes first, it alone predicting reaction
    - **c**: Exposure to real users follows once the shadow run says the change is safe to show
    - **d**: A shadow run exposes no user to a degradation
-   - **e**: Compare average segment accuracies, since averages summarise the change
+   - **e**: Compare average segment accuracies, averages summarising the change
 
 33. Scenario: A change at Ravel Freight is refused by the gate on a refund case that must pass, and the old model's retirement is 40 days away. The lead proposes to ship anyway. What does the page say?
    - **a**: Ship it as proposed and note the failure in the release
@@ -244,13 +244,13 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: In retrieval, by rebuilding the index with a different chunk size and overlap
    - **b**: In the model, by moving to a larger one from the same family
    - **c**: In format, by adding an output schema with stricter field types
-   - **d**: In grounding, by letting it say it does not know and quoting first
+   - **d**: In grounding, by permitting an admission of ignorance and quoting first
 
 35. Scenario: A team at Merrin Air trims its instructions and switches to a smaller model to cut delay before any evaluation of the full-strength system exists. Which order does the documentation advise?
-   - **a**: Cut delay first, then judge the quality of the answers afterwards on a sample
-   - **b**: Get the prompt performing well without constraints, then reduce latency
-   - **c**: Cut delay, measured only on the mean latency across all requests
-   - **d**: Cut delay and measure quality together in a single combined step
+   - **a**: Reduce latency first, then judge the quality of the answers afterwards on a sample
+   - **b**: Reduce latency only after the prompt performs well without constraints
+   - **c**: Reduce latency, measured only on the mean across all requests
+   - **d**: Reduce latency and measure quality together in a single combined step
 
 36. Scenario: Eskdale Telecom's gate measures the 95th percentile of the new model's timings on forty cases against its limit. One run shows a single slow case, and a second run shows three. What should the check do?
    - **a**: Pass at one, refuse at three, since a lone outlier is tolerated
@@ -291,14 +291,14 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 42. Scenario: A fairness review at Stanton Mutual wants a parity report across customer groups, but the system holds no field that labels a customer's group. What does the page say about the report?
    - **a**: The cohorts must be defined where they can be measured, or the gap hides
-   - **b**: The report can use the overall average instead, which covers every group
-   - **c**: The report should be skipped
-   - **d**: The report fixes the gap itself once the labels exist, with no owner needed
+   - **b**: An overall average can stand in, covering every group
+   - **c**: Skipping it is the right course for the report now
+   - **d**: The gap fixes itself once the labels exist, with no owner needed
 
 43. Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. Which two statements does the page support? (Select two.)
-   - **a**: One arrangement covers both, since zero retention implies the agreement
-   - **b**: Neither matters, since de-identified input removes the duty
-   - **c**: Both are offered there, since the platform shares the Claude API's policy
+   - **a**: One arrangement covers both, zero retention implying the agreement
+   - **b**: Neither matters, de-identified input removing the duty
+   - **c**: Both are offered there, the platform sharing the Claude API's policy
    - **d**: The agreement-based one is offered on the first-party API alone
    - **e**: Storing nothing and holding a contract are two different arrangements
 
@@ -310,9 +310,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 45. Scenario: Ingram Bank's design puts three strong controls on the input layer, a harmlessness screen, injection patterns and an untrusted-content rule, and none elsewhere. A confident wrong answer and a rogue tool call both occur in testing. What does the review conclude?
    - **a**: Other tiers are bare, so add output, action and monitor safeguards
-   - **b**: The design needs a longer system prompt to carry all of the rules
-   - **c**: The design needs a fourth input control for tool arguments
-   - **d**: The design is sound as it stands and needs no further layers added later
+   - **b**: A longer system prompt is needed to carry all of the rules
+   - **c**: A fourth input control is needed for tool arguments
+   - **d**: It is sound as it stands and needs no further layers added later
 
 46. Scenario: Calloway Mutual's policy caps log retention at 365 days. On the night, the purge job meets a record stored for exactly 365 days, and nobody has placed a hold on it. What does the job do?
    - **a**: Keeps it forever, since an entry at the edge is under a hold
@@ -327,23 +327,23 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: The requirement, the part of the system meeting it, and the evidence
 
 48. Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. Which two statements follow the page's rule? (Select two.)
-   - **a**: Every reply is held until the check returns, since a failed control must stop work
+   - **a**: Every reply is held until the check returns, a failed control having to stop work
    - **b**: The outage counts as a pass and leaves no trace
-   - **c**: The input screen is switched off too, since two checks are down together
+   - **c**: The input screen is switched off too, two checks being down together
    - **d**: The record keeps the gap visible
    - **e**: Replies go on carrying a mark that the guard did not run
 
 49. Scenario: A user of Pellew Insurance's assistant triggers refusals eleven times in a day, each ending with a refusal stop reason. What does the design do with that count?
    - **a**: Tell the person it breaches policy, then throttle or end access
-   - **b**: Raise the sampling temperature, so that the replies differ next time
+   - **b**: Raise the sampling temperature to make the replies differ next time
    - **c**: Show the category of each refusal to the user in a message
    - **d**: Ignore the count and leave the reply path unchanged
 
 50. Scenario: The tokenising layer at Wyndham Care replaces each e-mail address with a placeholder, and a reviewer asks where the map from placeholder to address lives and whether one person keeps one placeholder. What does the design say?
-   - **a**: In the provider's logs, so that the model can restore each value in its reply
+   - **a**: In the provider's logs, to let the model restore each value in its reply
    - **b**: In a vault held only by the caller, and equal values get one stand-in each
-   - **c**: In the system prompt, so that the model can reason about who wrote twice
-   - **d**: In a fresh placeholder for each mention, so that no pattern can be learnt
+   - **c**: In the system prompt, to let the model reason about who wrote twice
+   - **d**: In a fresh placeholder for each mention, leaving no pattern to be learnt
 
 51. Scenario: A sponsor at Addison Travel says the new assistant must be quick. The agents who use it sit at a screen, and a nightly job also calls it. What should discovery write down for the agents?
    - **a**: A target of fast, since the sponsor chose the word
@@ -353,7 +353,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 52. Scenario: A handover note at Oldham Health gives an owner and a runbook for a new assistant, and one monitor, the error rate, compared with a baseline. What does the hand-off section still lack?
    - **a**: A named vendor contact who can be reached after hours
-   - **b**: A statement that the design cannot change after launch, so that it stays stable
+   - **b**: A statement that the design cannot change after launch, to keep it stable
    - **c**: A second signal, read against the old figures both ways, and a rollback
    - **d**: A third document, the architecture diagram of the whole service
 
@@ -405,7 +405,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **b**: That individual figure is unreachable
    - **c**: The organisation limit is a safety net that makes the other figures optional
    - **d**: The three shares sum to the grand total exactly
-   - **e**: Nothing is wrong, since the member may exceed a group's limit with the organisation's consent
+   - **e**: Nothing is wrong, the member being allowed to exceed a group's limit with the organisation's consent
 
 61. Scenario: Rowan Labs has no device management and sets its policy in the admin console, and its security lead wants a stricter policy for the contractors' group alone. What does the page say?
    - **a**: Ask any administrator to edit the setting for the contractors' group
@@ -445,10 +445,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 15. **a**. Below the model's minimum the marking "has no effect and does not report an error", so the cache stays inactive and shows up only in the bill (module 82, page 1). *b* is ruled out because "A cache that was never active shows up only in the bill", so nothing was written that could expire. *c* is ruled out because the check is "to read the usage figures the API returns for cache writes and cache reads", and not to change the call type. *d* is ruled out because the marking "does not report an error" below the minimum, so there is none to miss.
 16. **b**. Equal priorities are broken by position, and the later module goes first (module 82, page 1). The page's rule is that "the assembler drops the lowest first, and among equal priorities the later one". *a* is ruled out because the rule leaves no tie unbroken: "among equal priorities the later one" goes. *c* is ruled out because "The order is the same every time", and "callers cannot" decide it. *d* is ruled out because the page orders the cut by rank and not by size: "each dynamic module has a priority".
 17. **a**. The tier a task needs is found by evaluating the task, not by reading a model's name, and it can change when a model is replaced (module 82, page 2). The page adds that price "can only rank models that are already right". *b* is ruled out because the page says the needed tier "can change when a model is replaced". *c* is ruled out because price "cannot make a model wrong, it can only rank models that are already right". *d* is ruled out because "Use the largest model for every workload" is rejected, because the requirement is a rung, a speed limit and a price.
-18. **d**. Showback is computed from usage rows by token kind at the price of the row's model, and the total is divided by a million and rounded once at the end (module 84, page 2). A bill that ignores the kinds is wrong. The page puts it as "Every token kind has its own price". *a* is ruled out because "rounding each row first gains or loses cents". *b* is ruled out because the page says "Every token kind has its own price", so leaving one out misstates the bill. *c* is ruled out because "Every token kind has its own price", so a bill that ignores either "cache reads are cheap, output is dear" is wrong.
+18. **d**. Showback is computed from usage rows by token kind at the price of the row's model, and the total is divided by a million and rounded once at the end (module 84, page 2). A bill that ignores the kinds is wrong. The page puts it as "Every token kind has its own price". *a* is ruled out because "rounding each row first gains or loses cents". *b* is ruled out because leaving one kind out misstates the bill: "a bill that ignores either is wrong". *c* is ruled out because an average hides what the page states: "cache reads are cheap, output is dear".
 19. **b**. A static module that holds a variable is refused when the request is assembled, because a value that changes in the prefix breaks the cache (module 82, page 1). The page's rule is that "Variables belong in dynamic modules only." *a* is ruled out because "The order is the same every time", and "callers cannot" decide it. *c* is ruled out because the page says "Two requests share a cache entry only when everything up to the breakpoint is identical, character for character." *d* is ruled out because "The static modules are never dropped, since they hold the rules"
 20. **c**. The variable that emits raw bodies implies consent to everything the three narrower variables would reveal, because the bodies include the entire conversation history (module 87, page 1). The page puts it as "include the entire conversation history". *a* is ruled out because the defaults say "Spans redact user prompt text, tool input details, and tool content by default", and this setting overrides that. *b* is ruled out because the page says it "implies consent to everything" the other three would reveal. *d* is ruled out because "a repository can't use them to turn telemetry on, choose where it goes, or capture content".
-21. **c and e**. When the next query depends on the last result, the mechanism is an agent that searches one query after another, because "A single top-k list that cannot follow a chain" is the failure the page names (module 85, page 1). *a* is ruled out because "One index's misses are never seen" is the risk of leaning on a single list. *b* is ruled out because the page reserves that for a corpus "under about 200,000 tokens". *d* is ruled out because that mechanism fits when "The answer lives in a table or a database".
+21. **c and e**. When the next query depends on the last result, the mechanism is an agent that searches one query after another, because "A single top-k list that cannot follow a chain" is the failure the page names (module 85, page 1). *a* is ruled out because a larger k is still one list from one index, and "One index's misses are never seen". *b* is ruled out because the page reserves that for a corpus "under about 200,000 tokens". *d* is ruled out because that mechanism fits when "The answer lives in a table or a database".
 22. **b**. The page states the cost plainly: the gateway becomes infrastructure the organisation operates, and it has to forward what its clients send as they change (module 86, page 1). The page puts it as "The tradeoff is that the gateway becomes infrastructure your organization operates". *a* is ruled out because "The tradeoff is that the gateway becomes infrastructure your organization operates." *c* is ruled out because the page says "the provider key stays server-side; developers hold gateway credentials instead". *d* is ruled out because "every decision, the refusals included, leaves a record", so the logs are a gain and not a cost.
 23. **a**. Facts that change weekly, belong to different readers and must be cited are retrieval's case: a weight cannot be edited for one document, name its source or be taken from one reader (module 85, page 2). The page puts it as "a weight cannot be edited for one document, cannot name its source and cannot be taken away from one reader". *b* is ruled out because "Facts change, a source must be shown or a reader's access must be respected" are the cases where the weights are weak. *c* is ruled out because the glossary says "The Claude API does not currently offer fine-tuning". *d* is ruled out because that suits "a small, stable body of rules shared by every request", which weekly guidance is not.
 24. **d**. Metrics are counts, so dropping a random share of points gives a wrong rate, and the lever for cost is fewer labels with many values (module 87, page 2). The page puts it as "metrics are counts, and a missing count is a wrong count". *a* is ruled out because the page rejects "a random sample of metric points" for every use of a rate. *b* is ruled out because "metrics are counts, and a missing count is a wrong count". *c* is ruled out because the example keeps traces by rule: "Tail-based sampling decides when the trace is complete".

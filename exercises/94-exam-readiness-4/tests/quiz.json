@@ -51,10 +51,10 @@
       "scope": "level",
       "stem": "Scenario: Brindle Law's drafting task is worth about forty chats, and four agents would each need the whole case file and the other agents' drafts at every step. A designer proposes a coordinator with four subagents. What does the page conclude?",
       "options": {
-        "a": "Use the team",
-        "b": "Use the team, but give every subagent a larger window to hold the shared file",
-        "c": "Use a workflow with four fixed calls",
-        "d": "Keep it to one worker"
+        "a": "Use the team of four subagents as the designer proposes",
+        "b": "Use the team, with a larger window for each subagent",
+        "c": "Use a workflow with four fixed calls in a set order",
+        "d": "Use one worker that holds all of the material itself"
       },
       "key": "d",
       "explanation": {
@@ -110,7 +110,7 @@
       "options": {
         "a": "Make a fresh value for each attempt and log every one of them",
         "b": "Derive the label once from the order and the action, and reuse it for every repeat",
-        "c": "Lengthen the key, so that two different payments cannot share one",
+        "c": "Lengthen the key, to keep two different payments from sharing one",
         "d": "Save the key before the call and the payment after it, in two steps"
       },
       "key": "b",
@@ -128,9 +128,9 @@
       "stem": "Scenario: A runner at Oaken Labs treats every tool error alike, with five attempts and growing pauses, and a call refused for lack of permission uses all five. Which rule belongs in its design?",
       "options": {
         "a": "Give every attempt a fresh idempotency key, so the tool sees each as new",
-        "b": "Open the breaker for the agent, so that every later task skips the tool",
+        "b": "Open the breaker for the agent, making every later task skip the tool",
         "c": "Classify faults: repeat passing ones up to a cap, fail permanent ones at once",
-        "d": "Raise the attempts to ten with longer pauses, so that the fault outlasts the wait"
+        "d": "Raise the attempts to ten with longer pauses, the fault outlasting the wait"
       },
       "key": "c",
       "explanation": {
@@ -147,7 +147,7 @@
       "stem": "Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?",
       "options": {
         "a": "It reverts to refusing requests at once until a further pause has passed",
-        "b": "It resets its count of failures, so that the next three calls are allowed",
+        "b": "It resets its count of failures, allowing the next three calls",
         "c": "It closes and lets all traffic back through again",
         "d": "It stays half-open and lets further probes through one after another"
       },
@@ -165,10 +165,10 @@
       "scope": "level",
       "stem": "Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which two statements does the capstone support? (Select two.)",
       "options": {
-        "a": "One agent holding every tool suits it, since a single agent is simpler to audit",
+        "a": "One agent holding every tool suits it, a single agent being simpler to audit",
         "b": "A coordinated crew would cost about 15 times a chat, and the value does not pay it",
-        "c": "One plain call with all the policy text pasted in suits it, since the route is simple",
-        "d": "A team of agents suits it, since the documents are many and change often",
+        "c": "One plain call with all the policy text pasted in suits it, the route being simple",
+        "d": "A team of agents suits it, the documents being many and changing often",
         "e": "A small fixed workflow around a retrieval-backed call suits the known path"
       },
       "key": [
@@ -190,10 +190,10 @@
       "scope": "level",
       "stem": "Scenario: A claims question at Larch Mutual shares no word with any document that the reader may read, though it does match a contract that only the partnership team may read. What does the chain return?",
       "options": {
-        "a": "The contract chunk",
-        "b": "A hold for lack of evidence",
-        "c": "The best readable chunk",
-        "d": "An answer from the model alone, flagged as unsupported by any document"
+        "a": "The contract chunk, marked as restricted to the partnership",
+        "b": "A hold for lack of evidence, with no answer given",
+        "c": "The best readable chunk, even though it shares no word",
+        "d": "An answer from the model alone, flagged as unsupported"
       },
       "key": "b",
       "explanation": {
@@ -230,7 +230,7 @@
       "options": {
         "a": "The cache lifetime ends on Fridays, so entries expire together and are rebuilt",
         "b": "Tool descriptions count as dynamic text, so they sit after the breakpoint and are never cached",
-        "c": "Definitions lead the request, so altering one invalidates everything that follows it",
+        "c": "Definitions lead the request, so altering one invalidates everything that is after it",
         "d": "The system prompt is hashed together with the date, so a weekly edit always changes it"
       },
       "key": "c",
@@ -266,10 +266,10 @@
       "scope": "level",
       "stem": "Scenario: Hollin Labs upgrades its assistant to a newer release and copies across a prompt sentence that fixed an over-eager habit on the older one. Nobody has tested the sentence on the release. Which two steps does the page support? (Select two.)",
       "options": {
-        "a": "Keep the line, since models in one family behave alike under the same wording",
+        "a": "Keep the line, models in one family behaving alike under the same wording",
         "b": "Treat the technique as measured on the old model until re-checked against your own evals",
         "c": "Keep the line and add a second one that repeats it in stronger words",
-        "d": "Drop every line that fixed a habit, since new models need no such lines",
+        "d": "Drop every line that fixed a habit, new models needing no such lines",
         "e": "Run the evaluation set on the new model and see whether the results back the line"
       },
       "key": [
@@ -367,10 +367,10 @@
       "scope": "level",
       "stem": "Scenario: Tern Fuel's usage report has a row for a model that the price table does not list. The report job must still finish. What should showback do with that row?",
       "options": {
-        "a": "Price it at the average of the listed models, so that the total stays near the truth",
-        "b": "Skip the row",
-        "c": "Price it at zero and add a note",
-        "d": "Reject that line and say which one has no rate"
+        "a": "Price it at the average of the listed models",
+        "b": "Skip the row and carry on with the rest of the report",
+        "c": "Price it at zero and add a note to the report",
+        "d": "Reject that line, naming the one with no rate"
       },
       "key": "d",
       "explanation": {
@@ -386,10 +386,10 @@
       "scope": "level",
       "stem": "Scenario: Quay Retail's assistant must give each branch's refund total for February. The figures sit in a table, and the team has cut the table into text chunks, after which the model adds the numbers by eye and gets them wrong. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A longer chunk size brings every branch's rows together and so fixes the sums",
-        "b": "An embedding index over the rows matches the meaning of each figure and so the sums",
+        "a": "A longer chunk size brings every branch's rows together, fixing the sums",
+        "b": "An embedding index over the rows matches each figure by meaning, giving the totals",
         "c": "Slicing the rows into fragments leaves the sums to guesswork",
-        "d": "A keyword index on the word refund finds every row and so totals them",
+        "d": "A keyword index on the word refund finds every row, giving the totals",
         "e": "A database query issued through a tool sums and filters exactly"
       },
       "key": [
@@ -411,8 +411,8 @@
       "scope": "level",
       "stem": "Scenario: Fallow Utilities' retrieval returns a chunk that reads only \"The charge is waived for the first month\", and users cannot tell which plan it belongs to. Which repair does the page support?",
       "options": {
-        "a": "Return twenty chunks for every question, so that the plan's name turns up in one",
-        "b": "Cut the text into smaller windows, so that each chunk holds fewer unrelated words",
+        "a": "Return twenty chunks for every question, to make the plan's name turn up in one",
+        "b": "Cut the text into smaller windows, each chunk then holding fewer unrelated words",
         "c": "Ask the model to guess the plan from the rest of the conversation when it answers",
         "d": "Put the document title and section name in front of each piece before indexing"
       },
@@ -451,7 +451,7 @@
       "options": {
         "a": "The newer model needs a larger chunk size, so the old chunks are now too small",
         "b": "The old vectors are stale copies of their documents, so a re-index would clear them",
-        "c": "Vectors from two different makers share no space, so rebuild the whole index",
+        "c": "Vectors from two different encoders do not share one space, so the whole index must be rebuilt",
         "d": "The keyword index must be rebuilt first, then the vectors"
       },
       "key": "c",
@@ -459,7 +459,7 @@
         "c": "The page gives the rule: \"Vectors made by two models are not in one space, so the index must be rebuilt as a whole\" (module 85, page 2).",
         "a": "Ruled out because \"Size then follows from the unit\", the structure of the data, and not from the embedding model that scores the chunks.",
         "b": "Ruled out because \"An index is stale when a chunk no longer matches its source\", and these old vectors still match their documents.",
-        "d": "Ruled out because the fault is that \"queries embedded by the new model will be compared with chunks embedded by the old one\"."
+        "d": "Ruled out because the keyword index does not depend on the embeddings, and the recall falls because \"queries embedded by the new model will be compared with chunks embedded by the old one\"."
       }
     },
     {
@@ -506,7 +506,7 @@
       "scope": "level",
       "stem": "Scenario: Pewter Labs merges its 40 tools into 8 tools, each with a switch argument, hoping to cure wrong tool selection. Selection does not improve. Which two statements explain it? (Select two.)",
       "options": {
-        "a": "A switch argument is a setting that a newer model refuses",
+        "a": "A switch argument is rejected by the platform as an unsupported parameter",
         "b": "Eight tools are still more than a request can hold, so the list must shrink",
         "c": "The choice among behaviours is hidden from the model's own judgement",
         "d": "Merged tools lose their descriptions, so selection has no information left",
@@ -571,7 +571,7 @@
       "options": {
         "a": "Add every content field to the records",
         "b": "Allow that one content field by name, for a stated purpose and a limited time",
-        "c": "Copy the prompts to a private file, so that the shared records stay free of content",
+        "c": "Copy the prompts to a private file, keeping the shared records free of content",
         "d": "Keep the records as they are, and ask users to describe the failing cases"
       },
       "key": "b",
@@ -588,7 +588,7 @@
       "scope": "level",
       "stem": "Scenario: Sable Cargo changed its model on purpose last Tuesday, and its cost per answer rose by 35 percent against the stored reference. The drift check pages the on-call engineer. What does the page advise?",
       "options": {
-        "a": "Keep the old baseline for a year, so that the rise is never forgotten, whatever else changes in between",
+        "a": "Keep the old baseline for a year, the rise never being forgotten, whatever else changes in between",
         "b": "Raise the tolerance until the page stops",
         "c": "Turn the cost metric off until the next planned change has been decided",
         "d": "Reset the baseline at the switch that was chosen and treat other moves as findings"
@@ -667,8 +667,8 @@
         "a": "Add trials until the lead reaches five points, then ship",
         "b": "Quitting on a lead gives false wins",
         "c": "Gather the sample that was planned before reading the result",
-        "d": "Run the same 300 trials again, since a repeat will confirm the lead",
-        "e": "Stop now, since the larger number is the better version"
+        "d": "Run the same 300 trials again, a repeat being expected to confirm the lead",
+        "e": "Stop now, the larger number being the better version"
       },
       "key": [
         "b",
@@ -830,7 +830,7 @@
       "options": {
         "a": "Retry the whole run three times, keeping the end-of-run write",
         "b": "Persist each outcome as soon as it is done, so a retry takes only the rest",
-        "c": "Catch the crash in the runner, so that the end is always reached",
+        "c": "Catch the crash in the runner, making the end always reached",
         "d": "Put the first nine results into the prompt of the tenth task"
       },
       "key": "b",
@@ -848,7 +848,7 @@
       "stem": "Scenario: Sorrel Cloud serves twelve customers from a single shared pool and separates their data by a filter in its application code. An auditor asks how the data of one customer is kept from another. What does the page say about the design?",
       "options": {
         "a": "It is sound",
-        "b": "It is sound, as long as each customer is given a key of its own to use",
+        "b": "It is sound provided that each customer is given a key of its own to use",
         "c": "It is a finding only if two of the customers work in the same industry",
         "d": "It is a finding"
       },
@@ -886,10 +886,10 @@
       "stem": "Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)",
       "options": {
         "a": "Add a line to the system prompt telling the model to disregard names",
-        "b": "Switch the layer off, since a pattern that misses names gives false comfort",
+        "b": "Switch the layer off, a pattern that misses names giving false comfort",
         "c": "Plant identifiers of every kind in tests and verify that none gets into the request",
         "d": "Add a stronger detector, or keep the free text away from the provider",
-        "e": "Accept the gap, since names carry no risk once the addresses are gone"
+        "e": "Accept the gap, names carrying no risk once the addresses are gone"
       },
       "key": [
         "c",
@@ -931,7 +931,7 @@
       "options": {
         "a": "Drop or rephrase the triggering turn, or send the request to another model",
         "b": "Show the user the category of the refusal, which is always present",
-        "c": "Raise the sampling temperature, so that the next reply differs",
+        "c": "Raise the sampling temperature to make the next reply differ",
         "d": "Resend the same history unchanged until it passes through"
       },
       "key": "a",
@@ -951,7 +951,7 @@
         "a": "Add it to the user turn with a request that the model ignore any orders in it",
         "b": "Strip every sentence that is written as an instruction, using a list of patterns",
         "c": "Carry the incoming item as JSON inside a tool result, with its origin named, and narrow that right",
-        "d": "Place the text in the system prompt, so that the model reads it before anything else"
+        "d": "Place the text in the system prompt, to have the model read it before anything else"
       },
       "key": "c",
       "explanation": {
@@ -994,7 +994,7 @@
       "options": {
         "a": "It is a wish",
         "b": "It is sound",
-        "c": "It is sound, as long as the owner column names a person",
+        "c": "It is sound provided that the owner column names a person",
         "d": "It is a minor flaw"
       },
       "key": "a",
@@ -1112,9 +1112,9 @@
       "scope": "level",
       "stem": "Scenario: The one-page note that Vane Rail's architect wrote for the funder describes the saving in detail and says nothing of what the proposal gives up. A colleague objects. What should the note also contain?",
       "options": {
-        "a": "The price paid, the exposure that remains and the decision that is requested",
-        "b": "The break-even derivation, so that the funder can check the arithmetic",
-        "c": "The list of model settings, so that the funder can confirm the build",
+        "a": "The price paid, the exposure that remains and the decision requested",
+        "b": "The break-even derivation, to let the funder check the arithmetic",
+        "c": "The list of model settings, to let the funder confirm the build",
         "d": "A second saving figure for a more optimistic case, to balance the first"
       },
       "key": "a",
@@ -1133,7 +1133,7 @@
       "options": {
         "a": "Short of the floor by 5, counted in the unit of the target",
         "b": "Failed, with the gap left unstated in the report",
-        "c": "Met, as the measurement is within a rounding margin",
+        "c": "Met, the measurement being within a rounding margin",
         "d": "Short by 5 percent of the monthly availability"
       },
       "key": "a",
@@ -1171,7 +1171,7 @@
       "options": {
         "a": "The flaws first in domain order, then the conclusion and the count at the end",
         "b": "The count first, then a narrative of the design, then the flaws with no conclusion",
-        "c": "The engineers' evidence first, so that the sponsor reads the analysis before the conclusion",
+        "c": "The engineers' evidence first, to let the sponsor read the analysis before the conclusion",
         "d": "Lead with the headline outcome, follow with a tally by area, then the ranked details"
       },
       "key": "d",
@@ -1207,10 +1207,10 @@
       "scope": "level",
       "stem": "Scenario: A platform team caps effort at high in managed settings. A project file sets medium and a user file sets max. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "The project file's cap is ignored, since only managed settings may set one",
+        "a": "The project file's cap is ignored, only managed settings being allowed to set one",
         "b": "The most restrictive setting wins, so the lowest of the three values is in force",
-        "c": "Max is in force, since the user file is read last",
-        "d": "High is in force, since managed settings outrank every other level for this key",
+        "c": "Max is in force, the user file being read last",
+        "d": "High is in force, managed settings outranking every other level for this key",
         "e": "Nobody can loosen the organisation's ceiling, though a developer may tighten it"
       },
       "key": [
@@ -1290,7 +1290,7 @@
       "stem": "Scenario: Marden Health's pilot ran with ten volunteers who sent clean cases, and the sponsor wants the roll-out to two thousand users to begin next week. Which test does the roll-out plan need for the pilot's assumption about what the volunteers sent?",
       "options": {
         "a": "Buy licences for all two thousand users and read the first week's tickets",
-        "b": "Raise the model tier before the roll-out, so that odd inputs are handled better",
+        "b": "Raise the model tier before the roll-out, to handle odd inputs better",
         "c": "Sample real production traffic and evaluate it by slice",
         "d": "Count escalations per hundred tasks and staff the help desk for that rate"
       },
@@ -1306,12 +1306,12 @@
       "id": "04-professional-mock-exam-2#x3",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "**Mark each answer** and read the explanations only after you finish.",
+      "stem": "Scenario: A design at Tamsin Rail passes each customer message straight to a model with no check on its length, its content or its source, and it has a good processing stage, an output check and a feedback loop. What does the four-stage review record?",
       "options": {
-        "a": "No finding, as the three stages present are the strong ones",
+        "a": "No finding, the three stages present being the strong ones",
         "b": "A medium finding for the missing input side, which asks for revision",
-        "c": "A low finding, as an input stage can be added after launch",
-        "d": "A high finding for the missing input side, which rejects the design"
+        "c": "A low finding, an input stage being addable after launch",
+        "d": "A high finding for the missing input side, which rejects it"
       },
       "key": "d",
       "explanation": {
@@ -1365,9 +1365,9 @@
       "scope": "level",
       "stem": "Scenario: An automated workflow at Torrance Mutual approves payments under a daily spending limit. The team measured 99.8 percent accuracy in testing and proposes to enforce the limit in the system prompt. Where should the limit live?",
       "options": {
-        "a": "In the model's tool description, so that the model reads it at every call",
+        "a": "In the model's tool description, to have the model read it at every call",
         "b": "In the prompt, with a check in the next test run",
-        "c": "In a reviewer's checklist, so that a person catches every breach by hand",
+        "c": "In a reviewer's checklist, to have a person catch every breach by hand",
         "d": "In code outside the model"
       },
       "key": "d",
@@ -1447,11 +1447,11 @@
       "scope": "level",
       "stem": "Scenario: A research run at Pike Biotech crashes after a payment tool acts but before the run writes its result to the store. The next run starts from the store. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A fresh identifier is minted, since a new run is a new intention",
+        "a": "A fresh identifier is minted, a new run being a new intention",
         "b": "The unsaved task is retried under the identifier already recorded for it",
         "c": "Results are written at the end of the run, so a crash is never half done",
         "d": "The vendor's endpoint returns the first receipt and does not pay again",
-        "e": "The task is skipped, since its effect already happened"
+        "e": "The task is skipped, its effect having already happened"
       },
       "key": [
         "b",
@@ -1474,7 +1474,7 @@
       "options": {
         "a": "A brief naming the objective, format, tools and boundaries",
         "b": "A longer one-line task with more adjectives about thoroughness",
-        "c": "The full conversation so far, so that no subagent lacks context",
+        "c": "The full conversation so far, leaving no subagent without context",
         "d": "The same one-line task with the market named more precisely"
       },
       "key": "a",
@@ -1494,7 +1494,7 @@
         "a": "The end of the policy is trimmed until the request fits",
         "b": "The request is sent anyway and the model discards the surplus",
         "c": "Building stops rather than a truncated policy being sent",
-        "d": "The lowest-priority static block is dropped, since every block has a rank",
+        "d": "The lowest-priority static block is dropped, every block having a rank",
         "e": "Rule-bearing blocks are never dropped, whatever the ceiling"
       },
       "key": [
@@ -1573,7 +1573,7 @@
       "scope": "level",
       "stem": "Scenario: Perrin Cloud's assembler holds two dynamic modules of equal priority, a long customer history and a long list of offers, and the request is over budget by a little. Which module does it drop first?",
       "options": {
-        "a": "Neither module, as they hold equal priority",
+        "a": "Neither module, both holding equal priority",
         "b": "The one that sits later in the final sequence",
         "c": "The one that the caller names first in the request",
         "d": "The one that holds more tokens in its current form"
@@ -1592,7 +1592,7 @@
       "scope": "level",
       "stem": "Scenario: Orlan Support picks the model for a classification workload by reading its name in the lineup, and a new release replaces the old one without a new check. Which practice does the page require for the capability the task needs?",
       "options": {
-        "a": "Evaluate the candidates, and repeat it whenever one is swapped",
+        "a": "Evaluate the candidates, and repeat it on each swap",
         "b": "Copy the tier from the previous model into the new one",
         "c": "Read the capability from the model's price and its position in the lineup",
         "d": "Take the highest rung of the lineup for every workload"
@@ -1620,8 +1620,8 @@
       "explanation": {
         "d": "Showback is computed from usage rows by token kind at the price of the row's model, and the total is divided by a million and rounded once at the end (module 84, page 2). A bill that ignores the kinds is wrong. The page puts it as \"Every token kind has its own price\".",
         "a": "Ruled out because \"rounding each row first gains or loses cents\".",
-        "b": "Ruled out because the page says \"Every token kind has its own price\", so leaving one out misstates the bill.",
-        "c": "Ruled out because \"Every token kind has its own price\", so a bill that ignores either \"cache reads are cheap, output is dear\" is wrong."
+        "b": "Ruled out because leaving one kind out misstates the bill: \"a bill that ignores either is wrong\".",
+        "c": "Ruled out because an average hides what the page states: \"cache reads are cheap, output is dear\"."
       }
     },
     {
@@ -1651,7 +1651,7 @@
       "options": {
         "a": "It redacts prompts by default and so changes nothing",
         "b": "It reveals tool inputs alone, and nothing else in the payload at all",
-        "c": "It exposes all other content too, as payloads hold the conversation",
+        "c": "It exposes all other content too, payloads holding the conversation",
         "d": "It stays off in a project file unless the repository sets it"
       },
       "key": "c",
@@ -1668,10 +1668,10 @@
       "scope": "level",
       "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the free-text procedure that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "A keyword index with a larger k is the fit, since more results reach more links",
-        "b": "A cached prompt that holds the whole rulebook is the fit, since nothing can then be missed",
+        "a": "A keyword index with a larger k is the fit, more results reaching more links",
+        "b": "A cached prompt that holds the whole rulebook is the fit, nothing then being missed",
         "c": "An agent that searches issues one query after another",
-        "d": "A structured query run by a tool is the fit, since each lookup is a record",
+        "d": "A structured query run by a tool is the fit, each lookup being a record",
         "e": "A single top-k list cannot follow a chain"
       },
       "key": [
@@ -1681,7 +1681,7 @@
       "explanation": {
         "c": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because \"A single top-k list that cannot follow a chain\" is the failure the page names (module 85, page 1).",
         "e": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because \"A single top-k list that cannot follow a chain\" is the failure the page names (module 85, page 1).",
-        "a": "Ruled out because \"One index's misses are never seen\" is the risk of leaning on a single list.",
+        "a": "Ruled out because a larger k is still one list from one index, and \"One index's misses are never seen\".",
         "b": "Ruled out because the page reserves that for a corpus \"under about 200,000 tokens\".",
         "d": "Ruled out because that mechanism fits when \"The answer lives in a table or a database\"."
       },
@@ -1750,11 +1750,11 @@
       "scope": "level",
       "stem": "Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. Which two changes does the page call for? (Select two.)",
       "options": {
-        "a": "Lower the number of results returned, so that the old leaflet falls out of the top",
+        "a": "Lower the number of results returned, to push the old leaflet out of the top",
         "b": "Drop a revised source's earlier copy before loading its replacement",
         "c": "Delete the records of retired sources",
-        "d": "Run the same job twice a night, since a second pass will catch the leaflet",
-        "e": "Re-embed every chunk with the same model, since vectors can drift"
+        "d": "Run the same job twice a night, a second pass catching the leaflet",
+        "e": "Re-embed every chunk with the same model, vectors being able to drift"
       },
       "key": [
         "b",
@@ -1816,7 +1816,7 @@
         "a": "Because a correct answer with normal latency is the rarest kind to find",
         "b": "Because retries of a tool are always logged as errors in the span",
         "c": "Because every successful trace is stored when it follows a failure",
-        "d": "Three or more calls of a single tool mark a loop that eventually worked"
+        "d": "Because three or more calls of a single tool mark a loop that is worth keeping"
       },
       "key": "d",
       "explanation": {
@@ -1832,9 +1832,9 @@
       "scope": "level",
       "stem": "Scenario: Ordway Telecom indexes eight years of call transcripts in fixed windows of 200 words, and answers quote half a line from one participant and half from the other. Where should the cut be made?",
       "options": {
-        "a": "At a larger window of 800 words, so that every exchange arrives whole",
+        "a": "At a larger window of 800 words, to bring every exchange in whole",
         "b": "At the same size, with a stronger embedding model to rank the pieces",
-        "c": "At a smaller window of 50 words, so that fewer sentences share a chunk",
+        "c": "At a smaller window of 50 words, to put fewer sentences in a chunk",
         "d": "At each change of speaker, with long turns split at sentence ends"
       },
       "key": "d",
@@ -1854,7 +1854,7 @@
         "a": "It is complete",
         "b": "It must add logging for every tool left",
         "c": "It must also report the shortfall",
-        "d": "It must remove the missing tool from the role description, so that the two agree"
+        "d": "It must remove the missing tool from the role description, to make the two agree"
       },
       "key": "c",
       "explanation": {
@@ -1872,7 +1872,7 @@
       "options": {
         "a": "Replace the search tool with shorter tool descriptions for all 120",
         "b": "Load the three to five most used definitions and defer the rest",
-        "c": "Defer nothing, so that every definition loads up front",
+        "c": "Defer nothing, loading every definition up front",
         "d": "Defer the most used ones too, along with the rest"
       },
       "key": "b",
@@ -1889,11 +1889,11 @@
       "scope": "level",
       "stem": "Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "Release to half of users, since a large exposure gives the clearest data",
-        "b": "An A/B test on all users comes first, since it alone predicts reaction",
+        "a": "Release to half of users, a large exposure giving the clearest data",
+        "b": "An A/B test on all users comes first, it alone predicting reaction",
         "c": "Exposure to real users follows once the shadow run says the change is safe to show",
         "d": "A shadow run exposes no user to a degradation",
-        "e": "Compare average segment accuracies, since averages summarise the change"
+        "e": "Compare average segment accuracies, averages summarising the change"
       },
       "key": [
         "c",
@@ -1936,7 +1936,7 @@
         "a": "In retrieval, by rebuilding the index with a different chunk size and overlap",
         "b": "In the model, by moving to a larger one from the same family",
         "c": "In format, by adding an output schema with stricter field types",
-        "d": "In grounding, by letting it say it does not know and quoting first"
+        "d": "In grounding, by permitting an admission of ignorance and quoting first"
       },
       "key": "d",
       "explanation": {
@@ -1952,10 +1952,10 @@
       "scope": "level",
       "stem": "Scenario: A team at Merrin Air trims its instructions and switches to a smaller model to cut delay before any evaluation of the full-strength system exists. Which order does the documentation advise?",
       "options": {
-        "a": "Cut delay first, then judge the quality of the answers afterwards on a sample",
-        "b": "Get the prompt performing well without constraints, then reduce latency",
-        "c": "Cut delay, measured only on the mean latency across all requests",
-        "d": "Cut delay and measure quality together in a single combined step"
+        "a": "Reduce latency first, then judge the quality of the answers afterwards on a sample",
+        "b": "Reduce latency only after the prompt performs well without constraints",
+        "c": "Reduce latency, measured only on the mean across all requests",
+        "d": "Reduce latency and measure quality together in a single combined step"
       },
       "key": "b",
       "explanation": {
@@ -2092,9 +2092,9 @@
       "stem": "Scenario: A fairness review at Stanton Mutual wants a parity report across customer groups, but the system holds no field that labels a customer's group. What does the page say about the report?",
       "options": {
         "a": "The cohorts must be defined where they can be measured, or the gap hides",
-        "b": "The report can use the overall average instead, which covers every group",
-        "c": "The report should be skipped",
-        "d": "The report fixes the gap itself once the labels exist, with no owner needed"
+        "b": "An overall average can stand in, covering every group",
+        "c": "Skipping it is the right course for the report now",
+        "d": "The gap fixes itself once the labels exist, with no owner needed"
       },
       "key": "a",
       "explanation": {
@@ -2110,9 +2110,9 @@
       "scope": "level",
       "stem": "Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "One arrangement covers both, since zero retention implies the agreement",
-        "b": "Neither matters, since de-identified input removes the duty",
-        "c": "Both are offered there, since the platform shares the Claude API's policy",
+        "a": "One arrangement covers both, zero retention implying the agreement",
+        "b": "Neither matters, de-identified input removing the duty",
+        "c": "Both are offered there, the platform sharing the Claude API's policy",
         "d": "The agreement-based one is offered on the first-party API alone",
         "e": "Storing nothing and holding a contract are two different arrangements"
       },
@@ -2155,9 +2155,9 @@
       "stem": "Scenario: Ingram Bank's design puts three strong controls on the input layer, a harmlessness screen, injection patterns and an untrusted-content rule, and none elsewhere. A confident wrong answer and a rogue tool call both occur in testing. What does the review conclude?",
       "options": {
         "a": "Other tiers are bare, so add output, action and monitor safeguards",
-        "b": "The design needs a longer system prompt to carry all of the rules",
-        "c": "The design needs a fourth input control for tool arguments",
-        "d": "The design is sound as it stands and needs no further layers added later"
+        "b": "A longer system prompt is needed to carry all of the rules",
+        "c": "A fourth input control is needed for tool arguments",
+        "d": "It is sound as it stands and needs no further layers added later"
       },
       "key": "a",
       "explanation": {
@@ -2211,9 +2211,9 @@
       "scope": "level",
       "stem": "Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. Which two statements follow the page's rule? (Select two.)",
       "options": {
-        "a": "Every reply is held until the check returns, since a failed control must stop work",
+        "a": "Every reply is held until the check returns, a failed control having to stop work",
         "b": "The outage counts as a pass and leaves no trace",
-        "c": "The input screen is switched off too, since two checks are down together",
+        "c": "The input screen is switched off too, two checks being down together",
         "d": "The record keeps the gap visible",
         "e": "Replies go on carrying a mark that the guard did not run"
       },
@@ -2237,7 +2237,7 @@
       "stem": "Scenario: A user of Pellew Insurance's assistant triggers refusals eleven times in a day, each ending with a refusal stop reason. What does the design do with that count?",
       "options": {
         "a": "Tell the person it breaches policy, then throttle or end access",
-        "b": "Raise the sampling temperature, so that the replies differ next time",
+        "b": "Raise the sampling temperature to make the replies differ next time",
         "c": "Show the category of each refusal to the user in a message",
         "d": "Ignore the count and leave the reply path unchanged"
       },
@@ -2255,10 +2255,10 @@
       "scope": "level",
       "stem": "Scenario: The tokenising layer at Wyndham Care replaces each e-mail address with a placeholder, and a reviewer asks where the map from placeholder to address lives and whether one person keeps one placeholder. What does the design say?",
       "options": {
-        "a": "In the provider's logs, so that the model can restore each value in its reply",
+        "a": "In the provider's logs, to let the model restore each value in its reply",
         "b": "In a vault held only by the caller, and equal values get one stand-in each",
-        "c": "In the system prompt, so that the model can reason about who wrote twice",
-        "d": "In a fresh placeholder for each mention, so that no pattern can be learnt"
+        "c": "In the system prompt, to let the model reason about who wrote twice",
+        "d": "In a fresh placeholder for each mention, leaving no pattern to be learnt"
       },
       "key": "b",
       "explanation": {
@@ -2294,7 +2294,7 @@
       "stem": "Scenario: A handover note at Oldham Health gives an owner and a runbook for a new assistant, and one monitor, the error rate, compared with a baseline. What does the hand-off section still lack?",
       "options": {
         "a": "A named vendor contact who can be reached after hours",
-        "b": "A statement that the design cannot change after launch, so that it stays stable",
+        "b": "A statement that the design cannot change after launch, to keep it stable",
         "c": "A second signal, read against the old figures both ways, and a rollback",
         "d": "A third document, the architecture diagram of the whole service"
       },
@@ -2455,7 +2455,7 @@
         "b": "That individual figure is unreachable",
         "c": "The organisation limit is a safety net that makes the other figures optional",
         "d": "The three shares sum to the grand total exactly",
-        "e": "Nothing is wrong, since the member may exceed a group's limit with the organisation's consent"
+        "e": "Nothing is wrong, the member being allowed to exceed a group's limit with the organisation's consent"
       },
       "key": [
         "b",

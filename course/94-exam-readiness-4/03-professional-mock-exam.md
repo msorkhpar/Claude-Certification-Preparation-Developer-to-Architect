@@ -50,10 +50,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Cost, since the work in total is priced lower than the bank pays today
 
 3. Scenario: Brindle Law's drafting task is worth about forty chats, and four agents would each need the whole case file and the other agents' drafts at every step. A designer proposes a coordinator with four subagents. What does the page conclude?
-   - **a**: Use the team
-   - **b**: Use the team, but give every subagent a larger window to hold the shared file
-   - **c**: Use a workflow with four fixed calls
-   - **d**: Keep it to one worker
+   - **a**: Use the team of four subagents as the designer proposes
+   - **b**: Use the team, with a larger window for each subagent
+   - **c**: Use a workflow with four fixed calls in a set order
+   - **d**: Use one worker that holds all of the material itself
 
 4. Scenario: Fable Retail's reviewer rates three designs. Design A is rejected and costs 30,000 a month. Design B needs a revision and costs 50,000. Design C is approved and costs 70,000. Which does the cheapest-adequate rule pick?
    - **a**: A, because the cheapest design wins whatever its verdict happens to be
@@ -70,33 +70,33 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 6. Scenario: Kite Pay's payment tool honours an idempotency key, but the agent builds that key from the current time on each attempt, so a retry after a lost response pays twice. Which change fixes the design?
    - **a**: Make a fresh value for each attempt and log every one of them
    - **b**: Derive the label once from the order and the action, and reuse it for every repeat
-   - **c**: Lengthen the key, so that two different payments cannot share one
+   - **c**: Lengthen the key, to keep two different payments from sharing one
    - **d**: Save the key before the call and the payment after it, in two steps
 
 7. Scenario: A runner at Oaken Labs treats every tool error alike, with five attempts and growing pauses, and a call refused for lack of permission uses all five. Which rule belongs in its design?
    - **a**: Give every attempt a fresh idempotency key, so the tool sees each as new
-   - **b**: Open the breaker for the agent, so that every later task skips the tool
+   - **b**: Open the breaker for the agent, making every later task skip the tool
    - **c**: Classify faults: repeat passing ones up to a cap, fail permanent ones at once
-   - **d**: Raise the attempts to ten with longer pauses, so that the fault outlasts the wait
+   - **d**: Raise the attempts to ten with longer pauses, the fault outlasting the wait
 
 8. Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?
    - **a**: It reverts to refusing requests at once until a further pause has passed
-   - **b**: It resets its count of failures, so that the next three calls are allowed
+   - **b**: It resets its count of failures, allowing the next three calls
    - **c**: It closes and lets all traffic back through again
    - **d**: It stays half-open and lets further probes through one after another
 
 9. Scenario: Larch Mutual's claims assistant answers policy questions for staff from documents that change often, and the way through a request never varies. A designer proposes agents. Which two statements does the capstone support? (Select two.)
-   - **a**: One agent holding every tool suits it, since a single agent is simpler to audit
+   - **a**: One agent holding every tool suits it, a single agent being simpler to audit
    - **b**: A coordinated crew would cost about 15 times a chat, and the value does not pay it
-   - **c**: One plain call with all the policy text pasted in suits it, since the route is simple
-   - **d**: A team of agents suits it, since the documents are many and change often
+   - **c**: One plain call with all the policy text pasted in suits it, the route being simple
+   - **d**: A team of agents suits it, the documents being many and changing often
    - **e**: A small fixed workflow around a retrieval-backed call suits the known path
 
 10. Scenario: A claims question at Larch Mutual shares no word with any document that the reader may read, though it does match a contract that only the partnership team may read. What does the chain return?
-   - **a**: The contract chunk
-   - **b**: A hold for lack of evidence
-   - **c**: The best readable chunk
-   - **d**: An answer from the model alone, flagged as unsupported by any document
+   - **a**: The contract chunk, marked as restricted to the partnership
+   - **b**: A hold for lack of evidence, with no answer given
+   - **c**: The best readable chunk, even though it shares no word
+   - **d**: An answer from the model alone, flagged as unsupported
 
 11. Scenario: A review at Larch Mutual of a proposal finds no way back to the previous model if the new one fails, and no other flaw. What does the written review record and conclude?
    - **a**: A medium item in P4, so it goes back for revision
@@ -107,7 +107,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 12. Scenario: Nettle Support edits the description of one tool every Friday to tune its wording, and the cache hit rate falls after each edit even though the system prompt and the messages never change. What explains it?
    - **a**: The cache lifetime ends on Fridays, so entries expire together and are rebuilt
    - **b**: Tool descriptions count as dynamic text, so they sit after the breakpoint and are never cached
-   - **c**: Definitions lead the request, so altering one invalidates everything that follows it
+   - **c**: Definitions lead the request, so altering one invalidates everything that is after it
    - **d**: The system prompt is hashed together with the date, so a weekly edit always changes it
 
 13. Scenario: Two workloads at Cobble Insurance both mark a breakpoint after their third block. Their first two blocks are identical, and their third blocks differ by one sentence. How much of the prefix can they share?
@@ -117,10 +117,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: All of it, provided that both prompts name the same model
 
 14. Scenario: Hollin Labs upgrades its assistant to a newer release and copies across a prompt sentence that fixed an over-eager habit on the older one. Nobody has tested the sentence on the release. Which two steps does the page support? (Select two.)
-   - **a**: Keep the line, since models in one family behave alike under the same wording
+   - **a**: Keep the line, models in one family behaving alike under the same wording
    - **b**: Treat the technique as measured on the old model until re-checked against your own evals
    - **c**: Keep the line and add a second one that repeats it in stronger words
-   - **d**: Drop every line that fixed a habit, since new models need no such lines
+   - **d**: Drop every line that fixed a habit, new models needing no such lines
    - **e**: Run the evaluation set on the new model and see whether the results back the line
 
 15. Scenario: Pallet Support's smaller model costs half as much per token as its larger one, but it needs about three attempts for each ticket, while the larger one answers once. Which comparison does the page require?
@@ -148,21 +148,21 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Switches to a model of the same tier from another vendor, to stay within the budget
 
 19. Scenario: Tern Fuel's usage report has a row for a model that the price table does not list. The report job must still finish. What should showback do with that row?
-   - **a**: Price it at the average of the listed models, so that the total stays near the truth
-   - **b**: Skip the row
-   - **c**: Price it at zero and add a note
-   - **d**: Reject that line and say which one has no rate
+   - **a**: Price it at the average of the listed models
+   - **b**: Skip the row and carry on with the rest of the report
+   - **c**: Price it at zero and add a note to the report
+   - **d**: Reject that line, naming the one with no rate
 
 20. Scenario: Quay Retail's assistant must give each branch's refund total for February. The figures sit in a table, and the team has cut the table into text chunks, after which the model adds the numbers by eye and gets them wrong. Which two statements does the page support? (Select two.)
-   - **a**: A longer chunk size brings every branch's rows together and so fixes the sums
-   - **b**: An embedding index over the rows matches the meaning of each figure and so the sums
+   - **a**: A longer chunk size brings every branch's rows together, fixing the sums
+   - **b**: An embedding index over the rows matches each figure by meaning, giving the totals
    - **c**: Slicing the rows into fragments leaves the sums to guesswork
-   - **d**: A keyword index on the word refund finds every row and so totals them
+   - **d**: A keyword index on the word refund finds every row, giving the totals
    - **e**: A database query issued through a tool sums and filters exactly
 
 21. Scenario: Fallow Utilities' retrieval returns a chunk that reads only "The charge is waived for the first month", and users cannot tell which plan it belongs to. Which repair does the page support?
-   - **a**: Return twenty chunks for every question, so that the plan's name turns up in one
-   - **b**: Cut the text into smaller windows, so that each chunk holds fewer unrelated words
+   - **a**: Return twenty chunks for every question, to make the plan's name turn up in one
+   - **b**: Cut the text into smaller windows, each chunk then holding fewer unrelated words
    - **c**: Ask the model to guess the plan from the rest of the conversation when it answers
    - **d**: Put the document title and section name in front of each piece before indexing
 
@@ -175,7 +175,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 23. Scenario: Dunmore Legal switches its retrieval from one embedding model to a newer one. It embeds only the documents that change from now on, and keeps the old embeddings for the rest. Recall on its labelled questions falls at once. What explains it?
    - **a**: The newer model needs a larger chunk size, so the old chunks are now too small
    - **b**: The old vectors are stale copies of their documents, so a re-index would clear them
-   - **c**: Vectors from two different makers share no space, so rebuild the whole index
+   - **c**: Vectors from two different encoders do not share one space, so the whole index must be rebuilt
    - **d**: The keyword index must be rebuilt first, then the vectors
 
 24. Scenario: Ferris Systems' staff each paste the company's access string for the model supplier into their own scripts, and a former employee still has a working copy. The security lead asks for a design that limits the damage of a leaked or abandoned copy. What fits?
@@ -191,7 +191,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Pass the user's own token on to the downstream service, so no scope is needed
 
 26. Scenario: Pewter Labs merges its 40 tools into 8 tools, each with a switch argument, hoping to cure wrong tool selection. Selection does not improve. Which two statements explain it? (Select two.)
-   - **a**: A switch argument is a setting that a newer model refuses
+   - **a**: A switch argument is rejected by the platform as an unsupported parameter
    - **b**: Eight tools are still more than a request can hold, so the list must shrink
    - **c**: The choice among behaviours is hidden from the model's own judgement
    - **d**: Merged tools lose their descriptions, so selection has no information left
@@ -212,11 +212,11 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 29. Scenario: Wick Health's log records hold ids, counts and timings, and no message text. An engineer needs the prompt of a few failing cases to find a fault. Which handling does the page support?
    - **a**: Add every content field to the records
    - **b**: Allow that one content field by name, for a stated purpose and a limited time
-   - **c**: Copy the prompts to a private file, so that the shared records stay free of content
+   - **c**: Copy the prompts to a private file, keeping the shared records free of content
    - **d**: Keep the records as they are, and ask users to describe the failing cases
 
 30. Scenario: Sable Cargo changed its model on purpose last Tuesday, and its cost per answer rose by 35 percent against the stored reference. The drift check pages the on-call engineer. What does the page advise?
-   - **a**: Keep the old baseline for a year, so that the rise is never forgotten, whatever else changes in between
+   - **a**: Keep the old baseline for a year, the rise never being forgotten, whatever else changes in between
    - **b**: Raise the tolerance until the page stops
    - **c**: Turn the cost metric off until the next planned change has been decided
    - **d**: Reset the baseline at the switch that was chosen and treat other moves as findings
@@ -243,8 +243,8 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Add trials until the lead reaches five points, then ship
    - **b**: Quitting on a lead gives false wins
    - **c**: Gather the sample that was planned before reading the result
-   - **d**: Run the same 300 trials again, since a repeat will confirm the lead
-   - **e**: Stop now, since the larger number is the better version
+   - **d**: Run the same 300 trials again, a repeat being expected to confirm the lead
+   - **e**: Stop now, the larger number being the better version
 
 35. Scenario: Pike Telecom reports a mean latency of 1.4 seconds for its streamed assistant, yet users complain that it is slow. Which figures should the report add?
    - **a**: The mean of the fastest half of the requests
@@ -292,12 +292,12 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 42. Scenario: A run of twelve tasks at Pelham Media crashes its process at the tenth task every time, and the runner writes results to the store only when the whole run ends. Which design change keeps finished work safe and cheap to redo?
    - **a**: Retry the whole run three times, keeping the end-of-run write
    - **b**: Persist each outcome as soon as it is done, so a retry takes only the rest
-   - **c**: Catch the crash in the runner, so that the end is always reached
+   - **c**: Catch the crash in the runner, making the end always reached
    - **d**: Put the first nine results into the prompt of the tenth task
 
 43. Scenario: Sorrel Cloud serves twelve customers from a single shared pool and separates their data by a filter in its application code. An auditor asks how the data of one customer is kept from another. What does the page say about the design?
    - **a**: It is sound
-   - **b**: It is sound, as long as each customer is given a key of its own to use
+   - **b**: It is sound provided that each customer is given a key of its own to use
    - **c**: It is a finding only if two of the customers work in the same industry
    - **d**: It is a finding
 
@@ -309,10 +309,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 45. Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)
    - **a**: Add a line to the system prompt telling the model to disregard names
-   - **b**: Switch the layer off, since a pattern that misses names gives false comfort
+   - **b**: Switch the layer off, a pattern that misses names giving false comfort
    - **c**: Plant identifiers of every kind in tests and verify that none gets into the request
    - **d**: Add a stronger detector, or keep the free text away from the provider
-   - **e**: Accept the gap, since names carry no risk once the addresses are gone
+   - **e**: Accept the gap, names carrying no risk once the addresses are gone
 
 46. Scenario: Brae Insurance's assistant quotes a sentence that is not in the policy text, and its score is 99. The threshold for sending unreviewed is 95. What becomes of the reply?
    - **a**: It goes out unreviewed
@@ -323,14 +323,14 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 47. Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. Which recovery belongs in the design?
    - **a**: Drop or rephrase the triggering turn, or send the request to another model
    - **b**: Show the user the category of the refusal, which is always present
-   - **c**: Raise the sampling temperature, so that the next reply differs
+   - **c**: Raise the sampling temperature to make the next reply differ
    - **d**: Resend the same history unchanged until it passes through
 
 48. Scenario: Linnet Legal's assistant summarises inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?
    - **a**: Add it to the user turn with a request that the model ignore any orders in it
    - **b**: Strip every sentence that is written as an instruction, using a list of patterns
    - **c**: Carry the incoming item as JSON inside a tool result, with its origin named, and narrow that right
-   - **d**: Place the text in the system prompt, so that the model reads it before anything else
+   - **d**: Place the text in the system prompt, to have the model read it before anything else
 
 49. Scenario: Odell Health's register row for an unfair outcome names the parity report as its control, and a reviewer asks what the row should say. Which two entries does the page support? (Select two.)
    - **a**: The residual reads nil, since a measured gap leaves no risk
@@ -342,7 +342,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 50. Scenario: Hollis Mutual's risk register lists four failure modes, and the entry for privacy leaks names a pattern filter that does not appear anywhere in the architecture. What does the page say about that row?
    - **a**: It is a wish
    - **b**: It is sound
-   - **c**: It is sound, as long as the owner column names a person
+   - **c**: It is sound provided that the owner column names a person
    - **d**: It is a minor flaw
 
 51. Scenario: In a pilot, two people checked every item, and after launch about 40,000 items a month will be sent to people for a check. The team wants to test the assumption that those people will keep up. Which test does the page give?
@@ -377,15 +377,15 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: The name of the engineer who first rejected the option, for traceability
 
 56. Scenario: The one-page note that Vane Rail's architect wrote for the funder describes the saving in detail and says nothing of what the proposal gives up. A colleague objects. What should the note also contain?
-   - **a**: The price paid, the exposure that remains and the decision that is requested
-   - **b**: The break-even derivation, so that the funder can check the arithmetic
-   - **c**: The list of model settings, so that the funder can confirm the build
+   - **a**: The price paid, the exposure that remains and the decision requested
+   - **b**: The break-even derivation, to let the funder check the arithmetic
+   - **c**: The list of model settings, to let the funder confirm the build
    - **d**: A second saving figure for a more optimistic case, to balance the first
 
 57. Scenario: A service level promises availability of at least 99.5 percent, written as 995 per mille. The month's measurement is 990 per mille. How does the report read?
    - **a**: Short of the floor by 5, counted in the unit of the target
    - **b**: Failed, with the gap left unstated in the report
-   - **c**: Met, as the measurement is within a rounding margin
+   - **c**: Met, the measurement being within a rounding margin
    - **d**: Short by 5 percent of the monthly availability
 
 58. Scenario: Two months into a pilot, Dray Finance's team sees that its accuracy target for the costly segment will not be met by the agreed deadline. How should it handle the promise?
@@ -397,7 +397,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 59. Scenario: Larch Mutual's architect has a finished review: a conclusion, a count per domain and twenty-two itemised flaws, and must present it to the sponsor and the engineers. How should the document be arranged?
    - **a**: The flaws first in domain order, then the conclusion and the count at the end
    - **b**: The count first, then a narrative of the design, then the flaws with no conclusion
-   - **c**: The engineers' evidence first, so that the sponsor reads the analysis before the conclusion
+   - **c**: The engineers' evidence first, to let the sponsor read the analysis before the conclusion
    - **d**: Lead with the headline outcome, follow with a tally by area, then the ranked details
 
 60. Scenario: Eland Systems fetches its policy from the admin console, and the security lead decides that no developer may begin without the current policy, even when the network is down and work stops. Which setting expresses that decision?
@@ -407,10 +407,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: allowManagedHooksOnly, which stops every unmanaged hook from running
 
 61. Scenario: A platform team caps effort at high in managed settings. A project file sets medium and a user file sets max. Which two statements does the page support? (Select two.)
-   - **a**: The project file's cap is ignored, since only managed settings may set one
+   - **a**: The project file's cap is ignored, only managed settings being allowed to set one
    - **b**: The most restrictive setting wins, so the lowest of the three values is in force
-   - **c**: Max is in force, since the user file is read last
-   - **d**: High is in force, since managed settings outrank every other level for this key
+   - **c**: Max is in force, the user file being read last
+   - **d**: High is in force, managed settings outranking every other level for this key
    - **e**: Nobody can loosen the organisation's ceiling, though a developer may tighten it
 
 62. Scenario: A developer at Gorse Bank says that a restriction in her local file is not honoured, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?
@@ -450,7 +450,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 20. **c and e**. When the answer lives in a table or a database the mechanism is a structured query run by a tool, which is "Exact, and able to total or filter", while cutting the table "adds numbers by eye" is the failure it avoids (module 85, page 1). *a* is ruled out because the failure the page names is "The table is cut into chunks and the model adds numbers by eye". *b* is ruled out because embedding models "can miss crucial exact matches", and add nothing up. *d* is ruled out because a keyword index "matches the exact string", and it does not total or filter.
 21. **d**. Structure supplies the context a chunk lacks: "The pipeline already knows the document title and the section name" (module 85, page 1). *a* is ruled out because "Returning more chunks per question does not help either". *b* is ruled out because "A smaller window cuts in more places and separates more sentences from their neighbours". *c* is ruled out because "Retrieval hands the model a chunk without its document", and a guess gives no evidence to cite.
 22. **b**. A corpus under about 200,000 tokens needs no index: "No stage can fail and nothing can be missed" (module 85, page 1). *a* is ruled out because "A pipeline adds stages that each can fail", and a corpus this small needs none of them. *c* is ruled out because the page says "The Claude API does not currently offer fine-tuning", and weights are weak when facts change and a source must be shown. *d* is ruled out because the corpus fits one window, and a team of agents is justified only when "the reading that has to be done is larger than one agent can hold".
-23. **c**. The page gives the rule: "Vectors made by two models are not in one space, so the index must be rebuilt as a whole" (module 85, page 2). *a* is ruled out because "Size then follows from the unit", the structure of the data, and not from the embedding model that scores the chunks. *b* is ruled out because "An index is stale when a chunk no longer matches its source", and these old vectors still match their documents. *d* is ruled out because the fault is that "queries embedded by the new model will be compared with chunks embedded by the old one".
+23. **c**. The page gives the rule: "Vectors made by two models are not in one space, so the index must be rebuilt as a whole" (module 85, page 2). *a* is ruled out because "Size then follows from the unit", the structure of the data, and not from the embedding model that scores the chunks. *b* is ruled out because "An index is stale when a chunk no longer matches its source", and these old vectors still match their documents. *d* is ruled out because the keyword index does not depend on the embeddings, and the recall falls because "queries embedded by the new model will be compared with chunks embedded by the old one".
 24. **a**. The documentation lists the gain of a gateway: "the provider key stays server-side; developers hold gateway credentials instead" (module 86, page 1), so offboarding revokes one credential. *b* is ruled out because the string stays in every pair of hands between rotations, whereas with a gateway "a leaked developer credential is not a leaked provider key". *c* is ruled out because "a line in the system prompt is a request to the model and not a control". *d* is ruled out because a shared string in each team keeps the same leak, and the page puts the provider credential in one place, "shared by all forwarded traffic".
 25. **a**. The guidance is progressive: "Implement a progressive, least-privilege scope model", starting from read operations (module 86, page 1). *b* is ruled out because "A token with every scope granted up front makes a stolen token worth the whole system". *c* is ruled out because "Poor scope design increases token compromise impact, elevates user friction, and obscures audit trails". *d* is ruled out because "Token passthrough is explicitly forbidden in the authorization specification".
 26. **c and e**. Merging "hides the behaviours from the model's own choice and leaves the number of capabilities the same" (module 86, page 2), so nothing was removed and the choice is only moved into an argument. *a* is ruled out because the merge is rejected for a different reason: "Merging tools into one with a mode argument is not a cure". *b* is ruled out because the page puts trouble where Claude's ability to pick the right tool "degrades once you exceed" the thirty to fifty mark, and eight is far below it. *d* is ruled out because "the descriptions are what the model chooses by", and a merge keeps them.

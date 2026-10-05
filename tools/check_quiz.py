@@ -320,6 +320,76 @@ def keys_longest(opts, key):
     return any(len(opts[k]) == top and sum(1 for v in opts.values() if len(v) == top) == 1 for k in keys)
 
 
+MOCK_TELL_MODULES = ("11", "44", "78", "94")
+REASON = re.compile(r"(,\s+(since|because|as)\b|\bso that\b)", re.I)
+AUXILIARY = set("is are was were has have had does do did will would can could should must may might".split())
+FINITE_VERBS = set("""loads load runs run returns return reads read keeps keep stays stay holds hold counts count applies apply
+allows allow blocks block refuses refuse costs cost needs need fails fail works work shows show makes make gives give
+takes take sets set sends send writes write changes change covers cover requires require uses use treats treat passes pass
+drops drop moves move expands expand matches match asks ask stops stop becomes become comes come goes go carries carry""".split())
+
+
+def reason_clause(text):
+    return bool(REASON.search(text))
+
+
+def main_part(text):
+    return re.split(r"[,;]", text, maxsplit=1)[0]
+
+
+def has_finite_verb(text):
+    """Conservative: a finite auxiliary or a listed verb after a subject, anywhere in the option."""
+    return any(w.lower() in AUXILIARY or w.lower() in FINITE_VERBS for w in WORD.findall(text)[1:])
+
+
+def option_tokens(text):
+    return frozenset(re.sub(r"[^a-z0-9 ]+", " ", text.lower()).split())
+
+
+def check_mock_item(qid, opts, key):
+    """Tells that single out the key of a mock or pool item: reason clauses, identical options, an odd form."""
+    keys = [key] if isinstance(key, str) else list(key)
+    rest = [k for k in sorted(opts) if k not in keys]
+    problems = []
+    keyed = [reason_clause(opts[k]) for k in keys]
+    others = [reason_clause(opts[k]) for k in rest]
+    if (any(others) and not any(keyed)) or (any(keyed) and not any(others)):
+        problems.append(f"{qid}: reason-clause asymmetry: the key set {'carries' if any(keyed) else 'lacks'} a reason clause that the other options {'lack' if any(keyed) else 'carry'}")
+    letters = sorted(opts)
+    for i, a in enumerate(letters):
+        for b in letters[i + 1:]:
+            ta, tb = option_tokens(opts[a]), option_tokens(opts[b])
+            if ta == tb or (len(ta | tb) and len(ta & tb) / len(ta | tb) >= 0.8):
+                problems.append(f"{qid}: options {a} and {b} are duplicates or near duplicates")
+    if len(keys) == 1 and rest:
+        lead = lambda text: [w for w in WORD.findall(text) if w.lower() not in ("a", "an", "the")][:1]
+        firsts = [lead(opts[k]) for k in rest]
+        if all(firsts) and len({f[0].lower() for f in firsts}) == 1 and [w.lower() for w in lead(opts[keys[0]])] != [firsts[0][0].lower()]:
+            problems.append(f"{qid}: the key is the odd one out in form: every other option opens with {firsts[0][0]!r}")
+        aux = {k: bool(AUXILIARY & {w.lower() for w in WORD.findall(opts[k])[1:]}) for k in opts}
+        verbs = {k: has_finite_verb(opts[k]) for k in opts}
+        if all(aux[k] for k in rest) and not verbs[keys[0]]:
+            problems.append(f"{qid}: the key is the odd one out in form: a phrase among full clauses")
+        if not any(verbs[k] for k in rest) and aux[keys[0]]:
+            problems.append(f"{qid}: the key is the odd one out in form: a full clause among phrases")
+    return problems
+
+
+MOCK_EXTREME = 0.25
+
+
+def check_mock_extremes(label, rows):
+    """rows: [(opts, key letter)] for the single-answer items of one mock page."""
+    problems = []
+    total = len(rows)
+    longest = sum(1 for o, k in rows if all(len(o[k]) > len(v) for x, v in o.items() if x != k))
+    shortest = sum(1 for o, k in rows if all(len(o[k]) < len(v) for x, v in o.items() if x != k))
+    for name, hits in (("longest", longest), ("shortest", shortest)):
+        if total and hits / total > MOCK_EXTREME:
+            problems.append(f"{label}: key is the {name} option in {hits} of {total} single-answer items ({hits / total:.0%}), limit {MOCK_EXTREME:.0%}")
+    return problems
+
+
 def check_key_paragraph(qid, para, key, letters="abcd"):
     """The folded key: key letter(s) first, then one sentence per other option, none merged."""
     problems = []
@@ -380,6 +450,7 @@ def check_module(folder):
     seen = set()
     longest = {}
     all_items = {}
+    mock_rows = {}
     pages = sorted(folder.glob("*.md"))
     module_prose = "\n".join(prose_of(p.read_text()) for p in pages)
     page_stems = {}
@@ -426,6 +497,10 @@ def check_module(folder):
                 if q.get("select") != select_count(stem):
                     problems.append(f"{qid}: quiz.json select {q.get('select')} differs from the page marker {select_count(stem)}")
                 problems += check_multi(qid, stem, opts, q["key"])
+                if kind == "Mock exam" and folder.name[:2] in MOCK_TELL_MODULES:
+                    problems += check_mock_item(qid, opts, q["key"])
+                    if isinstance(q["key"], str):
+                        mock_rows.setdefault(page.stem, []).append((opts, q["key"]))
                 scope_prose = {"Quiz": prose_of(md), "Module quiz": module_prose, "Mock exam": level_prose}[kind]
                 problems += check_quotes(qid, q.get("explanation", {}), q["key"], scope_prose)
                 if kind == "Module quiz":
@@ -441,6 +516,8 @@ def check_module(folder):
                 grp = longest.setdefault("mock exam" if kind == "Mock exam" else "module", [0, 0])
                 grp[0] += keys_longest(opts, q["key"])
                 grp[1] += 1
+    for page_name, rows in sorted(mock_rows.items()):
+        problems += check_mock_extremes(page_name, rows)
     for qid in by_id:
         if qid not in seen:
             problems.append(f"{qid}: in quiz.json but not on any page")

@@ -50,9 +50,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Compaction replaces early messages with a summary, so a rule that must hold throughout goes in CLAUDE.md or a hook
 
 2. Scenario S1. A customer writes in one message that a refund is wanted on one order, an address has changed, and a charge appears twice. Nothing has been looked up yet, and the three concerns relate to an order, an address record and a card statement. Which two steps does the page give before any tool runs? (Select two.)
-   - **a**: Pass the whole text to a person, since several concerns need human judgement
+   - **a**: Pass the whole text to a person, several concerns needing human judgement
    - **b**: Work on them in parallel with the shared context they need
-   - **c**: Run the three matters one after another in a single chain, so that each sees the previous conclusion
+   - **c**: Run the three matters one after another in a single chain, each seeing the previous conclusion
    - **d**: List the matters separately, each with its own question and result
    - **e**: Handle only the first matter and ask the customer to send the others separately
 
@@ -60,7 +60,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **a**: Read the identity fields in its input present only for nested workers
    - **b**: Use a matcher that names the coordinator in its pattern
    - **c**: Register the hook only in the coordinator's options file
-   - **d**: Wait for a subagent stop event and undo the call afterwards
+   - **d**: Wait for a subagent stop event and undo the call afterwards by hand and log it
 
 4. Scenario S1. A gate refuses a refund because identity is not verified. A teammate suggests that the gate should run the verification itself and carry on. Why not?
    - **a**: A gate may only read state and can never call a backend service, whatever the rule of the system
@@ -85,18 +85,18 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **b**: A constant pause of one second keeps the pressure even
    - **c**: The computed schedule is kept even when a wait is named
    - **d**: The delay that the service names replaces the computed value for that attempt
-   - **e**: The hint is ignored and the retry is made at once, since the failure may be a fluke
+   - **e**: The hint is ignored and the retry is made at once, the failure possibly being a fluke
 
 8. Scenario S1. A refund tool keeps getting amounts in the wrong format, and the model apologises after a few corrections. What does the page advise during development?
-   - **a**: Raise the retry bound so that the model corrects itself more often than it does now in each session
+   - **a**: Raise the retry bound to let the model correct itself more often than it does now in each session
    - **b**: Ask the model in the prompt to stop apologising and keep trying until it succeeds
    - **c**: Write more detailed descriptions, and let the error name the field with an example value
-   - **d**: Switch the field to free text so that no value can ever be rejected by the tool
+   - **d**: Switch the field to free text to leave no value for the tool to reject
 
 9. Scenario S1. A refund cap tool receives the boolean true as the amount in the model's call. The backend would accept the value without complaint, yet the cap check is meant to rely on whole numbers. What should the tool layer do?
    - **a**: Treat it as one unit and carry on with the cap check
    - **b**: Refuse it as malformed, with a result that says what is needed
-   - **c**: Pass it through to the backend unchanged, as it accepts it
+   - **c**: Pass it through to the backend unchanged, the backend accepting it
    - **d**: Round it to the nearest allowed value and move to the next step
 
 10. Scenario S1. A new engineer's session ignores the team rule that every endpoint validates its input. A senior engineer wrote the rule into the personal memory file in his home folder, and nothing in the repository carries it. Where should the rule go?
@@ -119,7 +119,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 13. Scenario S1. Which escalation triggers can the application itself check in code, without relying on the model's recollection?
    - **a**: The customer's mood, measured by a count of exclamation marks in the message
-   - **b**: The model's own confidence in its answer, as it reports the number itself
+   - **b**: The model's own confidence in its answer, the model reporting the number itself
    - **c**: Whether the issue sounds complicated to a reader of the transcript
    - **d**: Those that are plain facts, such as a spoken request for a person
 
@@ -136,29 +136,29 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Keep both and drop the newest message instead
 
 16. Scenario S3. A team plans to answer short factual look-ups from free-tier users with a coordinator and several helpers, because the published design does this. Each look-up is worth very little to the business. What is the sound objection?
-   - **a**: Helpers cannot answer factual questions, since they work in isolated context
+   - **a**: Helpers cannot answer factual questions, working in isolated context
    - **b**: A coordinator can only delegate to helpers whose descriptions are written in code
-   - **c**: Such arrangements cost many times the tokens of a chat, so they suit only tasks whose value pays for them
+   - **c**: Such arrangements cost many times the tokens of a chat, so they suit only valuable tasks
    - **d**: Several helpers on one question always produce conflicting answers that need a human referee
 
 17. Scenario S3. A research coordinator runs under a spending cap, and its subagents have used most of it. The cap is reached while two subagents are still working. Which two things happen in the Agent SDK? (Select two.)
    - **a**: The run is paused until the next billing period and then resumed
    - **b**: Starting another helper fails with a budget error
-   - **c**: The running subagents finish, since only the coordinator's own calls count toward the cap
+   - **c**: The running subagents finish, only the coordinator's own calls counting toward the cap
    - **d**: Background helpers stop and the query ends with a budget subtype
    - **e**: The cap is lowered for later subagents and the run continues on the remaining funds
 
 18. Scenario S3. A research system must use only its own restricted subagents, but the coordinator sometimes starts the general-purpose one that comes with the SDK. The team defined three narrow specialists with limited abilities and wants no fallback to anything broader. Which setting prevents it?
-   - **a**: A longer description on each custom definition, so that the model always prefers it to the built-in one
+   - **a**: A longer description on each custom definition, to make the model always prefer it to the built-in one
    - **b**: An allow rule for the Agent tool, which limits it to custom definitions
    - **c**: The environment variable that removes the bundled helper, after which such a call fails
-   - **d**: A lower turn limit for the coordinator, so that it cannot reach the built-in one
+   - **d**: A lower turn limit for the coordinator, to stop it reaching the built-in one
 
 19. Scenario S3. A coordinator must run a style review, a security scan and a coverage check on one change, and then write a summary that uses all three results. How should it invoke the subagents?
-   - **a**: Start them one at a time across separate turns, so that nothing conflicts
+   - **a**: Start them one at a time across separate turns, with nothing conflicting
    - **b**: Start all four together, with the summary agent reading the others' files as they appear on disk
-   - **c**: Start the summary agent first, so that it can ask the others for what it needs
-   - **d**: Launch the three together in one response, then compose the closing brief from their reports
+   - **c**: Start the summary agent first, letting it ask the others for what it needs
+   - **d**: Start the three together in one response, then compose the closing brief from their reports
 
 20. Scenario S3. A coordinator session runs in bypassPermissions for a batch job, and a reviewer definition sets permissionMode to plan. The job runs unattended overnight on a build server. In which mode does the reviewer run?
    - **a**: Plan, because the definition is more specific than the session that started the whole batch job
@@ -173,27 +173,27 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Set a budget cap so low that no deeper spawn can pay
 
 22. Scenario S3. A research system connects many servers, and the SDK's automatic mode counts the tokens of deferrable definitions against the window. When does tool search become active?
-   - **a**: At half of the window, so that a lot of room stays for the conversation with the user
+   - **a**: At half of the window, leaving a lot of room for the conversation with the user
    - **b**: At ten percent of the context size, below which everything loads up front
    - **c**: As soon as a second server connects, whatever the token count
    - **d**: Only when a person turns it on in the settings file
 
 23. Scenario S3. A research team needs a standard integration with a widely used service. Which does the guide prefer, and which kind of work still justifies a build of the team's own?
-   - **a**: A custom server, since only an own build can be trusted with the credentials of the company
-   - **b**: A custom server, so that its descriptions can be tuned to the model that uses it
-   - **c**: Several overlapping servers, so that the agent can always choose the best one for the task
+   - **a**: A custom server, only a self-built one is trusted with company credentials
+   - **b**: A custom server, with its descriptions tuned to the model that uses it
+   - **c**: Several overlapping servers, letting the agent always choose the best one for the task
    - **d**: A reviewed existing connector, with fresh development kept for unique processes
 
 24. Scenario S3. A team sets allowed_tools to Read and Grep for a writer subagent and expects that nothing else is available. What is true?
    - **a**: The rest is removed, since a list of allowed names is a whitelist that excludes whatever is omitted
-   - **b**: The rest still exists, since the list only approves, and unlisted calls follow the permission mode
+   - **b**: The rest still exists, since the list only approves and unlisted calls are governed by the permission mode
    - **c**: The rest is denied, since unlisted calls need a person to approve each one individually
    - **d**: The rest is hidden from the model, but can still run if the model insists on it
 
 25. Scenario S3. A skill with the setting context: fork is started from a research coordinator that has built up a long conversation. What does the forked subagent see?
-   - **a**: A copy of the parent conversation, since a fork copies the history
+   - **a**: A copy of the parent conversation, a fork copying the history
    - **b**: The parent's tool results but not its messages
-   - **c**: Its own instructions, which must therefore stand on their own
+   - **c**: Its own instructions, so these need to stand on their own
    - **d**: The summary that compaction produced for the parent
 
 26. Scenario S3. A research system's extraction returns claims with sources. Which two statements are true of the check that lets code catch a claim that no source supports? (Select two.)
@@ -210,11 +210,11 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: The last chunk's extraction, which keeps a running total
 
 28. Scenario S3. Five topics were scheduled for research, and four were covered. The report leaves out the fifth. Which two statements describe what the coverage note does? (Select two.)
-   - **a**: The topic is listed under no findings, since nothing was found for it
+   - **a**: The topic is listed under no findings, nothing having been found for it
    - **b**: That section sets the plan against what happened
-   - **c**: The topic is omitted, since the note covers only what was searched
+   - **c**: The topic is omitted, the note covering only what was searched
    - **d**: Something never looked into is recorded as a gap
-   - **e**: The topic is listed as partial, since part of the plan was carried out
+   - **e**: The topic is listed as partial, part of the plan having been carried out
 
 29. Scenario S3. A pipeline wants every finding to carry a source. Where should a finding without one be refused?
    - **a**: At the point of entry, with the origin made part of the required schema
@@ -237,7 +237,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 32. Scenario S5. A CI session must not end its turn while the tests still fail, and a request in the prompt has not been reliable. Which control is stronger?
    - **a**: A hook on the stop event that runs the suite and keeps the run open until it passes
    - **b**: A stronger sentence at the end of the prompt asking for passing results
-   - **c**: A larger turn limit so that the model has time to fix the failures
+   - **c**: A larger turn limit to give the model time to fix the failures
    - **d**: A second model call that confirms whether the output looks done
 
 33. Scenario S5. A developer adds a server named github in the local scope with another URL than the project file's entry of that name. Which definition does Claude Code end up using?
@@ -248,9 +248,9 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 34. Scenario S5. Each item from a review becomes an inline comment with its file, line, severity and fix. Which extra field lets the team tune its criteria?
    - **a**: A free-text apology field that softens the tone of every comment
-   - **b**: A hash of the whole diff so that duplicate comments can be removed later
-   - **c**: A label naming the detected pattern per entry, so dismissals can be analysed
-   - **d**: The reviewer's temperature setting, so that separate runs can be compared with one another
+   - **b**: A hash of the whole diff to let duplicate comments be removed later
+   - **c**: A label naming the detected pattern per entry, making dismissals analysable
+   - **d**: The reviewer's temperature setting, to let separate runs be compared with one another
 
 35. Scenario S5. A CI step sometimes loops for an hour, and its prompt already asks it to be quick. Which two controls does the page give? (Select two.)
    - **a**: A second sentence in the prompt names the minutes it may use
@@ -263,18 +263,18 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **a**: Repeat the single pass three times and keep what two runs agree upon
    - **b**: More room does not restore attention, so split the work per item and add a cross stage
    - **c**: Keep one pass but ask the reviewer to take equal care with every file
-   - **d**: Lower the number of findings requested so that each file gets a longer note
+   - **d**: Lower the number of findings requested, giving each file a longer note
 
 37. Scenario S5. An unattended pipeline gives its code-checking job a shell because it sometimes runs git. Why is that a finding?
    - **a**: Reading and searching suffice, so nothing able to change files should be listed
-   - **b**: A shell is slower than the file tools and delays the job
-   - **c**: A shell cannot be restricted by allowed-tools patterns in a pipeline
-   - **d**: A shell is needed for the job to read the diff, so it must stay
+   - **b**: It is slower than the file tools and delays the whole checking job
+   - **c**: Allowed-tools patterns cannot restrict it in an unattended pipeline run
+   - **d**: It is needed for the job to read the diff, so it must stay
 
 38. Scenario S5. A headless review step runs in a workflow with no interactive login. Which two statements describe how it should be set up? (Select two.)
-   - **a**: The key is written into the workflow file as a literal so that every runner has it
+   - **a**: The key is written into the workflow file as a literal, so every runner has it
    - **b**: The key is read from the developer's subscription login in the runner's keychain
-   - **c**: The key is passed in the prompt so that the model can attach it to its requests
+   - **c**: The key is passed in the prompt, letting the model attach it to its requests
    - **d**: The tool list is complete and minimal, with read tools and no bare shell
    - **e**: The API key comes from a repository secret exposed as an environment variable
 
@@ -288,7 +288,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **a**: Twenty-five lines, which the documentation sets for projects of a small size
    - **b**: Roughly two hundred, whereas the stricter cap is a testing choice
    - **c**: Five hundred lines, the ceiling the documentation names
-   - **d**: No target at all, as it leaves the length to each team
+   - **d**: No target at all, the length being left to each team
 
 41. Scenario S5. A team adds minLength to a required field to stop placeholder strings. Why does that not work?
    - **a**: Placeholder strings tend to be longer than real values, so the limit rejects real ones
@@ -299,19 +299,19 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 42. Scenario S5. A team puts a tool-using review into a batch. Which two results are possible? (Select two.)
    - **a**: An entry may come back as a call to run something
    - **b**: A multi-round procedure runs live, or each round becomes its own entry later
-   - **c**: The entry is refused at submission, since batches take no tools
+   - **c**: The entry is refused at submission, batches taking no tools
    - **d**: The entry streams partial answers that the client reassembles
-   - **e**: An entry returns a finished answer, since a batch runs the tools itself
+   - **e**: An entry returns a finished answer, a batch running the tools itself
 
 43. Scenario S5. A developer at the keyboard asks for a review but names neither a branch nor a reviewer. Which handling does the page prefer for an attended session?
    - **a**: Ask about every missing detail before doing anything
    - **b**: Stop with a plain failure that lists the missing fields
-   - **c**: Proceed silently on guesses, so that the developer is not interrupted
+   - **c**: Proceed silently on guesses, leaving the developer uninterrupted
    - **d**: Ask only what cannot be assumed, and state the assumptions
 
 44. Scenario S5. A CI extraction step fails the sum check and is retried. What must the second request hold besides the original document?
    - **a**: The faulty record and the specific errors with their fields
-   - **b**: Nothing more, since the same request gets a new sample each time it is sent again
+   - **b**: Nothing more, the same request getting a new sample each time it is sent again
    - **c**: Only the error message, to keep the request short
    - **d**: A note asking the model to try harder
 
@@ -328,8 +328,8 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Split it into parts so that each part can be checked separately
 
 47. Scenario S6. An extraction pass is limited to 200 lines per call, and a document has exactly 200 lines. Which two statements follow the page? (Select two.)
-   - **a**: The document is cut into two parts, since the final line needs its own
-   - **b**: The document is refused, since one at the limit counts as too long
+   - **a**: The document is cut into two parts, the final line needing its own
+   - **b**: The document is refused, one at the limit counting as too long
    - **c**: Only a file too long for one run is cut
    - **d**: The document is cut into two parts that overlap by one line
    - **e**: A file as long as the maximum is one part, not two
@@ -341,10 +341,10 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Pass it through as it was, since a normaliser changes only what it understands
 
 49. Scenario S6. An extraction tool rejects a date given as next Friday. Which two statements describe the reply that lets the model repair its input? (Select two.)
-   - **a**: It is a success with an empty field, so that the next stage asks again
-   - **b**: It is a transient error with retry set, since the user may type again
+   - **a**: It is a success with an empty field, leaving the next stage to ask again
+   - **b**: It is a transient error with retry set, the user possibly typing again
    - **c**: The message names the format to use
-   - **d**: It is a protocol error with a generic code, since the form was malformed
+   - **d**: It is a protocol error with a generic code, the form having been malformed
    - **e**: It is a flagged execution error in the validation category
 
 50. Scenario S6. A field accepts only open, shipped or closed. How should the tool schema express it?
@@ -362,7 +362,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 52. Scenario S6. A skill that extracts fields from documents sets context: fork and names no agent. Which subagent type runs it?
    - **a**: The Explore one, which is limited to read-only search
    - **b**: A new subagent that inherits the parent's conversation
-   - **c**: None, as a forked skill needs a named agent first
+   - **c**: None, a forked skill needing a named agent first
    - **d**: The general-purpose one, which is the default
 
 53. Scenario S6. A skill body uses $1, and the user types only one argument. What does the second placeholder become?
@@ -373,14 +373,14 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 
 54. Scenario S6. A document gives a currency that the closed enum does not list, and another document leaves the currency unstated. Which enum design handles both honestly?
    - **a**: Widen the enum with each new currency as it appears in a document
-   - **b**: Turn the enum into free text so that nothing can ever be refused
+   - **b**: Turn the enum into free text, leaving nothing to be refused
    - **c**: Map values that are not covered to the nearest covered value
    - **d**: Add unclear for the silent case, and other with a detail field for new values
 
 55. Scenario S6. A dashboard reports 97 percent among the records that were accepted, yet a tenth of the clients' uploads broke and never reached the next system. Which base should the figure use?
    - **a**: Only the accepted records that reached the next system
    - **b**: All inputs that arrived, each one lost on the way scored as wrong
-   - **c**: A mean taken over the kinds of input, so that rare kinds count equally
+   - **c**: A mean taken over the kinds of input, giving rare kinds equal count
    - **d**: Only the records that a person reviewed by hand
 
 56. Scenario S6. A pipeline handles invoices, receipts and credit notes, each with its own extraction tool, and the model allows forcing. Which setting fits?
@@ -390,14 +390,14 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: No tools at all, with the answer parsed from prose by a regular expression
 
 57. Scenario S6. A team makes every field of an invoice schema nullable, to be safe. Reviewers say that a fully optional schema feels safer because nothing can be rejected. What is the cost?
-   - **a**: Nothing, as every field still arrives in the result
-   - **b**: Required entries check more, so null fits only absent values
+   - **a**: Nothing, every field still arriving in the result
+   - **b**: Checking is weaker, null passing where a real value belongs
    - **c**: Parsing fails whenever one of the fields is left empty or missing
    - **d**: The model stops filling any entry with real data at all
 
 58. Scenario S6. Two chunks of one document give the vendor as null in the first and as a name with a quote in the second. How does the merge treat that field?
    - **a**: It keeps the earliest usable entry, with its passage
-   - **b**: It keeps null, as the first chunk came first in the document
+   - **b**: It keeps null, the first chunk having come first in the document
    - **c**: It marks a conflict and asks a person to resolve it by hand
    - **d**: It joins both into one string separated by a comma and a space
 
@@ -430,7 +430,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 12. **d**. The page states it (module 61, page 2): "They should also mirror the real output: show the format the answer must have, since examples are the surest way to steer format as well as judgement." *a* is ruled out because examples are for the border cases: "Few-shot examples are not a sample of typical cases; typical cases are already handled by the criteria." *b* is ruled out because a count is a sanity check: "the guide asks for two to four targeted examples, and a long list teaches accidents" *c* is ruled out because examples teach accidents of form: "five examples that all end with the same label teach the label"
 13. **d**. The page states it (module 65, page 1): "can be checked by the application, which then does not rely on the model's recollection of an instruction". *a* is ruled out because mood is not on the list: "Sentiment, a count of exclamation marks and the model's own confidence are not on the list." *b* is ruled out because a self-reported number is not calibrated: "It is not calibrated to whether the case is within policy" *c* is ruled out because a feeling says little about the case: "none of them says whether the case is within what the agent may decide"
 14. **d**. The page states it (module 64, page 1): "The Messages API keeps no conversation: every request carries the whole history it needs". *a* is ruled out because a lone message gets answers as though it were the first: "a request that sends only the newest message gets answers as though it were the first message" *b* is ruled out because what to resend is a decision: "Trimming and summarising are therefore decisions about what to resend" *c* is ruled out because the window does not reset: "The context window does not reset between turns within a session."
-15. **a**. The page states it (module 64, page 2): "The unit to drop is the exchange, not the message: a tool call and its result stay together or go together". *b* is ruled out because a lone result is invalid: "a result with no call (or a call with no result) is an invalid" *c* is ruled out because two rules keep a window valid: "Two rules keep it valid." *d* is ruled out because the oldest goes first: "keep the newest turns that fit the budget and drop the oldest"
+15. **a**. The page states it (module 64, page 2): "The unit to drop is the exchange, not the message: a tool call and its result stay together or go together". *b* is ruled out because a half exchange breaks the record: "a result with no call" is invalid. *c* is ruled out because a call left alone is just as invalid: "or a call with no result". *d* is ruled out because the oldest goes first: "keep the newest turns that fit the budget and drop the oldest"
 16. **c**. The article gives the price (module 46, page 1): "multi-agent systems use about 15× more tokens than chats", so the value has to pay for it. *a* is ruled out because isolation is not the obstacle: the page says what comes back, "the work is self-contained and can return a summary." *b* is ruled out because the coordinator chooses from natural-language descriptions: "Claude uses each subagent's description to decide when to delegate tasks." *d* is ruled out because conflict is not the objection, and the page ties effort to the question: "Simple fact-finding requires just 1 agent with 3-10 tool calls"
 17. **b and d**. Once the cap is reached, "spawning another subagent fails with `Budget limit reached`" and Claude Code stops any background subagents still running, and the query ends with the `error_max_budget_usd` subtype (module 46, page 2). *a* is ruled out because Claude Code "stops any background subagents still running" once the cap is reached. *c* is ruled out because "the budget cap covers subagents: their spend counts toward the total." *e* is ruled out because a refused spawn is "a normal outcome of a run that spent its budget".
 18. **c**. The page names the switch (module 47, page 1): "Setting `CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS=1` removes the built-in agent, and such a call then fails with `subagent_type is required`." *a* is ruled out because a description steers the choice and does not remove the option: "Claude uses each subagent's description to decide when to delegate tasks." *b* is ruled out because an allow rule only skips approval: the Agent tool is among the tools "that don't ask before running", listed or not *d* is ruled out because a turn limit bounds a run and does not change which subagents exist; the page says "A team that must only ever use its own named, restricted subagents sets it, because the general-purpose agent has every tool."
@@ -442,7 +442,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 24. **b**. The page states it (module 54, page 1): "Any other tool not listed in `allowed_tools` is still available to Claude, and a call to it that needs approval falls through to the permission mode". *a* is ruled out because the name suggests more than the field does: "The restriction is real in the SDK, but it is not where the name suggests" *c* is ruled out because an unlisted call follows the mode: "a call to it that needs approval falls through to the permission mode" *d* is ruled out because removal is another control: "a bare tool name in `disallowedTools` removes the tool from the agent's context"
 25. **c**. The page states it (module 58, page 2): "The subagent doesn't see your conversation history, so the skill's instructions have to stand on their own." *a* is ruled out because the name misleads: "The name misleads: this is not a fork of the conversation" *b* is ruled out because nothing of the parent is passed: "The subagent doesn't see your conversation history" *d* is ruled out because the prompt is the skill: it "gives it the skill content as its prompt"
 26. **c and d**. "The check is a plain substring test in code: it does not ask the model whether it is right", and "Provenance does not prove a value is correct, only that it is grounded" (module 62, page 1). *a* is ruled out because a self-check "carries the same blind spot as the finding". *b* is ruled out because "A length limit such as `minLength` is not the answer". *e* is ruled out because "the answer to a precision problem is explicit categories and examples, never an adjective about confidence".
-27. **b**. The page states it (module 62, page 2): "recompute the total in code, not by asking a model to add". *a* is ruled out because a model is not asked whether it is right: "it does not ask the model whether it is right" *c* is ruled out because the first value is kept for fields and not for totals: "keep the first value that is neither null nor unclear, with the quote it came with" *d* is ruled out because a different total is a conflict: "when a later chunk gives a different vendor or total, do not pick silently"
+27. **b**. The page states it (module 62, page 2): "recompute the total in code, not by asking a model to add". *a* is ruled out because the rule is to recompute the total in code, "not by asking a model to add". *c* is ruled out because the first value is kept for fields and not for totals: "keep the first value that is neither null nor unclear, with the quote it came with" *d* is ruled out because a different total is a conflict: "when a later chunk gives a different vendor or total, do not pick silently"
 28. **b and d**. "A topic that was never searched is a gap", and the note is "the place where the system's own plan is compared with what happened" (module 66, page 2). *a* is ruled out because "`No findings`: topics that were searched and have nothing". *c* is ruled out because "A report that quietly omits a topic is saying something false by leaving it out". *e* is ruled out because "`Partial`: topics that rest on part of their sources, with the cause".
 29. **a**. The page states it (module 69, page 1): "so that a finding without one is refused where it enters the pipeline, and not discovered in the final report". *b* is ruled out because sources cannot be rebuilt from prose: "the sources are lost in the compression and cannot be rebuilt from prose" *c* is ruled out because a prose hand-off drops attribution: "A single prose hand-off anywhere in the chain is where attribution drops out." *d* is ruled out because an unsourced statement is not returned as a finding: "A subagent that cannot name a source for a statement does not return it as a finding"
 30. **d**. The page states it (module 69, page 2): "\"At least two distinct sources\" counts source names: the same report cited on two dates is one source, and agreement needs independence." *a* is ruled out because well supported needs two sources: "`agreed`, and the value has at least two distinct sources" *b* is ruled out because contested means different values on one date: "Several values on the same date" *c* is ruled out because changed means different values on different dates: "Several values on different dates"
@@ -475,6 +475,6 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 57. **b**. The page states it (module 62, page 1): "Do not make every field nullable; nullability is for values that can really be absent, since a required field with a valid value is a stronger check." *a* is ruled out because the page names the cost as lost checking: "a required field with a valid value is a stronger check" *c* is ruled out because a field may be missing from the source and then be nullable: "a field that may be missing from the source is optional or nullable" *d* is ruled out because the remedy has a limit: "nullability is for values that can really be absent"
 58. **a**. The page states the rule (module 62, page 2): "keep the first value that is neither null nor unclear, with the quote it came with". *b* is ruled out because null means the source did not state it: "a field that may be missing from the source is optional or nullable" *c* is ruled out because a conflict needs two real values: "when a later chunk gives a different vendor or total, do not pick silently" *d* is ruled out because only line items are joined: "concatenate the line items"
 59. **d**. The page states it (module 68, page 1): "a wrong item that fits no known pattern is a novel error, which is the signal to change the pipeline". *a* is ruled out because new kinds appear when formats change: "the true error rate among accepted items is unknown, and new kinds of error appear when document formats change" *b* is ruled out because the sample does two jobs: "Checking the accepted sample does two jobs." *c* is ruled out because a single pull says almost nothing about hard strata: "A single random pull from the whole stream is mostly easy cases and says almost nothing about the small, hard strata."
-60. **c**. The page states it (module 68, page 1): "For a candidate threshold, take every item at or above it, and measure how many are right. This is the precision of automation at that threshold." *a* is ruled out because the first step groups by confidence: "Group the labelled items by the confidence they were given." *b* is ruled out because the choice comes after the measurement: "Pick the lowest threshold whose precision reaches the target." *d* is ruled out because stratified sampling is a different job: "The sample must be random within each stratum"
+60. **c**. The page states it (module 68, page 1): "For a candidate threshold, take every item at or above it, and measure how many are right. This is the precision of automation at that threshold." *a* is ruled out because the first step groups by confidence: "Group the labelled items by the confidence they were given." *b* is ruled out because precision is measured on the other side of the cut-off: "take every item at or above it". *d* is ruled out because stratified sampling is a different job: "The sample must be random within each stratum"
 
 </details>
