@@ -158,7 +158,7 @@ platform is a question about that platform's documentation.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The overview lists the version header as required, and a hand-written client has to send it itself. *b* is ruled out because "the overview marks no Accept or User-Agent header as required". *c* is ruled out for the same reason: "the overview marks no Accept or User-Agent header as required". *d* is ruled out because the workspace header is needed "only when the key spans several workspaces".
+1. **a**. The overview lists the version header as required, and a hand-written client has to send it itself. *b* is ruled out because "Authentication, version and body type are all a plain request needs", and the media type of the reply is not among them. *c* is ruled out because "the overview marks no Accept or User-Agent header as required", and the SDKs add that header for their own sake. *d* is ruled out because the workspace header is needed "only when the key spans several workspaces".
 2. **c**. A hand-written client has to cope with a non-JSON body, so the handler falls back to the text. *b* is ruled out because "always JSON is the API's promise about its own errors", and a gateway is not covered by it. *a* is ruled out because "a hand-written client must keep working when the body is HTML". *d* is ruled out because "the proxy answers the same page again".
 
 </details>
