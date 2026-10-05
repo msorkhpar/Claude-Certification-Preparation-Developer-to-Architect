@@ -63,7 +63,7 @@ Three operations cover most cases, from cheapest to most expensive in quality:
 
 The documentation's own statement for the third operation is "Compaction replaces the older turns of a conversation with a summary
 that Claude writes on the server, so you need no summarization code of your own." The next page covers the server-side forms. The
-practice writes the client-side one, with the summariser passed in as a function, which is the "own summarizer" column of the
+practice writes the client-side one, with the summariser passed in as a function, which is the "own summariser" column of the
 documentation's table.
 
 ### Never split a call from its result
