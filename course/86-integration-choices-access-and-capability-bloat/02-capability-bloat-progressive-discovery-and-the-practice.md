@@ -25,7 +25,7 @@ An internal platform exposes 45 tools from eight systems to agents used by 300 e
 
 The exam's sample item gives an agent that can read tickets, draft replies, issue refunds and delete accounts, where staff only read and draft. The keyed answer removes the refund and delete tools from the configuration entirely. Logging and confirmation prompts are compensating controls: they act after the privilege exists, or they ask a person to carry the risk of a capability the role never needed. A larger model does not change what the agent is allowed to do.
 
-The example's `audit` is the review as code. It compares what an agent holds with what its role needs and returns four things. The tools to remove are the ones held and not needed, and the risky ones among them (money, destruction) are named so that they are removed first. The needed tools the agent lacks are listed too, since a review that only removes will break the role. A fourth list is the dormant tools: held, needed and never used in the observed period. They are not removed, because the role needs them; they are reviewed, since either the role description or the usage sample is wrong. In the example, removing two tools cuts the support agent from 830 tokens of definitions to 380.
+The example's `audit` is the review as code. It compares what an agent holds with what its role needs and returns three lists. The tools to remove are the ones held and not needed, and the risky ones among them (money, destruction) are named so that they are removed first. The needed tools the agent lacks are listed too, since a review that only removes will break the role. The practice's `audit` adds a fourth list, the dormant tools: held, needed and never used in the observed period. They are not removed, because the role needs them; they are reviewed, since either the role description or the usage sample is wrong. In the example, removing two tools cuts the support agent from 830 tokens of definitions to 380.
 
 ### Progressive discovery: load few, find the rest
 
@@ -678,4 +678,4 @@ This quiz covers both pages of the module.
 
 </details>
 
-Question 2 of the first quiz is adapted from sample item 1 of the Claude Certified Architect - Professional exam guide (Anthropic, version 1.0), which the guide offers as an illustration of item style. Question 2 of the module quiz and the first of the quiz above are adapted in part from the practice questions of CLAUDE-CERTIFICATIONS by Amey Thakur (MIT License).
+Question 1 of the quiz above is adapted from sample item 1 of the Claude Certified Architect - Professional exam guide (Anthropic, version 1.0), which the guide offers as an illustration of item style. Question 2 of the module quiz and the first of the quiz above are adapted in part from the practice questions of CLAUDE-CERTIFICATIONS by Amey Thakur (MIT License).
