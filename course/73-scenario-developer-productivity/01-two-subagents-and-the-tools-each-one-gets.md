@@ -74,9 +74,12 @@ documented behaviour (checked 2026-10-04): the project's .mcp.json holds the ser
 mcp__<server>__<tool> in permission rules and in a subagent's tools field; a subagent that omits tools inherits every tool available to subagents; project subagents live in
 .claude/agents/. Nothing here starts Claude Code or an MCP server.
 """
+import logging
 import json
 import re
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve().parent.parent
 SECRET_KEY = re.compile(r"token|key|secret|authorization", re.I)
@@ -163,9 +166,12 @@ project-after: 2 servers, 2 agents, 5 permission rules
 // documented behaviour (checked 2026-10-04): the project's .mcp.json holds the servers and expands ${VAR} and ${VAR:-default} from the environment; an MCP tool is named
 // mcp__<server>__<tool> in permission rules and in a subagent's tools field; a subagent that omits tools inherits every tool available to subagents; project subagents live in
 // .claude/agents/. Nothing here starts Claude Code or an MCP server.
+import { logger } from "./logger.ts";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+const log = logger("setup_consistency");
+
 
 export const HERE = fileURLToPath(new URL("..", import.meta.url));
 const SECRET_KEY = /token|key|secret|authorization/i;
@@ -269,6 +275,7 @@ import java.util.stream.Stream;
  * .claude/agents/. Nothing here starts Claude Code or an MCP server.
  */
 public final class SetupConsistency {
+    private static final System.Logger LOG = System.getLogger(SetupConsistency.class.getName());
     static final Path HERE = Path.of("..").toAbsolutePath().normalize();
     private static final Pattern SECRET_KEY = Pattern.compile("token|key|secret|authorization", Pattern.CASE_INSENSITIVE);
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -375,6 +382,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
+
+private val log = System.getLogger("setup_consistency")
 
 /**
  * Check that the pieces of a developer-productivity setup agree with each other: the servers of the project file, the tools of each subagent, the permission rules and the credentials.

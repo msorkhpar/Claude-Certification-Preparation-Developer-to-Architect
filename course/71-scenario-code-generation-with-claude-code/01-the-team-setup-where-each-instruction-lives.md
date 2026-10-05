@@ -71,9 +71,12 @@ The projects are two small folders of plain files, project-before and project-af
 documented behaviour (checked 2026-10-04): a rule file under .claude/rules/ with a paths list loads when Claude works with a matching file and one without paths loads
 at launch; a command file under .claude/commands/ in the project is shared through version control; permission rules sit in .claude/settings.json. Nothing here starts Claude Code.
 """
+import logging
 import json
 import re
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve().parent.parent
 
@@ -183,9 +186,12 @@ project-after: CLAUDE.md 5 lines, 4 rule files, 1 shared commands
 // The projects are two small folders of plain files, project-before and project-after, beside this example. The checks are this course's own checklist, built on the
 // documented behaviour (checked 2026-10-04): a rule file under .claude/rules/ with a paths list loads when Claude works with a matching file and one without paths loads
 // at launch; a command file under .claude/commands/ in the project is shared through version control; permission rules sit in .claude/settings.json. Nothing here starts Claude Code.
+import { logger } from "./logger.ts";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+const log = logger("setup_audit");
+
 
 export const HERE = fileURLToPath(new URL("..", import.meta.url));
 
@@ -300,6 +306,7 @@ import java.util.stream.Stream;
  * at launch; a command file under .claude/commands/ in the project is shared through version control; permission rules sit in .claude/settings.json. Nothing here starts Claude Code.
  */
 public final class SetupAudit {
+    private static final System.Logger LOG = System.getLogger(SetupAudit.class.getName());
     static final Path HERE = Path.of("..").toAbsolutePath().normalize();
 
     /** A glob as a regular expression: ** crosses folders, * stays inside one, ? is one character. */
@@ -425,6 +432,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
+
+private val log = System.getLogger("setup_audit")
 
 /**
  * Audit a team's Claude Code setup for the exam's code generation scenario: which instructions load for which files, who gets the shared command and what is protected.

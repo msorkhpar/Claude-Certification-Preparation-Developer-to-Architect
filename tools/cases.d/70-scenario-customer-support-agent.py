@@ -19,6 +19,6 @@ PRACTICES[f"{X}/70-scenario-customer-support-agent/unit-01/practice-1"] = {
         "wrong-target-strict": (["e5"], "requires the rate to be above the target and not at it"),
         "wrong-wrong-tool-steps": (["e6"], "counts wrong steps and not the sessions that have one"),
         "wrong-empty-rate-one": (["e1"], "reports a rate of 1 when there are no sessions"),
-        "wrong-over-counts-needs-human": (["m1"], "counts every escalation as an over-escalation, even one that needed a person"),
+        "wrong-over-counts-needs-human": (["m1", "e3"], "counts every escalation as an over-escalation, even one that needed a person"),
     },
 }

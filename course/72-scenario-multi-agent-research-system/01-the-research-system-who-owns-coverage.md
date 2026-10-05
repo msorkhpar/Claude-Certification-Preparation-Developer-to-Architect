@@ -56,6 +56,10 @@ one retry through an alternative, a synthesis agent with a scoped verification t
 The subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The
 shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.
 """
+import logging
+
+log = logging.getLogger(__name__)
+
 REQUIRED = ["visual arts", "music", "writing", "film"]
 
 # what the web search subagent finds for a query: (claim, value, source, date)
@@ -160,6 +164,9 @@ report (film search down for good): status=partial, covered=3/4, findings=5, err
 //
 // The subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The
 // shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.
+import { logger } from "./logger.ts";
+const log = logger("research_run");
+
 export const REQUIRED = ["visual arts", "music", "writing", "film"];
 
 type Finding = [claim: string, value: string, source: string, date: string];
@@ -272,6 +279,7 @@ import java.util.stream.Collectors;
  * shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.
  */
 public final class ResearchRun {
+    private static final System.Logger LOG = System.getLogger(ResearchRun.class.getName());
     static final List<String> REQUIRED = List.of("visual arts", "music", "writing", "film");
 
     record Finding(String claim, String value, String source, String date) {}
@@ -393,6 +401,8 @@ report (film search down for good): status=partial, covered=3/4, findings=5, err
   note: film not covered: timeout on 'AI in film' and on 'AI in film production'
 ```
 ```kotlin
+private val log = System.getLogger("research_run")
+
 /**
  * A multi-agent research run in miniature: a coordinator that checks its own decomposition, a search subagent whose failure comes back as structured context,
  * one retry through an alternative, a synthesis agent with a scoped verification tool, and a report that says what it could not cover.

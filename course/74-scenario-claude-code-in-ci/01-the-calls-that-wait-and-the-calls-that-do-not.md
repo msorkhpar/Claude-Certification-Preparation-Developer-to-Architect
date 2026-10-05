@@ -63,9 +63,12 @@ without a person; the Message Batches API gives a discount and may take up to 24
 better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls
 Claude.
 """
+import logging
 import json
 import shlex
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve().parent.parent
 WRITERS = ("Bash", "Edit", "Write")
@@ -140,9 +143,12 @@ project-after: 3 jobs (2 real-time, 1 batch)
 // without a person; the Message Batches API gives a discount and may take up to 24 hours with no latency guarantee, so it fits work nobody waits for; a review of many files at once is
 // better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls
 // Claude.
+import { logger } from "./logger.ts";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+const log = logger("pipeline_check");
+
 
 export const HERE = fileURLToPath(new URL("..", import.meta.url));
 const WRITERS = ["Bash", "Edit", "Write"];
@@ -234,6 +240,7 @@ import java.util.List;
  * Claude.
  */
 public final class PipelineCheck {
+    private static final System.Logger LOG = System.getLogger(PipelineCheck.class.getName());
     static final Path HERE = Path.of("..").toAbsolutePath().normalize();
     private static final List<String> WRITERS = List.of("Bash", "Edit", "Write");
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -326,6 +333,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
+
+private val log = System.getLogger("pipeline_check")
 
 /**
  * Check the design of a CI pipeline that uses Claude: which calls wait for a person, how a pull request is reviewed, and what each run is allowed to do.
