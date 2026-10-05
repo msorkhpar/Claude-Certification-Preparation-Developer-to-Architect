@@ -76,7 +76,7 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
 6. Scenario S2. A developer approves a plan in plan mode and picks the option that auto-accepts edits. Which two statements describe what approval does to the session? (Select two.)
    - **a**: It applies the plan to a copy of the repository before touching the real files
    - **b**: It adopts the permission setting that the selected choice names
-   - **c**: It leaves that condition
+   - **c**: It ends the read-only phase
    - **d**: It restarts the session with the plan as its first message
    - **e**: It stays in plan mode and queues the edits until the end of the session
 
@@ -167,10 +167,10 @@ This mock exam covers the content of Level 3, modules 45 to 77, with questions s
    - **d**: Path checks for modifications use the edit spelling, so a rule spelled the other way is never used
 
 21. Scenario S4. A team screens an agent's output for dangerous calls and runs it unattended whenever the screen is clean. Which two statements apply to relying on this alone? (Select two.)
-   - **a**: Detection covers only what its authors anticipated, so a disguised version slips past
-   - **b**: Running it on every proposal costs too much, so it must be sampled, at first glance
-   - **c**: A clean result proves nothing about what the output declares, as many reviews assume
-   - **d**: Machine-written output cannot be read by any automatic check, as most teams do
+   - **a**: Detection covers only what its authors anticipated, so a disguise slips past
+   - **b**: Running it on every proposal costs too much, so it must be sampled
+   - **c**: A clean result proves nothing about what the output declares
+   - **d**: Machine-written output cannot be read by any automatic check
    - **e**: It still earns its place by refusing the obvious and checking what was declared
 
 22. Scenario S4. A tool design whose name breaks the required form also declares an effect that needs a person's sign-off. What should happen first?

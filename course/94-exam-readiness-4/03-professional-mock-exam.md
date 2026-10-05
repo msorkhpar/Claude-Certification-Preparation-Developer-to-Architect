@@ -408,7 +408,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 61. Scenario: A platform team caps effort at high in managed settings. A project file sets medium and a user file sets max. Which two statements does the page support? (Select two.)
    - **a**: The project file's cap is ignored, since only managed settings may set one
-   - **b**: The most restrictive setting wins, so the middle value is in force
+   - **b**: The most restrictive setting wins, so the lowest of the three values is in force
    - **c**: Max is in force, since the user file is read last
    - **d**: High is in force, since managed settings outrank every other level for this key
    - **e**: Nobody can loosen the organisation's ceiling, though a developer may tighten it

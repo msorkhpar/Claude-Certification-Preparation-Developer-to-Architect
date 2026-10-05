@@ -37,7 +37,7 @@ For a miss, open the page that the question's explanation names, as (module, pag
 This question pool covers the scenarios S2 to S5 of the content of Level 3, modules 45 to 77. Choose one answer for each question, or the number the question states.
 
 1. Scenario S2. A team places a CLAUDE.md in the folder of its payments service and expects every session in the repository to carry its rules from the first message. Sessions that never touch that folder do not show them. What explains it?
-   - **a**: The file loads only for sessions started by its owner, since it is a personal setting, for the time being
+   - **a**: The file loads only for sessions started by its owner, since it is a personal setting
    - **b**: The file loads at launch but is pushed out first when context fills, since it has the lowest rank, as a quick remedy
    - **c**: It loads on demand, when files in its own directory are read
    - **d**: The file loads only when a slash command names it, since commands choose memory
@@ -56,21 +56,21 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
 
 4. Scenario S2. A rule file for handlers lists the path pattern src/api/*.ts, and a developer opens src/api/v2/orders.ts. Does the rule load?
    - **a**: No, since rule files read only exact file names
-   - **b**: Yes, since the extension alone decides the match, as a first step
-   - **c**: Yes, since a star matches any depth below the folder, in the usual way
+   - **b**: Yes, since the extension alone decides the match
+   - **c**: Yes, since a star matches any depth below the folder
    - **d**: No; a lone star stays within one level and the item sits deeper
 
 5. Scenario S2. A repository keeps shared guidance in AGENTS.md beside its memory file, and a developer adds a CLAUDE.local.md for her notes. Afterwards the assistant stops following the shared guidance. What explains it?
-   - **a**: Her file overrides the shared guidance line by line, as many reviews assume
-   - **b**: Local files switch off every shared file in the repository, as most teams do
-   - **c**: Only one family is read, so the sibling is skipped unless imported
+   - **a**: Her file overrides the shared guidance line by line
+   - **b**: Local files switch off every shared file in the repository
+   - **c**: Only one family is read, so its sibling needs importing
    - **d**: AGENTS.md is read only in unattended runs
 
 6. Scenario S2. A team asks for a validation function with a paragraph of description, and the output handles the main scenario but guesses at awkward values. What does the page add to the prompt?
    - **a**: Two or three worked pairs with expected answers, one at a boundary
-   - **b**: A request to plan before coding, with no pairs
-   - **c**: A longer paragraph on how careful the code must be, as the sponsor prefers
-   - **d**: A larger model, so that it infers the awkward inputs, as the vendor suggests
+   - **b**: A request to plan before coding, with no worked pairs shown beside it
+   - **c**: A longer paragraph on how careful and exact the code must be
+   - **d**: A larger model, so that it infers the awkward inputs
 
 7. Scenario S2. To avoid match failures, a developer tells Claude Code to rewrite the whole document for a one-line fix in an existing source file. What does the page say?
    - **a**: Keep the whole-file write if the file is under a hundred lines
@@ -109,16 +109,16 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **d**: Hide the failure from the agent so that it keeps its plan
 
 13. Scenario S3. A search subagent hits a rate limit twice and succeeds on the third try, and the team's design passes every failure up to the coordinator for a decision. What does the page recommend?
-   - **a**: Keep passing everything up, since the coordinator sees the whole picture, as most teams do
-   - **b**: Report "search unavailable" so that the report stays short, as many reviews assume
+   - **a**: Keep passing everything up, since the coordinator sees the whole picture
+   - **b**: Report "search unavailable" so that the report stays short
    - **c**: Stop the run and tell the user it failed
    - **d**: Handle passing faults locally, and send up only what stays unresolved
 
 14. Scenario S3. To spare the coordinator's context, a developer lets the search and analysis subagents pass findings directly to each other. What does the page say?
-   - **a**: Allow it, since a shorter path saves tokens, at first glance
-   - **b**: Route it through the hub, giving one place for observability and errors
-   - **c**: Allow it if each pair logs its exchanges
-   - **d**: Allow it for the analysis agent only, since it reads documents, for the next release
+   - **a**: Allow it, since a shorter path saves tokens for the coordinator
+   - **b**: Route it through the hub, which gives one place to observe
+   - **c**: Allow it if each pair logs its exchanges to a shared file
+   - **d**: Allow it for the analysis agent only, since it reads documents
 
 15. Scenario S3. To keep the writer's input short, the coordinator has the synthesis step compress all findings into prose and tells the writer to add sources afterwards. What does the page say?
    - **a**: It is sound for numbers only, since prose carries words well
@@ -151,10 +151,10 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **d**: Fork Monday's session, since a branch keeps the analysis and the history
 
 20. Scenario S4. A pull request changes .mcp.json to add a new server, and the reviewer treats it as a configuration tweak. What does the page say?
-   - **a**: It is reviewed by the platform team alone, since developers cannot judge servers, as most teams do, as many reviews assume
+   - **a**: It is reviewed by the platform team alone, since developers cannot judge servers
    - **b**: It needs no review, since a configuration file cannot run code
    - **c**: Scrutiny like code, since entries load unprompted in unattended runs
-   - **d**: It needs a review only if the server is remote, since local ones are trusted, as many reviews assume, as most teams do
+   - **d**: It needs a review only if the server is remote, since local ones are trusted
 
 21. Scenario S4. A team denies the shell tool for its generator agent and concludes that the agent can no longer change files outside its folder. Is the conclusion sound?
    - **a**: Yes, since a deny rule on one tool covers its neighbours
@@ -163,22 +163,22 @@ This question pool covers the scenarios S2 to S5 of the content of Level 3, modu
    - **d**: No, since writing to disk has separate rules that must be set too
 
 22. Scenario S4. A developer adds an experimental documentation server to the committed project file, reasoning that colleagues who do not want it can ignore it. What does the page say?
-   - **a**: It loads for everyone, unattended runs included; use the user scope
-   - **b**: It is harmless, since unused servers cost nothing, as many reviews assume, as most teams do
+   - **a**: It loads for everyone, unattended runs included
+   - **b**: It is harmless, since unused servers cost nothing
    - **c**: It is harmless if the server is read-only
-   - **d**: It is fine if the file is added to the ignore list, as most teams do, as many reviews assume
+   - **d**: It is fine if the file is added to the ignore list
 
 23. Scenario S4. Every integration in a team's setup is flagged to be present from the opening message of each session, on the theory that tools should always be at hand. What follows?
    - **a**: Costs fall, since tools are cached once loaded
    - **b**: Crowded context and worse selection return
-   - **c**: Selection improves, since the model sees every definition, as the vendor suggests
-   - **d**: Nothing, since definitions never count against the window, as the sponsor prefers
+   - **c**: Selection improves, since the model sees every definition
+   - **d**: Nothing, since definitions never count against the window
 
 24. Scenario S4. A team wants an exploring helper that cannot change anything and can also query the company's knowledge server, and an engineer says the built-in read-only explorer already does that. What is missing?
-   - **a**: Nothing, since the built-in one reaches every connected server, as the vendor suggests, as the vendor suggests
+   - **a**: Nothing, since the built-in one reaches every connected server
    - **b**: A longer root memory file that names the server
-   - **c**: A custom project agent whose tool line holds the viewing tools and the lookup
-   - **d**: A prompt line telling the main agent to avoid writing, as the sponsor prefers, as the sponsor prefers
+   - **c**: A custom project agent whose tools include the lookup
+   - **d**: A prompt line telling the main agent to avoid writing
 
 25. Scenario S5. A headless step fails with a model error, and the job is configured to re-run itself until it passes. What does the page advise?
    - **a**: Extend the job timeout, since a longer wait is more likely to bring success

@@ -56,7 +56,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: The material and the question, with proof shown for each finding
    - **d**: The reader, the tone, the length and a sample of the style wanted
 
-3. A director's request to Claude names the deliverable and its length, and gives the steps to follow, but says nothing about how Claude should behave. The drafts agree with everything she proposes. Which two statements fit? (Select two.)
+3. A director's request to Claude names the deliverable, its length and its readers, and gives the steps to follow, but says nothing about how Claude should behave. The drafts agree with everything she proposes. Which two statements fit? (Select two.)
    - **a**: A sample of the target is the missing piece before any draft helps
    - **b**: Its manner is the part left out
    - **c**: The process is missing because no approach was named
@@ -135,7 +135,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **b**: Ask Claude to mark the sentences it is least sure of and review only those
    - **c**: Match effort to the cost of an error
    - **d**: Check nothing in routine papers, since the author reads each draft once
-   - **e**: Mark the riskiest claims and check them first
+   - **e**: Check figures and quotations first
 
 16. An analyst asks Claude for the reasons a new policy will succeed, and the reply gives only supporters' views. The memo goes to a review committee. What is the best next step?
    - **a**: Ask Claude whether its own answer was biased and accept a no

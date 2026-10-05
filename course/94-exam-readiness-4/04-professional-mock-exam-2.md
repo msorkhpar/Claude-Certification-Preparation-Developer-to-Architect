@@ -89,7 +89,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: The share of customers reached in a new way, since a new reach shows value
    - **b**: The spend per finished task, adding review time and rework, against the human baseline
    - **c**: The model's token rate, since the supplier publishes it and it needs no estimate
-   - **d**: The count of hours saved for each person each week, since staff time is the real cost, as most teams do
+   - **d**: The count of hours saved for each person each week, since staff time is the real cost
 
 10. Scenario: A research run at Pike Biotech crashes after a payment tool acts but before the run writes its result to the store. The next run starts from the store. Which two statements does the page support? (Select two.)
    - **a**: A fresh identifier is minted, since a new run is a new intention
@@ -167,7 +167,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **e**: A single top-k list cannot follow a chain
 
 22. Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licences. Which cost does the page name?
-   - **a**: Nothing beyond a configuration file, since a gateway is only a setting, as many reviews assume
+   - **a**: Nothing beyond a configuration file, since a gateway is only a setting
    - **b**: Running it as infrastructure that must follow whatever its clients send
    - **c**: A second provider key for every team, since gateways issue none
    - **d**: The loss of the logs, since a gateway cannot record a refusal
@@ -176,12 +176,12 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Retrieval, since weights cannot cite or be withheld from an audience
    - **b**: Train them in, since weights keep facts stable between releases
    - **c**: Train them in, using the Claude API's fine-tuning service
-   - **d**: Cache them in the prompt, since the same text suits every request, as a first step
+   - **d**: Cache them in the prompt, since the same text suits every request
 
 24. Scenario: To cut the monitoring bill, a team at Rowley Travel proposes to keep a random tenth of the data points on every time series. What does the page conclude?
    - **a**: It is wrong only for alerts, since dashboards can tolerate gaps
    - **b**: It is sound, since a random sample estimates any rate well
-   - **c**: It is sound, since traces are sampled the same way in the example, as the sponsor prefers
+   - **c**: It is sound, since traces are sampled the same way in the example
    - **d**: Wrong rates, since a metric is a count and a missing count is wrong
 
 25. Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. Which two changes does the page call for? (Select two.)
@@ -219,7 +219,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: It is complete, since least privilege is only a matter of taking tools away
    - **b**: It must add logging for every tool left, since removal alone is a weak control
    - **c**: It must also report the shortfall, since pruning alone leaves the job unfinishable
-   - **d**: It must remove the missing tool from the role description, so that the two agree, for the next release
+   - **d**: It must remove the missing tool from the role description, so that the two agree
 
 31. Scenario: Hendry Stores' agent is offered 120 tools through a search tool, and every request starts with a search because all tools are deferred. Latency is poor. Which configuration does the guidance advise?
    - **a**: Replace the search tool with shorter tool descriptions for all 120
@@ -241,7 +241,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **d**: Watch the failure in production and fix it later
 
 34. Scenario: Dovedale Insurance's assistant answers a coverage question with a claim the policy extract does not make, though the right passage was in the prompt and the reply has the right shape. Where does the diagnosis place the fault, and what does it try?
-   - **a**: In retrieval, by rebuilding the index, since evidence is always the first suspect, as the vendor suggests
+   - **a**: In retrieval, by rebuilding the index, since evidence is always the first suspect
    - **b**: In the model, by moving to a larger one, since a stronger model reads better
    - **c**: In format, by adding an output schema, since shape failures are the cheapest
    - **d**: In grounding, by allowing it to say it does not know and by requiring quotes first
@@ -272,7 +272,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 
 39. Scenario: Corran Health's release gate for its claims assistant measures accuracy, latency and cost, and an audit finds that prompt-injection attempts reach the tool layer. Which addition does the guide's list of dimensions require?
    - **a**: A user rating after each answer, since people notice an attack quickly
-   - **b**: A higher accuracy floor on ordinary cases, since a better model resists attacks, at first glance
+   - **b**: A higher accuracy floor on ordinary cases, since a better model resists attacks
    - **c**: A mean latency per request, since slow replies are the sign of an attack
    - **d**: The share of hostile inputs that succeeded, tested on cases built to provoke them
 
@@ -331,11 +331,11 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **b**: The outage counts as a pass and leaves no trace
    - **c**: The input screen is switched off too, since two checks are down together
    - **d**: The record keeps the gap visible
-   - **e**: Replies go on carrying a mark that the screen did not run
+   - **e**: Replies go on carrying a mark that the guard did not run
 
 49. Scenario: A user of Pellew Insurance's assistant triggers refusals eleven times in a day, each ending with a refusal stop reason. What does the design do with that count?
    - **a**: Tell the person the action breaches policy, then throttle or end access
-   - **b**: Raise the sampling temperature, so that the replies differ next time, as most teams do
+   - **b**: Raise the sampling temperature, so that the replies differ next time
    - **c**: Show the category of each refusal to the user in a message
    - **d**: Ignore the count, since a refusal is an event of the model alone
 
@@ -411,7 +411,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: Ask any administrator to edit it for the group, since all admins may
    - **b**: Set it in the shared project file, since the repository reaches everyone
    - **c**: It cannot yet target a subset, so a separate file or profile goes to those machines
-   - **d**: Set the stricter values in the console for the group, since groups are supported, as many reviews assume
+   - **d**: Set the stricter values in the console for the group, since groups are supported
 
 62. Scenario: Kinsale Software wants developers to install plugins only from its own marketplace repository, and an engineer sets the managed allowlist of marketplace sources to an empty list to be safe. What happens?
    - **a**: Every origin is blocked, the firm's collection and the official one alike

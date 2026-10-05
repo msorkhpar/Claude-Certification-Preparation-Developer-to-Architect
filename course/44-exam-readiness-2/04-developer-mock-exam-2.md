@@ -166,7 +166,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **b**: A larger window restores accuracy, since more room means better recall
    - **c**: Lowering the effort speeds up processing of the extra tokens
    - **d**: Repeating the key instruction inside the archive fixes the drift
-   - **e**: Extra capacity is no reason to use it all
+   - **e**: Trimming to what the task needs helps
 
 20. A system prompt contains an API key and tells Claude it is a guard who must never reveal it. A tester extracts the key with a clever request. Which redesign fits best?
    - **a**: Remove the credential from the context and protect it in program logic
@@ -266,11 +266,11 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
    - **c**: Retry the call and let the model recall the missing document from memory
    - **d**: Stop with a clear error before any request is made, saying what is absent
 
-36. A three-step pipeline over an 80,000-token contract resends the whole contract at every step, and costs run high. Step two only needs the clauses that step one found. Which two statements describe the change? (Select two.)
+36. A three-step pipeline over an 80,000-token contract resends the whole contract at every step, and costs run high. Step two only needs the clauses that step one found, and the team also wants to look at what each stage produces. Which two statements describe the change? (Select two.)
    - **a**: Delete every clause that looks unrelated to the question first
    - **b**: Move the contract into the system prompt of each step
-   - **c**: Hand later stages just the extracted excerpts
-   - **d**: Later stages then carry a much smaller load
+   - **c**: Hand on only the extracted excerpts
+   - **d**: Intermediate outputs can be read separately
    - **e**: Merge the three steps into one prompt so the contract goes once
 
 37. A service inserts a fresh random property into the shape of its JSON output format on every request, and every call shows added latency on first use. Which change fits best?
@@ -415,7 +415,7 @@ This mock exam covers the content of Levels 1 and 2, modules 1 to 43. Choose one
 33. **d**. "a create request that omits it gets `unrestricted`" (module 36, page 2). *a* is ruled out because limited mode must be chosen, and it "Restricts sandbox network access to the hosts in `allowed_hosts`". *b* is ruled out because "an omitted field is not neutral", but it is accepted and read as unrestricted. *c* is ruled out because "each session gets its own isolated sandbox (a fresh Linux container)".
 34. **b**. "the failure goes back to the model as a retry message and the run continues" (module 37, page 1). *a* is ruled out because "a reply that does not validate against the output type is refused". *c* is ruled out because the design "turns a malformed reply into a recoverable event". *d* is ruled out because "a reply that does not validate against the output type is refused", and nothing is guessed.
 35. **d**. The builder "raises an error for an unfilled variable" (module 24, page 1). *a* is ruled out because "A blank where a document should be gives a confident answer about nothing", and a default only hides the gap. *b* is ruled out because "A missing variable is an error". *c* is ruled out because private material "is unknown to it unless you supply it in the context or give it a tool that fetches it".
-36. **c and d**. "Pass forward only what the next step needs" (module 24, page 2), which shrinks what later stages carry. *a* is ruled out because the method is to "ask Claude to quote relevant parts of the documents first", not to delete by guesswork. *b* is ruled out because "Each step costs the full input again" wherever the text sits. *e* is ruled out because chaining is kept to "inspect intermediate outputs or enforce a specific pipeline structure".
+36. **c and d**. "Pass forward only what the next step needs" (module 24, page 2), which shrinks what later stages carry, and chaining lets you inspect intermediate outputs. *a* is ruled out because the method is to "ask Claude to quote relevant parts of the documents first", not to delete by guesswork. *b* is ruled out because "Each step costs the full input again" wherever the text sits. *e* is ruled out because chaining is kept to "inspect intermediate outputs or enforce a specific pipeline structure".
 37. **a**. "A schema that changes on every request therefore never benefits from it" (module 25, page 1). *b* is ruled out because "Changing only `name` or `description` fields does not invalidate the cache", so renaming gains nothing. *c* is ruled out because "The cache is invalidated when the schema's structure changes or the set of tools changes". *d* is ruled out because "Compiled grammars are cached for 24 hours from last use", and the changing shape defeats any warm-up.
 38. **c**. "An unbounded retry on a hard document is a cost leak" (module 25, page 2). *a* is ruled out because current models "do not support setting temperature". *b* is ruled out because "the model has no way to know what was wrong" without it. *d* is ruled out because a parse that succeeds "says nothing about the content".
 39. **d**. The write-up says to "make contextualization affordable with prompt caching" (module 28, page 2). *a* is ruled out because "The model is asked to write that sentence for each chunk, with the whole document in view". *b* is ruled out because "A chunk lifted out of its document can lose its meaning". *c* is ruled out because the fix is to prepend "chunk-specific explanatory context to each chunk before embedding".

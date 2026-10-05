@@ -144,12 +144,12 @@
       "id": "03-developer-mock-exam-1#x8",
       "page": "03-developer-mock-exam-1.md",
       "scope": "level",
-      "stem": "A logging layer for a streamed reply records the stop reason from the first chunk it receives and always stores a null. Which two statements explain it? (Select two.)",
+      "stem": "A logging layer for a streamed reply records the stop reason from the first chunk it receives and stores a null. Which two statements explain it? (Select two.)",
       "options": {
         "a": "It arrives in the HTTP status line of the response",
         "b": "The value arrives in the delta frame sent close to the finish",
         "c": "It arrives in a content_block_stop frame, once each block completes",
-        "d": "An interrupted transfer never delivers one",
+        "d": "Reading at the start finds it missing",
         "e": "It arrives in message_start, alongside the input token count"
       },
       "key": [
@@ -157,8 +157,8 @@
         "d"
       ],
       "explanation": {
-        "b": "The stop reason \"arrives in message_delta, near the end\", so a cut stream has none (module 17, page 1).",
-        "d": "The stop reason \"arrives in message_delta, near the end\", so a cut stream has none (module 17, page 1).",
+        "b": "The stop reason \"arrives in message_delta, near the end\", so a read at the start finds nothing (module 17, page 1).",
+        "d": "The stop reason \"arrives in message_delta, near the end\", so a read at the start finds nothing (module 17, page 1).",
         "a": "Ruled out because \"stop_reason indicates normal completion; HTTP errors indicate failures\".",
         "c": "Ruled out because that frame means \"The block at index is complete\" and carries no reason.",
         "e": "Ruled out because the opening frame carries \"an empty content and the input token count in usage\", not the stop reason."
@@ -1432,7 +1432,7 @@
         "b": "A larger window restores accuracy, since more room means better recall",
         "c": "Lowering the effort speeds up processing of the extra tokens",
         "d": "Repeating the key instruction inside the archive fixes the drift",
-        "e": "Extra capacity is no reason to use it all"
+        "e": "Trimming to what the task needs helps"
       },
       "key": [
         "a",
@@ -1767,12 +1767,12 @@
       "id": "04-developer-mock-exam-2#x36",
       "page": "04-developer-mock-exam-2.md",
       "scope": "level",
-      "stem": "A three-step pipeline over an 80,000-token contract resends the whole contract at every step, and costs run high. Step two only needs the clauses that step one found. Which two statements describe the change? (Select two.)",
+      "stem": "A three-step pipeline over an 80,000-token contract resends the whole contract at every step, and costs run high. Step two only needs the clauses that step one found, and the team also wants to look at what each stage produces. Which two statements describe the change? (Select two.)",
       "options": {
         "a": "Delete every clause that looks unrelated to the question first",
         "b": "Move the contract into the system prompt of each step",
-        "c": "Hand later stages just the extracted excerpts",
-        "d": "Later stages then carry a much smaller load",
+        "c": "Hand on only the extracted excerpts",
+        "d": "Intermediate outputs can be read separately",
         "e": "Merge the three steps into one prompt so the contract goes once"
       },
       "key": [
@@ -1780,8 +1780,8 @@
         "d"
       ],
       "explanation": {
-        "c": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry.",
-        "d": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry.",
+        "c": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry, and chaining lets you inspect intermediate outputs.",
+        "d": "\"Pass forward only what the next step needs\" (module 24, page 2), which shrinks what later stages carry, and chaining lets you inspect intermediate outputs.",
         "a": "Ruled out because the method is to \"ask Claude to quote relevant parts of the documents first\", not to delete by guesswork.",
         "b": "Ruled out because \"Each step costs the full input again\" wherever the text sits.",
         "e": "Ruled out because chaining is kept to \"inspect intermediate outputs or enforce a specific pipeline structure\"."

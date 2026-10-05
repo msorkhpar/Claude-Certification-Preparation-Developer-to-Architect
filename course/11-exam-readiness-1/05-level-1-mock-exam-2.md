@@ -134,7 +134,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **b**: It overreaches, since errors are reduced and not removed
    - **c**: It is reasonable if users are told to ask Claude how sure it is
    - **d**: It is sound, because grounded prompts leave hallucinations at zero
-   - **e**: Checking stays, because those steps only speed it up
+   - **e**: Checking stays, since these steps make it faster and do not replace it
 
 16. An HR assistant uploads a group photo from a company event and asks Claude to name each person pictured for a directory. What should the team expect?
    - **a**: Names looked up from the staff files after Claude checks each face against them
@@ -298,7 +298,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 42. A power user has connected twelve connectors and notices conversations feel crowded with tool lists. Which two statements fit the help centre's suggestion? (Select two.)
    - **a**: Blocked removes every tool from the list for good
-   - **b**: Auto is the default and suits most people in most cases
+   - **b**: Auto loads every tool name at the start of each conversation
    - **c**: Always allowed keeps the lists short by hiding the prompts
    - **d**: Load each integration only when the work needs it
    - **e**: Ten or more is the point where it pays off
