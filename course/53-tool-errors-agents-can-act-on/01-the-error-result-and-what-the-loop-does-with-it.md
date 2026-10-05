@@ -659,10 +659,10 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. A refund tool meets a slow card service, and each time it answers with the text "Operation failed". The agent tries three more times and then apologises, though a colleague could have settled the case. Which change helps most?
-   - **a**: Raise the number of automatic attempts from three to ten before the agent gives up on the case
-   - **b**: Add a line to the prompt that asks the agent to work out which failures deserve another attempt
-   - **c**: Reply with the kind of problem, whether another try is useful, and the next step
-   - **d**: Return an empty reply so that the agent moves on to its next step without stopping
+   - **a**: Raise the attempts from three to ten, with a longer wait between them
+   - **b**: Add a prompt rule on retries and a second rule on when to give up
+   - **c**: Reply with a category, a retry flag and a message that says what to do
+   - **d**: Return an empty list marked as a success and let the run continue
 
 2. A calendar service gets three requests: one asks for a function that it lacks, one gives a date as "next Friday" where a calendar date is needed, and one reaches a backend that answers 503. Which request alone is a protocol error?
    - **a**: The one that has nowhere to be routed
