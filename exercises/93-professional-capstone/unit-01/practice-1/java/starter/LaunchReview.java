@@ -8,17 +8,17 @@ final class LaunchReview {
 
     /** TODO: the findings "<severity> <domain> <rule>", high first, then by domain, then by rule id. */
     static List<String> launchReview(Set<String> f, Map<String, Integer> n) {
-        return null;
+        return List.of();
     }
 
     /** TODO: reject for a high finding, revise for a medium one, otherwise approve. */
     static String verdict(List<String> findings) {
-        return null;
+        return "";
     }
 
     /** TODO: the number of findings in each domain, P1 to P7. */
     static List<Integer> scorecard(List<String> findings) {
-        return null;
+        return List.of();
     }
 
     /** TODO: 100 minus the review cost as a percent of the error cost, rounded up, never below 0; 0 when an error costs nothing. */

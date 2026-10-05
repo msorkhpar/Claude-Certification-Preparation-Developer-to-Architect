@@ -5,19 +5,19 @@ DOMAINS = ["P1", "P2", "P3", "P4", "P5", "P6", "P7"]
 
 def launch_review(flags, numbers):
     # TODO: the findings "<severity> <domain> <rule>", high first, then by domain, then by rule id.
-    return None
+    return []
 
 
 def verdict(findings):
     # TODO: reject for a high finding, revise for a medium one, otherwise approve.
-    return None
+    return ""
 
 
 def scorecard(findings):
     # TODO: the number of findings in each domain, P1 to P7.
-    return None
+    return []
 
 
 def needed_accuracy(error_cost, review_cost):
     # TODO: 100 minus the review cost as a percent of the error cost, rounded up, never below 0; 0 when an error costs nothing.
-    return None
+    return -1
