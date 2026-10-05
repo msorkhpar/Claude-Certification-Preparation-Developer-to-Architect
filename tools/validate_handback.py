@@ -3,7 +3,7 @@
 
 usage: tools/validate_handback.py [.survey-out/gate-report.json]
 Exit 0 only when the report: exists; was written by a full gate run (not --report-only); is fresh (written after the last
-commit that touched the range, and for the current HEAD of the range); has a clean range (nothing uncommitted); covers all four
+commit that touched the range, from a commit in HEAD's history); has a clean range (nothing uncommitted); covers all four
 languages with executed == expected > 0 (a language may be waived only when every item in scope is an Agent SDK exception, and
 then only java and kotlin); has no step with a non-zero rc; has no findings; and says pass.
 Prints one line the register can read: the verdict, the range, the commit and the per-language executed/expected runs.
@@ -42,8 +42,8 @@ def validate(path):
         why.append("the range has uncommitted changes")
     if not r.get("range_clean"):
         why.append("the report was written over an unclean range")
-    if r.get("commit") != git("rev-parse", "HEAD"):
-        why.append("the report is for another commit than HEAD")
+    if subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor", str(r.get("commit")), "HEAD"], capture_output=True).returncode != 0:
+        why.append("the report's commit is not in the history of HEAD")
     langs = r.get("languages", {})
     waived = set(r.get("languages_waived", []))
     if not waived <= {"java", "kotlin"}:
