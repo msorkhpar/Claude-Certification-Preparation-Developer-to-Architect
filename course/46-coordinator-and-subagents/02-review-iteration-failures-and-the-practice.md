@@ -17,7 +17,7 @@ The first round of a research team rarely answers the question. Something is thi
 
 The research article describes the cycle as the lead's job: "The LeadResearcher synthesizes these results and decides whether more research is needed—if so, it can create additional subagents or refine its strategy." Three rules make that cycle safe in code.
 
-- **Only the review finds a gap, and only a subagent closes it.** A gap is a statement of what is missing ("2023 baseline for chip supply"). It becomes a new brief, and the new finding is added to the old ones. The synthesis step is never asked to fill a thin part from its own knowledge: a gap is found by the review and closed by a subagent, never invented by the synthesis.
+- **Only the review finds a gap, and only a subagent closes it.** A gap is a statement of what is missing ("2023 baseline for chip supply"). It becomes a new brief, and the new finding is added to the old ones, because a gap is found by the review and closed by a subagent, never invented by the synthesis.
 - **Send out the gaps and nothing else.** A first-round subagent that did its job has a finding. Sending every brief out again in the next round doubles the cost and adds repeats, which is the mistake that the practice's case `e5` plants.
 - **Bound the rounds, and report what is left.** A reviewer can always find one more thing. The practice caps the rounds, calls the reviewer once more after the last round, and returns the gaps that remain. The status is `complete` only when no gap remains and nothing failed; otherwise it is `partial`, and the caller can show the user the list of what is missing. Each round is paid for: "multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance."
 
@@ -85,12 +85,12 @@ This quiz covers both pages of the module.
 1. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. On one question, two of the three subagents come back with almost the same findings on the same period. Which cause fits best?
    - **a**: The coordinator ran too few rounds of review after the first answers
    - **b**: The context of one subagent leaked into another during the run
-   - **c**: The briefs did not divide the scope or say what each part must leave out
+   - **c**: The briefs did not divide the scope or name what each part excludes
    - **d**: The subagents ran on a smaller model than the coordinator uses
 
 2. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. The coordinator starts the same five subagents for every query, including "what is the boiling point of water". Which redesign fits best?
    - **a**: Keep the five subagents but lower the token limit of each one
-   - **b**: Scale the team to what is asked, down to a solo worker for a plain fact
+   - **b**: Size the team by difficulty, down to a lone worker for a plain fact
    - **c**: Let the five subagents share one context so that they finish sooner
    - **d**: Start the team only when the user asks for a long report
 

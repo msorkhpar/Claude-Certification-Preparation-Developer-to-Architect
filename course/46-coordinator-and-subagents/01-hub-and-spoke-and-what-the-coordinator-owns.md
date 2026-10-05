@@ -47,7 +47,7 @@ The coordinator itself is a loop (module 45) whose "tool" is the delegation. A m
 
 ### The split can be too narrow
 
-The mirror image of a vague brief is a plan that divides a broad topic into too few, too obvious parts. Each subagent then does its part well, and the answer still leaves out what no part covered. The research article states the cause on the brief's side: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information". A coordinator therefore does two things about coverage. It writes the split from the question's facets, not from the first parts that come to mind. And it checks the findings against the question afterwards and sends out what is missing, which page 2 builds.
+The mirror image of a vague brief is a plan that divides a broad topic into too few, too obvious parts. Each subagent then does its part well, and the answer still leaves out what no part covered. The cause lies with the brief, as quoted above. A coordinator therefore does two things about coverage. It writes the split from the question's facets, not from the first parts that come to mind. And it checks the findings against the question afterwards and sends out what is missing, which page 2 builds.
 
 ### When the coordinator should not delegate at all
 
@@ -479,7 +479,7 @@ answer: Chip supply recovered first, car output followed, and rates stayed high.
 ```
 <!-- /example -->
 
-Read the three subagent lines. Each request has one message, the role's system prompt, no copy of the coordinator's question and none of the other reports: the brief was written to be read alone, and the code never passed anything else. The synthesis request is the only one that holds all three reports, which is the point where the pieces meet. Five model calls in all: one plan, three subagents, one synthesis. Both languages print the same lines.
+Read the three subagent lines. Each request has one message, the role's system prompt, no copy of the coordinator's question and none of the other reports: the brief was written to be read alone, and the code never passed anything else. The synthesis request is the only one that holds all three reports, which is the point where the pieces meet. Five model calls in all: one plan, three subagents, one synthesis. All four languages print the same lines.
 
 ## Traps
 
@@ -494,7 +494,7 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. A coordinator spends ten turns locating the broken check and its failure text, then tells a subagent only to "fix the broken check". The subagent opens other modules and edits the wrong one. What should the coordinator have done?
-   - **a**: Put the path, the exact message and its decisions so far into the prompt it hands over
+   - **a**: Write the path, the message and its decisions into the prompt it hands over
    - **b**: Rely on the subagent to inherit the parent's earlier tool results by itself, unprompted
    - **c**: Name a stronger model for the subagent in its definition file
    - **d**: Add a line telling the subagent to ask the coordinator whenever it is unsure
@@ -502,7 +502,7 @@ These are the wrong answers that the exam's options for this task statement offe
 2. A team plans a multi-agent design for a feature whose planning, coding and verifying steps all draw on the same evolving sources, with the user steering between steps. Which choice fits best?
    - **a**: Run the three steps as parallel subagents to cut the total waiting time
    - **b**: Give each step to its own subagent so that every context stays clean and small
-   - **c**: Stay in one single conversation, since the phases lean on shared context
+   - **c**: Stay in one conversation, since the phases lean on shared context
    - **d**: Add a coordinator that merges what the three step-agents produce at the end
 
 <details>
