@@ -136,6 +136,9 @@ Scope: this round may edit exactly these files, beyond the rule that `tools/`, `
    ("current Opus, Sonnet, Fable models keep them" lacks an "and"): fix the sentence and the Developer
    mock 1 x24 quote (module 44) in the same commit. List anything needing documentation or a host
    run under `open`; do not guess.
+6. Scenario stems that give a named person a gendered pronoun (`course/92-*/01` q2, `course/92-*/02`
+   m1, and any others a search of all modules finds): rewrite with they/them or the person's name,
+   keeping the key and options parallel, and rebuild `quiz.json`.
 
 ### cloud-r3-read-l1, -l2, -l3, -l4 (independent reader, one level each)
 
