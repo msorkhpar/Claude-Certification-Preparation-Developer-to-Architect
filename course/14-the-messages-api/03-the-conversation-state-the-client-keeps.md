@@ -339,8 +339,8 @@ Every turn resends everything before it. If each exchange adds about 200 tokens,
 tokens, and a conversation of *n* turns pays for about 200 *n*(*n* + 1) / 2 input tokens in total: **the input cost
 of a conversation grows with the square of its length**. A 40-turn conversation costs roughly 15 times what the
 first 10 turns did, not 4 times. Three controls exist, taught later: prompt caching makes the repeated prefix cheaper
-(module 19) and does not count cached reads toward the input-token rate limit on most models, compaction summarises
-old turns (module 25), and a hard cap on turns ends the conversation politely. Until you add one, the client should at
+(module 20) and does not count cached reads toward the input-token rate limit on most models, compaction summarises
+old turns (module 29), and a hard cap on turns ends the conversation politely. Until you add one, the client should at
 least count the tokens, so the growth is visible.
 
 ### Failure leaves no mark
