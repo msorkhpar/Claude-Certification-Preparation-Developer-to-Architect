@@ -72,10 +72,10 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 3. A `search_orders` tool returns every match, sometimes thousands of rows, and fills the context before the agent can act. What change helps most?
-   - **a**: Send all rows, with a request that the model ignore the extras
-   - **b**: Serve one page with a cursor and a note on narrowing the search
-   - **c**: Cut the list at a fixed length without any message
-   - **d**: Wait for larger context windows, which will remove the problem
+   - **a**: Send all the rows and ask the model to skip the extras
+   - **b**: Serve one page, a cursor and a note on narrowing
+   - **c**: Cut the list at a fixed length and add no message
+   - **d**: Move to a larger context window and send the full list
 
 4. A `find_documents` tool answers with the sentence "Found these documents: Maintenance Schedule, Lab Access Plan." The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?
    - **a**: Return each hit with a stable identifier and the fields the following step needs
@@ -96,16 +96,16 @@ These are the wrong answers that the exam's options for this task statement offe
 This quiz covers both pages of the module.
 
 1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that look up customers and orders, issue refunds and escalate to a person. Over a week of logs it repeatedly picks a tool that is unable to serve the request, although the system prompt was reworded three times. What does this indicate?
-   - **a**: The tool list is too short, so more tools should be added to cover cases
-   - **b**: The model needs more instructions about tools, so the prompt should grow
-   - **c**: The texts cannot separate the options, so the surface needs redesign
-   - **d**: The tools are served by several services, which makes selection unstable
+   - **a**: The list is too short and needs more tools to cover the cases
+   - **b**: The prompt needs more instructions about the tools to steer the choice
+   - **c**: The descriptions fail to separate the options and need a redesign
+   - **d**: The services behind the tools differ, which makes selection unstable
 
 2. Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?
-   - **a**: Give both agents the same pair, with a written rule to prefer the first
-   - **b**: Rename one for pages fetched online, with a text that covers only those
-   - **c**: Remove the descriptions entirely, so the names alone decide the choice
-   - **d**: Ask each agent to explain its reasoning in a parameter of the call
+   - **a**: Give both agents the same pair and add a rule to prefer the first
+   - **b**: Rename one for fetched pages and narrow its text to those pages
+   - **c**: Drop the descriptions and let the names alone decide the choice
+   - **d**: Add a parameter where each agent explains its reasoning
 
 3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. It uses one MCP server with eight tools whose schemas take about 3% of the context window, and the team sets `ENABLE_TOOL_SEARCH=auto`. What does the SDK do?
    - **a**: Loads all of them at the start, as they are under the activation level
@@ -117,7 +117,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault. *b* is ruled out because more instructions can pull the wrong way: an instruction "contains a keyword that now pulls every order question toward" one tool, over the descriptions. *a* is ruled out because the article warns that "Too many tools or overlapping tools can also distract agents from pursuing efficient strategies." *d* is ruled out because where a tool is served is not a selection fault: the choice runs on "a name, a description and a schema".
-2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because a preference rule outside the descriptions is the kind of nudge that "contains a keyword that now pulls every order question toward" one tool, instead of the text the model reads. *c* is ruled out because the description is where the model learns "When it should be used (and when it shouldn't)". *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
+2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because the overlap stays in the texts the model chooses from, and the page says "Fix the text the model chooses from." *c* is ruled out because the description is where the model learns "When it should be used (and when it shouldn't)". *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
 3. **a**. Under `auto` the point is 10% of the window, and below it everything loads at the start. *b* is ruled out because "Below that, the SDK loads every tool definition into context upfront." *c* is ruled out because the rule gives no partial deferral, and "Below that, the SDK loads every tool definition into context upfront." *d* is ruled out because the choice turns on the size of the definitions, not on the prompt: "When the total reaches 10% of the window, tool search activates."
 
 </details>

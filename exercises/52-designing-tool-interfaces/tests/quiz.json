@@ -28,15 +28,15 @@
       "options": {
         "a": "Add a third tool that wraps both lookups behind one name",
         "b": "Add a routing layer in front of the model for order questions",
-        "c": "Rephrase that rule so that no keyword ties it to one function",
-        "d": "Cut each description down to a single sentence"
+        "c": "Reword that rule to drop its tool-specific trigger",
+        "d": "Lengthen the `lookup_order` description with more examples"
       },
       "key": "c",
       "explanation": {
         "c": "The keyword in the rule pulls the choice, so the rule is what to change.",
         "b": "Ruled out because a routing layer \"bypasses the model's own reading of the request\" and leaves the prompt as it was.",
         "a": "Ruled out because a wrapper adds a third name to choose from, and \"More tools don't always lead to better outcomes.\"",
-        "d": "Ruled out because the documentation says \"Aim for at least 3–4 sentences for each tool description\", and a shorter text separates the tools less."
+        "d": "Ruled out because the keyword pulls every order question toward `get_customer` \"however clear the description of `lookup_order` is\"; more text on the other side does not remove the pull."
       }
     },
     {
@@ -45,10 +45,10 @@
       "scope": "page",
       "stem": "A `search_orders` tool returns every match, sometimes thousands of rows, and fills the context before the agent can act. What change helps most?",
       "options": {
-        "a": "Send all rows, with a request that the model ignore the extras",
-        "b": "Serve one page with a cursor and a note on narrowing the search",
-        "c": "Cut the list at a fixed length without any message",
-        "d": "Wait for larger context windows, which will remove the problem"
+        "a": "Send all the rows and ask the model to skip the extras",
+        "b": "Serve one page, a cursor and a note on narrowing",
+        "c": "Cut the list at a fixed length and add no message",
+        "d": "Move to a larger context window and send the full list"
       },
       "key": "b",
       "explanation": {
@@ -83,10 +83,10 @@
       "scope": "module",
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that look up customers and orders, issue refunds and escalate to a person. Over a week of logs it repeatedly picks a tool that is unable to serve the request, although the system prompt was reworded three times. What does this indicate?",
       "options": {
-        "a": "The tool list is too short, so more tools should be added to cover cases",
-        "b": "The model needs more instructions about tools, so the prompt should grow",
-        "c": "The texts cannot separate the options, so the surface needs redesign",
-        "d": "The tools are served by several services, which makes selection unstable"
+        "a": "The list is too short and needs more tools to cover the cases",
+        "b": "The prompt needs more instructions about the tools to steer the choice",
+        "c": "The descriptions fail to separate the options and need a redesign",
+        "d": "The services behind the tools differ, which makes selection unstable"
       },
       "key": "c",
       "explanation": {
@@ -102,15 +102,15 @@
       "scope": "module",
       "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?",
       "options": {
-        "a": "Give both agents the same pair, with a written rule to prefer the first",
-        "b": "Rename one for pages fetched online, with a text that covers only those",
-        "c": "Remove the descriptions entirely, so the names alone decide the choice",
-        "d": "Ask each agent to explain its reasoning in a parameter of the call"
+        "a": "Give both agents the same pair and add a rule to prefer the first",
+        "b": "Rename one for fetched pages and narrow its text to those pages",
+        "c": "Drop the descriptions and let the names alone decide the choice",
+        "d": "Add a parameter where each agent explains its reasoning"
       },
       "key": "b",
       "explanation": {
         "b": "A web-specific name and description removes the overlap at its source.",
-        "a": "Ruled out because a preference rule outside the descriptions is the kind of nudge that \"contains a keyword that now pulls every order question toward\" one tool, instead of the text the model reads.",
+        "a": "Ruled out because the overlap stays in the texts the model chooses from, and the page says \"Fix the text the model chooses from.\"",
         "c": "Ruled out because the description is where the model learns \"When it should be used (and when it shouldn't)\".",
         "d": "Ruled out because \"A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal.\""
       }
