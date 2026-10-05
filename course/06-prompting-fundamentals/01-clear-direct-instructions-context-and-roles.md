@@ -8,8 +8,9 @@ explains the purpose, and use a role without mistaking it for a guarantee.
 
 Checked against the Claude API documentation on 2026-10-02: the prompt engineering overview, the
 Prompting best practices page (which covers the techniques below for Claude Fable 5.1, Opus 5.5, Sonnet 5.5
-and Haiku 4.5, among others), the reduce-hallucinations page and the vision page. Where this page gives a working rule of its own, it says so. All model replies on this page
-are hand-scripted and labelled illustrative; no live call was made.
+and Haiku 4.5, among others), the reduce-hallucinations page and the vision page. Where this page gives a
+working rule of its own, it says so. All model replies on this page are hand-scripted and labelled
+illustrative; no live call was made.
 
 ## Why it matters
 
@@ -56,7 +57,7 @@ Direct:  "Classify each review below as positive, negative or mixed. Output one 
 An instruction with a reason is followed better than a bare rule, because the reason lets the model handle
 the cases the rule did not list. Compare "Never use ellipses" with "Your reply will be read aloud by a
 text-to-speech engine, so avoid ellipses, which it cannot pronounce." The second explains itself and
-generalises: the model can infer to avoid other unpronounceable marks too.
+generalises: the model can infer that other unpronounceable marks should be avoided too.
 
 Context to include, when it applies:
 
