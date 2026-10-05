@@ -45,7 +45,7 @@ and modules 79 to 94 of Level 4 (Architect Professional), which is the whole of 
 | `36-managed-and-self-hosted-agents/` | Managed and self-hosted agents | 2 |
 | `37-agent-frameworks-compared/` | Agent frameworks compared | 2 |
 | `38-claude-code-for-developers/` | Claude Code for developers | 3 |
-| `39-extending-claude-code/` | Extending Claude Code | 4 |
+| `39-extending-claude-code/` | Extending Claude Code | 5 |
 | `40-claude-in-the-software-life-cycle/` | Claude in the software life cycle | 2 |
 | `41-security-and-safety/` | Security and safety | 3 |
 | `42-evaluation/` | Evaluation | 3 |
@@ -66,7 +66,7 @@ and modules 79 to 94 of Level 4 (Architect Professional), which is the whole of 
 | `57-memory-files-and-rules/` | Memory files and rules | 2 |
 | `58-commands-and-skills/` | Commands and skills | 2 |
 | `59-plan-mode-and-iterative-refinement/` | Plan mode and iterative refinement | 2 |
-| `60-claude-code-in-ci/` | Claude Code in CI | 2 |
+| `60-claude-code-in-ci/` | Claude Code in CI | 3 |
 | `61-criteria-and-examples/` | Criteria and examples | 2 |
 | `62-structured-output-at-the-architect-level/` | Structured output at the architect level | 2 |
 | `63-batch-and-multi-pass-review/` | Batch processing and multi-pass review | 2 |

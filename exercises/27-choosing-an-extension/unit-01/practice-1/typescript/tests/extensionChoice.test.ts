@@ -50,6 +50,16 @@ const BANK: Array<[string, Record<string, any>, string, string]> = [
   ["s16", { surface: "api" }, "api-tool", "own-schema-and-code"],
   ["s17", { surface: "api", builtin_covers: true }, "builtin-tool", "provided-schema"],
   ["s18", { surface: "api", external_system: true, remote_server: true }, "mcp", "remote-server"],
+  ["s19", { timing: "interval" }, "loop", "session-rhythm"],
+  ["s20", { timing: "interval", presence: "away" }, "routine", "runs-unattended"],
+  ["s21", { timing: "event" }, "monitor", "push-not-poll"],
+  ["s22", { timing: "background" }, "background-task", "work-while-it-runs"],
+  ["s23", { presence: "pipeline" }, "headless-ci", "no-person-present"],
+  ["s24", { timing: "condition" }, "goal", "until-condition-holds"],
+  ["s25", { personal: "voice" }, "output-style", "response-voice"],
+  ["s26", { personal: "display" }, "status-line", "personal-display"],
+  ["s27", { timing: "interval", lasts_days: 30, local_files: true }, "desktop-task", "durable-and-local"],
+  ["s28", { personal: "keys" }, "keybinding", "personal-keys"],
 ];
 
 test("m1 every situation of the bank gets its mechanism and its reason", () => {
@@ -58,12 +68,12 @@ test("m1 every situation of the bank gets its mechanism and its reason", () => {
 });
 
 test("e1 a rule that must hold goes to a hook whatever else is true", () => {
-  for (const s of sweep([["knowledge", ["none", "convention", "reference", "procedure"]], ["external_system", [false, true]], ["noisy", [false, true]], ["path_scoped", [false, true]]], { guarantee: true })) assert.deepEqual(choose(s), { mechanism: "hook", reason: "must-hold-every-time" }, JSON.stringify(s));
+  for (const s of sweep([["knowledge", ["none", "convention", "reference", "procedure"]], ["external_system", [false, true]], ["noisy", [false, true]], ["path_scoped", [false, true]], ["timing", ["none", "interval", "event", "condition", "background"]], ["presence", ["session", "pipeline", "away"]], ["personal", ["none", "voice"]]], { guarantee: true })) assert.deepEqual(choose(s), { mechanism: "hook", reason: "must-hold-every-time" }, JSON.stringify(s));
 });
 
 test("e2 an outside system needs a server and noisy work alone needs a subagent", () => {
-  for (const s of sweep([["knowledge", ["none", "convention", "reference", "procedure"]], ["noisy", [false, true]], ["path_scoped", [false, true]]], { external_system: true })) assert.deepEqual(choose(s), { mechanism: "mcp", reason: "external-system" }, JSON.stringify(s));
-  for (const s of sweep([["knowledge", ["none", "convention", "reference", "procedure"]], ["path_scoped", [false, true]]], { noisy: true })) assert.deepEqual(choose(s), { mechanism: "subagent", reason: "isolate-context" }, JSON.stringify(s));
+  for (const s of sweep([["knowledge", ["none", "convention", "reference", "procedure"]], ["noisy", [false, true]], ["path_scoped", [false, true]], ["timing", ["none", "interval", "event", "condition", "background"]], ["presence", ["session", "pipeline", "away"]]], { external_system: true })) assert.deepEqual(choose(s), { mechanism: "mcp", reason: "external-system" }, JSON.stringify(s));
+  for (const s of sweep([["knowledge", ["none", "convention", "reference", "procedure"]], ["path_scoped", [false, true]], ["timing", ["none", "interval", "event", "condition", "background"]], ["presence", ["session", "pipeline", "away"]]], { noisy: true })) assert.deepEqual(choose(s), { mechanism: "subagent", reason: "isolate-context" }, JSON.stringify(s));
 });
 
 test("e3 knowledge goes to the file or skill that loads it at the right time", () => {
@@ -106,4 +116,42 @@ test("e6 an unknown value is an error and a missing key takes its default", () =
   assert.ok(refused({ repos: 0 }), "{\"repos\": 0} must be an error");
   assert.ok(refused({ repos: -1 }), "{\"repos\": -1} must be an error");
   assert.ok(refused({ surface: "api", knowledge: "tips" }), "{\"surface\": \"api\", \"knowledge\": \"tips\"} must be an error");
+  assert.ok(refused({ timing: "weekly" }), "{\"timing\": \"weekly\"} must be an error");
+  assert.ok(refused({ presence: "cloud" }), "{\"presence\": \"cloud\"} must be an error");
+  assert.ok(refused({ personal: "theme" }), "{\"personal\": \"theme\"} must be an error");
+  assert.ok(refused({ lasts_days: 0 }), "{\"lasts_days\": 0} must be an error");
+  assert.ok(refused({ presence: "away", local_files: true, timing: "interval" }), "{\"presence\": \"away\", \"local_files\": true, \"timing\": \"interval\"} must be an error");
+  assert.ok(refused({ surface: "api", timing: "weekly" }), "{\"surface\": \"api\", \"timing\": \"weekly\"} must be an error");
+});
+
+test("e7 a pipeline a condition a long command and an event are not intervals", () => {
+  assert.deepEqual(choose({ presence: "pipeline" }), { mechanism: "headless-ci", reason: "no-person-present" }, "{\"presence\": \"pipeline\"}");
+  assert.deepEqual(choose({ presence: "pipeline", timing: "interval", lasts_days: 30 }), { mechanism: "headless-ci", reason: "no-person-present" }, "{\"presence\": \"pipeline\", \"timing\": \"interval\", \"lasts_days\": 30}");
+  assert.deepEqual(choose({ timing: "condition", lasts_days: 30 }), { mechanism: "goal", reason: "until-condition-holds" }, "{\"timing\": \"condition\", \"lasts_days\": 30}");
+  assert.deepEqual(choose({ timing: "condition", presence: "away" }), { mechanism: "goal", reason: "until-condition-holds" }, "{\"timing\": \"condition\", \"presence\": \"away\"}");
+  assert.deepEqual(choose({ timing: "background", presence: "away" }), { mechanism: "background-task", reason: "work-while-it-runs" }, "{\"timing\": \"background\", \"presence\": \"away\"}");
+  assert.deepEqual(choose({ timing: "event" }), { mechanism: "monitor", reason: "push-not-poll" }, "{\"timing\": \"event\"}");
+  assert.deepEqual(choose({ timing: "event", presence: "away" }), { mechanism: "routine", reason: "runs-unattended" }, "{\"timing\": \"event\", \"presence\": \"away\"}");
+});
+
+test("e8 an interval is a loop in the session and a routine or desktop task when it must outlive it", () => {
+  assert.deepEqual(choose({ timing: "interval", lasts_days: 7 }), { mechanism: "loop", reason: "session-rhythm" }, "{\"timing\": \"interval\", \"lasts_days\": 7}");
+  assert.deepEqual(choose({ timing: "interval", lasts_days: 8 }), { mechanism: "routine", reason: "runs-unattended" }, "{\"timing\": \"interval\", \"lasts_days\": 8}");
+  assert.deepEqual(choose({ timing: "interval", lasts_days: 8, local_files: true }), { mechanism: "desktop-task", reason: "durable-and-local" }, "{\"timing\": \"interval\", \"lasts_days\": 8, \"local_files\": true}");
+  assert.deepEqual(choose({ timing: "interval", local_files: true }), { mechanism: "loop", reason: "session-rhythm" }, "{\"timing\": \"interval\", \"local_files\": true}");
+  assert.deepEqual(choose({ timing: "interval", presence: "away", lasts_days: 30 }), { mechanism: "routine", reason: "runs-unattended" }, "{\"timing\": \"interval\", \"presence\": \"away\", \"lasts_days\": 30}");
+  assert.deepEqual(choose({ timing: "interval", presence: "away" }), { mechanism: "routine", reason: "runs-unattended" }, "{\"timing\": \"interval\", \"presence\": \"away\"}");
+  assert.deepEqual(choose({ timing: "interval", presence: "session" }), { mechanism: "loop", reason: "session-rhythm" }, "{\"timing\": \"interval\", \"presence\": \"session\"}");
+});
+
+test("e9 a personal preference goes to a style a status line or a key binding and knowledge keeps its own rules", () => {
+  assert.deepEqual(choose({ personal: "voice" }), { mechanism: "output-style", reason: "response-voice" }, "{\"personal\": \"voice\"}");
+  assert.deepEqual(choose({ personal: "display" }), { mechanism: "status-line", reason: "personal-display" }, "{\"personal\": \"display\"}");
+  assert.deepEqual(choose({ personal: "keys" }), { mechanism: "keybinding", reason: "personal-keys" }, "{\"personal\": \"keys\"}");
+  assert.deepEqual(choose({ personal: "voice", knowledge: "convention" }), { mechanism: "output-style", reason: "response-voice" }, "{\"personal\": \"voice\", \"knowledge\": \"convention\"}");
+  assert.deepEqual(choose({ personal: "keys", knowledge: "reference", repos: 4 }), { mechanism: "keybinding", reason: "personal-keys" }, "{\"personal\": \"keys\", \"knowledge\": \"reference\", \"repos\": 4}");
+  assert.deepEqual(choose({ personal: "display", repos: 3 }), { mechanism: "status-line", reason: "personal-display" }, "{\"personal\": \"display\", \"repos\": 3}");
+  assert.deepEqual(choose({ personal: "none", knowledge: "convention" }), { mechanism: "claude-md", reason: "always-known" }, "{\"personal\": \"none\", \"knowledge\": \"convention\"}");
+  assert.deepEqual(choose({ personal: "voice", timing: "interval" }), { mechanism: "loop", reason: "session-rhythm" }, "{\"personal\": \"voice\", \"timing\": \"interval\"}");
+  assert.deepEqual(choose({ personal: "voice", surface: "api" }), { mechanism: "api-tool", reason: "own-schema-and-code" }, "{\"personal\": \"voice\", \"surface\": \"api\"}");
 });

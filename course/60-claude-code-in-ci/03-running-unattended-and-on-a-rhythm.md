@@ -1,0 +1,230 @@
+# Running unattended and on a rhythm: loops, schedules, background work and headless runs
+
+**Level:** Architect · **Module 60:** Claude Code in CI · **Page 3 of 3**
+**Exams:** A3.6; S5
+
+**After this page you can** choose how Claude Code runs without you watching, from a list of nine ways (a loop on a fixed interval, a self-paced loop, a one-off reminder, a routine in the cloud, a desktop task, a monitor, a background task, a goal and a headless run in a pipeline), say what each costs and how each one fails, combine them without a gap, and write the decision function of the module's second practice.
+
+Checked on 2026-10-04 against the Claude Code documentation pages "Run prompts on a schedule", "Automate work with routines", "Schedule recurring tasks in Claude Code Desktop", "Keep Claude working toward a goal", "Tools reference", "Run Claude Code programmatically", "Claude Code GitHub Actions" and "Agent view", which document behaviour up to Claude Code v2.1.288. **What was read and what was run:** every statement about Claude Code on this page was read from those pages. No Claude Code session was started, no schedule was created, no routine was fired and no workflow ran. The decision function of the practice is the course's own model of the documented rules, not a feature of Claude Code; its tests run offline in the course container in Python, TypeScript, Java and Kotlin. Routines are documented as a research preview, so their limits may change.
+
+## Why it matters
+
+A team wants three things from Claude Code that nobody should have to remember: a quick check of a deployment while an engineer works, a nightly look at the issue tracker, and a review that fails the merge check when it cannot finish. The first is started as a loop, and the engineer closes the laptop at six; the check silently stops. The second is also started as a loop, and seven days later it is gone. The third is a routine, and a green status in its run list is read as "the review passed". Each mechanism is the right one for a different clock and a different owner of the machine, and exam scenario S5 and the questions on task statement 3.6 turn on telling them apart: who starts the next run, what has to be on for it to happen, how long it lasts, and what tells you that it failed.
+
+## The idea
+
+### Six questions that pick the mechanism
+
+Ask them in this order. The first answer that matches decides.
+
+| Question | If yes |
+|---|---|
+| Is the job inside a pipeline, with nobody to answer a prompt? | a headless run (`claude -p`), page 1 |
+| Should Claude keep going until a check holds, whatever the time? | a goal |
+| Is it a long command that Claude should not wait for? | a background task |
+| Does something push events, and should Claude react to each one? | a monitor in the session; a routine when it is a repository event or the machine is off |
+| Should it run once, later? | a one-off reminder in the session; a routine or desktop task when the session or machine will be gone |
+| Should it repeat every so often? | a loop while a session stays open for up to seven days; a routine or a desktop task beyond that or without a session |
+
+Notice what is not a question: "how clever is the prompt". The prompt is the same in every row. What differs is what starts the next run and what has to stay alive for it to happen.
+
+> **Exam guide and current product.** *What the guide states (task statement 3.6, quoted on page 1), and so what the exam keys:* for CI/CD integration the answer is the headless flag `-p`, with `--output-format json` and `--json-schema` for findings a script can post, and CLAUDE.md for project context. *What the product does now (documentation checked 2026-10-04):* all of that holds, and the product also has ways of running on a rhythm that the guide's wording does not name: a loop, a routine, a desktop task, a monitor, a goal. A scenario that says "in the CI pipeline" is keyed to the headless run. A scenario that says "every morning, with nobody logged in" or "while the engineer keeps working" is the product's wider surface, and this page is the map for it.
+
+### /loop: a prompt on a clock, inside a session
+
+The `/loop` bundled skill re-runs a prompt while the session stays open. What you give it decides how it behaves:
+
+| You type | What happens |
+|---|---|
+| `/loop 5m check the deploy` | the prompt runs on a fixed schedule |
+| `/loop check the deploy` | Claude chooses a delay after each iteration |
+| `/loop` | a built-in maintenance prompt runs, or your own `loop.md` |
+
+**Fixed interval.** Claude turns the interval into a cron expression and confirms the cadence and a job ID. The units are seconds, minutes, hours and days. "Seconds are rounded up to the nearest minute since cron has one-minute granularity", and an interval that is not a clean cron step, such as 7 minutes or 90 minutes, is rounded to the nearest one that is, with Claude saying what it picked. The practice's loop rounds seconds up and never goes below one minute.
+
+**Self-paced.** With no interval, "After each iteration it picks a delay between one minute and one hour based on what it observed". The delay and the reason are printed at the end of each iteration: short while a build finishes, longer when nothing is pending. Under the hood Claude reschedules with a `ScheduleWakeup` tool, and it can end the loop itself when the work is done. If an iteration ends without rescheduling or stopping, Claude Code schedules one fallback wakeup about 20 minutes later and ends the loop when that iteration does not reschedule either. Pressing `Esc` while it waits clears the pending wakeup.
+
+**The bare form.** `/loop` with no prompt runs a maintenance prompt that works through unfinished work, the current branch's pull request (review comments, failed CI, merge conflicts) and cleanup passes, and "irreversible actions such as pushing or deleting only proceed when they continue something the transcript already authorized". A `.claude/loop.md` in the project, or `~/.claude/loop.md` for you, replaces that default; the project file wins when both exist, edits apply on the next iteration, and anything beyond 25,000 bytes is cut.
+
+**What a loop can run.** A prompt, or a skill: `/loop 20m /review-pr 1234`. "A scheduled fire only runs skills that Claude is allowed to invoke on its own." Built-in commands such as `/model` or `/clear`, skills marked `disable-model-invocation: true` (the bundled `/verify` among them) and MCP prompts reach Claude as plain text instead of executing. A one-time reminder needs no `/loop`: say "remind me at 3pm to push the release branch", and Claude schedules a single task that deletes itself after it fires.
+
+**How it runs, and where it stops.** The scheduler checks every second and a due prompt "fires between your turns, not while Claude is mid-response"; it waits for the current turn. Recurring tasks get a deterministic offset of up to 30 minutes (up to half the interval when more often than hourly), so an exact minute is chosen away from `:00` and `:30`. A session holds at most 50 tasks. The limits that matter for the choice are these:
+
+- "Tasks only fire while Claude Code is running and idle." Close the terminal and they stop; backgrounding the session carries `/loop` tasks over to a background session that has no terminal.
+- "No catch-up for missed fires": a task that came due during a long turn fires once when Claude is idle, not once per missed interval.
+- Recurring tasks "expire 7 days after creation". The task fires one last time, then deletes itself.
+- On `--resume` or `--continue` the scheduled tasks come back, except expired ones and one-shot tasks whose time has passed, and a self-paced loop isn't restored on resume, so it is started again. Background shell commands and monitors are never restored.
+- `CLAUDE_CODE_DISABLE_CRON=1` turns the whole scheduler off.
+
+### Routines and desktop tasks: schedules that outlive the session
+
+Two products keep a schedule without an open session, and the documentation compares them with `/loop` in one table:
+
+| | Routine (cloud) | Desktop task | `/loop` |
+|---|---|---|---|
+| Runs on | Anthropic-managed cloud | your machine | your machine |
+| Needs the machine on | no | yes | yes |
+| Needs an open session | no | no | yes |
+| Local files | no, a fresh clone | yes | yes |
+| Permission prompts | none, runs autonomously | set per task | inherits the session |
+| Shortest interval | 1 hour | 1 minute | 1 minute |
+
+**A routine** is "a saved Claude Code configuration: a prompt, one or more repositories, and a set of connectors, packaged once and run automatically". It has one or more triggers, and one routine can combine them: a schedule (hourly, nightly, weekly, or once at a specific time), an API call with a per-routine bearer token, and GitHub events (pull requests and releases, with filters). It is created at the web page for routines, in the Desktop app, or in the CLI with `/schedule` (alias `/routines`). Facts that decide a design:
+
+- "Routines execute on Anthropic-managed cloud infrastructure ... so they keep working when your laptop is closed." Each run starts from a fresh clone of the repositories, and Claude pushes to `claude/`-prefixed branches unless told otherwise.
+- "The minimum interval is one hour; expressions that run more frequently are rejected." Scheduled runs are limited to 100 per hour per account, and an API call that fires a routine is limited to 30 per hour per routine.
+- It runs without asking: "Claude can use every tool from an included connector, including writes, without asking for permission during a run." So the connectors and the environment's network access are scoped to what the routine needs.
+- A saved prompt is the assignment, but the text sent with an API call arrives wrapped as untrusted data: the saved prompt must say to act on it, for example "Investigate the alert described in the routine-fire-payload block".
+- The status can mislead. "A green status in the run list means the session started and exited without an infrastructure error. It does not mean the task in your prompt succeeded." Open the run and read the transcript.
+- If the GitHub connection is missing when a run is due, the routine skips runs for up to 72 hours and then turns off.
+- A routine belongs to one account: it is not shared with teammates, and commits and messages it makes carry that person's identity.
+
+**A desktop task** is the local equivalent. "A local task runs on your machine with direct access to your files and tools, but only fires while the app is open and your computer is awake." If the computer sleeps through a run, the run is skipped; when the app starts or the computer wakes, Desktop starts exactly one catch-up run for the most recently missed time within the last seven days, which is why a prompt that depends on the date should guard itself ("Only review today's commits"). A task in manual permission mode that needs a tool it was never allowed stalls until someone approves it, so a new task is run once by hand and its prompts are allowed. A worktree toggle gives each run its own isolated checkout.
+
+### Background tasks, monitors and background sessions
+
+These are not schedules. They keep Claude working while something else runs.
+
+**Background commands.** "For long-running processes such as dev servers or watch builds, Claude can set `run_in_background: true`", and `/tasks` lists and stops them. A foreground command that reaches its timeout (two minutes by default, ten at most) is moved to the background instead of being stopped, unless it starts with `sleep`. In a session that runs unattended, such as a run with `-p`, an SDK application, a CI job or a cloud session, a background command has a time limit: 30 minutes, or the `timeout` Claude passes up to 2 hours. A session you work in from a terminal or an editor has none (the limit applies to unattended sessions from v2.1.288).
+
+**Monitor.** The Monitor tool "runs a command in the background and feeds each output line back to Claude, so it can react to log entries, file changes, or polled status mid-conversation", and it can also treat each message of a WebSocket as an event. It avoids polling, which is why a self-paced loop may use it. Its limits decide where it fits: "Every watch Claude starts has a deadline: 5 minutes by default, at most 30 minutes, and at most 10 minutes in a non-interactive run given a single prompt with `-p`." Monitor uses the same permission rules as Bash, and it is not available on Amazon Bedrock, Google Cloud's Agent Platform or Microsoft Foundry.
+
+**Background sessions.** `claude --bg "<task>"`, or `/background` from inside a session, runs a full conversation with no terminal; `claude agents` shows what each is doing and which need you. A supervisor keeps them running, restarts failing ones and stops idle ones after about an hour. They run on your machine, stop if it shuts down, and "background sessions consume your subscription usage the same as interactive sessions, so running ten agents in parallel uses quota roughly ten times as fast as running one."
+
+### /goal: until a condition holds
+
+`/goal <condition>` sets a completion condition and Claude keeps working without a prompt per step. After each turn "a model checks whether the condition holds"; the goal clears when the condition is met, when the model judges it impossible, or when a turn fails on an error you have to fix (authentication, no credit, a context overflow that compaction could not clear, a model that is not available). One goal is active per session, the condition can be up to 4,000 characters, and a clause such as "or stop after 20 turns" bounds it. The evaluator "doesn't run commands or read files independently": it judges what Claude has shown in the conversation, so the condition names something Claude's own output can prove ("`npm test` exits 0"). `/goal` also works with `-p`, where the loop runs to completion in one invocation.
+
+How it differs from a loop is the point: a loop's next turn starts when a time interval elapses, and a goal's when the previous turn finishes, until a check holds. A goal is a wrapper around a session-scoped prompt-based Stop hook, so it is unavailable when hooks are disabled. It does not change the permission mode: run it in auto mode if it must go on without approvals.
+
+### Headless runs in CI, for the unattended case
+
+Page 1 gave the command and the gate. Four more facts from the same documentation matter once a job runs with nobody there:
+
+- **Prompts.** `--permission-prompts none` (Claude Code v2.1.259 or later) "when nobody is available to answer permission prompts, for example in a scheduled job": anything that would prompt is denied unless a `PermissionRequest` hook allows it, and Claude is told that nobody can approve it and not to retry. The `dontAsk` mode "denies every call that would otherwise prompt", and `--allowedTools` lists what is approved.
+- **Background work at exit.** A background shell is terminated about five seconds after Claude returns its final result. A background subagent or workflow keeps `claude -p` open until it finishes, ending after 10 minutes of idle waiting by default. `--bare` runs no background tasks at all.
+- **Stopping.** SIGTERM ends the run with exit code 143 and records no result for the turn in progress, so a supervisor that kills a job leaves no answer for the gate to read.
+- **A schedule in the pipeline.** A workflow with a `prompt` input runs in automation mode on any GitHub event, a cron schedule included. "GitHub runs scheduled workflows only from the default branch and, in public repositories, disables the schedule after 60 days without repository activity." A scheduled run has no person behind it, and the action rejects a bot actor unless it is listed in `allowed_bots`.
+
+```yaml
+name: Daily Report
+on:
+  schedule:
+    - cron: "7 9 * * *"
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: read
+      id-token: write
+    steps:
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: "Summarize yesterday's commits and open issues"
+          claude_args: |
+            --max-turns 8
+            --allowedTools "mcp__github__list_commits,mcp__github__list_issues"
+```
+
+The shape follows the documentation's own scheduled-report workflow (read, not run). Three lines are the course's additions for an unattended job: a minute away from `:00`, `--max-turns` and `timeout-minutes`, because the documentation lists "Set `--max-turns` in `claude_args` to limit iterations" and "Set workflow-level timeouts to avoid runaway jobs" as the cost controls. The key comes from a secret, never a literal.
+
+### What each costs and how each fails
+
+| Mechanism | What it spends | How it fails, and what shows it |
+|---|---|---|
+| Loop, fixed | a prompt sent into the session at every fire, so the session's own usage | stops when the terminal closes, expires after 7 days, fires once after a long turn; the only sign is silence |
+| Loop, self-paced | the same, with Claude's choice of delay | not restored on resume; ends after the fallback if an iteration neither reschedules nor stops |
+| Routine | subscription usage like a session, plus the hourly caps | green status with a failed task; skips for up to 72 hours when GitHub is disconnected; acts on connectors without asking |
+| Desktop task | usage, and a machine that must be awake | skipped while asleep, one catch-up later; stalls on an unapproved tool |
+| Monitor | a background script and a model turn per event | the deadline ends the watch after one notice; not on three cloud providers |
+| Background task | nothing until it ends, then a turn | killed at its time limit when unattended; killed 5 seconds after the result in `-p` |
+| Goal | the turns it takes, plus a small-model evaluation per turn, "typically negligible" | cleared by an unfixable error; stops with the goal still set when Claude answers without progress; a condition Claude cannot show is never judged met |
+| Headless run | tokens per run and, on GitHub, runner minutes | exit status and JSON must be read: page 1's five-way gate |
+
+A fire of a loop is an ordinary turn in the session, so the course reads its cost as that session's usage, the way the documentation says a routine "draws down subscription usage the same way interactive sessions do". The one cost the documentation calls out as multiplying is parallel background sessions.
+
+### How they combine
+
+The mechanisms are not exclusive, and the combinations are where the gaps close.
+
+- **Routine plus pipeline.** A nightly routine opens a pull request with a proposed fix; the team's pipeline then runs its headless review gate on that pull request. The routine has no exit status for a gate to read, the pipeline has one.
+- **Self-paced loop plus monitor.** In a session where Monitor is available, Claude "may use it directly when you ask for a dynamic `/loop` schedule", which avoids polling.
+- **Goal plus auto mode.** Auto mode removes the per-tool prompts and `/goal` removes the per-turn prompts, so a long migration can finish unattended in a session.
+- **Loop plus background session.** Backgrounding the session keeps its loop tasks running without a terminal, until they expire in seven days.
+- **Routine with several triggers.** A review routine can run nightly, be started by a deploy script and react to each new pull request.
+- **Channels instead of polling.** When your CI should push a failure into a running session, the documentation points to Channels in place of an interval.
+
+### Worked examples
+
+**One: a deployment while I work.** *Features:* repeats; the session stays open; it lasts an afternoon; local files are not needed. *Choice:* a loop. With a known rollout time, `/loop 5m check whether the deployment finished and tell me what happened`; without one, the prompt alone, so Claude waits longer once the rollout is quiet. *The tempting alternative:* a routine. Its shortest interval is one hour and it starts from a fresh clone in the cloud.
+
+**Two: a triage while nobody is there.** *Features:* repeats nightly; the machine may be off; it must last for months; the issue tracker is reached through a connector. *Choice:* a routine with a schedule trigger and the tracker's connector, started from a minute such as 7 past the hour. *The tempting alternative:* a loop started before leaving. It stops with the terminal, and in seven days it is deleted even if the terminal stays open.
+
+**Three: a review that must block a merge.** *Features:* it runs in the team's pipeline; nobody answers a prompt; the merge check must fail when the run fails. *Choice:* a headless run, with `--bare`, `--json-schema`, `--max-turns`, a read-only tool list and the five-way gate of page 1. *The tempting alternative:* a routine with a GitHub trigger. It reviews, but its green status does not say the review worked and it gives the pipeline no exit status to fail on.
+
+**Four: a month of dependency audits on my machine.** *Features:* repeats daily; it needs uncommitted local files; it lasts 30 days. *Choice:* a desktop task, with the worktree toggle if each run should be isolated. *The tempting alternative:* a loop (gone after 7 days) or a routine (a fresh clone sees none of the local changes).
+
+### The practice's bank
+
+The practice takes fourteen jobs, each as features, and returns the mechanism, a reason code and the interval in minutes.
+
+| # | Job | Mechanism | Reason | Minutes |
+|---|---|---|---|---|
+| 1 | Watch a pull request until CI settles; no interval wanted | self-paced loop | `pace-by-what-is-seen` | 0 |
+| 2 | Check the deployment every 5 minutes in the open session | fixed loop | `fixed-cadence` | 5 |
+| 3 | The same, asked for every 30 seconds | fixed loop | `fixed-cadence` | 1 |
+| 4 | Remind me later, in this session | one-off task | `single-fire` | 0 |
+| 5 | Remind me later, though the machine will be off | routine | `survives-closed-machine` | 0 |
+| 6 | A daily run with the machine off | routine | `survives-closed-machine` | 1440 |
+| 7 | Every 30 minutes for 30 days, with local files | desktop task | `durable-and-local` | 30 |
+| 8 | Every 2 hours for 30 days, no local files | routine | `outlives-seven-days` | 120 |
+| 9 | React to each line of a stream, in the session | monitor | `push-not-poll` | 0 |
+| 10 | React to every new pull request | routine | `react-to-event-unattended` | 0 |
+| 11 | Keep going until a check holds | goal | `until-condition-holds` | 0 |
+| 12 | A dev server that must run while Claude works | background task | `work-while-it-runs` | 0 |
+| 13 | A pipeline job, even with an interval | headless run | `no-person-present` | 0 |
+| 14 | Every 15 minutes, no session open, local files needed | desktop task | `durable-and-local` | 15 |
+
+Two refusals complete it: a routine below one hour, and a desktop task below one minute, are errors and never a silently changed interval.
+
+## Traps
+
+1. **A loop as a scheduler.** The tempting answer to "run this every night" is a loop, because it is one command. It fires only while Claude Code is running and idle, it is not restored when self-paced and it expires after seven days. A schedule that must outlast a session is a routine or a desktop task.
+2. **A green status read as a pass.** A routine's run list shows that a session started and exited, not that the task succeeded; a headless run that hit its turn limit exits with an error and prints it. Whatever has to stop a merge or page a person reads an exit status and a structured answer, never a colour.
+3. **An unattended run with no bounds.** A job nobody watches needs the prompt question settled (`--allowedTools`, `dontAsk` or `--permission-prompts none`), a turn limit, a timeout and a key from a secret. Without them the job waits for an approval nobody gives, or runs as long as the model keeps finding work.
+
+## The practice
+
+The practice is in [`exercises/60-claude-code-in-ci/unit-02`](../../exercises/60-claude-code-in-ci/unit-02/practice-1/statement.md). You write `choose`, which takes a job described by the features above and returns the mechanism, the reason code and the interval in minutes, applying the rules in the order the statement gives them. It is graded in Python, TypeScript, Java and Kotlin, offline, on the main ask (the fourteen jobs above) and on seven edge cases: a pipeline job outranks everything, a condition or a long command is not an interval, a one-off job, the floors of a schedule, the rounding of a loop, the seven-day expiry and the validation of values.
+
+## Quiz
+
+1. A team needs a nightly triage of its issue tracker to run while every laptop is shut. Which setup fits?
+   - **a**: A fixed loop started by an engineer before leaving for the day
+   - **b**: A routine that carries a schedule trigger and a connector
+   - **c**: A self-paced loop that picks a long delay between its iterations
+   - **d**: A monitor that watches the tracker through the whole night
+
+2. A migration has dozens of failing call sites. An engineer wants Claude to keep working without being prompted until the build is clean and the checks pass, and then to stop. Which fits?
+   - **a**: A goal that a separate model evaluates after every turn
+   - **b**: A fixed loop that sends the same prompt every ten minutes
+   - **c**: A monitor that streams the compiler output into the chat
+   - **d**: A routine that starts a fresh cloud session each hour
+
+3. An engineer starts `/loop 20m /verify`. At the first run the app was not exercised and Claude replied as if it had received an ordinary sentence. What is the cause?
+   - **a**: The interval is too short for a loop to run any command, bundled or custom
+   - **b**: That command refuses invocation by the model, so each scheduled prompt arrived as plain text
+   - **c**: A loop re-runs prompts only and never starts a bundled command, whatever its settings
+   - **d**: The session was not restored after the first run, so the loop lost its task
+
+<details>
+<summary>Answer key</summary>
+
+1. **b**. The page says routines "keep working when your laptop is closed", and a routine can carry a schedule trigger and connectors. *a* is ruled out because "Tasks only fire while Claude Code is running and idle." *c* is ruled out because a self-paced loop "isn't restored on resume", and it is a loop of the session in any case. *d* is ruled out because a watch has "5 minutes by default, at most 30 minutes" and cannot last a night.
+2. **a**. The page says that after each turn "a model checks whether the condition holds" and that the goal clears when it is met. *b* is ruled out because a loop's next turn starts when "a time interval elapses" and not when a check holds. *c* is ruled out because Monitor only "feeds each output line back to Claude" and has a deadline, so it neither continues the work nor stops on a condition. *d* is ruled out because a routine starts each run from a fresh clone, and "Routines execute on Anthropic-managed cloud infrastructure" with no memory of an engineer's session.
+3. **b**. The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text. *a* is ruled out because the interval is not what decides: "A scheduled fire only runs skills that Claude is allowed to invoke on its own." *c* is ruled out because a loop can run "A prompt, or a skill", for example `/review-pr 1234`, which Claude may invoke on its own. *d* is ruled out because "the scheduled tasks come back" on resume apart from expired ones, and nothing in the session ended here.
+
+</details>

@@ -43,7 +43,17 @@ class ExtensionChoiceTest {
         Row("s15", mapOf("noisy" to true, "repos" to 4), "plugin", "shared-setup"),
         Row("s16", mapOf("surface" to "api"), "api-tool", "own-schema-and-code"),
         Row("s17", mapOf("surface" to "api", "builtin_covers" to true), "builtin-tool", "provided-schema"),
-        Row("s18", mapOf("surface" to "api", "external_system" to true, "remote_server" to true), "mcp", "remote-server")
+        Row("s18", mapOf("surface" to "api", "external_system" to true, "remote_server" to true), "mcp", "remote-server"),
+        Row("s19", mapOf("timing" to "interval"), "loop", "session-rhythm"),
+        Row("s20", mapOf("timing" to "interval", "presence" to "away"), "routine", "runs-unattended"),
+        Row("s21", mapOf("timing" to "event"), "monitor", "push-not-poll"),
+        Row("s22", mapOf("timing" to "background"), "background-task", "work-while-it-runs"),
+        Row("s23", mapOf("presence" to "pipeline"), "headless-ci", "no-person-present"),
+        Row("s24", mapOf("timing" to "condition"), "goal", "until-condition-holds"),
+        Row("s25", mapOf("personal" to "voice"), "output-style", "response-voice"),
+        Row("s26", mapOf("personal" to "display"), "status-line", "personal-display"),
+        Row("s27", mapOf("timing" to "interval", "lasts_days" to 30, "local_files" to true), "desktop-task", "durable-and-local"),
+        Row("s28", mapOf("personal" to "keys"), "keybinding", "personal-keys")
     )
 
     @Test
@@ -54,15 +64,15 @@ class ExtensionChoiceTest {
 
     @Test
     fun e1_aRuleThatMustHoldGoesToAHookWhateverElseIsTrue() {
-        for (s in sweep(mapOf("guarantee" to true), "knowledge" to listOf("none", "convention", "reference", "procedure"), "external_system" to listOf(false, true), "noisy" to listOf(false, true), "path_scoped" to listOf(false, true)))
+        for (s in sweep(mapOf("guarantee" to true), "knowledge" to listOf("none", "convention", "reference", "procedure"), "external_system" to listOf(false, true), "noisy" to listOf(false, true), "path_scoped" to listOf(false, true), "timing" to listOf("none", "interval", "event", "condition", "background"), "presence" to listOf("session", "pipeline", "away"), "personal" to listOf("none", "voice")))
             assertEquals(Choice("hook", "must-hold-every-time"), decide(s), s.toString())
     }
 
     @Test
     fun e2_anOutsideSystemNeedsAServerAndNoisyWorkAloneNeedsASubagent() {
-        for (s in sweep(mapOf("external_system" to true), "knowledge" to listOf("none", "convention", "reference", "procedure"), "noisy" to listOf(false, true), "path_scoped" to listOf(false, true)))
+        for (s in sweep(mapOf("external_system" to true), "knowledge" to listOf("none", "convention", "reference", "procedure"), "noisy" to listOf(false, true), "path_scoped" to listOf(false, true), "timing" to listOf("none", "interval", "event", "condition", "background"), "presence" to listOf("session", "pipeline", "away")))
             assertEquals(Choice("mcp", "external-system"), decide(s), s.toString())
-        for (s in sweep(mapOf("noisy" to true), "knowledge" to listOf("none", "convention", "reference", "procedure"), "path_scoped" to listOf(false, true)))
+        for (s in sweep(mapOf("noisy" to true), "knowledge" to listOf("none", "convention", "reference", "procedure"), "path_scoped" to listOf(false, true), "timing" to listOf("none", "interval", "event", "condition", "background"), "presence" to listOf("session", "pipeline", "away")))
             assertEquals(Choice("subagent", "isolate-context"), decide(s), s.toString())
     }
 
@@ -110,5 +120,46 @@ class ExtensionChoiceTest {
         assertTrue(refused(mapOf("repos" to 0)), "{\"repos\": 0} must be an error")
         assertTrue(refused(mapOf("repos" to -1)), "{\"repos\": -1} must be an error")
         assertTrue(refused(mapOf("surface" to "api", "knowledge" to "tips")), "{\"surface\": \"api\", \"knowledge\": \"tips\"} must be an error")
+        assertTrue(refused(mapOf("timing" to "weekly")), "{\"timing\": \"weekly\"} must be an error")
+        assertTrue(refused(mapOf("presence" to "cloud")), "{\"presence\": \"cloud\"} must be an error")
+        assertTrue(refused(mapOf("personal" to "theme")), "{\"personal\": \"theme\"} must be an error")
+        assertTrue(refused(mapOf("lasts_days" to 0)), "{\"lasts_days\": 0} must be an error")
+        assertTrue(refused(mapOf("presence" to "away", "local_files" to true, "timing" to "interval")), "{\"presence\": \"away\", \"local_files\": true, \"timing\": \"interval\"} must be an error")
+        assertTrue(refused(mapOf("surface" to "api", "timing" to "weekly")), "{\"surface\": \"api\", \"timing\": \"weekly\"} must be an error")
+    }
+
+    @Test
+    fun e7_aPipelineAConditionALongCommandAndAnEventAreNotIntervals() {
+        assertEquals(Choice("headless-ci", "no-person-present"), decide(mapOf("presence" to "pipeline")), "{\"presence\": \"pipeline\"}")
+        assertEquals(Choice("headless-ci", "no-person-present"), decide(mapOf("presence" to "pipeline", "timing" to "interval", "lasts_days" to 30)), "{\"presence\": \"pipeline\", \"timing\": \"interval\", \"lasts_days\": 30}")
+        assertEquals(Choice("goal", "until-condition-holds"), decide(mapOf("timing" to "condition", "lasts_days" to 30)), "{\"timing\": \"condition\", \"lasts_days\": 30}")
+        assertEquals(Choice("goal", "until-condition-holds"), decide(mapOf("timing" to "condition", "presence" to "away")), "{\"timing\": \"condition\", \"presence\": \"away\"}")
+        assertEquals(Choice("background-task", "work-while-it-runs"), decide(mapOf("timing" to "background", "presence" to "away")), "{\"timing\": \"background\", \"presence\": \"away\"}")
+        assertEquals(Choice("monitor", "push-not-poll"), decide(mapOf("timing" to "event")), "{\"timing\": \"event\"}")
+        assertEquals(Choice("routine", "runs-unattended"), decide(mapOf("timing" to "event", "presence" to "away")), "{\"timing\": \"event\", \"presence\": \"away\"}")
+    }
+
+    @Test
+    fun e8_anIntervalIsALoopInTheSessionAndARoutineOrDesktopTaskWhenItMustOutliveIt() {
+        assertEquals(Choice("loop", "session-rhythm"), decide(mapOf("timing" to "interval", "lasts_days" to 7)), "{\"timing\": \"interval\", \"lasts_days\": 7}")
+        assertEquals(Choice("routine", "runs-unattended"), decide(mapOf("timing" to "interval", "lasts_days" to 8)), "{\"timing\": \"interval\", \"lasts_days\": 8}")
+        assertEquals(Choice("desktop-task", "durable-and-local"), decide(mapOf("timing" to "interval", "lasts_days" to 8, "local_files" to true)), "{\"timing\": \"interval\", \"lasts_days\": 8, \"local_files\": true}")
+        assertEquals(Choice("loop", "session-rhythm"), decide(mapOf("timing" to "interval", "local_files" to true)), "{\"timing\": \"interval\", \"local_files\": true}")
+        assertEquals(Choice("routine", "runs-unattended"), decide(mapOf("timing" to "interval", "presence" to "away", "lasts_days" to 30)), "{\"timing\": \"interval\", \"presence\": \"away\", \"lasts_days\": 30}")
+        assertEquals(Choice("routine", "runs-unattended"), decide(mapOf("timing" to "interval", "presence" to "away")), "{\"timing\": \"interval\", \"presence\": \"away\"}")
+        assertEquals(Choice("loop", "session-rhythm"), decide(mapOf("timing" to "interval", "presence" to "session")), "{\"timing\": \"interval\", \"presence\": \"session\"}")
+    }
+
+    @Test
+    fun e9_aPersonalPreferenceGoesToAStyleAStatusLineOrAKeyBindingAndKnowledgeKeepsItsOwnRules() {
+        assertEquals(Choice("output-style", "response-voice"), decide(mapOf("personal" to "voice")), "{\"personal\": \"voice\"}")
+        assertEquals(Choice("status-line", "personal-display"), decide(mapOf("personal" to "display")), "{\"personal\": \"display\"}")
+        assertEquals(Choice("keybinding", "personal-keys"), decide(mapOf("personal" to "keys")), "{\"personal\": \"keys\"}")
+        assertEquals(Choice("output-style", "response-voice"), decide(mapOf("personal" to "voice", "knowledge" to "convention")), "{\"personal\": \"voice\", \"knowledge\": \"convention\"}")
+        assertEquals(Choice("keybinding", "personal-keys"), decide(mapOf("personal" to "keys", "knowledge" to "reference", "repos" to 4)), "{\"personal\": \"keys\", \"knowledge\": \"reference\", \"repos\": 4}")
+        assertEquals(Choice("status-line", "personal-display"), decide(mapOf("personal" to "display", "repos" to 3)), "{\"personal\": \"display\", \"repos\": 3}")
+        assertEquals(Choice("claude-md", "always-known"), decide(mapOf("personal" to "none", "knowledge" to "convention")), "{\"personal\": \"none\", \"knowledge\": \"convention\"}")
+        assertEquals(Choice("loop", "session-rhythm"), decide(mapOf("personal" to "voice", "timing" to "interval")), "{\"personal\": \"voice\", \"timing\": \"interval\"}")
+        assertEquals(Choice("api-tool", "own-schema-and-code"), decide(mapOf("personal" to "voice", "surface" to "api")), "{\"personal\": \"voice\", \"surface\": \"api\"}")
     }
 }

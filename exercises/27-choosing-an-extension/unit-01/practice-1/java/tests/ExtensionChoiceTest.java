@@ -76,6 +76,16 @@ class ExtensionChoiceTest {
         {"s16", s("surface", "api"), "api-tool", "own-schema-and-code"},
         {"s17", s("surface", "api", "builtin_covers", true), "builtin-tool", "provided-schema"},
         {"s18", s("surface", "api", "external_system", true, "remote_server", true), "mcp", "remote-server"},
+        {"s19", s("timing", "interval"), "loop", "session-rhythm"},
+        {"s20", s("timing", "interval", "presence", "away"), "routine", "runs-unattended"},
+        {"s21", s("timing", "event"), "monitor", "push-not-poll"},
+        {"s22", s("timing", "background"), "background-task", "work-while-it-runs"},
+        {"s23", s("presence", "pipeline"), "headless-ci", "no-person-present"},
+        {"s24", s("timing", "condition"), "goal", "until-condition-holds"},
+        {"s25", s("personal", "voice"), "output-style", "response-voice"},
+        {"s26", s("personal", "display"), "status-line", "personal-display"},
+        {"s27", s("timing", "interval", "lasts_days", 30, "local_files", true), "desktop-task", "durable-and-local"},
+        {"s28", s("personal", "keys"), "keybinding", "personal-keys"},
     };
 
     @Test
@@ -87,15 +97,15 @@ class ExtensionChoiceTest {
 
     @Test
     void e1_aRuleThatMustHoldGoesToAHookWhateverElseIsTrue() {
-        for (Map<String, Object> s : sweep(s("guarantee", true), axis("knowledge", "none", "convention", "reference", "procedure"), axis("external_system", false, true), axis("noisy", false, true), axis("path_scoped", false, true)))
+        for (Map<String, Object> s : sweep(s("guarantee", true), axis("knowledge", "none", "convention", "reference", "procedure"), axis("external_system", false, true), axis("noisy", false, true), axis("path_scoped", false, true), axis("timing", "none", "interval", "event", "condition", "background"), axis("presence", "session", "pipeline", "away"), axis("personal", "none", "voice")))
             assertEquals(new ExtensionChoice.Choice("hook", "must-hold-every-time"), choose(s), s.toString());
     }
 
     @Test
     void e2_anOutsideSystemNeedsAServerAndNoisyWorkAloneNeedsASubagent() {
-        for (Map<String, Object> s : sweep(s("external_system", true), axis("knowledge", "none", "convention", "reference", "procedure"), axis("noisy", false, true), axis("path_scoped", false, true)))
+        for (Map<String, Object> s : sweep(s("external_system", true), axis("knowledge", "none", "convention", "reference", "procedure"), axis("noisy", false, true), axis("path_scoped", false, true), axis("timing", "none", "interval", "event", "condition", "background"), axis("presence", "session", "pipeline", "away")))
             assertEquals(new ExtensionChoice.Choice("mcp", "external-system"), choose(s), s.toString());
-        for (Map<String, Object> s : sweep(s("noisy", true), axis("knowledge", "none", "convention", "reference", "procedure"), axis("path_scoped", false, true)))
+        for (Map<String, Object> s : sweep(s("noisy", true), axis("knowledge", "none", "convention", "reference", "procedure"), axis("path_scoped", false, true), axis("timing", "none", "interval", "event", "condition", "background"), axis("presence", "session", "pipeline", "away")))
             assertEquals(new ExtensionChoice.Choice("subagent", "isolate-context"), choose(s), s.toString());
     }
 
@@ -143,5 +153,46 @@ class ExtensionChoiceTest {
         assertTrue(refused(s("repos", 0)), "{\"repos\": 0} must be an error");
         assertTrue(refused(s("repos", -1)), "{\"repos\": -1} must be an error");
         assertTrue(refused(s("surface", "api", "knowledge", "tips")), "{\"surface\": \"api\", \"knowledge\": \"tips\"} must be an error");
+        assertTrue(refused(s("timing", "weekly")), "{\"timing\": \"weekly\"} must be an error");
+        assertTrue(refused(s("presence", "cloud")), "{\"presence\": \"cloud\"} must be an error");
+        assertTrue(refused(s("personal", "theme")), "{\"personal\": \"theme\"} must be an error");
+        assertTrue(refused(s("lasts_days", 0)), "{\"lasts_days\": 0} must be an error");
+        assertTrue(refused(s("presence", "away", "local_files", true, "timing", "interval")), "{\"presence\": \"away\", \"local_files\": true, \"timing\": \"interval\"} must be an error");
+        assertTrue(refused(s("surface", "api", "timing", "weekly")), "{\"surface\": \"api\", \"timing\": \"weekly\"} must be an error");
+    }
+
+    @Test
+    void e7_aPipelineAConditionALongCommandAndAnEventAreNotIntervals() {
+        assertEquals(new ExtensionChoice.Choice("headless-ci", "no-person-present"), choose(s("presence", "pipeline")), "{\"presence\": \"pipeline\"}");
+        assertEquals(new ExtensionChoice.Choice("headless-ci", "no-person-present"), choose(s("presence", "pipeline", "timing", "interval", "lasts_days", 30)), "{\"presence\": \"pipeline\", \"timing\": \"interval\", \"lasts_days\": 30}");
+        assertEquals(new ExtensionChoice.Choice("goal", "until-condition-holds"), choose(s("timing", "condition", "lasts_days", 30)), "{\"timing\": \"condition\", \"lasts_days\": 30}");
+        assertEquals(new ExtensionChoice.Choice("goal", "until-condition-holds"), choose(s("timing", "condition", "presence", "away")), "{\"timing\": \"condition\", \"presence\": \"away\"}");
+        assertEquals(new ExtensionChoice.Choice("background-task", "work-while-it-runs"), choose(s("timing", "background", "presence", "away")), "{\"timing\": \"background\", \"presence\": \"away\"}");
+        assertEquals(new ExtensionChoice.Choice("monitor", "push-not-poll"), choose(s("timing", "event")), "{\"timing\": \"event\"}");
+        assertEquals(new ExtensionChoice.Choice("routine", "runs-unattended"), choose(s("timing", "event", "presence", "away")), "{\"timing\": \"event\", \"presence\": \"away\"}");
+    }
+
+    @Test
+    void e8_anIntervalIsALoopInTheSessionAndARoutineOrDesktopTaskWhenItMustOutliveIt() {
+        assertEquals(new ExtensionChoice.Choice("loop", "session-rhythm"), choose(s("timing", "interval", "lasts_days", 7)), "{\"timing\": \"interval\", \"lasts_days\": 7}");
+        assertEquals(new ExtensionChoice.Choice("routine", "runs-unattended"), choose(s("timing", "interval", "lasts_days", 8)), "{\"timing\": \"interval\", \"lasts_days\": 8}");
+        assertEquals(new ExtensionChoice.Choice("desktop-task", "durable-and-local"), choose(s("timing", "interval", "lasts_days", 8, "local_files", true)), "{\"timing\": \"interval\", \"lasts_days\": 8, \"local_files\": true}");
+        assertEquals(new ExtensionChoice.Choice("loop", "session-rhythm"), choose(s("timing", "interval", "local_files", true)), "{\"timing\": \"interval\", \"local_files\": true}");
+        assertEquals(new ExtensionChoice.Choice("routine", "runs-unattended"), choose(s("timing", "interval", "presence", "away", "lasts_days", 30)), "{\"timing\": \"interval\", \"presence\": \"away\", \"lasts_days\": 30}");
+        assertEquals(new ExtensionChoice.Choice("routine", "runs-unattended"), choose(s("timing", "interval", "presence", "away")), "{\"timing\": \"interval\", \"presence\": \"away\"}");
+        assertEquals(new ExtensionChoice.Choice("loop", "session-rhythm"), choose(s("timing", "interval", "presence", "session")), "{\"timing\": \"interval\", \"presence\": \"session\"}");
+    }
+
+    @Test
+    void e9_aPersonalPreferenceGoesToAStyleAStatusLineOrAKeyBindingAndKnowledgeKeepsItsOwnRules() {
+        assertEquals(new ExtensionChoice.Choice("output-style", "response-voice"), choose(s("personal", "voice")), "{\"personal\": \"voice\"}");
+        assertEquals(new ExtensionChoice.Choice("status-line", "personal-display"), choose(s("personal", "display")), "{\"personal\": \"display\"}");
+        assertEquals(new ExtensionChoice.Choice("keybinding", "personal-keys"), choose(s("personal", "keys")), "{\"personal\": \"keys\"}");
+        assertEquals(new ExtensionChoice.Choice("output-style", "response-voice"), choose(s("personal", "voice", "knowledge", "convention")), "{\"personal\": \"voice\", \"knowledge\": \"convention\"}");
+        assertEquals(new ExtensionChoice.Choice("keybinding", "personal-keys"), choose(s("personal", "keys", "knowledge", "reference", "repos", 4)), "{\"personal\": \"keys\", \"knowledge\": \"reference\", \"repos\": 4}");
+        assertEquals(new ExtensionChoice.Choice("status-line", "personal-display"), choose(s("personal", "display", "repos", 3)), "{\"personal\": \"display\", \"repos\": 3}");
+        assertEquals(new ExtensionChoice.Choice("claude-md", "always-known"), choose(s("personal", "none", "knowledge", "convention")), "{\"personal\": \"none\", \"knowledge\": \"convention\"}");
+        assertEquals(new ExtensionChoice.Choice("loop", "session-rhythm"), choose(s("personal", "voice", "timing", "interval")), "{\"personal\": \"voice\", \"timing\": \"interval\"}");
+        assertEquals(new ExtensionChoice.Choice("api-tool", "own-schema-and-code"), choose(s("personal", "voice", "surface", "api")), "{\"personal\": \"voice\", \"surface\": \"api\"}");
     }
 }

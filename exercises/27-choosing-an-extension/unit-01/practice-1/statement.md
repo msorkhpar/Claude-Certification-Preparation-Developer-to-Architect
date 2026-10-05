@@ -1,13 +1,13 @@
 # Practice: choose the extension a situation calls for, and say why
 
-A team adds an instruction file for a rule that must never be broken, a skill for a database that needs a connection, and a plugin for a single sentence. Each choice looks reasonable
-and fails in its own way. In this practice you write the decision function of the page "Choosing in practice": a situation described by a few features goes in, and the
+A team adds an instruction file for a rule that must never be broken, a skill for a database that needs a connection, a loop for work that must run while the laptop is closed, and a
+response style for a status bar. Each choice looks reasonable and fails in its own way. In this practice you write the decision function of the page "Choosing in practice": a situation described by a few features goes in, and the
 mechanism that fits and a reason code come out. The model is not called and nothing is installed. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open
 `starter/` and edit the file there.
 
 Python has `choose(situation)` in `extension_choice.py`; TypeScript has `choose` in `extensionChoice.ts`; Java has the static method `ExtensionChoice.choose` and the record `Choice`;
 Kotlin has the top-level function `choose` and the data class `Choice`. Python and TypeScript take a plain object, and Java and Kotlin take a map from the key to its value. The keys
-are the same strings in every language, and a missing key has the default shown below. The page lists the eighteen situations of the scenario bank in words; the tests hold the same eighteen as features.
+are the same strings in every language, and a missing key has the default shown below. The page lists the twenty-eight situations of the scenario bank in words; the tests hold the same twenty-eight as features.
 
 ## What to write
 
@@ -24,6 +24,11 @@ are the same strings in every language, and a missing key has the default shown 
 | `path_scoped` | the knowledge applies only to some files | false |
 | `noisy` | the work reads or prints a lot that nobody needs afterwards, only its conclusion | false |
 | `repos` | how many repositories need the same setup, at least 1 | 1 |
+| `timing` | when the work runs: `none`, `interval` (every so often), `event` (when something happens), `condition` (until a check holds) or `background` (a long command Claude does not wait for) | `none` |
+| `presence` | who is there: `session` (a Claude Code session stays open), `pipeline` (a CI job, nobody to answer a prompt) or `away` (the computer may be off) | `session` |
+| `lasts_days` | how long a timed job must keep running, at least 1 | 1 |
+| `local_files` | the job needs files on this machine, uncommitted changes included | false |
+| `personal` | a preference of one person: `none`, `voice` (how every reply is written), `display` (what the bottom bar shows) or `keys` (a keyboard shortcut) | `none` |
 
 The mechanisms, with their reason codes:
 
@@ -41,17 +46,31 @@ The mechanisms, with their reason codes:
 | `api-tool` | `own-schema-and-code` | an application that defines the tool and runs its code |
 | `builtin-tool` | `provided-schema` | an application whose platform supplies the schema |
 | `mcp` | `remote-server` | an application that reaches an existing remote server |
+| `loop` | `session-rhythm` | an interval job in an open session that lasts up to seven days |
+| `routine` | `runs-unattended` | an interval or event job that must run with the computer off, or an interval job of more than seven days that needs no local files |
+| `desktop-task` | `durable-and-local` | an interval job of more than seven days that needs local files |
+| `monitor` | `push-not-poll` | react to each line of an event stream in the session |
+| `background-task` | `work-while-it-runs` | a long command Claude starts and does not wait for |
+| `headless-ci` | `no-person-present` | a job in a pipeline |
+| `goal` | `until-condition-holds` | keep working until a check holds |
+| `output-style` | `response-voice` | a person wants every reply in a voice, length or format |
+| `status-line` | `personal-display` | a person wants something shown in the bottom bar |
+| `keybinding` | `personal-keys` | a person wants a different keyboard shortcut |
 
 The rules apply in this order:
 
-1. An unknown `surface`, an unknown `knowledge` kind or `repos` below 1 is an error, on either surface. Say so with the language's usual argument error (`ValueError` in Python, `Error` in
+1. An unknown `surface`, `knowledge`, `timing`, `presence` or `personal` value, `repos` or `lasts_days` below 1, or `presence` `away` together with `local_files` (a cloud run starts from a fresh clone) is an error, on either surface. Say so with the language's usual argument error (`ValueError` in Python, `Error` in
    TypeScript, `IllegalArgumentException` in Java and Kotlin).
 2. On `api`, nothing else about Claude Code applies, and the first match wins: `builtin_covers` gives `builtin-tool`; `external_system` together with `remote_server` gives `mcp`; anything else
    gives `api-tool`.
-3. On `code`, the first match wins: `guarantee` gives `hook`; `external_system` gives `mcp`; `noisy` gives `subagent`; `knowledge` `convention` gives `path-rule` when `path_scoped` and `claude-md` when
+3. On `code`, the first match wins: `guarantee` gives `hook`; `external_system` gives `mcp`; `noisy` gives `subagent`; then work that runs without a person or on a rhythm:
+   `presence` `pipeline` gives `headless-ci`; `timing` `condition` gives `goal`; `background` gives `background-task`; `event` gives `monitor`, or `routine` when `presence` is `away`; `interval`
+   gives `routine` when `presence` is `away`, then `desktop-task` when `lasts_days` is above 7 and `local_files`, `routine` when `lasts_days` is above 7, and `loop` otherwise; then `personal`
+   `voice` gives `output-style`, `display` gives `status-line` and `keys` gives `keybinding`; then `knowledge` `convention` gives `path-rule` when `path_scoped` and `claude-md` when
    not; `reference` gives `skill` with `on-demand-reference`; `procedure` gives `skill` with `repeatable-procedure`; otherwise `builtin-tool`.
 4. Then, when `repos` is 2 or more and the mechanism is a skill, a hook, a subagent or an MCP server, the answer becomes `plugin` with `shared-setup`. An instruction file and a path rule stay
-   as they are, because a plugin cannot carry one, and a built-in tool has nothing to package.
+   as they are, because a plugin cannot carry one, and a built-in tool has nothing to package. The new mechanisms of rule 3 (loops, routines, tasks, goals, styles, the status line and key
+   bindings) are not packaged by this function.
 
 ## Why each part is there, and what you should see
 
@@ -60,18 +79,25 @@ The rules apply in this order:
 3. **Load time decides the file.** A convention for everything is paid for on every request; one for some files is loaded when those files are used; reference and procedure wait until used. *You should see* the four answers, and a path scope ignored for anything that is not a convention.
 4. **A plugin is for carrying.** *You should see* `plugin` from the second repository onward for the four kinds a plugin bundles, and never for an instruction file.
 5. **An application is not Claude Code.** *You should see* the API branch ignore every Claude Code feature, and a plugin never appear there.
-6. **Unknown means error.** *You should see* an error for a value that is not in the table, and the default for a key that is missing.
+6. **Time is a feature of its own.** A pipeline job, a condition, a long command and an event are not intervals, and an interval is a loop only while a session stays open and for seven days. *You
+   should see* `headless-ci`, `goal`, `background-task`, `monitor`, then `loop`, `routine` or `desktop-task` for an interval, and the hook, server and subagent rules still ahead of all of them.
+7. **A preference is personal.** How replies are written, what the bar shows and which key does what belong to one person's setup, not to knowledge. *You should see* `output-style`,
+   `status-line` and `keybinding`, and a convention still going to the instruction file when there is no preference.
+8. **Unknown means error.** *You should see* an error for a value that is not in the table, and the default for a key that is missing.
 
 ## The cases
 
 | Id | What it checks |
 |---|---|
-| `m1` | Each of the eighteen situations of the scenario bank gets its mechanism and its reason code |
+| `m1` | Each of the twenty-eight situations of the scenario bank gets its mechanism and its reason code |
 | `e1` | A rule that must hold goes to a hook whatever else is true |
 | `e2` | An outside system needs a server, and noisy work alone needs a subagent |
 | `e3` | Knowledge goes to the file or skill that loads it at the right time |
 | `e4` | A plugin carries a skill, hook, subagent or server to a second repository and nothing else |
 | `e5` | In an application the platform may supply the schema, and only a remote server replaces your own tool |
 | `e6` | An unknown value is an error and a missing key takes its default |
+| `e7` | A pipeline, a condition, a long command and an event are not intervals |
+| `e8` | An interval is a loop in the session, and a routine or desktop task when it must outlive it |
+| `e9` | A personal preference goes to a style, a status line or a key binding, and knowledge keeps its own rules |
 
 Run the tests with the command in the language folder's `run.sh`.
