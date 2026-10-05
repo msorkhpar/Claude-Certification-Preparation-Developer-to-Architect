@@ -25,7 +25,7 @@ The mock has **63 questions**, the number of items on the real exam. They are sp
 | 1 to 11 | P1 Solution design and architecture | 17% | 11 | 17.5% | 79, 80, 81, 93 |
 | 12 to 19 | P2 Claude models, prompting and context | 13% | 8 | 12.7% | 82, 84 |
 | 20 to 31 | P3 Integration | 19% | 12 | 19.0% | 85, 86, 87 |
-| 32 to 41 | P4 Evaluation, testing and optimisation | 16% | 10 | 15.9% | 88, 89, 93 |
+| 32 to 41 | P4 Evaluation, testing and optimization | 16% | 10 | 15.9% | 88, 89, 93 |
 | 42 to 50 | P5 Governance, safety and risk | 14% | 9 | 14.3% | 81, 83, 90 |
 | 51 to 59 | P6 Stakeholder communication and lifecycle | 14% | 9 | 14.3% | 79, 89, 90, 91, 93 |
 | 60 to 63 | P7 Developer productivity and operational enablement | 7% | 4 | 6.3% | 92 |
@@ -67,7 +67,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: Each subagent waits for the coordinator to ask, so nothing arrives unplanned
    - **d**: Each worker hands back its conclusion with a citation, in a fixed shape
 
-6. Scenario: Kite Pay's payment tool honours an idempotency key, but the agent builds that key from the current time on each attempt, so a retry after a lost response pays twice. Which change fixes the design?
+6. Scenario: Kite Pay's payment tool honors an idempotency key, but the agent builds that key from the current time on each attempt, so a retry after a lost response pays twice. Which change fixes the design?
    - **a**: Make a fresh value for each attempt and log every one of them
    - **b**: Derive the label once from the order and the action, and reuse it for every repeat
    - **c**: Lengthen the key, to keep two different payments from sharing one
@@ -79,7 +79,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: Classify faults: repeat passing ones up to a cap, fail permanent ones at once
    - **d**: Raise the attempts to ten with longer pauses to outlast the fault
 
-8. Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?
+8. Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behavior keeps spending low for the rest of the outage?
    - **a**: It reverts to refusing requests at once until a further pause has passed
    - **b**: It resets its count of failures and allows the next three calls
    - **c**: It closes and lets all traffic back through again
@@ -172,7 +172,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: Fine-tune a model on the corpus
    - **d**: Split the corpus across several agents, each of which holds a part of it
 
-23. Scenario: Dunmore Legal switches its retrieval from one embedding model to a newer one. It embeds only the documents that change from now on, and keeps the old embeddings for the rest. Recall on its labelled questions falls at once. What explains it?
+23. Scenario: Dunmore Legal switches its retrieval from one embedding model to a newer one. It embeds only the documents that change from now on, and keeps the old embeddings for the rest. Recall on its labeled questions falls at once. What explains it?
    - **a**: The newer model needs a larger chunk size, so the old chunks are now too small
    - **b**: The old vectors are stale copies of their documents, so a re-index would clear them
    - **c**: Vectors from two different encoders do not share one space, so the whole index must be rebuilt
@@ -193,7 +193,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 26. Scenario: Pewter Labs merges its 40 tools into 8 tools, each with a switch argument, hoping to cure wrong tool selection. Selection does not improve. Which two statements explain it? (Select two.)
    - **a**: A switch argument is rejected by the platform as an unsupported parameter
    - **b**: Eight tools are still more than a request can hold, so the list must shrink
-   - **c**: The choice among behaviours is hidden from the model's own judgement
+   - **c**: The choice among behaviors is hidden from the model's own judgment
    - **d**: Merged tools lose their descriptions, so selection has no information left
    - **e**: The number of capabilities is the same as before the change
 
@@ -225,12 +225,12 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **a**: As a signal to investigate, since such a collapse often points to a failed safeguard
    - **b**: As a clear improvement, since fewer declines mean happier users
    - **c**: As noise, since a metric that small cannot move in a meaningful way
-   - **d**: As a billing artefact, since declines are counted in a separate system from the one that bills
+   - **d**: As a billing artifact, since declines are counted in a separate system from the one that bills
 
 32. Scenario: Bexley Bank plans to let a language model mark 1,000 free-form write-ups each night against a rubric. No person has yet compared its marks with theirs. What comes first?
    - **a**: Switch the grader on at full volume straight away
    - **b**: Replace the grader with exact-match checks on every write-up
-   - **c**: Measure its agreement with human judgement on a small sample
+   - **c**: Measure its agreement with human judgment on a small sample
    - **d**: Have people grade all 1,000 reports each night as well
 
 33. Scenario: Colt Retail scores its assistant on the five worked examples written into its own prompt and reports 100 percent. A reviewer says the score tells little. What should make up its evaluation set?
@@ -307,7 +307,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **c**: Move clinical data out of the definition into the message
    - **d**: Encrypt the schema inside the request body in transit
 
-45. Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)
+45. Scenario: Vale Insurance's tokenizing layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)
    - **a**: Add a line to the system prompt telling the model to disregard names
    - **b**: Switch the layer off and drop the false comfort of a pattern that misses names
    - **c**: Plant identifiers of every kind in tests and verify that none gets into the request
@@ -323,10 +323,10 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 47. Scenario: A streamed reply in Garnet Health's assistant ends with a refusal, and the user's next message carries on the same conversation. The next call is refused as well. Which recovery belongs in the design?
    - **a**: Drop or rephrase the triggering turn, or send the request to another model
    - **b**: Show the user the category of the refusal, which is always present
-   - **c**: Raise the sampling temperature to make the next reply differ
+   - **c**: Treat it as a network fault and retry through the shared error path
    - **d**: Resend the same history unchanged until it passes through
 
-48. Scenario: Linnet Legal's assistant summarises inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?
+48. Scenario: Linnet Legal's assistant summarizes inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?
    - **a**: Add it to the user turn with a request that the model ignore any orders in it
    - **b**: Strip every sentence that is written as an instruction, using a list of patterns
    - **c**: Carry the incoming item as JSON inside a tool result, with its origin named, and narrow that right
@@ -411,9 +411,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
    - **b**: The most restrictive setting wins, so the lowest of the three values is in force
    - **c**: Max is in force and the user file is read last
    - **d**: High is in force and managed settings outrank every other level for this key
-   - **e**: Nobody can loosen the organisation's ceiling, though a developer may tighten it
+   - **e**: Nobody can loosen the organization's ceiling, though a developer may tighten it
 
-62. Scenario: A developer at Gorse Bank says that a restriction in her local file is not honoured, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?
+62. Scenario: A developer at Gorse Bank says that a restriction in her local file is not honored, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?
    - **a**: /memory, which shows the loaded files, and claude init, which writes a fresh settings file
    - **b**: /model, which shows the chosen model, and claude logout, which clears the stored session
    - **c**: /permissions, which lists the rules, and claude update, which fetches the newest policy
@@ -434,7 +434,7 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 4. **b**. Price comes last and among the survivors: "Price enters last, and only among the designs that were not rejected" (module 80, page 2). *a* is ruled out because "a cheaper design with a missing feedback loop is not cheaper, only unfinished". *c* is ruled out because the rule picks "the cheapest of those", and a design that needs revision is not a rejected one. *d* is ruled out because "when every design is rejected there is no winner", and here two designs survive.
 5. **d**. A subagent's reading is thrown away when it finishes, so what goes back is a digest in the contract's shape: "Return a digest, not a transcript" (module 80, page 2). The finding with its source leaves the coordinator's window free for writing. *a* is ruled out because the page asks for the objective and boundaries so "that two subagents do not research the same thing or leave a gap between them". *b* is ruled out because the transcript is the problem and not its size: "The subagent's reading is thrown away when it finishes". *c* is ruled out because "What goes back is the finding, with its source, in the contract's shape".
 6. **b**. The key must name the intention and be made once, before the first call, from what identifies the task (module 81, page 1). The page says "A new key for each attempt turns the retry into a new refund", which is the flaw here. *a* is ruled out because "The key is made once, before the first call, from what identifies the task (the order and the action), and it is stored with the task". *c* is ruled out because the flaw is that the value changes between attempts, and "The key names the intention, not the attempt". *d* is ruled out because the page says "Record the key together with the effect", in one transaction.
-7. **c**. A refusal is a fatal failure, and the runner "never retries the second" kind (module 81, page 1). A timeout or a rate limit is transient and is repeated up to a fixed number of calls. *a* is ruled out because "The key names the intention, not the attempt", and a missing permission is not a problem of recognising repeats. *b* is ruled out because the breaker counts "consecutive failures for one agent", and a missing permission is a fact about the account. *d* is ruled out because "An unlimited retry is a way to spend money while nothing changes", and ten is the same mistake.
+7. **c**. A refusal is a fatal failure, and the runner "never retries the second" kind (module 81, page 1). A timeout or a rate limit is transient and is repeated up to a fixed number of calls. *a* is ruled out because "The key names the intention, not the attempt", and a missing permission is not a problem of recognizing repeats. *b* is ruled out because the breaker counts "consecutive failures for one agent", and a missing permission is a fact about the account. *d* is ruled out because "An unlimited retry is a way to spend money while nothing changes", and ten is the same mistake.
 8. **a**. A failed probe opens the breaker again: "A success closes it; a failure opens it again" (module 81, page 1). The agent is not reached until the next probe, which saves calls in a long outage. *b* is ruled out because "A success resets the count, so scattered failures do not open it", which concerns the closed state. *c* is ruled out because only a success closes the breaker, and the open state is the one in which "Calls are refused at once, without reaching the agent". *d* is ruled out because "One probe call goes through", and a failure sends the breaker back to open.
 9. **b and e**. The capstone sets the rung: "an augmented call with a small fixed workflow, not an agent, because the path is known", and it notes "A team of agents would cost about 15 times a chat, and the value does not pay it" (module 93, page 1). *a* is ruled out because autonomous agents come with "higher costs, and the potential for compounding errors". *c* is ruled out because the design needs "The index is replaced when a document changes", and pasted text goes stale. *d* is ruled out because the ladder reaches a team only when "it becomes a team only when the parts are independent and the value pays for the team", and reading many documents that change often is not that.
 10. **b**. The chain removes first and ranks after: "a question that shares nothing with any readable document gets no evidence" (module 93, page 1). *a* is ruled out because "Documents the reader may not read are removed first, then the rest are ranked". *c* is ruled out because "the rest are ranked by the words they share with the question", so a document that shares no word is never ranked and no chunk is returned. *d* is ruled out because "an answer whose quote is missing is held as unsupported", and the chain never sends it out with a flag.
@@ -472,9 +472,9 @@ This mock exam covers the content of Level 4, modules 79 to 93. Choose one answe
 42. **b**. Results are written as work is done: "Write on success, immediately" (module 81, page 2). A crash in the tenth task then loses nothing from the first nine, and the next run does the rest. *a* is ruled out because a restart is the expensive path: "it discards the work that finished, which is the expensive part". *c* is ruled out because "swallowing it hides the defect and reports unverified results". *d* is ruled out because the checkpoint is a store of finished results, not context for the next task: "A checkpoint is a store of finished results".
 43. **d**. The separation is the platform's: "one workspace per tenant, with its own keys, limits and spend" (module 83, page 1). *a* is ruled out because "code-only separation fails the first time a filter is forgotten". *b* is ruled out because the workspace is the unit: "A single shared workspace for all tenants is a finding for a multi-tenant requirement". *c* is ruled out because the finding follows from the shape of the deployment, since "the separation then rests on application code alone".
 44. **c**. The page warns that schemas "are compiled into grammars that are cached separately from message content, so they do not get the protections of the prompt" (module 83, page 1), so health data stays out of them. *a* is ruled out because the page names no such limit, and the rule it gives is "put no health data in a schema". *b* is ruled out because tenants are separated by workspace, "one workspace per tenant", and a schema per tenant would still hold the data. *d* is ruled out because the objection concerns where the schema is stored, and the page says "put no health data in a schema".
-45. **c and d**. A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for "a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind" (module 83, page 2). *a* is ruled out because "the instruction is read by the model that has already received the data". *b* is ruled out because "a reviewer can test the layer with sample text, which cannot be done for an instruction". *e* is ruled out because "A layer that has not been tested against the identifiers it claims to remove is a hope with code around it."
+45. **c and d**. A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for "a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind" (module 83, page 2). *a* is ruled out because "the instruction is read by the model that has already received the data". *b* is ruled out because the layer is what keeps names and other values from the model, and the page says of it "It cannot leak what it never had". *e* is ruled out because "A layer that has not been tested against the identifiers it claims to remove is a hope with code around it."
 46. **d**. The route checks the source before the score: "An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99" (module 90, page 1). *a* is ruled out because "confidence is not evidence", and a model can be certain and wrong. *b* is ruled out because review is for answers the source supports: "a low-consequence action goes out unreviewed only at a confidence of at least 95, and below it goes to review". *c* is ruled out because the register pairs this failure with "a grounding check on the output (hold when unsupported)", and a note would still send the unsupported text out.
-47. **a**. The design treats a refusal as an outcome: "the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model" (module 90, page 1). *b* is ruled out because "the stop_details fields can be null", so the user-facing message comes from the application. *c* is ruled out because "Models released after Claude Opus 4.6 do not support setting temperature", and a sampling setting is not one of the two recoveries of the page. *d* is ruled out because "Re-sending a refused request to the same model usually results in another refusal".
+47. **a**. The design treats a refusal as an outcome: "the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model" (module 90, page 1). *b* is ruled out because "the stop_details fields can be null", so the user-facing message comes from the application. *c* is ruled out because the page says "The design treats it as an outcome with its own branch", and a shared error path is not that branch. *d* is ruled out because "Re-sending a refused request to the same model usually results in another refusal".
 48. **c**. The injection control has several parts: "untrusted content only in tool results, JSON-encoded; screen tool output; least privilege" (module 90, page 1). The narrow right limits what a hidden line can do. *a* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip". *b* is ruled out because pattern lists belong to the input layer, and the page says "A screen with a small model reduces risk and does not remove it". *d* is ruled out because for untrusted text placed in the system prompt "The model then has no marker that the text is third-party data".
 49. **d and e**. The report is a measure with an owner and not a repair: "The report does not fix anything on its own", which is why the residual column says "monitored and not prevented" (module 90, page 2). *a* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment". *b* is ruled out because "Compliance belongs to the deployment and its agreements." *c* is ruled out because "The design cannot prevent unfairness by saying so; it measures it."
 50. **a**. The register's test is mechanical: "a row with a control that does not exist is a wish" (module 90, page 2). *b* is ruled out because "every control in the register is a control in the design". *c* is ruled out because a row needs "a control that is defined in the design, a named owner and the residual risk in words", and an owner alone leaves the control missing. *d* is ruled out because "the residual column says what is left" once a control works, and a control that does not exist leaves the whole risk.

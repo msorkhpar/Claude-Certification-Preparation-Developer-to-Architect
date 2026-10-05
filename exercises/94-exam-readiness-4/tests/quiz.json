@@ -106,7 +106,7 @@
       "id": "03-professional-mock-exam#x6",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Kite Pay's payment tool honours an idempotency key, but the agent builds that key from the current time on each attempt, so a retry after a lost response pays twice. Which change fixes the design?",
+      "stem": "Scenario: Kite Pay's payment tool honors an idempotency key, but the agent builds that key from the current time on each attempt, so a retry after a lost response pays twice. Which change fixes the design?",
       "options": {
         "a": "Make a fresh value for each attempt and log every one of them",
         "b": "Derive the label once from the order and the action, and reuse it for every repeat",
@@ -135,7 +135,7 @@
       "key": "c",
       "explanation": {
         "c": "A refusal is a fatal failure, and the runner \"never retries the second\" kind (module 81, page 1). A timeout or a rate limit is transient and is repeated up to a fixed number of calls.",
-        "a": "Ruled out because \"The key names the intention, not the attempt\", and a missing permission is not a problem of recognising repeats.",
+        "a": "Ruled out because \"The key names the intention, not the attempt\", and a missing permission is not a problem of recognizing repeats.",
         "b": "Ruled out because the breaker counts \"consecutive failures for one agent\", and a missing permission is a fact about the account.",
         "d": "Ruled out because \"An unlimited retry is a way to spend money while nothing changes\", and ten is the same mistake."
       }
@@ -144,7 +144,7 @@
       "id": "03-professional-mock-exam#x8",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behaviour keeps spending low for the rest of the outage?",
+      "stem": "Scenario: A breaker around Quarry Labs' search agent opens during an outage. After its cooldown one probe call goes through and fails. Which behavior keeps spending low for the rest of the outage?",
       "options": {
         "a": "It reverts to refusing requests at once until a further pause has passed",
         "b": "It resets its count of failures and allows the next three calls",
@@ -447,7 +447,7 @@
       "id": "03-professional-mock-exam#x23",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Dunmore Legal switches its retrieval from one embedding model to a newer one. It embeds only the documents that change from now on, and keeps the old embeddings for the rest. Recall on its labelled questions falls at once. What explains it?",
+      "stem": "Scenario: Dunmore Legal switches its retrieval from one embedding model to a newer one. It embeds only the documents that change from now on, and keeps the old embeddings for the rest. Recall on its labeled questions falls at once. What explains it?",
       "options": {
         "a": "The newer model needs a larger chunk size, so the old chunks are now too small",
         "b": "The old vectors are stale copies of their documents, so a re-index would clear them",
@@ -508,7 +508,7 @@
       "options": {
         "a": "A switch argument is rejected by the platform as an unsupported parameter",
         "b": "Eight tools are still more than a request can hold, so the list must shrink",
-        "c": "The choice among behaviours is hidden from the model's own judgement",
+        "c": "The choice among behaviors is hidden from the model's own judgment",
         "d": "Merged tools lose their descriptions, so selection has no information left",
         "e": "The number of capabilities is the same as before the change"
       },
@@ -610,7 +610,7 @@
         "a": "As a signal to investigate, since such a collapse often points to a failed safeguard",
         "b": "As a clear improvement, since fewer declines mean happier users",
         "c": "As noise, since a metric that small cannot move in a meaningful way",
-        "d": "As a billing artefact, since declines are counted in a separate system from the one that bills"
+        "d": "As a billing artifact, since declines are counted in a separate system from the one that bills"
       },
       "key": "a",
       "explanation": {
@@ -628,7 +628,7 @@
       "options": {
         "a": "Switch the grader on at full volume straight away",
         "b": "Replace the grader with exact-match checks on every write-up",
-        "c": "Measure its agreement with human judgement on a small sample",
+        "c": "Measure its agreement with human judgment on a small sample",
         "d": "Have people grade all 1,000 reports each night as well"
       },
       "key": "c",
@@ -883,7 +883,7 @@
       "id": "03-professional-mock-exam#x45",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Vale Insurance's tokenising layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)",
+      "stem": "Scenario: Vale Insurance's tokenizing layer finds e-mail addresses and member numbers by pattern, and a check shows that customer names reach the model untouched. Which two steps does the page advise? (Select two.)",
       "options": {
         "a": "Add a line to the system prompt telling the model to disregard names",
         "b": "Switch the layer off and drop the false comfort of a pattern that misses names",
@@ -899,7 +899,7 @@
         "c": "A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for \"a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind\" (module 83, page 2).",
         "d": "A person's name has no fixed shape, so a pattern layer leaves it in, and the page asks for \"a stronger detector for names, or a design in which the free text does not reach the model at all, and tests that plant identifiers of every kind\" (module 83, page 2).",
         "a": "Ruled out because \"the instruction is read by the model that has already received the data\".",
-        "b": "Ruled out because \"a reviewer can test the layer with sample text, which cannot be done for an instruction\".",
+        "b": "Ruled out because the layer is what keeps names and other values from the model, and the page says of it \"It cannot leak what it never had\".",
         "e": "Ruled out because \"A layer that has not been tested against the identifiers it claims to remove is a hope with code around it.\""
       },
       "select": 2
@@ -931,14 +931,14 @@
       "options": {
         "a": "Drop or rephrase the triggering turn, or send the request to another model",
         "b": "Show the user the category of the refusal, which is always present",
-        "c": "Raise the sampling temperature to make the next reply differ",
+        "c": "Treat it as a network fault and retry through the shared error path",
         "d": "Resend the same history unchanged until it passes through"
       },
       "key": "a",
       "explanation": {
         "a": "The design treats a refusal as an outcome: \"the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model\" (module 90, page 1).",
         "b": "Ruled out because \"the stop_details fields can be null\", so the user-facing message comes from the application.",
-        "c": "Ruled out because \"Models released after Claude Opus 4.6 do not support setting temperature\", and a sampling setting is not one of the two recoveries of the page.",
+        "c": "Ruled out because the page says \"The design treats it as an outcome with its own branch\", and a shared error path is not that branch.",
         "d": "Ruled out because \"Re-sending a refused request to the same model usually results in another refusal\"."
       }
     },
@@ -946,7 +946,7 @@
       "id": "03-professional-mock-exam#x48",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: Linnet Legal's assistant summarises inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?",
+      "stem": "Scenario: Linnet Legal's assistant summarizes inbound e-mails and also holds a file-sharing capability, and one message hides a line telling the model to send the user's files to an outside address. Which design handles the message and that capability?",
       "options": {
         "a": "Add it to the user turn with a request that the model ignore any orders in it",
         "b": "Strip every sentence that is written as an instruction, using a list of patterns",
@@ -1211,7 +1211,7 @@
         "b": "The most restrictive setting wins, so the lowest of the three values is in force",
         "c": "Max is in force and the user file is read last",
         "d": "High is in force and managed settings outrank every other level for this key",
-        "e": "Nobody can loosen the organisation's ceiling, though a developer may tighten it"
+        "e": "Nobody can loosen the organization's ceiling, though a developer may tighten it"
       },
       "key": [
         "b",
@@ -1230,7 +1230,7 @@
       "id": "03-professional-mock-exam#x62",
       "page": "03-professional-mock-exam.md",
       "scope": "level",
-      "stem": "Scenario: A developer at Gorse Bank says that a restriction in her local file is not honoured, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?",
+      "stem": "Scenario: A developer at Gorse Bank says that a restriction in her local file is not honored, and the platform team wants a runbook step that explains why on her machine. Which two commands does the runbook name?",
       "options": {
         "a": "/memory, which shows the loaded files, and claude init, which writes a fresh settings file",
         "b": "/model, which shows the chosen model, and claude logout, which clears the stored session",
@@ -1289,7 +1289,7 @@
       "scope": "level",
       "stem": "Scenario: Marden Health's pilot ran with ten volunteers who sent clean cases, and the sponsor wants the roll-out to two thousand users to begin next week. Which test does the roll-out plan need for the pilot's assumption about what the volunteers sent?",
       "options": {
-        "a": "Buy licences for all two thousand users and read the first week's tickets",
+        "a": "Buy licenses for all two thousand users and read the first week's tickets",
         "b": "Raise the model tier before the roll-out, to handle odd inputs better",
         "c": "Sample real production traffic and evaluate it by slice",
         "d": "Count escalations per hundred tasks and staff the help desk for that rate"
@@ -1372,7 +1372,7 @@
       },
       "key": "d",
       "explanation": {
-        "d": "A control that must always hold is enforced in code, because the model's behaviour is probabilistic (module 79, page 2). The page adds that \"a regulatory control never rests on the model alone\", whatever the test score was.",
+        "d": "A control that must always hold is enforced in code, because the model's behavior is probabilistic (module 79, page 2). The page adds that \"a regulatory control never rests on the model alone\", whatever the test score was.",
         "a": "Ruled out because the page says to \"Enforce in code any control that must always hold, such as a spending limit or a mandatory approval\", and a tool description is only text the model reads.",
         "b": "Ruled out because the page says \"Probabilistic behaviour cannot give a guarantee, however high the measured accuracy\".",
         "c": "Ruled out because people are kept for \"decisions that carry accountability, cannot be undone or fall under a rule that demands a human\", whereas a control that must always hold is enforced in code."
@@ -1489,7 +1489,7 @@
       "id": "04-professional-mock-exam-2#x12",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. Which two statements describe the right behaviour? (Select two.)",
+      "stem": "Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. Which two statements describe the right behavior? (Select two.)",
       "options": {
         "a": "The end of the policy is trimmed until the request fits",
         "b": "The request is sent anyway and the model discards the surplus",
@@ -1656,7 +1656,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The variable that emits raw bodies implies consent to everything the three narrower variables would reveal, because the bodies include the entire conversation history (module 87, page 1). The page puts it as \"include the entire conversation history\".",
+        "c": "The variable that emits raw bodies reaches further than the three narrower variables, because the bodies carry the whole conversation (module 87, page 1). The page puts it as \"include the entire conversation history\".",
         "a": "Ruled out because the defaults say \"Spans redact user prompt text, tool input details, and tool content by default\", and this setting overrides that.",
         "b": "Ruled out because the page says it \"implies consent to everything\" the other three would reveal.",
         "d": "Ruled out because \"a repository can't use them to turn telemetry on, choose where it goes, or capture content\"."
@@ -1691,7 +1691,7 @@
       "id": "04-professional-mock-exam-2#x22",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licences. Which cost does the page name?",
+      "stem": "Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licenses. Which cost does the page name?",
       "options": {
         "a": "Nothing beyond a configuration file and a short setup guide for teams",
         "b": "Running it as infrastructure that follows what its clients send",
@@ -1893,7 +1893,7 @@
         "b": "An A/B test on all users comes first and alone predicts reaction",
         "c": "Exposure to real users follows once the shadow run says the change is safe to show",
         "d": "A shadow run exposes no user to a degradation",
-        "e": "Compare average segment accuracies, which summarise the change"
+        "e": "Compare average segment accuracies, which summarize the change"
       },
       "key": [
         "c",
@@ -1998,9 +1998,9 @@
       "key": "b",
       "explanation": {
         "b": "The accuracy is 100 minus the review cost as a percent of the error cost, rounded up and never below 0, so a check that costs as much as an error or more needs no accuracy (module 93, page 2). The result stays 0 and does not go negative. The page puts it as \"A check that costs as much as an error, or more, needs no accuracy\".",
-        "a": "Ruled out because \"the result stays 0 and does not go negative.\"",
-        "c": "Ruled out because the rule rounds the percent \"up, and never below 0\", and 80 is not a result of it.",
-        "d": "Ruled out because the formula is \"100 minus the review cost as a percent of the error cost\", and the result is clamped at zero."
+        "a": "Ruled out because the rule rounds the percent \"up, and never below 0\".",
+        "c": "Ruled out because the rule takes \"the review cost as a percent of the error cost\", and 80 is the error as a share of the check.",
+        "d": "Ruled out because the page says \"the check never pays\", so no accuracy is needed."
       }
     },
     {
@@ -2253,7 +2253,7 @@
       "id": "04-professional-mock-exam-2#x50",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: The tokenising layer at Wyndham Care replaces each e-mail address with a placeholder, and a reviewer asks where the map from placeholder to address lives and whether one person keeps one placeholder. What does the design say?",
+      "stem": "Scenario: The tokenizing layer at Wyndham Care replaces each e-mail address with a placeholder, and a reviewer asks where the map from placeholder to address lives and whether one person keeps one placeholder. What does the design say?",
       "options": {
         "a": "In the provider's logs, to let the model restore each value in its reply",
         "b": "In a vault held only by the caller, and equal values get one stand-in each",
@@ -2413,15 +2413,15 @@
       "scope": "level",
       "stem": "Scenario: A service record at Merton Care names an accountable party as \"the project team\", and the incident review cannot find anyone to call at night. What does the page say should have been written?",
       "options": {
-        "a": "The vendor, named as the supplier of the underlying model",
-        "b": "The sponsor, named as the executive who approved the work",
+        "a": "The vendor that supplies the underlying model to the assistant",
+        "b": "The executive sponsor who approved the work and funds it",
         "c": "A role reachable by phone, such as the billing operations manager",
-        "d": "A committee, named as the group that reviews every incident each week"
+        "d": "A committee that reviews every incident at its weekly meeting"
       },
       "key": "c",
       "explanation": {
         "c": "Accountability is a role that can be telephoned, written in the record, and where the model prepares and a person decides the record says so (module 91, page 1). The page calls an ownerless target \"nobody's\". The page puts it as \"A role that can be telephoned\".",
-        "a": "Ruled out because \"deploying an automated decision means owning its outcomes\", so the deploying organisation owns it.",
+        "a": "Ruled out because \"deploying an automated decision means owning its outcomes\", so the deploying organization owns it.",
         "b": "Ruled out because \"the owner is a role that can be called when it moves\", and a sponsor is not that.",
         "d": "Ruled out because \"A target without a measure cannot be reported, and one without an owner is nobody's.\""
       }
@@ -2449,11 +2449,11 @@
       "id": "04-professional-mock-exam-2#x60",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: Dunmow Group sets an organisation spend limit of 20,000, group limits of 6,000, 8,000 and 6,000, and gives one member a ceiling of 9,000 in the 6,000 group. Which two statements does the page support? (Select two.)",
+      "stem": "Scenario: Dunmow Group sets an organization spend limit of 20,000, group limits of 6,000, 8,000 and 6,000, and gives one member a ceiling of 9,000 in the 6,000 group. Which two statements does the page support? (Select two.)",
       "options": {
-        "a": "The groups together exceed the organisation, which breaks the sum",
+        "a": "The groups together exceed the organization, which breaks the sum",
         "b": "That individual figure is unreachable",
-        "c": "The organisation limit is a safety net that makes the other figures optional",
+        "c": "The organization limit is a safety net that makes the other figures optional",
         "d": "The three shares sum to the grand total exactly",
         "e": "Nothing is wrong, and a member may exceed a group's limit with consent"
       },
@@ -2462,10 +2462,10 @@
         "d"
       ],
       "explanation": {
-        "b": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2).",
-        "d": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2).",
+        "b": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organization's total (module 92, page 2).",
+        "d": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organization's total (module 92, page 2).",
         "a": "Ruled out because \"a total of exactly 20000 passes and 20001 does not\".",
-        "c": "Ruled out because \"make the groups add up exactly\", because the organisation limit decides first otherwise.",
+        "c": "Ruled out because \"make the groups add up exactly\", because the organization limit decides first otherwise.",
         "e": "Ruled out because \"a member's limit is no higher than the smallest group's\", so a figure above the group's cannot stand."
       },
       "select": 2
@@ -2483,7 +2483,7 @@
       },
       "key": "c",
       "explanation": {
-        "c": "Server-managed settings apply to everyone in the organisation, and a different policy for one group means a different file or profile deployed to that group (module 92, page 1). They are fetched at startup and refreshed hourly. The page puts it as \"per-group policy is not yet supported there\".",
+        "c": "Server-managed settings apply to everyone in the organization, and a different policy for one group means a different file or profile deployed to that group (module 92, page 1). They are fetched at startup and refreshed hourly. The page puts it as \"per-group policy is not yet supported there\".",
         "a": "Ruled out because it \"is edited by an Owner or Primary Owner, not by any administrator\".",
         "b": "Ruled out because \"a policy belongs in managed settings, and the shared file holds what the team agrees for itself\".",
         "d": "Ruled out because server-managed settings are applied to everyone: \"It applies to everyone in the organisation\"."
@@ -2512,7 +2512,7 @@
       "id": "04-professional-mock-exam-2#x63",
       "page": "04-professional-mock-exam-2.md",
       "scope": "level",
-      "stem": "Scenario: A platform team at Larkin Pay enables Claude Code for an organisation with zero data retention and promises leadership a dashboard of merged pull requests with assistance. What should it check first?",
+      "stem": "Scenario: A platform team at Larkin Pay enables Claude Code for an organization with zero data retention and promises leadership a dashboard of merged pull requests with assistance. What should it check first?",
       "options": {
         "a": "The baseline of four weeks, since the metrics begin once the baseline period ends",
         "b": "Whether those contribution metrics are available, since they need the GitHub app",
@@ -2521,7 +2521,7 @@
       },
       "key": "b",
       "explanation": {
-        "b": "Contribution metrics need the GitHub app and are not available for organisations with zero data retention enabled, so the team checks that before promising them (module 92, page 2). The page puts it as \"are not available for organisations with zero data retention enabled\".",
+        "b": "Contribution metrics need the GitHub app and are not available for organizations with zero data retention enabled, so the team checks that before promising them (module 92, page 2). The page puts it as \"are not available for organisations with zero data retention enabled\".",
         "a": "Ruled out because the baseline is collected before the launch: \"the plan takes four weeks of data before the rollout\".",
         "c": "Ruled out because \"Lines and suggestions accepted are reported and not targeted.\"",
         "d": "Ruled out because \"a member's use draws from a seat allowance\", which concerns spend and not metrics."
