@@ -5,7 +5,7 @@
 
 **After this page you can** improve a prompt with a loop that an eval set judges, tell a better average from a safe change, run a regression comparison that names what broke, keep a model or setting change under the same gate, and write the module's practice, an eval harness.
 
-Checked on 2026-10-03 against the Claude API documentation pages "Define success criteria and build evaluations", "Prompt engineering overview" and "Claude API errors", and against the pinned model table in the course's version notes. The example runs offline in Python and TypeScript with scripted stand-ins for the application and no model. The practice runs offline in Python, TypeScript, Java and Kotlin.
+Checked on 2026-10-03 against the Claude API documentation pages "Define success criteria and build evaluations", "Prompt engineering overview" and "Claude API errors", and against the pinned model table in the course's version notes. The example runs offline in Python, TypeScript, Java and Kotlin with scripted stand-ins for the application and no model. The practice runs offline in Python, TypeScript, Java and Kotlin.
 
 ## Why it matters
 
@@ -27,7 +27,7 @@ The prompt engineering overview supplies the guard on step 1: the techniques ass
 
 ### A run, a gate and a comparison
 
-The example below does the five steps on six sentiment cases. It uses two scripted "versions" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label (the example's grader trims and lower-cases only, a simpler rule than the practice's `exact` check, which also collapses runs of white space), the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of both languages is shown, and under each is what it printed in the container.
+The example below does the five steps on six sentiment cases. It uses two scripted "versions" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label (the example's grader trims and lower-cases only, a simpler rule than the practice's `exact` check, which also collapses runs of white space), the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of all four languages is shown, and under each is what it printed in the container.
 
 <!-- example: m42-eval-run tabs: python,typescript,java,kotlin -->
 ```python
@@ -445,7 +445,7 @@ A regression run is the same set, run again, with a comparison against the last 
 | A changed tool or schema | The model reads the description, so a rename changes its choices | Before the merge |
 | A scheduled run | The provider may change what an alias points to, and traffic drifts | Nightly, with an alert on a drop |
 
-The pinned model ids the course uses are snapshots, which is what makes a before-and-after comparison fair. The errors page shows that some migrations fail at the request and not in the output: a prefilled assistant message returns a 400 on Claude 4.6 and later models, a forced `tool_choice` returns a 400 on Claude Opus 5.5 and Sonnet 5.5, and `thinking: {"type": "enabled"}` returns a 400 on models from 4.7. A regression run on the new id turns each of those into a failed case the same afternoon, and not a failed request in production. Module 43 reads such failures.
+The pinned model ids the course uses are snapshots, which is what makes a before-and-after comparison fair. The errors page shows that some migrations fail at the request and not in the output: a prefilled assistant message returns a 400 on Claude 4.6 and later models, a forced `tool_choice` returns a 400 on Claude Opus 5.5 and Sonnet 5.5, among others, and `thinking: {"type": "enabled"}` returns a 400 on models from 4.7. A regression run on the new id turns each of those into a failed case the same afternoon, and not a failed request in production. Module 43 reads such failures.
 
 A pull request check is the natural home for the run: module 40 shows a workflow triggered by a repository event, and an eval job is one more job in it. The set lives in the repository beside the prompt, so a change to either shows in the same diff.
 
