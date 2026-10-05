@@ -129,10 +129,13 @@ a missing variable is an error; and no request ends on an assistant turn or carr
 
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 """
+import logging
 import re
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 
@@ -224,6 +227,8 @@ step 2 output: Yes: at 450 dollars it is above the 400 dollar limit, so it needs
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("prompt_chain");
 
 export const MODEL = "claude-sonnet-5-5";
 
@@ -337,6 +342,7 @@ import java.util.regex.Pattern;
  * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
  */
 public final class PromptChain {
+    private static final System.Logger LOG = System.getLogger(PromptChain.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     /** A versioned template: a system prompt and a user prompt with {{name}} placeholders. */
@@ -447,6 +453,8 @@ import harness.Scripted
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.Show.py
+
+private val log = System.getLogger("prompt_chain")
 
 /**
  * A two-step prompt chain with versioned templates, against a scripted model.

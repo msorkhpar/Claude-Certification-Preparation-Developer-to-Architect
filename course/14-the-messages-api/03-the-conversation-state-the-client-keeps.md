@@ -46,11 +46,14 @@ sequence. Read the output for what each request contained.
 Three turns through the real SDK against a scripted transport. The replies are illustrative,
 hand-written Messages responses (claude-sonnet-5-5), not captures.
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 SYSTEM = "You answer in one short sentence."
@@ -105,6 +108,8 @@ system is a top-level field: True | roles ever used in messages: ['assistant', '
 // hand-written Messages responses (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("conversation");
 
 const MODEL = "claude-sonnet-5-5";
 const SYSTEM = "You answer in one short sentence.";
@@ -187,6 +192,7 @@ import java.util.stream.Collectors;
  * hand-written Messages responses (claude-sonnet-5-5), not captures.
  */
 public final class Conversation {
+    private static final System.Logger LOG = System.getLogger(Conversation.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String SYSTEM = "You answer in one short sentence.";
 
@@ -253,6 +259,8 @@ import harness.Scripted
 import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
+
+private val log = System.getLogger("conversation")
 
 /**
  * A conversation the client keeps: the API is stateless, so every request carries the whole history.

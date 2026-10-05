@@ -98,11 +98,14 @@ The example runs the same call through the real SDK in five situations. Read it 
 The failures are illustrative, hand-written replies shaped like the API's error bodies.
 The SDK sleeps a short exponential back-off between attempts (about 0.5 s, then about 1 s).
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 PARAMS = dict(model=MODEL, max_tokens=16, messages=[{"role": "user", "content": "Hi"}])
@@ -162,6 +165,8 @@ timeout twice, max_retries=1: 2 request(s), retry-count header ['0', '1'] -> API
 // The SDK sleeps a short exponential back-off between attempts (about 0.5 s, then about 1 s).
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text, type Reply } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("sdk_retries");
 
 const PARAMS = { model: "claude-sonnet-5-5", max_tokens: 16, messages: [{ role: "user" as const, content: "Hi" }] };
 
@@ -240,6 +245,7 @@ import java.util.stream.Collectors;
  * those waits instead of sleeping them.
  */
 public final class SdkRetries {
+    private static final System.Logger LOG = System.getLogger(SdkRetries.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static MessageCreateParams params() {
@@ -305,6 +311,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.ScriptedHttp
 import java.net.SocketTimeoutException
+
+private val log = System.getLogger("sdk_retries")
 
 /**
  * What the SDK retries on its own, and what it does not, against a scripted transport.

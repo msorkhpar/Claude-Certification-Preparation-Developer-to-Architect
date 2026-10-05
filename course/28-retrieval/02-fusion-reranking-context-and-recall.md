@@ -102,8 +102,11 @@ The example builds the chunks, ranks the eight questions with each index and wit
 Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a
 hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.
 """
+import logging
 import math
 import re
+
+log = logging.getLogger(__name__)
 
 CORPUS = [
     ('refunds', 'Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the original payment method within five business days. Digital goods are not refundable after download.'),
@@ -313,6 +316,8 @@ mean recall@3: {'bm25': 0.5, 'embedding': 0.75, 'hybrid': 1.0}
 // A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.
 // Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a
 // hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.
+import { logger } from "./logger.ts";
+const log = logger("retrieval_recall");
 type Chunk = { id: string; doc: string; text: string };
 type Scorer = (query: string, text: string) => number;
 
@@ -540,6 +545,7 @@ import java.util.stream.Collectors;
  * hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.
  */
 public final class RetrievalRecall {
+    private static final System.Logger LOG = System.getLogger(RetrievalRecall.class.getName());
     record Chunk(String id, String doc, String text) {}
 
     record Query(String text, List<String> relevant) {}
@@ -811,6 +817,8 @@ mean recall@3: {'bm25': 0.5, 'embedding': 0.75, 'hybrid': 1.0}
 ```kotlin
 import kotlin.math.ln
 import kotlin.math.sqrt
+
+private val log = System.getLogger("retrieval_recall")
 
 /**
  * A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.

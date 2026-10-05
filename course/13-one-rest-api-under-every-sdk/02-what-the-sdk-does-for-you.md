@@ -34,11 +34,14 @@ program can record exactly what each one put on the wire, and nothing leaves the
 Both go through the same scripted transport, so nothing leaves the container. The reply is an
 illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.
 """
+import logging
 import anthropic
 import httpx2
 
 from harness import ScriptedTransport
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 URL = "https://api.anthropic.com/v1/messages"
@@ -100,6 +103,8 @@ sdk 429 : RateLimitError 429 request id req_illustrative_0001
 // illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("raw_vs_sdk");
 
 const MODEL = "claude-sonnet-5-5";
 const URL = "https://api.anthropic.com/v1/messages";
@@ -185,6 +190,7 @@ import java.util.TreeSet;
  * (`harness` is the course's stand-in: a scripted transport plugged into the SDK's own HttpClient hook.)
  */
 public final class RawVsSdk {
+    private static final System.Logger LOG = System.getLogger(RawVsSdk.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String URL = "https://api.anthropic.com/v1/messages";
     static final Map<String, Object> PAYLOAD = map("model", MODEL, "max_tokens", 64, "messages", List.of(map("role", "user", "content", "Capital of France?")));
@@ -259,6 +265,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import harness.ScriptedHttp
+
+private val log = System.getLogger("raw_vs_sdk")
 
 /**
  * One Messages call written by hand, then the same call through the SDK.

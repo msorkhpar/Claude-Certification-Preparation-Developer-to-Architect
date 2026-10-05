@@ -107,11 +107,14 @@ caches the prefix up to a block that carries cache_control when that prefix reac
 minutes from its last use, and reports `cache_creation_input_tokens`, `cache_read_input_tokens` and `input_tokens` (the
 tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).
 """
+import logging
 import json
 import math
 
 from harness import scripted_client
 from harness.scripted import message, text
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 POLICY = "Refund policy clause: items may be returned within 14 days. " * 40  # about 600 tokens
@@ -214,6 +217,8 @@ if __name__ == "__main__":
 // tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("cache_hits");
 
 export const MODEL = "claude-sonnet-5-5";
 export const POLICY = "Refund policy clause: items may be returned within 14 days. ".repeat(40); // about 600 tokens
@@ -343,6 +348,7 @@ import java.util.function.Function;
  * tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).
  */
 public final class CacheHits {
+    private static final System.Logger LOG = System.getLogger(CacheHits.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
     static final String POLICY = "Refund policy clause: items may be returned within 14 days. ".repeat(40); // about 600 tokens
 
@@ -493,6 +499,8 @@ import harness.Scripted.map
 import harness.Scripted.message
 import harness.Scripted.text
 import java.util.function.Function
+
+private val log = System.getLogger("cache_hits")
 
 /**
  * Prompt caching seen through the usage object, against a scripted server that applies the documented prefix rule.

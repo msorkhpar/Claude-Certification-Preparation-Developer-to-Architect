@@ -107,10 +107,13 @@ order of the calls, and the third one carries `is_error`.
 
 The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 """
+import logging
 import json
 
 from harness import scripted_client
 from harness.scripted import message, text, tool_use
+
+log = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-5-5"
 TOOLS = [
@@ -181,6 +184,8 @@ final text: In Oslo it is 09:15 and 4 C with light rain. I have no weather data 
 // The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
 import Anthropic from "@anthropic-ai/sdk";
 import { message, scriptedFetch, text } from "../../../harness/ts/scriptedFetch.ts";
+import { logger } from "./logger.ts";
+const log = logger("tool_loop");
 
 export const MODEL = "claude-sonnet-5-5";
 export const TOOLS: Anthropic.Tool[] = [
@@ -291,6 +296,7 @@ import java.util.function.Function;
  * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.
  */
 public final class ToolLoop {
+    private static final System.Logger LOG = System.getLogger(ToolLoop.class.getName());
     static final String MODEL = "claude-sonnet-5-5";
 
     static Tool tool(String name, String description) {
@@ -400,6 +406,8 @@ import harness.Scripted.message
 import harness.Scripted.text
 import harness.Scripted.toolUse
 import harness.Show.py
+
+private val log = System.getLogger("tool_loop")
 
 /**
  * A tool loop on the official SDK, against a scripted model: parallel calls, one failing tool and a tool_choice that is kept.
