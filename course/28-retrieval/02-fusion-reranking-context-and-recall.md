@@ -62,7 +62,7 @@ Anthropic reports the effect as a drop in the top-20-chunk retrieval failure rat
 
 These are the write-up's figures, measured on its datasets. They show an order of magnitude and a ranking of the techniques, and they do not
 promise a number for your data. The same write-up gives two practical guides: retrieve 20 chunks rather than fewer, and make
-contextualization affordable with prompt caching, at a cost it states as "$1.02 per million document tokens".
+contextualization affordable with prompt caching, at a one-time cost it states as "$1.02 per million document tokens", under its own assumptions about chunk and document sizes.
 
 ### When retrieval is unnecessary
 
