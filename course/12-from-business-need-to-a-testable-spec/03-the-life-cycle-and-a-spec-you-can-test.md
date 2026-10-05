@@ -52,8 +52,8 @@ that cannot name its test is a wish, and wishes do not survive the first inciden
 Four signals, all available without reading a single prompt:
 
 - **Error rate by status and type.** The API returns an error body with a `type` and a `request_id`; module 15 turns
-  them into classes. A rise in 429s is a capacity story, a rise in 400s is a bug in your requests, a rise in 5xx is a
-  provider story.
+  them into classes. A rise in 429s is a capacity story, a rise in 400s usually points at your requests (or at a spend limit you set, which also returns a 400, see module 15),
+  a rise in 5xx is a provider story.
 - **Latency**, as the percentile the budget names, measured at your edge.
 - **Token use and cost**, from the `usage` object that comes back with every response.
 - **Headroom against the limits.** The response headers report the remaining request and token allowance, so you
