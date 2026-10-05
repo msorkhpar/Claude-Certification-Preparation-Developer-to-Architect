@@ -43,9 +43,9 @@ in them becomes part of the conversation. So a tab with another customer's recor
 Site permissions come in two sizes: allow one action, or "always allow actions on this site". Even with an always-allow,
 certain things still need your explicit approval: file downloads, entering sensitive information and granting
 authorisations. Some actions are off limits whatever the mode. The permissions guide lists "Making purchases or
-financial transactions" among the actions Claude is prohibited from regardless of permission mode (checked 2026-10-02),
-and the same list includes creating accounts, permanent deletions and, notably, completing instructions found in emails or web content. On
-Team and Enterprise plans admins can set allowlists and blocklists of sites for everyone.
+financial transactions" among the actions Claude is prohibited from regardless of permission mode (checked 2026-10-02).
+The same list includes creating accounts, permanent deletions and, notably, completing instructions found in emails
+or web content. On Team and Enterprise plans admins can set allowlists and blocklists of sites for everyone.
 
 **The risks** are those of any tool that reads untrusted content and acts. The page's example is a harmless-looking
 to-do list or email containing invisible text that tells Claude to fetch bank statements. Claude's classifiers screen
