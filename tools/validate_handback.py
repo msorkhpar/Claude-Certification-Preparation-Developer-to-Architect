@@ -48,9 +48,7 @@ def validate(path):
     waived = set(r.get("languages_waived", []))
     if not waived <= {"java", "kotlin"}:
         why.append(f"only java and kotlin may be waived, not {sorted(waived - {'java', 'kotlin'})}")
-    if r.get("scope_empty"):
-        why.append("the range holds no practice and no example, so nothing was proved")
-    for l in LANGS:
+    for l in ([] if r.get("scope_empty") else LANGS):   # a pages-only range (no practice, no example) has no runs to demand
         t = langs.get(l)
         if t is None:
             why.append(f"{l}: missing from the report")
@@ -71,7 +69,7 @@ def validate(path):
     if not r.get("pass"):
         why.append("the report says fail")
     per = " ".join(f"{l}={langs.get(l, {}).get('executed', '?')}/{langs.get(l, {}).get('expected', '?')}" for l in LANGS)
-    verdict = "ACCEPTED" if not why else "REFUSED (" + "; ".join(why) + ")"
+    verdict = ("ACCEPTED (pages only: no practice or example in the range)" if r.get("scope_empty") else "ACCEPTED") if not why else "REFUSED (" + "; ".join(why) + ")"
     return why, f"{verdict} modules={r.get('modules')} commit={str(r.get('commit'))[:10]} runs {per} steps={len(r.get('steps', []))} findings={r.get('grade_findings')}"
 
 

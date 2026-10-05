@@ -65,11 +65,11 @@ quizjson_equal() {
 HARNESS_SPECS=''; JVM_TASKS=''; NPRACTICES=0; EXAMPLE_NAMES=''
 eval "$($R info --modules "$MODULES" --examples "$EXAMPLES" | awk '{k=$1; $1=""; sub(/^ /,""); gsub(/\047/,""); printf "INFO_%s=\047%s\047\n", k, $0}')"
 NPRACTICES=$INFO_PRACTICES; EXAMPLE_NAMES=$INFO_EXAMPLES; HARNESS_SPECS=$INFO_SPECS; JVM_TASKS=$INFO_JVMTASKS
-PAGES=$(python3 - "$MODULES" <<'PY'
+PAGES=$(python3 - "$MODULES" "$EXAMPLES" <<'PY'
 import re, sys
 from pathlib import Path
-rx = re.compile(sys.argv[1])
-print(" ".join(f"course/{p.name}/*.md" for p in sorted(Path("course").iterdir()) if p.is_dir() and rx.match(p.name)))
+rx = [re.compile(a) for a in sys.argv[1:3]]
+print(" ".join(f"course/{p.name}/*.md" for p in sorted(Path("course").iterdir()) if p.is_dir() and any(r.match(p.name) for r in rx)))
 PY
 )
 

@@ -52,10 +52,10 @@ MODULES_RX = re.compile(A.modules)
 def names_in_scope():
     """Module-named folders of course/, exercises/ and examples/ that the range covers."""
     dirs = []
-    for top, rx in (("course", MODULES_RX), ("exercises", MODULES_RX), ("examples", EXAMPLES_RX)):
+    for top, rxs in (("course", (MODULES_RX, EXAMPLES_RX)), ("exercises", (MODULES_RX,)), ("examples", (EXAMPLES_RX,))):
         base = ROOT / top
         if base.is_dir():
-            dirs += [str(p.relative_to(ROOT)) for p in sorted(base.iterdir()) if p.is_dir() and rx.match(p.name)]
+            dirs += [str(p.relative_to(ROOT)) for p in sorted(base.iterdir()) if p.is_dir() and any(r.match(p.name) for r in rxs)]
     return dirs
 
 
