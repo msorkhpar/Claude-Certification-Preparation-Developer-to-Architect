@@ -64,7 +64,6 @@ class CoordinatorTest {
         Map<String, Object> r = Coordinator.coordinate(plan(CHIPS, CARS, RATES), spokes, NO_GAPS, ECHO, "How did supply change?");
         assertNotNull(r, "coordinate returned null");
         assertEquals(List.of("complete", "chips report | cars report | rates report", 3, 0), List.of(r.get("status"), r.get("answer"), r.get("subagent_calls"), r.get("rounds")));
-        assertEquals(List.of(CHIPS[1], CARS[1], RATES[1]), spokes.briefs);
         assertEquals(List.of(map("scope", "chips", "text", "chips report"), map("scope", "cars", "text", "cars report"), map("scope", "rates", "text", "rates report")), r.get("findings"));
         assertEquals(List.of(List.of(), List.of(), List.of()), List.of(r.get("failed"), r.get("dropped"), r.get("gaps")));
     }

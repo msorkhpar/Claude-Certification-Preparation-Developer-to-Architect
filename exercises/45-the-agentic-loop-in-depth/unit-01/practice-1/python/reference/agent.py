@@ -1,42 +1,69 @@
 """The agent loop, driven by the stop reason. See ../../statement.md."""
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def _text(content):
     return "".join(block.get("text", "") for block in content if block.get("type") == "text")
 
 
+def _calls(content):
+    return [block for block in content if block.get("type") == "tool_use"]
+
+
+def _tool_result(block, content, is_error=False):
+    result = {"type": "tool_result", "tool_use_id": block["id"], "content": content}
+    if is_error:
+        result["is_error"] = True
+    return result
+
+
+def _status_for(reason):
+    if reason in ("end_turn", "stop_sequence"):
+        return "done"
+    if reason == "max_tokens":
+        return "truncated"
+    if reason == "refusal":
+        return "refused"
+    return "unexpected"
+
+
+def _at_limit(turns, max_turns):
+    return turns >= max_turns
+
+
+def _snapshot(messages):
+    return list(messages)
+
+
 def _run_tool(block, tools):
     handler = tools.get(block.get("name"))
     if handler is None:
-        return {"type": "tool_result", "tool_use_id": block["id"], "content": f"Unknown tool: {block.get('name')}", "is_error": True}
+        return _tool_result(block, f"Unknown tool: {block.get('name')}", True)
     try:
-        return {"type": "tool_result", "tool_use_id": block["id"], "content": handler(block.get("input", {}))}
+        return _tool_result(block, handler(block.get("input", {})))
     except Exception as error:  # a failing tool is a result for the model, not a crash of the loop
-        return {"type": "tool_result", "tool_use_id": block["id"], "content": str(error), "is_error": True}
+        return _tool_result(block, str(error), True)
 
 
 def run_agent(model, tools, task, max_turns=8):
+    log.debug("run_agent input: %r", task)
     messages = [{"role": "user", "content": task}]
     turns, last_text = 0, ""
     while True:
-        if turns >= max_turns:  # the count is a backstop: it only ends a run the model has not ended itself
+        if _at_limit(turns, max_turns):  # the count is a backstop: it only ends a run the model has not ended itself
             return {"status": "max_turns", "text": last_text, "turns": turns, "messages": messages}
         turns += 1
-        reply = model(list(messages))
+        reply = model(_snapshot(messages))
         content = reply["content"]
         last_text = _text(content)
         messages.append({"role": "assistant", "content": content})
         reason = reply["stop_reason"]
         if reason == "tool_use":
-            calls = [block for block in content if block.get("type") == "tool_use"]
+            calls = _calls(content)
             if not calls:
                 return {"status": "malformed", "text": last_text, "turns": turns, "messages": messages}
             messages.append({"role": "user", "content": [_run_tool(block, tools) for block in calls]})
-        elif reason in ("end_turn", "stop_sequence"):
-            return {"status": "done", "text": last_text, "turns": turns, "messages": messages}
-        elif reason == "max_tokens":
-            return {"status": "truncated", "text": last_text, "turns": turns, "messages": messages}
-        elif reason == "refusal":
-            return {"status": "refused", "text": last_text, "turns": turns, "messages": messages}
         else:
-            return {"status": "unexpected", "text": last_text, "turns": turns, "messages": messages}
+            return {"status": _status_for(reason), "text": last_text, "turns": turns, "messages": messages}

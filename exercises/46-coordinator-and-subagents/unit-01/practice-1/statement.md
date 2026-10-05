@@ -17,6 +17,24 @@ open `starter/` and edit the file there. Nothing here touches the network: the f
 | `synthesizer(question, findings)` | returns the final answer as text |
 | a finding | `{"scope": text, "text": the subagent's report}` |
 
+## What is already written, and what you write
+
+The starter is a working coordinator with seven small gaps cut out of it. The plan, the calls to the planner, subagent, reviewer and
+synthesizer, the failure handling and the result shapes are written and correct. Each gap is one function with its signature, a comment that
+says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the
+cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case.
+Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):
+
+1. `_wants_team` unlocks `e1`: does the plan ask for subagents.
+2. `_drop_reason` unlocks `e3`: why a subtask is dropped (empty brief, duplicate scope, over limit), or none.
+3. `_report_problem` unlocks `e4`: a report that is not text or is blank is an `empty report`.
+4. `_clean_gaps` unlocks `e5` and `e6`: the reviewer's gaps stripped, deduplicated and capped.
+5. `_follow_up` unlocks `e5`: the brief for one gap.
+6. `_may_refine` unlocks `e5` and `e6`: gaps left and rounds below the limit.
+7. `_final_status` unlocks `m1` and `e6`: `complete` or `partial`.
+
+About a dozen lines in all. The sections below describe the whole coordinator.
+
 ## What to write
 
 `coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2)` (`coordinate` in every language, with the same

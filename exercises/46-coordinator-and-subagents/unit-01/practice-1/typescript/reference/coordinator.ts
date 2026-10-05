@@ -1,5 +1,34 @@
 // A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.
+import { logger } from "../logger.ts";
+const log = logger("coordinator");
 type Finding = { scope: string; text: string };
+
+function dropReason(brief: string, key: string, seen: Set<string>, keptCount: number, maxAgents: number): string | null {
+  if (brief.trim() === "") return "empty brief";
+  if (seen.has(key)) return "duplicate scope";
+  if (keptCount >= maxAgents) return "over limit";
+  return null;
+}
+
+function reportProblem(report: unknown): string | null {
+  return typeof report !== "string" || report.trim() === "" ? "empty report" : null;
+}
+
+function followUp(gap: string, question: string): string {
+  return `Follow up: ${gap}\nQuestion: ${question}`;
+}
+
+function mayRefine(gaps: string[], rounds: number, maxRounds: number): boolean {
+  return gaps.length > 0 && rounds < maxRounds;
+}
+
+function finalStatus(gaps: string[], failed: unknown[]): string {
+  return gaps.length === 0 && failed.length === 0 ? "complete" : "partial";
+}
+
+function wantsTeam(plan: any): boolean {
+  return Boolean(plan.delegate);
+}
 
 function clean(subtasks: Array<{ scope?: unknown; brief?: unknown }>, maxAgents: number) {
   const kept: Array<{ scope: string; brief: string }> = [];
@@ -9,9 +38,8 @@ function clean(subtasks: Array<{ scope?: unknown; brief?: unknown }>, maxAgents:
     const scope = String(task.scope ?? "");
     const brief = String(task.brief ?? "");
     const key = scope.trim().toLowerCase();
-    if (brief.trim() === "") dropped.push({ scope, reason: "empty brief" });
-    else if (seen.has(key)) dropped.push({ scope, reason: "duplicate scope" });
-    else if (kept.length >= maxAgents) dropped.push({ scope, reason: "over limit" });
+    const reason = dropReason(brief, key, seen, kept.length, maxAgents);
+    if (reason) dropped.push({ scope, reason });
     else {
       seen.add(key);
       kept.push({ scope, brief });
@@ -38,8 +66,9 @@ export function coordinate(
   maxAgents = 4,
   maxRounds = 2,
 ): any {
+  log.debug("coordinate input", question);
   const plan = planner(question);
-  if (!plan.delegate) { // a question the coordinator can answer itself is not worth a team
+  if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team
     return { status: "direct", answer: plan.answer ?? null, findings: [], failed: [], dropped: [], gaps: [], rounds: 0, subagent_calls: 0 };
   }
   const { kept, dropped } = clean(plan.subtasks ?? [], maxAgents);
@@ -56,7 +85,8 @@ export function coordinate(
       failed.push({ scope, error: error instanceof Error ? error.message : String(error) });
       return;
     }
-    if (typeof report !== "string" || report.trim() === "") failed.push({ scope, error: "empty report" });
+    const problem = reportProblem(report);
+    if (problem) failed.push({ scope, error: problem });
     else findings.push({ scope, text: report });
   };
 
@@ -64,12 +94,12 @@ export function coordinate(
   if (findings.length === 0) return { status: "failed", answer: null, findings: [], failed, dropped, gaps: [], rounds: 0, subagent_calls: calls };
   let rounds = 0;
   let gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);
-  while (gaps.length > 0 && rounds < maxRounds) {
+  while (mayRefine(gaps, rounds, maxRounds)) {
     rounds += 1;
-    for (const gap of gaps) run(gap, `Follow up: ${gap}\nQuestion: ${question}`);
+    for (const gap of gaps) run(gap, followUp(gap, question));
     gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);
   }
   const answer = synthesizer(question, findings.map((f) => ({ ...f })));
-  const status = gaps.length === 0 && failed.length === 0 ? "complete" : "partial";
+  const status = finalStatus(gaps, failed);
   return { status, answer, findings, failed, dropped, gaps, rounds, subagent_calls: calls };
 }

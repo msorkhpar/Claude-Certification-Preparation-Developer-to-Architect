@@ -13,13 +13,13 @@ PRACTICES[f"{X}/46-coordinator-and-subagents/unit-01/practice-1"] = {
         ("e6", "edge", "the rounds are capped and the gaps that remain are reported"),
     ],
     "plants": {
-        "wrong-leaks-context": (["e2"], "appends what earlier subagents found to the brief of the next one"),
+        "wrong-leaks-context": (["e2"], "appends what earlier subagents found to the briefs of a team of three or more"),
         "wrong-no-dedupe": (["e3"], "runs two subagents on the same scope"),
         "wrong-empty-brief-sent": (["e3"], "sends a subagent an empty brief"),
         "wrong-always-delegates": (["e1"], "builds a team even when the planner answered the question itself"),
         "wrong-failure-as-finding": (["e4"], "reports a subagent's error message as a finding"),
-        "wrong-synthesizes-nothing": (["e4"], "synthesizes an answer when no subagent returned anything"),
-        "wrong-rerun-all": (["e5"], "sends every first-round brief out again in each refinement round"),
+        "wrong-synthesizes-nothing": (["e4"], "synthesizes an answer when every subagent failed"),
+        "wrong-gaps-not-deduped": (["e5"], "keeps a gap that the reviewer names twice and sends it out twice"),
         "wrong-rounds-off-by-one": (["e6"], "runs one refinement round more than the limit"),
     },
 }
