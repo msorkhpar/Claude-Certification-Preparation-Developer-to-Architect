@@ -27,5 +27,5 @@ fun main() {
     println("good tool: ${lintTool(good)}")
     val poorRules = lintTool(poor)
     println("poor tool: $poorRules")
-    println("rules the poor tool breaks: ${poorRules.size}")
+    println("rules the poor tool breaks: ${poorRules?.size ?: 0}")
 }
