@@ -32,6 +32,9 @@ imports nothing of this project, and it needs no sibling file: what `tour` and t
 need of it (the anchor of the README's section, below) is defined HERE. ⛔ There is ONE
 source; the copy is proved identical.
 
+Size exception: this file is one file by design, since a learner repository's runner runs it
+with plain `python3` and no sibling; split, the copy would be several files and no longer one.
+
 ## ⛔ The preview is made from the built page, and the repository is never written down
 
 ⭐ Every edit is a deterministic text edit of a page the site already built; the shipped
@@ -195,7 +198,8 @@ _EXAMPLE_RUN = re.compile(
     r'<p data-example-run="[^"]*"[^>]*>.*?</p>(\s*<pre data-example-part="output"[^>]*></pre>)?',
     re.DOTALL,
 )
-#: ⭐ The stylesheet and script of a Run beside a code example: with the strips gone they serve nothing.
+#: ⭐ The stylesheet and script of a Run beside a code example: with the strips gone they
+#: serve nothing.
 _EXAMPLE_RUN_ASSET = re.compile(
     r'<link\b[^>]*\bhref="(?:[^"]*/)?example-run\.css"[^>]*>\s*'
     r'|<script\b[^>]*\bsrc="(?:[^"]*/)?example-run\.js"[^>]*></script>\s*'
@@ -340,7 +344,7 @@ def _reference(page: str, url: str, sub: dict[str, str]) -> str:
 
 
 def _search(tree: Path, files: set[str], pages: dict[str, str]) -> set[str]:
-    """Return the search's files beside each copied `page.js` that has an index, or refuse by name."""
+    """Return the search's files beside each copied `page.js` with an index, or refuse by name."""
     found: set[str] = set()
     for bundle in sorted(files):
         if posixpath.basename(bundle) != SEARCH_BUNDLE:
