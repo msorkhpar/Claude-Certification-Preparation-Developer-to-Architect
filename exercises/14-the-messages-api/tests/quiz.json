@@ -8,16 +8,16 @@
       "stem": "A support bot works well in testing, where the developer types fast, but real users report that it answers each message as though it were the first. The code sends the newest user message and the system prompt each time. What is the cause?",
       "options": {
         "a": "The history of earlier turns is not part of the requests",
-        "b": "The system prompt should hold a summary of the earlier talk",
+        "b": "The model's memory of the session lapses between slower messages",
         "c": "The output limit is too low for the model to recall earlier turns",
         "d": "The model needs a different tier for multi-turn memory"
       },
       "key": "a",
       "explanation": {
         "a": "The page says \"the Messages API is stateless\", so the client has to send the whole history each time.",
-        "b": "Ruled out because the system prompt is a top-level field for \"instructions that apply from the start\", and a hand-made summary is not how history is kept.",
+        "b": "Ruled out because \"the model keeps nothing between requests\", so there is no session memory to lapse, however fast the turns come.",
         "c": "Ruled out because \"a conversation exists only as the list your code sends each time\", and no output limit supplies a missing list.",
-        "d": "Ruled out because \"the model keeps nothing between requests\", whichever tier answers."
+        "d": "is ruled out because, as the traps put it, \"nothing is wrong with the model; the history was never sent\", whichever tier answers."
       }
     },
     {
@@ -29,50 +29,50 @@
         "a": "Put the brace in a message with the role system at the end of the list",
         "b": "Keep the trailing message but lower the sampling temperature to zero",
         "c": "Drop the final entry and ask for the format through structured outputs",
-        "d": "Move the brace into the system field so that the reply still begins with it"
+        "d": "Retry each failed request with backoff until the trailing brace is accepted"
       },
       "key": "c",
       "explanation": {
         "c": "Prefill is not supported on current models, and the page names structured outputs and system-prompt instructions as the replacements.",
         "b": "Ruled out because \"a request that does returns a 400 invalid_request_error\", whatever the temperature.",
-        "a": "Ruled out because a system-role message is for \"instructions that only become relevant later\" and does not pre-fill a reply.",
-        "d": "Ruled out because the field is for \"instructions that hold from the first turn\", and an instruction does not start a reply with a given character."
+        "a": "Ruled out because a message with the role system \"is applied as a system instruction\", so it does not pre-fill the start of a reply.",
+        "d": "Ruled out because the 400 says the conversation \"must end with a user message\", and resending the same list cannot change that."
       }
     },
     {
       "id": "02-limits-stop-reasons-and-usage#q1",
       "page": "02-limits-stop-reasons-and-usage.md",
       "scope": "page",
-      "stem": "A nightly job asks for a JSON report and sometimes crashes in the JSON parser, with no error status from the API. Which first check does the page recommend?",
+      "stem": "A nightly job asks for a JSON report and sometimes crashes in the JSON parser, with no error status from the API. Which first check fits best?",
       "options": {
         "a": "Lower the sampling temperature so that the report is less variable from one night to the next",
         "b": "Read `stop_reason` and treat `max_tokens` as a cut reply before using the text",
         "c": "Add a stop sequence at the end of every field that the report holds",
-        "d": "Catch the HTTP status of the call and retry every status above 399"
+        "d": "Retry the call whenever the parser fails, since the next report may be whole"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"stop_reason indicates normal completion; HTTP errors indicate failures\", so a cut reply arrives as a normal 200 and only `stop_reason` shows it.",
         "a": "Ruled out because on current models \"a non-default value of any of them is rejected with a 400 error\", and variability is not what truncates a reply.",
         "c": "Ruled out because a stop sequence is \"a cheap way to end a reply at a delimiter you chose\", which does not stop the reply being cut at the ceiling.",
-        "d": "Ruled out because a `max_tokens` cut carries a 200 status: \"a `max_tokens` or a `refusal` arrives with status 200\"."
+        "d": "Ruled out because \"a reply that hits the ceiling stops where it stands\", and a retry under the same limit can be cut in the same way."
       }
     },
     {
       "id": "02-limits-stop-reasons-and-usage#q2",
       "page": "02-limits-stop-reasons-and-usage.md",
       "scope": "page",
-      "stem": "A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400 until they delete a line that sets the sampling temperature to 0.2. What should they do about `top_p`, which they also set?",
+      "stem": "A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400. The code sets the sampling temperature to 0.2 and `top_p` to 0.9, and the team will delete the temperature line. What should they do about `top_p`?",
       "options": {
         "a": "Replace it with `top_k`, which the model still accepts",
-        "b": "Keep it and raise it to 1.0, which is the safest setting",
+        "b": "Keep it, but lower it to 0.5 so that the replies stay focused",
         "c": "Keep it, because only the temperature setting is rejected on that model and the others pass",
-        "d": "Omit it as well, since any non-default value is rejected for that release"
+        "d": "Drop it too, since that release refuses the three randomness knobs alike"
       },
       "key": "d",
       "explanation": {
-        "d": "The page says a non-default value of any of the three settings \"is rejected with a 400 error\" on the current models.",
-        "b": "Ruled out because \"the upgrade is a deletion, not a change of value\", and the page does not name 1.0 or any value as safe.",
+        "d": "The page names the three settings together, and for all of them \"the documentation tells you to omit them\" on the current models.",
+        "b": "Ruled out because \"the upgrade is a deletion, not a change of value\", and 0.5 is still a value the team chose.",
         "c": "Ruled out because \"a non-default value of any of them is rejected with a 400 error\", and the three are named together.",
         "a": "Ruled out because \"temperature, top_p and top_k used to be the knobs of randomness\", and the page rejects all three, so `top_k` is no way out."
       }
@@ -83,17 +83,17 @@
       "scope": "page",
       "stem": "A chat client appends each user turn to its history before calling the API. After a night of occasional 529 errors, some conversations answer oddly, and their stored history shows two user turns in a row. What is the best fix?",
       "options": {
-        "a": "Retry every failed call forever so that no turn is ever left without its answer by morning",
-        "b": "Take that entry out again whenever the call raises, so that only whole exchanges are kept",
+        "a": "Retry each failed call with backoff so that a 529 rarely reaches the history",
+        "b": "Remove the orphaned message from the list on every path where the call fails",
         "c": "Merge any two consecutive user turns into one when the history is saved",
-        "d": "Store only the assistant turns, which are the ones that the model produced"
+        "d": "Raise the client timeout so that slow calls can finish before it gives up"
       },
       "key": "b",
       "explanation": {
         "b": "The rule is to \"commit a turn only when the whole exchange succeeded\", which means removing the user turn on any failure.",
         "a": "Ruled out because a retry is a separate decision, and the page says the retry \"will send a different conversation from the one the user saw\" if the history is damaged.",
         "c": "Ruled out because a merge hides the damage while \"the next request contains two user turns in a row\" in the very same way, and a question that never got an answer stays in the history.",
-        "d": "Ruled out because \"the whole list goes in every request\", and a list without user turns is not a conversation."
+        "d": "Ruled out because a call \"can fail after you appended the user turn\" with a 529 or a 429 as well as a timeout, and a longer wait leaves those turns dangling."
       }
     },
     {
@@ -105,7 +105,7 @@
         "a": "The system prompt is repeated once for every question, so it dominates the bill",
         "b": "Long conversations are charged at a higher price for each output token that is produced",
         "c": "The model writes longer replies as a conversation grows, and the replies dominate the bill in the end",
-        "d": "Each call repeats the earlier exchanges, so the input bill grows with the square of the length"
+        "d": "Each call resends every earlier exchange, so the later calls carry heavier input"
       },
       "key": "d",
       "explanation": {
@@ -121,15 +121,15 @@
       "scope": "module",
       "stem": "After a team adds a tool, some conversations fail with a 400 or lose the model's reasoning when they are resumed from the database. The save code keeps only the text of each reply. What is the best fix?",
       "options": {
-        "a": "Save the usage totals with each turn so that the conversation can be rebuilt from them",
-        "b": "Store each reply's content list exactly as received and send it back unchanged",
+        "a": "Turn thinking on again at resume so that the model can rebuild its reasoning",
+        "b": "Persist the whole content list of every response, with all the blocks it held",
         "c": "Save the model id with each turn so that the same tier answers after a resume",
         "d": "Follow every tool result with an explanatory text block when the turn is rebuilt"
       },
       "key": "b",
       "explanation": {
         "b": "Storing only text drops `tool_use` and thinking blocks, and the page says to \"store the content list as received\".",
-        "a": "Ruled out because usage totals are \"cost, and an early warning for the context window\", not a way to rebuild a conversation.",
+        "a": "Ruled out because thinking blocks are not rebuilt: \"every such block from the turn must be passed back exactly as received\".",
         "c": "Ruled out because the model id belongs to the \"settings that do not change per turn\", and it does not carry blocks.",
         "d": "Ruled out because adding text after tool results \"can teach the model to expect user input after every tool call\"."
       }
@@ -140,17 +140,17 @@
       "scope": "module",
       "stem": "A client receives `stop_reason` of `max_tokens` on the fifth turn of a conversation. Which handling fits the module?",
       "options": {
-        "a": "Mark the reply truncated, keep it in the history, and let the user ask to continue next",
+        "a": "Keep the cut message in the history and flag the reply to the user as truncated",
         "b": "End the list with the cut text as an assistant turn so that the model resumes writing",
         "c": "Treat the turn as failed and remove it, because a cut reply is not a whole exchange",
-        "d": "Raise the sampling temperature so that the model finishes inside the limit the next time it runs"
+        "d": "Trim the cut reply back to its last whole sentence before it is stored"
       },
       "key": "a",
       "explanation": {
         "a": "A truncated reply is kept: \"cut replies stay in the history\", and the user can ask to continue in a normal turn.",
         "b": "Ruled out because \"a request that does returns a 400 invalid_request_error\", and ending the list with an assistant turn is a prefill.",
         "c": "Ruled out because the rollback rule is to \"commit a turn only when the whole exchange succeeded\", and a cut reply is a completed exchange.",
-        "d": "Ruled out because \"a non-default value of any of them is rejected with a 400 error\", and sampling does not control where the limit cuts."
+        "d": "Ruled out because on a cut reply the client \"keeps the turn as received\", and a trimmed turn is no longer what the model wrote."
       }
     },
     {
@@ -178,9 +178,9 @@
       "scope": "module",
       "stem": "A developer logs each request body for debugging and finds that bodies logged earlier in a conversation change after later turns. Which defect fits best?",
       "options": {
-        "a": "A failed call was not rolled back before the error finally left the function that made it",
+        "a": "A failed call was not rolled back before the error left the function",
         "b": "The assistant content was rebuilt from text and not stored as received",
-        "c": "The payload holds the client's own history list instead of a snapshot of it",
+        "c": "The payload and the client share one list object that keeps growing",
         "d": "The system prompt is resent with every turn and grows each time"
       },
       "key": "c",

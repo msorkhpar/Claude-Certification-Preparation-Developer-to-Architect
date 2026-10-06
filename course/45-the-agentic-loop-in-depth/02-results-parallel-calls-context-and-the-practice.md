@@ -60,16 +60,16 @@ These are the wrong answers that the exam's options for this task statement offe
 
 ## Quiz
 
-3. A custom tool `deduct_stock` writes to inventory, and a custom tool `notify_warehouse` reads the new level. The model asks for both in one turn, and the developer marks only `notify_warehouse` as read-only to save time. What can the team count as guaranteed?
+3. A custom tool `deduct_stock` writes to inventory, and a custom tool `notify_warehouse` reads the new level. The model asks for both in one turn, and the developer marks only `notify_warehouse` as read-only to save time. What should the team conclude?
    - **a**: That the write finishes first, since state-changing tools always run ahead of any readers
-   - **b**: Nothing, since simultaneous requests have no promised order and need separate rounds
+   - **b**: That no order between them is promised, so the notification belongs in a later round
    - **c**: That both run in the order requested, since every custom tool runs one after another here
    - **d**: That the reader waits, since the SDK works out the dependency from the tool names
 
 4. A finance dashboard reads the `usage` field of every result to report what agent runs cost, but the invoices are higher for the runs that delegated to subagents. What explains the gap, and what is the fix?
-   - **a**: Add the cost of the helpers by parsing their own messages out of the stream
-   - **b**: Treat the figure as complete and look for unlogged retries in the application
-   - **c**: It covers only the lead loop, so consult the per-model accounting for the whole tree
+   - **a**: The helpers bill on their own, so parse each helper's messages out of the stream
+   - **b**: The figure is complete, so look for unlogged retries elsewhere in the application
+   - **c**: It leaves out the helpers' work, so use the per-model figures for the whole tree
    - **d**: The figure is zeroed whenever a run is cut off, so leave those runs out
 
 
@@ -77,7 +77,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 3. **b**. The page says to put a dependency in two turns, because the model decides what to ask for in one turn and the SDK promises no order between the calls it makes together. *a* is ruled out because the documented rule is about conflicts among tools that change state: "Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK does not read names for dependencies: "a dependency belongs in two turns."
-4. **c**. The `usage` figure counts one loop only, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
+4. **c**. The `usage` figure counts the main loop only, so subagent work is missing, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
 
 </details>
 
@@ -86,28 +86,28 @@ These are the wrong answers that the exam's options for this task statement offe
 This quiz covers both pages of the module.
 
 1. A team's runs often end with the status `max_turns` because one tool keeps failing, and raising the cap from ten to forty only made each failed run cost four times as much. What should they do?
-   - **a**: Turn the cap off entirely and let the model decide when a failure is final
-   - **b**: Raise the cap again and again until the failures stop ending in the cap itself
-   - **c**: Read the saved conversation, then repair that helper's description
-   - **d**: Mark such runs as done
+   - **a**: Turn the cap off, and let the model decide when a failure is final
+   - **b**: Lower the cap back to ten, so that each failed run costs less again
+   - **c**: Read the kept conversations, and fix whatever breaks those calls
+   - **d**: Report such runs as done, so that the dashboard stops flagging them
 
 2. A loop that follows this module's practice receives a reply whose stop reason asks for a tool, but its content holds only a sentence of text. What should it do?
    - **a**: Send an empty user message and call the model once more to see what it does
    - **b**: Finish with a malformed status and make no further call
    - **c**: Return the sentence to the user as the finished answer
-   - **d**: Call the model again with the same messages and hope for a call
+   - **d**: Call the model again with the same messages to get the missing call
 
 3. A dashboard alerts on every run that ends with a null stop reason and zero cost, and the team suspects a parsing bug. What explains those runs?
    - **a**: A turn limit, which can report a zero cost for the unfinished run of the agent
-   - **b**: A refusal by the model, which is reported with a null stop reason at first sight
-   - **c**: A normal run that has no stop reason to give
-   - **d**: A crashed session, which closes in an error result whose figures may be blanked
+   - **b**: A refusal by the model, which ends the reply without a stop reason to report
+   - **c**: A run that ended normally, whose last reply needed no stop reason at all
+   - **d**: A session crash, whose closing error result may leave those fields blank
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The status is a signal about a run that does not converge, and the conversation shows why. *b* is ruled out because the count is not what is wrong: "The status is a signal to read the conversation, which the practice keeps whole for that reason." *a* is ruled out because a run needs a backstop: "A count is added so that a run that does not converge is stopped." *d* is ruled out because the count "has its own status", and reporting `done` for it hides the problem that the fixed loop also hides.
-2. **b**. There is nothing to answer, and the practice stops with its own status. *a* is ruled out because the API does not accept it: "an empty message, which a loop can send by accident when a `tool_use` reply holds no call, is refused." *c* is ruled out because narration is not an answer: "Only the reply that ends the turn holds the answer." *d* is ruled out because guessing is what the loop avoids: "A value the loop has never seen must not be guessed at."
+1. **c**. The status is a signal about a run that does not converge, and the conversation shows why. *b* is ruled out because the cost is a symptom and the count is not what is wrong: "When the status `max_turns` shows up often, the count is not the thing to change." *a* is ruled out because a run needs a backstop: "A count is added so that a run that does not converge is stopped." *d* is ruled out because a run at the count must stay distinct: "A run that meets the count reports `max_turns`, and the caller can tell it from `done`."
+2. **b**. There is nothing to answer, and the practice stops with its own status. *a* is ruled out because the API does not accept it: "an empty message, which a loop can send by accident when a `tool_use` reply holds no call, is refused." *c* is ruled out because narration is not an answer: "only the reply that ends the turn holds the answer." *d* is ruled out because calling again is one of the planted wrong solutions the tests reject: "one that goes on after a `tool_use` reply with no call".
 3. **d**. The documentation describes this result for a crash: "the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`". *b* is ruled out because a refusal sets the reason: "Claude declined to respond." *c* is ruled out because a normal end carries a value: "Claude finished its response naturally." *a* is ruled out because a run that the loop ends has a value: "`stop_reason` carries the value from the last assistant response before the loop ended".
 
 </details>

@@ -494,8 +494,8 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. A coordinator spends ten turns locating the broken check and its failure text, then tells a subagent only to "fix the broken check". The subagent opens other modules and edits the wrong one. What should the coordinator have done?
-   - **a**: Write the path, the message and its decisions into the prompt it hands over
-   - **b**: Rely on the subagent to inherit the parent's earlier tool results by itself, unprompted
+   - **a**: Pass on the file path and error output it had already found
+   - **b**: Let the subagent look up the parent's earlier tool results in the session
    - **c**: Name a stronger model for the subagent in its definition file
    - **d**: Add a line telling the subagent to ask the coordinator whenever it is unsure
 
@@ -508,7 +508,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found. *b* is ruled out because nothing is inherited: "The only content you pass from parent to subagent is the Agent tool's prompt string". *c* is ruled out because the problem is missing information, and "a vague brief produces vague work." *d* is ruled out because the subagent cannot converse with its parent while it runs: "only its final message returns to the parent".
+1. **a**. The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found. *b* is ruled out because nothing is inherited: "The only content you pass from parent to subagent is the Agent tool's prompt string". *c* is ruled out because a stronger model still lacks the facts: "If a fact is not in the brief, the subagent does not have it". *d* is ruled out because the subagent cannot converse with its parent while it runs: "only its final message returns to the parent".
 2. **c**. The steps depend on one shared context and on steering, which a team cannot give. *b* is ruled out because the documentation lists this case for the main conversation: "multiple phases share significant context, such as planning, implementation, and testing". *a* is ruled out because a delegate loses time: a subagent that is not a fork "starts fresh and may need time to gather context". *d* is ruled out because the dependencies are the problem: "some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit".
 
 </details>

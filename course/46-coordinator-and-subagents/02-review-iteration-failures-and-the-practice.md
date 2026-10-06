@@ -59,22 +59,22 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 3. A subagent's call is cut short by a rate limit, and the coordinator's synthesis quotes the line "API error: rate limited" as if it were a finding. What should the coordinator do instead?
-   - **a**: Keep the error line among the findings
-   - **b**: Record the scope as failed and tell the user what is missing
+   - **a**: Hand the error line to the synthesizer as a low-confidence finding
+   - **b**: Return a partial status that lists the unfinished scope as missing
    - **c**: Instruct the synthesizer to skip any sentence that looks like an error
    - **d**: Send the whole team out again until every subagent succeeds
 
 4. After its first wave of subagents the lead finds that two of five sections are weak. It sends every assignment out again, and the bill doubles with little new content. Which change fits best?
-   - **a**: Stop after the first wave and report the whole answer as complete and final
+   - **a**: Resend every assignment again, capping the cycle at two rounds
    - **b**: Start more subagents in the first wave
    - **c**: Let the synthesis step fill the weak sections from what the model already knows
-   - **d**: Dispatch follow-ups for the flagged gaps alone, inside a fixed number of rounds
+   - **d**: Brief fresh workers on the two flagged parts alone, under a round cap
 
 <details>
 <summary>Answer key</summary>
 
-3. **b**. A failure belongs to its scope, and the user is owed a list of what is missing. *a* is ruled out because the documentation says of such an error that it "is never delivered as its result", so it is not evidence. *c* is ruled out because the problem is then hidden: "A partial answer looks like a full one". *d* is ruled out because it is the other coordinator mistake: "Sending every brief out again in the next round doubles the cost and adds repeats".
-4. **d**. The review names the gaps, only they are sent out again, and the rounds are capped. *b* is ruled out because every wave is paid for: "multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance." *c* is ruled out because "a gap is found by the review and closed by a subagent, never invented by the synthesis." *a* is ruled out because the answer is complete only when "no gap remains and nothing failed".
+3. **b**. A failure belongs to its scope, and the user is owed a list of what is missing. *a* is ruled out because a caveat does not change what the line is: "A failure is never turned into a finding." *c* is ruled out because the problem is then hidden: "A partial answer looks like a full one". *d* is ruled out because it is the other coordinator mistake: "Sending every brief out again in the next round doubles the cost and adds repeats".
+4. **d**. The review names the gaps, only they are sent out again, and the rounds are capped. *b* is ruled out because every wave is paid for: "multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance." *c* is ruled out because "a gap is found by the review and closed by a subagent, never invented by the synthesis." *a* is ruled out because a cap does not stop the repeats: "the first-round findings are already in hand".
 
 </details>
 
@@ -103,8 +103,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Overlap comes from the brief, because the subagents cannot see each other. *b* is ruled out because nothing crosses between subagents: "A subagent does not know the user's original question, the plan, the other subagents". *a* is ruled out because review cannot undo duplicate work already paid for, and the page puts the cause in the briefs: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." *d* is ruled out because the model size is not the cause in the article's example: "one subagent explored the 2021 automotive chip crisis while 2 others duplicated work investigating current 2025 supply chains."
-2. **b**. The effort should follow the question: "Simple fact-finding requires just 1 agent with 3-10 tool calls". *a* is ruled out because the cost of the team comes from running it: "agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats". *c* is ruled out because a shared context is what a team does not have: "The only content you pass from parent to subagent is the Agent tool's prompt string". *d* is ruled out because a long report does not make a team worth its cost: "the value of the task is high enough to pay for the increased performance".
+1. **c**. Overlap comes from the brief, because the subagents cannot see each other. *b* is ruled out because nothing crosses between subagents: "A subagent does not know the user's original question, the plan, the other subagents". *a* is ruled out because review cannot undo duplicate work already paid for, and the page puts the cause in the briefs: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." *d* is ruled out because a larger model cannot see its siblings either: "Overlap is avoided by exclusion written into the brief".
+2. **b**. The effort should follow the question: "Simple fact-finding requires just 1 agent with 3-10 tool calls". *a* is ruled out because the cost of the team comes from running it: "agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats". *c* is ruled out because sharing does not shrink the team's work and undoes the isolation: "it removes the isolation that keeps the context small". *d* is ruled out because a long report does not make a team worth its cost: "the value of the task is high enough to pay for the increased performance".
 3. **d**. A reference keeps the output out of the lead's window and out of its summaries. *b* is ruled out because condensing loses detail: "This prevents information loss during multi-stage processing". *c* is ruled out because copying through conversation history is the cost: "reduces token overhead from copying large outputs through conversation history". *a* is ruled out because a cap on turns does not change where the outputs travel, and the lead still reads each one: "Rather than requiring subagents to communicate everything through the lead agent".
 
 </details>

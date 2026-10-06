@@ -296,21 +296,21 @@ These are the wrong answers the exam's options for this domain offer, each with 
 ## Quiz
 
 1. Scenario: Cobalt Logistics has three proposals for a returns-handling service. One has no way to learn from wrong answers, one is a workflow and one is a team of agents. A board member wants the cheapest. What should the architect do first?
-   - **a**: Reject the cheapest design if the board has not yet seen its performance figures on live data
+   - **a**: Compare the prompts and model choice of each, since those decide the quality
    - **b**: Judge all of them on the same four stages and drop any that lacks one
    - **c**: Ask each team to run its design on a hundred real returns and compare the token bills
    - **d**: Choose the workflow because workflows cost less than an agent on this workload
 
-2. Scenario: Heron Analytics' task splits into six independent parts, and one context could not hold all the reading, but its value is about the cost of a single chat. What does the rule conclude?
-   - **a**: Use the team, since independence and volume are the hard conditions and value follows
-   - **b**: Use the team, since value can be raised later by adding more agents to it
-   - **c**: Neither level of autonomy pays, so leave it on a plain call or drop it
-   - **d**: Use one agent, since a team needs only independence among the parts
+2. Scenario: Heron Analytics' task splits into six independent parts, and one context could not hold all the reading, but its value is about the cost of a single chat. What should the architect conclude?
+   - **a**: Build the team, since independence and volume together already justify its cost
+   - **b**: Build the team with fewer subagents, so that its price falls below the task's value
+   - **c**: Build neither, since even an agent alone would be priced above what the work earns
+   - **d**: Build one agent, since the team is ruled out but a single agent still pays
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A review applies the same questions to every design, and the missing stage is the first finding. *a* is ruled out because rejection follows a missing stage, not missing live figures: "a design with a missing stage or an unapproved write is rejected first". *c* is ruled out because price is compared only "among those that pass the review". *d* is ruled out because the page prices a workflow at "one chat per step", so a long workflow can cost more than the rung above it.
-2. **c**. Two of the three conditions hold and the third fails, so no autonomous rung pays. *a* is ruled out because "a team that fails the third loses money on every run". *b* is ruled out because the page says "it needs independence, volume and value together", and adding agents raises cost, not value. *d* is ruled out because for this task "its value is below what even one agent costs".
+1. **b**. A review applies the same questions to every design, and the missing stage is the first finding. *a* is ruled out because the missing feedback loop "is an architecture finding that no prompt can fix". *c* is ruled out because price is compared only "among those that pass the review". *d* is ruled out because choosing on price skips the review, and "a design with a missing stage or an unapproved write is rejected first".
+2. **c**. Independence and volume hold but value fails: an agent costs about 4 chats and a team about 15, so neither pays and the question becomes "whether the task is worth automating at all". *a* is ruled out because "a team that fails the third loses money on every run". *b* is ruled out because "The answer is not a cheaper team." *d* is ruled out because for this task "its value is below what even one agent costs".
 
 </details>

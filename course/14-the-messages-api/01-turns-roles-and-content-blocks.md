@@ -115,7 +115,7 @@ All three have one root: the list is a record of what happened, and the API chec
    message as though it were the first. The code sends the newest user message and the system prompt each time. What
    is the cause?
    - **a**: The history of earlier turns is not part of the requests
-   - **b**: The system prompt should hold a summary of the earlier talk
+   - **b**: The model's memory of the session lapses between slower messages
    - **c**: The output limit is too low for the model to recall earlier turns
    - **d**: The model needs a different tier for multi-turn memory
 
@@ -124,12 +124,12 @@ All three have one root: the list is a record of what happened, and the API chec
    - **a**: Put the brace in a message with the role system at the end of the list
    - **b**: Keep the trailing message but lower the sampling temperature to zero
    - **c**: Drop the final entry and ask for the format through structured outputs
-   - **d**: Move the brace into the system field so that the reply still begins with it
+   - **d**: Retry each failed request with backoff until the trailing brace is accepted
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says "the Messages API is stateless", so the client has to send the whole history each time. *b* is ruled out because the system prompt is a top-level field for "instructions that apply from the start", and a hand-made summary is not how history is kept. *c* is ruled out because "a conversation exists only as the list your code sends each time", and no output limit supplies a missing list. *d* is ruled out because "the model keeps nothing between requests", whichever tier answers.
-2. **c**. Prefill is not supported on current models, and the page names structured outputs and system-prompt instructions as the replacements. *b* is ruled out because "a request that does returns a 400 invalid_request_error", whatever the temperature. *a* is ruled out because a system-role message is for "instructions that only become relevant later" and does not pre-fill a reply. *d* is ruled out because the field is for "instructions that hold from the first turn", and an instruction does not start a reply with a given character.
+1. **a**. The page says "the Messages API is stateless", so the client has to send the whole history each time. *b* is ruled out because "the model keeps nothing between requests", so there is no session memory to lapse, however fast the turns come. *c* is ruled out because "a conversation exists only as the list your code sends each time", and no output limit supplies a missing list. *d* is ruled out because, as the traps put it, "nothing is wrong with the model; the history was never sent", whichever tier answers.
+2. **c**. Prefill is not supported on current models, and the page names structured outputs and system-prompt instructions as the replacements. *b* is ruled out because "a request that does returns a 400 invalid_request_error", whatever the temperature. *a* is ruled out because a message with the role system "is applied as a system instruction", so it does not pre-fill the start of a reply. *d* is ruled out because the 400 says the conversation "must end with a user message", and resending the same list cannot change that.
 
 </details>

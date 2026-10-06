@@ -80,13 +80,13 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 ## Quiz
 
-1. Scenario: Harbor Mutual's loan officers need policy questions answered with citations, and separately need decline letters drafted from structured decision data. A vendor proposes a single autonomous multi-agent system for both jobs. Which design fits best?
+1. Scenario: Harbor Mutual's HR advisers need staff questions on the leave policy answered with citations to its text, and separately need offer letters drafted from structured hiring data. A vendor proposes a single autonomous multi-agent system for both jobs. Which design fits best?
    - **a**: The vendor's system, since both jobs work on documents and one shared platform is easier to run and to staff
    - **b**: One agent that holds every tool, plus a routing prompt that picks the task to perform
-   - **c**: Two parts: retrieval with a cited reply, plus a template-driven workflow for correspondence
-   - **d**: One model tuned on both kinds of text, so that no outside lookup is needed at all
+   - **c**: A retrieval call that cites its source passages, plus a fixed workflow that fills a correspondence template
+   - **d**: One model fine-tuned on both kinds of text, so that no policy lookup is needed at run time
 
-2. Scenario: Greywell Insurance's sponsor says the claims project exists to cut handling time per claim on routine claims, measured against last quarter. Which pillar does the sponsor want served?
+2. Scenario: Greywell Insurance's sponsor says the claims project succeeds if a routine claim takes fewer minutes of handler work than it did a quarter ago, at an unchanged volume. Which pillar does the sponsor want served?
    - **a**: Transformation, a capability that did not exist before the project
    - **b**: Efficiency, the same output with less effort for each unit
    - **c**: Cost, the whole process priced lower than before
@@ -96,7 +96,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <summary>Answer key</summary>
 
 1. **c**. The two jobs have different shapes, so each gets the cheapest structure that fits and its own measures. *a* is ruled out because "Documents in common are not an architectural argument". *b* is ruled out because a single agent with every tool joins two risk profiles, and "two different shapes need two different structures". *d* is ruled out because the first job needs the current policy text: "The answer needs outside facts or one action".
-2. **b**. Handling time per claim against a baseline is the efficiency pillar's measure. *a* is ruled out because transformation claims "Something that could not be done before", and routine claims were handled before. *c* is ruled out because cost counts "tokens, review time and rework, not model price alone" per task, and the sponsor named time. *d* is ruled out because that pillar's measures are "95th percentile latency, availability, accuracy by case type".
+2. **b**. Handler work per claim against last quarter is the efficiency pillar's measure: less effort for each unit. *a* is ruled out because transformation claims "Something that could not be done before", and routine claims were handled before. *c* is ruled out because cost counts "tokens, review time and rework, not model price alone" per task, and the sponsor named time. *d* is ruled out because that pillar's measures are "95th percentile latency, availability, accuracy by case type".
 
 </details>
 

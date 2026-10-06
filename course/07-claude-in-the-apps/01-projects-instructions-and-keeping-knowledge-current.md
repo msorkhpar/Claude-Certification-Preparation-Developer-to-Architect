@@ -150,7 +150,8 @@ Review:    the file name is March. The pricing file for October exists in Drive.
 1. **d**. A synced document follows its source, so the next read gets the latest version (connecting a document instead of copying it). *b* is ruled out because "an instruction is a request and a deleted file is a guarantee", and the old figure would still be in the knowledge base. *c* is ruled out because "nothing alerts you when a file goes stale", so Claude has no reason to doubt a March figure and the stale file stays in place. *a* is ruled out because "Two versions of one document side by side invite Claude to quote either".
 2. **a**. Instructions say how to work and files say what is true, so a figure typed into the instructions is a
    second copy that no file update will touch (the first trap). *b* is ruled out because memory "holds preferences
-   and context that Claude picked up, not the authoritative text of a policy". *c* is ruled out because the team
+   and context that Claude picked up, not the authoritative text of a policy", and here the figure was pasted into
+   the instructions, not picked up in a conversation. *c* is ruled out because the team
    deleted the March file, and "a deleted file is a guarantee" that no older passage remains to retrieve. *d* is ruled
    out because "anyone with access can read the instructions and every file in the knowledge base" describes who
    sees the content, not whether it is current.

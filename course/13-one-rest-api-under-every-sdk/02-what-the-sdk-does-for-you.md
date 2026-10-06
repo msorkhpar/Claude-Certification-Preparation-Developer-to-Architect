@@ -434,7 +434,7 @@ how a key reaches a log.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says that "customer text does not belong in a log by default", and request ids are the safe handle for a support ticket. *a* is ruled out because "sensitive data in request and response bodies may still be visible". *c* is ruled out because "headers are partly redacted, bodies are not", and the leak is in the bodies. *d* is ruled out because failing calls carry customer text too, and "customer text does not belong in a log by default".
-2. **d**. Two retries after the first attempt make three, and a spend-cap 429 "stays in force until the next month begins". *b* is ruled out because "certain errors are automatically retried 2 times by default". *c* is ruled out because the cap "stays in force until the next month begins", so no pause helps. *a* is ruled out because "two retries is a default for a generic caller" and the SDK does not inspect the cap.
+1. **b**. In that mode "all HTTP requests and responses are logged, including headers and bodies", so it does not belong on live traffic, and request ids are the safe handle for a support ticket. *a* is ruled out because "sensitive data in request and response bodies may still be visible". *c* is ruled out because "headers are partly redacted, bodies are not", and the leak is in the bodies. *d* is ruled out because failing calls carry customer text too, and "customer text does not belong in a log by default".
+2. **d**. Two retries after the first attempt make three, and for a spend-cap 429 "every retry of it fails". *b* is ruled out because "certain errors are automatically retried 2 times by default". *c* is ruled out because the cap "stays in force until the next month begins", so no pause helps. *a* is ruled out because the retry default "applies to every retryable failure, including ones that cannot succeed", and the SDK does not inspect the cap.
 
 </details>

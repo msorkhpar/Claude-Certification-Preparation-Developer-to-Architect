@@ -588,7 +588,7 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. A support agent's loop ends when the reply text contains "Case closed", a phrase the prompt tells the model to write last. In testing, some refunds are never issued, because the model writes the phrase in the same reply as the refund call. Which redesign fits best?
-   - **a**: Let the stop value of each response decide, and run every tool request it holds
+   - **a**: Exit only after a response whose stop value requests no further tool work
    - **b**: Tell the model in the prompt to write its closing phrase only in a final message
    - **c**: Search the text for more completion phrases, such as "finished" and "complete"
    - **d**: Call the model a fixed number of times, large enough for the longest case

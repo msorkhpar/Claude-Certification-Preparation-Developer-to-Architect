@@ -142,10 +142,10 @@ This quiz covers every page of the module.
 1. A team sets up a Cowork job that reads supplier meeting notes and updates the rows of a shared action tracker.
    They want it in Auto approval, running weekly from the first week, and checking last year's notes kept elsewhere
    on the drive. Which plan does the module support?
-   - **a**: Keep Auto approval on, open the drive wide to the job, then run it every week
+   - **a**: Approve actions by hand, open the drive wide to the job, then run it every week
    - **b**: Move it to the Excel add-in, let it reach notes on the drive, then run it weekly
    - **c**: Approve actions by hand, use one dedicated folder, then schedule after clean runs
-   - **d**: Leave Auto approval on, give it one folder holding both years, then run it from week one
+   - **d**: Leave Auto approval on, give it one folder for both years, then schedule once runs are clean
 
 2. A consultant opens a spreadsheet from an unknown sender in Excel with the add-in, and asks Claude to update the
    assumptions. The cells hide text telling Claude to send data elsewhere. Which handling fits?
@@ -167,8 +167,8 @@ This quiz covers every page of the module.
    Which combination fits best?
    - **a**: Plain chat with the write-ups uploaded, then Claude Tag in the team channel
    - **b**: Cowork on a dedicated reports folder, then Claude Tag in the team channel
-   - **c**: Claude in Chrome on the write-up files, then Claude Tag in a direct message
-   - **d**: The Excel add-in on the open spreadsheet, then Claude Tag in a direct message
+   - **c**: Cowork on one folder of the write-ups, then Claude Tag in a direct message
+   - **d**: The Excel add-in on the open spreadsheet, then Claude Tag in the team channel
 
 <details>
 <summary>Answer key</summary>
@@ -178,7 +178,7 @@ This quiz covers every page of the module.
    "grant access selectively and avoid financial documents, credentials and personal records", and an entire drive
    does the opposite. *b* is ruled out because the add-in can "read and write only files that are open at that
    moment". *d* is ruled out because the first runs use Manual "because the task is new and writes files", and
-   "Only once the output is reliably right is a weekly schedule added".
+   updating the tracker's rows writes files from the very first run.
 2. **c**. The add-in page says to "only use it with trusted spreadsheets", and a workbook from an unknown sender with hidden instructions is not one. *b* is ruled out because with cross-app work "one conversation can read an Excel model and write a Word memo or a slide", which widens what the hidden text can reach. *a* is ruled out because the Chrome habits say to "avoid unfamiliar pages or those with content from unknown people", and the sender's page is one. *d* is ruled out because the Auto mode described is for Chrome and Cowork, and the add-in page warns that "files from outside sources can contain hidden instructions".
 3. **a**. In a channel everyone gets the same access, and "Admins can restrict who can invoke Claude and where it
    works", which is the check a channel that gained guests deserves (pages 2 and 3). *d* is ruled out because "the
@@ -187,6 +187,6 @@ This quiz covers every page of the module.
    deletes that workspace's Claude data", far more than the change needs. *c* is ruled out because a direct message
    changes only the staff's route to "Your own claude.ai account and your own connectors", and the channel set-up
    stays open to the contractors.
-4. **b**. A multi-step job over files is Cowork, kept to a dedicated folder, and work the whole team must see and steer belongs in a channel (pages 1 and 3). *a* is ruled out because chat is best for "work light on files and sources", and a month of write-ups plus a spreadsheet to update is a multi-step job over files. *c* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", not a folder of files, and "Claude Tag in a channel shows everything to everyone in the channel; a direct message does not". *d* is ruled out because "Claude can read and write only files that are open at that moment" and "it cannot open, create or switch files itself", so the add-in cannot work through the stored write-ups, and a direct message is seen by its sender alone.
+4. **b**. A multi-step job over files is Cowork, kept to a dedicated folder, and work the whole team must see and steer belongs in a channel (pages 1 and 3). *a* is ruled out because chat is best for "work light on files and sources", and a month of write-ups plus a spreadsheet to update is a multi-step job over files. *c* is ruled out because "Claude Tag in a channel shows everything to everyone in the channel; a direct message does not", so the colleagues could neither see the list nor steer the follow-ups. *d* is ruled out because "Claude can read and write only files that are open at that moment" and "it cannot open, create or switch files itself", so the add-in cannot work through the stored write-ups.
 
 </details>

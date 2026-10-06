@@ -397,22 +397,22 @@ a `run.sh` or build file. The starter fails every test.
 1. A chat client appends each user turn to its history before calling the API. After a night of occasional 529
    errors, some conversations answer oddly, and their stored history shows two user turns in a row. What is the best
    fix?
-   - **a**: Retry every failed call forever so that no turn is ever left without its answer by morning
-   - **b**: Take that entry out again whenever the call raises, so that only whole exchanges are kept
+   - **a**: Retry each failed call with backoff so that a 529 rarely reaches the history
+   - **b**: Remove the orphaned message from the list on every path where the call fails
    - **c**: Merge any two consecutive user turns into one when the history is saved
-   - **d**: Store only the assistant turns, which are the ones that the model produced
+   - **d**: Raise the client timeout so that slow calls can finish before it gives up
 
 2. A product team notices that a support conversation of 40 turns costs far more than four conversations of 10
    turns, although the total number of questions is the same. What explains it?
    - **a**: The system prompt is repeated once for every question, so it dominates the bill
    - **b**: Long conversations are charged at a higher price for each output token that is produced
    - **c**: The model writes longer replies as a conversation grows, and the replies dominate the bill in the end
-   - **d**: Each call repeats the earlier exchanges, so the input bill grows with the square of the length
+   - **d**: Each call resends every earlier exchange, so the later calls carry heavier input
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The rule is to "commit a turn only when the whole exchange succeeded", which means removing the user turn on any failure. *a* is ruled out because a retry is a separate decision, and the page says the retry "will send a different conversation from the one the user saw" if the history is damaged. *c* is ruled out because a merge hides the damage while "the next request contains two user turns in a row" in the very same way, and a question that never got an answer stays in the history. *d* is ruled out because "the whole list goes in every request", and a list without user turns is not a conversation.
+1. **b**. The rule is to "commit a turn only when the whole exchange succeeded", which means removing the user turn on any failure. *a* is ruled out because a retry is a separate decision, and the page says the retry "will send a different conversation from the one the user saw" if the history is damaged. *c* is ruled out because a merge hides the damage while "the next request contains two user turns in a row" in the very same way, and a question that never got an answer stays in the history. *d* is ruled out because a call "can fail after you appended the user turn" with a 529 or a 429 as well as a timeout, and a longer wait leaves those turns dangling.
 2. **d**. The page says "the input cost of a conversation grows with the square of its length", because each turn resends everything before it. *b* is ruled out because nothing on the page prices long conversations differently, and the growth comes from input: "every turn resends everything before it". *c* is ruled out because "turn n sends about 200 n input tokens", which is growth in input and not in replies. *a* is ruled out because the system prompt is the same size on every turn, and the page says "every turn resends everything before it", so the history is what grows.
 
 </details>
@@ -423,17 +423,17 @@ This quiz covers all three pages of the module.
 
 1. After a team adds a tool, some conversations fail with a 400 or lose the model's reasoning when they are resumed
    from the database. The save code keeps only the text of each reply. What is the best fix?
-   - **a**: Save the usage totals with each turn so that the conversation can be rebuilt from them
-   - **b**: Store each reply's content list exactly as received and send it back unchanged
+   - **a**: Turn thinking on again at resume so that the model can rebuild its reasoning
+   - **b**: Persist the whole content list of every response, with all the blocks it held
    - **c**: Save the model id with each turn so that the same tier answers after a resume
    - **d**: Follow every tool result with an explanatory text block when the turn is rebuilt
 
 2. A client receives `stop_reason` of `max_tokens` on the fifth turn of a conversation. Which handling fits the
    module?
-   - **a**: Mark the reply truncated, keep it in the history, and let the user ask to continue next
+   - **a**: Keep the cut message in the history and flag the reply to the user as truncated
    - **b**: End the list with the cut text as an assistant turn so that the model resumes writing
    - **c**: Treat the turn as failed and remove it, because a cut reply is not a whole exchange
-   - **d**: Raise the sampling temperature so that the model finishes inside the limit the next time it runs
+   - **d**: Trim the cut reply back to its last whole sentence before it is stored
 
 3. A team wants an early warning before long chats approach the context window and become expensive. Which signal
    can the client compute from every reply?
@@ -444,16 +444,16 @@ This quiz covers all three pages of the module.
 
 4. A developer logs each request body for debugging and finds that bodies logged earlier in a conversation change
    after later turns. Which defect fits best?
-   - **a**: A failed call was not rolled back before the error finally left the function that made it
+   - **a**: A failed call was not rolled back before the error left the function
    - **b**: The assistant content was rebuilt from text and not stored as received
-   - **c**: The payload holds the client's own history list instead of a snapshot of it
+   - **c**: The payload and the client share one list object that keeps growing
    - **d**: The system prompt is resent with every turn and grows each time
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Storing only text drops `tool_use` and thinking blocks, and the page says to "store the content list as received". *a* is ruled out because usage totals are "cost, and an early warning for the context window", not a way to rebuild a conversation. *c* is ruled out because the model id belongs to the "settings that do not change per turn", and it does not carry blocks. *d* is ruled out because adding text after tool results "can teach the model to expect user input after every tool call".
-2. **a**. A truncated reply is kept: "cut replies stay in the history", and the user can ask to continue in a normal turn. *b* is ruled out because "a request that does returns a 400 invalid_request_error", and ending the list with an assistant turn is a prefill. *c* is ruled out because the rollback rule is to "commit a turn only when the whole exchange succeeded", and a cut reply is a completed exchange. *d* is ruled out because "a non-default value of any of them is rejected with a 400 error", and sampling does not control where the limit cuts.
+1. **b**. Storing only text drops `tool_use` and thinking blocks, and the page says to "store the content list as received". *a* is ruled out because thinking blocks are not rebuilt: "every such block from the turn must be passed back exactly as received". *c* is ruled out because the model id belongs to the "settings that do not change per turn", and it does not carry blocks. *d* is ruled out because adding text after tool results "can teach the model to expect user input after every tool call".
+2. **a**. A truncated reply is kept: "cut replies stay in the history", and the user can ask to continue in a normal turn. *b* is ruled out because "a request that does returns a 400 invalid_request_error", and ending the list with an assistant turn is a prefill. *c* is ruled out because the rollback rule is to "commit a turn only when the whole exchange succeeded", and a cut reply is a completed exchange. *d* is ruled out because on a cut reply the client "keeps the turn as received", and a trimmed turn is no longer what the model wrote.
 3. **a**. The page says the total input is the sum of three numbers, and that counting tokens makes the growth visible. *b* is ruled out because "turn n sends about 200 n input tokens", so each turn adds more than the one before and a turn count is a poor proxy. *c* is ruled out because the page says "the input cost of a conversation grows with the square of its length", and the history is input. *d* is ruled out because that value reports that "the context window filled before max_tokens", which is already too late.
 4. **c**. The page describes it: "if the request body holds the client's own history list, a later turn changes earlier requests". *b* is ruled out because the page says to "store the content list as received", which concerns what a turn contains, not whether old requests change. *a* is ruled out because the rollback rule is to "commit a turn only when the whole exchange succeeded", and it concerns failures. *d* is ruled out because "system is the same top-level field on every request", so it does not grow.
 

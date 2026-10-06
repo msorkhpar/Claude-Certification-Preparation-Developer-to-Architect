@@ -115,24 +115,24 @@ Decides        Agents only read summaries; no action is driven by one
 ## Quiz
 
 1. A team's nightly report job started returning slightly different summaries after a provider released an update.
-   The code names its model with a moving alias. What does the page say is the underlying mistake?
-   - **a**: The job should have been interactive, so that a person could review its output live
-   - **b**: A deliberate pin was missing, so behaviour moved without a regression run
+   The code names its model with an alias. What is the underlying mistake?
+   - **a**: The evaluation set was too small to notice that the summaries had started to drift
+   - **b**: The id was never pinned, so the new version went live with no regression run
    - **c**: The summaries were never written down as requirements before the first prompt was tried
-   - **d**: The nightly schedule should have been replaced by a fixed monthly cost budget for the job
+   - **d**: The job logged no request ids, so nobody could trace which call had changed
 
 2. A client library crashes whenever the API adds a new field to a response, although the API's documented rules
    allow additions. What is the best fix?
    - **a**: Pin an older API version header to stop any new property from appearing in the reply body
-   - **b**: Ask the provider to announce each new addition before it is released to the public
-   - **c**: Wrap every call in a retry so that the crash is repeated until it clears for good
+   - **b**: Validate each reply against a strict schema and reject any reply that has extra fields
+   - **c**: Wrap the parsing step in a retry with backoff so that a later reply parses cleanly
    - **d**: Take only the properties the code needs and skip everything else in the reply
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. An alias that moves "changes behaviour under you", and the routine is to pin an id and change it on purpose, with a regression run. *a* is ruled out because the symptom has nothing to do with live review, and the maintain routine is to "re-run the evaluation set against the new model". *c* is ruled out because a missing spec is a separate fault, while the symptom is described by "a silent change of model is a silent change of behaviour". *d* is ruled out because a cost budget does not decide which model answers, and the page's fix is to "pin the model id" in configuration.
-2. **d**. The page says to be tolerant of additions and strict about what you send, which means reading only what the code uses. *a* is ruled out because earlier versions are deprecated and "may be unavailable for new users", and additions arrive within the current one. *c* is ruled out because "a retry cannot help, because the same reply is parsed the same way again". *b* is ruled out because the policy already says Anthropic "may add additional values to the output", so no announcement is promised.
+1. **b**. An alias that moves "changes behaviour under you", and the routine is to pin an id and change it on purpose, with a regression run. *a* is ruled out because the routine asks for "a regression run of the evaluation set on every change", and no set was run on this change at all, whatever its size. *c* is ruled out because a missing spec is a separate fault, while the symptom is described by "a silent change of model is a silent change of behaviour". *d* is ruled out because the request id is logged to "include it when you contact support about a specific request", which helps a trace but does not stop the change.
+2. **d**. The page says to be tolerant of additions and strict about what you send, which means reading only what the code uses. *a* is ruled out because earlier versions are deprecated and "may be unavailable for new users", and additions arrive within the current one. *c* is ruled out because "a retry cannot help, because the same reply is parsed the same way again". *b* is ruled out because "a client that rejects an unknown field or an unknown event type breaks on a change that is allowed".
 
 </details>
 
@@ -143,7 +143,7 @@ This quiz covers all three pages of the module.
 1. A feature must return a complete answer to a waiting user within two seconds. The team's design is a chain of five
    calls, each taking about one second. Which action fits best?
    - **a**: Stream the final stage so that its first words appear sooner for the person waiting
-   - **b**: Merge or remove stages until the summed time sits inside the budget
+   - **b**: Merge or drop stages until the summed time of what remains sits inside the budget
    - **c**: Request a higher usage plan from the provider so that each individual call runs faster
    - **d**: Move the whole pipeline to asynchronous batches, which are processed at half the price
 
@@ -156,8 +156,8 @@ This quiz covers all three pages of the module.
 
 3. A feature runs comfortably under its entry-level request limit on average, but a quarterly campaign sends four
    times that rate for ten minutes, and the first requests of the burst are refused. Which response fits best?
-   - **a**: Size for the highest peak, then ask for a bigger allowance or smooth the traffic
-   - **b**: Size for the daily average, because capacity refills continuously over each minute of the day
+   - **a**: Spread the traffic over a longer window so the peak load stays under the allowance
+   - **b**: Keep the current tier, since the daily average stays well below the request limit
    - **c**: Shorten every reply from the model so that each single request counts for less against the limit
    - **d**: Switch the residency setting to global so that a second and separate pool becomes available
 
@@ -165,15 +165,15 @@ This quiz covers all three pages of the module.
    the visitor waiting. Which design fits best?
    - **a**: Chain three separate calls that draft, check and polish the reply before it is shown
    - **b**: Run an agent loop that explores the documents until the loop is satisfied with what it found
-   - **c**: Fetch the matching passages, then ask once for a reply grounded in them
-   - **d**: Submit each question as part of an overnight batch that is collected the next morning
+   - **c**: Retrieve the passages that match each question and send them with it in a single call
+   - **d**: Send each question in one streamed call and let the model answer from what it knows
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Chained calls add up, so the fix is to cut the sequence: "a requirement of two seconds rules out a five-call pipeline". *a* is ruled out because "streaming does not shorten the total time", and the requirement is for the complete answer. *c* is ruled out because a higher tier "does not make one call finish sooner". *d* is ruled out because a batch "is the right design when nobody is waiting", and a user is waiting.
 2. **a**. The maintain routine is to re-run the evaluation set against the new model and compare, so the change is judged on numbers. *b* is ruled out because "a requirement that only a person's impression can settle is a wish". *c* is ruled out because "a silent change of model is a silent change of behaviour". *d* is ruled out because a bill covers cost alone, while the routine says to "re-run the evaluation set against the new model" for quality.
-3. **a**. The bucket can be emptied by a burst whatever the average is, so the page asks for the peak and offers a higher tier or a smoother load. *b* is ruled out because the page says "write the peak, not the mean". *c* is ruled out because "a request counts against the request limit however short its reply is". *d* is ruled out because "rate limits are shared across all geos", so no second pool appears.
-4. **c**. Answers that must come from the company's own documents point to retrieval followed by one call. *b* is ruled out because an agent loop is for when "the path depends on what is found and cannot be listed in advance". *a* is ruled out because a chain is for "several dependent steps, each checkable", and three calls would also cost latency. *d* is ruled out because a batch "is the right design when nobody is waiting".
+3. **a**. The bucket can be emptied by a burst whatever the average is, so the plan must fit the peak, and smoothing the load over time is one of the page's answers. *b* is ruled out because the page says "write the peak, not the mean". *c* is ruled out because "a request counts against the request limit however short its reply is". *d* is ruled out because "rate limits are shared across all geos", so no second pool appears.
+4. **c**. Answers that must come from the company's own documents point to retrieval followed by one call. *b* is ruled out because an agent loop is for when "the path depends on what is found and cannot be listed in advance". *a* is ruled out because a chain is for "several dependent steps, each checkable", and three calls would also cost latency. *d* is ruled out because one call alone fits "one answer from the input alone", and for the company's documents "the model's training does not contain them".
 
 </details>

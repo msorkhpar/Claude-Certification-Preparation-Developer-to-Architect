@@ -136,8 +136,8 @@ changed and actions taken by scheduled tasks on your behalf.
    - **d**: Run it daily rather than weekly, so that any mistakes surface sooner
 
 3. A user connects a documents folder and their mailbox to Cowork. One file carries an invisible instruction telling
-   Claude to mail the folder's contents to an address. The cloud environment is isolated and temporary. Why can this
-   still cause harm?
+   Claude to mail the folder's contents to an address. The user relies on the cloud environment for protection. Why
+   can this still cause harm?
    - **a**: The hidden text can reach the home network from inside the sandbox
    - **b**: The hidden text stays in the sandbox and acts again in later sessions
    - **c**: The hidden text can send messages via a linked tool the sandbox leaves open

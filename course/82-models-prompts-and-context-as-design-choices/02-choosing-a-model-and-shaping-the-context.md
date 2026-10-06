@@ -64,21 +64,21 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 1. Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?
    - **a**: C, since the lowest price decides the matter once capability has been established
-   - **b**: B, the lowest-priced of the ones that satisfy every requirement
+   - **b**: B, since it is the cheaper of the two that meet the time limit
    - **c**: A, since the dearer option is the safer one for a first release to customers
    - **d**: Whichever the team used last, because consistency across workloads outweighs the saving
 
 2. Scenario: Kestrel Labs needs a model for a task at tier 3 with a latency limit of 500 ms. The candidates are a tier 3 model at 2,500 ms and a tier 2 model at 300 ms. What should the plan record?
    - **a**: The tier 2 candidate, since it is the only one that stays within the limit
    - **b**: The tier 3 candidate, since capability matters more than speed in a first release to customers
-   - **c**: That nothing qualifies, since neither option satisfies both requirements
-   - **d**: The cheaper of the two candidates, so that the budget of the project is protected
+   - **c**: Neither option, since each one fails one of the two stated requirements
+   - **d**: The cheaper of the two, since price settles it when neither fits fully
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Latency rules C out, and price ranks the models that remain. *a* is ruled out because C fails the limit, and price "can only rank models that are already right". *c* is ruled out because the rule is to choose "among the models whose tier is at least the workload's and whose latency is within the limit" and take the cheapest, with no bonus for the dearer one. *d* is ruled out because the choice is "a design choice per workload", not one habit applied to all.
-2. **c**. No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement. *a* is ruled out because "A model below the tier fails the task". *b* is ruled out because the limit is part of the requirement too, and the candidate would fall under "A model slower than the limit". *d* is ruled out because "Price comes last because it is the only fact that cannot make a model wrong".
+2. **c**. No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement. *a* is ruled out because "A model below the tier fails the task". *b* is ruled out because the limit is part of the requirement too, and the candidate would fall under "A model slower than the limit". *d* is ruled out because "Price comes last because it is the only fact that cannot make a model wrong", so it cannot rescue a candidate that fails a requirement.
 
 </details>
 
@@ -93,22 +93,22 @@ This quiz covers both pages of the module.
    - **d**: Fill the gap with a guess, drawn from the caller's previous call
 
 2. Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?
-   - **a**: Take the largest model for safety, and place the long text last in the request
-   - **b**: Take the cheapest model of any tier, and place the long text in the final message
+   - **a**: Take the largest model for safety, and put the constant passage first
+   - **b**: Take the cheapest model of any tier, and place the constant passage in the final message
    - **c**: Take the model that was used last time, and cache the whole request as one piece
-   - **d**: Take the cheapest that is capable and quick enough, and put the bulky constant passage first
+   - **d**: Take the cheapest model that is able and quick enough, and put the constant passage first
 
 3. Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?
    - **a**: All four as static modules, so that they are cached together
-   - **b**: Rules and question as static modules, policy and chat as dynamic ones
-   - **c**: Fixed guidance as static modules, per-visit text as dynamic ones
+   - **b**: Standing guidance and past messages as static modules, the new query as a dynamic one
+   - **c**: Standing guidance as static modules, the new query and past messages as dynamic ones
    - **d**: All four as dynamic modules, so that any piece is edited freely
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A missing value is a defect in the caller, so the assembler refuses and names it. *a* is ruled out because "A request that goes out with `{customer}` in its text" is sent with a gap that nobody checks. *c* is ruled out because a blank is the same silent defect, and "A missing variable is an error". *d* is ruled out because a guess invents data nobody supplied, and a request with a gap "is a defect that no model will report".
-2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload", and the page says "static modules first, in the order given, then the dynamic ones". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
-3. **c**. The pieces that never change go first as static modules, and the per-request pieces follow as dynamic ones, so that the stable prefix can be cached. *a* is ruled out because "A static module whose text holds a `{variable}` is refused", and the question changes on every request. *b* is ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against "static modules first, in the order given, then the dynamic ones". *d* is ruled out because the cache works on "the request from its start up to a marked breakpoint", so with no static modules there is nothing to cache.
+2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
+3. **c**. The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached. *a* is ruled out because "A static module whose text holds a `{variable}` is refused", and the question changes on every request. *b* is ruled out because the earlier chat belongs to one traveller, and a dynamic module is one that "changes with the customer, the question or the history". *d* is ruled out because the cache works on "the request from its start up to a marked breakpoint", so with no static modules there is nothing to cache.
 
 </details>

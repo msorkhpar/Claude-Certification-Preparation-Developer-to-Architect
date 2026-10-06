@@ -119,16 +119,16 @@ R3  Input: any thread, when the model call fails with a 429, a 5xx or a timeout.
    - **d**: Customers rate each email after sending, and the feature stays while the ratings stay positive
 
 2. A draft spec for an invoice-extraction feature lists the fields to extract, the accepted file types and the
-   expected accuracy. Which missing item does the page expect a reviewer to flag first?
+   expected accuracy. Which missing item should a reviewer ask the team to add first?
    - **a**: The exact system prompt that the developers plan to use for the extraction
    - **b**: One expected output string for each sample invoice, compared character by character
-   - **c**: A statement of what the system does when the call fails, is refused or is cut short
-   - **d**: A choice of typeface for the page that lists the extracted values
+   - **c**: What the screen shows the user when a call to the model errors, is refused or stops early
+   - **d**: A recorded demo of the extraction running cleanly on a handful of sample invoices
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. It states a rate over a fixed sample and names a grader, which is what the page asks of a quality requirement: a number over that set. *b* is ruled out because "a requirement that only a person's impression can settle is a wish", and a read-through by one lead is only an impression. *c* is ruled out because a rule in a prompt "is only a request to the model", and a prompt line is not a test. *d* is ruled out because ratings after sending are an operational signal, while the acceptance criterion must be "written before the first prompt is tried".
-2. **c**. Failure behaviour is the row the page says teams forget, because a spec without it produces code without it. *a* is ruled out because "a requirement is a sentence a test can fail", and a planned prompt is an implementation choice, not a sentence to test. *b* is ruled out because quality "is stated as a rate over a set of examples, not as a single expected string". *d* is ruled out because a typeface does not change what the system does, and "the fourth row is the one teams forget", and the fourth row is failure behaviour.
+2. **c**. Failure behaviour is the row the page says teams forget, because a spec without it produces code without it. *a* is ruled out because the quality number is "written before the first prompt is tried", so the prompt is an implementation choice that comes after the spec. *b* is ruled out because quality "is stated as a rate over a set of examples, not as a single expected string". *d* is ruled out because a demo can be one that "impresses everyone and cannot say whether it is done", so it adds no line a test can fail.
 
 </details>

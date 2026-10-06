@@ -90,20 +90,20 @@ These are the wrong answers that the exam's options for this task statement offe
 
 3. A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?
    - **a**: The lock should have waited for ten failures instead of three
-   - **b**: The route to a person depended on the same safeguard that had tripped
-   - **c**: The turn limit should have been set a lot lower
+   - **b**: Escalation should have stayed callable whatever the desk's state
+   - **c**: The turn limit should have been cut to end the loop sooner
    - **d**: The model should have been asked to hand the case over on its own
 
 4. A refund over the limit is escalated with the full chat transcript attached, and reviewers spend minutes finding what was verified and what was blocked. Which change helps most?
    - **a**: Keep the transcript, but have the model highlight its key lines
    - **b**: Attach a model-written summary of the conversation beside the full transcript
    - **c**: Add the customer's complete order history to the escalation
-   - **d**: Send a gate-built record, with the agent's reason as one field
+   - **d**: Send a record of the checks, lookups and refusals from the gate's state
 
 <details>
 <summary>Answer key</summary>
 
-3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because the number of failures is not what looped the chat, and a lock is needed at all: without it, "a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries". The loop came from the dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because asking does not open a route: handing over is a tool call, and it only works when "one tool outside the gate, `escalate`, which is always allowed" exists.
+3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because a later lock leaves the same dead end, and three is already lenient: "a successful check resets the count, so ordinary typing mistakes do not lock anyone out". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because asking does not open a route: handing over is a tool call, and it only works when "one tool outside the gate, `escalate`, which is always allowed" exists.
 4. **d**. The gate holds the facts, and a record answers the reviewer's questions in a fixed place. *b* is ruled out because "A summary written by the model can leave out what went wrong." *c* is ruled out because a record carries only what is needed: "identifiers and amounts, not the whole order contents". *a* is ruled out because the model is again choosing what the reviewer sees: "The gate's state is the source for what was verified, looked up and refunded; the model's account of them is not."
 
 </details>
@@ -112,7 +112,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. This desk's rule is that a failed check wipes whatever an earlier success had set. What should the gate's state say next?
+1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. The gate follows the state rules of this module's practice desk. What should the gate's state say next?
    - **a**: Customers A and B are both verified at the same time
    - **b**: Customer A is still verified from the earlier check
    - **c**: No one is cleared and every protected step is refused again
@@ -122,19 +122,19 @@ This quiz covers both pages of the module.
    - **a**: Keep extending the keyword list until the valid claims finally pass through it
    - **b**: Let the model weigh the evidence, and keep steps, amounts and limits as rules
    - **c**: Move the refund limit and the order of steps into the prompt as well
-   - **d**: Drop the ownership check altogether and send more claims onward
+   - **d**: Send damage claims to a person for review instead of the gate
 
 3. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?
-   - **a**: A judge model that grades every single conversation for the order of its steps in it
+   - **a**: A judge model that grades each conversation for the order of its steps
    - **b**: A larger live sample of several thousand conversations
-   - **c**: The same live run with the verification rule written in capitals
-   - **d**: Direct checks that make the forbidden call and assert it never hits the backend
+   - **c**: An evaluation set that scores how often verification is skipped
+   - **d**: Direct checks that make the forbidden call and read the backend log
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. A failed check clears the verified customer. *b* is ruled out because "a failed verification clears the state, so that an earlier success cannot be reused." *a* is ruled out because the state holds one verified customer, and a failure does not add one: "set only by a successful verification call". *d* is ruled out because the gate does not consult the model about its own state: "does not ask the model whether it did".
-2. **b**. Judgement is the model's work, and rules with a right answer are the gate's. *a* is ruled out because "A design that puts judgement in code ends up with a brittle rule engine". *c* is ruled out because "the thresholds and the order of steps go in the gate". *d* is ruled out because ownership is a rule with a right answer: "Everything above it is a rule with a right answer, which code checks the same way every time."
-3. **d**. The gate is code, so it is tested with the forbidden call and an assertion on the backend log. *b* is ruled out because a sample measures a rate, which is the way the model is tested: "where a failure is a rate and not a bug". *c* is ruled out because capitals only change the text the model weighs: "text that the model reads and weighs with everything else in its context". *a* is ruled out because the gate is tested the way all code is: "the same inputs, the same outputs".
+2. **b**. Judgement is the model's work, and rules with a right answer are the gate's. *a* is ruled out because "A design that puts judgement in code ends up with a brittle rule engine". *c* is ruled out because "the thresholds and the order of steps go in the gate". *d* is ruled out because whether a claim is covered is the model's call below the limit: "reading the customer's message, deciding whether the complaint is covered".
+3. **d**. The gate is code, so it is tested with the forbidden call and an assertion on the backend log. *b* is ruled out because a sample measures a rate, which is the way the model is tested: "where a failure is a rate and not a bug". *c* is ruled out because an evaluation set measures the model, not the gate: "A team that tests the gate with a model, or the model with unit tests, has mixed up the two." *a* is ruled out because the gate is tested the way all code is: "the same inputs, the same outputs".
 
 </details>

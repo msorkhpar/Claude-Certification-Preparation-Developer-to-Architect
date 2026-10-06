@@ -9,12 +9,12 @@
       "options": {
         "a": "Truncates the end of the rules until the whole request fits within the budget",
         "b": "Drops the conversation history first, because it is the largest block of the three",
-        "c": "Refuses the request at once, since it is over budget by any amount at all",
-        "d": "Sheds the least important block first, stopping as soon as it fits"
+        "c": "Refuses the request outright, since a refusal beats sending a cut-down context",
+        "d": "Drops the promotional copy first, since its rank is the lowest of the parts"
       },
       "key": "d",
       "explanation": {
-        "d": "The lowest-priority dynamic block goes first, and the assembler climbs only while the request is still over.",
+        "d": "The marketing blurbs are the lowest-priority dynamic block, so they go first, and the assembler climbs only while the request is still over.",
         "a": "Ruled out because \"The static modules are never dropped\".",
         "b": "Ruled out because \"the assembler drops the lowest first\", by priority and not by size.",
         "c": "Ruled out because refusal is for when \"only static modules remain and they still exceed the budget, the assembler refuses the request\"."
@@ -36,7 +36,7 @@
         "d": "One assembler fixes the order, so every team's prefix matches.",
         "a": "Ruled out because a reminder leaves the order to each caller, where \"the assembler decides the order and callers cannot\".",
         "b": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", and a longer lifetime does not make the strings identical.",
-        "c": "Ruled out because a header does not fix the order that follows it: \"The order is the same every time\" only when one assembler decides it."
+        "c": "Ruled out because a header does not fix the order of what follows it, and \"Shuffling the modules changes the prefix\"."
       }
     },
     {
@@ -46,7 +46,7 @@
       "stem": "Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?",
       "options": {
         "a": "C, since the lowest price decides the matter once capability has been established",
-        "b": "B, the lowest-priced of the ones that satisfy every requirement",
+        "b": "B, since it is the cheaper of the two that meet the time limit",
         "c": "A, since the dearer option is the safer one for a first release to customers",
         "d": "Whichever the team used last, because consistency across workloads outweighs the saving"
       },
@@ -66,15 +66,15 @@
       "options": {
         "a": "The tier 2 candidate, since it is the only one that stays within the limit",
         "b": "The tier 3 candidate, since capability matters more than speed in a first release to customers",
-        "c": "That nothing qualifies, since neither option satisfies both requirements",
-        "d": "The cheaper of the two candidates, so that the budget of the project is protected"
+        "c": "Neither option, since each one fails one of the two stated requirements",
+        "d": "The cheaper of the two, since price settles it when neither fits fully"
       },
       "key": "c",
       "explanation": {
         "c": "No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement.",
         "a": "Ruled out because \"A model below the tier fails the task\".",
         "b": "Ruled out because the limit is part of the requirement too, and the candidate would fall under \"A model slower than the limit\".",
-        "d": "Ruled out because \"Price comes last because it is the only fact that cannot make a model wrong\"."
+        "d": "Ruled out because \"Price comes last because it is the only fact that cannot make a model wrong\", so it cannot rescue a candidate that fails a requirement."
       }
     },
     {
@@ -102,15 +102,15 @@
       "scope": "module",
       "stem": "Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?",
       "options": {
-        "a": "Take the largest model for safety, and place the long text last in the request",
-        "b": "Take the cheapest model of any tier, and place the long text in the final message",
+        "a": "Take the largest model for safety, and put the constant passage first",
+        "b": "Take the cheapest model of any tier, and place the constant passage in the final message",
         "c": "Take the model that was used last time, and cache the whole request as one piece",
-        "d": "Take the cheapest that is capable and quick enough, and put the bulky constant passage first"
+        "d": "Take the cheapest model that is able and quick enough, and put the constant passage first"
       },
       "key": "d",
       "explanation": {
         "d": "The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached.",
-        "a": "Ruled out because the largest model is not needed when \"the cheapest model that meets the first two is the right one for each workload\", and the page says \"static modules first, in the order given, then the dynamic ones\".",
+        "a": "Ruled out because the largest model is not needed when \"the cheapest model that meets the first two is the right one for each workload\".",
         "b": "Ruled out because \"A model below the tier fails the task\", whatever its price.",
         "c": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", so the whole request, which includes the changing part, cannot be cached as one piece."
       }
@@ -122,15 +122,15 @@
       "stem": "Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?",
       "options": {
         "a": "All four as static modules, so that they are cached together",
-        "b": "Rules and question as static modules, policy and chat as dynamic ones",
-        "c": "Fixed guidance as static modules, per-visit text as dynamic ones",
+        "b": "Standing guidance and past messages as static modules, the new query as a dynamic one",
+        "c": "Standing guidance as static modules, the new query and past messages as dynamic ones",
         "d": "All four as dynamic modules, so that any piece is edited freely"
       },
       "key": "c",
       "explanation": {
-        "c": "The pieces that never change go first as static modules, and the per-request pieces follow as dynamic ones, so that the stable prefix can be cached.",
+        "c": "The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached.",
         "a": "Ruled out because \"A static module whose text holds a `{variable}` is refused\", and the question changes on every request.",
-        "b": "Ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against \"static modules first, in the order given, then the dynamic ones\".",
+        "b": "Ruled out because the earlier chat belongs to one traveller, and a dynamic module is one that \"changes with the customer, the question or the history\".",
         "d": "Ruled out because the cache works on \"the request from its start up to a marked breakpoint\", so with no static modules there is nothing to cache."
       }
     }

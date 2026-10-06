@@ -124,23 +124,24 @@ a deletion, not a change of value.
 ## Quiz
 
 1. A nightly job asks for a JSON report and sometimes crashes in the JSON parser, with no error status from the API.
-   Which first check does the page recommend?
+   Which first check fits best?
    - **a**: Lower the sampling temperature so that the report is less variable from one night to the next
    - **b**: Read `stop_reason` and treat `max_tokens` as a cut reply before using the text
    - **c**: Add a stop sequence at the end of every field that the report holds
-   - **d**: Catch the HTTP status of the call and retry every status above 399
+   - **d**: Retry the call whenever the parser fails, since the next report may be whole
 
-2. A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400 until they delete a line that
-   sets the sampling temperature to 0.2. What should they do about `top_p`, which they also set?
+2. A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400. The code sets the sampling
+   temperature to 0.2 and `top_p` to 0.9, and the team will delete the temperature line. What should they do about
+   `top_p`?
    - **a**: Replace it with `top_k`, which the model still accepts
-   - **b**: Keep it and raise it to 1.0, which is the safest setting
+   - **b**: Keep it, but lower it to 0.5 so that the replies stay focused
    - **c**: Keep it, because only the temperature setting is rejected on that model and the others pass
-   - **d**: Omit it as well, since any non-default value is rejected for that release
+   - **d**: Drop it too, since that release refuses the three randomness knobs alike
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "stop_reason indicates normal completion; HTTP errors indicate failures", so a cut reply arrives as a normal 200 and only `stop_reason` shows it. *a* is ruled out because on current models "a non-default value of any of them is rejected with a 400 error", and variability is not what truncates a reply. *c* is ruled out because a stop sequence is "a cheap way to end a reply at a delimiter you chose", which does not stop the reply being cut at the ceiling. *d* is ruled out because a `max_tokens` cut carries a 200 status: "a `max_tokens` or a `refusal` arrives with status 200".
-2. **d**. The page says a non-default value of any of the three settings "is rejected with a 400 error" on the current models. *b* is ruled out because "the upgrade is a deletion, not a change of value", and the page does not name 1.0 or any value as safe. *c* is ruled out because "a non-default value of any of them is rejected with a 400 error", and the three are named together. *a* is ruled out because "temperature, top_p and top_k used to be the knobs of randomness", and the page rejects all three, so `top_k` is no way out.
+1. **b**. The page says "stop_reason indicates normal completion; HTTP errors indicate failures", so a cut reply arrives as a normal 200 and only `stop_reason` shows it. *a* is ruled out because on current models "a non-default value of any of them is rejected with a 400 error", and variability is not what truncates a reply. *c* is ruled out because a stop sequence is "a cheap way to end a reply at a delimiter you chose", which does not stop the reply being cut at the ceiling. *d* is ruled out because "a reply that hits the ceiling stops where it stands", and a retry under the same limit can be cut in the same way.
+2. **d**. The page names the three settings together, and for all of them "the documentation tells you to omit them" on the current models. *b* is ruled out because "the upgrade is a deletion, not a change of value", and 0.5 is still a value the team chose. *c* is ruled out because "a non-default value of any of them is rejected with a 400 error", and the three are named together. *a* is ruled out because "temperature, top_p and top_k used to be the knobs of randomness", and the page rejects all three, so `top_k` is no way out.
 
 </details>

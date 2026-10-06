@@ -66,22 +66,22 @@ These are the wrong answers the exam's options for this domain offer, each with 
 ## Quiz
 
 1. Scenario: At Alder Freight an intake service and a pricing service each pass every one of their own tests. In production about one request in fifty stalls between them, and always for shipments with no matching tariff. What does this most likely indicate?
-   - **a**: Upgrading the pricing service to a more capable model so it copes with unusual shipments
+   - **a**: A pricing model too weak to cope with the unusual shipments it receives
    - **b**: An unwritten rule for how the two parts treat a lookup that finds nothing
    - **c**: A transient network fault that an automatic retry would clear on the next attempt
-   - **d**: A third component placed between the two that logs every request and response
+   - **d**: A defect inside the intake service that its own tests have never covered
 
 2. Scenario: Cobalt Freight's design has an input stage, a processing stage, a feedback loop and an output stage that writes the model's text straight into the shipping database with no check. What does the rubric report?
    - **a**: No finding, since all four stages are present in the design and the loop is in place
    - **b**: A high finding, so the verdict is reject whatever the price of the whole design
    - **c**: A medium finding, so the verdict is revise until a vetting step is added
-   - **d**: A finding for the missing feedback stage, since nothing is ever learned from the results
+   - **d**: A missing-stage finding for output, since an unchecked stage does not count
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Both parts pass their own checks, so the gap is what neither contract says about the empty case. *a* is ruled out because a bigger model "only changes how the same ambiguity is worded". *c* is ruled out because a failure that follows an input pattern "is deterministic, and a retry repeats it". *d* is ruled out because logging adds a component and not a rule, and the page says to "Find the case the contract left out".
-2. **c**. A stage that exists but lets text through unchecked is a medium finding, and a medium finding gives `revise`. *a* is ruled out because the rubric raises a finding when "There is an output stage that has no validation step". *b* is ruled out because "any `high` gives `reject`, otherwise any `medium` gives `revise`", and nothing here is high. *d* is ruled out because the finding for that is raised when "There is no feedback stage", and this design has one.
+1. **b**. Both parts pass their own checks, so the gap is what neither contract says about the empty case. *a* is ruled out because a bigger model "only changes how the same ambiguity is worded". *c* is ruled out because a failure that follows an input pattern "is deterministic, and a retry repeats it". *d* is ruled out because each service passes its own tests, and of such a pair the page says "Neither is wrong by its own rules."
+2. **c**. A stage that exists but lets text through unchecked is a medium finding, and a medium finding gives `revise`. *a* is ruled out because the rubric raises a finding when "There is an output stage that has no validation step". *b* is ruled out because "any `high` gives `reject`, otherwise any `medium` gives `revise`", and nothing here is high. *d* is ruled out because a missing-stage finding is raised when "A stage is empty or absent", and this output stage exists and writes to the database.
 
 </details>
 
@@ -91,28 +91,28 @@ This quiz covers both pages of the module.
 
 1. Scenario: Fenwick Bank's design review turns up two problems, one rated medium and one rated high. What outcome does the rubric give?
    - **a**: Revise, because the medium problem is the one that can be repaired most easily
-   - **b**: Reject, since the worst item governs the result
-   - **c**: Approve, because a medium and a high problem cancel each other out
+   - **b**: Reject, since the more severe of the two findings decides the whole verdict
+   - **c**: Revise, leaving the price to decide whether it beats the other designs
    - **d**: Revise, because the two ratings are averaged into one level of severity
 
 2. Scenario: Willow Bank's complaint triage design collects a rating from customers for every reply and stores the ratings in a table that nobody reads. How should the review treat the feedback stage?
    - **a**: As present, since a rating is collected for every reply that customers receive
-   - **b**: As absent, since no path leads from those scores to a change in the system
-   - **c**: As present, once the ratings table is backed up on a regular schedule
-   - **d**: As absent only if the table holds fewer than a thousand rows of ratings
+   - **b**: As absent, since nothing in the system ever changes because of those scores
+   - **c**: As absent, which the rubric rates as medium, so the verdict is revise
+   - **d**: As present, since the ratings stay available for anyone who later wants them
 
 3. Scenario: Quince Retail runs a returns agent that writes refunds to the ledger without approval, and the auditors require a record of each approval. What does the rubric report?
-   - **a**: A medium finding, because the missing approval can be added during later testing
+   - **a**: A medium finding, so the verdict is revise until an approval step is added
    - **b**: No finding, since the agent's answers have already been validated before the write
-   - **c**: A finding about autonomy, since the path of a return is known in advance
+   - **c**: An autonomy finding, since the agent acts with no person in the loop
    - **d**: A high finding, which makes the verdict reject whatever the cost of the design
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The verdict follows the worst finding, and a `high` gives `reject`. *a* is ruled out because "any `high` gives `reject`, otherwise any `medium` gives `revise`". *c* is ruled out because "The verdict follows the worst finding" and nothing cancels it. *d* is ruled out because there is no averaging: "otherwise any `medium` gives `revise`, otherwise `approve`".
-2. **b**. The stage is defined by "the path by which they change the system", and here there is none. *a* is ruled out because collecting a rating is logging and not a loop: the stage holds "Evaluation, logging, human corrections, and the path by which they change the system". *c* is ruled out because backups protect the table and do not change the system, and the cost of the gap is that "Nobody learns that it was wrong". *d* is ruled out because the size of a table does not decide the finding, and a pipeline that "never learns from the result" goes wrong whatever its volume.
-3. **d**. A write without approval where an audit is needed is a `high` finding, so the verdict is reject. *a* is ruled out because "The verdict follows the worst finding", and the rubric names `high` for this one. *b* is ruled out because the rule fires when "The design writes without approval and an audit is needed", whatever was validated. *c* is ruled out because that finding applies only when "An agent or a team is used on a path that is already known".
+1. **b**. The verdict follows the worst finding, and a `high` gives `reject`. *a* is ruled out because "any `high` gives `reject`, otherwise any `medium` gives `revise`". *c* is ruled out because "Price enters last, and only among the designs that were not rejected". *d* is ruled out because there is no averaging: "The verdict follows the worst finding".
+2. **b**. The stage is defined by "the path by which they change the system", and here there is none. *a* is ruled out because collecting a rating is logging and not a loop: the stage holds "Evaluation, logging, human corrections, and the path by which they change the system". *c* is ruled out because the rubric lists `no-feedback` as high, and "any `high` gives `reject`". *d* is ruled out because ratings that sit unread are not a loop, and a pipeline that "never learns from the result, goes wrong silently and stays wrong".
+3. **d**. A write without approval where an audit is needed is a `high` finding, so the verdict is reject. *a* is ruled out because "The verdict follows the worst finding", and the rubric names `high` for this one. *b* is ruled out because the rule fires when "The design writes without approval and an audit is needed", whatever was validated. *c* is ruled out because the autonomy finding is about need, not oversight, and applies only when "An agent or a team is used on a path that is already known".
 
 </details>
 

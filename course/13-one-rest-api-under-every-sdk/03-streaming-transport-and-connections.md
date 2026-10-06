@@ -117,22 +117,22 @@ timeout disables it. That is a design hint and not an obstacle: if you see it, y
 1. A team's report generator sets a very large `max_tokens` on a non-streaming call and now fails intermittently on
    the office network after several minutes without any reply. Which change is best?
    - **a**: Open a websocket so that the server can push the report when it is ready
-   - **b**: Turn on server-sent events so that data keeps flowing while the long text is produced
+   - **b**: Use server-sent events so that data arrives while the text is written
    - **c**: Raise the client timeout so that the call may stay silent for longer
    - **d**: Split the report into three prompts and send them over three connections
 
 2. A developer proposes a websocket between a web page and the model API so that the page can send a stop signal
-   during a long answer. What does the page say is the better design?
-   - **a**: Add a second HTTP request that tells the model to stop generating
-   - **b**: Keep the single HTTP request and poll it every second for the next words
+   during a long answer. Which design is best?
+   - **a**: Send a second HTTP request that tells the model to stop generating
+   - **b**: Send the stop signal as an event on the open stream of the reply
    - **c**: Switch to the websocket, because only that protocol allows a cancel
-   - **d**: Keep the single HTTP request and stream, and cancel by closing the connection
+   - **d**: Keep the stream and close the connection when the user wants it to end
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Streaming keeps data moving: "Bytes keep flowing, and the connection is not idle". *a* is ruled out because "there is no client-to-server traffic to carry" in a model call, and a websocket is "not what the API sends". *c* is ruled out because "Some networks may drop idle connections after a variable period of time", so a longer timeout on your side does not help. *d* is ruled out because "the call is silent for as long as the generation takes", and each of three connections would be silent while its own part is written.
-2. **d**. The page says the client cancels "by closing the connection", with the stream running on one ordinary HTTP request. *b* is ruled out because "the server answers with a normal HTTP response whose body is a stream of server-sent events", so the words arrive without polling. *c* is ruled out because "a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return". *a* is ruled out because the page documents "breaking out of the loop or calling stream.controller.abort()", not a second request.
+2. **d**. The stream runs on one ordinary HTTP request, and the client cancels "by closing the connection". *b* is ruled out because the stream is one-directional: "after the request is sent, the client only listens". *c* is ruled out because "a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return". *a* is ruled out because the page documents "breaking out of the loop or calling stream.controller.abort()", not a second request.
 
 </details>
 
@@ -149,7 +149,7 @@ This quiz covers all three pages of the module.
 
 2. A service builds a new SDK client for every streamed call, and its latency and open-socket count grow under
    load. Which change is best?
-   - **a**: Keep a single instance created at start-up and let every request handler share it
+   - **a**: Make one instance at start-up and pass it to each request handler
    - **b**: Move the calls to a websocket so that one connection is kept open
    - **c**: Turn streaming off so that fewer sockets are used by each of the calls
    - **d**: Raise the output limit so that fewer calls are needed for the same work
@@ -159,21 +159,21 @@ This quiz covers all three pages of the module.
    - **a**: The code shows only that the reply began, so the end must be checked as well
    - **b**: The code is final, since the server sends it after the whole message is written
    - **c**: The events already received form a complete message and can be stored as the result
-   - **d**: The call needs a longer timeout value so that the code can arrive before the drop
+   - **d**: The rest of the reply can be fetched later by the message id it already carries
 
-4. A team must report a failing call to the provider's support while keeping its logs free of secrets and customer
-   text. Which record should the service keep for each call?
+4. A team logs every failing call so that it can open tickets with the provider's support. Which record should the
+   service keep for each call?
    - **a**: The authorization header and the body, so that the call can be reproduced
    - **b**: The complete request and reply, so that support staff can replay them
-   - **c**: The request id, the status and the error type, without bodies or keys
+   - **c**: The request id, the status and the error type, so staff can locate it
    - **d**: Only the time of the call, since the provider can find the call from it
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A client that fails on an unknown value breaks "on a change the versioning page allows", and the page says a stop reason is among the values "you do not know" that must be tolerated, not only a field. *a* is ruled out because a retry cannot cure a parse failure, and "retrying does not help: the proxy answers the same page again" shows the same logic for a repeated reply. *c* is ruled out because the SDK's extra headers "help debugging and are not part of your contract". *d* is ruled out because "the only current value of anthropic-version is 2023-06-01", and an older one "may be unavailable for new users".
+1. **b**. A client that fails on an unknown value breaks "on a change the versioning page allows", and the page says a stop reason is among the values "you do not know" that must be tolerated, not only a field. *a* is ruled out because the new value arrives in a 200, and "a successful reply is a JSON object", so there is no error for a retry to repeat. *c* is ruled out because the SDK's extra headers "help debugging and are not part of your contract". *d* is ruled out because "the only current value of anthropic-version is 2023-06-01", and an older one "may be unavailable for new users".
 2. **a**. The page says to create one client and share it, because "a new client means a new connection pool each time". *b* is ruled out because "a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return". *c* is ruled out because streaming is what keeps long calls from being dropped as idle: "Bytes keep flowing, and the connection is not idle". *d* is ruled out because "the cost shows up as latency and sockets" and comes from the number of clients, which the output limit does not change.
-3. **a**. The page's second trap says "a 200 does not mean the answer is complete", so the end of the stream has to be checked as well. *b* is ruled out because "the connection stays open until the message is complete", so the status comes first. *c* is ruled out because "a streamed reply can start with a 200 and still end with an error event". *d* is ruled out because "some networks may drop idle connections after a variable period of time", and a longer timeout on your side does not stop a drop.
-4. **c**. The request id is what support asks for: "include it when you contact support about a specific request", and the status and type classify the failure. *b* is ruled out because "customer text does not belong in a log by default". *a* is ruled out because an error message that is logged "is read by people who must not see a key", and a header would carry the key. *d* is ruled out because the documentation says to "include it when you contact support about a specific request", and a time stamp is not that id.
+3. **a**. The page's second trap says "a 200 does not mean the answer is complete", so the end of the stream has to be checked as well. *b* is ruled out because "the connection stays open until the message is complete", so the status comes first. *c* is ruled out because "a streamed reply can start with a 200 and still end with an error event". *d* is ruled out because "the Messages API is stateless, so the history is yours", and no stored reply waits to be fetched by its id.
+4. **c**. The request id is what support asks for: "include it when you contact support about a specific request", and the status and type classify the failure without carrying a key or customer text. *b* is ruled out because "customer text does not belong in a log by default". *a* is ruled out because an error message that is logged "is read by people who must not see a key", and a header would carry the key. *d* is ruled out because the request id is "a globally unique identifier for the request", and a time stamp does not single out one call.
 
 </details>

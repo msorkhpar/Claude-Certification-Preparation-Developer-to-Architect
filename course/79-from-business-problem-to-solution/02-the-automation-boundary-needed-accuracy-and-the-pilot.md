@@ -74,19 +74,19 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **a**: Which model tier will run the approval steps, so that the cost of the project can be estimated early in planning
    - **b**: How many tokens one disbursement review is expected to consume across all the steps
    - **c**: Whether the build can be completed inside the quarter that the sponsor has proposed
-   - **d**: Which decisions carry accountability for the lender and so have to stay with a person
+   - **d**: Who at the lender answers when a payout goes wrong, and so where a person must make the call
 
 2. Scenario: Alder Health's ten-user pilot of a note-summarising assistant went well, and the business now wants it for two thousand clinicians. What should the architect raise first?
    - **a**: The cost of the additional licences for the two thousand new users
-   - **b**: Which friendly conditions of the trial will not carry over to everyone
+   - **b**: Whether the trial's inputs, review load and data access will look the same across all wards
    - **c**: Whether a larger and more capable model should replace the smaller one that was used in the pilot
    - **d**: The training timetable for the clinicians who will start using it
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. Where accountability sits fixes what may be automated at all, and everything else follows from that boundary. *a* is ruled out because the model comes after the boundary, and the page says to "Keep with a person" decisions that carry accountability. *b* is ruled out because cost is downstream of the same question, and the page asks "who answers for it, and could a person have caught it?". *c* is ruled out because a schedule is not among the facts the page says to establish before promising anything: "the boundary, the number and the scale".
-2. **b**. Scale changes the surroundings, so the first contribution is naming the assumptions that held only in friendly conditions. *a* is ruled out because licences are a consequence and not a risk, and a roll-out plan "that lists licence counts is not" a plan. *c* is ruled out because the page says "None of the rows is about the model getting worse". *d* is ruled out because training addresses a later step, while the page asks for the assumptions to be named "before the roll-out, not after the first incident".
+1. **d**. Where accountability sits fixes what may be automated at all, and everything else follows from that boundary. *a* is ruled out because the model comes after the boundary, which "is an architectural decision made first". *b* is ruled out because a token count prices a design whose shape is not yet settled, and the fact to establish first is "where accountability sits, what accuracy the use case needs". *c* is ruled out because a schedule is not among the facts the page says to establish before promising anything: "the boundary, the number and the scale".
+2. **b**. Scale changes the surroundings, so the first contribution is naming the assumptions that held only in friendly conditions. *a* is ruled out because licences are a consequence and not a risk, and a roll-out plan "that lists licence counts is not" a plan. *c* is ruled out because the page says "None of the rows is about the model getting worse". *d* is ruled out because a timetable is not what makes a roll-out plan, which is one that "lists these assumptions, the evidence for each and the trigger that stops the roll-out".
 
 </details>
 
@@ -95,7 +95,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 This quiz covers both pages of the module.
 
 1. Scenario: Quillfeather Retail's sponsor tells the architect that a returns-triage system must be "as accurate as possible" and asks for a design. Which response fits best?
-   - **a**: Settle what accuracy the use case needs and what a wrong decision costs, then build to that
+   - **a**: Ask what a wrong decision and a human check each cost, and set the target from both
    - **b**: Start from the most capable model and optimise the prompts until accuracy stops improving
    - **c**: Choose the most elaborate pattern the budget allows, since that gives the highest ceiling
    - **d**: Hold the question open until the pilot has produced some real accuracy figures to use
@@ -104,7 +104,7 @@ This quiz covers both pages of the module.
    - **a**: Send each of them to a person, because a human check lowers the error count and so repays its price
    - **b**: Pass them through unreviewed, because reviewing them would burn more than the errors it prevents
    - **c**: Sample a tenth of them for review, since a sample is cheaper than a full check
-   - **d**: Hold them until the model reaches full accuracy on every slice
+   - **d**: Review them all until the model's accuracy on that slice reaches 99.9 percent
 
 3. Scenario: Corvid Care runs a pilot of a discharge-letter drafting assistant for nurses, who now spend less time writing. The sponsor must say which value pillar the project serves and how it will be shown. Which answer fits best?
    - **a**: Productivity, measured by hours saved per staff member each week against a baseline taken before launch
@@ -116,7 +116,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **a**. An unbounded requirement cannot be designed against, so it is made concrete first: "needed accuracy comes from two costs". *b* is ruled out because capability without a target spends money without a bar: "cannot be designed against, tested or priced". *c* is ruled out because the ladder buys complexity only for a stated requirement, and the page says "find the simplest solution possible". *d* is ruled out because the design is aimed at a number, and "the first piece of work" is finding it before the pilot is built.
-2. **b**. The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money. *a* is ruled out because "reviewing the item loses money" where the model beats the break-even, and the page says "Reviewing everything wastes review". *c* is ruled out because a sample is a guess at the same trade-off, and the page asks for design that spends attention "only where it changes the outcome". *d* is ruled out because the break-even accuracy is 98 percent, not full accuracy, and a design routes by slice, not by "one number for the whole system".
+2. **b**. The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money. *a* is ruled out because "reviewing the item loses money" where the model beats the break-even, and the page says "Reviewing everything wastes review". *c* is ruled out because a sample is a guess at the same trade-off, and the page asks for design that spends attention "only where it changes the outcome". *d* is ruled out because 99 percent already clears the threshold, since "the break-even accuracy is 98 percent", so waiting for a higher figure keeps paying for reviews that lose money.
 3. **a**. Nurses getting more done is the productivity pillar, measured as hours saved per person. *b* is ruled out because the page says the cost pillar counts "tokens, review time and rework, not model price alone". *c* is ruled out because a count of outputs measures activity and not a new capability: "Share of customers served in a new way". *d* is ruled out because latency belongs to the performance pillar, with "95th percentile latency, availability, accuracy by case type".
 
 </details>

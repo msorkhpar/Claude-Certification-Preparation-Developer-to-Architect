@@ -61,7 +61,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **b**: The performance part is the one that is absent
    - **c**: Regenerating would bring out a more critical draft
    - **d**: Nothing says the model may challenge an idea
-   - **e**: The product part is the one that is unclear
+   - **e**: Adjectives such as thorough and professional would fix it
 
 4. A user pastes a 25-page report beneath a single line of instruction and gets weak, unfocused answers. The user also needs any instruction hidden inside the report to be ignored. Which change fits best?
    - **a**: Add a role such as world-class analyst and ask for tighter focus
@@ -102,9 +102,9 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 10. A news desk asks Claude to confirm that a reader's photo of a flood is not AI-generated before it runs on the front page. What should the desk expect?
    - **a**: A sound verdict, backed by a confidence score on request
-   - **b**: A polite refusal to assess any photo of a news event
-   - **c**: No reliable verdict, so provenance checks must settle it
-   - **d**: A dependable verdict when the photo is sharp, large and upright
+   - **b**: A firm verdict, supported by a detailed reading of the scene
+   - **c**: No reliable verdict, leaving provenance checks to settle it
+   - **d**: A dependable verdict, given a sharp, large and upright photo
 
 11. A team lead receives Claude Tag's summary of a long thread, and must also forward a reply Claude drafted for a client. How should the lead check them?
    - **a**: Study the digest, since the team acts on it, and glance over the reply
@@ -183,7 +183,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **a**: They do, because each of those tools is a front end to one shared engine
    - **b**: They do not, since each surface keeps its own separate configuration files
    - **c**: They apply only in the terminal, since the files are read from a shell prompt
-   - **d**: They apply only after being exported once into each of the other tools
+   - **d**: They do, once each file has been exported into each of the other tools
 
 24. An analyst switches on Research mode to look up the notice period stated in a supplier contract that is already open. How should this choice be judged?
    - **a**: It is more than needed, since one file in hand holds the answer
@@ -199,15 +199,15 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
 
 26. A strategist must compare twelve vendors on price, support and security from what is published about them online, and wants each finding cited by tomorrow. Which feature fits best?
    - **a**: Research mode, with web search switched on in the chat
-   - **b**: A Project loaded with each vendor's brochures
+   - **b**: A Project, loaded with each vendor's brochures and price sheets
    - **c**: A plain chat, asked for sources in each reply
-   - **d**: An artifact that lays the comparison out as a dashboard
+   - **d**: An artifact, laying the comparison out as a live dashboard
 
-27. A team weighs capability, speed and cost when picking a model, and moves to a bigger tier whenever answers fall short. Going by the course's criteria, what should it try before such a move?
-   - **a**: Raise effort on the requests where quality was lacking
-   - **b**: Switch on fast mode so the weak replies return sooner
-   - **c**: Regenerate each weak answer and keep the best of the set
-   - **d**: Pin a dated model id, in case the tier has drifted
+27. Two engineers disagree over which of two Claude tiers should draft a firm's contract summaries, and each cites a few chat replies they liked. Going by the course's criteria, what should settle the choice?
+   - **a**: Score both on a fixed set of real past files, weighing cost last
+   - **b**: Take the higher tier for the legal weight that the summaries carry
+   - **c**: Take the cheaper tier for its faster answers at a lower price
+   - **d**: Have each tier grade its own summaries and keep the top scorer
 
 28. A user tells Claude about a project in an incognito chat and finds that the next chat has no trace of it. Which two statements are correct? (Select two.)
    - **a**: Claude forgot it because the chat ran past its window
@@ -241,9 +241,9 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Claude checks a sample of orders and the rest are assumed to be fine
    - **d**: Claude screens each postcode first, then code confirms the ones it flags
 
-33. A team ranks Claude surfaces by power and picks the top one each time. For a task that edits a few client files, which choice fits the course's table of what each surface must not be given?
+33. A team ranks Claude's apps and features by power and picks the top one each time. For a task that edits a few client files, which choice would the course make instead?
    - **a**: The most capable surface, so the task never stalls for lack of access
-   - **b**: Only those documents in reach, with a person confirming each change
+   - **b**: The narrowest surface for the job, with every change confirmed
    - **c**: The cheapest surface, tried first and upgraded only if it falls short
    - **d**: The most automated surface, with each step logged for review afterwards
 
@@ -396,15 +396,15 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    - **c**: Raise effort to the maximum, with fewer retries expected as a result
    - **d**: Name the cause, test one faster, cheaper tier on the same set, and compare
 
-58. A nightly job re-scores 200,000 archived documents, and the results are due the next morning. Which cost lever fits best?
+58. A nightly job re-scores 200,000 different archived documents under a one-line instruction, and the results are due the next morning. Which cost lever fits best?
    - **a**: Batched requests, which are half the price of standard ones
-   - **b**: Prompt cache reads, which price every output token lower
+   - **b**: Prompt cache reads, which cost a fraction of the base input price
    - **c**: Fast mode, which doubles the output speed at premium pricing
    - **d**: Higher effort, which trades latency for cost
 
 59. A support bot includes a 40,000-token manual in each turn's request, and the bill is far higher than expected. Which lever cuts that cost?
    - **a**: Cache that document so each later call reads it at a lower rate
-   - **b**: Raise the output limit so the cost spreads over more tokens
+   - **b**: Lower the output limit so each reply is cut shorter
    - **c**: Move to a larger context window so each long request costs less
    - **d**: Switch on fast mode so the turns are billed for less
 
@@ -424,7 +424,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    ruled out because the documents must nest "each with an index or a name, so the answer can say which one it
    used".
 2. **d**. A drafting task wants audience, tone and an example of the target style, and "A request that omits these gets a generic answer" (module 5, page 1). *a* is ruled out because that is the brainstorming task: "brainstorming wants breadth first and judgment later". *b* is ruled out because that is the research task: "research wants sources named and unsupported claims flagged". *c* is ruled out because that is the analysis task: "Analysis wants the material and the question".
-3. **b and d**. The performance part says how Claude should behave, including "whether to challenge you" (module 5, page 1), and the request covers only the product and the process. *a* is ruled out because the page adds an example only "when a style matters". *c* is ruled out because "Regenerating the same request and hoping is the reflex; revising the request is the method". *e* is ruled out because the page defines it as "The deliverable, its form (an email, a table, a list of options), its length and its audience".
+3. **b and d**. The performance part says how Claude should behave, including "whether to challenge you" (module 5, page 1), and the request covers only the product and the process. *a* is ruled out because the page adds an example only "when a style matters". *c* is ruled out because "Regenerating the same request and hoping is the reflex; revising the request is the method". *e* is ruled out because "Stacking adjectives instead of constraints" is a named trap whose example "gives conflicting, unverifiable demands", and none of those words invites pushback.
 4. **b**. Long inputs go near the top, tagged as data, with the query at the end (module 6, pages 1 and 2). *a* is ruled out because a role "changes style and focus, not truth", and it neither marks the report as data nor moves the question to the end. *d*
    is ruled out because "Moving a pasted document above the instructions does not mark it as data". *c* is ruled out
    because a restated question helps focus but leaves the report open to injection, and the rule is "Tag the data, tell the model it is data, and escape it".
@@ -439,7 +439,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    ruled out because "A role is a request, not a credential", so a role does not supply missing figures. *d* is
    ruled out because "Regenerating the same request and hoping is the reflex; revising the request is the method".
 9. **a and d**. A summary "can be accurate in every sentence and still leave out the clause that matters" (module 5, page 2), which is a completeness failure, and "Silent omissions are the quiet failure", since nothing in the draft declared the gap. *b* is ruled out because the fairness check asks whether a draft will "present one side as the whole", and nothing in this summary takes a side. *c* is ruled out because the page's example is "An accurate technical answer can be wrong for a board", which concerns the reader. *e* is ruled out because accuracy asks "Are the specific claims, figures, names, dates, quotations and citations true?", and every sentence here was true.
-10. **c**. Synthetic images are one of the stated vision limits, so whether the photo is genuine rests on provenance checks and an editor (module 4, page 1). *a* is ruled out because "Self-reported confidence is not a measure of accuracy", so a score adds no evidence. *b* is ruled out because "Claude reads images and PDFs", and the one refusal the page lists is that Claude "cannot be used to name people in images, and refuses to". *d* is ruled out because image quality is a separate limit, and of synthetic images the page says Claude "cannot determine whether an image is AI-generated".
+10. **c**. Synthetic images are one of the stated vision limits, so whether the photo is genuine rests on provenance checks and an editor (module 4, page 1). *a* is ruled out because "Self-reported confidence is not a measure of accuracy", so a score adds no evidence. *b* is ruled out because "Detail is not accuracy; the vision page lists the conditions under which it is wrong", and a full reading of the scene says nothing about how the photo was made. *d* is ruled out because image quality is a separate limit, and of synthetic images the page says Claude "cannot determine whether an image is AI-generated".
 11. **d**. The page asks to read Claude's work in proportion to what is at stake, so the internal digest gets a light pass and the outgoing reply the close reading (module 8, page 2). *a* is ruled out because the page has it the other way round: "A summary you can skim", while "something going to a customer or changing a system gets a careful read". *b* is ruled out because "Do not check everything equally", so a summary for the lead does not need the close read that outgoing work does. *c* is ruled out because "Self-reported confidence is not a measure of accuracy", so Claude's own flags do not replace reading the reply.
 12. **b**. Output varies by sampling and infrastructure, so one run proves nothing (module 1, page 2). *a* is ruled
    out because every id is pinned, "including the dateless IDs used from the 4.6 generation on". *c* is ruled out
@@ -477,7 +477,7 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    remove the need to decide what goes in". *d* is ruled out because "more context isn't automatically better", and
    the whole transcript brings the rot with it.
 26. **a**. Research runs many linked searches with citations and needs web search on (module 7, page 2). *b* is ruled out because a Project suits "Recurring work with fixed rules and reference files". *c* is ruled out because plain chat is for "A one-off question, a draft, a quick comparison", while the page names "a comparison of vendors" as work for Research. *d* is ruled out because an artifact is for "A document, deck, dashboard or small tool to hand to someone", not for gathering sources.
-27. **a**. Effort is the fourth of the page's criteria, which the team left out, and the page says "tuning effort is often a better lever than switching models" (module 3, page 1). *b* is ruled out because fast mode offers "up to 2.5x higher output speed at premium pricing", which buys speed, not better answers. *c* is ruled out because "Regenerating the same request and hoping is the reflex; revising the request is the method". *d* is ruled out because "every Claude model id is a pinned snapshot", so the model behind a fixed id has not drifted.
+27. **a**. The page's decision rule is to run your own prompts and data across the candidates and compare quality before cost, since "Having a good evaluation set is the most important step" (module 3, page 1). *b* is ruled out because, of always choosing the largest model, "nothing on the pages says the biggest model is the safest default for every task". *c* is ruled out because the rule is to "compare accuracy, quality and edge-case handling, then weigh cost", so price comes after quality. *d* is ruled out because "Self-reported confidence is not a measure of accuracy", so a tier's grade of its own work settles nothing.
 28. **c and e**. Incognito chats "keep a conversation out of memory and history" on purpose (modules 7 and 10), and the model itself carries nothing between chats, since "your code resends the history". *a* is ruled out because a new chat starts as "a model with no memory of you", whatever the window of the last one. *b* is ruled out because "Weights are fixed at inference time". *d* is ruled out because "Incognito chats are available only outside Projects" (module 7, page 1), so one cannot be started inside a Project.
 29. **c**. The add-in answers with clickable cell-level citations (module 8, page 2). *b* is ruled out because with cross-app work "one conversation can read an Excel model and write a Word memo or a slide", which moves the figure but does not trace it. *d* is ruled out because "Macros and VBA, and data tables, are unsupported". *a* is ruled out because "Claude can read and write only files that are open at that moment".
 30. **b**. The Academy lesson recommends starting with one skill, testing it and then scaling to a plugin you share (module 8, page 1). *a* is ruled out because "a plugin bundles skills, connectors and sub-agents around a job". *c* is ruled out because the habit is to "Start narrow, learn how Claude does on your material, then widen", so testing comes before the plugin and not after rollout. *d* is ruled out because "a procedure you want everywhere (the monthly report layout) belongs in a skill", not in one Project's instructions.
@@ -543,8 +543,8 @@ This mock exam covers the whole of Level 1, modules 1 to 11. Choose one answer f
    tier answers both the bill and the deadline. *a* is ruled out because "Several simultaneous edits leave you unable to say what helped". *b* is ruled out because "Having a good evaluation set is the most important
    step". *c* is ruled out because effort "trades intelligence for latency and cost within a single model", and a
    maximum setting adds both.
-58. **a**. Latency-tolerant bulk work suits batches, which are 50 percent cheaper (module 3, page 1). *b* is ruled out because cache reads are described as costing "a fraction of the base input price", and these documents are all different. *c* is ruled out because fast mode offers "up to 2.5x higher output speed at premium pricing", which raises cost. *d* is ruled out because effort "trades intelligence for latency and cost within a single model", not bulk cost.
-59. **a**. Reusing context instead of resending it is what Projects in the apps and caching in the API are for (module 6, page 4). *b* is ruled out because "max_tokens is a cap on output, not on context". *c* is ruled out because "Larger windows raise the ceiling; they do not remove the need to decide what goes in", so the manual is still sent and paid for on each turn. *d* is ruled out because fast mode offers "up to 2.5x higher output speed at premium pricing", which raises the price.
+58. **a**. Latency-tolerant bulk work suits batches, which are 50 percent cheaper (module 3, page 1). *b* is ruled out because caching pays off by "reusing context instead of resending it", and here each document is sent once under a one-line instruction, so almost nothing is resent. *c* is ruled out because fast mode offers "up to 2.5x higher output speed at premium pricing", which raises cost. *d* is ruled out because effort "trades intelligence for latency and cost within a single model", so a higher setting adds cost rather than saving it.
+59. **a**. Reusing context instead of resending it is what Projects in the apps and caching in the API are for (module 6, page 4). *b* is ruled out because "max_tokens is a cap on output, not on context", so the manual sent with each turn is still billed in full. *c* is ruled out because "Larger windows raise the ceiling; they do not remove the need to decide what goes in", so the manual is still sent and paid for on each turn. *d* is ruled out because fast mode offers "up to 2.5x higher output speed at premium pricing", which raises the price.
 60. **c**. The labels are not yet right, so the cause is found and fixed before any cheaper setting is tried (module 6,
    page 4). *a* is ruled out because "Optimisation comes after correctness: first reach the quality bar". *b* is
    ruled out because the page lists only "a shorter prompt that keeps the same results" as a saving, not as a fix for

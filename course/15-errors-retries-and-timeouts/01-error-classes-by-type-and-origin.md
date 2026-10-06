@@ -141,16 +141,16 @@ The debugging routine that the exam rewards is short:
    - **c**: Capacity is at fault, so wait for the retry-after interval
    - **d**: Your request is at fault, so repair the body and send it again
 
-2. A request that carries a very large attachment returns a 413 `request_too_large`. Which action does the table give?
+2. A request that carries a very large attachment returns a 413 `request_too_large`. What should the client do next?
    - **a**: Wait for the retry-after interval, since this is a capacity error
    - **b**: Retry with back-off, since the provider will probably recover soon
-   - **c**: Shrink the payload below the documented ceiling, then send it again
-   - **d**: Resolve the conflict with a concurrent write, then try the call again
+   - **c**: Shrink the upload, since the same body will be refused again
+   - **d**: Stream the same body instead, since long requests should be streamed
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The table puts 403 under "Your access", and "a person has to act", so retrying is waste. *b* is ruled out because for the provider "something broke on their side", which is the 500 and 504 case. *c* is ruled out because capacity means "the request was fine and the service could not take it now". *d* is ruled out because a 403 belongs to "Your credential or account", and a repaired body would meet the same refusal.
-2. **c**. The table lists 413 under "Your request size" with the action "Shrink it (32 MB limit on Messages)". *b* is ruled out because for the provider "something broke on their side", and a 413 is not that. *a* is ruled out because capacity means "the request was fine and the service could not take it now", which a size refusal is not. *d* is ruled out because a conflict belongs to the "State of a resource" row, not to the size of the body.
+2. **c**. The table lists 413 under "Your request size" with the action "Shrink it (32 MB limit on Messages)". *b* is ruled out because for the provider "something broke on their side", and a 413 is not that. *a* is ruled out because capacity means "the request was fine and the service could not take it now", which a size refusal is not. *d* is ruled out because streaming is the cure when "The provider took too long", while for a 413 "the same request will fail again" whichever way it is sent.
 
 </details>

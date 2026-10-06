@@ -131,7 +131,7 @@ aligned?) and ownership.
    where their case is weakest. Which use fits?
    - **a**: Ask Claude for a model paragraph on their topic, then rewrite it in their voice
    - **b**: Have Claude draft their weakest section, cite it as a source, and write the rest themselves
-   - **c**: Paste the essay prompt and keep only the sentences that match their view
+   - **c**: Ask Claude for the strongest counterarguments, then paste its rebuttals into the essay
    - **d**: Ask Claude to challenge their outline, then do all the writing themselves
 
 3. A teacher asks Claude for a quiz on a unit and gets ten questions. Which step best reflects discernment and
@@ -144,13 +144,13 @@ aligned?) and ownership.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The builder's costly mistake is "Shipping unrun output", and the natural check is to "Run it, test it, review it". *b* is ruled out because a builder delegates "first drafts of code and tests", so handing Claude the function was a fair choice and the slip came afterwards. *c* is ruled out because the weight for builders falls on "Discernment of code and user experience", and a longer request does not test the result. *a* is ruled out because a disclosure tests nothing, and the builder still answers for the import "If it fails in production".
+1. **d**. The builder's costly mistake is "Shipping unrun output", and the natural check is to "Run it, test it, review it". *b* is ruled out because a builder delegates "first drafts of code and tests", so handing Claude the function was a fair choice and the slip came afterwards. *c* is ruled out because the weight for builders falls on "Discernment of code and user experience", and a longer request does not test the result. *a* is ruled out because the scenario tests "whether the person verified and owns the output", and a disclosure line verifies nothing about an import that shipped after a glance.
 2. **d**. A student uses Claude as a partner by questioning the plan while the thinking and the writing stay theirs.
    *a* is ruled out because "writing the analysis with Claude and submitting it defeats the point and may breach the
    institution's rules", and rewording a model paragraph still hands the thinking over. *b* is ruled out because the
    student does not delegate "the thinking the course exists to build", and a citation does not return it. *c* is
-   ruled out because the student checks "whether the tool is leading them to a conclusion rather than helping them
-   reach one", and keeping only the sentences that agree with them finds none of the weak points.
+   ruled out because the costly mistake is "Submitting AI work as one's own thinking", and pasted rebuttals put
+   Claude's answers to the weak points in place of the student's own.
 3. **c**. Discernment is judging accuracy and alignment with the stated outcome, and the educator owns what students are taught. *b* is ruled out because the educator "Checks: accuracy of the content taught", and a past good quiz does not show this one is right. *a* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades", and passing the checking to pupils gives that up. *d* is ruled out because the question "Is what came back accurate, complete, fair and fit for its reader?" is the person's to ask, and a self-rating hands it back to the tool.
 
 </details>

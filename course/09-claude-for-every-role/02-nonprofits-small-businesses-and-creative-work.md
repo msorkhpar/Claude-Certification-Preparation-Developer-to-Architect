@@ -163,10 +163,10 @@ This quiz covers both pages of the module.
    - **d**: First: its match to last year's rubric; second: its match to last year's appeal
 
 2. A freelancer working for a charity wants Claude to write personalised thank-you notes that cite each supporter's
-   past gifts, working from the full supporter list. Charity policy says personal data may not leave its systems
-   unprotected. What should happen first?
+   past gifts. The charity has given them the full supporter list, with names, addresses and gift history. How should
+   the notes be produced?
    - **a**: Upload the full list, then delete the chat once the notes are done
-   - **b**: Strip names and addresses, then use templates with merge fields
+   - **b**: Have the AI draft with blanks, then add each donor's details by hand
    - **c**: Pick a faster, cheaper model, since thanks are low-stakes drafting
    - **d**: Ask Claude to confirm that it will not keep the supporters' details
 
@@ -175,14 +175,14 @@ This quiz covers both pages of the module.
    - **a**: The first leaves it out; the second uses it for production and says what was done
    - **b**: The first uses it for planning only; the second uses it and says so
    - **c**: The first leaves it out; the second uses it and says nothing unless a client asks
-   - **d**: The first leaves it out; the second does too, as a silent contract forbids it
+   - **d**: The first leaves it out; the second has it draw the artwork and says so
 
 4. Claude turns a wholesaler's data sheet into allergen notes for a bakery's new product line. One note says "may
    contain nuts" for an item that the sheet marks nut-free. What should the owner do?
    - **a**: Treat it as a one-off slip and correct only that item
    - **b**: Ask Claude to explain how it reached that note, then trust the rest
-   - **c**: Check each entry against the supplier's list, then fix and release
-   - **d**: Add a line saying an AI drafted it, and publish the rest unchanged
+   - **c**: Check every entry against the source document, then fix and release
+   - **d**: Have Claude re-read the sheet and reissue every note, then release
 
 <details>
 <summary>Answer key</summary>
@@ -194,21 +194,22 @@ This quiz covers both pages of the module.
    statistic and every funder requirement against the source" before the audience reacts. *d* is ruled out because
    the page lists "Impact claims and statistics against source" as the check that matters most, and last year's
    appeal is not the source of this year's figures.
-2. **b**. Donor records are sensitive, so identifiers come out before the data goes anywhere, and the notes can be
-   merged afterwards. *a* is ruled out because "the best answer anonymises or aggregates first and checks results",
+2. **b**. Donor records are sensitive, so the list stays out of the prompt: Claude drafts the wording and the
+   freelancer adds each supporter's details outside the tool. *a* is ruled out because "the best answer anonymises or aggregates first and checks results",
    and deleting the chat afterwards does not undo the upload. *d* is ruled out because the freelancer must "follow the organisation's policy
-   and the law", and the details have left unprotected once uploaded, whatever the tool promises. *c* is ruled out
+   and the law", and the details have left the charity once uploaded, whatever the tool promises. *c* is ruled out
    because for a non-profit delegation means "Drafting and summarising, with data kept out", and a cheaper model still
    receives the full list.
 3. **a**. Where a setting has a rule, follow it; where it has none, say what you did, and a maker delegates
-   production while keeping authorship. *d* is ruled out because a setting with no rule calls for the step "when it has none, say what you did",
-   so a silent contract asks for disclosure, not abstention. *b* is ruled out because "When the setting has a rule about AI help, follow it", and a ban leaves
+   production while keeping authorship. *d* is ruled out because for a creative practice delegation covers "Production tasks, never the voice",
+   and the artwork is the illustrator's voice, however openly it is disclosed. *b* is ruled out because "When the setting has a rule about AI help, follow it", and a ban leaves
    no room for planning help. *c* is ruled out because "Disclosure matters more here than in many fields", and the
    maker answers for audiences' and commissioners' expectations.
 4. **c**. A statement customers rely on is checked against the source, and one error shows the rest are unproven.
    *a* is ruled out because the owner checks "commitments in anything a customer will rely on", and every other
    note is one of those. *b* is ruled out because the check is "that an answer matches the actual
    policy and not a plausible one", and an explanation from the same tool is not that comparison. *d* is ruled out
-   because "the draft is the start of the judging", and a disclosure line does not correct any statement.
+   because "the draft is the start of the judging", and a reissued set from the same tool is a new draft nobody has
+   judged.
 
 </details>

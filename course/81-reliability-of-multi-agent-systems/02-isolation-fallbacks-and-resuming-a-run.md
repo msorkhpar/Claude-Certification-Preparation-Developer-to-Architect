@@ -63,7 +63,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 2. Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?
    - **a**: Write it to the store of finished work, so that a later run does not repeat the same effort
-   - **b**: Use it, flag it as degraded, and leave it out of the store of finished work
+   - **b**: Use it marked as degraded and leave it unsaved, so that a later run can try the primary
    - **c**: Discard it, because only the primary agent's answers may ever appear in a final report
    - **d**: Use it and say nothing, because the reader of the report wants only the content of the answer
 
@@ -82,14 +82,14 @@ This quiz covers both pages of the module.
 1. Scenario: Dovetail Labs sets a breaker threshold of three consecutive failures for each agent. Agent X fails, succeeds, fails, succeeds, and fails again. Agent Y fails three times running. Which breakers are open afterwards?
    - **a**: Only Y's, since X's tally returns to zero whenever a call works
    - **b**: Both, since each agent has failed at least three times in all across the run
-   - **c**: Only X's, since it has made the larger number of calls overall in the run
+   - **c**: Only X's, since an agent that keeps alternating is the less stable of the two
    - **d**: Neither, because a breaker opens only after a cooldown has already passed
 
-2. Scenario: Larkspur Media's runner wraps every task in a catch-all that records any exception as a failure and carries on. A coding defect makes task seven raise an unexpected error in every run. What is wrong with this design?
-   - **a**: Nothing, because carrying on always gives the most complete report that is possible
-   - **b**: It should retry the task until the error stops, since all errors are temporary ones
-   - **c**: It presents a software bug as routine trouble, so the real fault stays hidden
-   - **d**: It should delete the stored results so that the next run starts again from nothing
+2. Scenario: Larkspur Media's runner wraps every task in a catch-all that records any exception as a failure and carries on. Task seven raises an error that none of the runner's handlers was written for, and it does so in every run. What is wrong with this design?
+   - **a**: It records the error without a retry, so a passing glitch is turned into a lasting failure
+   - **b**: It keeps the results saved before the error, so the next run builds on work it cannot trust
+   - **c**: It treats a crash as an expected outcome, so the bug behind it never comes to light
+   - **d**: It lets the run go on, so the tasks that need task seven then run without their input
 
 3. Scenario: Hazel Analytics' plan has tasks a, b, c and d, where d needs b. In the first run b used up its retries, and a and c finished and were saved. What does a second run call?
    - **a**: All four, since a run restarts the whole plan
@@ -101,7 +101,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **a**. The count is of consecutive failures, and a success clears it. *b* is ruled out because "The count is of consecutive failures for one agent, not of all failures in the run". *c* is ruled out because "A success resets the count, so scattered failures do not open it". *d* is ruled out because the breaker opens "After a set number of failures in a row", and the cooldown comes after it opens.
-2. **c**. An unexpected error is a defect, and catching it as a routine failure hides it. *a* is ruled out because "The runner handles failures it expects", and anything else is a crash that must not be caught. *b* is ruled out because "an unlimited retry is a way to spend money while nothing changes". *d* is ruled out because "the crash still loses nothing finished", so deleting the stored results destroys what the checkpoint protects.
+2. **c**. An error that no handler expects is a crash, and recording it as a routine failure hides the defect behind it. *a* is ruled out because the error returns in every run, and of a failure that never passes the page says "It does not help with one that does not". *b* is ruled out because the results saved before the error are finished work, and "the crash still loses nothing finished". *d* is ruled out because the runner marks "each task that needs a failed task" as skipped, so no task runs without its input.
 3. **c**. The second run does the failed task and the one that was skipped because of it, and takes the rest from the checkpoint. *a* is ruled out because "a second run does only the work that is left". *b* is ruled out because "Failures, skips and degraded answers are not stored, because a later run must be free to try them again". *d* is ruled out because d needs b, and the remaining work is "the task that failed, the tasks that were skipped because of it, and nothing else".
 
 </details>

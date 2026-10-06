@@ -10,12 +10,12 @@
         "a": "Delete stored keys that are older than a minute, so that a retry can proceed afresh",
         "b": "Make the agent confirm the account balance in its prompt before every retry",
         "c": "Write the transfer first and the key second, as two steps in that order",
-        "d": "Persist both together as one indivisible operation"
+        "d": "Save the payment and the record of its request together within a single transaction"
       },
       "key": "d",
       "explanation": {
         "d": "The key and the effect are recorded in one step, so neither can exist without the other.",
-        "a": "Ruled out because the page says to \"Record the key together with the effect\", and deleting keys breaks the recognition of repeats.",
+        "a": "Ruled out because \"The tool keeps the keys it has seen\", and deleting keys breaks the recognition of repeats.",
         "b": "Ruled out because \"a control that must hold is enforced in code outside the model\".",
         "c": "Ruled out because it only reverses the gap: \"a crash between the two leaves an effect with no key, or a key with no effect\"."
       }
@@ -36,7 +36,7 @@
         "a": "A breaker refuses calls at once while it is open and probes once after the cooldown.",
         "b": "Ruled out because \"an unlimited retry is a way to spend money while nothing changes\" and a larger count is the same mistake.",
         "c": "Ruled out because the waste is the count of calls, \"a hundred and fifty wasted calls\", which speed leaves in place.",
-        "d": "Ruled out because a restart makes the same calls again, where the breaker means \"the task fails fast with the reason `circuit open`\"."
+        "d": "Ruled out because a restart makes the same calls again, where with the breaker open \"the rest of the plan goes on\"."
       }
     },
     {
@@ -65,7 +65,7 @@
       "stem": "Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?",
       "options": {
         "a": "Write it to the store of finished work, so that a later run does not repeat the same effort",
-        "b": "Use it, flag it as degraded, and leave it out of the store of finished work",
+        "b": "Use it marked as degraded and leave it unsaved, so that a later run can try the primary",
         "c": "Discard it, because only the primary agent's answers may ever appear in a final report",
         "d": "Use it and say nothing, because the reader of the report wants only the content of the answer"
       },
@@ -85,7 +85,7 @@
       "options": {
         "a": "Only Y's, since X's tally returns to zero whenever a call works",
         "b": "Both, since each agent has failed at least three times in all across the run",
-        "c": "Only X's, since it has made the larger number of calls overall in the run",
+        "c": "Only X's, since an agent that keeps alternating is the less stable of the two",
         "d": "Neither, because a breaker opens only after a cooldown has already passed"
       },
       "key": "a",
@@ -100,19 +100,19 @@
       "id": "02-isolation-fallbacks-and-resuming-a-run#m2",
       "page": "02-isolation-fallbacks-and-resuming-a-run.md",
       "scope": "module",
-      "stem": "Scenario: Larkspur Media's runner wraps every task in a catch-all that records any exception as a failure and carries on. A coding defect makes task seven raise an unexpected error in every run. What is wrong with this design?",
+      "stem": "Scenario: Larkspur Media's runner wraps every task in a catch-all that records any exception as a failure and carries on. Task seven raises an error that none of the runner's handlers was written for, and it does so in every run. What is wrong with this design?",
       "options": {
-        "a": "Nothing, because carrying on always gives the most complete report that is possible",
-        "b": "It should retry the task until the error stops, since all errors are temporary ones",
-        "c": "It presents a software bug as routine trouble, so the real fault stays hidden",
-        "d": "It should delete the stored results so that the next run starts again from nothing"
+        "a": "It records the error without a retry, so a passing glitch is turned into a lasting failure",
+        "b": "It keeps the results saved before the error, so the next run builds on work it cannot trust",
+        "c": "It treats a crash as an expected outcome, so the bug behind it never comes to light",
+        "d": "It lets the run go on, so the tasks that need task seven then run without their input"
       },
       "key": "c",
       "explanation": {
-        "c": "An unexpected error is a defect, and catching it as a routine failure hides it.",
-        "a": "Ruled out because \"The runner handles failures it expects\", and anything else is a crash that must not be caught.",
-        "b": "Ruled out because \"an unlimited retry is a way to spend money while nothing changes\".",
-        "d": "Ruled out because \"the crash still loses nothing finished\", so deleting the stored results destroys what the checkpoint protects."
+        "c": "An error that no handler expects is a crash, and recording it as a routine failure hides the defect behind it.",
+        "a": "Ruled out because the error returns in every run, and of a failure that never passes the page says \"It does not help with one that does not\".",
+        "b": "Ruled out because the results saved before the error are finished work, and \"the crash still loses nothing finished\".",
+        "d": "Ruled out because the runner marks \"each task that needs a failed task\" as skipped, so no task runs without its input."
       }
     },
     {

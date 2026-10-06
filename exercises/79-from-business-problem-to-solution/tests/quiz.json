@@ -5,12 +5,12 @@
       "id": "01-from-a-business-problem-to-the-simplest-pattern#q1",
       "page": "01-from-a-business-problem-to-the-simplest-pattern.md",
       "scope": "page",
-      "stem": "Scenario: Harbor Mutual's loan officers need policy questions answered with citations, and separately need decline letters drafted from structured decision data. A vendor proposes a single autonomous multi-agent system for both jobs. Which design fits best?",
+      "stem": "Scenario: Harbor Mutual's HR advisers need staff questions on the leave policy answered with citations to its text, and separately need offer letters drafted from structured hiring data. A vendor proposes a single autonomous multi-agent system for both jobs. Which design fits best?",
       "options": {
         "a": "The vendor's system, since both jobs work on documents and one shared platform is easier to run and to staff",
         "b": "One agent that holds every tool, plus a routing prompt that picks the task to perform",
-        "c": "Two parts: retrieval with a cited reply, plus a template-driven workflow for correspondence",
-        "d": "One model tuned on both kinds of text, so that no outside lookup is needed at all"
+        "c": "A retrieval call that cites its source passages, plus a fixed workflow that fills a correspondence template",
+        "d": "One model fine-tuned on both kinds of text, so that no policy lookup is needed at run time"
       },
       "key": "c",
       "explanation": {
@@ -24,7 +24,7 @@
       "id": "01-from-a-business-problem-to-the-simplest-pattern#q2",
       "page": "01-from-a-business-problem-to-the-simplest-pattern.md",
       "scope": "page",
-      "stem": "Scenario: Greywell Insurance's sponsor says the claims project exists to cut handling time per claim on routine claims, measured against last quarter. Which pillar does the sponsor want served?",
+      "stem": "Scenario: Greywell Insurance's sponsor says the claims project succeeds if a routine claim takes fewer minutes of handler work than it did a quarter ago, at an unchanged volume. Which pillar does the sponsor want served?",
       "options": {
         "a": "Transformation, a capability that did not exist before the project",
         "b": "Efficiency, the same output with less effort for each unit",
@@ -33,7 +33,7 @@
       },
       "key": "b",
       "explanation": {
-        "b": "Handling time per claim against a baseline is the efficiency pillar's measure.",
+        "b": "Handler work per claim against last quarter is the efficiency pillar's measure: less effort for each unit.",
         "a": "Ruled out because transformation claims \"Something that could not be done before\", and routine claims were handled before.",
         "c": "Ruled out because cost counts \"tokens, review time and rework, not model price alone\" per task, and the sponsor named time.",
         "d": "Ruled out because that pillar's measures are \"95th percentile latency, availability, accuracy by case type\"."
@@ -48,13 +48,13 @@
         "a": "Which model tier will run the approval steps, so that the cost of the project can be estimated early in planning",
         "b": "How many tokens one disbursement review is expected to consume across all the steps",
         "c": "Whether the build can be completed inside the quarter that the sponsor has proposed",
-        "d": "Which decisions carry accountability for the lender and so have to stay with a person"
+        "d": "Who at the lender answers when a payout goes wrong, and so where a person must make the call"
       },
       "key": "d",
       "explanation": {
         "d": "Where accountability sits fixes what may be automated at all, and everything else follows from that boundary.",
-        "a": "Ruled out because the model comes after the boundary, and the page says to \"Keep with a person\" decisions that carry accountability.",
-        "b": "Ruled out because cost is downstream of the same question, and the page asks \"who answers for it, and could a person have caught it?\".",
+        "a": "Ruled out because the model comes after the boundary, which \"is an architectural decision made first\".",
+        "b": "Ruled out because a token count prices a design whose shape is not yet settled, and the fact to establish first is \"where accountability sits, what accuracy the use case needs\".",
         "c": "Ruled out because a schedule is not among the facts the page says to establish before promising anything: \"the boundary, the number and the scale\"."
       }
     },
@@ -65,7 +65,7 @@
       "stem": "Scenario: Alder Health's ten-user pilot of a note-summarising assistant went well, and the business now wants it for two thousand clinicians. What should the architect raise first?",
       "options": {
         "a": "The cost of the additional licences for the two thousand new users",
-        "b": "Which friendly conditions of the trial will not carry over to everyone",
+        "b": "Whether the trial's inputs, review load and data access will look the same across all wards",
         "c": "Whether a larger and more capable model should replace the smaller one that was used in the pilot",
         "d": "The training timetable for the clinicians who will start using it"
       },
@@ -74,7 +74,7 @@
         "b": "Scale changes the surroundings, so the first contribution is naming the assumptions that held only in friendly conditions.",
         "a": "Ruled out because licences are a consequence and not a risk, and a roll-out plan \"that lists licence counts is not\" a plan.",
         "c": "Ruled out because the page says \"None of the rows is about the model getting worse\".",
-        "d": "Ruled out because training addresses a later step, while the page asks for the assumptions to be named \"before the roll-out, not after the first incident\"."
+        "d": "Ruled out because a timetable is not what makes a roll-out plan, which is one that \"lists these assumptions, the evidence for each and the trigger that stops the roll-out\"."
       }
     },
     {
@@ -83,7 +83,7 @@
       "scope": "module",
       "stem": "Scenario: Quillfeather Retail's sponsor tells the architect that a returns-triage system must be \"as accurate as possible\" and asks for a design. Which response fits best?",
       "options": {
-        "a": "Settle what accuracy the use case needs and what a wrong decision costs, then build to that",
+        "a": "Ask what a wrong decision and a human check each cost, and set the target from both",
         "b": "Start from the most capable model and optimise the prompts until accuracy stops improving",
         "c": "Choose the most elaborate pattern the budget allows, since that gives the highest ceiling",
         "d": "Hold the question open until the pilot has produced some real accuracy figures to use"
@@ -105,14 +105,14 @@
         "a": "Send each of them to a person, because a human check lowers the error count and so repays its price",
         "b": "Pass them through unreviewed, because reviewing them would burn more than the errors it prevents",
         "c": "Sample a tenth of them for review, since a sample is cheaper than a full check",
-        "d": "Hold them until the model reaches full accuracy on every slice"
+        "d": "Review them all until the model's accuracy on that slice reaches 99.9 percent"
       },
       "key": "b",
       "explanation": {
         "b": "The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money.",
         "a": "Ruled out because \"reviewing the item loses money\" where the model beats the break-even, and the page says \"Reviewing everything wastes review\".",
         "c": "Ruled out because a sample is a guess at the same trade-off, and the page asks for design that spends attention \"only where it changes the outcome\".",
-        "d": "Ruled out because the break-even accuracy is 98 percent, not full accuracy, and a design routes by slice, not by \"one number for the whole system\"."
+        "d": "Ruled out because 99 percent already clears the threshold, since \"the break-even accuracy is 98 percent\", so waiting for a higher figure keeps paying for reviews that lose money."
       }
     },
     {

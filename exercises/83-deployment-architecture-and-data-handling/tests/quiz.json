@@ -8,14 +8,14 @@
       "stem": "Scenario: Linden Clinics asks a vendor to serve its patients from Europe and offers the Claude API with `inference_geo` set to `us` as the compliant option. Which assessment is right?",
       "options": {
         "a": "It meets the need, as long as the audit log itself is kept in a data store located in Europe",
-        "b": "It fails the need, because the pin sends the processing to the United States",
+        "b": "It fails the need, because that pin places all of the processing in the United States",
         "c": "It meets the need, since the geography of the workspace can still be set to Europe separately",
         "d": "It fails the need only if the clinics have not yet signed the business associate agreement in full"
       },
       "key": "b",
       "explanation": {
         "b": "The `us` pin is a United States geography, and the API has no European one.",
-        "a": "Ruled out because the audit log is separate from where inference runs, and \"the request carries an inference geography\" that the log store does not change.",
+        "a": "Ruled out because where the log is stored does not move inference, and \"A customer that needs Europe cannot be served by pinning on that API\".",
         "c": "Ruled out because \"The workspace geography is set per workspace\" and the page says it is `us` only.",
         "d": "Ruled out because the agreement concerns health data and does not move the processing: \"there is no European pin\"."
       }
@@ -27,15 +27,15 @@
       "stem": "Scenario: Harrow Insurance runs Claude on Amazon Bedrock and writes in its design that \"zero data retention is enabled with Anthropic\". What is the problem?",
       "options": {
         "a": "The statement is correct, since every platform shares one retention arrangement with the model maker",
-        "b": "The statement holds only once a second approval has been given by the cloud provider's own sales team",
-        "c": "The arrangement belongs to the model maker, and on that platform the cloud provider does the processing",
+        "b": "The statement holds, provided the company has also signed a business associate agreement with Anthropic",
+        "c": "The statement is wrong, since the arrangement is the model maker's and the cloud provider is the processor",
         "d": "The statement is correct, but it must be repeated for each separate model that the company uses in production"
       },
       "key": "c",
       "explanation": {
         "c": "Zero data retention is an arrangement with Anthropic, and on Bedrock the cloud provider is the processor.",
         "a": "Ruled out because \"Their retention, compliance and region rules are the provider's\", so no arrangement is shared.",
-        "b": "Ruled out because the page gives no such approval, and says the provider's rules are \"the provider's own documentation\".",
+        "b": "Ruled out because that agreement is a separate arrangement, and \"On Amazon Bedrock or Google Cloud, zero data retention is not Anthropic's arrangement to give\".",
         "d": "Ruled out because the model is a separate rule (\"A model that requires 30-day retention cannot satisfy a zero-retention requirement\") and does not change who the processor is."
       }
     },
@@ -48,13 +48,13 @@
         "a": "A system prompt that instructs the model to ignore any personal details it comes across",
         "b": "A review step that checks the model's reply for personal details after it has been returned",
         "c": "A larger model that is better at noticing which parts of a note are sensitive ones",
-        "d": "A layer that tokenises identifiers before the call and restores them afterwards"
+        "d": "A step in the caller that swaps each identifier for a token and puts the values back afterwards"
       },
       "key": "d",
       "explanation": {
         "d": "A layer before the call means the provider sees tokens and never the values, and the layer can be tested.",
         "a": "Ruled out because \"the data has already crossed the boundary\".",
-        "c": "Ruled out because the model would still receive the data, and the point is to keep the identifier out of the request: \"It cannot leak what it never had\".",
+        "c": "Ruled out because a larger model still receives the data, and \"a compliance control belongs in the architecture where it can be tested\".",
         "b": "Ruled out because a check on the reply, like an instruction, \"acts after the data has already crossed the boundary\"."
       }
     },
@@ -64,7 +64,7 @@
       "scope": "page",
       "stem": "Scenario: Rook Mutual's auditors ask for proof of each model call. The team proposes logging every full prompt and reply for ten years. What should the architect say?",
       "options": {
-        "a": "Log request identifiers, sizes and outcomes, and keep content in the system of record",
+        "a": "Log each call's id, caller, time and size, and pull content from the source records only when needed",
         "b": "Accept the proposal, since a complete record is the strongest evidence that a regulator can ask to see",
         "c": "Log full content, but encrypt the log, which removes the obligations that a data store has",
         "d": "Log nothing from the calls, since any stored record of a call becomes a risk in itself"
@@ -83,16 +83,16 @@
       "scope": "module",
       "stem": "Scenario: Marlow Care's service holds data of patients in the United States and in the European Union. It runs a deployment in each region. A European patient's request arrives while the European deployment is down for maintenance. What should the router do?",
       "options": {
-        "a": "Decline to answer, and let the caller retry once the local site is back",
+        "a": "Turn it away for now with an error, and let the caller try again once the local site is back up",
         "b": "Send it to the United States deployment, since being available matters more than where the data sits",
-        "c": "Send it to the European deployment that belongs to a different tenant, since the location still matches",
+        "c": "Send it to the United States deployment, after tokenising the identifiers in the request",
         "d": "Send it to whichever deployment answers the fastest, and record the exception in the audit log"
       },
       "key": "a",
       "explanation": {
         "a": "Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none.",
         "b": "Ruled out because \"serving a European user from a United States deployment because it was available is the failure the router exists to prevent\".",
-        "c": "Ruled out because another tenant's deployment breaks the tenant boundary: \"one workspace per tenant\".",
+        "c": "Ruled out because tokenising does not change where the request is processed, and \"a user's data goes only to a deployment that keeps it in the user's region\".",
         "d": "Ruled out because speed is not a criterion, and the router sends a user's data \"only to a deployment that keeps it in that region\"."
       }
     },
@@ -103,8 +103,8 @@
       "stem": "Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?",
       "options": {
         "a": "None, because the arrangement is organisation-wide and covers the models that are in use",
-        "b": "That choice cannot meet the target, so only a different one or another arrangement will do",
-        "c": "A warning only, since thirty days is short enough to be treated as nothing kept",
+        "b": "A failed check, because the arrangement excludes anything that must keep content for thirty days",
+        "c": "A minor warning, since thirty days is short enough to be treated as nothing kept",
         "d": "None, provided the deployment's audit log is set to expire after thirty days"
       },
       "key": "b",

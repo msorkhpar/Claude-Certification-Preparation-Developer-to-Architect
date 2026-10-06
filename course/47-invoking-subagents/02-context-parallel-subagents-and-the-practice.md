@@ -91,22 +91,22 @@ These are the wrong answers that the exam's options for this task statement offe
 3. A coordinator spawns a subagent when it did not set `run_in_background`, and then writes its answer to the user before the subagent has reported. What explains it?
    - **a**: Delegated work launches immediately unless the call asks for a foreground wait
    - **b**: The spend cap was reached, so the subagent never started and nothing was reported
-   - **c**: Subagents are started one at a time, so the second one was still queued
+   - **c**: Subagents start one at a time, so this one was queued behind another
    - **d**: The concurrency limit refused the spawn without telling the coordinator anything
 
 
-4. A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact. Which change fits best?
-   - **a**: Keep only the first source of every repeated fact
+4. A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact. Following this module's own advice on findings, which change fits best?
+   - **a**: Deduplicate repeated facts, keeping the first source that reported each
    - **b**: Ask the synthesizer to cite sources by recalling where each figure appeared
-   - **c**: Write the source into each claim sentence, in brackets right after the text
-   - **d**: Return each claim and its origin as separate fields, and combine on claims
+   - **c**: Have each subagent list its sources at the end of its prose report
+   - **d**: Return each claim and its origin as separate fields of one record
 
 <details>
 <summary>Answer key</summary>
 
 3. **a**. The documentation's default is a background launch, and a coordinator that needs the result first has to ask for a foreground run. *b* is ruled out because a spent cap is reported, not silent: "spawning another subagent fails with `Budget limit reached`". *c* is ruled out because the SDK runs them together: "Multiple subagents can run concurrently, so independent subtasks finish in the time of the slowest one rather than the sum of all of them." *d* is ruled out because the refusal is a result that the coordinator reads: "the spawn is refused with the tool result `Concurrent subagent limit reached`, and the coordinator reads it like any other result".
 
-4. **d**. Content and metadata in separate fields let the merge recognise one claim and keep every source. *b* is ruled out because "attribution is a property of the data, and the synthesis cannot be asked to rebuild it from prose." *c* is ruled out because "The metadata is never written into the claim string, because then the merge could not recognise that two sentences are the same claim." *a* is ruled out because the sources are the evidence: "two subagents that found the same fact independently strengthen it, and the reader sees both sources".
+4. **d**. Content and metadata in separate fields let the merge recognise one claim and keep every source. *b* is ruled out because "attribution is a property of the data, and the synthesis cannot be asked to rebuild it from prose." *c* is ruled out because a list at the end of prose does not tie a source to its sentence: "When the subagent writes its report as prose, the sources drift into sentences, get shortened or are dropped, and by the time two subagents' reports are merged nobody can say which source supports which sentence." *a* is ruled out because every source is evidence and must be kept: "two subagents that found the same fact independently strengthen it, and the reader sees both sources".
 
 </details>
 
@@ -115,28 +115,28 @@ These are the wrong answers that the exam's options for this task statement offe
 This quiz covers both pages of the module.
 
 1. A CI coordinator runs in bypassPermissions, and its reviewer definition lists only the tools Read and Grep. A teammate fears that the reviewer can still do anything, because the mode skips prompts. Which limit remains?
-   - **a**: Nothing at all
+   - **a**: None, since a bypass parent approves whatever call a subagent makes
    - **b**: The permission mode in its own definition, which overrides the parent's mode entirely
-   - **c**: Its own capability set
+   - **c**: Its session's capability set, which has nothing that edits or executes
    - **d**: The parent's allowed tools, which cap what the mode may approve
 
 2. The final answer of a coordinator paraphrases a subagent's findings and drops the line numbers that the user needs. Which fix fits best?
    - **a**: Raise the subagent's turn limit by a large margin and rerun it
-   - **b**: Tell the parent to keep the report verbatim, or read the tool result directly
-   - **c**: Remove the return-format line from the brief and let it write freely
+   - **b**: Add an instruction to the main query to keep the report verbatim
+   - **c**: Ask in the brief for line numbers on every finding the subagent returns
    - **d**: Switch the subagent to a larger model with a longer context window
 
 3. Six delegates run side by side, and each asks for approval before reading files, which floods the operator. Which design fits best?
    - **a**: Take the Read tool out of the definitions of all six delegates
    - **b**: Set bypassPermissions in each agent definition of the six delegates
    - **c**: Run the six one after another instead of side by side
-   - **d**: Answer those lookups once, in a PreToolUse hook or inherited rules
+   - **d**: Add an allow rule on the parent that every subagent inherits
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A tool that is not in the subagent's session cannot be called, whatever the mode. *b* is ruled out because a definition cannot loosen a bypass parent or override it: "A subagent runs in `bypassPermissions` mode only when the parent session itself does." *a* is ruled out because "A tool you leave out isn't in the subagent's session at all: Claude works without it, with no permission prompt or error." *d* is ruled out because "allowed_tools does not constrain bypassPermissions".
-2. **b**. The parent may summarize, so the words that matter must be kept by instruction or read from the result. *a* is ruled out because the paraphrase happens in the parent, which "may summarize it in its own response". *c* is ruled out because the format line decides what comes back: "The return format tells it what the coordinator will do with the answer." *d* is ruled out because a larger model does not stop the coordinator from summarizing: "The parent receives the subagent's final report, but may summarize it in its own response."
-3. **d**. A hook or inherited rules answer the repeated requests once, in one place. *b* is ruled out because a definition cannot set bypass: "A subagent runs in `bypassPermissions` mode only when the parent session itself does." *c* is ruled out because sequencing independent work costs time: "independent subtasks finish in the time of the slowest one rather than the sum of all of them". *a* is ruled out because a subagent without the tool cannot read: "A tool you leave out isn't in the subagent's session at all: Claude works without it".
+1. **c**. A tool that is not in the subagent's session cannot be called, whatever the mode. *b* is ruled out because a definition's mode applies only under a narrower parent: "A subagent runs in the parent session's permission mode unless you set `permissionMode` on its `AgentDefinition` and the parent session is in `default`, `dontAsk`, or `plan` mode." *a* is ruled out because the mode only approves calls to tools the subagent has: "A tool you leave out isn't in the subagent's session at all: Claude works without it, with no permission prompt or error." *d* is ruled out because "allowed_tools does not constrain bypassPermissions".
+2. **b**. The parent may summarize, so an instruction in the prompt of the main `query()` call is what keeps the subagent's words. *a* is ruled out because the paraphrase happens in the parent, which "may summarize it in its own response". *c* is ruled out because the subagent's report already held the line numbers, and the loss happens later, since "the coordinator may summarize". *d* is ruled out because a larger model does not stop the coordinator from summarizing: "The parent receives the subagent's final report, but may summarize it in its own response."
+3. **d**. Permission rules set on the parent reach every subagent, so one allow rule answers all six requests: subagents "inherit from the parent conversation". *b* is ruled out because a definition cannot set bypass: "A subagent runs in `bypassPermissions` mode only when the parent session itself does." *c* is ruled out because sequencing independent work costs time: "independent subtasks finish in the time of the slowest one rather than the sum of all of them". *a* is ruled out because a subagent without the tool cannot read: "A tool you leave out isn't in the subagent's session at all: Claude works without it".
 
 </details>

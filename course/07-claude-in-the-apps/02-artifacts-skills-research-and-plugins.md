@@ -129,7 +129,7 @@ trust and review before sharing.
 2. A consultant writes client briefings in one house layout, in unrelated chats, some inside Projects and some
    outside any Project. Which feature lets all of those chats follow the layout?
    - **a**: Written rules in one Project's own instructions
-   - **b**: A plugin installed for the consultant's role
+   - **b**: A Research run started for each new briefing
    - **c**: An artifact kept as the pattern for each briefing
    - **d**: A custom skill kept in the account's skill list
 
@@ -151,8 +151,8 @@ trust and review before sharing.
    for every chat and leaves no file for the client to open.
 2. **d**. A skill is a reusable procedure that Claude pulls in "in any chat where it is enabled", inside or outside
    a Project, and a simple one needs no code. *a* is ruled out because "Project instructions apply to every chat in that Project", and the consultant's
-   other chats sit elsewhere. *b* is ruled out because "Where a skill is one playbook, a plugin is several", so a
-   role's bundle is the wrong size for one layout. *c* is ruled out because an artifact is "A document, deck, dashboard or small tool to hand
+   other chats sit elsewhere. *b* is ruled out because the page says "Use Research when the question is open and
+   broad", and a run gathers many sources but carries no house layout into the next chat. *c* is ruled out because an artifact is "A document, deck, dashboard or small tool to hand
    to someone" and does not make later chats follow a layout.
 3. **b**. Skills carry instructions and scripts that Claude follows, so the page says to install skills only from trusted sources and to review what they bundle. *a* is ruled out because "A skill can carry scripts and instructions that Claude follows", and reading the instructions alone leaves any scripts unchecked. *c* is ruled out because a skill from an unknown source is "a route for prompt injection", and a quiet week of use neither changes the source nor reveals hidden instructions. *d* is ruled out because the first reply cannot show hidden scripts or instructions, which is why the page says to review "code dependencies and bundled resources" first.
 

@@ -365,8 +365,8 @@ These are the wrong answers the exam's options for this domain offer, each with 
 1. Scenario: Egret Support's request holds fixed rules, a conversation history at priority 5 and marketing blurbs at priority 1. It exceeds its token budget by a small margin. What does the assembler do?
    - **a**: Truncates the end of the rules until the whole request fits within the budget
    - **b**: Drops the conversation history first, because it is the largest block of the three
-   - **c**: Refuses the request at once, since it is over budget by any amount at all
-   - **d**: Sheds the least important block first, stopping as soon as it fits
+   - **c**: Refuses the request outright, since a refusal beats sending a cut-down context
+   - **d**: Drops the promotional copy first, since its rank is the lowest of the parts
 
 2. Scenario: Heron Retail has four teams that each write the support prompt by hand as one string, with a slightly different order, and the cache hit rate is low. Which change helps most?
    - **a**: A reminder in the team wiki that the policy text ought to come first in the prompt
@@ -377,7 +377,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The lowest-priority dynamic block goes first, and the assembler climbs only while the request is still over. *a* is ruled out because "The static modules are never dropped". *b* is ruled out because "the assembler drops the lowest first", by priority and not by size. *c* is ruled out because refusal is for when "only static modules remain and they still exceed the budget, the assembler refuses the request".
-2. **d**. One assembler fixes the order, so every team's prefix matches. *a* is ruled out because a reminder leaves the order to each caller, where "the assembler decides the order and callers cannot". *b* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", and a longer lifetime does not make the strings identical. *c* is ruled out because a header does not fix the order that follows it: "The order is the same every time" only when one assembler decides it.
+1. **d**. The marketing blurbs are the lowest-priority dynamic block, so they go first, and the assembler climbs only while the request is still over. *a* is ruled out because "The static modules are never dropped". *b* is ruled out because "the assembler drops the lowest first", by priority and not by size. *c* is ruled out because refusal is for when "only static modules remain and they still exceed the budget, the assembler refuses the request".
+2. **d**. One assembler fixes the order, so every team's prefix matches. *a* is ruled out because a reminder leaves the order to each caller, where "the assembler decides the order and callers cannot". *b* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", and a longer lifetime does not make the strings identical. *c* is ruled out because a header does not fix the order of what follows it, and "Shuffling the modules changes the prefix".
 
 </details>

@@ -439,7 +439,7 @@ after the last attempt, spending time to learn nothing.
    - **a**: Wait longer between the attempts so that the first one can finish
    - **b**: Lower the retry count of the call to zero for all tools
    - **c**: Ask the model in the prompt not to call the tool a second time
-   - **d**: Give each action its own key and check it before it runs
+   - **d**: Skip the action whenever its unique request key is already on record
 
 <details>
 <summary>Answer key</summary>

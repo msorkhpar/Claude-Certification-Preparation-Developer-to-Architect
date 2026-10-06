@@ -502,7 +502,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **a**: Delete stored keys that are older than a minute, so that a retry can proceed afresh
    - **b**: Make the agent confirm the account balance in its prompt before every retry
    - **c**: Write the transfer first and the key second, as two steps in that order
-   - **d**: Persist both together as one indivisible operation
+   - **d**: Save the payment and the record of its request together within a single transaction
 
 2. Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. What limits the waste best?
    - **a**: A breaker that trips after repeated errors in a row and refuses calls for a pause
@@ -513,7 +513,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The key and the effect are recorded in one step, so neither can exist without the other. *a* is ruled out because the page says to "Record the key together with the effect", and deleting keys breaks the recognition of repeats. *b* is ruled out because "a control that must hold is enforced in code outside the model". *c* is ruled out because it only reverses the gap: "a crash between the two leaves an effect with no key, or a key with no effect".
-2. **a**. A breaker refuses calls at once while it is open and probes once after the cooldown. *b* is ruled out because "an unlimited retry is a way to spend money while nothing changes" and a larger count is the same mistake. *c* is ruled out because the waste is the count of calls, "a hundred and fifty wasted calls", which speed leaves in place. *d* is ruled out because a restart makes the same calls again, where the breaker means "the task fails fast with the reason `circuit open`".
+1. **d**. The key and the effect are recorded in one step, so neither can exist without the other. *a* is ruled out because "The tool keeps the keys it has seen", and deleting keys breaks the recognition of repeats. *b* is ruled out because "a control that must hold is enforced in code outside the model". *c* is ruled out because it only reverses the gap: "a crash between the two leaves an effect with no key, or a key with no effect".
+2. **a**. A breaker refuses calls at once while it is open and probes once after the cooldown. *b* is ruled out because "an unlimited retry is a way to spend money while nothing changes" and a larger count is the same mistake. *c* is ruled out because the waste is the count of calls, "a hundred and fifty wasted calls", which speed leaves in place. *d* is ruled out because a restart makes the same calls again, where with the breaker open "the rest of the plan goes on".
 
 </details>

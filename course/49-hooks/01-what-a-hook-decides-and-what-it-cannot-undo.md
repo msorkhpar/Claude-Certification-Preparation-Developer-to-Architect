@@ -370,7 +370,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 2. A team adds a hook with the matcher `src/payments/*` to review every write under that folder. The hook never fires. What is the best fix?
    - **a**: Switch the matcher to a regular expression that also lists every file in the folder
-   - **b**: Raise the timeout of the hook
+   - **b**: Correct the spelling of the event key, since event names are case-sensitive
    - **c**: Attach it to the file-editing tools and test the path inside the callback
    - **d**: Move the hook to the PostToolUse event, which evaluates paths after the write
 
@@ -378,6 +378,6 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 1. **a**. The answer is read only from its documented place. *b* is ruled out because a deferral discards the change: "the input is dropped". *c* is ruled out because callback hooks may change input too: "Pair `updatedInput` with `permissionDecision: 'allow'` to auto-approve the modified input". *d* is ruled out because nothing undoes a change that is applied: "the modified input still applies and flows through the normal permission evaluation".
-2. **c**. A matcher sees only the name of the tool, so the path is read from the input. *a* is ruled out because "Matchers only match tool names, not file paths or other arguments." *b* is ruled out because the timeout bounds the callback and has nothing to do with matching: "Each callback runs with a timeout in seconds". *d* is ruled out because the post event comes after the tool and cannot change what a matcher sees: "the tool already ran".
+2. **c**. A matcher sees only the name of the tool, so the path is read from the input. *a* is ruled out because "Matchers only match tool names, not file paths or other arguments." *b* is ruled out because the event key is not at fault here, the matcher is: "the matcher must match the tool name exactly". *d* is ruled out because a post hook's matcher is read the same way: "For tool events it is tested against the tool name".
 
 </details>
