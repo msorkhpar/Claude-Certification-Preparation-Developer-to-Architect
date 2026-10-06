@@ -10,7 +10,7 @@ that level.
 
 | Batch | Modules | State |
 |---|---|---|
-| 1 | 1 to 10, then the Level 1 mock exams (module 11, pages 04 and 05) | reworked and pushed; resolve pass of the items still weak running |
+| 1 | 1 to 10, then the Level 1 mock exams (module 11, pages 04 and 05) | done |
 | 2 | 12 to 27 | running |
 | 3 | 28 to 43, then the Developer mock exams (module 44, pages 03 and 04) | waits for batch 2 |
 | 4 | 45 to 61 | running |

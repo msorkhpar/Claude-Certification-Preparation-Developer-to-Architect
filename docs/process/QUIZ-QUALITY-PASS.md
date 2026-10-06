@@ -81,6 +81,16 @@ Base commit of the pass: `c32f09b`. Each batch lands as one or more commits on t
 
 | Batch | Modules | Items judged | Items changed | Still weak (kept or restored) | Lesson lines changed |
 |---|---|---|---|---|---|
+| 1 | 1 to 11 (Level 1, both mock exams) | 220 | 195 | 22 (2 restored to their base text) | 0 |
+
+## Items whose tested point changed
+
+Most changed items test the same point in better form. These items now test a different point or carry a new
+scenario, so a reader comparing them with an earlier copy should not expect the same question:
+
+- Level 1: `07-claude-in-the-apps` 03#m1 (the earlier key, syncing the source, does not hold for a shared Project;
+  the new key follows page 1) and 03#m4 (new scenario, same key letter); `08-claudes-apps-in-depth` 03#m3 (recast
+  to the visible Chrome tabs, as it duplicated page 3 q2) and 03#m4 (new scenario); Level 1 mock 1 x27 (new stem).
 
 ## Open points
 

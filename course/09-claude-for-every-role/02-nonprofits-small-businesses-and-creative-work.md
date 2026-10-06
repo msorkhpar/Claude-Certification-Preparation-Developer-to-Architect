@@ -175,7 +175,7 @@ This quiz covers both pages of the module.
    - **a**: The first leaves it out; the second uses it for production and says what was done
    - **b**: The first uses it for planning only; the second uses it and says so
    - **c**: The first leaves it out; the second uses it and says nothing unless a client asks
-   - **d**: The first leaves it out; the second has it draw the artwork and says so
+   - **d**: The first leaves it out; the second uses it freely and stays silent, as the contract says nothing
 
 4. Claude turns a wholesaler's data sheet into allergen notes for a bakery's new product line. One note says "may
    contain nuts" for an item that the sheet marks nut-free. What should the owner do?
@@ -201,8 +201,8 @@ This quiz covers both pages of the module.
    because for a non-profit delegation means "Drafting and summarising, with data kept out", and a cheaper model still
    receives the full list.
 3. **a**. Where a setting has a rule, follow it; where it has none, say what you did, and a maker delegates
-   production while keeping authorship. *d* is ruled out because for a creative practice delegation covers "Production tasks, never the voice",
-   and the artwork is the illustrator's voice, however openly it is disclosed. *b* is ruled out because "When the setting has a rule about AI help, follow it", and a ban leaves
+   production while keeping authorship. *d* is ruled out because the page says that when a setting has no rule, "say
+   what you did". *b* is ruled out because "When the setting has a rule about AI help, follow it", and a ban leaves
    no room for planning help. *c* is ruled out because "Disclosure matters more here than in many fields", and the
    maker answers for audiences' and commissioners' expectations.
 4. **c**. A statement customers rely on is checked against the source, and one error shows the rest are unproven.

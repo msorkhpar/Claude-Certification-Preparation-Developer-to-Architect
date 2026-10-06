@@ -1,30 +1,23 @@
 # Quiz polish list
 
-Level 1 quiz items that an independent reader judged WEAK (not FAIL). They pass every automatic check and
-are kept until a polish pass. Ids are page slug and question (q = page quiz, m = module quiz).
+Quiz items that an independent reader judged WEAK (not FAIL). They pass every automatic check. Ids are page slug and
+question (q = page quiz, m = module quiz, x = mock or pool item).
 
-| Id | Reader's reason |
-|---|---|
-| 02-fine-tuning#m1 | key echoes the stem; longest option |
-| 02-fine-tuning#m3 | only skeptical option |
-| 02-surfaces#q2 | key shortest, vague |
-| 02-surfaces#m3 | mirror pair; duplicates mock x11 and x18 |
-| 01-what-claude-does#q2 | cropping is a legitimate mitigation |
-| 02-judging#m4 | key longest |
-| 04-diagnosing#m1 | stem signals the key |
-| 01-projects#q2 | option c contradicts the stem |
-| 01-projects#q3 | clients and customer are near-synonyms |
-| 02-artifacts#q3 | only conditional option |
-| 02-chrome#q2 | only hedged option |
-
-Further WEAK items, with the recurring reasons (synonym echoes, a lone hedged or composite key, strawman
-distractors, repeated themes: anonymise-first, cheap-tier escalation, faster tier, tags):
-
-- 03-choosing: q2, m1, m3
-- 02-nonprofits: q1, m1, m4
-- 02-prompt: q1, q2, m1, m2, m4
-- 03-scenario: q1, q2, m1, m2
-- mock exam: x2, x3, x4, x5, x7, x8, x11, x16, x20, x24, x26, x28, x30
+- Level 1 (modules 1 to 11), after the quiz quality pass (`QUIZ-QUALITY-PASS.md`). Every item below is the same as or
+  better than its text before the pass; two were restored to that text because a rework read worse. Recurring reasons:
+  the key is the only option of its polarity (the only cautious, negative or checking option), a key close to a page
+  sentence, a stem that asks for the page's own default advice.
+  - 02: 01#q2 (text restored; the key is the longest and the only "Only" option), 02#m3 (the key is the only option
+    that checks the figure)
+  - 04: 01#q2 (the key is the only cautious option), 02#m1 (options a to c differ only in who does the step)
+  - 07: 03#m1 (key correct after the pass; options still lean on one fact of page 1), 03#m2 (key the only plain list)
+  - 08: 03#m4 (the key overlaps every other option)
+  - 09: 02#m3 (text restored; d nearly mirrors the key), 02#m4 (d duplicates the flaw of a)
+  - Level 1 mock 1: x10 (the key is the only option that denies a verdict), x33 (a contradicts the stem)
+  - Level 1 mock 2: x3 (the key is the only three-step option), x15 (d an absolute strawman), x22 (recall of the
+    overview's default advice), x29 (c also supplies a record), x31 (stem paraphrases a key), x32 (the key is the only
+    "none at first" option), x43 (a and c built with weakness words), x46 (key near-verbatim; c arbitrary), x50 (the
+    keys are the only alarm statements), x51 (a gives the key's outcome for this ask), x55 (a is filler)
 
 - 18-model-choice-cost-and-migration, 19-thinking-effort-and-speed: the key is the longest option in 31% and 40% of the module questions (checker warnings); rebalance option lengths.
 
